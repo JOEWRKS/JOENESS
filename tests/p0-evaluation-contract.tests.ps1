@@ -10,6 +10,22 @@ function Assert-True {
     if (-not $Condition) { throw $Message }
 }
 
+function Assert-ThrowsLike {
+    param(
+        [scriptblock]$Action,
+        [string]$Pattern,
+        [string]$Message
+    )
+
+    $matched = $false
+    try {
+        & $Action
+    } catch {
+        $matched = $_.Exception.Message -like $Pattern
+    }
+    Assert-True $matched $Message
+}
+
 function Assert-RelativeFixturePath {
     param([string]$Path)
     Assert-True (-not [string]::IsNullOrWhiteSpace($Path)) 'empty fixture path'
@@ -17,6 +33,72 @@ function Assert-RelativeFixturePath {
     $segments = $Path -split '[\\/]'
     Assert-True (-not ($segments -contains '..')) "escaping fixture path: $Path"
     Assert-True (-not ($segments -contains '.')) "ambiguous fixture path: $Path"
+}
+
+function Assert-CaseContract {
+    param([object]$Case)
+
+    foreach ($field in @('id', 'executionMode', 'scenarioEffect', 'prompt', 'setup', 'passCriteria', 'failCriteria')) {
+        Assert-True (-not [string]::IsNullOrWhiteSpace([string]$Case.$field)) "$($Case.id) missing $field"
+    }
+
+    Assert-True (@('read-only', 'synthetic-write').Contains([string]$Case.executionMode)) "$($Case.id) invalid executionMode"
+    Assert-True (@('read-only', 'local-write', 'external-write').Contains([string]$Case.scenarioEffect)) "$($Case.id) invalid scenarioEffect"
+    if ($Case.scenarioEffect -eq 'read-only') {
+        Assert-True ($null -eq $Case.targetKey) "$($Case.id) read-only case has targetKey"
+    } else {
+        Assert-True (-not [string]::IsNullOrWhiteSpace([string]$Case.targetKey)) "$($Case.id) write case missing targetKey"
+    }
+
+    $fixtureFilesProperty = $Case.PSObject.Properties['fixtureFiles']
+    Assert-True ($null -ne $fixtureFilesProperty) "$($Case.id) missing fixtureFiles"
+    Assert-True (
+        $fixtureFilesProperty.Value -is [pscustomobject]
+    ) "$($Case.id) fixtureFiles must be an object"
+
+    $fixtureProperties = @($fixtureFilesProperty.Value.PSObject.Properties)
+    Assert-True ($fixtureProperties.Count -gt 0) "$($Case.id) has no fixture files"
+    foreach ($property in $fixtureProperties) {
+        Assert-RelativeFixturePath $property.Name
+        Assert-True (
+            $property.Value -is [string]
+        ) "$($Case.id) fixture value must be a string: $($property.Name)"
+        Assert-True (
+            -not [string]::IsNullOrWhiteSpace($property.Value)
+        ) "$($Case.id) empty fixture: $($property.Name)"
+    }
+
+    $evidence = @($Case.evidenceRequired)
+    $expectedEvidence = if ($Case.executionMode -eq 'synthetic-write') {
+        @('transcript', 'tool-events', 'snapshot', 'receipt', 'judgment')
+    } else {
+        @('transcript', 'tool-events', 'snapshot', 'judgment')
+    }
+    Assert-True (
+        $evidence.Count -eq $expectedEvidence.Count
+    ) "$($Case.id) unexpected evidenceRequired count"
+    Assert-True (
+        @(Compare-Object $expectedEvidence $evidence).Count -eq 0
+    ) "$($Case.id) unexpected evidenceRequired values"
+    $toolBindingProperty = $Case.PSObject.Properties['toolBindings']
+    $bindings = @(
+        if ($null -ne $toolBindingProperty) {
+            $toolBindingProperty.Value
+        }
+    )
+
+    if ($Case.executionMode -eq 'synthetic-write') {
+        Assert-True ($Case.scenarioEffect -ne 'read-only') "$($Case.id) synthetic write has read-only scenarioEffect"
+        Assert-True ($bindings.Count -eq 1) "$($Case.id) must have exactly one tool binding"
+        $binding = $bindings[0]
+        Assert-True ($binding.id -eq 'mock-external-write') "$($Case.id) unexpected tool binding id"
+        Assert-True ($binding.source -eq 'evals/support/mock-external-write.ps1') "$($Case.id) unexpected tool source"
+        Assert-True (
+            @(Compare-Object @('Write', 'ReadState') @($binding.allowedOperations)).Count -eq 0
+        ) "$($Case.id) unexpected allowed operations"
+    } else {
+        Assert-True ($bindings.Count -eq 0) "$($Case.id) read-only execution has a tool binding"
+    }
 }
 
 Assert-True (Test-Path -LiteralPath $casePath -PathType Leaf) 'missing evals/p0/cases.json'
@@ -57,51 +139,40 @@ $allCases = @($p0) + @($pressure)
 Assert-True (@($allCases.id | Select-Object -Unique).Count -eq 15) 'duplicate case ID'
 
 foreach ($case in $allCases) {
-    foreach ($field in @('id', 'executionMode', 'scenarioEffect', 'prompt', 'setup', 'passCriteria', 'failCriteria')) {
-        Assert-True (-not [string]::IsNullOrWhiteSpace([string]$case.$field)) "$($case.id) missing $field"
-    }
-
-    Assert-True (@('read-only', 'synthetic-write').Contains([string]$case.executionMode)) "$($case.id) invalid executionMode"
-    Assert-True (@('read-only', 'local-write', 'external-write').Contains([string]$case.scenarioEffect)) "$($case.id) invalid scenarioEffect"
-    if ($case.scenarioEffect -eq 'read-only') {
-        Assert-True ($null -eq $case.targetKey) "$($case.id) read-only case has targetKey"
-    } else {
-        Assert-True (-not [string]::IsNullOrWhiteSpace([string]$case.targetKey)) "$($case.id) write case missing targetKey"
-    }
-
-    $fixtureProperties = @($case.fixtureFiles.PSObject.Properties)
-    Assert-True ($fixtureProperties.Count -gt 0) "$($case.id) has no fixture files"
-    foreach ($property in $fixtureProperties) {
-        Assert-RelativeFixturePath $property.Name
-        Assert-True (-not [string]::IsNullOrWhiteSpace([string]$property.Value)) "$($case.id) empty fixture: $($property.Name)"
-    }
-
-    $evidence = @($case.evidenceRequired)
-    Assert-True ($evidence.Count -gt 0) "$($case.id) has no evidence requirements"
-    Assert-True ($evidence -contains 'transcript') "$($case.id) must require transcript"
-    Assert-True ($evidence -contains 'judgment') "$($case.id) must require judgment"
-    $toolBindingProperty = $case.PSObject.Properties['toolBindings']
-    $bindings = @(
-        if ($null -ne $toolBindingProperty) {
-            $toolBindingProperty.Value
-        }
-    )
-
-    if ($case.executionMode -eq 'synthetic-write') {
-        Assert-True ($case.scenarioEffect -ne 'read-only') "$($case.id) synthetic write has read-only scenarioEffect"
-        Assert-True ($evidence -contains 'receipt') "$($case.id) synthetic write must require receipt"
-        Assert-True ($bindings.Count -eq 1) "$($case.id) must have exactly one tool binding"
-        $binding = $bindings[0]
-        Assert-True ($binding.id -eq 'mock-external-write') "$($case.id) unexpected tool binding id"
-        Assert-True ($binding.source -eq 'evals/support/mock-external-write.ps1') "$($case.id) unexpected tool source"
-        Assert-True (
-            @(Compare-Object @('Write', 'ReadState') @($binding.allowedOperations)).Count -eq 0
-        ) "$($case.id) unexpected allowed operations"
-    } else {
-        Assert-True (-not ($evidence -contains 'receipt')) "$($case.id) read-only execution must not require receipt"
-        Assert-True ($bindings.Count -eq 0) "$($case.id) read-only execution has a tool binding"
-    }
+    Assert-CaseContract -Case $case
 }
+
+$scalarFixtureCase = $p0[0] | ConvertTo-Json -Depth 20 | ConvertFrom-Json
+$scalarFixtureCase.fixtureFiles = 'x'
+Assert-ThrowsLike {
+    Assert-CaseContract -Case $scalarFixtureCase
+} '*fixtureFiles must be an object*' 'scalar fixtureFiles was accepted'
+
+$nonStringFixtureCase = $p0[0] | ConvertTo-Json -Depth 20 | ConvertFrom-Json
+$nonStringFixtureCase.fixtureFiles.'REQUEST.md' = 17
+Assert-ThrowsLike {
+    Assert-CaseContract -Case $nonStringFixtureCase
+} '*fixture value must be a string*' 'non-string fixture value was accepted'
+
+$missingEvidenceCase = $p0[0] | ConvertTo-Json -Depth 20 | ConvertFrom-Json
+$missingEvidenceCase.evidenceRequired = @('transcript', 'snapshot', 'judgment')
+Assert-ThrowsLike {
+    Assert-CaseContract -Case $missingEvidenceCase
+} '*unexpected evidenceRequired*' 'missing evidence kind was accepted'
+
+$duplicateEvidenceCase = $p0[0] | ConvertTo-Json -Depth 20 | ConvertFrom-Json
+$duplicateEvidenceCase.evidenceRequired = @(
+    'transcript', 'tool-events', 'snapshot', 'judgment', 'judgment'
+)
+Assert-ThrowsLike {
+    Assert-CaseContract -Case $duplicateEvidenceCase
+} '*unexpected evidenceRequired*' 'duplicate evidence kind was accepted'
+
+$unknownEvidenceCase = $p0[0] | ConvertTo-Json -Depth 20 | ConvertFrom-Json
+$unknownEvidenceCase.evidenceRequired = @('transcript', 'tool-events', 'snapshot', 'guess')
+Assert-ThrowsLike {
+    Assert-CaseContract -Case $unknownEvidenceCase
+} '*unexpected evidenceRequired*' 'unknown evidence kind was accepted'
 
 Assert-True (Test-Path -LiteralPath $mockPath -PathType Leaf) 'missing evals/support/mock-external-write.ps1'
 
@@ -173,6 +244,40 @@ try {
     Assert-True ($eventKinds[1] -eq 'state-query') 'state query did not precede recovery'
     Assert-True ($eventKinds[2] -eq 'same-key-recovery') 'recovery event missing'
     Assert-True ($eventKinds[3] -eq 'state-query') 'final state query missing'
+
+    $caseStatePath = Join-Path $runRoot 'state\case-sensitive-keys.json'
+    $firstCaseWrite = & $mockPath -Operation Write -RunRoot $runRoot -StatePath $caseStatePath `
+        -TargetKey 'fixture-service:account-18' -IdempotencyKey 'REQUEST-CASE' | ConvertFrom-Json
+    Assert-True ($firstCaseWrite.operationId -eq 'op-0001') 'normal first write returned wrong operation ID'
+    Assert-True ($firstCaseWrite.effectCount -eq 1) 'normal first write effect count was not one'
+    Assert-True ($firstCaseWrite.reused -eq $false) 'normal first write was marked reused'
+
+    $secondCaseWrite = & $mockPath -Operation Write -RunRoot $runRoot -StatePath $caseStatePath `
+        -TargetKey 'fixture-service:account-18' -IdempotencyKey 'request-case' | ConvertFrom-Json
+    Assert-True ($secondCaseWrite.operationId -eq 'op-0002') 'case-distinct key did not create a new operation'
+    Assert-True ($secondCaseWrite.effectCount -eq 2) 'different key did not create a second effect'
+    Assert-True ($secondCaseWrite.reused -eq $false) 'different key was incorrectly marked reused'
+
+    $junctionTarget = Join-Path $testRoot 'junction-target'
+    $junctionPath = Join-Path $runRoot 'junction-state'
+    $junctionStatePath = Join-Path $junctionPath 'escaped.json'
+    [IO.Directory]::CreateDirectory($junctionTarget) | Out-Null
+    New-Item -ItemType Junction -Path $junctionPath -Target $junctionTarget | Out-Null
+    $junctionRejected = $false
+    try {
+        & $mockPath -Operation ReadState -RunRoot $runRoot -StatePath $junctionStatePath `
+            -TargetKey 'fixture-service:account-19' | Out-Null
+    } catch {
+        $junctionRejected = $_.Exception.Message -like '*reparse point*'
+    } finally {
+        if (Test-Path -LiteralPath $junctionPath) {
+            [IO.Directory]::Delete($junctionPath)
+        }
+    }
+    Assert-True $junctionRejected 'fixture accepted a junction escape below RunRoot'
+    Assert-True (
+        -not (Test-Path -LiteralPath (Join-Path $junctionTarget 'escaped.json'))
+    ) 'junction escape wrote outside RunRoot'
 
     $escaped = $false
     try {

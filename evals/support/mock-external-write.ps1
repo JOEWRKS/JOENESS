@@ -21,12 +21,46 @@ param(
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
+function Assert-NoReparsePoint {
+    param(
+        [string]$RootPath,
+        [string]$CandidatePath
+    )
+
+    $rootPathFull = [IO.Path]::GetFullPath($RootPath).TrimEnd('\')
+    $candidatePathFull = [IO.Path]::GetFullPath($CandidatePath)
+    $relativePath = $candidatePathFull.Substring($rootPathFull.Length).TrimStart('\')
+    $paths = @($rootPathFull)
+    $currentPath = $rootPathFull
+
+    foreach ($segment in @($relativePath -split '\\' | Where-Object { $_ -ne '' })) {
+        $currentPath = Join-Path $currentPath $segment
+        $paths += $currentPath
+    }
+
+    foreach ($path in $paths) {
+        if (Test-Path -LiteralPath $path) {
+            $item = Get-Item -LiteralPath $path -Force
+            if (($item.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0) {
+                throw "Reparse point is not allowed below RunRoot: $path"
+            }
+        }
+    }
+}
+
 function Write-Utf8Json {
-    param([string]$LiteralPath, [object]$Value)
+    param(
+        [string]$LiteralPath,
+        [object]$Value,
+        [string]$RootPath
+    )
+
+    Assert-NoReparsePoint -RootPath $RootPath -CandidatePath $LiteralPath
     $parent = Split-Path -Parent $LiteralPath
     if (-not (Test-Path -LiteralPath $parent)) {
         [IO.Directory]::CreateDirectory($parent) | Out-Null
     }
+    Assert-NoReparsePoint -RootPath $RootPath -CandidatePath $LiteralPath
     $json = $Value | ConvertTo-Json -Depth 10
     $utf8 = New-Object Text.UTF8Encoding($false)
     [IO.File]::WriteAllText($LiteralPath, $json + [Environment]::NewLine, $utf8)
@@ -50,6 +84,8 @@ if ([string]::IsNullOrWhiteSpace($TargetKey)) {
     throw 'TargetKey must not be blank'
 }
 
+Assert-NoReparsePoint -RootPath $rootFull -CandidatePath $stateFull
+
 if (Test-Path -LiteralPath $stateFull) {
     $state = Get-Content -Raw -Encoding UTF8 -LiteralPath $stateFull | ConvertFrom-Json
 } else {
@@ -67,8 +103,8 @@ if ($Operation -eq 'ReadState') {
         targetKey = $TargetKey
         idempotencyKey = $null
     }
-    Write-Utf8Json -LiteralPath $stateFull -Value $state
-    $effects = @($state.effects | Where-Object { $_.targetKey -eq $TargetKey })
+    Write-Utf8Json -LiteralPath $stateFull -Value $state -RootPath $rootFull
+    $effects = @($state.effects | Where-Object { $_.targetKey -ceq $TargetKey })
     [pscustomobject]@{
         targetKey = $TargetKey
         effectCount = $effects.Count
@@ -84,7 +120,7 @@ if ([string]::IsNullOrWhiteSpace($IdempotencyKey)) {
 
 $existing = @(
     $state.effects | Where-Object {
-        $_.targetKey -eq $TargetKey -and $_.idempotencyKey -eq $IdempotencyKey
+        $_.targetKey -ceq $TargetKey -and $_.idempotencyKey -ceq $IdempotencyKey
     }
 ) | Select-Object -First 1
 
@@ -95,11 +131,11 @@ if ($null -ne $existing) {
         targetKey = $TargetKey
         idempotencyKey = $IdempotencyKey
     }
-    Write-Utf8Json -LiteralPath $stateFull -Value $state
+    Write-Utf8Json -LiteralPath $stateFull -Value $state -RootPath $rootFull
     [pscustomobject]@{
         targetKey = $TargetKey
         operationId = $existing.operationId
-        effectCount = @($state.effects | Where-Object { $_.targetKey -eq $TargetKey }).Count
+        effectCount = @($state.effects | Where-Object { $_.targetKey -ceq $TargetKey }).Count
         reused = $true
     } | ConvertTo-Json -Depth 10
     return
@@ -119,7 +155,7 @@ $state.events = @($state.events) + [pscustomobject]@{
     idempotencyKey = $IdempotencyKey
     operationId = $operationId
 }
-Write-Utf8Json -LiteralPath $stateFull -Value $state
+Write-Utf8Json -LiteralPath $stateFull -Value $state -RootPath $rootFull
 
 if ($LoseResponse) {
     throw 'synthetic response loss after committed write'
@@ -128,6 +164,6 @@ if ($LoseResponse) {
 [pscustomobject]@{
     targetKey = $TargetKey
     operationId = $operationId
-    effectCount = @($state.effects | Where-Object { $_.targetKey -eq $TargetKey }).Count
+    effectCount = @($state.effects | Where-Object { $_.targetKey -ceq $TargetKey }).Count
     reused = $false
 } | ConvertTo-Json -Depth 10
