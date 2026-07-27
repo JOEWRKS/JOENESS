@@ -305,7 +305,7 @@ try {
     $junctionRejected = $_.Exception.Message -like '*reparse point*'
 } finally {
     if (Test-Path -LiteralPath $junctionPath) {
-        Remove-Item -LiteralPath $junctionPath -Force
+        [IO.Directory]::Delete($junctionPath)
     }
 }
 Assert-True $junctionRejected 'fixture accepted a junction escape below RunRoot'
