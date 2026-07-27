@@ -1,6 +1,6 @@
 # P0 평가 계약 보강 설계
 
-**상태:** 사용자 방향 승인 — 작성본 검토 대기  
+**상태:** 사용자 승인
 **기준 명세:** `docs/superpowers/specs/2026-07-27-common-work-harness-design.md`  
 **기존 구현 계획:** `docs/superpowers/plans/2026-07-27-p0-evaluation-contract.md`
 
@@ -153,14 +153,13 @@
 
 각 RED가 기대한 이유로 실패하는 것을 확인한 후 mock, case contract, 검증기를 최소 수정한다.
 
-수정 대상은 다음뿐이다.
+구현 수정 대상은 다음뿐이다.
 
-- `docs/superpowers/plans/2026-07-27-p0-evaluation-contract.md`
 - `evals/p0/cases.json`
 - `evals/support/mock-external-write.ps1`
 - `tests/p0-evaluation-contract.tests.ps1`
 
-`.gitattributes`의 기존 규칙은 충분하므로 변경하지 않는다. 이 설계 문서 외의 새 파일은 만들지 않는다.
+기존 `docs/superpowers/plans/2026-07-27-p0-evaluation-contract.md`는 당시 승인·실행된 내용을 보존하는 역사 기록이므로 사후 수정하지 않는다. 이번 변경은 별도 보강 구현 계획에 기록한다. `.gitattributes`의 기존 규칙은 충분하므로 변경하지 않는다. 보강 구현 계획 외의 새 파일은 만들지 않는다.
 
 ## 8. 완료 조건
 
@@ -169,6 +168,6 @@
 - junction 시험을 포함한 테스트 쓰기와 정리는 새 시스템 임시 루트 안에서만 일어난다.
 - 최종 테스트 출력은 `PASS: P0 evaluation contract`이다.
 - `git diff --check`가 통과한다.
-- net 구현 범위가 승인된 계획, 기존 네 구현 파일, 이 설계 문서에 한정된다.
+- net 보강 범위가 이 설계 문서, 별도 보강 구현 계획, 기존 세 구현 파일에 한정된다.
 - 현재 Git, 실제 실행 출력, receipt보다 대화 기억이나 draft 보고가 우선하지 않는다.
 - 외부 스킬, 하네스 공통 규칙, vendor, 설치 및 프로젝트 migration은 추가되지 않는다.
