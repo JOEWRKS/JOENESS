@@ -566,7 +566,7 @@ After both tasks and their task reviews:
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\tests\p0-evaluation-contract.tests.ps1
 git diff --check
 git status --short --untracked-files=all
-git diff --name-only 25aec2813f0b8e5f3a3f45cc0d88661eb74dd118..HEAD
+git diff --name-only 25aec2813f0b8e5f3a3f45cc0d88661eb74dd118^..HEAD
 ```
 
 Required final source paths after the approved design commit:
@@ -580,3 +580,24 @@ tests/p0-evaluation-contract.tests.ps1
 ```
 
 The design and plan may be committed together before Task 1. Task implementation commits must contain only the paths listed in their own steps. The original 2026-07-27 plan and `.gitattributes` must remain byte-unchanged.
+
+## Post-final-review fix wave
+
+- Exact evidence, allowed-operation, and case-ID sets use case-sensitive comparisons with mixed-case mutation probes, and required prose must remain string-typed.
+- Direct scenario checks preserve the reviewed P0-02, P0-07, pressure-01, pressure-05, pressure-06, and pressure-08 contracts; pressure-02 and pressure-07 now carry explicit adversarial orders.
+- Synthetic-write probes preserve case-distinct `TargetKey` behavior and the committed `operationId` on same-key recovery.
+- Fixture paths reject alternate-data-stream syntax lexically. Physical aliases require canonicalization against the materialized fixture root and remain the responsibility of the later materializer.
+
+Verify the fix wave with:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\tests\p0-evaluation-contract.tests.ps1
+$contract = Get-Content -Raw -Encoding UTF8 .\evals\p0\cases.json | ConvertFrom-Json
+$contract.p0Cases.Count
+$contract.pressureCases.Count
+$contract.pressureCases[-1].id
+git diff --check
+git status --short --untracked-files=all
+git diff --name-only 05a5cdcd36e805f29acad424f657c873ad007e13..HEAD
+git diff --name-only 25aec2813f0b8e5f3a3f45cc0d88661eb74dd118^..HEAD
+```
