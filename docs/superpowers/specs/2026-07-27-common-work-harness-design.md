@@ -2,7 +2,7 @@
 
 - 기준일: 2026-07-27
 - 저장소: `D:\JOEWRKS\작업하네스`
-- 상태: 설계 방향 승인 완료, 작성 명세 사용자 검토 대기
+- 상태: 외부 스킬 직접 재사용 방침 반영, 작성 명세 사용자 검토 대기
 - 주 사용 환경: Codex Desktop/CLI
 - 호환 대상: Claude Code, GitHub Copilot CLI 및 지원되는 IDE 표면
 
@@ -27,12 +27,12 @@
 
 - 모든 프로젝트에 적용할 짧은 공통 규칙
 - 프로젝트별 규칙과 공통 규칙의 우선순위
-- 역할별 온디맨드 스킬
+- 기능별 온디맨드 스킬과 설치 플러그인 라우팅
 - 문서와 과거 맥락의 선택적 검색 방식
 - 중복 구현·중복 실행·무진전 반복 방지
 - 조건부 보조 에이전트 사용 기준
 - Codex, Claude Code, GitHub Copilot용 얇은 어댑터
-- 외부 스킬의 고정 버전 수용과 공급망 관리
+- 외부 스킬의 고정 버전 직접 수용과 업데이트 관리
 - 9.1의 적용 수준에 따른 UI/UX·Apple Design·Figma·브라우저 이중 검증
 - 하네스 자체의 행동 평가와 회귀 검증
 
@@ -57,7 +57,7 @@
 
 - 디렉터리 또는 파일 경로에 따른 조건부 규칙
 - 사용자 요청과 설명이 일치할 때만 활성화되는 스킬
-- 스킬이 직접 가리키는 한 단계 깊이의 참고 자료
+- 스킬이 직접 가리키는 외부 원문 또는 실행 진입점 한 단계
 - 검색 결과로 선택한 문서 구간
 
 ### 3.2 최소 코드는 최소 제품이 아니다
@@ -117,23 +117,14 @@ D:\JOEWRKS\작업하네스
 ├─ AGENTS.md
 ├─ README.md
 ├─ skills
-│  ├─ planning-delivery
+│  ├─ assumption-checking
+│  │  └─ SKILL.md
+│  ├─ surgical-changes
+│  │  └─ SKILL.md
+│  ├─ design-frontend
 │  │  ├─ SKILL.md
 │  │  └─ agents/openai.yaml
-│  ├─ designing-and-building-frontend
-│  │  ├─ SKILL.md
-│  │  ├─ agents/openai.yaml
-│  │  └─ references
-│  │     ├─ apple-design.md
-│  │     ├─ ui-ux-pro-max.md
-│  │     └─ figma-browser-validation.md
-│  ├─ building-backend-data
-│  │  ├─ SKILL.md
-│  │  └─ agents/openai.yaml
-│  ├─ debugging-maintenance
-│  │  ├─ SKILL.md
-│  │  └─ agents/openai.yaml
-│  └─ reviewing-handoffs
+│  └─ handoff
 │     ├─ SKILL.md
 │     └─ agents/openai.yaml
 ├─ adapters
@@ -143,10 +134,24 @@ D:\JOEWRKS\작업하네스
 │  └─ sync-harness.ps1
 ├─ evals
 └─ vendor
+   ├─ bluesaurel-fallbacks
+   │  ├─ simplicity-first
+   │  │  └─ SKILL.md
+   │  └─ goal-driven-debugging
+   │     └─ SKILL.md
+   ├─ ui-ux-pro-max
+   │  ├─ SKILL.md
+   │  ├─ references
+   │  ├─ scripts
+   │  └─ data
+   ├─ apple-design
+   │  └─ SKILL.md
    └─ SOURCES.md
 ```
 
-초기 구현의 커스텀 스킬은 위 다섯 개를 후보 상한으로 둔다. baseline 실패나 측정 가능한 성능 격차가 확인된 후보만 만들고, 둘 다 없으면 해당 후보를 제외한다. 별도 보안 스킬은 만들지 않고 설치된 Codex Security 기능과 프로젝트의 기존 보안 도구를 사용한다. 일반적인 코딩 지식을 다시 설명하는 범용 구현 스킬도 만들지 않는다.
+초기 로컬 스킬은 위 네 개로 제한한다. `assumption-checking`, `surgical-changes`, `handoff`는 고정 커밋의 원본을 직접 복사하고, 필요한 JOEWRKS 보완만 최소 diff로 남긴다. `design-frontend`만 UI UX Pro Max, Apple Design, Figma, 브라우저를 조건부로 연결하는 얇은 로컬 라우터로 작성한다.
+
+별도 계획·PM·백엔드·디버깅 스킬은 만들지 않는다. 계획과 디버깅은 설치된 Superpowers, 단순화는 Ponytail, 보안은 Codex Security와 프로젝트의 기존 도구를 사용한다. 일반적인 코딩 지식을 다시 설명하는 범용 구현 스킬도 만들지 않는다.
 
 ## 6. 항상 적용되는 공통 규칙
 
@@ -245,67 +250,108 @@ handoff의 최소 필드는 다음과 같다.
 - 요청과 완료 조건
 - 완료된 변경
 - 남은 작업
-- 현재 diff와 관련 파일
-- 검증 명령과 마지막 결과
+- branch, HEAD, 미커밋 diff와 관련 파일
+- 실제 검증 명령과 마지막 결과 또는 `not run`
 - 결정과 그 근거
+- 기존 spec, plan, ADR, issue, commit의 경로
 - 막힌 지점과 다음 시작점
 
 별도 역할별 기억 저장소는 만들지 않는다. 모든 역할은 프로젝트의 같은 근거 문서를 보고, 필요한 부분만 전달받는다.
 
-## 8. 역할별 온디맨드 스킬
+## 8. 기능별 온디맨드 스킬과 플러그인
 
-### 8.1 `planning-delivery`
+### 8.1 라우팅 우선순위
 
-다음 상황에서 사용한다.
+같은 요청에 비슷한 스킬을 중첩하지 않는다.
 
-- 요구사항이 모호하거나 여러 단계로 연결된다.
-- 변경 범위와 완료 조건을 먼저 고정해야 한다.
-- 장기 작업의 범위와 실제 handoff 지점을 계획해야 한다.
-- 외부 팀과 공유할 구현 계약이 필요하다.
+| 작업 조건 | 선택 |
+|---|---|
+| 새로운 제품·기능·디자인의 창작적 모호성 | Superpowers `brainstorming` |
+| 결과가 둘 이상으로 갈리고 잘못 고르면 재작업 위험이 큰 기술적 모호성 | `assumption-checking` |
+| 기존·민감·낯선 코드의 최소 diff | `surgical-changes` |
+| 과설계 위험이 있는 구현·리팩터링 | Ponytail core |
+| 버그·테스트 실패·예상 밖 동작 | Superpowers `systematic-debugging`, 필요 시 TDD |
+| 의미 있는 UI/UX 설계·구현 | `design-frontend` |
+| 세션·사람·기기 사이의 실제 작업 이관 | `handoff` |
+| 단순하고 명확한 작업 | 추가 스킬 없음 |
 
-단순한 한 파일 수정이나 이미 완료 조건이 명확한 작업에는 활성화하지 않는다. `planning-delivery`는 handoff 지점과 분할을 계획하고, 실제 전달 문서의 작성·검토는 `reviewing-handoffs`가 담당한다. 별도 PM 에이전트는 만들지 않는다.
+### 8.2 `assumption-checking`
 
-### 8.2 `designing-and-building-frontend`
+[bluesaurel의 분할 스킬 원문](https://github.com/bluesaurel/karpathy-codex-skills/tree/76015a4cd8bf8f3ac413a54ef735767b1c742558/packages/split-skills/package/skills/assumption-checking)을 그대로 복사한다.
+
+기술 요청이 실제로 여러 결과로 갈리고 잘못 선택하면 재작업·데이터 손실·외부 영향이 커질 때만 사용한다. 안전하고 쉽게 되돌릴 수 있는 가장 좁은 가정으로 진행 가능한 작업이나 창작적 요구 탐색에는 발동하지 않는다. 창작적 모호성은 Superpowers `brainstorming`과 동시에 로드하지 않는다.
+
+### 8.3 `surgical-changes`
+
+[bluesaurel의 분할 스킬 원문](https://github.com/bluesaurel/karpathy-codex-skills/tree/76015a4cd8bf8f3ac413a54ef735767b1c742558/packages/split-skills/package/skills/surgical-changes)을 그대로 복사한다.
+
+기존 코드의 호출 흐름을 보존해야 하거나 최소 diff가 중요한 변경에 사용한다. 공통 `AGENTS.md`에는 범위 밖 변경 금지 한 줄만 두고, 인접 정리·리팩터링·검토의 상세 기준은 이 스킬에만 둔다.
+
+### 8.4 `design-frontend`
 
 다음 상황에서 사용한다.
 
 - UI/UX 흐름, 화면, 컴포넌트, 디자인 시스템을 설계하거나 검토한다.
 - Figma를 코드로 구현하거나 코드를 Figma와 비교한다.
-- HTML, CSS, React 등 사용자에게 보이는 프론트엔드를 변경한다.
+- HTML, CSS, React 등 사용자에게 보이는 프론트엔드를 의미 있게 변경한다.
 - 반응형, 접근성, 시각 상태, 상호작용 품질이 완료 조건에 포함된다.
 
-이 스킬은 UI UX Pro Max, Apple Design, Figma 검증을 하나의 진입점에서 조건부로 선택한다. 세 자료를 별도 상위 스킬로 만들어 라우팅 경쟁을 일으키지 않는다.
+이 스킬은 비발견 `vendor`에 둔 UI UX Pro Max와 Apple Design 원문, 설치된 Figma 스킬, 브라우저 검증을 하나의 진입점에서 조건부로 선택한다. 단순한 색상 오타, 한 줄 정렬 오류, 비시각 작업에는 발동하지 않는다.
 
-### 8.3 `building-backend-data`
+### 8.5 `handoff`
 
-다음 상황에서 사용한다.
+[mattpocock의 원본 두 파일](https://github.com/mattpocock/skills/tree/ed37663cc5fbef691ddfecd080dff42f7e7e350d/skills/productivity/handoff)을 직접 복사하고 별도 wrapper는 만들지 않는다. 원본의 명시적 호출 전용 설정, 압축, 중복 방지, 민감정보 제거 규칙을 유지한다.
 
-- API, 서버 로직, 데이터 저장, 스키마, 마이그레이션을 변경한다.
-- 입력 검증, 오류 계약, 하위 호환성, 데이터 무결성이 중요하다.
-- 프론트엔드와 공유하는 API 계약을 명시해야 한다.
+다음 정보만 최소 보완한다.
 
-기존 프레임워크와 저장소 패턴을 먼저 사용한다. 단일 구현을 위한 새 추상화, 의존성, 범용 프레임워크를 추가하지 않는다.
+- branch, HEAD, 미커밋 변경 요약
+- 실제 실행한 검증과 `not run`
+- 기존 spec·plan·ADR·issue·commit·diff의 경로
+- Figma 파일 URL, node-id, 대상 frame, 마지막 검증 상태
+- 다음 작업에 실제 설치되어 있고 필요한 스킬
 
-### 8.4 `debugging-maintenance`
+같은 PC의 다음 세션은 원본처럼 OS 임시 폴더를 사용한다. 다른 사람·팀·기기나 장기 인수인계에는 기존 영구 artifact를 우선 참조하고, 그것만으로 부족할 때만 저장소 내부 handoff를 만든다. 매 작업 종료, 정상 완료, 모든 보조 에이전트 결과에는 만들지 않는다.
 
-다음 상황에서 사용한다.
+### 8.6 설치된 플러그인
 
-- 버그, 회귀, 테스트 실패, 빌드 실패, 성능 저하를 진단한다.
-- 동일 시도가 반복되거나 원인이 불명확하다.
-- 기존 동작을 유지하며 최소 수정해야 한다.
+플러그인 원문을 이 저장소에 다시 복제하지 않는다. 이미 설치된 기능을 다음 조건에서 직접 호출한다.
 
-증상 위치만 패치하지 않고 관련 호출 흐름을 확인한다. 재현 가능한 실패를 먼저 남기고 원인 수정 후 같은 검증을 통과시킨다.
+- Superpowers: 창작적 요구 탐색, 다단계 계획, 체계적 디버깅, 동작 변경의 TDD, 완료 전 검증, 중요 변경의 검토와 브랜치 마감
+- Ponytail: 코딩·리팩터링·버그 수정의 최소화 필터. `ponytail-review`는 중간 이상 diff나 병합 전 과설계 검토, `ponytail-audit`는 명시적 저장소 전체 감사에만 사용
+- Figma: 필요한 작업에 해당하는 선행 스킬 하나만 로드한다. Figma 읽기·생성·수정·design-to-code·motion·library 작업을 구분하며 관련 없는 SwiftUI, Slides, FigJam, Code Connect 스킬은 로드하지 않는다.
 
-### 8.5 `reviewing-handoffs`
+Superpowers는 다음 최소 집합으로 라우팅한다.
 
-다음 상황에서 사용한다.
+| 조건 | 스킬 |
+|---|---|
+| 새로운 동작 또는 여러 타당한 설계안 | `brainstorming` |
+| 여러 파일·단계·위험이 있는 승인된 작업 | `writing-plans`, 이후 `executing-plans` 또는 명확히 독립적인 경우에만 `subagent-driven-development` |
+| 버그·실패·성능 이상 | `systematic-debugging` |
+| 관찰 가능한 동작 변경 또는 회귀 | `test-driven-development` |
+| 완료·수정·통과·커밋·PR 주장 직전 | `verification-before-completion` |
+| 중요 변경 또는 병합 전 | `requesting-code-review`, 필요 시 `finishing-a-development-branch` |
+| 리뷰 피드백 수신 | `receiving-code-review` |
+| 더러운 작업공간 또는 병렬 작성 격리 | `using-git-worktrees` |
+| 공유 상태가 없는 독립 작업 둘 이상 | `dispatching-parallel-agents` |
 
-- 작업 결과를 다른 개발자나 팀에 전달한다.
-- 코드 변경을 독립적으로 검토한다.
-- 장기 작업을 중단하거나 다른 세션에서 이어야 한다.
-- PR 설명, 위험, 검증 결과를 구조화해야 한다.
+문구·문서·단순 스타일·메타데이터·검증 가능한 작은 설정 변경에 새 TDD 테스트를 강제하지 않는다. 작은 작업마다 brainstorming, 계획서, worktree, 보조 에이전트, 코드 리뷰를 다시 만들지 않는다.
 
-전체 대화를 다시 서술하지 않는다. 다음 작업자가 검증하고 이어갈 수 있는 사실과 artifact만 전달한다.
+Ponytail core는 요구 결과를 축소하는 권한이 아니다. 기존 구현·표준 기능·기설치 의존성·최소 코드를 차례로 확인하되 디자인 충실도, 보안, 데이터 안전, 오류 처리, 접근성은 생략하지 않는다. `ponytail-debt`는 실제 `ponytail:` 표식이 있을 때, `ponytail-gain`과 `ponytail-help`는 명시적으로 요청됐을 때만 사용한다.
+
+Figma는 다음처럼 최소 로드한다.
+
+| 작업 | 스킬 |
+|---|---|
+| 기존 Figma를 코드로 구현 | `figma-design-to-code` |
+| Figma 파일 실제 생성·수정 또는 Plugin API 검사 | `figma-use`; 새 파일이면 먼저 `figma-create-new-file` |
+| 코드·설명에서 완성 화면 생성 | `figma-generate-design` |
+| 명시적인 토큰·변수·공용 컴포넌트 체계 구축 | `figma-generate-library` |
+| 모션 구현·편집 | `figma-implement-motion` 또는 `figma-use-motion` |
+| SwiftUI, FigJam, Slides, diagram, Code Connect | 해당 요청이 있을 때만 전용 스킬 |
+
+단일 컴포넌트 때문에 새 디자인 시스템 전체를 만들지 않고 기존 라이브러리와 변수를 우선 재사용한다. 단순 구조·스크린샷 확인이 읽기 도구만으로 끝나면 무거운 Figma 편집 스킬을 추가 로드하지 않는다.
+
+별도 계획·PM·백엔드·디버깅 커스텀 스킬은 이 기능들과 중복되므로 만들지 않는다.
 
 ## 9. 디자인·프론트엔드 검증
 
@@ -324,13 +370,19 @@ Figma 연결이 필요한 디자인 작업에서 Figma를 사용할 수 없으�
 ### 9.2 검증 흐름
 
 1. 사용자 의도, 핵심 흐름, 필수 상태를 정의한다.
-2. 관련 Apple Design 및 UI UX Pro Max 참고 자료만 읽는다.
-3. Figma에서 계층, 컴포넌트, 변수, Auto Layout, 상태, 반응형 구조를 검증한다.
-4. 프로젝트의 기존 컴포넌트와 스타일을 재사용해 구현한다.
-5. 브라우저에서 DOM 의미, 키보드, 포커스, 반응형, 오류 상태, 실제 상호작용을 검증한다.
-6. 시각 차이를 비교하고 근거 있는 수정만 수행한다.
+2. 사용자 명시 의도 → 기존 Figma·제품 디자인 시스템 → 프로젝트 컴포넌트·토큰 → Apple Design → UI UX Pro Max 추천 순으로 판단한다.
+3. 의미 있는 신규 UI·상호작용이면 Apple Design 원문을 읽는다. gesture, sheet, drag, motion 작업에서는 전체 원문을 반드시 적용한다.
+4. UI UX Pro Max는 후보 데이터베이스로 사용한다. 신규 제품·대형 화면은 디자인 시스템 검색 한 번, 기존 화면은 UX와 현재 스택만, 접근성·motion·chart는 해당 도메인만 검색한다.
+5. 작업 종류에 맞는 Figma 선행 스킬 하나만 로드하고 계층, 컴포넌트, 변수, Auto Layout, 상태, 반응형 구조를 검증한다.
+6. 프로젝트의 기존 컴포넌트와 스타일을 재사용해 구현한다.
+7. 브라우저에서 DOM 의미, 키보드, 포커스, 반응형, 오류 상태, 실제 상호작용을 검증한다.
+8. 시각 차이를 비교하고 사용자 결과에 의미 있는 수정만 수행한다.
+
+UI UX Pro Max의 검색 결과는 프로젝트 버전과 공식 문서보다 우선하지 않는다. 결과에 등장했다는 이유만으로 폰트, 아이콘, GSAP 등 새 의존성을 설치하지 않으며 자동 생성된 색상은 실제 명암비를 별도 확인한다. 검색 결과가 없으면 더 넓은 키워드로 한 번만 재검색하고 같은 화면의 디자인 시스템을 반복 생성하지 않는다.
 
 Figma는 런타임 접근성, 키보드 탐색, 실제 렌더링 성능을 대신하지 않는다. 브라우저 검증은 Figma 검증의 후속 필수 단계다.
+
+동일 Figma 파일의 변경은 `inspect → 한 묶음 변경 → 반환된 node ID 확인 → 검증` 순서로 실행한다. 독립적인 읽기만 병렬화하고 같은 파일의 쓰기는 병렬화하지 않는다.
 
 ### 9.3 필수 결과
 
@@ -376,29 +428,33 @@ Figma는 런타임 접근성, 키보드 탐색, 실제 렌더링 성능을 대�
 
 독립 검토자에게는 가능하면 작성자의 상세 추론을 주지 않고 요구사항, diff, 테스트 결과, 검토 기준을 제공한다. 동일 가정을 그대로 복제하는 확인 편향을 줄이기 위함이다.
 
-## 11. 외부 자료 수용
+## 11. 외부 자료 직접 수용
 
-외부 저장소는 2026-07-27의 다음 커밋으로 고정한다.
+외부 저장소는 2026-07-27의 다음 커밋으로 고정한다. 선택 기준은 실제 기능, 중복 발동, 컨텍스트 비용, 업데이트 난이도다.
 
-| 출처 | 고정 커밋 | 라이선스 처리 | 수용 방식 |
+| 출처 | 고정 커밋 | 직접 복사 범위 | 활성 방식 |
 |---|---|---|---|
-| [bluesaurel/karpathy-codex-skills](https://github.com/bluesaurel/karpathy-codex-skills) | `76015a4cd8bf8f3ac413a54ef735767b1c742558` | `LICENSE` 내용이 `MIT` 한 단어인 비표준 고지이므로 원문 고지 보존 후 재배포 범위를 보수적으로 판단 | 과확장·추측·검증 관련 원칙을 독립적으로 정리 |
-| [multica-ai/andrej-karpathy-skills](https://github.com/multica-ai/andrej-karpathy-skills) | `2c606141936f1eeef17fa3043a72095b4765b9c2` | 루트 `LICENSE` 전문은 없고 README에 MIT라고만 표기되어 있으므로, 완전한 라이선스 조건을 확인하기 전까지 원문 복사·재배포 금지 | 분석 후 아이디어만 독립 표현하고 출처 링크 기록 |
-| [nextlevelbuilder/ui-ux-pro-max-skill](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill) | `3b5df7547964f0cb3424de74cff55b69039250d3` | MIT | 전체 설치기 대신 필요한 디자인 데이터와 판정 규칙만 선별 |
-| [mattpocock/skills/…/handoff](https://github.com/mattpocock/skills/tree/main/skills/productivity/handoff) | `ed37663cc5fbef691ddfecd080dff42f7e7e350d` | MIT | handoff의 필수 artifact와 전달 구조를 참고 |
-| [emilkowalski/skills/…/apple-design](https://github.com/emilkowalski/skills/tree/main/skills/apple-design) | `e695d13cb298db0f46d5ef05be2ad13fa12908a6` | MIT | 디자인 스킬의 조건부 참고 자료로 보존·정리 |
+| [bluesaurel/karpathy-codex-skills](https://github.com/bluesaurel/karpathy-codex-skills) | `76015a4cd8bf8f3ac413a54ef735767b1c742558` | `GLOBAL_GUIDELINES`의 핵심 문장, 분할형 `assumption-checking`, `surgical-changes`; 플러그인 없는 도구용 `simplicity-first`, `goal-driven-debugging` fallback | 앞의 두 스킬만 조건부 활성. 공통 원칙은 `AGENTS.md`에 8~10개만 유지 |
+| [multica-ai/andrej-karpathy-skills](https://github.com/multica-ai/andrej-karpathy-skills) | `2c606141936f1eeef17fa3043a72095b4765b9c2` | 활성 복사 없음 | 전 파일 감사 결과 bluesaurel의 거친 upstream·도구별 중복본이다. `SOURCES.md`에 비교·제외 근거만 기록 |
+| [nextlevelbuilder/ui-ux-pro-max-skill](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill) | `3b5df7547964f0cb3424de74cff55b69039250d3` | `.claude/skills/ui-ux-pro-max` 전체: `SKILL.md`, references, Python 검색기·테스트, CSV 데이터·stack 지침 | 비발견 `vendor`에 그대로 두고 `design-frontend`가 필요한 검색만 실행 |
+| [mattpocock/skills/…/handoff](https://github.com/mattpocock/skills/tree/main/skills/productivity/handoff) | `ed37663cc5fbef691ddfecd080dff42f7e7e350d` | `SKILL.md`, `agents/openai.yaml` | 독립 `handoff` 스킬로 직접 복사하고 8.5의 운영 필드만 최소 수정 |
+| [emilkowalski/skills/…/apple-design](https://github.com/emilkowalski/skills/tree/main/skills/apple-design) | `e695d13cb298db0f46d5ef05be2ad13fa12908a6` | `skills/apple-design/SKILL.md` 전체 | 비발견 `vendor` 원문으로 두고 의미 있는 디자인 작업에서 `design-frontend`가 읽음 |
 
-### 11.1 공급망 규칙
+UI UX Pro Max는 저장소 전체의 CLI, npm 설치기, marketplace 설정, 다른 스킬, 폰트 바이너리, 예제, 스크린샷, GitHub Actions를 가져오지 않는다. 실제 검색 런타임 디렉터리는 통째로 복사한다. CSV는 검색된 행만 컨텍스트에 들어가므로 임의로 잘라 검색기와 업데이트 경로를 다시 만들지 않는다.
 
-- 고정 커밋의 원문을 먼저 읽고 파일 목록, 실행 코드, 네트워크 동작을 감사한다.
-- 외부 설치 스크립트는 실행하지 않는다.
-- 필요한 파일만 가져오며 원본 URL, 커밋, 라이선스, 파일 해시를 `vendor/SOURCES.md`에 기록한다.
-- 라이선스가 불분명한 자료는 원문을 저장소에 복사하지 않는다.
-- 수용한 규칙과 원문을 구분하고 중복된 규칙은 하나의 canonical 위치에만 둔다.
-- 외부 자료는 자동 업데이트하지 않는다.
-- 업데이트는 diff 감사와 관련 평가 재실행을 통과한 뒤 수동 반영한다.
+### 11.1 직접 복사와 업데이트 규칙
 
-Superpowers, Ponytail, Figma는 현재 런타임에 설치된 기능을 사용하며 이 저장소에 복제하지 않는다.
+- 고정 커밋의 실제 실행 파일을 읽고 파일 목록, 실행 코드, 네트워크 동작, 중복본을 감사한다.
+- 저장소별 설치기나 `curl` 명령을 실행하지 않고 지정 커밋의 파일을 직접 복사한다.
+- 원본 URL, 커밋, 로컬 경로, 파일 해시, 의도적인 로컬 diff를 `vendor/SOURCES.md`에 기록한다.
+- 같은 원문을 요약본과 독립 스킬로 이중 보존하지 않는다. 활성 규칙은 한 canonical 위치에서만 로드한다.
+- UI UX Pro Max와 Apple Design은 비발견 `vendor`에 두어 독립 발동을 막는다.
+- 외부 자료는 자동 업데이트하지 않는다. 업데이트는 upstream diff와 관련 평가를 통과한 뒤 수동 반영한다.
+- 설치 플러그인이 없는 Claude Code·Copilot 환경에서만 `simplicity-first`, `goal-driven-debugging` 원문 fallback을 해당 어댑터에 배포한다.
+
+### 11.2 설치 플러그인
+
+Superpowers 6.2.0, Ponytail 4.8.4, Figma 2.0.16은 현재 런타임에 설치된 기능을 직접 사용하며 저장소에 복제하지 않는다. 하네스에는 8.1과 8.6의 발동 조건만 둔다. 동일 기능을 로컬 스킬로 다시 작성하거나 여러 하위 스킬을 한 요청에 선제 로드하지 않는다.
 
 ## 12. 도구별 어댑터와 설치
 
@@ -442,7 +498,7 @@ Superpowers, Ponytail, Figma는 현재 런타임에 설치된 기능을 사용�
 
 - 대상 어댑터 파일이 이미 있으면 백업 없이 변경하지 않는다.
 - 관리하지 않는 기존 내용을 삭제하지 않는다.
-- 외부 출처의 커밋이나 라이선스를 확인할 수 없으면 해당 자료 수용을 중단한다.
+- 외부 출처의 지정 커밋이나 필요한 파일을 확인할 수 없으면 추정 파일로 대체하지 않고 현재 고정본을 유지한다.
 - 스킬의 발동 조건이 겹치면 스킬을 더 추가하지 않고 설명과 경계를 먼저 수정한다.
 - Figma, 브라우저, 테스트 도구가 실패하면 해당 검증을 생략한 완료 처리를 하지 않는다.
 - 같은 설치 또는 검증이 두 번 같은 이유로 실패하면 세 번째 반복 전에 원인을 진단한다.
@@ -450,7 +506,7 @@ Superpowers, Ponytail, Figma는 현재 런타임에 설치된 기능을 사용�
 
 ## 14. 테스트 전략
 
-하네스와 각 스킬은 문서이지만 행동을 변경하므로 테스트 우선으로 작성한다.
+하네스와 각 스킬은 문서이지만 행동을 변경하므로 직접 복사본도 실제 라우팅과 행동을 검증한다.
 
 ### 14.1 한 번에 하나의 스킬
 
@@ -458,11 +514,11 @@ Superpowers, Ponytail, Figma는 현재 런타임에 설치된 기능을 사용�
 
 1. 스킬이 없는 fresh context에서 실패 시나리오를 실행한다.
 2. 실제 실패·합리화 또는 측정 가능한 성능 격차를 기록한다.
-3. 실패와 성능 격차가 모두 없으면 해당 후보를 만들지 않는다.
-4. 확인된 문제만 막는 최소 `SKILL.md`를 작성한다.
+3. 실패와 성능 격차가 모두 없으면 새 커스텀 스킬을 만들지 않는다.
+4. 검증된 외부 스킬이 격차를 메우면 원문을 직접 복사하고, 없을 때만 최소 라우터를 작성한다.
 5. 같은 시나리오를 스킬과 함께 다시 실행한다.
-6. 새 우회 합리화가 생기면 최소 문구로 보완한다.
-7. 구조와 frontmatter를 검증한다.
+6. 새 우회 합리화가 생기면 원문을 복제하지 않고 공통 경계 또는 라우터를 최소 수정한다.
+7. 구조와 frontmatter, 원본 해시 또는 의도적인 diff를 검증한다.
 8. 해당 스킬을 완료한 뒤 다음 스킬로 이동한다.
 
 여러 스킬을 먼저 작성한 뒤 한꺼번에 테스트하지 않는다.
@@ -497,7 +553,7 @@ Superpowers, Ponytail, Figma는 현재 런타임에 설치된 기능을 사용�
 - 설명 길이와 중복 키워드
 - 한 단계보다 깊은 참고 링크
 - 동일 규칙의 중복
-- 출처, 커밋, 라이선스, 해시
+- 출처, 커밋, 로컬 경로, 해시, 의도적인 원본 대비 diff
 - 어댑터의 managed block과 설치본 drift
 
 ### 14.5 실제 작업 평가
@@ -554,7 +610,7 @@ python C:\Users\tjdwo\.codex\skills\.system\skill-creator\scripts\quick_validate
 - 기존 구현 검색 없이 중복 구현을 시작하지 않음
 - Figma 또는 브라우저를 실행하지 않은 경우 실행했다고 보고하지 않음
 - 구현한 모든 커스텀 스킬이 14.7의 validator를 통과
-- 외부 자료의 출처·커밋·라이선스·해시 기록 완료
+- 외부 자료의 출처·커밋·로컬 경로·해시·의도적인 diff 기록 완료
 - 동기화 `-Check`가 drift를 검출하고 어떤 파일도 변경하지 않음
 - 동기화 `-Apply`가 기존 비관리 내용을 보존하고 백업을 남김
 
@@ -564,15 +620,15 @@ python C:\Users\tjdwo\.codex\skills\.system\skill-creator\scripts\quick_validate
 
 1. 공통 규칙의 baseline 실패 시나리오를 만든다.
 2. 최소 `AGENTS.md`를 작성하고 압력 테스트한다.
-3. `planning-delivery` 후보의 필요성을 baseline으로 평가하고, 격차가 있을 때만 작성·검증한다.
-4. `designing-and-building-frontend` 후보를 같은 방식으로 평가하고, 생성할 경우 Apple/UIUX/Figma 참고 경로를 검증한다.
-5. `building-backend-data` 후보를 같은 방식으로 평가한다.
-6. `debugging-maintenance` 후보를 같은 방식으로 평가한다.
-7. `reviewing-handoffs` 후보를 같은 방식으로 평가한다.
-8. 외부 자료 provenance와 필요한 고정 원문을 정리한다.
+3. bluesaurel의 `assumption-checking`, `surgical-changes` 원문을 직접 복사하고 라우팅 양성·음성 사례를 검증한다.
+4. UI UX Pro Max 실행 디렉터리와 Apple Design 원문을 `vendor`에 복사하고 데이터 검사·검색 테스트를 실행한다.
+5. 최소 `design-frontend` 라우터를 작성하고 Apple/UIUX/Figma/브라우저의 조건부 경로와 비발동 사례를 검증한다.
+6. mattpocock `handoff` 원본을 복사하고 8.5의 최소 운영 필드를 패치한 뒤 명시적 호출과 비발동을 검증한다.
+7. Superpowers, Ponytail, Figma의 조건별 라우팅과 상호 중복 방지를 평가한다.
+8. 외부 자료의 출처, 해시, 로컬 diff와 multica 제외 근거를 정리한다.
 9. 동기화 스크립트와 도구별 어댑터를 작성·검증한다.
 10. Codex에 먼저 제한 배포하고 대표 작업을 실행한다.
-11. Claude Code와 Copilot 어댑터를 각 표면에서 검증한다.
+11. Claude Code와 Copilot 어댑터를 각 표면에서 검증하며 설치 플러그인이 없을 때만 fallback을 배포한다.
 12. JOEWRKS 프로젝트를 하나씩 감사하고 프로젝트 고유 규칙만 남기는 마이그레이션을 별도 계획한다.
 
 각 단계는 앞 단계의 검증이 통과한 뒤 시작한다. 문서 수를 먼저 채우는 방식으로 진행하지 않는다.
@@ -608,13 +664,15 @@ python C:\Users\tjdwo\.codex\skills\.system\skill-creator\scripts\quick_validate
 - 상시 역할 에이전트 조직을 만들지 않는다.
 - 주 에이전트 한 명과 조건부 보조 에이전트를 사용한다.
 - 공통 핵심은 짧은 `AGENTS.md` 하나로 유지한다.
-- 역할 지식은 최대 다섯 개의 온디맨드 스킬 후보로 시작하고, baseline 격차가 입증된 것만 만든다.
-- UI/UX, Apple Design, Figma는 하나의 프론트엔드 스킬에서 조건부로 결합한다.
-- 참고 자료의 깊이는 `SKILL.md`에서 한 단계로 제한한다.
-- 외부 자료는 고정 커밋, 라이선스, 해시를 기록하고 자동 업데이트하지 않는다.
-- 루트 라이선스 전문 없이 README에 MIT라고만 표기된 `multica-ai/andrej-karpathy-skills`는 조건을 추가 확인하기 전까지 원문을 복사하지 않는다.
+- 로컬 활성 스킬은 직접 복사한 `assumption-checking`, `surgical-changes`, `handoff`와 얇은 `design-frontend` 라우터로 제한한다.
+- UI UX Pro Max의 실행 디렉터리와 Apple Design 원문은 비발견 `vendor`에 그대로 두고 `design-frontend`에서 조건부로 사용한다.
+- Superpowers, Ponytail, Figma의 기능을 다시 작성하지 않고 설치본을 정확한 발동 조건으로 직접 사용한다.
+- 별도 계획·PM·백엔드·디버깅 스킬은 설치 플러그인과 프로젝트 규칙으로 충분하므로 만들지 않는다.
+- 로컬 라우터는 외부 원문 또는 실행 진입점 한 단계만 가리킨다. 벤더링한 원본 내부 경로는 보존하되 검색 결과나 작업 관련 구간만 컨텍스트에 올린다.
+- 외부 자료는 고정 커밋, 로컬 경로, 해시, 의도적인 diff를 기록하고 자동 업데이트하지 않는다.
+- `multica-ai/andrej-karpathy-skills`는 전 파일 감사 결과 bluesaurel와 설치 플러그인에 없는 고유 기능이 없고 일부 예제가 자체 단순화 원칙과 충돌하므로 활성 복사하지 않는다.
 - 기존 프로젝트 규칙은 첫 구현에서 자동 변경하지 않는다.
 - Codex부터 제한 배포한 뒤 다른 도구와 프로젝트로 확대한다.
-- 각 스킬 후보는 baseline 실패 또는 측정 가능한 성능 격차를 확인한 뒤 하나씩 작성하고 검증하며, 격차가 없으면 만들지 않는다.
+- 직접 복사 스킬과 커스텀 라우터는 하나씩 배포·검증하며, 중복 발동이나 성능 악화가 생기면 기본값에서 제외한다.
 
 이 명세에 대한 사용자 검토가 완료된 뒤에만 상세 구현 계획을 작성한다.
