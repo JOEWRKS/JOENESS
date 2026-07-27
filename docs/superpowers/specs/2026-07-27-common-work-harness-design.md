@@ -2,7 +2,7 @@
 
 - 기준일: 2026-07-27
 - 저장소: `D:\JOEWRKS\작업하네스`
-- 상태: P0 보강 명세 사용자 재검토 대기
+- 상태: 설계 명세 승인 — P0 평가 계약 구현 계획 사용자 검토 대기
 - 주 사용 환경: Codex Desktop/CLI
 - 호환 대상: Claude Code, GitHub Copilot CLI 및 지원되는 IDE 표면
 
@@ -347,13 +347,13 @@ handoff의 최소 필드는 다음과 같다.
 
 ### 8.2 `joewrks-assumption-checking` 후보
 
-[bluesaurel의 분할 스킬 원문](https://github.com/bluesaurel/karpathy-codex-skills/tree/76015a4cd8bf8f3ac413a54ef735767b1c742558/packages/split-skills/package/skills/assumption-checking)을 후보로 감사한다. no-skill baseline에서 기능적·운영상 이득이 확인될 때만 본문을 활용한 namespaced 활성본을 만든다.
+[bluesaurel의 분할 스킬 원문](https://github.com/bluesaurel/karpathy-codex-skills/tree/76015a4cd8bf8f3ac413a54ef735767b1c742558/packages/split-skills/package/assumption-checking)을 후보로 감사한다. no-skill baseline에서 기능적·운영상 이득이 확인될 때만 본문을 활용한 namespaced 활성본을 만든다.
 
 기술 요청이 실제로 여러 결과로 갈리고 잘못 선택하면 재작업·데이터 손실·외부 영향이 커질 때만 사용한다. 안전하고 쉽게 되돌릴 수 있는 가장 좁은 가정으로 진행 가능한 작업이나 창작적 요구 탐색에는 발동하지 않는다. 창작적 모호성은 Superpowers `brainstorming`과 동시에 로드하지 않는다.
 
 ### 8.3 `joewrks-surgical-changes` 후보
 
-[bluesaurel의 분할 스킬 원문](https://github.com/bluesaurel/karpathy-codex-skills/tree/76015a4cd8bf8f3ac413a54ef735767b1c742558/packages/split-skills/package/skills/surgical-changes)을 후보로 감사한다. no-skill baseline에서 이득이 확인될 때만 namespaced 활성본을 만든다.
+[bluesaurel의 분할 스킬 원문](https://github.com/bluesaurel/karpathy-codex-skills/tree/76015a4cd8bf8f3ac413a54ef735767b1c742558/packages/split-skills/package/surgical-changes)을 후보로 감사한다. no-skill baseline에서 이득이 확인될 때만 namespaced 활성본을 만든다.
 
 기존 코드의 호출 흐름을 보존해야 하거나 최소 diff가 중요한 변경에 사용한다. 공통 `AGENTS.md`에는 범위 밖 변경 금지 한 줄만 두고, 인접 정리·리팩터링·검토의 상세 기준은 이 스킬에만 둔다.
 
@@ -778,7 +778,7 @@ python C:\Users\tjdwo\.codex\skills\.system\skill-creator\scripts\quick_validate
 
 ## 16. 단계적 배포
 
-이 절은 명세 승인 뒤의 구현 순서다. 현재 `P0 보강 명세 사용자 재검토 대기` 상태에서는 어느 단계도 시작하지 않는다.
+이 절은 각 단계의 상세 구현 계획 승인 뒤의 구현 순서다. 현재 `설계 명세 승인 — P0 평가 계약 구현 계획 사용자 검토 대기` 상태에서는 첫 단계도 시작하지 않는다.
 
 1. 14.2의 P0 핵심 fixture, 공통 압력 시나리오와 사전 판정 rubric을 만든다.
 2. 같은 모델·권한·snapshot에서 no-harness 대조군을 실행한다.
@@ -813,7 +813,7 @@ python C:\Users\tjdwo\.codex\skills\.system\skill-creator\scripts\quick_validate
 - [Instruction Adherence in Coding Agent Configuration Files](https://arxiv.org/abs/2605.10039)
 - [Guardrails Beat Guidance](https://arxiv.org/abs/2604.11088)
 - [Toward Instructions-as-Code](https://arxiv.org/abs/2606.13449)
-- [Progressive Disclosure for Long-Context Agents](https://arxiv.org/abs/2607.17598)
+- [Is Progressive Disclosure All You Need for Long-Context Agents?](https://arxiv.org/abs/2607.17598)
 - [Anthropic multi-agent research system](https://www.anthropic.com/engineering/multi-agent-research-system)
 - [Claude Code agent teams](https://code.claude.com/docs/en/agent-teams)
 
@@ -821,7 +821,7 @@ python C:\Users\tjdwo\.codex\skills\.system\skill-creator\scripts\quick_validate
 
 다음 사항은 본 명세에서 확정되었다.
 
-- 현재 상태는 `P0 보강 명세 사용자 재검토 대기`다. 명시적 승인 전에는 `AGENTS.md`, 스킬, vendor 파일, sync, 전역 설치와 프로젝트 마이그레이션을 만들거나 실행하지 않는다.
+- 현재 상태는 `설계 명세 승인 — P0 평가 계약 구현 계획 사용자 검토 대기`다. P0 평가 계약 구현 계획의 명시적 승인 전에는 그 fixture·검사 파일을 만들지 않으며, 후속 단계의 `AGENTS.md`, 스킬, vendor 파일, sync, 전역 설치와 프로젝트 마이그레이션도 각 단계 계획 승인 전에 만들거나 실행하지 않는다.
 - 초기 설계 범위는 JOE 개인의 비공개 로컬 환경에서 Codex·Claude Code·Copilot 호환성을 확보하는 것이다. 실제 배포는 Codex부터 시작해 Claude Code, Copilot 순으로 확대하며 공개 저장소·외부 팀 third-party 원문 배포와 범용 설치 패키지는 초기 범위에서 제외한다.
 - 상시 역할 에이전트 조직을 만들지 않는다.
 - 주 에이전트 한 명과 조건부 보조 에이전트를 사용한다.
@@ -839,4 +839,4 @@ python C:\Users\tjdwo\.codex\skills\.system\skill-creator\scripts\quick_validate
 - 기존 프로젝트 규칙은 첫 구현에서 자동 변경하지 않는다.
 - 활성화한 선택 스킬과 라우터는 하나씩 배포·검증하며, 중복 발동이나 성능 악화가 생기면 기본값에서 제외한다. 안전 불변식과 사용자 디자인 계약은 제외 대상이 아니다.
 
-이 명세에 대한 사용자 검토가 완료된 뒤에만 상세 구현 계획을 작성한다.
+이 명세는 사용자 승인을 완료했다. 실제 구현은 해당 단계의 상세 구현 계획에 대한 사용자 승인이 완료된 뒤에만 시작한다.
