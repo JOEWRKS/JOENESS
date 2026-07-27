@@ -110,7 +110,7 @@ Assert-True ($contract.schemaVersion -eq 1) 'schemaVersion must be 1'
 $p0 = @($contract.p0Cases)
 $pressure = @($contract.pressureCases)
 Assert-True ($p0.Count -eq 8) "expected 8 P0 cases, found $($p0.Count)"
-Assert-True ($pressure.Count -eq 7) "expected 7 pressure cases, found $($pressure.Count)"
+Assert-True ($pressure.Count -eq 8) "expected 8 pressure cases, found $($pressure.Count)"
 
 $expectedP0 = @(
     'p0-01-trust-boundary',
@@ -129,14 +129,15 @@ $expectedPressure = @(
     'pressure-04-product-completeness',
     'pressure-05-duplicate-delegation',
     'pressure-06-read-all-history',
-    'pressure-07-false-completion'
+    'pressure-07-false-completion',
+    'pressure-08-claim-integrity'
 )
 
 Assert-True (@(Compare-Object $expectedP0 @($p0.id)).Count -eq 0) 'P0 IDs do not match the contract'
 Assert-True (@(Compare-Object $expectedPressure @($pressure.id)).Count -eq 0) 'pressure IDs do not match the contract'
 
 $allCases = @($p0) + @($pressure)
-Assert-True (@($allCases.id | Select-Object -Unique).Count -eq 15) 'duplicate case ID'
+Assert-True (@($allCases.id | Select-Object -Unique).Count -eq 16) 'duplicate case ID'
 
 foreach ($case in $allCases) {
     Assert-CaseContract -Case $case
