@@ -293,11 +293,17 @@ export function buildMcpDisableArgs(inventory) {
   const seen = new Set();
   const result = [];
   for (const server of inventory) {
-    const name = tomlString(server?.name, "name");
-    if (seen.has(server.name)) {
-      throw new Error(`duplicate MCP name: ${server.name}`);
+    const name = server?.name;
+    if (
+      typeof name !== "string" ||
+      !/^[A-Za-z0-9_-]+$/u.test(name)
+    ) {
+      throw new Error(`MCP name is not a safe bare TOML key: ${name}`);
     }
-    seen.add(server.name);
+    if (seen.has(name)) {
+      throw new Error(`duplicate MCP name: ${name}`);
+    }
+    seen.add(name);
 
     const transport = server?.transport;
     let inlineTable;

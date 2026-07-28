@@ -209,11 +209,24 @@ test("MCP overrides retain minimum transport but omit secrets", () => {
   ]);
   assert.deepEqual(args, [
     "-c",
-    'mcp_servers."figma"={enabled=false,url="https://mcp.figma.com/mcp"}',
+    'mcp_servers.figma={enabled=false,url="https://mcp.figma.com/mcp"}',
     "-c",
-    'mcp_servers."node_repl"={enabled=false,command="C:\\\\runtime\\\\node.exe",args=[]}',
+    'mcp_servers.node_repl={enabled=false,command="C:\\\\runtime\\\\node.exe",args=[]}',
   ]);
   assert.doesNotMatch(args.join(" "), /Authorization|SECRET|secret/);
+  assert.throws(
+    () =>
+      buildMcpDisableArgs([
+        {
+          name: "needs.quoting",
+          transport: {
+            type: "streamable_http",
+            url: "https://example.invalid/mcp",
+          },
+        },
+      ]),
+    /bare TOML key/,
+  );
 });
 
 test("MCP disabled inventory preserves names and has no enabled server", () => {

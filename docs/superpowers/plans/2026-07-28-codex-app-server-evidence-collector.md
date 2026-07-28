@@ -213,11 +213,18 @@ test("MCP overrides retain minimum transport but omit secrets", () => {
   ]);
   assert.deepEqual(args, [
     "-c",
-    "mcp_servers.\"figma\"={enabled=false,url=\"https://mcp.figma.com/mcp\"}",
+    "mcp_servers.figma={enabled=false,url=\"https://mcp.figma.com/mcp\"}",
     "-c",
-    "mcp_servers.\"node_repl\"={enabled=false,command=\"C:\\\\runtime\\\\node.exe\",args=[]}",
+    "mcp_servers.node_repl={enabled=false,command=\"C:\\\\runtime\\\\node.exe\",args=[]}",
   ]);
   assert.doesNotMatch(args.join(" "), /Authorization|SECRET|secret/);
+  assert.throws(
+    () => buildMcpDisableArgs([{
+      name: "needs.quoting",
+      transport: { type: "streamable_http", url: "https://example.invalid/mcp" },
+    }]),
+    /bare TOML key/,
+  );
 });
 
 test("MCP disabled inventory preserves names and has no enabled server", () => {
@@ -295,11 +302,11 @@ node --test "D:\JOEWRKS\작업하네스\tests\codex-app-server-collector.tests.m
 `buildMcpDisableArgs` must emit one `-c` pair per server:
 
 ```text
-streamable_http/sse -> mcp_servers."<name>"={enabled=false,url="<url>"}
-stdio               -> mcp_servers."<name>"={enabled=false,command="<command>",args=["<arg>"]}
+streamable_http/sse -> mcp_servers.<bare-name>={enabled=false,url="<url>"}
+stdio               -> mcp_servers.<bare-name>={enabled=false,command="<command>",args=["<arg>"]}
 ```
 
-Use JSON-compatible double-quoted TOML strings and reject control characters or unknown transports. Do not include any other inventory field.
+Codex 0.145.0의 `-c` dotted-path parser는 quoted key segment의 따옴표를 서버 이름에 포함하므로 사용하지 않는다. 이름은 TOML bare key 문자(`A-Z`, `a-z`, `0-9`, `_`, `-`)만 허용하고 다른 이름은 추정하지 않고 차단한다. Value에는 JSON-compatible double-quoted TOML strings를 사용하고 control character나 unknown transport를 거부한다. 다른 inventory field는 포함하지 않는다.
 
 `prepareRuntime` order:
 

@@ -215,7 +215,7 @@ subject를 시작하기 전에 같은 App Server connection에서 다음을 수�
 
 결과에는 이름, 버전, enabled 상태와 오류만 보존한다. auth token, secret, 전체 config와 직접 연락·결제 식별자는 저장하지 않는다.
 
-App Server 시작 전 같은 package binary의 `mcp list --json`으로 configured server 이름과 transport 종류를 읽는다. 0.145.0에서는 `mcp_servers.<name>.enabled=false`만 덮어쓰면 기존 transport가 사라져 config가 거부되므로 사용하지 않는다. 각 서버마다 secret·header·environment 값은 복사하지 않고, 유효성 검사에 필요한 최소 transport 필드와 `enabled=false`를 하나의 inline TOML table로 다시 만들어 child-process argv 한 항목으로 전달한다. 같은 argv로 다시 실행한 `mcp list --json`에서 원래 이름 집합이 유지되고 모두 `enabled: false`인지 확인한 뒤에만 App Server를 시작한다. `mcp_servers={}` 전체 override도 기존 table을 확실히 지우지 못하므로 사용하지 않는다.
+App Server 시작 전 같은 package binary의 `mcp list --json`으로 configured server 이름과 transport 종류를 읽는다. 0.145.0에서는 `mcp_servers.<name>.enabled=false`만 덮어쓰면 기존 transport가 사라져 config가 거부되므로 사용하지 않는다. 각 서버마다 secret·header·environment 값은 복사하지 않고, 유효성 검사에 필요한 최소 transport 필드와 `enabled=false`를 하나의 inline TOML table로 다시 만들어 child-process argv 한 항목으로 전달한다. 이 버전의 `-c` dotted-path parser는 quoted key segment의 따옴표를 서버 이름 자체로 취급하므로 이름은 TOML bare key 문자만 허용하며, 다른 이름은 추정한 escaping으로 실행하지 않고 차단한다. 같은 argv로 다시 실행한 `mcp list --json`에서 원래 이름 집합이 유지되고 모두 `enabled: false`인지 확인한 뒤에만 App Server를 시작한다. `mcp_servers={}` 전체 override도 기존 table을 확실히 지우지 못하므로 사용하지 않는다.
 
 model, reasoning effort와 service tier는 override하지 않고 사용자 기본값의 실제 응답값을 기록한다. reroute event나 두 subject 사이의 예상하지 않은 runtime 차이가 있으면 동일 조건이라고 추정하지 않고 evidence limitation 또는 capability block으로 남긴다.
 
