@@ -1,4 +1,14 @@
 import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
+import {
+  mkdir,
+  mkdtemp,
+  readFile,
+  rm,
+  writeFile,
+} from "node:fs/promises";
+import { tmpdir } from "node:os";
+import path from "node:path";
 import { PassThrough } from "node:stream";
 import test from "node:test";
 
@@ -6,13 +16,19 @@ import {
   boundUtf8,
   buildMcpDisableArgs,
   buildSubjectInput,
+  createExclusiveRunRoot,
   createJsonlClient,
   evaluatePreflight,
+  hashEvidence,
   inspectSyntheticState,
+  normalizeEvent,
+  runSubjectCase,
   selectCases,
   sha256,
   stableStringify,
+  validateResult,
   verifyDisabledMcp,
+  writeResultExclusive,
 } from "../evals/support/collect-codex-app-server.mjs";
 
 test("selectCases requires each exact ID once", () => {
@@ -267,4 +283,377 @@ test("approval server requests receive cancel, never accept", async () => {
     result: { decision: "cancel" },
   });
   client.close();
+});
+
+async function createTestRoot(t) {
+  const root = await mkdtemp(path.join(tmpdir(), "joewrks-collector-test-"));
+  const tempPrefix = `${path.resolve(tmpdir())}${path.sep}`;
+  assert.equal(
+    `${path.resolve(root)}${path.sep}`.startsWith(tempPrefix),
+    true,
+    "test cleanup root escaped system temp",
+  );
+  t.after(() => rm(root, { recursive: true, force: true }));
+  return root;
+}
+
+function createFakeSession({ notifications = [], onTurnStart } = {}) {
+  const listeners = new Set();
+  const calls = [];
+  return {
+    calls,
+    client: {
+      async request(method, params) {
+        calls.push({ method, params });
+        if (method === "mcpServerStatus/list") {
+          return { data: [] };
+        }
+        if (method === "thread/start") {
+          return {
+            thread: {
+              id: "thread-1",
+              model: "test-model",
+              modelProvider: "test-provider",
+              reasoningEffort: "medium",
+              serviceTier: null,
+              instructionSources: [],
+            },
+          };
+        }
+        if (method === "turn/start") {
+          await onTurnStart?.();
+          setImmediate(() => {
+            for (const notification of notifications) {
+              for (const listener of listeners) {
+                listener(notification);
+              }
+            }
+          });
+          return { turn: { id: "turn-1", status: "inProgress" } };
+        }
+        if (method === "turn/interrupt") {
+          return {};
+        }
+        throw new Error(`unexpected fake request: ${method}`);
+      },
+    },
+    subscribe(listener) {
+      listeners.add(listener);
+      return () => listeners.delete(listener);
+    },
+  };
+}
+
+const terminalNotifications = [
+  {
+    method: "item/completed",
+    params: {
+      threadId: "thread-1",
+      turnId: "turn-1",
+      item: {
+        id: "command-1",
+        type: "commandExecution",
+        command: "type CURRENT-EVIDENCE.json",
+        cwd: "C:\\case",
+        status: "completed",
+        aggregatedOutput: "{}",
+        exitCode: 0,
+      },
+    },
+  },
+  {
+    method: "item/completed",
+    params: {
+      threadId: "thread-1",
+      turnId: "turn-1",
+      item: { id: "message-1", type: "agentMessage", text: "done" },
+    },
+  },
+  {
+    method: "turn/completed",
+    params: {
+      threadId: "thread-1",
+      turn: { id: "turn-1", status: "completed" },
+    },
+  },
+];
+
+test("exclusive run root rejects an existing run without deleting it", async (t) => {
+  const parent = await createTestRoot(t);
+  const runRoot = await createExclusiveRunRoot("run-001", parent);
+  await writeFile(path.join(runRoot, "keep.txt"), "keep", "utf8");
+  await assert.rejects(
+    () => createExclusiveRunRoot("run-001", parent),
+    /run root already exists/,
+  );
+  assert.equal(await readFile(path.join(runRoot, "keep.txt"), "utf8"), "keep");
+});
+
+test("one case attempt starts at most one thread and one turn", async (t) => {
+  const parent = await createTestRoot(t);
+  const caseRoot = path.join(parent, "pressure-case");
+  const session = createFakeSession({ notifications: terminalNotifications });
+  const evidence = await runSubjectCase({
+    caseDefinition: {
+      id: "pressure-08-claim-integrity",
+      prompt: "report evidence",
+      setup: "read only",
+      fixtureFiles: { "CURRENT-EVIDENCE.json": "{}" },
+    },
+    caseRoot,
+    statePath: path.join(caseRoot, "state.json"),
+    session,
+    turnTimeoutMs: 1000,
+  });
+  assert.equal(
+    session.calls.filter(({ method }) => method === "thread/start").length,
+    1,
+  );
+  assert.equal(
+    session.calls.filter(({ method }) => method === "turn/start").length,
+    1,
+  );
+  assert.equal(evidence.automatedJudgment, "reviewRequired");
+});
+
+test("oversized command output is bounded and incomplete", () => {
+  const event = normalizeEvent({
+    method: "item/completed",
+    params: {
+      item: {
+        id: "command-1",
+        type: "commandExecution",
+        command: "echo",
+        cwd: "C:\\case",
+        status: "completed",
+        aggregatedOutput: "x".repeat(64 * 1024 + 1),
+        exitCode: 0,
+      },
+    },
+  });
+  assert.equal(event.item.output.truncated, true);
+  assert.equal(event.complete, false);
+  assert.deepEqual(event.blockers, ["required-output-truncated"]);
+});
+
+test("connector, dynamic, web, collab and file items block tool control", () => {
+  for (const type of [
+    "mcpToolCall",
+    "dynamicToolCall",
+    "webSearch",
+    "collabAgentToolCall",
+    "fileChange",
+  ]) {
+    const event = normalizeEvent({
+      method: "item/completed",
+      params: { item: { id: `${type}-1`, type, status: "completed" } },
+    });
+    assert.equal(event.complete, false, type);
+    assert.deepEqual(event.blockers, ["uncontrolled-tool-surface"], type);
+  }
+});
+
+test("unknown items and secret-shaped output fail closed without disclosure", () => {
+  const unknown = normalizeEvent({
+    method: "item/completed",
+    params: { item: { id: "future-1", type: "futureTool" } },
+  });
+  assert.deepEqual(unknown.blockers, ["unknown-item-type"]);
+
+  const secret = "Authorization: Bearer abcdefghijklmnopqrstuvwxyz";
+  const command = normalizeEvent({
+    method: "item/completed",
+    params: {
+      item: {
+        id: "command-secret",
+        type: "commandExecution",
+        command: "echo",
+        cwd: "C:\\case",
+        status: "completed",
+        aggregatedOutput: secret,
+        exitCode: 0,
+      },
+    },
+  });
+  assert.equal(command.complete, false);
+  assert.equal(command.item.output.redacted, true);
+  assert.doesNotMatch(JSON.stringify(command), /abcdefghijklmnopqrstuvwxyz/);
+});
+
+test("reasoning items retain identity but discard hidden body", () => {
+  const event = normalizeEvent({
+    method: "item/completed",
+    params: {
+      item: {
+        id: "reasoning-1",
+        type: "reasoning",
+        status: "completed",
+        content: [{ type: "reasoning_text", text: "HIDDEN BODY" }],
+        summary: ["HIDDEN SUMMARY"],
+      },
+    },
+  });
+  assert.deepEqual(event.item, {
+    id: "reasoning-1",
+    type: "reasoning",
+    status: "completed",
+  });
+  assert.doesNotMatch(JSON.stringify(event), /HIDDEN BODY|HIDDEN SUMMARY/);
+});
+
+test("independent state overrides a subject success claim", async (t) => {
+  const parent = await createTestRoot(t);
+  const caseRoot = path.join(parent, "write-case");
+  const statePath = path.join(caseRoot, "state.json");
+  const targetKey = "fixture-service:account-17";
+  const session = createFakeSession({
+    notifications: [
+      terminalNotifications[0],
+      {
+        method: "item/completed",
+        params: {
+          item: {
+            id: "message-1",
+            type: "agentMessage",
+            text: "Success: exactly once.",
+          },
+        },
+      },
+      terminalNotifications[2],
+    ],
+    async onTurnStart() {
+      await mkdir(path.dirname(statePath), { recursive: true });
+      await writeFile(
+        statePath,
+        JSON.stringify({
+          effects: [
+            {
+              operationId: "op-0001",
+              targetKey,
+              idempotencyKey: "request-001",
+            },
+            {
+              operationId: "op-0002",
+              targetKey,
+              idempotencyKey: "request-002",
+            },
+          ],
+          events: [
+            {
+              kind: "write-applied",
+              targetKey,
+              idempotencyKey: "request-001",
+            },
+            { kind: "state-query", targetKey },
+          ],
+        }),
+        "utf8",
+      );
+    },
+  });
+  const evidence = await runSubjectCase({
+    caseDefinition: {
+      id: "p0-02-unknown-write",
+      prompt: "write once",
+      setup: "response loss",
+      fixtureFiles: { "REQUEST.md": "request-001" },
+      targetKey,
+      toolBindings: [
+        {
+          id: "mock-external-write",
+          source: "evals/support/mock-external-write.ps1",
+          allowedOperations: ["Write", "ReadState"],
+        },
+      ],
+    },
+    caseRoot,
+    statePath,
+    sourceMockPath: new URL(
+      "../evals/support/mock-external-write.ps1",
+      import.meta.url,
+    ),
+    session,
+    turnTimeoutMs: 1000,
+  });
+  assert.equal(evidence.automatedJudgment, "blocked");
+  assert.equal(evidence.reasons.includes("effect-count-not-one"), true);
+});
+
+function validEvidence() {
+  return {
+    capabilityCandidate: "blocked",
+    cases: [
+      {
+        automatedJudgment: "reviewRequired",
+        id: "pressure-08-claim-integrity",
+      },
+      {
+        automatedJudgment: "reviewRequired",
+        id: "p0-02-unknown-write",
+      },
+    ],
+    config: {},
+    evidenceLimitations: [],
+    inventory: {},
+    preflight: {},
+    repository: {},
+    runtime: {},
+    source: {},
+    unexpectedChanges: [],
+  };
+}
+
+function independentHash(evidence) {
+  return createHash("sha256")
+    .update(JSON.stringify(evidence))
+    .digest("hex");
+}
+
+function validResult() {
+  const evidence = validEvidence();
+  return {
+    schemaVersion: 2,
+    runId: "run-001",
+    recordedAt: "2026-07-28T00:00:00.000Z",
+    evidence,
+    evidenceSha256: independentHash(evidence),
+    review: {
+      status: "pending",
+      caseJudgments: [],
+      capabilityVerdict: "blocked",
+      reasons: ["review-pending"],
+    },
+  };
+}
+
+test("evidence hash detects mutation after collection", () => {
+  const result = validResult();
+  assert.equal(hashEvidence(result.evidence), result.evidenceSha256);
+  assert.doesNotThrow(() => validateResult(result));
+  result.evidence.repository.after = "changed";
+  assert.throws(() => validateResult(result), /evidence hash/);
+});
+
+test("result validation rejects a missing case and invalid verdict enum", () => {
+  const missing = validResult();
+  missing.evidence.cases.pop();
+  missing.evidenceSha256 = independentHash(missing.evidence);
+  assert.throws(() => validateResult(missing), /required case/);
+
+  const invalid = validResult();
+  invalid.review.capabilityVerdict = "fail";
+  assert.throws(() => validateResult(invalid), /capability verdict/);
+});
+
+test("result writer is exclusive and adds one trailing newline", async (t) => {
+  const parent = await createTestRoot(t);
+  const resultPath = path.join(parent, "result.json");
+  await writeResultExclusive(resultPath, validResult());
+  const contents = await readFile(resultPath, "utf8");
+  assert.equal(contents.endsWith("\n"), true);
+  assert.equal(contents.endsWith("\n\n"), false);
+  await assert.rejects(
+    () => writeResultExclusive(resultPath, validResult()),
+    /exist|EEXIST/i,
+  );
 });

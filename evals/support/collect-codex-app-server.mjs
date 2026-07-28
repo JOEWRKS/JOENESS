@@ -3,11 +3,16 @@ import { createHash } from "node:crypto";
 import { constants as fsConstants } from "node:fs";
 import {
   access,
+  copyFile,
+  mkdir,
   readFile,
   realpath,
+  rename,
   stat,
+  unlink,
+  writeFile,
 } from "node:fs/promises";
-import { homedir } from "node:os";
+import { homedir, tmpdir } from "node:os";
 import path from "node:path";
 import { createInterface } from "node:readline";
 
@@ -727,6 +732,14 @@ export async function prepareRuntime(runRoot) {
 const APPROVAL_METHOD_SUFFIX = "/requestApproval";
 
 export async function openAppServer(runtime, callbacks = {}) {
+  const notificationListeners = new Set();
+  async function dispatchNotification(message) {
+    await callbacks.onNotification?.(message);
+    for (const listener of notificationListeners) {
+      await listener(message);
+    }
+  }
+
   const child = spawn(
     runtime.executable,
     [
@@ -758,12 +771,20 @@ export async function openAppServer(runtime, callbacks = {}) {
   const client = createJsonlClient({
     readable: child.stdout,
     writable: child.stdin,
-    onNotification: callbacks.onNotification,
+    onNotification: dispatchNotification,
     onServerRequest: async (message) => {
       if (message.method.endsWith(APPROVAL_METHOD_SUFFIX)) {
+        await dispatchNotification({
+          method: "collector/serverRequest",
+          params: { kind: "approval", requestMethod: message.method },
+        });
         await callbacks.onApproval?.(message);
         return { decision: "cancel" };
       }
+      await dispatchNotification({
+        method: "collector/serverRequest",
+        params: { kind: "unknown", requestMethod: message.method },
+      });
       await callbacks.onUnknownServerRequest?.(message);
       const error = new Error(`unsupported server request: ${message.method}`);
       error.code = -32601;
@@ -793,6 +814,10 @@ export async function openAppServer(runtime, callbacks = {}) {
       process: child,
       client,
       initializeResult,
+      subscribe(listener) {
+        notificationListeners.add(listener);
+        return () => notificationListeners.delete(listener);
+      },
       get processExitCode() {
         return processExitCode;
       },
@@ -813,4 +838,628 @@ export async function openAppServer(runtime, callbacks = {}) {
     }
     throw error;
   }
+}
+
+export async function createExclusiveRunRoot(runId, parent = tmpdir()) {
+  if (
+    typeof runId !== "string" ||
+    !/^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$/u.test(runId)
+  ) {
+    throw new Error("invalid run id");
+  }
+  const runRoot = path.join(parent, `joewrks-eval-${runId}`);
+  try {
+    await mkdir(runRoot);
+  } catch (error) {
+    if (error?.code === "EEXIST") {
+      throw new Error(`run root already exists: ${runRoot}`, { cause: error });
+    }
+    throw error;
+  }
+  return realpath(runRoot);
+}
+
+const UNCONTROLLED_ITEM_TYPES = new Set([
+  "mcpToolCall",
+  "dynamicToolCall",
+  "webSearch",
+  "collabAgentToolCall",
+  "fileChange",
+]);
+const PUBLIC_MESSAGE_TYPES = new Set(["agentMessage", "userMessage"]);
+const SECRET_PATTERN =
+  /(?:authorization\s*:|bearer\s+[A-Za-z0-9._~+/=-]{12,}|(?:sk|ghp|github_pat)_[A-Za-z0-9_-]{12,})/iu;
+
+function boundedEvidenceText(value) {
+  const bounded = boundUtf8(value);
+  if (!SECRET_PATTERN.test(value)) {
+    return { value: bounded, blockers: [] };
+  }
+  return {
+    value: {
+      redacted: true,
+      truncated: bounded.truncated,
+      byteLength: bounded.byteLength,
+      sha256: bounded.sha256,
+    },
+    blockers: ["secret-shaped-output"],
+  };
+}
+
+function itemIdentity(item) {
+  const result = { id: item?.id, type: item?.type };
+  if (item?.status !== undefined) {
+    result.status = item.status;
+  }
+  return result;
+}
+
+export function normalizeEvent(notification) {
+  const method = notification?.method;
+  const params = notification?.params ?? {};
+  const event = {
+    method,
+    threadId: params.threadId,
+    turnId: params.turnId ?? params.turn?.id,
+    complete: true,
+    blockers: [],
+  };
+
+  if (method === "collector/serverRequest") {
+    event.serverRequest = {
+      kind: params.kind,
+      method: params.requestMethod,
+    };
+    event.blockers.push(
+      params.kind === "approval"
+        ? "approval-requested"
+        : "uncontrolled-tool-surface",
+    );
+  } else if (params.item && typeof params.item.type === "string") {
+    const item = params.item;
+    if (item.type === "reasoning") {
+      event.item = itemIdentity(item);
+    } else if (item.type === "commandExecution") {
+      event.item = {
+        ...itemIdentity(item),
+        command: item.command,
+        cwd: item.cwd,
+        exitCode: item.exitCode,
+        durationMs: item.durationMs,
+      };
+      if (typeof item.aggregatedOutput === "string") {
+        const output = boundedEvidenceText(item.aggregatedOutput);
+        event.item.output = output.value;
+        event.blockers.push(...output.blockers);
+        if (output.value.truncated) {
+          event.blockers.push("required-output-truncated");
+        }
+      } else if (method === "item/completed") {
+        event.blockers.push("required-output-missing");
+      }
+    } else if (PUBLIC_MESSAGE_TYPES.has(item.type)) {
+      event.item = itemIdentity(item);
+      if (typeof item.text === "string") {
+        const text = boundedEvidenceText(item.text);
+        event.item.text = text.value;
+        event.blockers.push(...text.blockers);
+        if (text.value.truncated) {
+          event.blockers.push("required-output-truncated");
+        }
+      }
+    } else if (UNCONTROLLED_ITEM_TYPES.has(item.type)) {
+      event.item = itemIdentity(item);
+      event.blockers.push("uncontrolled-tool-surface");
+    } else {
+      event.item = itemIdentity(item);
+      event.blockers.push("unknown-item-type");
+    }
+  } else if (method === "turn/completed") {
+    event.turn = {
+      id: params.turn?.id,
+      status: params.turn?.status,
+    };
+  } else if (method === "mcpServer/startupStatus/updated") {
+    event.mcpServer = {
+      name: params.name ?? params.serverName ?? params.server?.name,
+      status: params.status ?? params.startupStatus ?? params.server?.status,
+    };
+    if (String(event.mcpServer.status).toLowerCase() === "ready") {
+      event.blockers.push("uncontrolled-tool-surface");
+    }
+  }
+
+  event.blockers = [...new Set(event.blockers)];
+  event.complete = event.blockers.length === 0;
+  return event;
+}
+
+function isPathInside(root, candidate) {
+  const relative = path.relative(path.resolve(root), path.resolve(candidate));
+  return (
+    relative !== "" &&
+    relative !== ".." &&
+    !relative.startsWith(`..${path.sep}`) &&
+    !path.isAbsolute(relative)
+  );
+}
+
+async function materializeCase(
+  caseDefinition,
+  caseRoot,
+  sourceMockPath,
+  mockPath,
+) {
+  await mkdir(caseRoot);
+  for (const [fixturePath, contents] of Object.entries(
+    caseDefinition.fixtureFiles ?? {},
+  )) {
+    validateFixturePath(fixturePath);
+    const target = path.join(caseRoot, ...fixturePath.split(/[\\/]/));
+    if (!isPathInside(caseRoot, target)) {
+      throw new Error(`fixture escaped case root: ${fixturePath}`);
+    }
+    await mkdir(path.dirname(target), { recursive: true });
+    await writeFile(target, contents, { encoding: "utf8", flag: "wx" });
+  }
+
+  if (caseDefinition.id === "p0-02-unknown-write") {
+    if (!sourceMockPath) {
+      throw new Error("synthetic write case requires the verified mock source");
+    }
+    await mkdir(path.dirname(mockPath), { recursive: true });
+    await copyFile(sourceMockPath, mockPath, fsConstants.COPYFILE_EXCL);
+  }
+}
+
+async function pathMustNotExist(candidate, label) {
+  try {
+    await access(candidate, fsConstants.F_OK);
+  } catch (error) {
+    if (error?.code === "ENOENT") {
+      return;
+    }
+    throw error;
+  }
+  throw new Error(`${label} already exists: ${candidate}`);
+}
+
+async function writeCheckpointExclusive(checkpointPath, value) {
+  const temporaryPath = `${checkpointPath}.tmp`;
+  await pathMustNotExist(temporaryPath, "checkpoint temp");
+  await pathMustNotExist(checkpointPath, "checkpoint");
+  await writeFile(
+    temporaryPath,
+    `${JSON.stringify(value, null, 2)}\n`,
+    { encoding: "utf8", flag: "wx" },
+  );
+  try {
+    await pathMustNotExist(checkpointPath, "checkpoint");
+    await rename(temporaryPath, checkpointPath);
+  } catch (error) {
+    await unlink(temporaryPath).catch((cleanupError) => {
+      if (cleanupError?.code !== "ENOENT") {
+        throw cleanupError;
+      }
+    });
+    throw error;
+  }
+}
+
+function instructionSourcePaths(thread, threadResponse) {
+  const sources =
+    thread?.instructionSources ?? threadResponse?.instructionSources ?? [];
+  return (Array.isArray(sources) ? sources : [])
+    .map((source) =>
+      typeof source === "string"
+        ? source
+        : source?.path ?? source?.filePath ?? null,
+    )
+    .filter((source) => typeof source === "string");
+}
+
+function sanitizedMcpStatus(response) {
+  const rawEntries = Array.isArray(response)
+    ? response
+    : Array.isArray(response?.data)
+      ? response.data
+      : Array.isArray(response?.servers)
+        ? response.servers
+        : null;
+  if (rawEntries === null) {
+    throw new Error("unreadable MCP status response");
+  }
+  return rawEntries.map((entry) => ({
+    name: entry?.name ?? entry?.serverName ?? entry?.server?.name,
+    status:
+      entry?.status ?? entry?.startupStatus ?? entry?.server?.status ?? null,
+  }));
+}
+
+function hasReadyMcp(entries) {
+  return entries.some(
+    ({ status }) => String(status).toLowerCase() === "ready",
+  );
+}
+
+function uniqueReasons(reasons) {
+  return [...new Set(reasons)];
+}
+
+export async function runSubjectCase({
+  caseDefinition,
+  caseRoot,
+  statePath = path.join(caseRoot, "state.json"),
+  sourceMockPath,
+  session,
+  turnTimeoutMs = TURN_TIMEOUT_MS,
+  eventLimit = EVENT_LIMIT,
+}) {
+  if (!CASE_IDS.includes(caseDefinition?.id)) {
+    throw new Error(`unsupported case: ${caseDefinition?.id}`);
+  }
+  if (
+    !session?.client?.request ||
+    typeof session.subscribe !== "function"
+  ) {
+    throw new TypeError("case run requires an App Server session");
+  }
+  if (!isPathInside(caseRoot, statePath)) {
+    throw new Error("state path escaped case root");
+  }
+
+  const mockPath =
+    caseDefinition.id === "p0-02-unknown-write"
+      ? path.join(caseRoot, "tools", "mock-external-write.ps1")
+      : undefined;
+  await materializeCase(
+    caseDefinition,
+    caseRoot,
+    sourceMockPath,
+    mockPath,
+  );
+  const input = buildSubjectInput(caseDefinition, {
+    caseRoot,
+    mockPath,
+    statePath,
+  });
+
+  const events = [];
+  const reasons = [];
+  let threadId = null;
+  let turnId = null;
+  let terminalEvent = null;
+  let resolveTerminal;
+  let interruptRequested = false;
+  let eventLimitReached = false;
+  const terminalPromise = new Promise((resolve) => {
+    resolveTerminal = resolve;
+  });
+
+  function addReasons(values) {
+    reasons.push(...values);
+  }
+
+  async function interruptOnce() {
+    if (interruptRequested || !threadId || !turnId) {
+      return;
+    }
+    interruptRequested = true;
+    try {
+      await session.client.request(
+        "turn/interrupt",
+        { threadId, turnId },
+        10_000,
+      );
+    } catch {
+      reasons.push("turn-interrupt-failed");
+    }
+  }
+
+  const unsubscribe = session.subscribe((notification) => {
+    const event = normalizeEvent(notification);
+    if (events.length < eventLimit) {
+      events.push(event);
+    } else if (!eventLimitReached) {
+      eventLimitReached = true;
+      reasons.push("event-limit-exceeded");
+      void interruptOnce();
+    }
+    addReasons(event.blockers);
+    if (notification?.method === "turn/completed") {
+      terminalEvent = event;
+      resolveTerminal(event);
+    }
+  });
+
+  try {
+    const mcpBefore = sanitizedMcpStatus(
+      await session.client.request("mcpServerStatus/list", {}, 10_000),
+    );
+    if (hasReadyMcp(mcpBefore)) {
+      reasons.push("uncontrolled-tool-surface");
+    }
+
+    const threadRequest = {
+      cwd: caseRoot,
+      approvalPolicy: "never",
+      sandbox: "read-only",
+      ephemeral: true,
+      dynamicTools: [],
+      selectedCapabilityRoots: [],
+      runtimeWorkspaceRoots: [caseRoot],
+    };
+    const threadResponse = await session.client.request(
+      "thread/start",
+      threadRequest,
+      30_000,
+    );
+    const thread = threadResponse?.thread ?? threadResponse;
+    threadId = thread?.id ?? thread?.threadId;
+    if (typeof threadId !== "string" || !threadId) {
+      throw new Error("thread/start did not return a thread id");
+    }
+    const instructionSources = instructionSourcePaths(thread, threadResponse);
+    if (
+      instructionSources.some((source) =>
+        /(^|[\\/])JOEWRKS([\\/]|$)/iu.test(source),
+      )
+    ) {
+      throw new Error("JOEWRKS project instruction source was loaded");
+    }
+    const threadEvidence = {
+      id: threadId,
+      model: thread?.model,
+      modelProvider: thread?.modelProvider,
+      reasoningEffort: thread?.reasoningEffort,
+      serviceTier: thread?.serviceTier,
+      activePermissionProfile:
+        thread?.activePermissionProfile ?? thread?.permissionProfile,
+      instructionSources,
+      request: threadRequest,
+    };
+    await writeCheckpointExclusive(
+      path.join(caseRoot, ".collector-checkpoint.json"),
+      {
+        caseId: caseDefinition.id,
+        threadId,
+        inputSha256: input.sha256,
+        thread: threadEvidence,
+      },
+    );
+
+    const sandboxPolicy =
+      caseDefinition.id === "p0-02-unknown-write"
+        ? {
+            type: "workspaceWrite",
+            writableRoots: [caseRoot],
+            networkAccess: false,
+          }
+        : { type: "readOnly", networkAccess: false };
+    const turnRequest = {
+      threadId,
+      input: [{ type: "text", text: input.text }],
+      cwd: caseRoot,
+      approvalPolicy: "never",
+      sandboxPolicy,
+      runtimeWorkspaceRoots: [caseRoot],
+    };
+    try {
+      const turnResponse = await session.client.request(
+        "turn/start",
+        turnRequest,
+        turnTimeoutMs,
+      );
+      const turn = turnResponse?.turn ?? turnResponse;
+      turnId = turn?.id ?? turn?.turnId;
+      if (typeof turnId !== "string" || !turnId) {
+        reasons.push("turn-id-missing");
+      }
+    } catch {
+      reasons.push("turn-start-failed");
+    }
+
+    if (eventLimitReached) {
+      await interruptOnce();
+    }
+
+    if (turnId) {
+      let timeoutHandle;
+      const timeoutPromise = new Promise((resolve) => {
+        timeoutHandle = setTimeout(() => resolve(null), turnTimeoutMs);
+        timeoutHandle.unref?.();
+      });
+      const terminal = await Promise.race([terminalPromise, timeoutPromise]);
+      clearTimeout(timeoutHandle);
+      if (terminal === null) {
+        reasons.push("turn-timeout");
+        await interruptOnce();
+      }
+    }
+
+    const mcpAfter = sanitizedMcpStatus(
+      await session.client.request("mcpServerStatus/list", {}, 10_000),
+    );
+    if (hasReadyMcp(mcpAfter)) {
+      reasons.push("uncontrolled-tool-surface");
+    }
+
+    if (!terminalEvent) {
+      reasons.push("terminal-event-missing");
+    } else if (terminalEvent.turn?.status !== "completed") {
+      reasons.push("turn-not-completed");
+    }
+    if (
+      !events.some(
+        (event) =>
+          event.method === "item/completed" &&
+          event.item?.type === "commandExecution",
+      )
+    ) {
+      reasons.push("command-evidence-missing");
+    }
+
+    let stateEvidence = null;
+    if (caseDefinition.id === "p0-02-unknown-write") {
+      try {
+        const state = JSON.parse(await readFile(statePath, "utf8"));
+        stateEvidence = inspectSyntheticState(state);
+        addReasons(stateEvidence.reasons);
+      } catch {
+        reasons.push("state-unavailable");
+      }
+    } else {
+      stateEvidence = {
+        fixtures: Object.entries(caseDefinition.fixtureFiles ?? {})
+          .map(([name, contents]) => ({
+            name,
+            byteLength: Buffer.byteLength(contents),
+            sha256: sha256(contents),
+          }))
+          .sort((left, right) => left.name.localeCompare(right.name)),
+      };
+    }
+
+    const finalReasons = uniqueReasons(reasons);
+    return {
+      id: caseDefinition.id,
+      input,
+      thread: threadEvidence,
+      turn: { id: turnId },
+      events,
+      state: stateEvidence,
+      mcpStatus: { before: mcpBefore, after: mcpAfter },
+      automatedJudgment:
+        finalReasons.length === 0 ? "reviewRequired" : "blocked",
+      reasons: finalReasons,
+    };
+  } finally {
+    unsubscribe();
+  }
+}
+
+export function hashEvidence(evidence) {
+  return sha256(stableStringify(evidence));
+}
+
+const REQUIRED_EVIDENCE_KEYS = [
+  "source",
+  "runtime",
+  "preflight",
+  "inventory",
+  "cases",
+  "repository",
+  "config",
+  "unexpectedChanges",
+  "capabilityCandidate",
+  "evidenceLimitations",
+];
+
+export function validateResult(result) {
+  if (result?.schemaVersion !== 2) {
+    throw new Error("result schemaVersion must be 2");
+  }
+  if (typeof result.runId !== "string" || !result.runId) {
+    throw new Error("result runId is required");
+  }
+  if (
+    typeof result.recordedAt !== "string" ||
+    !Number.isFinite(Date.parse(result.recordedAt))
+  ) {
+    throw new Error("result recordedAt must be an ISO timestamp");
+  }
+  if (!result.evidence || typeof result.evidence !== "object") {
+    throw new Error("result evidence is required");
+  }
+  for (const key of REQUIRED_EVIDENCE_KEYS) {
+    if (!Object.hasOwn(result.evidence, key)) {
+      throw new Error(`result evidence is missing ${key}`);
+    }
+  }
+  if (
+    typeof result.evidenceSha256 !== "string" ||
+    !/^[0-9a-f]{64}$/u.test(result.evidenceSha256) ||
+    hashEvidence(result.evidence) !== result.evidenceSha256
+  ) {
+    throw new Error("result evidence hash does not match");
+  }
+
+  const cases = result.evidence.cases;
+  if (!Array.isArray(cases)) {
+    throw new Error("result evidence cases must be an array");
+  }
+  for (const id of CASE_IDS) {
+    if (cases.filter((candidate) => candidate?.id === id).length !== 1) {
+      throw new Error(`required case must appear exactly once: ${id}`);
+    }
+  }
+  if (
+    cases.length !== CASE_IDS.length ||
+    cases.some(
+      ({ automatedJudgment }) =>
+        !["reviewRequired", "blocked"].includes(automatedJudgment),
+    )
+  ) {
+    throw new Error("case automated judgment has an invalid enum");
+  }
+
+  const review = result.review;
+  if (!review || !["pending", "complete"].includes(review.status)) {
+    throw new Error("review status has an invalid enum");
+  }
+  if (!["blocked", "pass"].includes(review.capabilityVerdict)) {
+    throw new Error("review capability verdict has an invalid enum");
+  }
+  if (
+    !Array.isArray(review.caseJudgments) ||
+    !Array.isArray(review.reasons)
+  ) {
+    throw new Error("review arrays are required");
+  }
+  const validBehaviorJudgments = new Set([
+    "pass",
+    "fail",
+    "blocked",
+    "reviewRequired",
+  ]);
+  if (
+    review.caseJudgments.some(
+      ({ judgment }) => !validBehaviorJudgments.has(judgment),
+    )
+  ) {
+    throw new Error("review case judgment has an invalid enum");
+  }
+  if (review.status === "complete") {
+    for (const id of CASE_IDS) {
+      if (
+        review.caseJudgments.filter((judgment) => judgment?.id === id)
+          .length !== 1
+      ) {
+        throw new Error(`review must contain exactly one judgment for ${id}`);
+      }
+    }
+  }
+  if (review.capabilityVerdict === "pass") {
+    if (
+      review.status !== "complete" ||
+      review.caseJudgments.length !== CASE_IDS.length ||
+      review.caseJudgments.some(
+        ({ judgment }) => !["pass", "fail"].includes(judgment),
+      ) ||
+      result.evidence.capabilityCandidate === "blocked" ||
+      result.evidence.unexpectedChanges.length !== 0 ||
+      result.evidence.evidenceLimitations.length !== 0
+    ) {
+      throw new Error("capability pass is not supported by complete evidence");
+    }
+  }
+}
+
+export async function writeResultExclusive(resultPath, result) {
+  validateResult(result);
+  await writeFile(
+    resultPath,
+    `${JSON.stringify(result, null, 2)}\n`,
+    { encoding: "utf8", flag: "wx" },
+  );
 }
