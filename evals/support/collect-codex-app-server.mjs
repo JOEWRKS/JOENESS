@@ -1,5 +1,5 @@
 import { spawn } from "node:child_process";
-import { createHash } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 import { constants as fsConstants } from "node:fs";
 import {
   access,
@@ -8,6 +8,7 @@ import {
   readFile,
   realpath,
   rename,
+  rm,
   stat,
   unlink,
   writeFile,
@@ -15,6 +16,7 @@ import {
 import { homedir, tmpdir } from "node:os";
 import path from "node:path";
 import { createInterface } from "node:readline";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
 export const CASE_IDS = [
   "pressure-08-claim-integrity",
@@ -28,6 +30,18 @@ export const TURN_TIMEOUT_MS = 180_000;
 const EXPECTED_TARGET_KEY = "fixture-service:account-17";
 const EXPECTED_IDEMPOTENCY_KEY = "request-001";
 const RUBRIC_KEYS = ["passCriteria", "failCriteria", "evidenceRequired"];
+
+export function parseCli(argv) {
+  if (
+    argv.length === 1 &&
+    (argv[0] === "smoke" || argv[0] === "run-v2")
+  ) {
+    return { mode: argv[0] };
+  }
+  throw new Error(
+    "usage: node evals/support/collect-codex-app-server.mjs <smoke|run-v2>",
+  );
+}
 
 export function sha256(value) {
   return createHash("sha256").update(value).digest("hex");
@@ -793,6 +807,7 @@ export async function openAppServer(runtime, callbacks = {}) {
   });
   child.once("error", (error) => client.close(error));
   child.once("close", () => client.close(new Error("App Server exited")));
+  let closePromise;
 
   try {
     const initializeResult = await client.request(
@@ -824,11 +839,20 @@ export async function openAppServer(runtime, callbacks = {}) {
       get stderr() {
         return boundUtf8(Buffer.concat(stderrChunks).toString("utf8"));
       },
-      close() {
-        client.close();
-        if (child.exitCode === null) {
-          child.kill();
-        }
+      async close() {
+        closePromise ??= (async () => {
+          client.close();
+          if (child.exitCode !== null) {
+            return;
+          }
+          const exited = new Promise((resolve) => child.once("close", resolve));
+          child.stdin.end();
+          const timeout = setTimeout(() => child.kill(), 5000);
+          timeout.unref?.();
+          await exited;
+          clearTimeout(timeout);
+        })();
+        await closePromise;
       },
     };
   } catch (error) {
@@ -1462,4 +1486,686 @@ export async function writeResultExclusive(resultPath, result) {
     `${JSON.stringify(result, null, 2)}\n`,
     { encoding: "utf8", flag: "wx" },
   );
+}
+
+const MODULE_PATH = fileURLToPath(import.meta.url);
+const REPOSITORY_ROOT = path.resolve(path.dirname(MODULE_PATH), "..", "..");
+const COLLECTOR_RELATIVE_PATH =
+  "evals/support/collect-codex-app-server.mjs";
+const CASES_RELATIVE_PATH = "evals/p0/cases.json";
+const MOCK_RELATIVE_PATH = "evals/support/mock-external-write.ps1";
+const P0_CONTRACT_RELATIVE_PATH =
+  "tests/p0-evaluation-contract.tests.ps1";
+const RESULT_RELATIVE_PATH =
+  "evals/p0/baseline-capability-spike-v2.json";
+const RESULT_PATH = path.join(REPOSITORY_ROOT, ...RESULT_RELATIVE_PATH.split("/"));
+const VERIFIED_SOURCE_PATHS = [
+  COLLECTOR_RELATIVE_PATH,
+  CASES_RELATIVE_PATH,
+  MOCK_RELATIVE_PATH,
+  P0_CONTRACT_RELATIVE_PATH,
+];
+
+async function runGit(args) {
+  return runBuffered("git", ["-C", REPOSITORY_ROOT, ...args], {
+    cwd: REPOSITORY_ROOT,
+  });
+}
+
+async function requireHeadMatchedFile(relativePath) {
+  const tracked = await runGit([
+    "ls-files",
+    "--error-unmatch",
+    "--",
+    relativePath,
+  ]);
+  requireSuccessfulProcess(tracked, `tracked source ${relativePath}`);
+  const workingHash = requireSuccessfulProcess(
+    await runGit(["hash-object", "--", relativePath]),
+    `working hash ${relativePath}`,
+  ).trim();
+  const headHash = requireSuccessfulProcess(
+    await runGit(["rev-parse", `HEAD:${relativePath}`]),
+    `HEAD hash ${relativePath}`,
+  ).trim();
+  if (workingHash !== headHash) {
+    throw new Error(`source does not match current HEAD: ${relativePath}`);
+  }
+  return { workingGitHash: workingHash, headGitHash: headHash };
+}
+
+async function hashFile(filePath) {
+  return sha256(await readFile(filePath));
+}
+
+async function captureConfigState() {
+  const codexHome =
+    process.env.CODEX_HOME || path.join(homedir(), ".codex");
+  const configPath = path.join(codexHome, "config.toml");
+  try {
+    return { exists: true, sha256: await hashFile(configPath) };
+  } catch (error) {
+    if (error?.code === "ENOENT") {
+      return { exists: false, sha256: null };
+    }
+    throw error;
+  }
+}
+
+async function captureRepositoryState() {
+  const [branchResult, headResult, statusResult, collectorHashResult] =
+    await Promise.all([
+      runGit(["branch", "--show-current"]),
+      runGit(["rev-parse", "HEAD"]),
+      runGit(["status", "--porcelain=v1", "-z", "--untracked-files=all"]),
+      runGit(["hash-object", "--", COLLECTOR_RELATIVE_PATH]),
+    ]);
+  return {
+    branch: requireSuccessfulProcess(branchResult, "git branch").trim(),
+    head: requireSuccessfulProcess(headResult, "git HEAD").trim(),
+    status: requireSuccessfulProcess(statusResult, "git status")
+      .split("\0")
+      .filter(Boolean),
+    collectorWorkingGitHash: requireSuccessfulProcess(
+      collectorHashResult,
+      "Collector working hash",
+    ).trim(),
+  };
+}
+
+function statesEqual(before, after) {
+  return stableStringify(before) === stableStringify(after);
+}
+
+async function runP0Contract() {
+  const windowsRoot = process.env.SystemRoot || "C:\\Windows";
+  const powershell = path.join(
+    windowsRoot,
+    "System32",
+    "WindowsPowerShell",
+    "v1.0",
+    "powershell.exe",
+  );
+  const result = await runBuffered(
+    powershell,
+    [
+      "-NoLogo",
+      "-NoProfile",
+      "-NonInteractive",
+      "-ExecutionPolicy",
+      "Bypass",
+      "-File",
+      path.join(
+        REPOSITORY_ROOT,
+        ...P0_CONTRACT_RELATIVE_PATH.split("/"),
+      ),
+    ],
+    { cwd: REPOSITORY_ROOT, timeoutMs: 60_000 },
+  );
+  const stdout = requireSuccessfulProcess(result, "P0 evaluation contract");
+  if (stdout.trim() !== "PASS: P0 evaluation contract") {
+    throw new Error("P0 evaluation contract returned unexpected output");
+  }
+  return { status: "pass", stdout: stdout.trim() };
+}
+
+async function captureExecutionGate(mode) {
+  if (mode === "run-v2") {
+    await pathMustNotExist(RESULT_PATH, "v2 result");
+  }
+  const sourceGit = {};
+  for (const relativePath of VERIFIED_SOURCE_PATHS) {
+    sourceGit[relativePath] = await requireHeadMatchedFile(relativePath);
+  }
+  const [repository, config, p0] = await Promise.all([
+    captureRepositoryState(),
+    captureConfigState(),
+    runP0Contract(),
+  ]);
+  const sourceSha256 = {};
+  for (const relativePath of VERIFIED_SOURCE_PATHS) {
+    sourceSha256[relativePath] = await hashFile(
+      path.join(REPOSITORY_ROOT, ...relativePath.split("/")),
+    );
+  }
+  return { repository, config, p0, sourceGit, sourceSha256 };
+}
+
+function safeError(error) {
+  const message = boundedEvidenceText(
+    error instanceof Error ? error.message : String(error),
+  );
+  return {
+    name: error instanceof Error ? error.name : "Error",
+    message: message.value,
+    blockedForSecret: message.blockers.includes("secret-shaped-output"),
+  };
+}
+
+function runtimeEvidence(runtime) {
+  return {
+    executable: runtime.executable,
+    packageRoot: runtime.packageRoot,
+    version: runtime.version,
+    helpers: {
+      setup: runtime.helpers.setup,
+      commandRunner: runtime.helpers.commandRunner,
+    },
+    doctor: runtime.doctor,
+    protocolSchema: {
+      sha256: runtime.protocolSchema.sha256,
+    },
+    mcpInventory: runtime.mcpInventory,
+  };
+}
+
+function commandEvidence(response) {
+  return {
+    exitCode: response?.exitCode,
+    stdout:
+      typeof response?.stdout === "string"
+        ? boundedEvidenceText(response.stdout).value
+        : null,
+    stderr:
+      typeof response?.stderr === "string"
+        ? boundedEvidenceText(response.stderr).value
+        : null,
+  };
+}
+
+function assertSafeTempCleanup(runRoot) {
+  const tempRoot = path.resolve(tmpdir());
+  const resolved = path.resolve(runRoot);
+  const relative = path.relative(tempRoot, resolved);
+  if (
+    !relative ||
+    relative.startsWith(`..${path.sep}`) ||
+    path.isAbsolute(relative) ||
+    !path.basename(resolved).startsWith("joewrks-eval-smoke-")
+  ) {
+    throw new Error(`unsafe smoke cleanup path: ${resolved}`);
+  }
+}
+
+async function writeSmokeDiagnostic(runRoot, runId, error, session) {
+  const diagnostic = {
+    schemaVersion: 1,
+    mode: "smoke",
+    runId,
+    status: "blocked",
+    error: safeError(error),
+    appServer:
+      session === null
+        ? null
+        : {
+            processExitCode: session.processExitCode,
+            stderr: session.stderr,
+          },
+  };
+  await writeFile(
+    path.join(runRoot, "smoke-diagnostic.json"),
+    `${JSON.stringify(diagnostic, null, 2)}\n`,
+    { encoding: "utf8", flag: "wx" },
+  );
+}
+
+async function runSmoke() {
+  const gateBefore = await captureExecutionGate("smoke");
+  const runId = `smoke-${Date.now()}-${randomUUID()}`;
+  const runRoot = await createExclusiveRunRoot(runId);
+  const smokeRoot = path.join(runRoot, "smoke");
+  await mkdir(smokeRoot);
+  let session = null;
+  try {
+    const runtime = await prepareRuntime(runRoot);
+    session = await openAppServer(runtime);
+    const request = {
+      command: [
+        "C:\\Windows\\System32\\cmd.exe",
+        "/d",
+        "/c",
+        "echo",
+        "APP_SERVER_SANDBOX_OK",
+      ],
+      cwd: smokeRoot,
+      sandboxPolicy: { type: "readOnly", networkAccess: false },
+      timeoutMs: 10_000,
+      outputBytesCap: 4096,
+    };
+    const response = await session.client.request(
+      "command/exec",
+      request,
+      15_000,
+    );
+    await session.close();
+    const preflight = evaluatePreflight({
+      processExitCode: session.processExitCode,
+      response,
+    });
+    if (!preflight.pass) {
+      throw new Error(`smoke preflight blocked: ${preflight.reasons.join(", ")}`);
+    }
+    if (
+      session.stderr.truncated ||
+      session.stderr.byteLength !== 0
+    ) {
+      throw new Error("App Server wrote unexpected stderr during smoke");
+    }
+
+    const [repositoryAfter, configAfter] = await Promise.all([
+      captureRepositoryState(),
+      captureConfigState(),
+    ]);
+    if (!statesEqual(gateBefore.repository, repositoryAfter)) {
+      throw new Error("repository changed during smoke");
+    }
+    if (!statesEqual(gateBefore.config, configAfter)) {
+      throw new Error("Codex config changed during smoke");
+    }
+
+    const summary = {
+      mode: "smoke",
+      verdict: "pass",
+      codexVersion: runtime.version,
+      protocolSchemaSha256: runtime.protocolSchema.sha256,
+      configuredMcp: runtime.mcpInventory,
+      preflight,
+      repositoryUnchanged: true,
+      configUnchanged: true,
+      resultCreated: false,
+    };
+    assertSafeTempCleanup(runRoot);
+    await rm(runRoot, { recursive: true, force: false });
+    process.stdout.write(`${JSON.stringify(summary, null, 2)}\n`);
+  } catch (error) {
+    if (session !== null) {
+      await session.close().catch(() => {});
+    }
+    await writeSmokeDiagnostic(runRoot, runId, error, session).catch(() => {});
+    throw error;
+  }
+}
+
+function compactInventory(response) {
+  const records = [];
+  const errors = [];
+  const seen = new Set();
+
+  function visit(value) {
+    if (records.length >= 500 || value === null || value === undefined) {
+      return;
+    }
+    if (Array.isArray(value)) {
+      for (const item of value) {
+        visit(item);
+      }
+      return;
+    }
+    if (typeof value !== "object") {
+      return;
+    }
+
+    const record = {};
+    for (const key of [
+      "id",
+      "name",
+      "pluginId",
+      "pluginName",
+      "marketplaceName",
+      "version",
+      "enabled",
+      "status",
+    ]) {
+      if (
+        ["string", "boolean", "number"].includes(typeof value[key])
+      ) {
+        record[key] = value[key];
+      }
+    }
+    if (Object.keys(record).length) {
+      const serialized = stableStringify(record);
+      if (!seen.has(serialized)) {
+        seen.add(serialized);
+        records.push(record);
+      }
+    }
+    for (const key of ["error", "errors", "warnings"]) {
+      if (typeof value[key] === "string" && errors.length < 100) {
+        errors.push(boundedEvidenceText(value[key]).value);
+      } else if (Array.isArray(value[key])) {
+        for (const item of value[key]) {
+          if (errors.length >= 100) {
+            break;
+          }
+          if (typeof item === "string") {
+            errors.push(boundedEvidenceText(item).value);
+          } else if (item?.message) {
+            errors.push(boundedEvidenceText(String(item.message)).value);
+          }
+        }
+      }
+    }
+    for (const child of Object.values(value)) {
+      visit(child);
+    }
+  }
+
+  visit(response);
+  return {
+    responseSha256: sha256(stableStringify(response)),
+    records,
+    errors,
+    truncated: records.length >= 500 || errors.length >= 100,
+  };
+}
+
+async function collectPermissionProfiles(client, cwd) {
+  const data = [];
+  const cursors = new Set();
+  let cursor = null;
+  for (let page = 0; page < 100; page += 1) {
+    const response = await client.request(
+      "permissionProfile/list",
+      { cursor, cwd, limit: 100 },
+      10_000,
+    );
+    data.push(...(Array.isArray(response?.data) ? response.data : []));
+    if (!response?.nextCursor) {
+      return { data };
+    }
+    if (cursors.has(response.nextCursor)) {
+      throw new Error("permission profile pagination repeated a cursor");
+    }
+    cursors.add(response.nextCursor);
+    cursor = response.nextCursor;
+  }
+  throw new Error("permission profile pagination exceeded 100 pages");
+}
+
+async function collectRuntimeInventory(client, cwd) {
+  const [skills, plugins, hooks, permissionProfiles, mcp] =
+    await Promise.all([
+      client.request(
+        "skills/list",
+        { cwds: [cwd], forceReload: false },
+        15_000,
+      ),
+      client.request(
+        "plugin/installed",
+        { cwds: [cwd], installSuggestionPluginNames: [] },
+        15_000,
+      ),
+      client.request("hooks/list", { cwds: [cwd] }, 15_000),
+      collectPermissionProfiles(client, cwd),
+      client.request(
+        "mcpServerStatus/list",
+        { detail: "toolsAndAuthOnly", limit: 100 },
+        15_000,
+      ),
+    ]);
+  return {
+    skills: compactInventory(skills),
+    plugins: compactInventory(plugins),
+    hooks: compactInventory(hooks),
+    permissionProfiles: compactInventory(permissionProfiles),
+    mcp: compactInventory(mcp),
+  };
+}
+
+function blockedCase(id, reason) {
+  return {
+    id,
+    automatedJudgment: "blocked",
+    reasons: [reason],
+    events: [],
+  };
+}
+
+async function runV2() {
+  const gateBefore = await captureExecutionGate("run-v2");
+  const runId = `v2-${Date.now()}-${randomUUID()}`;
+  const runRoot = await createExclusiveRunRoot(runId);
+  const casesContract = JSON.parse(
+    await readFile(
+      path.join(REPOSITORY_ROOT, ...CASES_RELATIVE_PATH.split("/")),
+      "utf8",
+    ),
+  );
+  const caseDefinitions = selectCases(casesContract);
+  const cases = [];
+  const limitations = [];
+  const unexpectedChanges = [];
+  const globalControlBlockers = [];
+  let runtime = null;
+  let runtimeRecord = { status: "blocked" };
+  let session = null;
+  let preflight = { status: "blocked", reasons: ["not-run"] };
+  let inventory = {};
+
+  try {
+    runtime = await prepareRuntime(runRoot);
+    runtimeRecord = runtimeEvidence(runtime);
+    session = await openAppServer(runtime, {
+      onNotification(message) {
+        if (
+          message.method === "collector/serverRequest" ||
+          message.method === "mcpServer/startupStatus/updated"
+        ) {
+          globalControlBlockers.push(...normalizeEvent(message).blockers);
+        }
+      },
+    });
+    const preflightRoot = path.join(runRoot, "preflight");
+    await mkdir(preflightRoot);
+    const preflightRequest = {
+      command: [
+        "C:\\Windows\\System32\\cmd.exe",
+        "/d",
+        "/c",
+        "echo",
+        "APP_SERVER_SANDBOX_OK",
+      ],
+      cwd: preflightRoot,
+      sandboxPolicy: { type: "readOnly", networkAccess: false },
+      timeoutMs: 10_000,
+      outputBytesCap: 4096,
+    };
+    const preflightResponse = await session.client.request(
+      "command/exec",
+      preflightRequest,
+      15_000,
+    );
+    const preflightCheck = evaluatePreflight({
+      processExitCode: 0,
+      response: preflightResponse,
+    });
+    preflight = {
+      status: preflightCheck.pass ? "pass" : "blocked",
+      request: preflightRequest,
+      response: commandEvidence(preflightResponse),
+      reasons: preflightCheck.reasons,
+      appServerExitCodeAtCheck: null,
+    };
+    if (!preflightCheck.pass) {
+      throw new Error(
+        `model-free preflight blocked: ${preflightCheck.reasons.join(", ")}`,
+      );
+    }
+
+    inventory = await collectRuntimeInventory(session.client, runRoot);
+    for (let index = 0; index < caseDefinitions.length; index += 1) {
+      const definition = caseDefinitions[index];
+      try {
+        cases.push(
+          await runSubjectCase({
+            caseDefinition: definition,
+            caseRoot: path.join(
+              runRoot,
+              `case-${index + 1}-${definition.id}`,
+            ),
+            sourceMockPath: path.join(
+              REPOSITORY_ROOT,
+              ...MOCK_RELATIVE_PATH.split("/"),
+            ),
+            session,
+          }),
+        );
+      } catch (error) {
+        cases.push(blockedCase(definition.id, safeError(error)));
+      }
+
+      const [repositoryNow, configNow] = await Promise.all([
+        captureRepositoryState(),
+        captureConfigState(),
+      ]);
+      if (!statesEqual(gateBefore.repository, repositoryNow)) {
+        unexpectedChanges.push(`repository-changed-after-${definition.id}`);
+      }
+      if (!statesEqual(gateBefore.config, configNow)) {
+        unexpectedChanges.push(`config-changed-after-${definition.id}`);
+      }
+      const lastCaseReasons = cases.at(-1)?.reasons ?? [];
+      if (
+        unexpectedChanges.length ||
+        lastCaseReasons.includes("uncontrolled-tool-surface") ||
+        lastCaseReasons.includes("secret-shaped-output")
+      ) {
+        break;
+      }
+    }
+  } catch (error) {
+    limitations.push(safeError(error));
+  } finally {
+    if (session !== null) {
+      await session.close().catch((error) => {
+        limitations.push(safeError(error));
+      });
+      preflight.appServerExitCode = session.processExitCode;
+      if (session.processExitCode !== 0) {
+        limitations.push("app-server-nonzero-exit");
+      }
+      if (session.stderr.byteLength !== 0) {
+        limitations.push("app-server-stderr-not-empty");
+      }
+    }
+  }
+
+  for (const id of CASE_IDS) {
+    if (!cases.some((candidate) => candidate.id === id)) {
+      cases.push(blockedCase(id, "case-not-run"));
+    }
+  }
+  cases.sort(
+    (left, right) => CASE_IDS.indexOf(left.id) - CASE_IDS.indexOf(right.id),
+  );
+  limitations.push(...globalControlBlockers);
+
+  let repositoryAfter;
+  let configAfter;
+  try {
+    [repositoryAfter, configAfter] = await Promise.all([
+      captureRepositoryState(),
+      captureConfigState(),
+    ]);
+  } catch (error) {
+    limitations.push(safeError(error));
+    repositoryAfter = { status: "unavailable" };
+    configAfter = { status: "unavailable" };
+  }
+  const repositoryUnchanged = statesEqual(
+    gateBefore.repository,
+    repositoryAfter,
+  );
+  const configUnchanged = statesEqual(gateBefore.config, configAfter);
+  if (!repositoryUnchanged) {
+    unexpectedChanges.push("repository-changed");
+  }
+  if (!configUnchanged) {
+    unexpectedChanges.push("config-changed");
+  }
+
+  const uniqueLimitations = uniqueReasons(limitations);
+  const uniqueUnexpectedChanges = uniqueReasons(unexpectedChanges);
+  const evidence = {
+    source: {
+      ...gateBefore.repository,
+      p0Contract: gateBefore.p0,
+      gitBlobs: gateBefore.sourceGit,
+      sha256: gateBefore.sourceSha256,
+    },
+    runtime: runtimeRecord,
+    preflight,
+    inventory,
+    cases,
+    repository: {
+      before: gateBefore.repository,
+      after: repositoryAfter,
+      unchanged: repositoryUnchanged,
+    },
+    config: {
+      before: gateBefore.config,
+      after: configAfter,
+      unchanged: configUnchanged,
+    },
+    unexpectedChanges: uniqueUnexpectedChanges,
+    capabilityCandidate:
+      cases.every(
+        ({ automatedJudgment }) => automatedJudgment === "reviewRequired",
+      ) &&
+      uniqueLimitations.length === 0 &&
+      uniqueUnexpectedChanges.length === 0
+        ? "reviewRequired"
+        : "blocked",
+    evidenceLimitations: uniqueLimitations,
+  };
+  const result = {
+    schemaVersion: 2,
+    runId,
+    recordedAt: new Date().toISOString(),
+    evidence,
+    evidenceSha256: hashEvidence(evidence),
+    review: {
+      status: "pending",
+      caseJudgments: cases.map(({ id, automatedJudgment, reasons }, index) => ({
+        id,
+        judgment: automatedJudgment,
+        reasons,
+        references: [`/evidence/cases/${index}`],
+      })),
+      capabilityVerdict: "blocked",
+      reasons: ["review-pending"],
+    },
+  };
+  await writeResultExclusive(RESULT_PATH, result);
+  process.stdout.write(
+    `${JSON.stringify({
+      mode: "run-v2",
+      resultPath: RESULT_PATH,
+      evidenceSha256: result.evidenceSha256,
+      capabilityCandidate: evidence.capabilityCandidate,
+      cases: cases.map(({ id, automatedJudgment }) => ({
+        id,
+        automatedJudgment,
+      })),
+    }, null, 2)}\n`,
+  );
+}
+
+async function main(argv) {
+  const { mode } = parseCli(argv);
+  if (mode === "smoke") {
+    await runSmoke();
+  } else {
+    await runV2();
+  }
+}
+
+const isMain =
+  process.argv[1] !== undefined &&
+  import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href;
+if (isMain) {
+  main(process.argv.slice(2)).catch((error) => {
+    process.stderr.write(`${error?.message ?? String(error)}\n`);
+    process.exitCode = 1;
+  });
 }

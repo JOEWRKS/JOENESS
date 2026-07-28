@@ -22,6 +22,7 @@ import {
   hashEvidence,
   inspectSyntheticState,
   normalizeEvent,
+  parseCli,
   runSubjectCase,
   selectCases,
   sha256,
@@ -656,4 +657,21 @@ test("result writer is exclusive and adds one trailing newline", async (t) => {
     () => writeResultExclusive(resultPath, validResult()),
     /exist|EEXIST/i,
   );
+});
+
+test("CLI accepts only one explicit smoke or run-v2 mode", () => {
+  assert.deepEqual(parseCli(["smoke"]), { mode: "smoke" });
+  assert.deepEqual(parseCli(["run-v2"]), { mode: "run-v2" });
+  for (const argv of [
+    [],
+    ["resume"],
+    ["--force"],
+    ["smoke", "--force"],
+    ["run-v2", "extra"],
+  ]) {
+    assert.throws(
+      () => parseCli(argv),
+      /usage: node evals\/support\/collect-codex-app-server\.mjs <smoke\|run-v2>/,
+    );
+  }
 });
