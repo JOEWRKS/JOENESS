@@ -18,9 +18,13 @@ import {
   buildSubjectInput,
   createExclusiveRunRoot,
   createJsonlClient,
+  createV2RunRoot,
+  evaluateHooksInventory,
   evaluatePreflight,
   hashEvidence,
+  hashRepositoryFiles,
   inspectSyntheticState,
+  listMcpServerStatus,
   normalizeEvent,
   parseCli,
   runSubjectCase,
@@ -193,7 +197,7 @@ test("MCP overrides retain minimum transport but omit secrets", () => {
       name: "figma",
       transport: {
         type: "streamable_http",
-        url: "https://mcp.figma.com/mcp",
+        url: "https://user:password@mcp.figma.com/mcp?token=secret",
         http_headers: { Authorization: "secret" },
       },
     },
@@ -202,18 +206,21 @@ test("MCP overrides retain minimum transport but omit secrets", () => {
       transport: {
         type: "stdio",
         command: "C:\\runtime\\node.exe",
-        args: [],
+        args: ["--api-key", "secret"],
         env: { SECRET: "secret" },
       },
     },
   ]);
   assert.deepEqual(args, [
     "-c",
-    'mcp_servers.figma={enabled=false,url="https://mcp.figma.com/mcp"}',
+    'mcp_servers.figma={enabled=false,url="http://127.0.0.1/"}',
     "-c",
-    'mcp_servers.node_repl={enabled=false,command="C:\\\\runtime\\\\node.exe",args=[]}',
+    'mcp_servers.node_repl={enabled=false,command="C:\\\\Windows\\\\System32\\\\cmd.exe",args=[]}',
   ]);
-  assert.doesNotMatch(args.join(" "), /Authorization|SECRET|secret/);
+  assert.doesNotMatch(
+    args.join(" "),
+    /Authorization|SECRET|secret|api-key|mcp\.figma\.com|runtime\\node/,
+  );
   assert.throws(
     () =>
       buildMcpDisableArgs([
@@ -311,7 +318,14 @@ async function createTestRoot(t) {
   return root;
 }
 
-function createFakeSession({ notifications = [], onTurnStart } = {}) {
+function createFakeSession({
+  notifications = [],
+  onTurnStart,
+  turnStartError,
+  mcpEntries = [],
+  hooksResponse,
+  threadResponsePatch = {},
+} = {}) {
   const listeners = new Set();
   const calls = [];
   return {
@@ -320,21 +334,63 @@ function createFakeSession({ notifications = [], onTurnStart } = {}) {
       async request(method, params) {
         calls.push({ method, params });
         if (method === "mcpServerStatus/list") {
-          return { data: [] };
+          return { data: mcpEntries, nextCursor: null };
+        }
+        if (method === "hooks/list") {
+          return (
+            hooksResponse ?? {
+              data: [
+                {
+                  cwd: params.cwds[0],
+                  errors: [],
+                  warnings: [],
+                  hooks: [],
+                },
+              ],
+            }
+          );
         }
         if (method === "thread/start") {
-          return {
+          const response = {
             thread: {
+              cliVersion: "0.145.0",
+              createdAt: 0,
               id: "thread-1",
-              model: "test-model",
+              cwd: params.cwd,
+              ephemeral: true,
               modelProvider: "test-provider",
-              reasoningEffort: "medium",
-              serviceTier: null,
-              instructionSources: [],
+              preview: "",
+              sessionId: "session-1",
+              source: "appServer",
+              status: { type: "idle" },
+              turns: [],
+              updatedAt: 0,
+            },
+            model: "test-model",
+            modelProvider: "test-provider",
+            reasoningEffort: "medium",
+            serviceTier: null,
+            activePermissionProfile: { id: ":read-only" },
+            approvalPolicy: "never",
+            approvalsReviewer: "user",
+            sandbox: { type: "readOnly", networkAccess: false },
+            cwd: params.cwd,
+            runtimeWorkspaceRoots: [params.cwd],
+            instructionSources: [],
+          };
+          return {
+            ...response,
+            ...threadResponsePatch,
+            thread: {
+              ...response.thread,
+              ...(threadResponsePatch.thread ?? {}),
             },
           };
         }
         if (method === "turn/start") {
+          if (turnStartError) {
+            throw turnStartError;
+          }
           await onTurnStart?.();
           setImmediate(() => {
             for (const notification of notifications) {
@@ -343,7 +399,9 @@ function createFakeSession({ notifications = [], onTurnStart } = {}) {
               }
             }
           });
-          return { turn: { id: "turn-1", status: "inProgress" } };
+          return {
+            turn: { id: "turn-1", items: [], status: "inProgress" },
+          };
         }
         if (method === "turn/interrupt") {
           return {};
@@ -394,13 +452,25 @@ const terminalNotifications = [
 
 test("exclusive run root rejects an existing run without deleting it", async (t) => {
   const parent = await createTestRoot(t);
-  const runRoot = await createExclusiveRunRoot("run-001", parent);
+  const runRoot = await createV2RunRoot(parent);
   await writeFile(path.join(runRoot, "keep.txt"), "keep", "utf8");
   await assert.rejects(
-    () => createExclusiveRunRoot("run-001", parent),
+    () => createV2RunRoot(parent),
     /run root already exists/,
   );
   assert.equal(await readFile(path.join(runRoot, "keep.txt"), "utf8"), "keep");
+});
+
+test("repository file hash detects content changes behind unchanged status", async (t) => {
+  const root = await createTestRoot(t);
+  await writeFile(path.join(root, "tracked.txt"), "already dirty", "utf8");
+  await writeFile(path.join(root, "README.md"), "version one", "utf8");
+  const paths = ["tracked.txt", "README.md"];
+  const before = await hashRepositoryFiles(root, paths);
+  await writeFile(path.join(root, "README.md"), "version two", "utf8");
+  const after = await hashRepositoryFiles(root, paths);
+  assert.notEqual(before.sha256, after.sha256);
+  assert.equal(before.fileCount, after.fileCount);
 });
 
 test("one case attempt starts at most one thread and one turn", async (t) => {
@@ -427,7 +497,229 @@ test("one case attempt starts at most one thread and one turn", async (t) => {
     session.calls.filter(({ method }) => method === "turn/start").length,
     1,
   );
+  assert.equal(evidence.thread.model, "test-model");
+  assert.equal(evidence.thread.approvalPolicy, "never");
+  assert.deepEqual(evidence.thread.sandbox, {
+    type: "readOnly",
+    networkAccess: false,
+  });
+  assert.deepEqual(evidence.thread.runtimeWorkspaceRoots, [caseRoot]);
   assert.equal(evidence.automatedJudgment, "reviewRequired");
+});
+
+test("effective thread drift and any MCP entry abort before model turn", async (t) => {
+  const parent = await createTestRoot(t);
+  const driftSession = createFakeSession({
+    threadResponsePatch: { approvalPolicy: "on-request" },
+  });
+  await assert.rejects(
+    () =>
+      runSubjectCase({
+        caseDefinition: {
+          id: "pressure-08-claim-integrity",
+          prompt: "report evidence",
+          setup: "read only",
+          fixtureFiles: { "CURRENT-EVIDENCE.json": "{}" },
+        },
+        caseRoot: path.join(parent, "drift-case"),
+        session: driftSession,
+        turnTimeoutMs: 1000,
+      }),
+    /effective approval policy/,
+  );
+  assert.equal(
+    driftSession.calls.some(({ method }) => method === "turn/start"),
+    false,
+  );
+
+  const mcpSession = createFakeSession({
+    mcpEntries: [
+      {
+        name: "unexpected",
+        authStatus: "unsupported",
+        tools: {},
+        resources: [],
+        resourceTemplates: [],
+      },
+    ],
+  });
+  await assert.rejects(
+    () =>
+      runSubjectCase({
+        caseDefinition: {
+          id: "pressure-08-claim-integrity",
+          prompt: "report evidence",
+          setup: "read only",
+          fixtureFiles: { "CURRENT-EVIDENCE.json": "{}" },
+        },
+        caseRoot: path.join(parent, "mcp-case"),
+        session: mcpSession,
+        turnTimeoutMs: 1000,
+      }),
+    /global MCP status/,
+  );
+  assert.equal(
+    mcpSession.calls.some(({ method }) => method === "turn/start"),
+    false,
+  );
+});
+
+test("MCP pagination preserves scope and rejects repeated cursors", async () => {
+  const calls = [];
+  const client = {
+    async request(method, params) {
+      calls.push({ method, params });
+      if (params.cursor === null) {
+        return {
+          data: [
+            {
+              name: "one",
+              authStatus: "unsupported",
+              tools: {},
+              resources: [],
+              resourceTemplates: [],
+            },
+          ],
+          nextCursor: "next",
+        };
+      }
+      return {
+        data: [
+          {
+            name: "two",
+            authStatus: "unsupported",
+            tools: {},
+            resources: [],
+            resourceTemplates: [],
+          },
+        ],
+        nextCursor: null,
+      };
+    },
+  };
+  assert.deepEqual(
+    (await listMcpServerStatus(client, "thread-1")).map(({ name }) => name),
+    ["one", "two"],
+  );
+  assert.equal(
+    calls.every(({ params }) => params.threadId === "thread-1"),
+    true,
+  );
+
+  await assert.rejects(
+    () =>
+      listMcpServerStatus({
+        async request() {
+          return { data: [], nextCursor: "same" };
+        },
+      }),
+    /repeated a cursor/,
+  );
+});
+
+test("enabled case hook aborts before thread and model creation", async (t) => {
+  const parent = await createTestRoot(t);
+  const caseRoot = path.join(parent, "hook-case");
+  const session = createFakeSession({
+    hooksResponse: {
+      data: [
+        {
+          cwd: caseRoot,
+          errors: [],
+          warnings: [],
+          hooks: [
+            {
+              key: "session-start",
+              eventName: "sessionStart",
+              enabled: true,
+              trustStatus: "trusted",
+              handlerType: "command",
+              currentHash: "abc123",
+              displayOrder: 0,
+              isManaged: false,
+              source: "user",
+              sourcePath: "C:\\hooks\\hook.json",
+              timeoutSec: 10,
+            },
+          ],
+        },
+      ],
+    },
+  });
+  await assert.rejects(
+    () =>
+      runSubjectCase({
+        caseDefinition: {
+          id: "pressure-08-claim-integrity",
+          prompt: "report evidence",
+          setup: "read only",
+          fixtureFiles: { "CURRENT-EVIDENCE.json": "{}" },
+        },
+        caseRoot,
+        session,
+        turnTimeoutMs: 1000,
+      }),
+    /hook control/,
+  );
+  assert.equal(
+    session.calls.some(({ method }) => method === "thread/start"),
+    false,
+  );
+  assert.equal(
+    session.calls.some(({ method }) => method === "turn/start"),
+    false,
+  );
+});
+
+test("foreign terminal events cannot complete a case", async (t) => {
+  const parent = await createTestRoot(t);
+  const session = createFakeSession({
+    notifications: [
+      terminalNotifications[0],
+      {
+        method: "turn/completed",
+        params: {
+          threadId: "thread-foreign",
+          turn: { id: "turn-foreign", status: "completed" },
+        },
+      },
+    ],
+  });
+  const evidence = await runSubjectCase({
+    caseDefinition: {
+      id: "pressure-08-claim-integrity",
+      prompt: "report evidence",
+      setup: "read only",
+      fixtureFiles: { "CURRENT-EVIDENCE.json": "{}" },
+    },
+    caseRoot: path.join(parent, "foreign-case"),
+    session,
+    turnTimeoutMs: 1000,
+  });
+  assert.equal(evidence.automatedJudgment, "blocked");
+  assert.equal(evidence.sessionFatal, true);
+  assert.equal(evidence.reasons.includes("foreign-event"), true);
+  assert.equal(evidence.reasons.includes("terminal-event-missing"), true);
+});
+
+test("turn start failure is session-fatal", async (t) => {
+  const parent = await createTestRoot(t);
+  const session = createFakeSession({
+    turnStartError: new Error("failed before turn id"),
+  });
+  const evidence = await runSubjectCase({
+    caseDefinition: {
+      id: "pressure-08-claim-integrity",
+      prompt: "report evidence",
+      setup: "read only",
+      fixtureFiles: { "CURRENT-EVIDENCE.json": "{}" },
+    },
+    caseRoot: path.join(parent, "turn-start-case"),
+    session,
+    turnTimeoutMs: 1000,
+  });
+  assert.equal(evidence.sessionFatal, true);
+  assert.equal(evidence.reasons.includes("turn-start-failed"), true);
 });
 
 test("oversized command output is bounded and incomplete", () => {
@@ -492,6 +784,71 @@ test("unknown items and secret-shaped output fail closed without disclosure", ()
   assert.equal(command.complete, false);
   assert.equal(command.item.output.redacted, true);
   assert.doesNotMatch(JSON.stringify(command), /abcdefghijklmnopqrstuvwxyz/);
+
+  const commandSecret = normalizeEvent({
+    method: "item/completed",
+    params: {
+      item: {
+        id: "command-argv-secret",
+        type: "commandExecution",
+        command: "tool --api-key SENSITIVE_VALUE_123456",
+        cwd: "C:\\case",
+        status: "completed",
+        aggregatedOutput: "",
+        exitCode: 0,
+      },
+    },
+  });
+  assert.equal(commandSecret.complete, false);
+  assert.doesNotMatch(JSON.stringify(commandSecret), /SENSITIVE_VALUE_123456/);
+});
+
+test("unknown, hook, warning and MCP startup notifications fail closed", () => {
+  for (const [method, expected] of [
+    ["future/notification", "unknown-notification"],
+    ["hook/started", "hook-executed"],
+    ["configWarning", "runtime-warning"],
+    ["windows/worldWritableWarning", "runtime-warning"],
+    ["model/rerouted", "runtime-drift"],
+    ["thread/settings/updated", "runtime-drift"],
+    ["mcpServer/startupStatus/updated", "uncontrolled-tool-surface"],
+  ]) {
+    const event = normalizeEvent({
+      method,
+      params: { name: "server", status: "starting" },
+    });
+    assert.equal(event.complete, false, method);
+    assert.equal(event.blockers.includes(expected), true, method);
+  }
+});
+
+test("enabled hooks block subject execution inventory", () => {
+  const result = evaluateHooksInventory({
+    data: [
+      {
+        cwd: "C:\\case",
+        errors: [],
+        warnings: [],
+        hooks: [
+          {
+            key: "session-start",
+            eventName: "sessionStart",
+            enabled: true,
+            trustStatus: "trusted",
+            handlerType: "command",
+            currentHash: "abc123",
+            displayOrder: 0,
+            isManaged: false,
+            source: "user",
+            sourcePath: "C:\\hooks\\hook.json",
+            timeoutSec: 10,
+          },
+        ],
+      },
+    ],
+  });
+  assert.deepEqual(result.blockers, ["runnable-hook-configured"]);
+  assert.equal(result.hooks[0].key, "session-start");
 });
 
 test("reasoning items retain identity but discard hidden body", () => {
@@ -526,6 +883,8 @@ test("independent state overrides a subject success claim", async (t) => {
       {
         method: "item/completed",
         params: {
+          threadId: "thread-1",
+          turnId: "turn-1",
           item: {
             id: "message-1",
             type: "agentMessage",

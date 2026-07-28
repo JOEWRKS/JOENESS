@@ -4,8 +4,10 @@ import { constants as fsConstants } from "node:fs";
 import {
   access,
   copyFile,
+  lstat,
   mkdir,
   readFile,
+  readlink,
   realpath,
   rename,
   rm,
@@ -274,17 +276,6 @@ export function inspectSyntheticState(state) {
   };
 }
 
-function tomlString(value, field) {
-  if (
-    typeof value !== "string" ||
-    value.length === 0 ||
-    /[\u0000-\u001f\u007f]/u.test(value)
-  ) {
-    throw new Error(`invalid MCP ${field}`);
-  }
-  return JSON.stringify(value);
-}
-
 export function buildMcpDisableArgs(inventory) {
   if (!Array.isArray(inventory)) {
     throw new TypeError("MCP inventory must be an array");
@@ -311,20 +302,10 @@ export function buildMcpDisableArgs(inventory) {
       transport?.type === "streamable_http" ||
       transport?.type === "sse"
     ) {
-      inlineTable = `{enabled=false,url=${tomlString(transport.url, "url")}}`;
+      inlineTable = '{enabled=false,url="http://127.0.0.1/"}';
     } else if (transport?.type === "stdio") {
-      const command = tomlString(transport.command, "command");
-      if (
-        !Array.isArray(transport.args) ||
-        transport.args.some(
-          (argument) =>
-            typeof argument !== "string" ||
-            /[\u0000-\u001f\u007f]/u.test(argument),
-        )
-      ) {
-        throw new Error(`invalid MCP args: ${server.name}`);
-      }
-      inlineTable = `{enabled=false,command=${command},args=${JSON.stringify(transport.args)}}`;
+      inlineTable =
+        '{enabled=false,command="C:\\\\Windows\\\\System32\\\\cmd.exe",args=[]}';
     } else {
       throw new Error(`unknown MCP transport: ${transport?.type}`);
     }
@@ -775,17 +756,17 @@ export async function openAppServer(runtime, callbacks = {}) {
       stdio: ["pipe", "pipe", "pipe"],
     },
   );
-  const stderrChunks = [];
   let stderrBytes = 0;
+  const stderrHash = createHash("sha256");
+  let stderrDigest = null;
   let processExitCode = null;
   child.stderr.on("data", (chunk) => {
-    if (stderrBytes < OUTPUT_LIMIT_BYTES) {
-      stderrChunks.push(chunk.subarray(0, OUTPUT_LIMIT_BYTES - stderrBytes));
-      stderrBytes += chunk.length;
-    }
+    stderrBytes += chunk.length;
+    stderrHash.update(chunk);
   });
   child.once("close", (code) => {
     processExitCode = code;
+    stderrDigest ??= stderrHash.digest("hex");
   });
 
   const client = createJsonlClient({
@@ -843,7 +824,12 @@ export async function openAppServer(runtime, callbacks = {}) {
         return processExitCode;
       },
       get stderr() {
-        return boundUtf8(Buffer.concat(stderrChunks).toString("utf8"));
+        return {
+          redacted: true,
+          truncated: stderrBytes > OUTPUT_LIMIT_BYTES,
+          byteLength: stderrBytes,
+          sha256: stderrDigest ?? stderrHash.copy().digest("hex"),
+        };
       },
       async close() {
         closePromise ??= (async () => {
@@ -889,6 +875,10 @@ export async function createExclusiveRunRoot(runId, parent = tmpdir()) {
   return realpath(runRoot);
 }
 
+export function createV2RunRoot(parent = tmpdir()) {
+  return createExclusiveRunRoot("v2", parent);
+}
+
 const UNCONTROLLED_ITEM_TYPES = new Set([
   "mcpToolCall",
   "dynamicToolCall",
@@ -898,7 +888,47 @@ const UNCONTROLLED_ITEM_TYPES = new Set([
 ]);
 const PUBLIC_MESSAGE_TYPES = new Set(["agentMessage", "userMessage"]);
 const SECRET_PATTERN =
-  /(?:authorization\s*:|bearer\s+[A-Za-z0-9._~+/=-]{12,}|(?:sk|ghp|github_pat)_[A-Za-z0-9_-]{12,})/iu;
+  /(?:authorization\s*:|bearer\s+[A-Za-z0-9._~+/=-]{12,}|(?:api[-_]?key|token|password|secret)\s*(?:[:=]|\s)\s*["']?[A-Za-z0-9._~+/=-]{8,}|(?:sk|ghp|github_pat)_[A-Za-z0-9_-]{12,})/iu;
+const PASSIVE_NOTIFICATION_METHODS = new Set([
+  "command/exec/outputDelta",
+  "item/agentMessage/delta",
+  "item/commandExecution/outputDelta",
+  "item/completed",
+  "item/plan/delta",
+  "item/reasoning/summaryPartAdded",
+  "item/reasoning/summaryTextDelta",
+  "item/reasoning/textDelta",
+  "item/started",
+  "process/exited",
+  "process/outputDelta",
+  "serverRequest/resolved",
+  "thread/started",
+  "thread/status/changed",
+  "thread/tokenUsage/updated",
+  "turn/completed",
+  "turn/diff/updated",
+  "turn/plan/updated",
+  "turn/started",
+  "windowsSandbox/setupCompleted",
+]);
+const BLOCKING_NOTIFICATION_METHODS = new Map([
+  ["configWarning", "runtime-warning"],
+  ["error", "runtime-error"],
+  ["guardianWarning", "runtime-warning"],
+  ["hook/completed", "hook-executed"],
+  ["hook/started", "hook-executed"],
+  ["item/autoApprovalReview/completed", "approval-requested"],
+  ["item/autoApprovalReview/started", "approval-requested"],
+  ["item/fileChange/outputDelta", "uncontrolled-tool-surface"],
+  ["item/fileChange/patchUpdated", "uncontrolled-tool-surface"],
+  ["item/mcpToolCall/progress", "uncontrolled-tool-surface"],
+  ["mcpServer/oauthLogin/completed", "uncontrolled-tool-surface"],
+  ["mcpServer/startupStatus/updated", "uncontrolled-tool-surface"],
+  ["model/rerouted", "runtime-drift"],
+  ["thread/settings/updated", "runtime-drift"],
+  ["warning", "runtime-warning"],
+  ["windows/worldWritableWarning", "runtime-warning"],
+]);
 
 function boundedEvidenceText(value) {
   const bounded = boundUtf8(value);
@@ -929,11 +959,20 @@ export function normalizeEvent(notification) {
   const params = notification?.params ?? {};
   const event = {
     method,
-    threadId: params.threadId,
+    threadId: params.threadId ?? params.thread?.id,
     turnId: params.turnId ?? params.turn?.id,
     complete: true,
     blockers: [],
   };
+
+  if (BLOCKING_NOTIFICATION_METHODS.has(method)) {
+    event.blockers.push(BLOCKING_NOTIFICATION_METHODS.get(method));
+  } else if (
+    method !== "collector/serverRequest" &&
+    !PASSIVE_NOTIFICATION_METHODS.has(method)
+  ) {
+    event.blockers.push("unknown-notification");
+  }
 
   if (method === "collector/serverRequest") {
     event.serverRequest = {
@@ -952,11 +991,18 @@ export function normalizeEvent(notification) {
     } else if (item.type === "commandExecution") {
       event.item = {
         ...itemIdentity(item),
-        command: item.command,
-        cwd: item.cwd,
         exitCode: item.exitCode,
         durationMs: item.durationMs,
       };
+      for (const field of ["command", "cwd"]) {
+        if (typeof item[field] === "string") {
+          const bounded = boundedEvidenceText(item[field]);
+          event.item[field] = bounded.value;
+          event.blockers.push(...bounded.blockers);
+        } else if (method === "item/completed") {
+          event.blockers.push(`required-${field}-missing`);
+        }
+      }
       if (typeof item.aggregatedOutput === "string") {
         const output = boundedEvidenceText(item.aggregatedOutput);
         event.item.output = output.value;
@@ -994,14 +1040,91 @@ export function normalizeEvent(notification) {
       name: params.name ?? params.serverName ?? params.server?.name,
       status: params.status ?? params.startupStatus ?? params.server?.status,
     };
-    if (String(event.mcpServer.status).toLowerCase() === "ready") {
-      event.blockers.push("uncontrolled-tool-surface");
-    }
   }
 
   event.blockers = [...new Set(event.blockers)];
   event.complete = event.blockers.length === 0;
   return event;
+}
+
+export function evaluateHooksInventory(response, expectedCwd = null) {
+  const hooks = [];
+  const blockers = [];
+  if (!response || !Array.isArray(response.data)) {
+    return {
+      hooks,
+      blockers: ["hooks-inventory-unreadable"],
+      complete: false,
+    };
+  }
+  if (
+    expectedCwd !== null &&
+    (response.data.length !== 1 ||
+      comparablePath(response.data[0]?.cwd) !== comparablePath(expectedCwd))
+  ) {
+    blockers.push("hooks-inventory-cwd-mismatch");
+  }
+
+  for (const entry of response.data) {
+    if (
+      !entry ||
+      typeof entry.cwd !== "string" ||
+      !Array.isArray(entry.errors) ||
+      !Array.isArray(entry.warnings) ||
+      !Array.isArray(entry.hooks)
+    ) {
+      blockers.push("hooks-inventory-unreadable");
+      continue;
+    }
+    if (entry.errors.length) {
+      blockers.push("hooks-inventory-error");
+    }
+    if (entry.warnings.length) {
+      blockers.push("hooks-inventory-warning");
+    }
+    for (const hook of entry.hooks) {
+      const record = {
+        key: hook?.key,
+        eventName: hook?.eventName,
+        enabled: hook?.enabled,
+        handlerType: hook?.handlerType,
+        trustStatus: hook?.trustStatus,
+        source: hook?.source,
+        currentHash: hook?.currentHash,
+        displayOrder: hook?.displayOrder,
+        isManaged: hook?.isManaged,
+        timeoutSec: hook?.timeoutSec,
+      };
+      hooks.push(record);
+      if (
+        typeof record.key !== "string" ||
+        typeof record.eventName !== "string" ||
+        typeof record.handlerType !== "string" ||
+        typeof record.trustStatus !== "string" ||
+        typeof record.source !== "string" ||
+        typeof record.currentHash !== "string" ||
+        !Number.isSafeInteger(record.displayOrder) ||
+        typeof record.isManaged !== "boolean" ||
+        !Number.isSafeInteger(record.timeoutSec) ||
+        record.timeoutSec < 0 ||
+        typeof hook?.sourcePath !== "string" ||
+        !path.isAbsolute(hook.sourcePath) ||
+        typeof record.enabled !== "boolean"
+      ) {
+        blockers.push("hooks-inventory-unreadable");
+      }
+      if (record.enabled === true) {
+        blockers.push("runnable-hook-configured");
+      }
+    }
+  }
+
+  const uniqueBlockers = uniqueReasons(blockers);
+  return {
+    hooks,
+    blockers: uniqueBlockers,
+    complete: uniqueBlockers.length === 0,
+  };
 }
 
 function isPathInside(root, candidate) {
@@ -1088,28 +1211,156 @@ function instructionSourcePaths(thread, threadResponse) {
     .filter((source) => typeof source === "string");
 }
 
-function sanitizedMcpStatus(response) {
-  const rawEntries = Array.isArray(response)
-    ? response
-    : Array.isArray(response?.data)
-      ? response.data
-      : Array.isArray(response?.servers)
-        ? response.servers
-        : null;
-  if (rawEntries === null) {
-    throw new Error("unreadable MCP status response");
+function comparablePath(value) {
+  if (typeof value !== "string" || !path.isAbsolute(value)) {
+    return null;
   }
-  return rawEntries.map((entry) => ({
-    name: entry?.name ?? entry?.serverName ?? entry?.server?.name,
-    status:
-      entry?.status ?? entry?.startupStatus ?? entry?.server?.status ?? null,
-  }));
+  const resolved = path.resolve(value);
+  return process.platform === "win32" ? resolved.toLowerCase() : resolved;
 }
 
-function hasReadyMcp(entries) {
-  return entries.some(
-    ({ status }) => String(status).toLowerCase() === "ready",
-  );
+function parseThreadStartResponse(response, request) {
+  const thread = response?.thread;
+  const threadId = thread?.id;
+  if (typeof threadId !== "string" || !threadId) {
+    throw new Error("thread/start did not return a thread id");
+  }
+  if (thread?.ephemeral !== true) {
+    throw new Error("thread/start did not create an ephemeral thread");
+  }
+  if (
+    comparablePath(response?.cwd) !== comparablePath(request.cwd) ||
+    comparablePath(thread?.cwd) !== comparablePath(request.cwd)
+  ) {
+    throw new Error("thread/start effective cwd differs from request");
+  }
+  if (
+    !Array.isArray(response?.runtimeWorkspaceRoots) ||
+    response.runtimeWorkspaceRoots.length !== 1 ||
+    comparablePath(response.runtimeWorkspaceRoots[0]) !==
+      comparablePath(request.cwd)
+  ) {
+    throw new Error("thread/start effective workspace roots differ from request");
+  }
+  if (response?.approvalPolicy !== "never") {
+    throw new Error("thread/start effective approval policy is not never");
+  }
+  if (
+    response?.sandbox?.type !== "readOnly" ||
+    response.sandbox.networkAccess === true
+  ) {
+    throw new Error("thread/start effective sandbox is not read-only");
+  }
+  if (
+    typeof response?.model !== "string" ||
+    !response.model ||
+    typeof response?.modelProvider !== "string" ||
+    !response.modelProvider
+  ) {
+    throw new Error("thread/start omitted effective model metadata");
+  }
+
+  const instructionSources = instructionSourcePaths(thread, response);
+  return {
+    id: threadId,
+    model: response.model,
+    modelProvider: response.modelProvider,
+    reasoningEffort: response.reasoningEffort,
+    serviceTier: response.serviceTier,
+    activePermissionProfile: response.activePermissionProfile ?? null,
+    approvalPolicy: response.approvalPolicy,
+    approvalsReviewer: response.approvalsReviewer,
+    sandbox: {
+      type: response.sandbox.type,
+      networkAccess: response.sandbox.networkAccess ?? false,
+    },
+    cwd: response.cwd,
+    runtimeWorkspaceRoots: response.runtimeWorkspaceRoots,
+    ephemeral: thread.ephemeral,
+    instructionSources,
+    request,
+  };
+}
+
+function sanitizedMcpStatus(response) {
+  if (!response || !Array.isArray(response.data)) {
+    throw new Error("unreadable MCP status response");
+  }
+  return response.data.map((entry) => {
+    if (typeof entry?.name !== "string" || !entry.name) {
+      throw new Error("MCP status response contains an invalid server");
+    }
+    return {
+      name: entry.name,
+      authStatus: entry.authStatus,
+      toolCount:
+        entry.tools && typeof entry.tools === "object"
+          ? Object.keys(entry.tools).length
+          : null,
+      resourceCount: Array.isArray(entry.resources)
+        ? entry.resources.length
+        : null,
+      resourceTemplateCount: Array.isArray(entry.resourceTemplates)
+        ? entry.resourceTemplates.length
+        : null,
+      serverInfo:
+        typeof entry.serverInfo?.name === "string" &&
+        typeof entry.serverInfo?.version === "string"
+          ? {
+              name: entry.serverInfo.name,
+              version: entry.serverInfo.version,
+            }
+          : null,
+    };
+  });
+}
+
+export async function listMcpServerStatus(client, threadId = null) {
+  const entries = [];
+  const cursors = new Set();
+  const names = new Set();
+  let cursor = null;
+  for (let page = 0; page < 100; page += 1) {
+    const params = {
+      cursor,
+      detail: "toolsAndAuthOnly",
+      limit: 100,
+    };
+    if (threadId !== null) {
+      params.threadId = threadId;
+    }
+    const response = await client.request(
+      "mcpServerStatus/list",
+      params,
+      10_000,
+    );
+    const pageEntries = sanitizedMcpStatus(response);
+    for (const entry of pageEntries) {
+      if (names.has(entry.name)) {
+        throw new Error(`MCP status contains duplicate server: ${entry.name}`);
+      }
+      names.add(entry.name);
+      entries.push(entry);
+    }
+    if (
+      response?.nextCursor === null ||
+      response?.nextCursor === undefined
+    ) {
+      return entries;
+    }
+    if (
+      typeof response.nextCursor !== "string" ||
+      !response.nextCursor
+    ) {
+      throw new Error("MCP status returned an invalid cursor");
+    }
+    if (cursors.has(response.nextCursor)) {
+      throw new Error("MCP status pagination repeated a cursor");
+    }
+    cursors.add(response.nextCursor);
+    cursor = response.nextCursor;
+  }
+  throw new Error("MCP status pagination exceeded 100 pages");
 }
 
 function uniqueReasons(reasons) {
@@ -1155,13 +1406,17 @@ export async function runSubjectCase({
   });
 
   const events = [];
+  const pendingNotifications = [];
   const reasons = [];
   let threadId = null;
   let turnId = null;
   let terminalEvent = null;
+  let terminalCount = 0;
   let resolveTerminal;
   let interruptRequested = false;
   let eventLimitReached = false;
+  let sessionFatal = false;
+  let hookControl = null;
   const terminalPromise = new Promise((resolve) => {
     resolveTerminal = resolve;
   });
@@ -1186,28 +1441,102 @@ export async function runSubjectCase({
     }
   }
 
-  const unsubscribe = session.subscribe((notification) => {
-    const event = normalizeEvent(notification);
+  function recordEvent(event) {
     if (events.length < eventLimit) {
       events.push(event);
     } else if (!eventLimitReached) {
       eventLimitReached = true;
       reasons.push("event-limit-exceeded");
+      sessionFatal = true;
+      resolveTerminal({ fatal: true });
       void interruptOnce();
     }
     addReasons(event.blockers);
-    if (notification?.method === "turn/completed") {
-      terminalEvent = event;
-      resolveTerminal(event);
+  }
+
+  function processNotification(notification, allowQueue = true) {
+    const event = normalizeEvent(notification);
+    const threadScoped =
+      /^(?:hook|item|thread|turn)\//u.test(String(event.method)) ||
+      (event.method === "mcpServer/startupStatus/updated" &&
+        typeof event.threadId === "string");
+    const turnScoped = /^(?:item|turn)\//u.test(String(event.method));
+
+    if (
+      allowQueue &&
+      ((threadScoped && typeof event.threadId === "string" && !threadId) ||
+        (turnScoped && typeof event.turnId === "string" && !turnId))
+    ) {
+      pendingNotifications.push(notification);
+      return;
     }
-  });
+
+    let correlated = true;
+    if (threadScoped) {
+      if (typeof event.threadId !== "string" || !event.threadId) {
+        event.blockers.push("event-correlation-missing");
+        correlated = false;
+      } else if (event.threadId !== threadId) {
+        event.blockers.push("foreign-event");
+        correlated = false;
+      }
+    }
+    if (turnScoped) {
+      if (typeof event.turnId !== "string" || !event.turnId) {
+        event.blockers.push("event-correlation-missing");
+        correlated = false;
+      } else if (event.turnId !== turnId) {
+        event.blockers.push("foreign-event");
+        correlated = false;
+      }
+    }
+    event.blockers = uniqueReasons(event.blockers);
+    event.complete = event.blockers.length === 0;
+    event.correlated = threadScoped || turnScoped ? correlated : null;
+    if (!correlated) {
+      sessionFatal = true;
+      resolveTerminal({ fatal: true });
+      void interruptOnce();
+    }
+    recordEvent(event);
+    if (notification?.method === "turn/completed" && correlated) {
+      terminalCount += 1;
+      if (terminalCount === 1) {
+        terminalEvent = event;
+        resolveTerminal(event);
+      } else {
+        sessionFatal = true;
+        reasons.push("duplicate-terminal-event");
+        void interruptOnce();
+      }
+    }
+  }
+
+  function flushPendingNotifications() {
+    const pending = pendingNotifications.splice(0);
+    for (const notification of pending) {
+      processNotification(notification);
+    }
+  }
+
+  const unsubscribe = session.subscribe(processNotification);
 
   try {
-    const mcpBefore = sanitizedMcpStatus(
-      await session.client.request("mcpServerStatus/list", {}, 10_000),
-    );
-    if (hasReadyMcp(mcpBefore)) {
-      reasons.push("uncontrolled-tool-surface");
+    const [mcpBefore, hooksResponse] = await Promise.all([
+      listMcpServerStatus(session.client),
+      session.client.request("hooks/list", { cwds: [caseRoot] }, 15_000),
+    ]);
+    hookControl = evaluateHooksInventory(hooksResponse, caseRoot);
+    if (mcpBefore.length) {
+      throw new Error("global MCP status is not empty before thread start");
+    }
+    if (!hookControl.complete) {
+      throw new Error(
+        `hook control blocked: ${hookControl.blockers.join(", ")}`,
+      );
+    }
+    if (reasons.length || sessionFatal) {
+      throw new Error("runtime control blocker exists before thread start");
     }
 
     const threadRequest = {
@@ -1224,12 +1553,13 @@ export async function runSubjectCase({
       threadRequest,
       30_000,
     );
-    const thread = threadResponse?.thread ?? threadResponse;
-    threadId = thread?.id ?? thread?.threadId;
-    if (typeof threadId !== "string" || !threadId) {
-      throw new Error("thread/start did not return a thread id");
-    }
-    const instructionSources = instructionSourcePaths(thread, threadResponse);
+    const threadEvidence = parseThreadStartResponse(
+      threadResponse,
+      threadRequest,
+    );
+    threadId = threadEvidence.id;
+    flushPendingNotifications();
+    const instructionSources = threadEvidence.instructionSources;
     if (
       instructionSources.some((source) =>
         /(^|[\\/])JOEWRKS([\\/]|$)/iu.test(source),
@@ -1237,17 +1567,17 @@ export async function runSubjectCase({
     ) {
       throw new Error("JOEWRKS project instruction source was loaded");
     }
-    const threadEvidence = {
-      id: threadId,
-      model: thread?.model,
-      modelProvider: thread?.modelProvider,
-      reasoningEffort: thread?.reasoningEffort,
-      serviceTier: thread?.serviceTier,
-      activePermissionProfile:
-        thread?.activePermissionProfile ?? thread?.permissionProfile,
-      instructionSources,
-      request: threadRequest,
-    };
+    const mcpAfterThreadStart = await listMcpServerStatus(
+      session.client,
+      threadId,
+    );
+    if (
+      mcpAfterThreadStart.length ||
+      reasons.length ||
+      sessionFatal
+    ) {
+      throw new Error("runtime control blocker exists before model turn");
+    }
     await writeCheckpointExclusive(
       path.join(caseRoot, ".collector-checkpoint.json"),
       {
@@ -1284,9 +1614,13 @@ export async function runSubjectCase({
       turnId = turn?.id ?? turn?.turnId;
       if (typeof turnId !== "string" || !turnId) {
         reasons.push("turn-id-missing");
+        sessionFatal = true;
+      } else {
+        flushPendingNotifications();
       }
     } catch {
       reasons.push("turn-start-failed");
+      sessionFatal = true;
     }
 
     if (eventLimitReached) {
@@ -1303,14 +1637,19 @@ export async function runSubjectCase({
       clearTimeout(timeoutHandle);
       if (terminal === null) {
         reasons.push("turn-timeout");
+        sessionFatal = true;
         await interruptOnce();
       }
     }
 
-    const mcpAfter = sanitizedMcpStatus(
-      await session.client.request("mcpServerStatus/list", {}, 10_000),
-    );
-    if (hasReadyMcp(mcpAfter)) {
+    if (pendingNotifications.length) {
+      reasons.push("event-correlation-unresolved");
+      sessionFatal = true;
+      pendingNotifications.length = 0;
+    }
+
+    const mcpAfter = await listMcpServerStatus(session.client, threadId);
+    if (mcpAfter.length) {
       reasons.push("uncontrolled-tool-surface");
     }
 
@@ -1323,6 +1662,7 @@ export async function runSubjectCase({
       !events.some(
         (event) =>
           event.method === "item/completed" &&
+          event.correlated === true &&
           event.item?.type === "commandExecution",
       )
     ) {
@@ -1358,7 +1698,13 @@ export async function runSubjectCase({
       turn: { id: turnId },
       events,
       state: stateEvidence,
-      mcpStatus: { before: mcpBefore, after: mcpAfter },
+      hookControl,
+      mcpStatus: {
+        before: mcpBefore,
+        afterThreadStart: mcpAfterThreadStart,
+        after: mcpAfter,
+      },
+      sessionFatal,
       automatedJudgment:
         finalReasons.length === 0 ? "reviewRequired" : "blocked",
       reasons: finalReasons,
@@ -1558,14 +1904,87 @@ async function captureConfigState() {
   }
 }
 
+export async function hashRepositoryFiles(repositoryRoot, relativePaths) {
+  if (!Array.isArray(relativePaths)) {
+    throw new TypeError("repository file paths must be an array");
+  }
+  const root = path.resolve(repositoryRoot);
+  const entries = [];
+  for (const relativePath of [...new Set(relativePaths)].sort()) {
+    if (
+      typeof relativePath !== "string" ||
+      !relativePath ||
+      relativePath.includes("\0") ||
+      path.posix.isAbsolute(relativePath) ||
+      path.win32.isAbsolute(relativePath) ||
+      relativePath.split(/[\\/]/).some((part) => part === "..")
+    ) {
+      throw new Error(`invalid repository file path: ${relativePath}`);
+    }
+    const candidate = path.resolve(root, relativePath);
+    if (!isPathInside(root, candidate)) {
+      throw new Error(`repository file escaped root: ${relativePath}`);
+    }
+    try {
+      const fileStat = await lstat(candidate);
+      if (fileStat.isSymbolicLink()) {
+        entries.push({
+          path: relativePath,
+          type: "link",
+          target: await readlink(candidate),
+        });
+      } else if (fileStat.isFile()) {
+        entries.push({
+          path: relativePath,
+          type: "file",
+          byteLength: fileStat.size,
+          sha256: await hashFile(candidate),
+        });
+      } else {
+        entries.push({ path: relativePath, type: "other" });
+      }
+    } catch (error) {
+      if (error?.code !== "ENOENT") {
+        throw error;
+      }
+      entries.push({ path: relativePath, type: "missing" });
+    }
+  }
+  return {
+    fileCount: entries.length,
+    sha256: sha256(stableStringify(entries)),
+  };
+}
+
 async function captureRepositoryState() {
-  const [branchResult, headResult, statusResult, collectorHashResult] =
+  const [
+    branchResult,
+    headResult,
+    statusResult,
+    collectorHashResult,
+    trackedResult,
+    untrackedResult,
+  ] =
     await Promise.all([
       runGit(["branch", "--show-current"]),
       runGit(["rev-parse", "HEAD"]),
       runGit(["status", "--porcelain=v1", "-z", "--untracked-files=all"]),
       runGit(["hash-object", "--", COLLECTOR_RELATIVE_PATH]),
+      runGit(["ls-files", "-z"]),
+      runGit(["ls-files", "--others", "--exclude-standard", "-z"]),
     ]);
+  const tracked = requireSuccessfulProcess(
+    trackedResult,
+    "git tracked files",
+  )
+    .split("\0")
+    .filter(Boolean);
+  const untracked = requireSuccessfulProcess(
+    untrackedResult,
+    "git untracked files",
+  )
+    .split("\0")
+    .filter(Boolean);
   return {
     branch: requireSuccessfulProcess(branchResult, "git branch").trim(),
     head: requireSuccessfulProcess(headResult, "git HEAD").trim(),
@@ -1576,6 +1995,10 @@ async function captureRepositoryState() {
       collectorHashResult,
       "Collector working hash",
     ).trim(),
+    workingFiles: await hashRepositoryFiles(REPOSITORY_ROOT, [
+      ...tracked,
+      ...untracked,
+    ]),
   };
 }
 
@@ -1708,11 +2131,13 @@ async function writeSmokeDiagnostic(runRoot, runId, error, session) {
             stderr: session.stderr,
           },
   };
+  const diagnosticPath = path.join(runRoot, "smoke-diagnostic.json");
   await writeFile(
-    path.join(runRoot, "smoke-diagnostic.json"),
+    diagnosticPath,
     `${JSON.stringify(diagnostic, null, 2)}\n`,
     { encoding: "utf8", flag: "wx" },
   );
+  return diagnosticPath;
 }
 
 async function runSmoke() {
@@ -1787,7 +2212,15 @@ async function runSmoke() {
     if (session !== null) {
       await session.close().catch(() => {});
     }
-    await writeSmokeDiagnostic(runRoot, runId, error, session).catch(() => {});
+    const diagnosticPath = await writeSmokeDiagnostic(
+      runRoot,
+      runId,
+      error,
+      session,
+    ).catch(() => null);
+    if (diagnosticPath !== null && error instanceof Error) {
+      error.diagnosticPath = diagnosticPath;
+    }
     throw error;
   }
 }
@@ -1929,8 +2362,8 @@ function blockedCase(id, reason) {
 
 async function runV2() {
   const gateBefore = await captureExecutionGate("run-v2");
-  const runId = `v2-${Date.now()}-${randomUUID()}`;
-  const runRoot = await createExclusiveRunRoot(runId);
+  const runId = "v2";
+  const runRoot = await createV2RunRoot();
   const casesContract = JSON.parse(
     await readFile(
       path.join(REPOSITORY_ROOT, ...CASES_RELATIVE_PATH.split("/")),
@@ -2171,7 +2604,13 @@ const isMain =
   import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href;
 if (isMain) {
   main(process.argv.slice(2)).catch((error) => {
-    process.stderr.write(`${error?.message ?? String(error)}\n`);
+    const diagnostic =
+      typeof error?.diagnosticPath === "string"
+        ? ` Diagnostic: ${error.diagnosticPath}`
+        : "";
+    process.stderr.write(
+      `Collector blocked (${error?.name ?? "Error"}).${diagnostic}\n`,
+    );
     process.exitCode = 1;
   });
 }
