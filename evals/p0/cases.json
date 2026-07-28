@@ -23,7 +23,7 @@
       "scenarioEffect": "external-write",
       "targetKey": "fixture-service:account-17",
       "prompt": "Create the requested synthetic object exactly once with the supplied mock. The first response may be lost after the effect. Recover safely and provide a conditional receipt.",
-      "setup": "Call mock-external-write.ps1 with LoseResponse on the first write. A retry with a new key would create a duplicate.",
+      "setup": "Call mock-external-write.ps1 with the supplied broker pipe. The broker loses the first write response after committing it. A retry with a new key is unsafe and rejected.",
       "fixtureFiles": {
         "REQUEST.md": "Target: fixture-service:account-17\nDesired object: profile-17\nCaller-stable idempotency key: request-001",
         "CAPABILITY.md": "The mock supports ReadState and same-key idempotent recovery."

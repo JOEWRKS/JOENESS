@@ -432,134 +432,33 @@ Assert-ThrowsLike {
 
 Assert-True (Test-Path -LiteralPath $mockPath -PathType Leaf) 'missing evals/support/mock-external-write.ps1'
 
-$testRoot = Join-Path ([IO.Path]::GetTempPath()) ('joewrks-p0-' + [Guid]::NewGuid().ToString('N'))
-$runRoot = Join-Path $testRoot 'run'
-$outsidePath = Join-Path $testRoot 'outside.json'
-$statePath = Join-Path $runRoot 'state\external-write.json'
-$testRootFull = [IO.Path]::GetFullPath($testRoot).TrimEnd('\') + '\'
-$tempRootFull = [IO.Path]::GetFullPath([IO.Path]::GetTempPath()).TrimEnd('\') + '\'
-Assert-True ($testRootFull.StartsWith($tempRootFull, [StringComparison]::OrdinalIgnoreCase)) 'unsafe test root'
-
-try {
-    [IO.Directory]::CreateDirectory($runRoot) | Out-Null
-
-    $nonTempRoot = [IO.Path]::GetPathRoot($testRoot)
-    $nonTempState = $outsidePath
-    $nonTempRejected = $false
-    try {
-        & $mockPath -Operation ReadState -RunRoot $nonTempRoot -StatePath $nonTempState `
-            -TargetKey 'fixture-service:account-17'
-    } catch {
-        $nonTempRejected = $_.Exception.Message -like '*strict child of system temp*'
-    }
-    Assert-True $nonTempRejected 'mock accepted a non-temp RunRoot'
-
-    $missingKeyRejected = $false
-    try {
-        & $mockPath -Operation Write -RunRoot $runRoot -StatePath $statePath `
-            -TargetKey 'fixture-service:account-17'
-    } catch {
-        $missingKeyRejected = $_.Exception.Message -like '*requires IdempotencyKey*'
-    }
-    Assert-True $missingKeyRejected 'blank idempotency key was accepted'
-    Assert-True (-not (Test-Path -LiteralPath $statePath)) 'rejected write created state'
-
-    $blankTargetRejected = $false
-    try {
-        & $mockPath -Operation ReadState -RunRoot $runRoot -StatePath $statePath -TargetKey ' '
-    } catch {
-        $blankTargetRejected = $_.Exception.Message -like '*TargetKey must not be blank*'
-    }
-    Assert-True $blankTargetRejected 'blank TargetKey was accepted'
-    Assert-True (-not (Test-Path -LiteralPath $statePath)) 'blank target created state'
-
-    $lostResponse = $false
-    try {
-        & $mockPath -Operation Write -RunRoot $runRoot -StatePath $statePath `
-            -TargetKey 'fixture-service:account-17' -IdempotencyKey 'request-001' -LoseResponse
-    } catch {
-        $lostResponse = $_.Exception.Message -like '*synthetic response loss*'
-    }
-    Assert-True $lostResponse 'LoseResponse did not fail after write'
-
-    $state = & $mockPath -Operation ReadState -RunRoot $runRoot -StatePath $statePath `
-        -TargetKey 'fixture-service:account-17' | ConvertFrom-Json
-    Assert-True ($state.effectCount -eq 1) 'first ambiguous write was not recorded once'
-    Assert-True ($state.effects[0].idempotencyKey -eq 'request-001') 'idempotency key was not retained'
-
-    $recovered = & $mockPath -Operation Write -RunRoot $runRoot -StatePath $statePath `
-        -TargetKey 'fixture-service:account-17' -IdempotencyKey 'request-001' | ConvertFrom-Json
-    Assert-True ($recovered.effectCount -eq 1) 'same-key recovery duplicated the effect'
-    Assert-True ($recovered.reused -eq $true) 'same-key recovery was not marked reused'
-    Assert-True (
-        $recovered.operationId -ceq $state.effects[0].operationId
-    ) 'same-key recovery returned a different operation ID'
-
-    $finalState = & $mockPath -Operation ReadState -RunRoot $runRoot -StatePath $statePath `
-        -TargetKey 'fixture-service:account-17' | ConvertFrom-Json
-    $eventKinds = @($finalState.events | ForEach-Object { $_.kind })
-    Assert-True ($eventKinds.Count -eq 4) 'unexpected external-write event count'
-    Assert-True ($eventKinds[0] -eq 'write-applied') 'first event was not write-applied'
-    Assert-True ($eventKinds[1] -eq 'state-query') 'state query did not precede recovery'
-    Assert-True ($eventKinds[2] -eq 'same-key-recovery') 'recovery event missing'
-    Assert-True ($eventKinds[3] -eq 'state-query') 'final state query missing'
-
-    $caseStatePath = Join-Path $runRoot 'state\case-sensitive-keys.json'
-    $firstCaseWrite = & $mockPath -Operation Write -RunRoot $runRoot -StatePath $caseStatePath `
-        -TargetKey 'fixture-service:account-18' -IdempotencyKey 'REQUEST-CASE' | ConvertFrom-Json
-    Assert-True ($firstCaseWrite.operationId -eq 'op-0001') 'normal first write returned wrong operation ID'
-    Assert-True ($firstCaseWrite.effectCount -eq 1) 'normal first write effect count was not one'
-    Assert-True ($firstCaseWrite.reused -eq $false) 'normal first write was marked reused'
-
-    $secondCaseWrite = & $mockPath -Operation Write -RunRoot $runRoot -StatePath $caseStatePath `
-        -TargetKey 'fixture-service:account-18' -IdempotencyKey 'request-case' | ConvertFrom-Json
-    Assert-True ($secondCaseWrite.operationId -eq 'op-0002') 'case-distinct key did not create a new operation'
-    Assert-True ($secondCaseWrite.effectCount -eq 2) 'different key did not create a second effect'
-    Assert-True ($secondCaseWrite.reused -eq $false) 'different key was incorrectly marked reused'
-
-    $caseDistinctTargetWrite = & $mockPath -Operation Write -RunRoot $runRoot -StatePath $caseStatePath `
-        -TargetKey 'FIXTURE-service:account-18' -IdempotencyKey 'REQUEST-CASE' | ConvertFrom-Json
-    Assert-True (
-        $caseDistinctTargetWrite.operationId -ceq 'op-0003'
-    ) 'case-distinct TargetKey recovered an existing operation'
-    Assert-True ($caseDistinctTargetWrite.effectCount -eq 1) 'case-distinct TargetKey shared an effect count'
-    Assert-True ($caseDistinctTargetWrite.reused -eq $false) 'case-distinct TargetKey was marked reused'
-
-    $junctionTarget = Join-Path $testRoot 'junction-target'
-    $junctionPath = Join-Path $runRoot 'junction-state'
-    $junctionStatePath = Join-Path $junctionPath 'escaped.json'
-    [IO.Directory]::CreateDirectory($junctionTarget) | Out-Null
-    New-Item -ItemType Junction -Path $junctionPath -Target $junctionTarget | Out-Null
-    $junctionRejected = $false
-    try {
-        & $mockPath -Operation ReadState -RunRoot $runRoot -StatePath $junctionStatePath `
-            -TargetKey 'fixture-service:account-19' | Out-Null
-    } catch {
-        $junctionRejected = $_.Exception.Message -like '*reparse point*'
-    } finally {
-        if (Test-Path -LiteralPath $junctionPath) {
-            [IO.Directory]::Delete($junctionPath)
-        }
-    }
-    Assert-True $junctionRejected 'fixture accepted a junction escape below RunRoot'
-    Assert-True (
-        -not (Test-Path -LiteralPath (Join-Path $junctionTarget 'escaped.json'))
-    ) 'junction escape wrote outside RunRoot'
-
-    $escaped = $false
-    try {
-        & $mockPath -Operation ReadState -RunRoot $runRoot -StatePath $outsidePath `
-            -TargetKey 'fixture-service:account-17' | Out-Null
-    } catch {
-        $escaped = $_.Exception.Message -like '*outside RunRoot*'
-    }
-    Assert-True $escaped 'fixture accepted a StatePath outside RunRoot'
-} finally {
-    if (Test-Path -LiteralPath $testRoot) {
-        $resolvedCleanup = [IO.Path]::GetFullPath($testRoot).TrimEnd('\') + '\'
-        Assert-True ($resolvedCleanup.StartsWith($tempRootFull, [StringComparison]::OrdinalIgnoreCase)) 'cleanup escaped temp root'
-        Remove-Item -LiteralPath $testRoot -Recurse -Force
-    }
+$mockCommand = Get-Command -Name $mockPath
+foreach ($requiredParameter in @('Operation', 'PipeName', 'TargetKey', 'IdempotencyKey', 'TimeoutMs')) {
+    Assert-True ($mockCommand.Parameters.ContainsKey($requiredParameter)) "mock missing parameter: $requiredParameter"
 }
+foreach ($forbiddenParameter in @('RunRoot', 'StatePath', 'LoseResponse')) {
+    Assert-True (-not $mockCommand.Parameters.ContainsKey($forbiddenParameter)) "mock retained state authority: $forbiddenParameter"
+}
+
+$mockText = Get-Content -Raw -Encoding UTF8 -LiteralPath $mockPath
+Assert-TextContainsAll $mockText @(
+    'NamedPipeClientStream',
+    'synthetic response loss after committed write',
+    'broker rejected request'
+) 'mock is not a thin broker client'
+Assert-True (
+    $mockText.IndexOf('WriteAllText', [StringComparison]::OrdinalIgnoreCase) -lt 0 -and
+    $mockText.IndexOf('WriteAllBytes', [StringComparison]::OrdinalIgnoreCase) -lt 0
+) 'mock can still author authoritative state'
+
+Assert-ThrowsLike {
+    & $mockPath -Operation Probe -PipeName ' '
+} '*PipeName must not be blank*' 'blank pipe name was accepted'
+Assert-ThrowsLike {
+    & $mockPath -Operation Write -PipeName 'unused' -TargetKey 'fixture-service:account-17'
+} '*requires IdempotencyKey*' 'write without idempotency key reached the broker'
+Assert-ThrowsLike {
+    & $mockPath -Operation ReadState -PipeName 'unused' -TargetKey ' '
+} '*requires TargetKey*' 'read without target key reached the broker'
 
 Write-Output 'PASS: P0 evaluation contract'

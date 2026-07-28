@@ -1,6 +1,6 @@
 # Codex App Server Evidence Collector 설계
 
-**상태:** 사용자 설계 승인 — 구현 계획 작성 중
+**상태:** 사용자 설계 승인 — 구현 및 오프라인 검증 완료, 2차 model-free smoke 대기
 
 **기준 명세:** `docs/superpowers/specs/2026-07-28-no-harness-baseline-capability-spike-design.md`
 
@@ -41,11 +41,11 @@ Collector는 개인 설치본이나 팀 배포 템플릿에 포함하지 않는�
 
 - 공식 standalone Codex CLI의 실제 패키지 바이너리 확인
 - 버전이 일치하는 App Server JSON-RPC 연결
-- 모델을 거치지 않는 read-only sandbox preflight
+- 모델을 거치지 않는 named exact-read permission preflight
 - 같은 App Server 프로세스의 실행 조건과 capability 인벤토리 수집
 - rubric-free 두 subject 입력 실행
 - typed turn/item/command event 수집
-- Git·파일·합성 state 독립 확인
+- Git·실제 파일·Collector 소유 합성 state 독립 확인
 - 기계 판정과 review-required 항목 분리
 - bounded v2 결과 JSON 생성
 - 오프라인 단위 테스트와 명시적 live smoke
@@ -98,14 +98,17 @@ Node.js 표준 라이브러리로 App Server stdio JSON-RPC를 직접 사용한�
 
 ## 6. 최소 구현 단위
 
-구현 파일은 다음 둘로 제한한다.
+구현 파일은 다음 다섯 개로 제한한다.
 
 | 파일 | 역할 |
 |---|---|
 | `evals/support/collect-codex-app-server.mjs` | CLI 해석, JSON-RPC, 두 case 실행, evidence 정규화와 결과 작성 |
 | `tests/codex-app-server-collector.tests.mjs` | 오프라인 protocol replay, 입력 누출·중복·판정 검사 |
+| `evals/support/mock-external-write.ps1` | state 권한이 없는 named-pipe 클라이언트 |
+| `evals/p0/cases.json` | 자동 응답 손실 방식이 반영된 고정 case 계약 |
+| `tests/p0-evaluation-contract.tests.ps1` | case 계약과 thin-client 경계 검사 |
 
-새 npm package나 dependency를 추가하지 않는다. Node.js의 `child_process`, `readline`, `fs`, `path`, `os`, `crypto`와 `node:test`만 사용한다.
+새 npm package나 dependency를 추가하지 않는다. Node.js 표준 라이브러리의 `child_process`, `readline`, `fs`, `path`, `os`, `crypto`, `net`과 `node:test`만 사용한다.
 
 한 파일 안에서도 다음 책임은 함수 경계로 분리한다.
 
@@ -115,6 +118,32 @@ Node.js 표준 라이브러리로 App Server stdio JSON-RPC를 직접 사용한�
 4. evidence normalizer와 bounded writer
 
 두 번째 구현이나 교체 가능한 provider가 생기기 전에는 interface, class hierarchy, plugin system과 factory를 만들지 않는다.
+
+### 6.1 P0 리뷰 뒤 확정된 신뢰 경계
+
+이 절은 아래 실행 절차와 충돌하는 이전 문장을 대체한다.
+
+- Collector는 현재 HEAD와 같은 Git blob인 source bytes를 메모리에 고정한다. P0 계약은 그 bytes로 만든 격리 temp tree에서 실행하고, case와 mock도 같은 snapshot bytes로 materialize한다.
+- MCP 비활성화 argv에는 원래 URL·command·args·header·environment를 복사하지 않는다. transport 종류에 맞는 inert placeholder와 `enabled=false`만 쓴다.
+- `mcpServerStatus/list` 응답에는 readiness 필드가 없다. 모든 MCP를 비활성화한 run에서는 global 또는 thread-scoped 목록에 항목이 하나라도 있으면 model 전 차단한다. 모든 페이지와 cursor를 검증한다.
+- exact case cwd의 `hooks/list`를 `thread/start` 전에 검사한다. enabled hook, warning, error, malformed/중복 cwd 응답은 모두 차단한다.
+- `ThreadStartResponse`의 model, provider, approval policy, reviewer, sandbox, cwd, runtime roots와 instruction sources는 중첩 `thread`가 아니라 응답 최상위 effective 값으로 검증한다.
+- `thread/start`와 `turn/start`에는 `environments: []`를 명시해 기본 environment 선택을 막는다. approval 요청은 method별 유효한 거절 응답만 반환한다.
+- Codex 0.145.0의 legacy Windows `readOnly` policy는 평가 자료의 exact-read 경계가 아니다. App Server를 `windows.sandbox="elevated"`와 이름 있는 `joewrks-eval-exact-read-v2` profile로 시작하고, profile은 `:minimal`과 `:workspace_roots`만 read, network disabled로 선언한다. `thread/start`·`turn/start`는 `permissions`, `command/exec`는 `permissionProfile`로 같은 ID를 요구하며 legacy `sandbox`/`sandboxPolicy`와 섞지 않는다.
+- `:minimal`은 Windows와 설치된 프로그램의 실행 필수 system root를 읽게 하므로 “workspace만 읽는다”고 과장하지 않는다. 평가 자산에 대한 경계는 허용 workspace sentinel 읽기 성공, frozen rubric과 발견된 Codex config/auth/credential 파일 읽기 실패로 매 run 입증한다.
+- App Server child environment는 OS 실행에 필요한 명시적 allowlist만 상속한다. 임의 token/API 환경 변수는 전달하지 않고 `shell_environment_policy={inherit="core",ignore_default_excludes=false}`를 함께 고정한다. evidence에는 값이 아니라 전달된 key 이름만 남긴다.
+- `windowsSandbox/readiness`가 `ready`가 아니면 model 전에 차단한다. Collector는 setup이나 unelevated/full-access fallback을 실행하지 않는다. 필요한 경우 사용자가 Collector 밖에서 `codex sandbox setup --elevated --current-user`를 별도로 결정한다.
+- preflight는 named profile 아래에서 workspace read 성공, sibling Collector-control sentinel과 외부 평가 자산 read 실패, workspace write 실패와 controller 확인, loopback controller reachability 성공 뒤 sandbox network 실패를 각각 실제 `command/exec`로 입증한다. 각 case도 동적 workspace root에 대해 sibling control/read·write 증명을 반복한다. frozen rubric과 실행 시 존재한 Codex config/auth/credential label manifest는 config 전후 상태 및 모든 proof와 일치해야 한다.
+- Codex 0.145.0 elevated Windows sandbox는 custom `outputBytesCap`을 거부하므로 `command/exec` request에서 이 필드를 생략한다. 수집된 output은 Collector가 UTF-8 64 KiB로 별도 제한한다.
+- JSONL 입력은 wire 순서대로 직렬 처리한다. broker probe 뒤와 각 case 직전에 session-fatal·pending notification·global blocker를 다시 확인한다.
+- 알림은 좁은 allowlist와 payload schema로 처리한다. `thread/status/changed`의 `idle`·`notLoaded`·유효한 `active[]`만 수동 상태이며 `systemError`·approval/user-input 대기는 차단한다. `windowsSandbox/setupCompleted`는 `mode: elevated`, `success: true`만 허용한다. `item/started|completed`에는 유효한 item type과 ID가 필수다. unknown, malformed item, hook, warning/error, MCP startup, approval, runtime drift는 fail-closed이며 foreign/missing thread·turn ID는 terminal 또는 command evidence가 될 수 없다.
+- p0-02 state는 subject workspace의 파일이 아니다. Collector 메모리의 bounded named-pipe broker만 effect를 commit하며 첫 write 응답을 commit 뒤 끊는다. thin PowerShell client에는 state 쓰기 권한이 없다.
+- broker는 연결 수와 연결 lifetime을 제한한다. close는 listener를 먼저 닫고 불완전 socket을 거부·파기한 뒤 완료 요청과 직렬 queue만 drain한다. close는 idempotent하며 Collector probe는 sequence 1의 첫 이벤트이자 정확히 한 번이어야 하고 subject의 추가 probe도 차단한다.
+- 두 case 모두 named exact-read/network-disabled profile을 사용한다. p0-02는 model turn 전에 같은 profile의 `command/exec`로 pipe reachability를 검증한다.
+- checkpoint와 broker ledger는 subject runtime root 밖의 control root 또는 Collector 메모리에 둔다. fixture는 materialize 직후와 turn 뒤 실제 bytes를 각각 snapshot해 완전히 같아야 한다. 최종 검증은 현재 검증 source SHA를 다시 확인하고 동결 `cases.json`에서 canonical input과 fixture 이름·byte length·SHA 집합을 재구성하며, P0 mock을 고정 상대 경로와 동결 mock SHA에 결합한다.
+- v2 run lock은 고정 이름으로 exclusive create하며 repository snapshot은 status 문자열뿐 아니라 tracked/untracked 파일 내용 hash까지 포함한다.
+- initialize·skills·plugins·permission profile inventory는 endpoint별 schema를 검증하고 malformed·중복 응답을 차단한다. skills의 `errors` 항목은 message가 비어 있어도 존재 자체가 차단 조건이다.
+- capability `pass`는 두 자동 case가 모두 완전하고, reviewer가 각 case를 `pass` 또는 `fail`로 최종 판정하며 비어 있지 않은 이유와 실제 존재하는 해당 case의 exact evidence JSON Pointer를 남기고, source/runtime/preflight/inventory/case/repository/config 교차 링크와 evidence hash가 모두 통과한 경우에만 허용한다. thread/turn/preflight/broker request는 허용 key 집합과 실제 실행 시점 App Server 상태까지 검증한다. subject 행동의 `pass`/`fail`은 Collector capability와 별개다.
 
 ## 7. CLI와 protocol 계약
 
@@ -139,7 +168,13 @@ PATH fallback, WindowsApps binary fallback, helper 수동 복사와 full-access 
 - [`rust-v0.145.0` App Server README](https://github.com/openai/codex/blob/rust-v0.145.0/codex-rs/app-server/README.md)
 - [`ThreadStartParams`](https://github.com/openai/codex/blob/rust-v0.145.0/codex-rs/app-server-protocol/src/protocol/v2/thread.rs)
 - [`TurnStartParams`](https://github.com/openai/codex/blob/rust-v0.145.0/codex-rs/app-server-protocol/src/protocol/v2/turn.rs)
-- [`SandboxPolicy`](https://github.com/openai/codex/blob/rust-v0.145.0/codex-rs/app-server-protocol/src/protocol/v2/permissions.rs)
+- [`command/exec`의 `permissionProfile`](https://github.com/openai/codex/blob/rust-v0.145.0/codex-rs/app-server-protocol/src/protocol/v2/command_exec.rs)
+- [Windows `command/exec` custom output cap 거부](https://github.com/openai/codex/blob/rust-v0.145.0/codex-rs/app-server/src/command_exec.rs#L184-L187)
+- [named permission TOML 구조](https://github.com/openai/codex/blob/rust-v0.145.0/codex-rs/config/src/permissions_toml.rs)
+- [permission profile 해석](https://github.com/openai/codex/blob/rust-v0.145.0/codex-rs/core/src/config/permissions.rs)
+- [Windows elevated permission 적용](https://github.com/openai/codex/blob/rust-v0.145.0/codex-rs/sandboxing/src/windows.rs)
+- [`windowsSandbox/readiness`](https://github.com/openai/codex/blob/rust-v0.145.0/codex-rs/app-server-protocol/src/protocol/v2/windows_sandbox.rs)
+- [legacy Windows sandbox 동작](https://github.com/openai/codex/blob/rust-v0.145.0/codex-rs/core/README.md)
 - [standalone launcher resource-resolution 보고](https://github.com/openai/codex/issues/28457)
 
 내부 debug 표현인 kebab-case 값을 JSON wire 값으로 추정하지 않는다. 생성 schema의 camelCase enum과 field를 사용한다.
@@ -195,13 +230,18 @@ global system/developer 안전 규칙과 사용자 환경의 ambient capability�
 1. 실제 package binary와 resources를 검증한다.
 2. `doctor --json`에서 인증·provider·network 건강 상태의 필요한 boolean과 버전만 추출한다.
 3. 실행 버전의 App Server JSON schema를 run root에 생성하고 hash한다.
-4. App Server를 stdio로 시작하고 initialize한다.
-5. `command/exec`로 read-only, network-disabled `APP_SERVER_SANDBOX_OK` echo를 10초 제한으로 한 번 실행한다.
-6. deferred `command/exec` 응답의 `exitCode`, `stdout`, `stderr`를 검사하고, exit code `0`, 정확한 stdout과 빈 stderr일 때만 model turn으로 진행한다.
+4. safe environment와 named elevated permission profile argv로 App Server를 stdio로 시작하고 initialize한다.
+5. `windowsSandbox/readiness`가 정확히 `ready`인지 확인하고, allowed profile 목록에 `joewrks-eval-exact-read-v2`가 정확히 하나인지 확인한다.
+6. custom output cap 없이 `command/exec.permissionProfile`로 network-disabled `APP_SERVER_SANDBOX_OK` echo를 10초 제한으로 실행하고, 응답 시점의 App Server exit 상태가 실제로 `null`인지 기록한다.
+7. deferred `command/exec` 응답의 `exitCode`, `stdout`, `stderr`를 검사하고, exit code `0`, 정확한 stdout과 빈 stderr를 요구한다.
+8. workspace sentinel 읽기는 성공하고 sibling Collector-control sentinel, frozen rubric 및 현재 존재하는 Codex config/auth/credential target 읽기는 모두 실패하는지 확인한다.
+9. workspace write sentinel 생성 시도는 실패하고 Collector가 실제 파일 부재를 확인하는지 검사한다.
+10. Collector가 연 loopback TCP listener에는 controller가 연결할 수 있지만 sandboxed command는 연결하지 못하고 listener에도 새 연결이 관찰되지 않는지 검사한다.
 
 preflight가 실패하면 model을 호출하지 않는다.
 
 preflight에는 unsandboxed `process/spawn`이나 `thread/shellCommand`를 사용하지 않는다.
+elevated sandbox가 준비되지 않은 경우 Collector는 setup을 실행하지 않고 필요한 수동 명령만 blocked 진단으로 남긴다.
 
 ### 9.3 같은 프로세스의 실행 조건 수집
 
@@ -211,7 +251,7 @@ subject를 시작하기 전에 같은 App Server connection에서 다음을 수�
 - `skills/list`
 - `plugin/installed`
 - `hooks/list`
-- 필요한 permission profile 목록
+- 모든 page의 permission profile 목록과 exact named profile availability
 
 결과에는 이름, 버전, enabled 상태와 오류만 보존한다. auth token, secret, 전체 config와 직접 연락·결제 식별자는 저장하지 않는다.
 
@@ -224,16 +264,18 @@ model, reasoning effort와 service tier는 override하지 않고 사용자 기�
 각 case에 대해 다음을 수행한다.
 
 1. rubric-free input과 SHA-256을 만든다.
-2. case root와 checkpoint를 만든다.
-3. 현재 대화를 fork·resume하지 않고 read-only, network-disabled, approval-never 새 thread를 시작한다. `dynamicTools`와 `selectedCapabilityRoots`는 각각 빈 배열이며 input에는 text 외 mention·skill item을 넣지 않는다.
-4. thread ID와 실제 thread-start metadata를 즉시 checkpoint에 기록한다.
-5. read-only case는 같은 제한을 유지한다.
-6. 합성 write case만 turn 수준에서 case root에 한정된 workspace-write를 요청한다.
-7. typed notification을 turn terminal state까지 수집한다. case당 제한은 180초와 typed event 256개다.
-8. 시간 또는 event 제한을 넘으면 같은 turn을 한 번 interrupt하고 새 thread나 turn을 만들지 않는다.
-9. write case의 state와 receipt를 Collector가 직접 읽는다.
-10. repository와 user config hash를 다시 확인한다.
-11. subject 전후 snapshot이 확정된 뒤에만 v2 결과 파일을 새로 쓴다. 이 예상된 결과 파일은 subject가 만든 repository 변경으로 계산하지 않는다.
+2. subject case root와 그 밖의 Collector control root를 각각 exclusive create한다.
+3. fixture를 materialize하고 실제 bytes의 before snapshot을 만든다.
+4. exact case cwd의 hook과 global MCP 목록이 비어 있음을 확인한 뒤, 현재 대화를 fork·resume하지 않고 named exact-read/network-disabled, approval-never 새 thread를 시작한다. `dynamicTools`와 `selectedCapabilityRoots`는 각각 빈 배열이며 input에는 text 외 mention·skill item을 넣지 않는다.
+5. 응답 최상위의 effective thread metadata에서 active named profile과 runtime root까지 검증한 뒤 thread ID와 metadata를 control root의 checkpoint에 기록한다.
+6. 같은 case root에서 workspace fixture read 성공, sibling control sentinel과 외부 평가 자산 read 실패, workspace write 실패를 다시 입증한다.
+7. thread-scoped MCP 목록도 비어 있고 위험 알림이 없을 때만 turn으로 진행한다.
+8. 합성 write case는 Collector 소유 named-pipe broker 접근을 같은 named profile의 model-free command로 먼저 검증한다.
+9. typed notification을 turn terminal state까지 수집한다. case당 제한은 180초와 typed event 256개다.
+10. 시간 또는 event 제한을 넘으면 같은 turn을 한 번 interrupt하고 새 thread나 turn을 만들지 않는다.
+11. turn 뒤 fixture bytes의 after snapshot을 만들고 before와 exact equality를 요구한다. write case의 state는 subject가 수정할 수 없는 Collector broker ledger에서 읽고, receipt는 typed public message와 command evidence로 검토한다.
+12. repository와 user config hash를 다시 확인한다.
+13. subject 전후 snapshot이 확정된 뒤에만 v2 결과 파일을 새로 쓴다. 이 예상된 결과 파일은 subject가 만든 repository 변경으로 계산하지 않는다.
 
 thread는 `ephemeral: true`로 시작한다. 이는 과거 memory pipeline과 task clutter를 baseline에 섞지 않기 위한 v2 변경이다. 이전 Desktop spike의 “subject task 보존” 요구는 완전한 typed event evidence와 result hash로 대체한다.
 
@@ -244,18 +286,18 @@ thread는 `ephemeral: true`로 시작한다. 이는 과거 memory pipeline과 ta
 - dynamic tools를 제공하지 않는다.
 - connector·plugin tool과 subject의 실제 업무 시스템 호출을 허용하지 않는다.
 - shell network는 비활성화한다.
-- write root는 합성 case root 하나다.
-- mock script는 현재 HEAD의 hash가 고정된 파일만 읽는다.
+- subject write root는 없다.
+- mock script는 현재 HEAD와 같은 snapshot bytes로 materialize된 thin named-pipe client다.
 
 Collector는 다음 model-free 증거가 모두 있을 때만 subject tool surface를 shell-only로 인정한다.
 
 1. 생성 schema가 `thread/start.dynamicTools`와 `thread/start.selectedCapabilityRoots`를 지원한다.
 2. thread request가 두 필드에 각각 빈 배열을 보냈고 text 외 mention·skill input item을 보내지 않았다.
 3. `mcp list --json`에서 발견한 모든 server에 최소 transport 필드와 `enabled=false`를 함께 가진 version-matched inline-table argv override를 적용했고, 같은 argv의 재조회에서 이름 집합이 유지되고 모두 disabled이며 config warning이 없다.
-4. thread-scoped MCP startup이 `ready`가 아니고 model turn 전후 MCP·connector request 또는 tool item이 없다.
+4. global/thread-scoped MCP 목록이 비어 있고 모든 MCP startup notification state와 connector request/tool item이 없다.
 5. subject의 실행 item type은 허용된 `commandExecution`과 공개 message뿐이다.
 
-MCP startup status 자체는 inventory evidence로 기록한다. 위 조건 중 하나를 확인할 수 없거나 MCP·connector tool call이 관찰되면 우회하지 않고 `blocked: uncontrolled-tool-surface`로 판정한다. 구현 계획은 실행 버전의 generated schema와 effective config를 이용해 정확한 MCP-disable key를 먼저 확인해야 하며, 추정한 key로 model을 실행하면 안 된다.
+MCP startup notification 자체가 비활성화 계약 위반이다. 위 조건 중 하나를 확인할 수 없거나 MCP·connector tool call이 관찰되면 우회하지 않고 `blocked: uncontrolled-tool-surface`로 판정한다. 구현 계획은 실행 버전의 generated schema와 effective config를 이용해 정확한 MCP-disable key를 먼저 확인해야 하며, 추정한 key로 model을 실행하면 안 된다.
 
 Codex 인증·provider health 확인과 model 요청은 평가 실행에 필요한 control-plane 통신이다. 이를 subject의 connector·업무 시스템 호출과 혼동하지 않는다.
 
@@ -267,7 +309,7 @@ Codex 인증·provider health 확인과 model 요청은 평가 실행에 필요�
 
 1. App Server request/response와 typed lifecycle event
 2. command item의 실제 command, cwd, status, output, exit code와 duration
-3. Collector가 직접 읽은 state와 receipt
+3. Collector broker가 직접 기록한 state와 typed receipt evidence
 4. 실행 전후 Git·파일·config hash
 5. frozen rubric을 적용한 별도 판정
 
@@ -287,14 +329,14 @@ v2 결과의 최소 영역은 다음과 같다.
 
 - schema version, run ID와 시각
 - source branch, HEAD, Collector HEAD blob 일치 여부와 source hashes
-- CLI absolute package identity, version과 protocol schema hash
-- preflight request/result
-- runtime metadata와 bounded capability inventory
-- subject input 원문·SHA-256과 thread/turn IDs
+- CLI absolute package identity, version, protocol schema hash, safe environment key 목록과 named permission policy identity/hash
+- elevated readiness, exact echo, workspace read, 외부 평가 자산 read denial, workspace write denial과 network denial을 포함한 preflight request/result
+- runtime metadata, config/auth/credential protected-label manifest와 bounded capability inventory
+- subject input 원문·SHA-256, thread/turn request·response IDs와 case별 access-control proof
 - case별 transcript와 typed command/tool evidence
-- state snapshot과 receipt
+- fixture before/after snapshot, broker state와 receipt
 - automated checks
-- behavior judgment 또는 review-required
+- behavior judgment 또는 review-required, reviewer 이유와 exact case evidence JSON references
 - capability verdict와 evidence limitations
 - repository/config before-after hashes
 - unexpected changes
@@ -319,9 +361,9 @@ capability에는 `fail`을 사용하지 않는다. subject의 정당한 behavior
 
 CLI/App Server process exit code `0`만으로 pass하지 않는다. preflight `command/exec` 응답은 정확한 stdout, 빈 stderr와 inner exit code `0`이 모두 필요하다.
 
-subject command의 non-zero exit은 자동 capability block이 아니다. `LoseResponse`처럼 case가 의도한 실패인지, state와 후속 행동이 rubric에 맞는지를 판정한다.
+subject command의 non-zero exit은 자동 capability block이 아니다. 첫 write의 의도된 응답 손실인지, broker state와 후속 행동이 rubric에 맞는지를 판정한다.
 
-자유형 semantic 판단은 v2에서 자동화하지 않는다. 기계로 확인 가능한 조건만 자동 판정하고 나머지는 frozen rubric을 보는 reviewer가 근거와 함께 확정한다. review가 남은 결과를 최종 pass로 보고하지 않는다.
+자유형 semantic 판단은 v2에서 자동화하지 않는다. 기계로 확인 가능한 조건만 자동 판정하고 나머지는 frozen rubric을 보는 reviewer가 비어 있지 않은 이유와 해당 case 아래에 실제 존재하는 정확한 `/evidence/cases/{index}` JSON Pointer를 함께 남겨 확정한다. stale·foreign·존재하지 않는 reference나 이유 없는 판정은 완료가 아니다. review가 남은 결과를 최종 pass로 보고하지 않는다.
 
 ## 14. 중복과 재실행
 
@@ -330,7 +372,7 @@ subject command의 non-zero exit은 자동 capability block이 아니다. `LoseR
 - thread ID는 응답 직후 atomic checkpoint에 기록한다.
 - timeout 또는 ambiguous failure 뒤 자동으로 새 thread를 만들지 않는다.
 - 같은 run ID를 자동 resume하지 않는다.
-- write case는 같은 idempotency key와 state verification으로 합성 effect 중복을 막는다.
+- write case는 Collector broker의 exact target/key allowlist와 serialized commit으로 합성 effect 중복을 막는다.
 
 v2에는 crash recovery engine이나 같은 명세 안의 재평가 경로를 만들지 않는다. 중단된 run은 evidence limitation과 checkpoint를 보존한 단 하나의 `baseline-capability-spike-v2.json` blocked 결과다. 다시 평가하려면 사용자가 별도 후속 run을 승인하고 새 결과 파일명을 가진 후속 명세를 작성해야 한다. v2 결과를 덮어쓰지 않는다.
 
@@ -343,8 +385,8 @@ v2에는 crash recovery engine이나 같은 명세 안의 재평가 경로를 �
 - CLI 또는 helper 불일치
 - protocol version drift
 - auth/provider/network health 실패
-- initialize 또는 model-free sandbox preflight 실패
-- required inventory 조회 불가
+- initialize, elevated readiness, named permission profile 또는 model-free isolation preflight 실패
+- required inventory 조회 불가, malformed payload 또는 skills error 존재
 - 외부 tool surface를 제한할 수 없음
 
 ### case-local 오류
@@ -352,7 +394,8 @@ v2에는 crash recovery engine이나 같은 명세 안의 재평가 경로를 �
 다음은 해당 case를 차단하지만 독립적인 다른 case는 실행할 수 있다.
 
 - subject turn timeout
-- case state 접근 불가
+- broker 또는 실제 fixture snapshot 접근 불가
+- case별 read/write isolation proof 실패 또는 fixture before/after 불일치
 - 필요한 command event 누락
 - bounded output의 필요한 구간 잘림
 
@@ -375,20 +418,31 @@ v2에는 crash recovery engine이나 같은 명세 안의 재평가 경로를 �
 최소 검사는 다음과 같다.
 
 1. outer process exit `0`과 `command/exec` 응답의 inner command failure를 preflight success로 오판하지 않는다.
-2. expected `LoseResponse` command failure를 state evidence 없이 pass하지 않는다.
+2. commit 뒤 발생한 expected response loss를 Collector broker state evidence 없이 pass하지 않는다.
 3. 금지 rubric 필드나 exact rubric text가 subject 입력에 들어가면 실행 전에 거부한다.
 4. 기존 run root를 덮어쓰거나 같은 case thread를 다시 만들지 않는다.
 5. truncated 또는 missing tool output을 완전한 증거로 표시하지 않는다.
 6. subject 자기보고와 state가 충돌하면 state를 우선한다.
 7. evidence hash가 달라진 review 결과를 거부한다.
-8. result의 필수 필드와 enum을 검증한다.
+8. broker connection/lifetime bound와 idempotent close가 멈추지 않는다.
+9. fixture가 turn 중 바뀌면 증거 완료를 거부한다.
+10. malformed thread status와 sandbox setup notification을 차단한다.
+11. malformed item payload, empty-message skills error와 missing/duplicate named profile을 차단한다.
+12. broker connection cap과 absolute lifetime을 close와 별개로 실제 관찰한다.
+13. config/auth protected-label과 sibling control denial을 제거하면 pass를 거부한다.
+14. request extra field, P0 counter/event/operation 구조와 Windows 동등 경로를 각각 회귀 검사한다.
+15. pass result의 runtime/preflight/inventory/case 교차 링크를 하나씩 변조하면 거부한다.
+16. reviewer 이유 누락과 stale/foreign/nonexistent case reference를 거부한다.
+17. result의 필수 필드와 enum을 검증한다.
 
 live smoke는 명시적 command로만 실행한다.
 
 - matching package binary
-- read-only `command/exec`
+- elevated sandbox readiness와 exact named permission profile
 - 정확한 `APP_SERVER_SANDBOX_OK`
-- inner exit code `0`
+- inner exit code `0`, workspace read 성공, 외부 평가 자산 read 실패
+- sibling control read 실패, workspace write 실패와 network 실패
+- Windows sandbox request에 custom `outputBytesCap` 없음
 - repository before/after 동일
 
 live smoke는 모델 호출을 포함하지 않는다. 두 실제 model case는 사용자가 승인한 capability run에서만 한 번 실행한다.
@@ -397,19 +451,19 @@ live smoke는 모델 호출을 포함하지 않는다. 두 실제 model case는 
 
 구현은 다음을 모두 충족해야 한다.
 
-- 파일 두 개와 v2 결과 하나 이외의 영구 artifact를 만들지 않음
+- 정의된 다섯 구현·테스트 파일과 v2 결과 하나 이외의 영구 runtime artifact를 만들지 않음
 - 외부 dependency 없음
 - live run의 Collector가 current HEAD에 tracked되어 있고 HEAD blob과 일치
 - PATH launcher와 helper 혼합 없음
 - version-matched schema와 package resources 확인
-- model-free preflight가 internal status까지 검사
+- model-free preflight가 elevated readiness, named profile과 실제 read/write/network isolation까지 검사
 - subject input rubric 누출 없음
 - projectless ephemeral case와 JOEWRKS instruction 비로딩 확인
-- model, reasoning, permission, sandbox, instruction source와 capability 관찰
+- model, reasoning, exact permission profile, runtime root, instruction source와 capability 관찰
 - 실제 command/tool event와 output 수집
-- 합성 state·receipt 독립 확인
+- fixture before/after equality와 합성 state·receipt 독립 확인
 - repository와 config 예상 밖 변경 없음
-- pass, fail, blocked, review-required 구분
+- pass, fail, blocked, review-required 구분과 reviewer 이유·case evidence reference 검증
 - 자동 재시도·권한 확대·외부 쓰기 없음
 - 기존 blocked 결과 보존
 
