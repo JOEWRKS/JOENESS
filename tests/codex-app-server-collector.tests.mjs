@@ -1,14 +1,18 @@
 import assert from "node:assert/strict";
+import { PassThrough } from "node:stream";
 import test from "node:test";
 
 import {
   boundUtf8,
+  buildMcpDisableArgs,
   buildSubjectInput,
+  createJsonlClient,
   evaluatePreflight,
   inspectSyntheticState,
   selectCases,
   sha256,
   stableStringify,
+  verifyDisabledMcp,
 } from "../evals/support/collect-codex-app-server.mjs";
 
 test("selectCases requires each exact ID once", () => {
@@ -164,4 +168,103 @@ test("synthetic state rejects duplicate or wrong-key effects", () => {
     }).complete,
     false,
   );
+});
+
+test("MCP overrides retain minimum transport but omit secrets", () => {
+  const args = buildMcpDisableArgs([
+    {
+      name: "figma",
+      transport: {
+        type: "streamable_http",
+        url: "https://mcp.figma.com/mcp",
+        http_headers: { Authorization: "secret" },
+      },
+    },
+    {
+      name: "node_repl",
+      transport: {
+        type: "stdio",
+        command: "C:\\runtime\\node.exe",
+        args: [],
+        env: { SECRET: "secret" },
+      },
+    },
+  ]);
+  assert.deepEqual(args, [
+    "-c",
+    'mcp_servers."figma"={enabled=false,url="https://mcp.figma.com/mcp"}',
+    "-c",
+    'mcp_servers."node_repl"={enabled=false,command="C:\\\\runtime\\\\node.exe",args=[]}',
+  ]);
+  assert.doesNotMatch(args.join(" "), /Authorization|SECRET|secret/);
+});
+
+test("MCP disabled inventory preserves names and has no enabled server", () => {
+  const before = [{ name: "a" }, { name: "b" }];
+  assert.doesNotThrow(() =>
+    verifyDisabledMcp(before, [
+      { name: "a", enabled: false },
+      { name: "b", enabled: false },
+    ]),
+  );
+  assert.throws(
+    () => verifyDisabledMcp(before, [{ name: "a", enabled: false }]),
+    /name set/,
+  );
+});
+
+test("JSONL RPC correlates response IDs and records notifications", async () => {
+  const readable = new PassThrough();
+  const writable = new PassThrough();
+  const sent = [];
+  const notifications = [];
+  writable.setEncoding("utf8");
+  writable.on("data", (chunk) => sent.push(chunk));
+  const client = createJsonlClient({
+    readable,
+    writable,
+    onNotification: (message) => notifications.push(message),
+    onServerRequest: async () => ({ decision: "cancel" }),
+  });
+  const pending = client.request("skills/list", { cwds: ["C:\\case"] }, 1000);
+  await new Promise((resolve) => setImmediate(resolve));
+  const request = JSON.parse(sent.join("").trim());
+  readable.write(`${JSON.stringify({ id: request.id, result: { data: [] } })}\n`);
+  assert.deepEqual(await pending, { data: [] });
+  readable.write(
+    `${JSON.stringify({
+      method: "item/completed",
+      params: { item: { type: "agentMessage", text: "done" } },
+    })}\n`,
+  );
+  await new Promise((resolve) => setImmediate(resolve));
+  assert.equal(notifications.length, 1);
+  client.close();
+});
+
+test("approval server requests receive cancel, never accept", async () => {
+  const readable = new PassThrough();
+  const writable = new PassThrough();
+  const sent = [];
+  writable.setEncoding("utf8");
+  writable.on("data", (chunk) => sent.push(chunk));
+  const client = createJsonlClient({
+    readable,
+    writable,
+    onNotification: () => {},
+    onServerRequest: async () => ({ decision: "cancel" }),
+  });
+  readable.write(
+    `${JSON.stringify({
+      id: 77,
+      method: "item/commandExecution/requestApproval",
+      params: {},
+    })}\n`,
+  );
+  await new Promise((resolve) => setImmediate(resolve));
+  assert.deepEqual(JSON.parse(sent.join("").trim()), {
+    id: 77,
+    result: { decision: "cancel" },
+  });
+  client.close();
 });
