@@ -2,7 +2,7 @@
 
 - 기준일: 2026-07-27, 배포 방향 보강: 2026-07-29
 - 저장소: 현재 checkout의 repository root
-- 상태: 공유형 디자인·개발 하네스 보강안 사용자 검토 대기
+- 상태: 공유형 디자인·개발 하네스 설계 승인 — Collector v3 capability `pass`, full baseline/common-core pair 구현 계획 사용자 승인 대기
 - 주 사용 환경: Codex Desktop/CLI
 - 호환 대상: Claude Code, GitHub Copilot CLI 및 지원되는 IDE 표면
 
@@ -794,12 +794,15 @@ python "<skill-creator-root>\scripts\quick_validate.py" "<harness-repository>\sk
 
 ## 16. 단계적 배포
 
-P0 계약과 Collector는 구현되었다. one-shot v2는 `pressure-08`의 의미적 통과를 기록했지만 Collector가 정상 `userMessage`와 `account/rateLimits/updated`를 잘못 차단해 `p0-02`를 실행하지 못했고 capability verdict는 `blocked`다. v2 증거는 보존하며 같은 명세로 재실행하지 않는다. 해당 두 호환성 결함은 회귀 테스트와 함께 수정했지만, 수정만으로 미실행 capability를 통과했다고 주장하지 않는다.
+P0 계약과 Collector는 구현되었다. one-shot v2의 capability `blocked`
+증거는 보존했고 protocol compatibility 결함을 수정한 별도 v3 one-shot은
+두 고정 case의 behavior와 Collector capability를 모두 `pass`로 확정했다.
+v2와 v3는 재실행하지 않는다.
 
-1. 별도 결과 경로와 명시적 `run-v3` 모드를 가진 후속 one-shot capability 평가 명세·계획을 작성하고 승인받는다. v3는 새 근거가 생긴 수정된 Collector의 end-to-end 검증이므로 두 고정 case를 각각 한 번 실행한다.
-2. model-free smoke와 v3가 통과한 뒤 같은 모델·권한·snapshot에서 no-harness 대조군을 실행한다.
-3. 최소 공통 안전 불변식을 작성하고 P0 fixture와 압력 시나리오로 평가한다. 안전 불변식은 결과에 따라 표현과 검사 방식을 고치되 제거하지 않는다.
-4. UI UX Pro Max의 필요한 전체 실행 디렉터리와 Apple Design 전체 원문을 비발견 vendor에 materialize하고 `joewrks-design-frontend` 라우터의 로딩 비용·오발동을 디자인 fixture로 평가한다.
+1. 완료: P0 계약, Collector, model-free smoke와 v3 capability 검증.
+2. 별도 승인된 계획에서 같은 model·권한·fixture의 16-case no-harness Control을 순차 one-shot으로 실행하고 검토한다.
+3. Control evidence가 완전할 때만 비발견 common-core candidate를 작성하고 같은 16-case Core condition과 paired 평가를 실행한다. pair가 통과할 때만 byte-identical candidate를 루트 `AGENTS.md`로 승격한다. 안전 불변식은 결과에 따라 표현과 검사 방식을 고치되 제거하지 않는다.
+4. Core pair가 통과하면 UI UX Pro Max의 필요한 전체 실행 디렉터리와 Apple Design 전체 원문을 비발견 vendor에 materialize하고 `joewrks-design-frontend` 라우터의 로딩 비용·오발동을 디자인 fixture로 평가한다.
 5. `joewrks-assumption-checking`, `joewrks-surgical-changes`, `joewrks-handoff`를 14.1 순서로 하나씩 평가한다. baseline 이득이 있는 후보만 namespaced 내장 활성본으로 만든다.
 6. 활성화한 외부 자료에는 provenance, source 해시와 필요한 고지를 기록하고, 내장 활성본이 있을 때만 활성본 해시와 의도적인 diff를 추가한다. 비활성 출처는 최소 비교·제외 근거만 기록한다.
 7. capability 검사, 동기화 스크립트, Codex 어댑터와 실제 동작에 맞는 `README.md`를 작성하고 capability·충돌·중간 실패 fixture를 통과시킨다.
@@ -837,7 +840,7 @@ P0 계약과 Collector는 구현되었다. one-shot v2는 `pressure-08`의 의�
 
 다음 사항은 본 명세에서 확정되었다.
 
-- P0 계약과 Collector는 구현됐고 v2 one-shot 증거는 capability `blocked`로 보존됐다. 같은 v2는 재실행하지 않으며 수정된 Collector의 별도 v3 명세·계획을 승인받기 전 새 모델 평가는 실행하지 않는다. 후속 `AGENTS.md`, 스킬, vendor, sync, 설치와 프로젝트 마이그레이션도 각 단계 계획 승인 전에 만들거나 실행하지 않는다.
+- P0 계약과 Collector는 구현됐고 v2 one-shot 증거는 capability `blocked`로 보존됐다. 별도 v3는 두 behavior와 Collector capability `pass`로 확정됐으며 v2와 v3를 재실행하지 않는다. 후속 16-case Control, `AGENTS.md`, Core pair, 스킬, vendor, sync, 설치와 프로젝트 마이그레이션은 각 단계 계획 승인 전에 만들거나 실행하지 않는다.
 - 제품 범위는 다른 개인과 팀이 설치할 수 있는 디자인·개발 공통 하네스다. 실제 배포 검증은 Codex부터 시작해 Claude Code, Copilot 순으로 확대하며 배포 artifact에는 개인 절대경로를 넣지 않는다.
 - `README.md`는 런타임 지시 파일이 아니라 실제 패키지가 생긴 뒤 작성하는 공유·설치·사용·지원 범위 안내서다.
 - 상시 역할 에이전트 조직을 만들지 않는다.
@@ -856,4 +859,6 @@ P0 계약과 Collector는 구현되었다. one-shot v2는 `pressure-08`의 의�
 - 기존 프로젝트 규칙은 첫 구현에서 자동 변경하지 않는다.
 - 활성화한 선택 스킬과 라우터는 하나씩 배포·검증하며, 중복 발동이나 성능 악화가 생기면 기본값에서 제외한다. 안전 불변식과 사용자 디자인 계약은 제외 대상이 아니다.
 
-2026-07-29 공유형 배포 보강안은 사용자가 이 파일을 검토해 승인한 뒤 다음 구현 계획으로 넘긴다.
+2026-07-29 공유형 배포 보강안은 승인됐다. 다음 구현 gate는
+`docs/superpowers/specs/2026-07-29-full-baseline-common-core-pair-design.md`
+와 대응 계획의 사용자 승인이다.

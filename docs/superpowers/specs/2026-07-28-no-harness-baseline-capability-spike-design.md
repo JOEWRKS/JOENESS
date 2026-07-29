@@ -1,12 +1,16 @@
 # No-Harness Baseline Capability Spike 설계
 
-**상태:** 사용자 방향 승인 — 작성 명세 검토 대기
+**상태:** 완료 — v2 blocked 증거 보존, 수정된 v3 one-shot capability `pass`
 
 **기준 명세:** `docs/superpowers/specs/2026-07-27-common-work-harness-design.md`
 
 **P0 계약:** `evals/p0/cases.json`
 
 **선행 구현 HEAD:** `857269f94adae1b36e747118952d8c1e1e27b536`
+
+**최종 capability evidence:** `evals/p0/baseline-capability-spike-v3.json`
+
+**최종 evidence commit:** `5ff0b6e`
 
 ## 1. 목적
 
