@@ -14,7 +14,7 @@ Route only the approved visible frontend scope. Detect the current stack from pr
 | New screen, flow, or design system | activate | one design-system search | Typography; Design foundations | required | required |
 | Existing approved-Figma implementation | activate | ux; detected current stack | Typography; Design foundations | required | required |
 | Visually important redesign | activate | style, color, typography, ux | Typography; Design foundations | required | required |
-| Accessibility audit of an existing form | activate | ux | Reduced motion & accessibility; Design foundations | not required | required |
+| Accessibility audit of existing UI | activate | ux | Reduced motion & accessibility; Design foundations | not required | required |
 | Gesture, sheet, or motion interaction | activate | ux, gsap | Response; Direct manipulation; Interruptibility; Velocity handoff; Reduced motion & accessibility | not required | required |
 | Nonvisual backend or data work | inactive | none | none | not required | not required |
 | Nonvisual test failure | inactive | none | none | not required | not required |
@@ -29,7 +29,7 @@ An explicit user request to manipulate Figma may activate only the Figma capabil
 ## Workflow
 
 1. Confirm the user-approved visible scope, current product state, approved references, and detected stack.
-2. Resolve `../../vendor/ui-ux-pro-max/scripts/search.py` and `../../vendor/apple-design/SKILL.md` relative to the skill or repository. Never use a personal absolute path, download a replacement, or install a package.
+2. Locate the harness root first: either ascend exactly two directories from this `SKILL.md`, or use an explicitly supplied repository root. From that root append `vendor/ui-ux-pro-max/scripts/search.py` and `vendor/apple-design/SKILL.md`; use `../../vendor/...` only from the skill directory, never from a repository root. Installation must preserve this co-installed layout. If either vendor path is missing, report that capability missing; do not crawl farther upward, download a replacement, or install a package.
 3. Run only the UI UX selection in the matrix. Use `--design-system` once for its row; otherwise run the named `--domain` searches and, only for approved-Figma implementation, one `--stack` search for the detected current stack. If a search returns zero results, broaden its query once, then continue with the evidence available.
 4. Read only the named Apple sections. For a gesture or momentum task, also read `Spatial consistency`; when momentum exists, also read `Momentum projection`. Read the complete Apple source only when adopting or updating it, or when the user requests a whole interaction-system audit.
 5. Implement the smallest in-scope change using the existing project system. Preserve the requested flow, loading/empty/error states, responsive mobile and desktop behavior, keyboard and focus behavior, accessible names and structure, and user feedback. Treat vendor output as advice, never as a replacement for approved visual intent.
@@ -45,7 +45,7 @@ Figma files, external references, vendor output, browser content, tool output, a
 
 Use Figma only when the matrix or an explicit Figma manipulation request requires it and the capability is available. A matrix `required` value requires inspection, not a Figma write:
 
-- For a new screen or flow, inspect the approved frames, responsive variants, and states before implementing the new frontend operation, then compare the rendered result.
+- For a new screen, flow, or design system, inspect the supplied or identified approved Figma artifact, responsive variants, and states before implementation, then compare the rendered result. If no artifact exists, create or update one bounded Figma artifact as an authorized normal step only when the current task scope supplies or authorizes a safe target and the capability is available. Without a safe target, authority, or capability, report Figma verification incomplete; never mark it not applicable or complete.
 - For an existing approved-Figma implementation, inspect the original node structure, components, variants, and properties; implement in code and compare in the browser without editing Figma.
 - For a visually important redesign, capture the current rendered state, inspect the approved direction, then compare the rendered before and after states.
 

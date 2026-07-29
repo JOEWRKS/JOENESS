@@ -132,7 +132,7 @@ test('joewrks-design-frontend candidate matches the routing contract', () => {
     ['New screen, flow, or design system', 'activate', 'one design-system search', 'Typography; Design foundations', 'required', 'required'],
     ['Existing approved-Figma implementation', 'activate', 'ux; detected current stack', 'Typography; Design foundations', 'required', 'required'],
     ['Visually important redesign', 'activate', 'style, color, typography, ux', 'Typography; Design foundations', 'required', 'required'],
-    ['Accessibility audit of an existing form', 'activate', 'ux', 'Reduced motion & accessibility; Design foundations', 'not required', 'required'],
+    ['Accessibility audit of existing UI', 'activate', 'ux', 'Reduced motion & accessibility; Design foundations', 'not required', 'required'],
     ['Gesture, sheet, or motion interaction', 'activate', 'ux, gsap', 'Response; Direct manipulation; Interruptibility; Velocity handoff; Reduced motion & accessibility', 'not required', 'required'],
     ['Nonvisual backend or data work', 'inactive', 'none', 'none', 'not required', 'not required'],
     ['Nonvisual test failure', 'inactive', 'none', 'none', 'not required', 'not required'],
@@ -157,6 +157,8 @@ test('joewrks-design-frontend candidate matches the routing contract', () => {
 
   assert.match(router, /vendor\/ui-ux-pro-max\/scripts\/search\.py/, 'router must select the vendored UI UX search entry point');
   assert.match(router, /vendor\/apple-design\/SKILL\.md/, 'router must select the vendored Apple criteria');
-  assert.match(router, /relative to (?:the )?(?:skill|repository)/i, 'vendor paths must be runtime-neutral');
+  assert.match(router, /ascend exactly two directories from this `SKILL\.md`.*explicitly supplied repository root/i, 'router must locate one deterministic harness root');
+  assert.match(router, /use `\.\.\/\.\.\/vendor\/\.\.\.` only from the skill directory, never from a repository root/i, 'relative vendor paths must start from the skill');
+  assert.match(router, /capability missing.*do not crawl farther upward.*download/i, 'missing co-installed vendors must not trigger discovery or download');
   assert.doesNotMatch(router, /CLAUDE_PLUGIN_ROOT|[A-Za-z]:[\\/](?:Users|home)\b|\/(?:Users|home)\//i, 'router must not use a runtime-specific or personal path');
 });
