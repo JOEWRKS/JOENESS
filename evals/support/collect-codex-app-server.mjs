@@ -121,12 +121,12 @@ export function buildAppServerEnvironment(source = process.env) {
 export function parseCli(argv) {
   if (
     argv.length === 1 &&
-    (argv[0] === "smoke" || argv[0] === "run-v2")
+    (argv[0] === "smoke" || argv[0] === "run-v3")
   ) {
     return { mode: argv[0] };
   }
   throw new Error(
-    "usage: node evals/support/collect-codex-app-server.mjs <smoke|run-v2>",
+    "usage: node evals/support/collect-codex-app-server.mjs <smoke|run-v3>",
   );
 }
 
@@ -3118,6 +3118,8 @@ function caseEventIsAdmissible(
     }
     return (
       event.method !== "item/completed" ||
+      (event.item.type === "userMessage" &&
+        event.item.text === undefined) ||
       completeBoundedText(event.item.text)
     );
   }
@@ -4055,15 +4057,30 @@ const CASES_RELATIVE_PATH = "evals/p0/cases.json";
 const MOCK_RELATIVE_PATH = "evals/support/mock-external-write.ps1";
 const P0_CONTRACT_RELATIVE_PATH =
   "tests/p0-evaluation-contract.tests.ps1";
-const RESULT_RELATIVE_PATH =
-  "evals/p0/baseline-capability-spike-v2.json";
-const RESULT_PATH = path.join(REPOSITORY_ROOT, ...RESULT_RELATIVE_PATH.split("/"));
+const RUN_V3_RESULT_RELATIVE_PATH =
+  "evals/p0/baseline-capability-spike-v3.json";
+const RUN_V3_CONFIGURATION = Object.freeze({
+  mode: "run-v3",
+  runId: "v3",
+  resultRelativePath: RUN_V3_RESULT_RELATIVE_PATH,
+  resultPath: path.join(
+    REPOSITORY_ROOT,
+    ...RUN_V3_RESULT_RELATIVE_PATH.split("/"),
+  ),
+});
 const VERIFIED_SOURCE_PATHS = [
   COLLECTOR_RELATIVE_PATH,
   CASES_RELATIVE_PATH,
   MOCK_RELATIVE_PATH,
   P0_CONTRACT_RELATIVE_PATH,
 ];
+
+export function runConfigurationForMode(mode) {
+  if (mode !== RUN_V3_CONFIGURATION.mode) {
+    throw new Error(`unsupported live run mode: ${mode}`);
+  }
+  return RUN_V3_CONFIGURATION;
+}
 
 function loadFrozenEvidenceIdentity() {
   const snapshots = Object.fromEntries(
@@ -4311,9 +4328,12 @@ async function runP0Contract(sourceSnapshots) {
   }
 }
 
-async function captureExecutionGate(mode) {
-  if (mode === "run-v2") {
-    await pathMustNotExist(RESULT_PATH, "v2 result");
+async function captureExecutionGate(configuration = null) {
+  if (configuration !== null) {
+    await pathMustNotExist(
+      configuration.resultPath,
+      `${configuration.runId} result`,
+    );
   }
   const verifiedSources = await captureVerifiedSources();
   const [repository, config, p0] = await Promise.all([
@@ -4630,7 +4650,7 @@ async function writeSmokeDiagnostic(runRoot, runId, error, session) {
 }
 
 async function runSmoke() {
-  const gateBefore = await captureExecutionGate("smoke");
+  const gateBefore = await captureExecutionGate();
   const runId = `smoke-${Date.now()}-${randomUUID()}`;
   const runRoot = await createExclusiveRunRoot(runId);
   const smokeRoot = path.join(runRoot, "smoke");
@@ -5104,10 +5124,10 @@ function blockedCase(id, reason) {
   };
 }
 
-async function runV2() {
-  const gateBefore = await captureExecutionGate("run-v2");
-  const runId = "v2";
-  const runRoot = await createV2RunRoot();
+async function runConfiguredEvaluation(configuration) {
+  const gateBefore = await captureExecutionGate(configuration);
+  const { mode, runId, resultPath } = configuration;
+  const runRoot = await createExclusiveRunRoot(runId);
   const casesContract = JSON.parse(
     gateBefore.sourceSnapshots[CASES_RELATIVE_PATH].toString("utf8"),
   );
@@ -5409,11 +5429,11 @@ async function runV2() {
       reasons: ["review-pending"],
     },
   };
-  await writeResultExclusive(RESULT_PATH, result);
+  await writeResultExclusive(resultPath, result);
   process.stdout.write(
     `${JSON.stringify({
-      mode: "run-v2",
-      resultPath: RESULT_PATH,
+      mode,
+      resultPath,
       evidenceSha256: result.evidenceSha256,
       capabilityCandidate: evidence.capabilityCandidate,
       cases: cases.map(({ id, automatedJudgment }) => ({
@@ -5429,7 +5449,7 @@ async function main(argv) {
   if (mode === "smoke") {
     await runSmoke();
   } else {
-    await runV2();
+    await runConfiguredEvaluation(runConfigurationForMode(mode));
   }
 }
 

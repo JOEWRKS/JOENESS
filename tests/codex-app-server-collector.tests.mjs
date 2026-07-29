@@ -3544,6 +3544,35 @@ test("capability pass requires every automated and control gate", () => {
   }
 });
 
+test("capability validation accepts passive user input lifecycle events", () => {
+  const result = completeReviewedPassResult();
+  const userMessage = normalizeEvent({
+    method: "item/completed",
+    params: {
+      threadId: "thread-pressure-08-claim-integrity",
+      turnId: "turn-pressure-08-claim-integrity",
+      item: {
+        id: "user-message-pressure-08-claim-integrity",
+        type: "userMessage",
+      },
+    },
+  });
+  userMessage.correlated = true;
+  const rateLimits = normalizeEvent({
+    method: "account/rateLimits/updated",
+    params: {},
+  });
+  rateLimits.correlated = null;
+  result.evidence.cases[0].events.splice(
+    -1,
+    0,
+    userMessage,
+    rateLimits,
+  );
+  result.evidenceSha256 = independentHash(result.evidence);
+  assert.doesNotThrow(() => validateResult(result));
+});
+
 test("capability pass accepts exact inert configured MCP status", () => {
   const result = completeReviewedPassResult();
   result.evidence.runtime.mcpInventory = [
@@ -3652,19 +3681,47 @@ test("result writer is exclusive and adds one trailing newline", async (t) => {
   );
 });
 
-test("CLI accepts only one explicit smoke or run-v2 mode", () => {
+test("run-v3 has an immutable independent one-shot identity", async () => {
+  const collector = await import(
+    "../evals/support/collect-codex-app-server.mjs"
+  );
+  assert.equal(typeof collector.runConfigurationForMode, "function");
+  const config = collector.runConfigurationForMode("run-v3");
+  assert.deepEqual(
+    {
+      mode: config.mode,
+      runId: config.runId,
+      resultRelativePath: config.resultRelativePath,
+      resultFile: path.basename(config.resultPath),
+    },
+    {
+      mode: "run-v3",
+      runId: "v3",
+      resultRelativePath: "evals/p0/baseline-capability-spike-v3.json",
+      resultFile: "baseline-capability-spike-v3.json",
+    },
+  );
+  assert.equal(Object.isFrozen(config), true);
+  assert.throws(
+    () => collector.runConfigurationForMode("run-v2"),
+    /unsupported live run mode/,
+  );
+});
+
+test("CLI accepts only one explicit smoke or run-v3 mode", () => {
   assert.deepEqual(parseCli(["smoke"]), { mode: "smoke" });
-  assert.deepEqual(parseCli(["run-v2"]), { mode: "run-v2" });
+  assert.deepEqual(parseCli(["run-v3"]), { mode: "run-v3" });
   for (const argv of [
     [],
+    ["run-v2"],
     ["resume"],
     ["--force"],
     ["smoke", "--force"],
-    ["run-v2", "extra"],
+    ["run-v3", "extra"],
   ]) {
     assert.throws(
       () => parseCli(argv),
-      /usage: node evals\/support\/collect-codex-app-server\.mjs <smoke\|run-v2>/,
+      /usage: node evals\/support\/collect-codex-app-server\.mjs <smoke\|run-v3>/,
     );
   }
 });
