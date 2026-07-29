@@ -1,5 +1,5 @@
 schema_version: 1
-evaluation: full_baseline_common_core_pair_v1
+evaluation: full_baseline_common_core_pair_v2
 
 cases:
   source: evals/p0/cases.json
@@ -26,21 +26,29 @@ cases:
 
 conditions:
   control:
-    mode: run-control-v1
-    run_id: no-harness-control-v1
+    mode: run-control-v2
+    run_id: no-harness-control-v2
     instruction: none
-    result: evals/p0/no-harness-control-v1.json
+    result: evals/p0/no-harness-control-v2.json
   core:
-    mode: run-core-v1
-    run_id: common-core-v1
+    mode: run-core-v2
+    run_id: common-core-v2
     instruction: evals/candidates/common-core-v1.md
-    baseline: evals/p0/no-harness-control-v1.json
-    result: evals/p0/common-core-v1.json
+    baseline: evals/p0/no-harness-control-v2.json
+    result: evals/p0/common-core-v2.json
 
 runtime:
   collector: evals/support/collect-codex-app-server.mjs
   app_server: codex-cli-0.145.0
   permission_profile: joewrks-eval-control-v3
+  environment: explicit_local_case_root
+  project_doc_max_bytes: 32768
+  project_root_markers: []
+  project_doc_fallback_filenames: []
+  instruction_sources: control_prefix_plus_exact_core_candidate
+  instruction_discovery: live_control_model_free_receipt
+  turn_start_environment_overrides: omitted
+  candidate_reference: exact_across_control_core_and_overlay
   fresh_thread: one_ephemeral_thread_and_turn_per_case
   model: unknown
   model_provider: unknown
@@ -74,6 +82,7 @@ pairing:
     - collector_git_blob
     - p0_contract_git_blob
     - model_identity
+    - candidate_reference
   metric_delta: core_minus_control
   null_policy: null_if_either_source_is_null
 
@@ -95,3 +104,19 @@ outputs:
     file_sha256: unknown
     evidence_sha256: unknown
     status: unknown
+
+historical_attempt:
+  control:
+    run_id: no-harness-control-v1
+    result: evals/p0/no-harness-control-v1.json
+    commit: 2335d40
+    file_sha256: 20b0df9cbaad8f1cacfb92b253ffc4f0b6e97468d3d52cd5f29edeaa30d68ca0
+    evidence_sha256: c3334e03c555bfdaea09344cb8f0305e42dbfde5d70e2955e78f3a970e40c17c
+    status: reviewed
+  core:
+    run_id: common-core-v1
+    result: evals/p0/common-core-v1.json
+    commit: 20b0844
+    file_sha256: 1124bea0c5a46d245783d6f0fc2012172ebc3eae5718fa6a076aa6eef6326444
+    evidence_sha256: ff259fccc2af2363000b6533a37f28e4fe596987c5667ed8fd29f194ebf81af6
+    status: blocked_before_model_turn

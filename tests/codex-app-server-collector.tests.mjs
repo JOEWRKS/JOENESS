@@ -20,12 +20,14 @@ import {
   boundUtf8,
   buildAppServerEnvironment,
   buildCaseDynamicTools,
+  buildEnvironmentSelectionEvidence,
   buildDoctorArgs,
   buildEnvironmentAccessEvidence,
   buildEvaluationPermissionArgs,
   buildMcpDisableArgs,
   buildRuntimeIsolationArgs,
   buildSubjectInput,
+  buildThreadStartRequest,
   collectRuntimeInventory,
   createExclusiveRunRoot,
   createJsonlClient,
@@ -44,6 +46,8 @@ import {
   listMcpServerStatus,
   normalizeEvent,
   parseCli,
+  prepareInstructionDiscoveryReceipt,
+  probeInstructionDiscovery,
   proveNetworkIsolation,
   proveWriteIsolation,
   readWindowsSandboxReadiness,
@@ -1277,6 +1281,14 @@ function createFakeSession({
           return { status: "ready" };
         }
         if (method === "thread/start") {
+          emit({
+            method: "thread/started",
+            params: {
+              thread: {
+                id: "thread-1",
+              },
+            },
+          });
           const response = {
             thread: {
               cliVersion: "0.145.0",
@@ -1301,15 +1313,20 @@ function createFakeSession({
             approvalsReviewer: "user",
             sandbox: { type: "readOnly", networkAccess: false },
             cwd: params.cwd,
-            runtimeWorkspaceRoots: [],
+            runtimeWorkspaceRoots:
+              params.runtimeWorkspaceRoots ?? [],
             instructionSources: [],
           };
+          const resolvedThreadResponsePatch =
+            typeof threadResponsePatch === "function"
+              ? threadResponsePatch(params)
+              : threadResponsePatch;
           return {
             ...response,
-            ...threadResponsePatch,
+            ...resolvedThreadResponsePatch,
             thread: {
               ...response.thread,
-              ...(threadResponsePatch.thread ?? {}),
+              ...(resolvedThreadResponsePatch.thread ?? {}),
             },
           };
         }
@@ -1317,6 +1334,13 @@ function createFakeSession({
           if (turnStartError) {
             throw turnStartError;
           }
+          emit({
+            method: "turn/started",
+            params: {
+              threadId: params.threadId,
+              turn: { id: "turn-1" },
+            },
+          });
           await onTurnStart?.();
           for (const dynamicCall of dynamicCalls) {
             await emitDynamicCall(dynamicCall);
@@ -1428,7 +1452,7 @@ test("repository file hash detects content changes behind unchanged status", asy
   assert.equal(before.fileCount, after.fileCount);
 });
 
-test("one case attempt starts at most one thread and one turn", async (t) => {
+test("one case attempt uses one explicit local thread and its sticky turn", async (t) => {
   const parent = await createTestRoot(t);
   const caseRoot = path.join(parent, "pressure-case");
   const session = createFakeSession({ notifications: terminalNotifications });
@@ -1457,7 +1481,7 @@ test("one case attempt starts at most one thread and one turn", async (t) => {
     type: "readOnly",
     networkAccess: false,
   });
-  assert.deepEqual(evidence.thread.runtimeWorkspaceRoots, []);
+  assert.deepEqual(evidence.thread.runtimeWorkspaceRoots, [caseRoot]);
   assert.equal(
     evidence.thread.activePermissionProfile.id,
     EVALUATION_PERMISSION_PROFILE,
@@ -1467,29 +1491,49 @@ test("one case attempt starts at most one thread and one turn", async (t) => {
   assert.deepEqual(Object.keys(threadCall.params).sort(), [
     "approvalPolicy",
     "approvalsReviewer",
+    "config",
     "cwd",
     "dynamicTools",
     "environments",
     "ephemeral",
     "permissions",
+    "runtimeWorkspaceRoots",
     "selectedCapabilityRoots",
   ]);
   assert.deepEqual(Object.keys(turnCall.params).sort(), [
     "approvalPolicy",
-    "cwd",
-    "environments",
     "input",
     "permissions",
     "threadId",
   ]);
-  assert.deepEqual(threadCall.params.environments, []);
-  assert.deepEqual(turnCall.params.environments, []);
+  assert.deepEqual(threadCall.params.runtimeWorkspaceRoots, [caseRoot]);
+  assert.deepEqual(threadCall.params.environments, [
+    {
+      environmentId: "local",
+      cwd: caseRoot,
+      runtimeWorkspaceRoots: [caseRoot],
+    },
+  ]);
+  assert.deepEqual(threadCall.params.config, {
+    project_doc_max_bytes: 32768,
+    project_root_markers: [],
+    project_doc_fallback_filenames: [],
+  });
+  assert.equal(Object.hasOwn(turnCall.params, "environments"), false);
+  assert.equal(Object.hasOwn(turnCall.params, "runtimeWorkspaceRoots"), false);
+  assert.equal(Object.hasOwn(turnCall.params, "config"), false);
+  assert.equal(Object.hasOwn(turnCall.params, "cwd"), false);
   assert.equal(
     threadCall.params.permissions,
     EVALUATION_PERMISSION_PROFILE,
   );
   assert.equal(turnCall.params.permissions, EVALUATION_PERMISSION_PROFILE);
   assert.equal(Object.hasOwn(threadCall.params, "sandbox"), false);
+  assert.equal(
+    Object.hasOwn(threadCall.params, "developerInstructions"),
+    false,
+  );
+  assert.equal(Object.hasOwn(threadCall.params, "baseInstructions"), false);
   assert.equal(Object.hasOwn(turnCall.params, "sandboxPolicy"), false);
   assert.equal(
     session.calls.every(
@@ -1498,6 +1542,33 @@ test("one case attempt starts at most one thread and one turn", async (t) => {
         !Object.hasOwn(params, "outputBytesCap"),
     ),
     true,
+  );
+  assert.deepEqual(evidence.accessControl.environmentSelectionControl, {
+    status: "pass",
+    mechanism: "explicit-local-case-root",
+    permissionProfile: EVALUATION_PERMISSION_PROFILE,
+    selectionOnly: true,
+    environment: {
+      environmentId: "local",
+      cwd: caseRoot,
+      runtimeWorkspaceRoots: [caseRoot],
+    },
+    threadRuntimeWorkspaceRoots: [caseRoot],
+    reasons: [],
+  });
+  assert.equal(
+    Object.hasOwn(evidence.accessControl, "environmentAccessControl"),
+    false,
+  );
+  assert.equal(
+    evidence.events.filter(({ method }) => method === "thread/started")
+      .length,
+    1,
+  );
+  assert.equal(
+    evidence.events.filter(({ method }) => method === "turn/started")
+      .length,
+    1,
   );
   assert.equal(evidence.automatedJudgment, "reviewRequired");
 });
@@ -1545,17 +1616,29 @@ test("Core writes one exact AGENTS overlay and records an unchanged snapshot", a
   ]);
   const bytes = Buffer.from(validCoreCandidateText());
   const instructionPath = path.join(caseRoot, "AGENTS.md");
+  const globalInstructionPath = path.join(parent, "global", "AGENTS.md");
+  await mkdir(path.dirname(globalInstructionPath), { recursive: true });
+  await writeFile(globalInstructionPath, "global", "utf8");
   const evidence = await runSubjectCase({
     caseDefinition,
     caseRoot,
     session: createFakeSession({
       notifications: terminalNotifications,
-      threadResponsePatch: { instructionSources: [instructionPath] },
+      threadResponsePatch: {
+        instructionSources: [globalInstructionPath, instructionPath],
+      },
     }),
     instructionOverlay: {
       bytes,
       sourcePath: "evals/candidates/common-core-v1.md",
     },
+    expectedBaselineInstructionSources: [
+      {
+        path: globalInstructionPath,
+        byteLength: Buffer.byteLength("global"),
+        sha256: sha256("global"),
+      },
+    ],
     turnTimeoutMs: 1000,
   });
 
@@ -1573,9 +1656,21 @@ test("Core writes one exact AGENTS overlay and records an unchanged snapshot", a
     },
     unchanged: true,
   });
+  assert.deepEqual(evidence.instructionSourceSnapshot, [
+    {
+      path: globalInstructionPath,
+      byteLength: Buffer.byteLength("global"),
+      sha256: sha256("global"),
+    },
+    {
+      path: instructionPath,
+      byteLength: bytes.length,
+      sha256: sha256(bytes),
+    },
+  ]);
 });
 
-test("instruction source mismatch aborts before model turn", async (t) => {
+test("instruction source mismatch preserves blocked pre-turn evidence", async (t) => {
   const parent = await createTestRoot(t);
   const contract = JSON.parse(
     readFileSync(new URL("../evals/p0/cases.json", import.meta.url), "utf8"),
@@ -1585,23 +1680,76 @@ test("instruction source mismatch aborts before model turn", async (t) => {
   ]);
   const bytes = Buffer.from(validCoreCandidateText());
 
+  const controlCaseRoot = path.join(parent, "control-source-case");
+  const unexpectedControlSource = path.join(
+    controlCaseRoot,
+    "AGENTS.md",
+  );
   const controlSession = createFakeSession({
     threadResponsePatch: {
-      instructionSources: [path.join(parent, "foreign", "AGENTS.md")],
+      instructionSources: [unexpectedControlSource],
     },
   });
   await assert.rejects(
     () =>
       runSubjectCase({
         caseDefinition,
-        caseRoot: path.join(parent, "control-source-case"),
+        caseRoot: controlCaseRoot,
         session: controlSession,
         turnTimeoutMs: 1000,
       }),
-    /instruction source/,
+    (error) => {
+      assert.match(error.message, /instruction source/);
+      assert.equal(
+        error.diagnostic.stage,
+        "instruction-source-verification",
+      );
+      assert.deepEqual(error.diagnostic.thread.instructionSources, [
+        unexpectedControlSource,
+      ]);
+      assert.equal(
+        error.diagnostic.events.filter(
+          ({ method }) => method === "thread/started",
+        ).length,
+        1,
+      );
+      return true;
+    },
   );
   assert.equal(
     controlSession.calls.some(({ method }) => method === "turn/start"),
+    false,
+  );
+
+  const globalInstructionPath = path.join(
+    parent,
+    "global",
+    "AGENTS.md",
+  );
+  await mkdir(path.dirname(globalInstructionPath), {
+    recursive: true,
+  });
+  await writeFile(globalInstructionPath, "global", "utf8");
+  const staleControlSession = createFakeSession({
+    threadResponsePatch: {
+      instructionSources: [globalInstructionPath],
+    },
+  });
+  await assert.rejects(
+    () =>
+      runSubjectCase({
+        caseDefinition,
+        caseRoot: path.join(parent, "stale-control-source-case"),
+        session: staleControlSession,
+        expectedBaselineInstructionSources: [],
+        turnTimeoutMs: 1000,
+      }),
+    /Control instruction source bytes drifted/,
+  );
+  assert.equal(
+    staleControlSession.calls.some(
+      ({ method }) => method === "turn/start",
+    ),
     false,
   );
 
@@ -1638,6 +1786,143 @@ test("instruction source mismatch aborts before model turn", async (t) => {
       name,
     );
   }
+});
+
+test("model-free instruction probe verifies isolated source delta", async (t) => {
+  const parent = await createTestRoot(t);
+  const probeRoot = path.join(parent, "instruction-discovery");
+  const coreInstructionPath = path.join(
+    probeRoot,
+    "core",
+    "AGENTS.md",
+  );
+  const globalInstructionPath = path.join(parent, "global", "AGENTS.md");
+  await mkdir(path.dirname(globalInstructionPath), { recursive: true });
+  await writeFile(globalInstructionPath, "global", "utf8");
+  const candidateBytes = Buffer.from(validCoreCandidateText());
+  const session = createFakeSession({
+    threadResponsePatch(params) {
+      const baseline = [globalInstructionPath];
+      return {
+        instructionSources:
+          params.config.project_doc_max_bytes === 0
+            ? baseline
+            : path.resolve(params.cwd) ===
+                path.resolve(path.dirname(coreInstructionPath))
+              ? [...baseline, coreInstructionPath]
+              : baseline,
+      };
+    },
+  });
+
+  const evidence = await probeInstructionDiscovery(
+    session.client,
+    probeRoot,
+    candidateBytes,
+  );
+
+  assert.deepEqual(
+    evidence.control.instructionSources,
+    [globalInstructionPath],
+  );
+  assert.deepEqual(evidence.core.instructionSources, [
+    globalInstructionPath,
+    coreInstructionPath,
+  ]);
+  assert.deepEqual(
+    evidence.projectDocsDisabled.instructionSources,
+    [globalInstructionPath],
+  );
+  assert.equal(
+    session.calls.filter(({ method }) => method === "thread/start").length,
+    3,
+  );
+  assert.equal(
+    session.calls.some(({ method }) => method === "turn/start"),
+    false,
+  );
+  for (const { params } of session.calls.filter(
+    ({ method }) => method === "thread/start",
+  )) {
+    assert.deepEqual(params.runtimeWorkspaceRoots, [params.cwd]);
+    assert.deepEqual(params.environments, [
+      {
+        environmentId: "local",
+        cwd: params.cwd,
+        runtimeWorkspaceRoots: [params.cwd],
+      },
+    ]);
+    assert.deepEqual(params.config.project_root_markers, []);
+    assert.deepEqual(
+      params.config.project_doc_fallback_filenames,
+      [],
+    );
+  }
+
+  const receiptPreflightRoot = path.join(
+    parent,
+    "receipt-preflight",
+  );
+  const receiptCorePath = path.join(
+    receiptPreflightRoot,
+    "instruction-discovery",
+    "core",
+    "AGENTS.md",
+  );
+  await mkdir(receiptPreflightRoot);
+  const receiptSession = createFakeSession({
+    threadResponsePatch(params) {
+      const baseline = [globalInstructionPath];
+      return {
+        instructionSources:
+          params.config.project_doc_max_bytes === 0
+            ? baseline
+            : path.resolve(params.cwd) ===
+                path.resolve(path.dirname(receiptCorePath))
+              ? [...baseline, receiptCorePath]
+              : baseline,
+      };
+    },
+  });
+  const candidateReference = {
+    sourcePath: "evals/candidates/common-core-v1.md",
+    byteLength: candidateBytes.length,
+    sha256: sha256(candidateBytes),
+  };
+  const receipt = await prepareInstructionDiscoveryReceipt({
+    client: receiptSession.client,
+    preflightRoot: receiptPreflightRoot,
+    candidateBytes,
+    runtime: {
+      version: "codex-cli 0.145.0",
+      protocolSchema: { sha256: "a".repeat(64) },
+    },
+    candidateReference,
+  });
+  const checkpointPath = path.join(
+    receiptPreflightRoot,
+    "instruction-discovery-receipt.json",
+  );
+  assert.deepEqual(
+    JSON.parse(await readFile(checkpointPath, "utf8")),
+    receipt,
+  );
+  await assert.rejects(
+    () => readFile(`${checkpointPath}.tmp`, "utf8"),
+    { code: "ENOENT" },
+  );
+  assert.equal(
+    receiptSession.calls.filter(
+      ({ method }) => method === "thread/start",
+    ).length,
+    3,
+  );
+  assert.equal(
+    receiptSession.calls.some(
+      ({ method }) => method === "turn/start",
+    ),
+    false,
+  );
 });
 
 test("model identity drift aborts before model turn", async (t) => {
@@ -1893,6 +2178,7 @@ test("malformed effective thread metadata fails closed", async (t) => {
     { sandbox: { type: "readOnly" } },
     { sandbox: { type: "readOnly", networkAccess: "enabled" } },
     { runtimeWorkspaceRoots: undefined },
+    { runtimeWorkspaceRoots: [] },
     { runtimeWorkspaceRoots: [path.join(parent, "unexpected-root")] },
     { reasoningEffort: undefined },
     { serviceTier: undefined },
@@ -3130,9 +3416,13 @@ function frozenFixtureManifest(caseDefinition) {
     }));
 }
 
-function completeCase(id) {
+function completeCase(
+  id,
+  index = 0,
+  runRoot = path.resolve(tmpdir(), "joewrks-eval-fixture"),
+) {
   const p0 = id === "p0-02-unknown-write";
-  const caseRoot = path.resolve(tmpdir(), `joewrks-${id}`);
+  const caseRoot = path.join(runRoot, `case-${index + 1}-${id}`);
   const caseDefinition = FROZEN_CASE_DEFINITIONS[id];
   const input = buildSubjectInput(caseDefinition);
   const threadId = `thread-${id}`;
@@ -3251,6 +3541,21 @@ function completeCase(id) {
       ]
     : [];
   const events = [
+    {
+      method: "thread/started",
+      threadId,
+      correlated: true,
+      complete: true,
+      blockers: [],
+    },
+    {
+      method: "turn/started",
+      threadId,
+      turnId,
+      correlated: true,
+      complete: true,
+      blockers: [],
+    },
     ...dynamicEvents,
     {
       method: "thread/tokenUsage/updated",
@@ -3436,6 +3741,7 @@ const DOCTOR_TEST_CHECKS = [
 
 function completePassEvidence(
   caseIds = EXPECTED_HISTORICAL_CASE_IDS,
+  runId = null,
 ) {
   const runtimeRoot = path.resolve(tmpdir(), "joewrks-codex-runtime");
   const sourceBytes = Object.fromEntries(
@@ -3470,9 +3776,21 @@ function completePassEvidence(
     ]),
   );
   const preflightRoot = path.resolve(tmpdir(), "joewrks-preflight");
+  const caseRunRoot = path.resolve(
+    tmpdir(),
+    runId === null
+      ? "joewrks-eval-fixture"
+      : `joewrks-eval-${runId}`,
+  );
   return {
     capabilityCandidate: "reviewRequired",
-    cases: caseIds.map((id) => completeCase(id)),
+    cases: caseIds.map((id, index) =>
+      completeCase(
+        id,
+        index,
+        caseRunRoot,
+      ),
+    ),
     config: {
       before: {
         exists: true,
@@ -3753,7 +4071,10 @@ function completeReviewedPassResult() {
 
 function completeSchema3ControlPassResult() {
   const pending = schema3ControlResult();
-  const evidence = completePassEvidence(EXPECTED_FULL_CASE_IDS);
+  const evidence = completePassEvidence(
+    EXPECTED_FULL_CASE_IDS,
+    "no-harness-control-v1",
+  );
   evidence.evaluation = pending.evidence.evaluation;
   const result = {
     schemaVersion: 3,
@@ -3775,6 +4096,150 @@ function completeSchema3ControlPassResult() {
     },
   };
   return result;
+}
+
+function completeSchema3V2ControlPassResult(
+  candidateBytes = Buffer.from("core"),
+) {
+  const result = completeSchema3ControlPassResult();
+  const runRoot = path.resolve(
+    tmpdir(),
+    "joewrks-eval-no-harness-control-v2",
+  );
+  result.runId = "no-harness-control-v2";
+  result.evidence.cases = result.evidence.cases.map(
+    (candidate, index) => {
+      const caseRoot = path.join(
+        runRoot,
+        `case-${index + 1}-${candidate.id}`,
+      );
+      candidate.thread.cwd = caseRoot;
+      candidate.thread.runtimeWorkspaceRoots = [caseRoot];
+      candidate.thread.request = buildThreadStartRequest(
+        caseRoot,
+        buildCaseDynamicTools(FROZEN_CASE_DEFINITIONS[candidate.id]),
+      );
+      candidate.turn.request = {
+        threadId: candidate.thread.id,
+        input: [{ type: "text", text: candidate.input.text }],
+        approvalPolicy: "never",
+        permissions: EVALUATION_PERMISSION_PROFILE,
+      };
+      candidate.accessControl = {
+        environmentSelectionControl:
+          buildEnvironmentSelectionEvidence(caseRoot),
+        writeIsolation: candidate.accessControl.writeIsolation,
+      };
+      candidate.instructionSourceSnapshot = [];
+      return candidate;
+    },
+  );
+  delete result.evidence.preflight.environmentAccessControl;
+  result.evidence.evaluation = {
+    ...result.evidence.evaluation,
+    condition: "control",
+    candidateReference: {
+      sourcePath: "evals/candidates/common-core-v1.md",
+      byteLength: candidateBytes.length,
+      sha256: sha256(candidateBytes),
+    },
+    instructionOverlay: null,
+    baseline: null,
+  };
+  const receiptBody = {
+    kind: "model-free-instruction-discovery",
+    schemaVersion: 1,
+    status: "pass",
+    binding: {
+      codexVersion: result.evidence.runtime.version,
+      protocolSchemaSha256:
+        result.evidence.runtime.protocolSchema.sha256,
+      candidateReference: structuredClone(
+        result.evidence.evaluation.candidateReference,
+      ),
+      projectDocConfig: {
+        project_doc_max_bytes: 32768,
+        project_root_markers: [],
+        project_doc_fallback_filenames: [],
+      },
+    },
+    sourceSnapshots: {
+      control: [],
+      core: [
+        {
+          path: path.join(
+            result.evidence.preflight.request.cwd,
+            "instruction-discovery",
+            "core",
+            "AGENTS.md",
+          ),
+          byteLength: candidateBytes.length,
+          sha256: sha256(candidateBytes),
+        },
+      ],
+      projectDocsDisabled: [],
+    },
+  };
+  result.evidence.preflight.instructionDiscoveryReceipt = {
+    ...receiptBody,
+    receiptSha256: independentHash(receiptBody),
+  };
+  result.evidenceSha256 = independentHash(result.evidence);
+  return result;
+}
+
+function schema3V2CoreResult(control) {
+  const baselineBytes = Buffer.from(
+    `${JSON.stringify(control, null, 2)}\n`,
+  );
+  const result = structuredClone(control);
+  result.runId = "common-core-v2";
+  delete result.evidence.preflight.instructionDiscoveryReceipt;
+  result.evidence.evaluation = {
+    condition: "core",
+    caseIds: [...EXPECTED_FULL_CASE_IDS],
+    candidateReference: structuredClone(
+      control.evidence.evaluation.candidateReference,
+    ),
+    instructionOverlay: {
+      sourcePath: "evals/candidates/common-core-v1.md",
+      byteLength: Buffer.byteLength("core"),
+      sha256: sha256("core"),
+    },
+    baseline: {
+      path: "evals/p0/no-harness-control-v2.json",
+      runId: "no-harness-control-v2",
+      evidenceSha256: control.evidenceSha256,
+      fileSha256: sha256(baselineBytes),
+    },
+    metrics: {
+      tokenUsage: "last-correlated-total",
+      wallClock:
+        "performance-now-before-turn-start-to-first-correlated-completion",
+    },
+  };
+  result.review = {
+    status: "pending",
+    capabilityVerdict: "blocked",
+    reasons: ["review-pending"],
+    caseJudgments: result.evidence.cases.map(
+      ({ id, automatedJudgment, reasons }, index) => ({
+        id,
+        judgment: automatedJudgment,
+        reasons,
+        references: [`/evidence/cases/${index}`],
+      }),
+    ),
+    pair: {
+      status: "pending",
+      verdict: "blocked",
+      efficiencyVerdict: "pending",
+      reasons: ["review-pending"],
+      caseComparisons: [],
+    },
+  };
+  result.evidenceSha256 = independentHash(result.evidence);
+  return { result, baselineBytes };
 }
 
 function schema3CoreResult(control) {
@@ -3841,6 +4306,53 @@ function exactMetricDelta(controlMetrics, coreMetrics) {
 
 function completeComparableCoreResult(control) {
   const { result, baselineBytes } = schema3CoreResult(control);
+  const runRoot = path.resolve(
+    tmpdir(),
+    "joewrks-eval-common-core-v1",
+  );
+  result.evidence.cases.forEach((candidate, index) => {
+    const previousThreadId = candidate.thread.id;
+    const previousTurnId = candidate.turn.id;
+    const caseRoot = path.join(
+      runRoot,
+      `case-${index + 1}-${candidate.id}`,
+    );
+    const threadId = `core-thread-${candidate.id}`;
+    const turnId = `core-turn-${candidate.id}`;
+    const overlay = result.evidence.evaluation.instructionOverlay;
+    const instructionPath = path.join(caseRoot, "AGENTS.md");
+    candidate.thread.id = threadId;
+    candidate.thread.cwd = caseRoot;
+    candidate.thread.instructionSources = [instructionPath];
+    candidate.thread.request.cwd = caseRoot;
+    candidate.turn.id = turnId;
+    candidate.turn.request.threadId = threadId;
+    candidate.turn.request.cwd = caseRoot;
+    candidate.events.forEach((event) => {
+      if (event.threadId === previousThreadId) {
+        event.threadId = threadId;
+      }
+      if (event.turnId === previousTurnId) {
+        event.turnId = turnId;
+      }
+      if (event.turn?.id === previousTurnId) {
+        event.turn.id = turnId;
+      }
+    });
+    candidate.state.instructionOverlay = {
+      sourcePath: overlay.sourcePath,
+      target: "AGENTS.md",
+      before: {
+        byteLength: overlay.byteLength,
+        sha256: overlay.sha256,
+      },
+      after: {
+        byteLength: overlay.byteLength,
+        sha256: overlay.sha256,
+      },
+      unchanged: true,
+    };
+  });
   result.review = {
     status: "complete",
     capabilityVerdict: "blocked",
@@ -3869,30 +4381,13 @@ function completeComparableCoreResult(control) {
       })),
     },
   };
+  result.evidenceSha256 = independentHash(result.evidence);
   return { result, baselineBytes };
 }
 
 function completeSchema3CorePassResult(control) {
   const { result, baselineBytes } =
     completeComparableCoreResult(control);
-  const overlay = result.evidence.evaluation.instructionOverlay;
-  for (const candidate of result.evidence.cases) {
-    const instructionPath = path.join(candidate.thread.cwd, "AGENTS.md");
-    candidate.thread.instructionSources = [instructionPath];
-    candidate.state.instructionOverlay = {
-      sourcePath: overlay.sourcePath,
-      target: "AGENTS.md",
-      before: {
-        byteLength: overlay.byteLength,
-        sha256: overlay.sha256,
-      },
-      after: {
-        byteLength: overlay.byteLength,
-        sha256: overlay.sha256,
-      },
-      unchanged: true,
-    };
-  }
   result.review.capabilityVerdict = "pass";
   result.review.reasons = [];
   result.review.pair.verdict = "pass";
@@ -3958,6 +4453,26 @@ test("historical v3 validates from its recorded Git objects after source evoluti
     ),
   );
   assert.doesNotThrow(() => validateResult(result));
+});
+
+test("paired v1 artifacts remain valid after v2 recovery", () => {
+  const controlBytes = readFileSync(
+    new URL(
+      "../evals/p0/no-harness-control-v1.json",
+      import.meta.url,
+    ),
+  );
+  const control = JSON.parse(controlBytes.toString("utf8"));
+  const core = JSON.parse(
+    readFileSync(
+      new URL("../evals/p0/common-core-v1.json", import.meta.url),
+      "utf8",
+    ),
+  );
+  assert.doesNotThrow(() => validateResult(control));
+  assert.doesNotThrow(() =>
+    validateResult(core, { baselineBytes: controlBytes }),
+  );
 });
 
 test("Git source resolution rejects foreign identity and rebuilds case input", () => {
@@ -4112,12 +4627,307 @@ test("schema 3 Core requires the exact reviewed Control bytes", () => {
   );
 });
 
+test("schema 3 v2 keeps the local profile and same-generation pair exact", () => {
+  const control = completeSchema3V2ControlPassResult();
+  assert.doesNotThrow(() => validateFixtureResult(control));
+  const { result, baselineBytes } = schema3V2CoreResult(control);
+  assert.doesNotThrow(() =>
+    validateFixtureResult(result, { baselineBytes }),
+  );
+
+  const mixedPair = structuredClone(result);
+  mixedPair.evidence.evaluation.baseline.path =
+    "evals/p0/no-harness-control-v1.json";
+  mixedPair.evidence.evaluation.baseline.runId =
+    "no-harness-control-v1";
+  mixedPair.evidenceSha256 = independentHash(mixedPair.evidence);
+  assert.throws(
+    () => validateFixtureResult(mixedPair, { baselineBytes }),
+    /identity|generation|baseline/i,
+  );
+
+  const missingCandidateReference = structuredClone(control);
+  delete missingCandidateReference.evidence.evaluation
+    .candidateReference;
+  missingCandidateReference.evidenceSha256 = independentHash(
+    missingCandidateReference.evidence,
+  );
+  assert.throws(
+    () => validateFixtureResult(missingCandidateReference),
+    /evaluation|candidate reference/i,
+  );
+
+  const missingDiscoveryReceipt = structuredClone(control);
+  delete missingDiscoveryReceipt.evidence.preflight
+    .instructionDiscoveryReceipt;
+  missingDiscoveryReceipt.evidenceSha256 = independentHash(
+    missingDiscoveryReceipt.evidence,
+  );
+  assert.throws(
+    () => validateFixtureResult(missingDiscoveryReceipt),
+    /capability pass is not supported/,
+  );
+
+  for (const mutateReceipt of [
+    (receipt) => {
+      receipt.binding.codexVersion = "codex-cli 0.999.0";
+    },
+    (receipt) => {
+      receipt.binding.projectDocConfig.project_doc_max_bytes = 1;
+    },
+    (receipt) => {
+      receipt.sourceSnapshots.core.at(-1).byteLength += 1;
+    },
+  ]) {
+    const invalidReceipt = structuredClone(control);
+    const receipt =
+      invalidReceipt.evidence.preflight.instructionDiscoveryReceipt;
+    mutateReceipt(receipt);
+    const {
+      receiptSha256: _invalidReceiptSha256,
+      ...invalidReceiptBody
+    } = receipt;
+    receipt.receiptSha256 = independentHash(invalidReceiptBody);
+    invalidReceipt.evidenceSha256 = independentHash(
+      invalidReceipt.evidence,
+    );
+    assert.throws(
+      () => validateFixtureResult(invalidReceipt),
+      /capability pass is not supported/,
+    );
+  }
+
+  const overlayDrift = structuredClone(result);
+  overlayDrift.evidence.evaluation.instructionOverlay.sha256 =
+    "f".repeat(64);
+  overlayDrift.evidenceSha256 = independentHash(overlayDrift.evidence);
+  assert.throws(
+    () => validateFixtureResult(overlayDrift, { baselineBytes }),
+    /candidate reference/i,
+  );
+
+  const driftedControl = structuredClone(control);
+  driftedControl.evidence.evaluation.candidateReference.sha256 =
+    "e".repeat(64);
+  driftedControl.evidence.preflight.instructionDiscoveryReceipt
+    .binding.candidateReference.sha256 = "e".repeat(64);
+  driftedControl.evidence.preflight.instructionDiscoveryReceipt
+    .sourceSnapshots.core.at(-1).sha256 = "e".repeat(64);
+  const {
+    receiptSha256: _receiptSha256,
+    ...driftedReceiptBody
+  } =
+    driftedControl.evidence.preflight
+      .instructionDiscoveryReceipt;
+  driftedControl.evidence.preflight.instructionDiscoveryReceipt
+    .receiptSha256 = independentHash(driftedReceiptBody);
+  driftedControl.evidenceSha256 = independentHash(
+    driftedControl.evidence,
+  );
+  const driftedBaselineBytes = Buffer.from(
+    `${JSON.stringify(driftedControl, null, 2)}\n`,
+  );
+  const baselineDrift = structuredClone(result);
+  baselineDrift.evidence.evaluation.baseline.evidenceSha256 =
+    driftedControl.evidenceSha256;
+  baselineDrift.evidence.evaluation.baseline.fileSha256 =
+    sha256(driftedBaselineBytes);
+  baselineDrift.evidenceSha256 = independentHash(
+    baselineDrift.evidence,
+  );
+  assert.throws(
+    () =>
+      validateFixtureResult(baselineDrift, {
+        baselineBytes: driftedBaselineBytes,
+      }),
+    /candidate drifted/i,
+  );
+
+  const v1WithCandidateReference =
+    completeSchema3ControlPassResult();
+  v1WithCandidateReference.evidence.evaluation.candidateReference =
+    structuredClone(control.evidence.evaluation.candidateReference);
+  v1WithCandidateReference.evidenceSha256 = independentHash(
+    v1WithCandidateReference.evidence,
+  );
+  assert.throws(
+    () => validateFixtureResult(v1WithCandidateReference),
+    /evaluation.*shape/i,
+  );
+
+  const falseAccessClaim = structuredClone(control);
+  falseAccessClaim.evidence.cases[0].accessControl.environmentAccessControl = {
+    status: "pass",
+  };
+  falseAccessClaim.evidenceSha256 = independentHash(
+    falseAccessClaim.evidence,
+  );
+  assert.throws(
+    () => validateFixtureResult(falseAccessClaim),
+    /capability pass is not supported/,
+  );
+
+  const unstableGlobalSource = structuredClone(control);
+  const globalPath = path.resolve(tmpdir(), "global", "AGENTS.md");
+  unstableGlobalSource.evidence.cases[0].thread.instructionSources = [
+    globalPath,
+  ];
+  unstableGlobalSource.evidence.cases[0].instructionSourceSnapshot = [
+    {
+      path: globalPath,
+      byteLength: 6,
+      sha256: sha256("global"),
+    },
+  ];
+  unstableGlobalSource.evidenceSha256 = independentHash(
+    unstableGlobalSource.evidence,
+  );
+  assert.throws(
+    () => validateFixtureResult(unstableGlobalSource),
+    /capability pass is not supported/,
+  );
+
+  const nestedRunRoot = structuredClone(control);
+  const wrongRunRoot = path.join(
+    tmpdir(),
+    "nested-eval-root",
+    "joewrks-eval-no-harness-control-v2",
+  );
+  nestedRunRoot.evidence.cases.forEach((caseEvidence, index) => {
+    const caseRoot = path.join(
+      wrongRunRoot,
+      `case-${index + 1}-${caseEvidence.id}`,
+    );
+    caseEvidence.thread.cwd = caseRoot;
+    caseEvidence.thread.runtimeWorkspaceRoots = [caseRoot];
+    caseEvidence.thread.request.cwd = caseRoot;
+    caseEvidence.thread.request.runtimeWorkspaceRoots = [caseRoot];
+    caseEvidence.thread.request.environments[0].cwd = caseRoot;
+    caseEvidence.thread.request.environments[0]
+      .runtimeWorkspaceRoots = [caseRoot];
+    caseEvidence.accessControl.environmentSelectionControl
+      .environment.cwd = caseRoot;
+    caseEvidence.accessControl.environmentSelectionControl
+      .environment.runtimeWorkspaceRoots = [caseRoot];
+    caseEvidence.accessControl.environmentSelectionControl
+      .threadRuntimeWorkspaceRoots = [caseRoot];
+  });
+  nestedRunRoot.evidenceSha256 = independentHash(
+    nestedRunRoot.evidence,
+  );
+  assert.throws(
+    () => validateFixtureResult(nestedRunRoot),
+    /capability pass is not supported/,
+  );
+});
+
+test("schema 3 complete pass rejects duplicate identities and start lifecycle", () => {
+  const original = completeSchema3ControlPassResult();
+  assert.doesNotThrow(() => validateFixtureResult(original));
+
+  const mutations = [
+    (candidate) => {
+      const [first, second] = candidate.evidence.cases;
+      second.thread.id = first.thread.id;
+      second.turn.request.threadId = first.thread.id;
+      second.events.forEach((event) => {
+        if (event.threadId !== undefined) {
+          event.threadId = first.thread.id;
+        }
+      });
+    },
+    (candidate) => {
+      const [first, second] = candidate.evidence.cases;
+      second.turn.id = first.turn.id;
+      second.events.forEach((event) => {
+        if (event.turnId !== undefined) {
+          event.turnId = first.turn.id;
+        }
+        if (event.turn?.id !== undefined) {
+          event.turn.id = first.turn.id;
+        }
+      });
+    },
+    (candidate) => {
+      const [first, second] = candidate.evidence.cases;
+      second.thread.cwd = first.thread.cwd;
+      second.thread.request.cwd = first.thread.cwd;
+      second.turn.request.cwd = first.thread.cwd;
+    },
+    (candidate) => {
+      const [first] = candidate.evidence.cases;
+      first.events.unshift(structuredClone(first.events[0]));
+      first.metrics.eventCount = first.events.length;
+    },
+    (candidate) => {
+      const [first] = candidate.evidence.cases;
+      [first.events[0], first.events[1]] = [
+        first.events[1],
+        first.events[0],
+      ];
+    },
+    (candidate) => {
+      const wrongRunRoot = path.resolve(
+        tmpdir(),
+        "joewrks-eval-wrong-run",
+      );
+      candidate.evidence.cases.forEach((caseEvidence, index) => {
+        const caseRoot = path.join(
+          wrongRunRoot,
+          `case-${index + 1}-${caseEvidence.id}`,
+        );
+        caseEvidence.thread.cwd = caseRoot;
+        caseEvidence.thread.request.cwd = caseRoot;
+        caseEvidence.turn.request.cwd = caseRoot;
+      });
+    },
+  ];
+
+  for (const mutate of mutations) {
+    const candidate = structuredClone(original);
+    mutate(candidate);
+    candidate.evidenceSha256 = independentHash(candidate.evidence);
+    assert.throws(
+      () => validateFixtureResult(candidate),
+      /capability pass is not supported/,
+    );
+  }
+});
+
 test("schema 3 pair recomputes outcomes, pointers and exact metric deltas", () => {
   const control = completeSchema3ControlPassResult();
   const { result, baselineBytes } =
     completeComparableCoreResult(control);
   assert.doesNotThrow(() =>
     validateFixtureResult(result, { baselineBytes }),
+  );
+
+  const duplicateLifecycle = structuredClone(result);
+  duplicateLifecycle.evidence.cases[0].events.unshift(
+    structuredClone(duplicateLifecycle.evidence.cases[0].events[0]),
+  );
+  duplicateLifecycle.evidence.cases[0].metrics.eventCount =
+    duplicateLifecycle.evidence.cases[0].events.length;
+  duplicateLifecycle.review.pair.caseComparisons[0]
+    .metricDelta.eventCount += 1;
+  duplicateLifecycle.evidenceSha256 = independentHash(
+    duplicateLifecycle.evidence,
+  );
+  assert.throws(
+    () =>
+      validateFixtureResult(duplicateLifecycle, { baselineBytes }),
+    /comparable Core lacks complete case evidence/,
+  );
+
+  const missingOverlay = structuredClone(result);
+  missingOverlay.evidence.cases[0].thread.instructionSources = [];
+  missingOverlay.evidence.cases[0].state.instructionOverlay = null;
+  missingOverlay.evidenceSha256 = independentHash(
+    missingOverlay.evidence,
+  );
+  assert.throws(
+    () => validateFixtureResult(missingOverlay, { baselineBytes }),
+    /comparable Core lacks complete case evidence/,
   );
 
   const wrongOutcome = structuredClone(result);
@@ -4144,7 +4954,7 @@ test("schema 3 pair recomputes outcomes, pointers and exact metric deltas", () =
   assert.throws(
     () =>
       validateFixtureResult(forgedSourceMetric, { baselineBytes }),
-    /metrics lack source evidence/,
+    /metrics lack source evidence|comparable Core lacks complete case evidence/,
   );
 
   const uncorrelatedMetric = structuredClone(result);
@@ -4157,7 +4967,7 @@ test("schema 3 pair recomputes outcomes, pointers and exact metric deltas", () =
   assert.throws(
     () =>
       validateFixtureResult(uncorrelatedMetric, { baselineBytes }),
-    /metrics lack source evidence/,
+    /metrics lack source evidence|comparable Core lacks complete case evidence/,
   );
 
   const runtimeDrift = structuredClone(result);
@@ -4194,6 +5004,33 @@ test("schema 3 pass binds metrics, instructions, and model identity", () => {
     validateFixtureResult(result, { baselineBytes }),
   );
 
+  const reusedIdentity = structuredClone(result);
+  const baselineCase = control.evidence.cases[0];
+  const coreCase = reusedIdentity.evidence.cases[0];
+  const previousThreadId = coreCase.thread.id;
+  const previousTurnId = coreCase.turn.id;
+  coreCase.thread.id = baselineCase.thread.id;
+  coreCase.turn.id = baselineCase.turn.id;
+  coreCase.turn.request.threadId = baselineCase.thread.id;
+  coreCase.events.forEach((event) => {
+    if (event.threadId === previousThreadId) {
+      event.threadId = baselineCase.thread.id;
+    }
+    if (event.turnId === previousTurnId) {
+      event.turnId = baselineCase.turn.id;
+    }
+    if (event.turn?.id === previousTurnId) {
+      event.turn.id = baselineCase.turn.id;
+    }
+  });
+  reusedIdentity.evidenceSha256 = independentHash(
+    reusedIdentity.evidence,
+  );
+  assert.throws(
+    () => validateFixtureResult(reusedIdentity, { baselineBytes }),
+    /capability pass is not supported|comparable Core lacks complete case evidence/,
+  );
+
   for (const mutate of [
     (candidate) => {
       candidate.evidence.cases[0].metrics.totalTokens += 1;
@@ -4216,7 +5053,7 @@ test("schema 3 pass binds metrics, instructions, and model identity", () => {
     candidate.evidenceSha256 = independentHash(candidate.evidence);
     assert.throws(
       () => validateFixtureResult(candidate, { baselineBytes }),
-      /capability pass is not supported|pair pass is not supported|pair efficiency pass is not supported|metrics lack source evidence/,
+      /capability pass is not supported|comparable Core lacks complete case evidence|pair pass is not supported|pair efficiency pass is not supported|metrics lack source evidence/,
     );
   }
 
@@ -4258,7 +5095,7 @@ test("schema 3 closes a non-comparable Core pair as blocked", () => {
     mutate(candidate);
     assert.throws(
       () => validateFixtureResult(candidate, { baselineBytes }),
-      /Core complete pair|non-comparable/,
+      /Core complete pair|non-comparable|comparable Core lacks complete case evidence/,
     );
   }
 });
@@ -4445,15 +5282,15 @@ test("capability pass requires every automated and control gate", () => {
       const caseEvidence = candidate.evidence.cases[1];
       caseEvidence.dynamicToolRequests[1].callId =
         caseEvidence.dynamicToolRequests[0].callId;
-      caseEvidence.events[2].item.id =
+      caseEvidence.events[4].item.id =
         caseEvidence.dynamicToolRequests[0].callId;
-      caseEvidence.events[3].item.id =
+      caseEvidence.events[5].item.id =
         caseEvidence.dynamicToolRequests[0].callId;
     },
     (candidate) => {
       const caseEvidence = candidate.evidence.cases[1];
       const forged = completeBounded('{"status":"failed"}');
-      caseEvidence.events[1].item.output = forged;
+      caseEvidence.events[3].item.output = forged;
       caseEvidence.dynamicToolRequests[0].responseSha256 =
         forged.sha256;
     },
@@ -4503,16 +5340,16 @@ test("capability pass requires every automated and control gate", () => {
       });
     },
     (candidate) => {
-      candidate.evidence.cases[1].events[1].item.success = true;
+      candidate.evidence.cases[1].events[3].item.success = true;
     },
     (candidate) => {
-      candidate.evidence.cases[1].events[0].item.status = "failed";
+      candidate.evidence.cases[1].events[2].item.status = "failed";
     },
     (candidate) => {
-      candidate.evidence.cases[1].events[1].item.status = "completed";
+      candidate.evidence.cases[1].events[3].item.status = "completed";
     },
     (candidate) => {
-      candidate.evidence.cases[1].events[0].threadId =
+      candidate.evidence.cases[1].events[2].threadId =
         "foreign-thread";
     },
     (candidate) => {
@@ -4532,7 +5369,7 @@ test("capability pass requires every automated and control gate", () => {
       });
     },
     (candidate) => {
-      candidate.evidence.cases[1].events[0].item.id =
+      candidate.evidence.cases[1].events[2].item.id =
         "unbound-dynamic-item";
     },
     (candidate) => {
@@ -4744,8 +5581,8 @@ test("full profiles select the exact frozen 16-case order", async () => {
     EXPECTED_FULL_CASE_IDS,
   );
 
-  const control = collector.runConfigurationForMode("run-control-v1");
-  const core = collector.runConfigurationForMode("run-core-v1");
+  const control = collector.runConfigurationForMode("run-control-v2");
+  const core = collector.runConfigurationForMode("run-core-v2");
   assert.deepEqual(
     {
       mode: control.mode,
@@ -4756,9 +5593,9 @@ test("full profiles select the exact frozen 16-case order", async () => {
       baselineRelativePath: control.baselineRelativePath,
     },
     {
-      mode: "run-control-v1",
-      runId: "no-harness-control-v1",
-      resultRelativePath: "evals/p0/no-harness-control-v1.json",
+      mode: "run-control-v2",
+      runId: "no-harness-control-v2",
+      resultRelativePath: "evals/p0/no-harness-control-v2.json",
       caseIds: EXPECTED_FULL_CASE_IDS,
       instructionCondition: "none",
       baselineRelativePath: null,
@@ -4775,12 +5612,12 @@ test("full profiles select the exact frozen 16-case order", async () => {
       candidateRelativePath: core.candidateRelativePath,
     },
     {
-      mode: "run-core-v1",
-      runId: "common-core-v1",
-      resultRelativePath: "evals/p0/common-core-v1.json",
+      mode: "run-core-v2",
+      runId: "common-core-v2",
+      resultRelativePath: "evals/p0/common-core-v2.json",
       caseIds: EXPECTED_FULL_CASE_IDS,
       instructionCondition: "common-core",
-      baselineRelativePath: "evals/p0/no-harness-control-v1.json",
+      baselineRelativePath: "evals/p0/no-harness-control-v2.json",
       candidateRelativePath: "evals/candidates/common-core-v1.md",
     },
   );
@@ -4788,6 +5625,10 @@ test("full profiles select the exact frozen 16-case order", async () => {
   assert.equal(Object.isFrozen(core), true);
   assert.equal(Object.isFrozen(control.caseIds), true);
   assert.equal(Object.isFrozen(core.caseIds), true);
+  assert.throws(
+    () => collector.runConfigurationForMode("run-control-v1"),
+    /unsupported live run mode/,
+  );
   assert.throws(
     () => collector.runConfigurationForMode("run-v3"),
     /unsupported live run mode/,
@@ -4891,6 +5732,13 @@ test("Core candidate validation stays mechanical and non-personal", async () => 
   assert.throws(
     () =>
       validateCoreCandidate(
+        Buffer.from(`${valid}${"x".repeat(32768)}`),
+      ),
+    /project doc budget/,
+  );
+  assert.throws(
+    () =>
+      validateCoreCandidate(
         Buffer.from(valid.replace("## 7. Completion and Handoff", "")),
       ),
     /required heading/,
@@ -4914,10 +5762,19 @@ test("evaluation manifest freezes the portable one-shot pair", () => {
   );
   for (const required of [
     "repetitions_per_condition: 1",
-    "mode: run-control-v1",
-    "mode: run-core-v1",
-    "result: evals/p0/no-harness-control-v1.json",
-    "result: evals/p0/common-core-v1.json",
+    "evaluation: full_baseline_common_core_pair_v2",
+    "mode: run-control-v2",
+    "mode: run-core-v2",
+    "result: evals/p0/no-harness-control-v2.json",
+    "result: evals/p0/common-core-v2.json",
+    "environment: explicit_local_case_root",
+    "project_doc_max_bytes: 32768",
+    "instruction_sources: control_prefix_plus_exact_core_candidate",
+    "instruction_discovery: live_control_model_free_receipt",
+    "turn_start_environment_overrides: omitted",
+    "candidate_reference: exact_across_control_core_and_overlay",
+    "run_id: common-core-v1",
+    "status: blocked_before_model_turn",
     "fresh_thread: one_ephemeral_thread_and_turn_per_case",
     "token_usage: last_correlated_total",
     "review: independent_evidence_scoped_behavior_and_pair_review",
@@ -4938,13 +5795,14 @@ test("paired execution gate blocks root activation, dirty inputs and source drif
     await import("../evals/support/collect-codex-app-server.mjs");
   assert.equal(typeof assertEvaluationGateSnapshot, "function");
   const controlConfiguration =
-    runConfigurationForMode("run-control-v1");
-  const coreConfiguration = runConfigurationForMode("run-core-v1");
-  const reviewedControl = completeSchema3ControlPassResult();
+    runConfigurationForMode("run-control-v2");
+  const coreConfiguration = runConfigurationForMode("run-core-v2");
+  const candidateBytes = Buffer.from(validCoreCandidateText());
+  const reviewedControl =
+    completeSchema3V2ControlPassResult(candidateBytes);
   const baselineBytes = Buffer.from(
     `${JSON.stringify(reviewedControl, null, 2)}\n`,
   );
-  const candidateBytes = Buffer.from(validCoreCandidateText());
   const source = {
     gitBlobs: structuredClone(reviewedControl.evidence.source.gitBlobs),
     sha256: structuredClone(reviewedControl.evidence.source.sha256),
@@ -4952,7 +5810,12 @@ test("paired execution gate blocks root activation, dirty inputs and source drif
   const cleanControl = {
     result: { exists: false },
     rootInstruction: { exists: false },
-    candidate: { exists: false },
+    candidate: {
+      exists: true,
+      tracked: true,
+      clean: true,
+      bytes: candidateBytes,
+    },
     baseline: { exists: false },
     source,
   };
@@ -4987,6 +5850,23 @@ test("paired execution gate blocks root activation, dirty inputs and source drif
     }),
   );
 
+  const candidateDrift = {
+    ...cleanCore,
+    candidate: {
+      ...cleanCore.candidate,
+      bytes: Buffer.from(
+        `${validCoreCandidateText()}Candidate drift sentinel.\n`,
+      ),
+    },
+  };
+  assert.throws(
+    () =>
+      assertEvaluationGateSnapshot(coreConfiguration, candidateDrift, {
+        sourceResolver: fixtureSourceResolver,
+      }),
+    /candidate drift/i,
+  );
+
   for (const mutate of [
     (snapshot) => {
       snapshot.rootInstruction.exists = true;
@@ -5015,12 +5895,7 @@ test("paired execution gate blocks root activation, dirty inputs and source drif
   }
 
   const activatedControl = structuredClone(cleanControl);
-  activatedControl.candidate = {
-    exists: true,
-    tracked: true,
-    clean: true,
-    bytes: candidateBytes,
-  };
+  activatedControl.candidate.clean = false;
   assert.throws(
     () =>
       assertEvaluationGateSnapshot(
@@ -5046,26 +5921,28 @@ test("paired execution gate blocks root activation, dirty inputs and source drif
   }
 });
 
-test("CLI accepts only smoke and the two paired live modes", () => {
+test("CLI accepts only smoke and the fresh paired live modes", () => {
   assert.deepEqual(parseCli(["smoke"]), { mode: "smoke" });
   assert.deepEqual(
-    parseCli(["run-control-v1"]),
-    { mode: "run-control-v1" },
+    parseCli(["run-control-v2"]),
+    { mode: "run-control-v2" },
   );
-  assert.deepEqual(parseCli(["run-core-v1"]), { mode: "run-core-v1" });
+  assert.deepEqual(parseCli(["run-core-v2"]), { mode: "run-core-v2" });
   for (const argv of [
     [],
+    ["run-control-v1"],
+    ["run-core-v1"],
     ["run-v2"],
     ["run-v3"],
     ["resume"],
     ["--force"],
     ["smoke", "--force"],
-    ["run-control-v1", "extra"],
-    ["run-core-v1", "--force"],
+    ["run-control-v2", "extra"],
+    ["run-core-v2", "--force"],
   ]) {
     assert.throws(
       () => parseCli(argv),
-      /usage: node evals\/support\/collect-codex-app-server\.mjs <smoke\|run-control-v1\|run-core-v1>/,
+      /usage: node evals\/support\/collect-codex-app-server\.mjs <smoke\|run-control-v2\|run-core-v2>/,
     );
   }
 });
