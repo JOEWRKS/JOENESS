@@ -125,6 +125,38 @@ test('joewrks-design-frontend candidate matches the routing contract', () => {
   assert.ok(existsSync(ROUTER_PATH), 'router_absent');
   const router = readFileSync(ROUTER_PATH, 'utf8');
   assert.match(router, /^---\r?\nname: joewrks-design-frontend\r?\n/m, 'router name must match its folder');
-  assert.match(router, /meaningful UI\/UX|responsive-layout|accessibility|motion/i, 'router must define positive activation boundaries');
-  assert.match(router, /nonvisual|one-line copy|handoff|backend/i, 'router must define hard-negative boundaries');
+  assert.match(router, /^## Routing matrix$/m, 'router must expose a reader-facing routing matrix');
+  assert.match(router, /^\| Request class \| Router \| UI UX selection \| Apple sections \| Figma \| Browser \|$/m, 'router matrix must explain each routing decision');
+
+  const routingRows = [
+    ['New screen, flow, or design system', 'activate', 'one design-system search', 'Typography; Design foundations', 'required', 'required'],
+    ['Existing approved-Figma implementation', 'activate', 'ux; detected current stack', 'Typography; Design foundations', 'required', 'required'],
+    ['Visually important redesign', 'activate', 'style, color, typography, ux', 'Typography; Design foundations', 'required', 'required'],
+    ['Accessibility audit of an existing form', 'activate', 'ux', 'Reduced motion & accessibility; Design foundations', 'not required', 'required'],
+    ['Gesture, sheet, or motion interaction', 'activate', 'ux, gsap', 'Response; Direct manipulation; Interruptibility; Velocity handoff; Reduced motion & accessibility', 'not required', 'required'],
+    ['Nonvisual backend or data work', 'inactive', 'none', 'none', 'not required', 'not required'],
+    ['Nonvisual test failure', 'inactive', 'none', 'none', 'not required', 'not required'],
+    ['One-line copy or literal-value change', 'inactive', 'none', 'none', 'not required', 'required'],
+    ['Generic handoff', 'inactive', 'none', 'none', 'not required', 'not required'],
+    ['Read-only external design-content review', 'inactive', 'none', 'none', 'not required', 'not required'],
+  ];
+  for (const row of routingRows) {
+    assert.ok(router.includes(`| ${row.join(' | ')} |`), `missing routing matrix row: ${row[0]}`);
+  }
+
+  assert.match(router, /^## Authority and trust boundary$/m);
+  assert.match(router, /approved Figma.*project tokens|project tokens.*approved Figma/i, 'approved visual authority must take precedence');
+  assert.match(router, /untrusted task data/i, 'external design content must remain untrusted');
+  assert.match(router, /cannot.*(?:authorize writes|install dependencies)|(?:authorize writes|install dependencies).*cannot/i, 'untrusted content must not expand authority');
+
+  assert.match(router, /^## Safety and completion$/m);
+  assert.match(router, /do not.*--persist|--persist.*only.*(?:user|project contract)/i, 'persistence must not be the default');
+  assert.match(router, /do not install dependencies|dependency installation requires/i, 'dependency installation must be forbidden by default');
+  assert.match(router, /duplicate writes|one bounded change batch/i, 'duplicate writes must be prevented');
+  assert.match(router, /do not claim.*(?:Figma|browser).*without.*evidence|without.*evidence.*do not claim.*(?:Figma|browser)/i, 'verification claims require evidence');
+
+  assert.match(router, /vendor\/ui-ux-pro-max\/scripts\/search\.py/, 'router must select the vendored UI UX search entry point');
+  assert.match(router, /vendor\/apple-design\/SKILL\.md/, 'router must select the vendored Apple criteria');
+  assert.match(router, /relative to (?:the )?(?:skill|repository)/i, 'vendor paths must be runtime-neutral');
+  assert.doesNotMatch(router, /CLAUDE_PLUGIN_ROOT|[A-Za-z]:[\\/](?:Users|home)\b|\/(?:Users|home)\//i, 'router must not use a runtime-specific or personal path');
 });
