@@ -811,6 +811,28 @@ test("JSONL RPC preserves notification-before-response wire order", async () => 
   client.close();
 });
 
+test("JSONL drain waits for queued notifications before shutdown", async () => {
+  const readable = new PassThrough();
+  const writable = new PassThrough();
+  let handled = false;
+  const client = createJsonlClient({
+    readable,
+    writable,
+    async onNotification() {
+      await Promise.resolve();
+      handled = true;
+    },
+  });
+  readable.end(
+    `${JSON.stringify({
+      method: "remoteControl/status/changed",
+      params: {},
+    })}\n`,
+  );
+  await client.waitForInputClose();
+  assert.equal(handled, true);
+});
+
 test("approval denial responses match each protocol method", () => {
   assert.deepEqual(
     approvalDenialResponse("item/commandExecution/requestApproval"),
@@ -1966,6 +1988,19 @@ test("unknown, hook, warning and MCP startup notifications fail closed", () => {
     assert.equal(event.complete, false, method);
     assert.equal(event.blockers.includes(expected), true, method);
   }
+
+  const mcpStartup = normalizeEvent({
+    method: "mcpServer/startupStatus/updated",
+    params: {
+      name: "token=MCP_STARTUP_SECRET_123456",
+      status: "token=MCP_STATUS_SECRET_123456",
+    },
+  });
+  assert.deepEqual(mcpStartup.mcpServer, { reported: true });
+  assert.doesNotMatch(
+    JSON.stringify(mcpStartup),
+    /MCP_(?:STARTUP|STATUS)_SECRET_123456/u,
+  );
 });
 
 test("remote control status permits only a disabled detached snapshot", () => {

@@ -932,6 +932,10 @@ export function createJsonlClient({
   let nextId = 1;
   let closed = false;
   let fatalError = null;
+  let resolveInputClose;
+  const inputClosed = new Promise((resolve) => {
+    resolveInputClose = resolve;
+  });
 
   function writeMessage(message) {
     if (closed || writable.destroyed) {
@@ -1020,11 +1024,15 @@ export function createJsonlClient({
     void inputQueue.catch(fail);
   });
   lines.once("close", () => {
-    void inputQueue.then(() => {
-      if (!closed) {
-        fail(new Error("JSONL stream closed"));
-      }
-    }, fail);
+    void inputQueue.then(
+      () => {
+        if (!closed) {
+          fail(new Error("JSONL stream closed"));
+        }
+        resolveInputClose();
+      },
+      () => resolveInputClose(),
+    );
   });
   readable.once("error", fail);
   writable.once("error", fail);
@@ -1058,6 +1066,9 @@ export function createJsonlClient({
     },
     notify(method, params) {
       writeMessage({ method, params });
+    },
+    waitForInputClose() {
+      return inputClosed;
     },
     close(error = new Error("JSONL client closed")) {
       if (closed) {
@@ -1452,7 +1463,6 @@ export async function openAppServer(runtime, callbacks = {}) {
     },
   });
   child.once("error", (error) => client.close(error));
-  child.once("close", () => client.close(new Error("App Server exited")));
   let closePromise;
 
   try {
@@ -1516,16 +1526,18 @@ export async function openAppServer(runtime, callbacks = {}) {
       },
       async close() {
         closePromise ??= (async () => {
-          client.close();
-          if (child.exitCode !== null) {
-            return;
+          const inputClosed = client.waitForInputClose();
+          if (child.exitCode === null) {
+            const exited = new Promise((resolve) =>
+              child.once("close", resolve),
+            );
+            child.stdin.end();
+            const timeout = setTimeout(() => child.kill(), 5000);
+            timeout.unref?.();
+            await exited;
+            clearTimeout(timeout);
           }
-          const exited = new Promise((resolve) => child.once("close", resolve));
-          child.stdin.end();
-          const timeout = setTimeout(() => child.kill(), 5000);
-          timeout.unref?.();
-          await exited;
-          clearTimeout(timeout);
+          await inputClosed;
         })();
         await closePromise;
       },
@@ -1827,10 +1839,7 @@ export function normalizeEvent(notification) {
       status: params.turn?.status,
     };
   } else if (method === "mcpServer/startupStatus/updated") {
-    event.mcpServer = {
-      name: params.name ?? params.serverName ?? params.server?.name,
-      status: params.status ?? params.startupStatus ?? params.server?.status,
-    };
+    event.mcpServer = { reported: true };
   }
 
   event.blockers = [...new Set(event.blockers)];
@@ -4232,11 +4241,12 @@ async function runSmoke() {
       15_000,
     );
     const mcpAfter = await listMcpServerStatus(session.client);
-    if (!remoteControlSnapshotIsSafe(session.remoteControlSnapshot)) {
-      controlBlockers.push("remote-control-unverified");
-    }
     if (!mcpRuntimeIsInert(runtime.mcpInventory, mcpAfter)) {
       controlBlockers.push("uncontrolled-tool-surface");
+    }
+    await session.close();
+    if (!remoteControlSnapshotIsSafe(session.remoteControlSnapshot)) {
+      controlBlockers.push("remote-control-unverified");
     }
     const finalControlBlockers = uniqueReasons(controlBlockers);
     if (finalControlBlockers.length) {
@@ -4244,7 +4254,6 @@ async function runSmoke() {
         `smoke observed runtime control drift: ${finalControlBlockers.join(", ")}`,
       );
     }
-    await session.close();
     const preflight = evaluatePreflight({
       processExitCode: session.processExitCode,
       response,
@@ -4815,6 +4824,12 @@ async function runV2() {
       await session.close().catch((error) => {
         limitations.push(safeError(error));
       });
+      if (Object.hasOwn(inventory, "initialize")) {
+        inventory.remoteControl = session.remoteControlSnapshot;
+        if (!remoteControlSnapshotIsSafe(inventory.remoteControl)) {
+          globalControlBlockers.push("remote-control-unverified");
+        }
+      }
       preflight.appServerExitCode = session.processExitCode;
       if (session.processExitCode !== 0) {
         limitations.push("app-server-nonzero-exit");
