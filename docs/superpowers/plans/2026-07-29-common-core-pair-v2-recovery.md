@@ -1,6 +1,6 @@
 # Common Core Pair v2 Recovery Plan
 
-**Status:** approved by the recorded v1 blocker; implementation must precede any new model run.
+**Status:** v2 closed as blocked; the evidence-preserving v3 recovery below is active.
 
 ## 1. Evidence that closed v1
 
@@ -113,7 +113,41 @@ one-shot gates, and the new lifecycle mutations.
 
 ## 4. Promotion rule
 
-Create root `AGENTS.md` only when the reviewed v2 pair passes behavior,
+Create root `AGENTS.md` only when the latest reviewed pair passes behavior,
 capability, and efficiency gates with no regression. Its bytes must equal the
-candidate. If v2 is blocked or regresses, keep root `AGENTS.md` absent and retain
-both rounds as evidence.
+candidate. If a pair is blocked or regresses, keep root `AGENTS.md` absent and
+retain that round as evidence.
+
+## 5. v2 outcome and v3 recovery
+
+- Control v2 ran exactly once and is immutable at commit
+  `7207a78519c716ec0815fb5b2f2f57ca98f9bd59`.
+- Its evidence SHA-256 is
+  `f07b7d96a7e64bd2301b6b62145a24dd9226a76ddb207511b73ac54d4e8ff55b`;
+  its reviewed file SHA-256 is
+  `b2ea370e7cb377480dceb7d3fb38d7346bc2360119a21df33c3dee91bc6ad536`.
+- The first ten completed cases passed independent behavior review.
+- `pressure-04-product-completeness` stopped at the 256-event evidence limit
+  before its substantive message and turn completed. The remaining five cases
+  were not run, so Control capability is blocked and Core v2 must not run.
+- Of the 256 recorded events in the blocking case, 242 were correlated,
+  blocker-free `item/agentMessage/delta` notifications whose text was already
+  intentionally discarded; completed messages retain the bounded final text.
+
+The root fix validates the exact pinned delta envelope, correlates it, and
+coalesces each safe message stream into one count/byte/hash summary in the
+bounded event array. Count and byte caps prevent a stream from bypassing the
+evidence limit. Each item has one summary before exactly one matching completed
+message, with the same byte length and SHA-256; aggregate count/bytes and event
+count are revalidated. Malformed, foreign, oversized, or secret-shaped deltas
+remain recorded and blocking, including secrets split across fragments or item
+IDs in receipt order. Non-coalescible deltas retain only count/byte/hash
+metadata, and every valid raw delta consumes the same global count/byte budget
+regardless of correlation. Notifications received before start responses are
+normalized at queue ingress; their deltas are bounded and coalesced before any
+raw payload can wait in memory. A complete review may label a case `pass` or `fail` only
+when that individual case has complete runtime, source, and identity evidence
+even if the overall capability is blocked. Recorded execution identities may
+not collide across blocked and reviewed cases. The fixed Collector uses new immutable IDs
+`no-harness-control-v3` and `common-core-v3`; neither v1 nor v2 is retried or
+rewritten.

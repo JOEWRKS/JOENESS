@@ -1,5 +1,5 @@
 schema_version: 1
-evaluation: full_baseline_common_core_pair_v2
+evaluation: full_baseline_common_core_pair_v3
 
 cases:
   source: evals/p0/cases.json
@@ -26,16 +26,16 @@ cases:
 
 conditions:
   control:
-    mode: run-control-v2
-    run_id: no-harness-control-v2
+    mode: run-control-v3
+    run_id: no-harness-control-v3
     instruction: none
-    result: evals/p0/no-harness-control-v2.json
+    result: evals/p0/no-harness-control-v3.json
   core:
-    mode: run-core-v2
-    run_id: common-core-v2
+    mode: run-core-v3
+    run_id: common-core-v3
     instruction: evals/candidates/common-core-v1.md
-    baseline: evals/p0/no-harness-control-v2.json
-    result: evals/p0/common-core-v2.json
+    baseline: evals/p0/no-harness-control-v3.json
+    result: evals/p0/common-core-v3.json
 
 runtime:
   collector: evals/support/collect-codex-app-server.mjs
@@ -49,6 +49,12 @@ runtime:
   instruction_discovery: live_control_model_free_receipt
   turn_start_environment_overrides: omitted
   candidate_reference: exact_across_control_core_and_overlay
+  agent_message_delta: exact_protocol_validated_bounded_semantic_summary
+  delta_summary_binding: unique_item_before_exact_completed_message
+  delta_secret_scan: bounded_receipt_order_across_items
+  delta_raw_retention: none_hash_summary_for_noncoalesced
+  pending_notification_queue: normalized_bounded_delta_coalescing
+  reviewed_case_claims: pass_or_fail_requires_complete_case_evidence
   fresh_thread: one_ephemeral_thread_and_turn_per_case
   model: unknown
   model_provider: unknown
@@ -120,3 +126,17 @@ historical_attempt:
     file_sha256: 1124bea0c5a46d245783d6f0fc2012172ebc3eae5718fa6a076aa6eef6326444
     evidence_sha256: ff259fccc2af2363000b6533a37f28e4fe596987c5667ed8fd29f194ebf81af6
     status: blocked_before_model_turn
+
+historical_attempt_v2:
+  control:
+    run_id: no-harness-control-v2
+    result: evals/p0/no-harness-control-v2.json
+    commit: 7207a78519c716ec0815fb5b2f2f57ca98f9bd59
+    file_sha256: b2ea370e7cb377480dceb7d3fb38d7346bc2360119a21df33c3dee91bc6ad536
+    evidence_sha256: f07b7d96a7e64bd2301b6b62145a24dd9226a76ddb207511b73ac54d4e8ff55b
+    behavior: 10_pass_6_blocked
+    status: blocked_event_limit
+  core:
+    run_id: common-core-v2
+    result: evals/p0/common-core-v2.json
+    status: not_run

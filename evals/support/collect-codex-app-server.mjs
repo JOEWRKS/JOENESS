@@ -59,6 +59,8 @@ const TOKEN_USAGE_KEYS = Object.freeze(CASE_METRIC_KEYS.slice(0, 5));
 export const EXPECTED_CODEX_VERSION = "codex-cli 0.145.0";
 export const OUTPUT_LIMIT_BYTES = 64 * 1024;
 export const EVENT_LIMIT = 256;
+const MESSAGE_DELTA_COUNT_LIMIT = EVENT_LIMIT * 16;
+const MESSAGE_DELTA_BYTES_LIMIT = OUTPUT_LIMIT_BYTES * 16;
 export const TURN_TIMEOUT_MS = 180_000;
 export const EVALUATION_PERMISSION_PROFILE =
   "joewrks-eval-control-v3";
@@ -159,7 +161,7 @@ export function parseCli(argv) {
     return { mode: argv[0] };
   }
   throw new Error(
-    "usage: node evals/support/collect-codex-app-server.mjs <smoke|run-control-v2|run-core-v2>",
+    "usage: node evals/support/collect-codex-app-server.mjs <smoke|run-control-v3|run-core-v3>",
   );
 }
 
@@ -1924,6 +1926,7 @@ const BLOCKING_NOTIFICATION_METHODS = new Map([
 const SESSION_FATAL_REASONS = new Set([
   "approval-requested",
   "hook-executed",
+  "message-delta-limit-exceeded",
   "runtime-drift",
   "runtime-error",
   "runtime-warning",
@@ -2112,8 +2115,40 @@ export function normalizeEvent(
     } else {
       event.tokenUsage = tokenUsage;
     }
+  } else if (method === "item/agentMessage/delta") {
+    const itemId = sanitizeEventId(params.itemId);
+    if (
+      !exactKeys(params, ["threadId", "turnId", "itemId", "delta"]) ||
+      itemId.blocker !== null ||
+      itemId.value !== params.itemId ||
+      typeof params.delta !== "string"
+    ) {
+      event.blockers.push("runtime-drift");
+    } else {
+      const byteLength = Buffer.byteLength(params.delta, "utf8");
+      const blockers = [];
+      if (SECRET_PATTERN.test(params.delta)) {
+        blockers.push("secret-shaped-output");
+      }
+      if (byteLength > MESSAGE_DELTA_BYTES_LIMIT) {
+        blockers.push("message-delta-limit-exceeded");
+      }
+      event.messageDelta =
+        blockers.length === 0
+          ? { itemId: params.itemId, text: params.delta }
+          : {
+              itemId: params.itemId,
+              count: 1,
+              byteLength,
+              sha256: sha256(params.delta),
+            };
+      event.blockers.push(...blockers);
+    }
   } else if (params.item && typeof params.item.type === "string") {
     const item = params.item;
+    if (!["item/started", "item/completed"].includes(method)) {
+      event.blockers.push("runtime-drift");
+    }
     if (
       ["item/started", "item/completed"].includes(method) &&
       (typeof item.id !== "string" || !item.id)
@@ -2926,8 +2961,10 @@ export async function runSubjectCase({
   }
 
   const events = [];
+  const messageDeltaStates = new Map();
   const dynamicToolRequests = [];
   const pendingNotifications = [];
+  const pendingDeltaStates = new Map();
   const reasons = [];
   let threadId = null;
   let turnId = null;
@@ -2947,6 +2984,12 @@ export async function runSubjectCase({
   let lastContextWindowTokens = null;
   let turnStartedAt = null;
   let turnCompletedAt = null;
+  let messageDeltaCount = 0;
+  let messageDeltaBytes = 0;
+  let messageDeltaTranscript = "";
+  let pendingDeltaCount = 0;
+  let pendingDeltaBytes = 0;
+  let pendingDeltaTranscript = "";
   const terminalPromise = new Promise((resolve) => {
     resolveTerminal = resolve;
   });
@@ -2971,9 +3014,11 @@ export async function runSubjectCase({
     }
   }
 
-  function recordEvent(event) {
+  function persistEvent(event) {
+    addReasons(event.blockers);
     if (events.length < eventLimit) {
       events.push(event);
+      return true;
     } else if (!eventLimitReached) {
       eventLimitReached = true;
       reasons.push("event-limit-exceeded");
@@ -2981,7 +3026,232 @@ export async function runSubjectCase({
       resolveTerminal({ fatal: true });
       void interruptOnce();
     }
+    return false;
+  }
+
+  function deltaBlockersFor(count, byteLength, transcript) {
+    const blockers = [];
+    if (
+      count > MESSAGE_DELTA_COUNT_LIMIT ||
+      byteLength > MESSAGE_DELTA_BYTES_LIMIT
+    ) {
+      blockers.push("message-delta-limit-exceeded");
+    }
+    if (SECRET_PATTERN.test(transcript)) {
+      blockers.push("secret-shaped-output");
+    }
+    return blockers;
+  }
+
+  function deltaSummary(itemId, count, text) {
+    return {
+      itemId,
+      count,
+      byteLength: Buffer.byteLength(text, "utf8"),
+      sha256: sha256(text),
+    };
+  }
+
+  function applyDeltaBlockers(event, blockers) {
+    if (blockers.length === 0) {
+      return;
+    }
+    event.blockers = uniqueReasons([...event.blockers, ...blockers]);
+    event.complete = false;
     addReasons(event.blockers);
+    sessionFatal = true;
+    resolveTerminal({ fatal: true });
+    void interruptOnce();
+  }
+
+  function recordEvent(event) {
+    const rawDelta =
+      event.method === "item/agentMessage/delta" &&
+      exactKeys(event.messageDelta, ["itemId", "text"]);
+    if (!rawDelta) {
+      if (
+        event.method === "item/agentMessage/delta" &&
+        exactKeys(event.messageDelta, [
+          "itemId",
+          "count",
+          "byteLength",
+          "sha256",
+        ])
+      ) {
+        messageDeltaCount += event.messageDelta.count;
+        messageDeltaBytes += event.messageDelta.byteLength;
+        applyDeltaBlockers(
+          event,
+          messageDeltaCount > MESSAGE_DELTA_COUNT_LIMIT ||
+            messageDeltaBytes > MESSAGE_DELTA_BYTES_LIMIT
+            ? ["message-delta-limit-exceeded"]
+            : [],
+        );
+      }
+      persistEvent(event);
+      return;
+    }
+
+    const { itemId, text } = event.messageDelta;
+    const textBytes = Buffer.byteLength(text, "utf8");
+    // ponytail: bounded 1 MiB/4096-fragment transcript;
+    // use a streaming matcher only if these caps become operational.
+    const nextTranscript = messageDeltaTranscript + text;
+    messageDeltaCount += 1;
+    messageDeltaBytes += textBytes;
+    const deltaBlockers = deltaBlockersFor(
+      messageDeltaCount,
+      messageDeltaBytes,
+      nextTranscript,
+    );
+
+    const coalescible =
+      event.complete === true &&
+      event.correlated === true &&
+      exactKeys(event, [
+        "method",
+        "threadId",
+        "turnId",
+        "complete",
+        "blockers",
+        "messageDelta",
+        "correlated",
+      ]);
+    if (!coalescible) {
+      event.messageDelta = deltaSummary(itemId, 1, text);
+      applyDeltaBlockers(event, deltaBlockers);
+      if (deltaBlockers.length === 0) {
+        messageDeltaTranscript = nextTranscript;
+      } else {
+        messageDeltaTranscript = "";
+      }
+      persistEvent(event);
+      return;
+    }
+
+    let state = messageDeltaStates.get(itemId);
+    if (state?.blocked) {
+      return;
+    }
+    if (!state) {
+      const summary = {
+        method: event.method,
+        threadId: event.threadId,
+        turnId: event.turnId,
+        complete: true,
+        blockers: [],
+        messageDelta: {
+          itemId,
+          count: 0,
+          byteLength: 0,
+          sha256: sha256(""),
+        },
+        correlated: true,
+      };
+      if (!persistEvent(summary)) {
+        return;
+      }
+      state = { text: "", event: summary, blocked: false };
+      messageDeltaStates.set(itemId, state);
+    }
+
+    const nextText = state.text + text;
+    state.event.messageDelta = deltaSummary(
+      itemId,
+      state.event.messageDelta.count + 1,
+      nextText,
+    );
+    if (deltaBlockers.length === 0) {
+      state.text = nextText;
+      messageDeltaTranscript = nextTranscript;
+      return;
+    }
+
+    state.blocked = true;
+    state.text = "";
+    messageDeltaTranscript = "";
+    applyDeltaBlockers(state.event, deltaBlockers);
+  }
+
+  function queuePendingEvent(event, receivedAt) {
+    const push = (queuedEvent) => {
+      if (pendingNotifications.length < eventLimit) {
+        pendingNotifications.push({
+          notification: {
+            method: "collector/replayedEvent",
+            params: { event: queuedEvent },
+          },
+          receivedAt,
+        });
+        return true;
+      }
+      if (!eventLimitReached) {
+        eventLimitReached = true;
+        reasons.push("event-limit-exceeded");
+        sessionFatal = true;
+        resolveTerminal({ fatal: true });
+        void interruptOnce();
+      }
+      return false;
+    };
+
+    if (
+      event.method !== "item/agentMessage/delta" ||
+      !exactKeys(event.messageDelta, ["itemId", "text"])
+    ) {
+      push(event);
+      return;
+    }
+
+    const { itemId, text } = event.messageDelta;
+    const nextTranscript = pendingDeltaTranscript + text;
+    pendingDeltaCount += 1;
+    pendingDeltaBytes += Buffer.byteLength(text, "utf8");
+    const blockers = deltaBlockersFor(
+      pendingDeltaCount,
+      pendingDeltaBytes,
+      nextTranscript,
+    );
+    const key = stableStringify([
+      event.threadId,
+      event.turnId,
+      itemId,
+    ]);
+    let state = pendingDeltaStates.get(key);
+    if (state?.blocked) {
+      return;
+    }
+    if (!state) {
+      const summary = {
+        method: event.method,
+        threadId: event.threadId,
+        turnId: event.turnId,
+        complete: event.complete,
+        blockers: [...event.blockers],
+        messageDelta: deltaSummary(itemId, 0, ""),
+      };
+      if (!push(summary)) {
+        return;
+      }
+      state = { text: "", event: summary, blocked: false };
+      pendingDeltaStates.set(key, state);
+    }
+
+    const nextText = state.text + text;
+    state.event.messageDelta = deltaSummary(
+      itemId,
+      state.event.messageDelta.count + 1,
+      nextText,
+    );
+    if (blockers.length === 0) {
+      state.text = nextText;
+      pendingDeltaTranscript = nextTranscript;
+      return;
+    }
+    state.blocked = true;
+    state.text = "";
+    pendingDeltaTranscript = "";
+    applyDeltaBlockers(state.event, blockers);
   }
 
   function processNotification(
@@ -3008,7 +3278,7 @@ export async function runSubjectCase({
       ((threadScoped && typeof event.threadId === "string" && !threadId) ||
         (turnScoped && typeof event.turnId === "string" && !turnId))
     ) {
-      pendingNotifications.push({ notification, receivedAt });
+      queuePendingEvent(event, receivedAt);
       return;
     }
 
@@ -3069,13 +3339,95 @@ export async function runSubjectCase({
         void interruptOnce();
       }
     }
+    return event;
   }
 
   function flushPendingNotifications() {
     const pending = pendingNotifications.splice(0);
+    const pendingStatesByEvent = new Map(
+      [...pendingDeltaStates.values()].map((state) => [
+        state.event,
+        state,
+      ]),
+    );
+    const transcript = pendingDeltaTranscript;
+    let promotedCount = 0;
     for (const item of pending) {
-      processNotification(item.notification, false, item.receivedAt);
+      const queuedEvent = item.notification.params.event;
+      const replayedEvent = processNotification(
+        item.notification,
+        false,
+        item.receivedAt,
+      );
+      const pendingState = pendingStatesByEvent.get(queuedEvent);
+      if (!pendingState || pendingState.blocked) {
+        continue;
+      }
+      const { itemId, count } = pendingState.event.messageDelta;
+      const expected = deltaSummary(itemId, count, pendingState.text);
+      if (
+        !events.includes(replayedEvent) ||
+        replayedEvent.complete !== true ||
+        replayedEvent.correlated !== true ||
+        replayedEvent.blockers.length !== 0 ||
+        stableStringify(replayedEvent.messageDelta) !==
+          stableStringify(expected)
+      ) {
+        continue;
+      }
+
+      const liveState = messageDeltaStates.get(itemId);
+      if (!liveState) {
+        messageDeltaStates.set(itemId, {
+          text: pendingState.text,
+          event: replayedEvent,
+          blocked: false,
+        });
+      } else if (!liveState.blocked) {
+        const mergedText = pendingState.text + liveState.text;
+        liveState.event.messageDelta = deltaSummary(
+          itemId,
+          count + liveState.event.messageDelta.count,
+          mergedText,
+        );
+        liveState.text = mergedText;
+        events.splice(events.indexOf(replayedEvent), 1);
+      } else {
+        events.splice(events.indexOf(replayedEvent), 1);
+        continue;
+      }
+      promotedCount += 1;
     }
+    if (
+      promotedCount === pendingDeltaStates.size &&
+      [...pendingDeltaStates.values()].every(
+        (state) => state.blocked === false,
+      )
+    ) {
+      const combinedTranscript = transcript + messageDeltaTranscript;
+      const blockers = deltaBlockersFor(
+        messageDeltaCount,
+        messageDeltaBytes,
+        combinedTranscript,
+      );
+      if (blockers.length === 0) {
+        messageDeltaTranscript = combinedTranscript;
+      } else {
+        messageDeltaTranscript = "";
+        const state = [...messageDeltaStates.values()].at(-1);
+        if (state) {
+          state.blocked = true;
+          state.text = "";
+          applyDeltaBlockers(state.event, blockers);
+        }
+      }
+    } else if (pendingDeltaStates.size > 0) {
+      messageDeltaTranscript = "";
+    }
+    pendingDeltaStates.clear();
+    pendingDeltaCount = 0;
+    pendingDeltaBytes = 0;
+    pendingDeltaTranscript = "";
   }
 
   const unsubscribe = session.subscribe(processNotification, {
@@ -3614,6 +3966,36 @@ function completeBoundedText(value, allowEmpty = false) {
   );
 }
 
+function agentMessageDeltaSummaryIsComplete(event) {
+  const itemId = sanitizeEventId(event?.messageDelta?.itemId);
+  return (
+    exactKeys(event, [
+      "method",
+      "threadId",
+      "turnId",
+      "complete",
+      "blockers",
+      "messageDelta",
+      "correlated",
+    ]) &&
+    exactKeys(event.messageDelta, [
+      "itemId",
+      "count",
+      "byteLength",
+      "sha256",
+    ]) &&
+    itemId.blocker === null &&
+    itemId.value === event.messageDelta.itemId &&
+    Number.isSafeInteger(event.messageDelta.count) &&
+    event.messageDelta.count > 0 &&
+    event.messageDelta.count <= MESSAGE_DELTA_COUNT_LIMIT &&
+    Number.isSafeInteger(event.messageDelta.byteLength) &&
+    event.messageDelta.byteLength >= 0 &&
+    event.messageDelta.byteLength <= MESSAGE_DELTA_BYTES_LIMIT &&
+    /^[0-9a-f]{64}$/u.test(event.messageDelta.sha256)
+  );
+}
+
 function caseEventIsAdmissible(
   event,
   threadId,
@@ -3655,6 +4037,19 @@ function caseEventIsAdmissible(
     event.mcpServer !== undefined
   ) {
     return false;
+  }
+  if (event.method === "item/agentMessage/delta") {
+    return (
+      agentMessageDeltaSummaryIsComplete(event) ||
+      exactKeys(event, [
+        "method",
+        "threadId",
+        "turnId",
+        "complete",
+        "blockers",
+        "correlated",
+      ])
+    );
   }
 
   if (event.item !== undefined) {
@@ -4120,6 +4515,9 @@ function caseEvidenceIsComplete(
       event.correlated === true &&
       event.item?.type === "agentMessage",
   );
+  const messageDeltas = events?.filter(
+    (event) => event.method === "item/agentMessage/delta",
+  );
   const finalMessage = messages?.at(-1);
   const terminals = events?.filter(
     (event) => event.method === "turn/completed",
@@ -4141,7 +4539,44 @@ function caseEvidenceIsComplete(
   const input = candidate?.input;
   const threadRequest = thread?.request;
   const turnRequest = turn?.request;
-  const explicitLocal = schema3Profile?.generation === "v2";
+  const explicitLocal =
+    schema3ProfileUsesExplicitLocal(schema3Profile);
+  const messageDeltaItemIds = Array.isArray(messageDeltas)
+    ? messageDeltas.map((event) => event.messageDelta?.itemId)
+    : [];
+  const messageDeltaEvidenceComplete =
+    schema3Profile?.generation !== "v3" ||
+    (Array.isArray(events) &&
+      events.length <= EVENT_LIMIT &&
+      Array.isArray(messageDeltas) &&
+      new Set(messageDeltaItemIds).size ===
+        messageDeltaItemIds.length &&
+      messageDeltas.reduce(
+        (total, event) => total + (event.messageDelta?.count ?? 0),
+        0,
+      ) <= MESSAGE_DELTA_COUNT_LIMIT &&
+      messageDeltas.reduce(
+        (total, event) =>
+          total + (event.messageDelta?.byteLength ?? 0),
+        0,
+      ) <= MESSAGE_DELTA_BYTES_LIMIT &&
+      messageDeltas.every(
+        (event) => {
+          const matchingMessages = messages.filter(
+            (message) =>
+              message.item?.id === event.messageDelta?.itemId,
+          );
+          return (
+            agentMessageDeltaSummaryIsComplete(event) &&
+            matchingMessages.length === 1 &&
+            events.indexOf(event) < events.indexOf(matchingMessages[0]) &&
+            event.messageDelta.byteLength ===
+              matchingMessages[0].item.text?.byteLength &&
+            event.messageDelta.sha256 ===
+              matchingMessages[0].item.text?.sha256
+          );
+        },
+      ));
   const environmentControlComplete = explicitLocal
     ? exactKeys(candidate?.accessControl, [
         "writeIsolation",
@@ -4277,6 +4712,7 @@ function caseEvidenceIsComplete(
         !Array.isArray(event.blockers) ||
         event.blockers.length !== 0,
     ) ||
+    !messageDeltaEvidenceComplete ||
     !Array.isArray(commands) ||
     commands.length !== 0 ||
     !finalMessage ||
@@ -4524,6 +4960,37 @@ function caseEvidenceIsComplete(
   );
 }
 
+function schema3CaseExecutionIdentityIsComplete(
+  candidate,
+  expectedCaseId,
+  caseIndex,
+  runId,
+  schema3Profile,
+) {
+  const root = candidate?.thread?.cwd;
+  const runRoot =
+    typeof root === "string"
+      ? comparablePath(path.dirname(root))
+      : null;
+  return (
+    typeof candidate?.thread?.id === "string" &&
+    candidate.thread.id.length > 0 &&
+    typeof candidate?.turn?.id === "string" &&
+    candidate.turn.id.length > 0 &&
+    candidate.thread.id !== candidate.turn.id &&
+    runRoot !== null &&
+    path.basename(path.dirname(root)).toLowerCase() ===
+      `joewrks-eval-${runId}`.toLowerCase() &&
+    (!schema3ProfileUsesExplicitLocal(schema3Profile) ||
+      runRoot ===
+        comparablePath(
+          path.join(tmpdir(), `joewrks-eval-${runId}`),
+        )) &&
+    path.basename(root) ===
+      `case-${caseIndex + 1}-${expectedCaseId}`
+  );
+}
+
 function schema3ExecutionIdentitiesAreComplete(
   cases,
   expectedCaseIds,
@@ -4536,32 +5003,23 @@ function schema3ExecutionIdentitiesAreComplete(
   ) {
     return false;
   }
-  const threadIds = cases.map(({ thread }) => thread?.id);
-  const turnIds = cases.map(({ turn }) => turn?.id);
-  const executionIds = [...threadIds, ...turnIds];
-  const roots = cases.map(({ thread }) => thread?.cwd);
-  const comparableRoots = roots.map(comparablePath);
-  if (
-    new Set(executionIds).size !== executionIds.length ||
-    comparableRoots.some((root) => root === null) ||
-    new Set(comparableRoots).size !== roots.length
-  ) {
-    return false;
-  }
-  const runRoot = comparablePath(path.dirname(roots[0]));
+  const executionIds = cases.flatMap(({ thread, turn }) => [
+    thread?.id,
+    turn?.id,
+  ]);
+  const roots = cases.map(({ thread }) => comparablePath(thread?.cwd));
   return (
-    path.basename(path.dirname(roots[0])).toLowerCase() ===
-      `joewrks-eval-${runId}`.toLowerCase() &&
-    (schema3Profile?.generation !== "v2" ||
-      runRoot ===
-        comparablePath(
-          path.join(tmpdir(), `joewrks-eval-${runId}`),
-        )) &&
-    roots.every(
-    (root, index) =>
-      comparablePath(path.dirname(root)) === runRoot &&
-      path.basename(root) ===
-        `case-${index + 1}-${expectedCaseIds[index]}`,
+    new Set(executionIds).size === executionIds.length &&
+    roots.every((root) => root !== null) &&
+    new Set(roots).size === roots.length &&
+    cases.every((candidate, index) =>
+      schema3CaseExecutionIdentityIsComplete(
+        candidate,
+        expectedCaseIds[index],
+        index,
+        runId,
+        schema3Profile,
+      ),
     )
   );
 }
@@ -4591,7 +5049,7 @@ function schema3InstructionSourcesAreStable(
   condition,
 ) {
   if (
-    schema3Profile?.generation !== "v2" ||
+    !schema3ProfileUsesExplicitLocal(schema3Profile) ||
     condition !== "control"
   ) {
     return true;
@@ -4669,7 +5127,8 @@ function passEvidenceIsComplete(
   const source = evidence?.source;
   const preflight = evidence?.preflight;
   const inventory = evidence?.inventory;
-  const explicitLocal = schema3Profile?.generation === "v2";
+  const explicitLocal =
+    schema3ProfileUsesExplicitLocal(schema3Profile);
   const caseRuntimeIdentities = Array.isArray(evidence?.cases)
     ? evidence.cases.map(({ thread }) => ({
         model: thread?.model,
@@ -4898,6 +5357,10 @@ function jsonPointerExists(root, pointer) {
   return current !== undefined;
 }
 
+function schema3ProfileUsesExplicitLocal(profile) {
+  return ["v2", "v3"].includes(profile?.generation);
+}
+
 const SCHEMA3_RUN_PROFILES = Object.freeze({
   "no-harness-control-v1": Object.freeze({
     generation: "v1",
@@ -4923,6 +5386,18 @@ const SCHEMA3_RUN_PROFILES = Object.freeze({
     controlRunId: "no-harness-control-v2",
     baselinePath: "evals/p0/no-harness-control-v2.json",
   }),
+  "no-harness-control-v3": Object.freeze({
+    generation: "v3",
+    condition: "control",
+    controlRunId: "no-harness-control-v3",
+    baselinePath: null,
+  }),
+  "common-core-v3": Object.freeze({
+    generation: "v3",
+    condition: "core",
+    controlRunId: "no-harness-control-v3",
+    baselinePath: "evals/p0/no-harness-control-v3.json",
+  }),
 });
 
 function validateSchema3Evaluation(result) {
@@ -4931,7 +5406,7 @@ function validateSchema3Evaluation(result) {
   const evaluationKeys = [
     "condition",
     "caseIds",
-    ...(profile?.generation === "v2"
+    ...(schema3ProfileUsesExplicitLocal(profile)
       ? ["candidateReference"]
       : []),
     "instructionOverlay",
@@ -4953,7 +5428,7 @@ function validateSchema3Evaluation(result) {
   }
 
   if (
-    profile.generation === "v2" &&
+    schema3ProfileUsesExplicitLocal(profile) &&
     (!exactKeys(evaluation.candidateReference, [
       "sourcePath",
       "byteLength",
@@ -4971,7 +5446,9 @@ function validateSchema3Evaluation(result) {
         evaluation.candidateReference.sha256,
       ))
   ) {
-    throw new Error("schema 3 v2 candidate reference is invalid");
+    throw new Error(
+      "schema 3 explicit-local candidate reference is invalid",
+    );
   }
 
   if (profile.condition === "control") {
@@ -5009,7 +5486,7 @@ function validateSchema3Evaluation(result) {
     throw new Error("schema 3 Core identity is invalid");
   }
   if (
-    profile.generation === "v2" &&
+    schema3ProfileUsesExplicitLocal(profile) &&
     stableStringify(evaluation.instructionOverlay) !==
       stableStringify(evaluation.candidateReference)
   ) {
@@ -5170,7 +5647,7 @@ function schema3CaseEvidenceIsComplete(
 
   if (condition === "control") {
     return (
-      (schema3Profile.generation === "v2" ||
+      (schema3ProfileUsesExplicitLocal(schema3Profile) ||
         candidate.thread.instructionSources.length === 0) &&
       candidate.state?.instructionOverlay === null
     );
@@ -5185,8 +5662,8 @@ function schema3CaseEvidenceIsComplete(
     candidate.thread.cwd,
     "AGENTS.md",
   );
-  const v2SourceDeltaIsComplete =
-    schema3Profile.generation !== "v2" ||
+  const explicitSourceDeltaIsComplete =
+    !schema3ProfileUsesExplicitLocal(schema3Profile) ||
     (Array.isArray(baselineCandidate?.instructionSourceSnapshot) &&
       instructionSourceSnapshotsEqual(
         candidate.instructionSourceSnapshot.slice(
@@ -5204,7 +5681,7 @@ function schema3CaseEvidenceIsComplete(
       candidate.instructionSourceSnapshot.at(-1)?.sha256 ===
         expectedSnapshot.sha256);
   return (
-    (schema3Profile.generation === "v2"
+    (schema3ProfileUsesExplicitLocal(schema3Profile)
       ? candidate.thread.instructionSources.length ===
           baselineCandidate.thread.instructionSources.length + 1 &&
         candidate.thread.instructionSources
@@ -5219,7 +5696,7 @@ function schema3CaseEvidenceIsComplete(
       : candidate.thread.instructionSources.length === 1) &&
     comparablePath(candidate.thread.instructionSources.at(-1)) ===
       comparablePath(candidateInstructionPath) &&
-    v2SourceDeltaIsComplete &&
+    explicitSourceDeltaIsComplete &&
     exactKeys(overlay, [
       "sourcePath",
       "target",
@@ -5483,7 +5960,7 @@ export function validateResult(
     : null;
   const condition = schema3Profile?.condition ?? null;
   if (
-    schema3Profile?.generation === "v2" &&
+    schema3ProfileUsesExplicitLocal(schema3Profile) &&
     condition === "core" &&
     Object.hasOwn(
       result.evidence.preflight ?? {},
@@ -5507,7 +5984,7 @@ export function validateResult(
         )
       : null;
   if (
-    schema3Profile?.generation === "v2" &&
+    schema3ProfileUsesExplicitLocal(schema3Profile) &&
     condition === "core" &&
     stableStringify(
       result.evidence.evaluation.candidateReference,
@@ -5632,6 +6109,24 @@ export function validateResult(
     ) {
       throw new Error("schema 3 review case order is invalid");
     }
+    const recordedExecutionIds = cases.flatMap(({ thread, turn }) =>
+      [thread?.id, turn?.id].filter(
+        (id) => typeof id === "string" && id.length > 0,
+      ),
+    );
+    const recordedExecutionRoots = cases
+      .map(({ thread }) => comparablePath(thread?.cwd))
+      .filter((root) => root !== null);
+    if (
+      new Set(recordedExecutionIds).size !==
+        recordedExecutionIds.length ||
+      new Set(recordedExecutionRoots).size !==
+        recordedExecutionRoots.length
+    ) {
+      throw new Error(
+        "schema 3 recorded execution identities collide",
+      );
+    }
   }
   if (review.status === "complete") {
     for (const id of expectedCaseIds) {
@@ -5642,6 +6137,11 @@ export function validateResult(
         throw new Error(`review must contain exactly one judgment for ${id}`);
       }
       const judgment = matches[0];
+      if (schema3 && judgment.judgment === "reviewRequired") {
+        throw new Error(
+          "complete review cannot retain pending case judgments",
+        );
+      }
       const caseIndex = cases.findIndex((candidate) => candidate.id === id);
       const referencePrefix = `/evidence/cases/${caseIndex}`;
       if (
@@ -5671,12 +6171,22 @@ export function validateResult(
     condition === "core" &&
     review.status === "complete" &&
     schema3PairIsComparable(result, baselineResult);
+  const reviewedCompleteCaseIndexes =
+    schema3 && review.status === "complete"
+      ? review.caseJudgments.flatMap(({ judgment }, index) =>
+          ["pass", "fail"].includes(judgment) ? [index] : [],
+        )
+      : [];
   const needsCompleteCaseEvidence =
     review.capabilityVerdict === "pass" || comparableCore;
+  const needsFrozenIdentity =
+    needsCompleteCaseEvidence ||
+    reviewedCompleteCaseIndexes.length > 0;
   let frozenIdentity = null;
   let requiredSensitiveTargetLabels = [];
+  let schema3ModelIdentity = null;
   let completeCaseEvidenceSupported = true;
-  if (needsCompleteCaseEvidence) {
+  if (needsFrozenIdentity) {
     frozenIdentity = resolveFrozenEvidenceIdentity(
       result.evidence.source,
       expectedCaseIds,
@@ -5690,9 +6200,69 @@ export function validateResult(
           "collector-control",
         ]
       : [];
-    const schema3ModelIdentity = schema3
-      ? caseModelIdentity(cases[0])
+    schema3ModelIdentity = schema3
+      ? caseModelIdentity(
+          cases[reviewedCompleteCaseIndexes[0] ?? 0],
+        )
       : null;
+  }
+  if (reviewedCompleteCaseIndexes.length > 0) {
+    const reviewedCases = reviewedCompleteCaseIndexes.map(
+      (index) => cases[index],
+    );
+    const executionIds = reviewedCases.flatMap(({ thread, turn }) => [
+      thread?.id,
+      turn?.id,
+    ]);
+    const executionRoots = reviewedCases.map(({ thread }) =>
+      comparablePath(thread?.cwd),
+    );
+    const reviewedCasesAreComplete =
+      new Set(executionIds).size === executionIds.length &&
+      executionRoots.every((root) => root !== null) &&
+      new Set(executionRoots).size === executionRoots.length &&
+      schema3InstructionSourcesAreStable(
+        reviewedCases,
+        schema3Profile,
+        condition,
+      ) &&
+      (condition !== "core" ||
+        schema3PairExecutionIdentitiesAreDisjoint(
+          reviewedCases,
+          baselineResult?.evidence?.cases,
+        )) &&
+      reviewedCompleteCaseIndexes.every(
+        (index) =>
+          schema3CaseExecutionIdentityIsComplete(
+            cases[index],
+            expectedCaseIds[index],
+            index,
+            result.runId,
+            schema3Profile,
+          ) &&
+          caseEvidenceIsComplete(
+            cases[index],
+            requiredSensitiveTargetLabels,
+            frozenIdentity,
+            result.evidence.runtime?.mcpInventory,
+            schema3Profile,
+          ) &&
+          schema3CaseEvidenceIsComplete(
+            cases[index],
+            condition,
+            result.evidence.evaluation,
+            schema3ModelIdentity,
+            baselineResult?.evidence?.cases?.[index] ?? null,
+            schema3Profile,
+          ),
+      );
+    if (!reviewedCasesAreComplete) {
+      throw new Error(
+        "reviewed pass/fail case lacks complete evidence",
+      );
+    }
+  }
+  if (needsCompleteCaseEvidence) {
     completeCaseEvidenceSupported =
       (!schema3 ||
         schema3ExecutionIdentitiesAreComplete(
@@ -5785,19 +6355,19 @@ const CASES_RELATIVE_PATH = "evals/p0/cases.json";
 const MOCK_RELATIVE_PATH = "evals/support/mock-external-write.ps1";
 const P0_CONTRACT_RELATIVE_PATH =
   "tests/p0-evaluation-contract.tests.ps1";
-const CONTROL_V2_RESULT_RELATIVE_PATH =
-  "evals/p0/no-harness-control-v2.json";
-const CORE_V2_RESULT_RELATIVE_PATH = "evals/p0/common-core-v2.json";
+const CONTROL_V3_RESULT_RELATIVE_PATH =
+  "evals/p0/no-harness-control-v3.json";
+const CORE_V3_RESULT_RELATIVE_PATH = "evals/p0/common-core-v3.json";
 const CORE_CANDIDATE_RELATIVE_PATH =
   "evals/candidates/common-core-v1.md";
 const LIVE_RUN_CONFIGURATIONS = Object.freeze({
-  "run-control-v2": Object.freeze({
-    mode: "run-control-v2",
-    runId: "no-harness-control-v2",
-    resultRelativePath: CONTROL_V2_RESULT_RELATIVE_PATH,
+  "run-control-v3": Object.freeze({
+    mode: "run-control-v3",
+    runId: "no-harness-control-v3",
+    resultRelativePath: CONTROL_V3_RESULT_RELATIVE_PATH,
     resultPath: path.join(
       REPOSITORY_ROOT,
-      ...CONTROL_V2_RESULT_RELATIVE_PATH.split("/"),
+      ...CONTROL_V3_RESULT_RELATIVE_PATH.split("/"),
     ),
     caseIds: FULL_CASE_IDS,
     instructionCondition: "none",
@@ -5810,22 +6380,22 @@ const LIVE_RUN_CONFIGURATIONS = Object.freeze({
       ...CORE_CANDIDATE_RELATIVE_PATH.split("/"),
     ),
   }),
-  "run-core-v2": Object.freeze({
-    mode: "run-core-v2",
-    runId: "common-core-v2",
-    resultRelativePath: CORE_V2_RESULT_RELATIVE_PATH,
+  "run-core-v3": Object.freeze({
+    mode: "run-core-v3",
+    runId: "common-core-v3",
+    resultRelativePath: CORE_V3_RESULT_RELATIVE_PATH,
     resultPath: path.join(
       REPOSITORY_ROOT,
-      ...CORE_V2_RESULT_RELATIVE_PATH.split("/"),
+      ...CORE_V3_RESULT_RELATIVE_PATH.split("/"),
     ),
     caseIds: FULL_CASE_IDS,
     instructionCondition: "common-core",
-    baselineRelativePath: CONTROL_V2_RESULT_RELATIVE_PATH,
+    baselineRelativePath: CONTROL_V3_RESULT_RELATIVE_PATH,
     baselinePath: path.join(
       REPOSITORY_ROOT,
-      ...CONTROL_V2_RESULT_RELATIVE_PATH.split("/"),
+      ...CONTROL_V3_RESULT_RELATIVE_PATH.split("/"),
     ),
-    baselineRunId: "no-harness-control-v2",
+    baselineRunId: "no-harness-control-v3",
     candidateRelativePath: CORE_CANDIDATE_RELATIVE_PATH,
     candidatePath: path.join(
       REPOSITORY_ROOT,

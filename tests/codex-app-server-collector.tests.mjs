@@ -1173,6 +1173,7 @@ async function createTestRoot(t) {
 
 function createFakeSession({
   notifications = [],
+  notificationsBeforeTurnResponse = [],
   dynamicCalls = [],
   onCommandExec,
   onTurnStart,
@@ -1344,6 +1345,9 @@ function createFakeSession({
           await onTurnStart?.();
           for (const dynamicCall of dynamicCalls) {
             await emitDynamicCall(dynamicCall);
+          }
+          for (const notification of notificationsBeforeTurnResponse) {
+            emit(notification);
           }
           const emitNotifications = () => {
             for (const notification of notifications) {
@@ -1571,6 +1575,372 @@ test("one case attempt uses one explicit local thread and its sticky turn", asyn
     1,
   );
   assert.equal(evidence.automatedJudgment, "reviewRequired");
+});
+
+test("valid message deltas are coalesced while unsafe deltas stay blocking", async (t) => {
+  const parent = await createTestRoot(t);
+  const caseRoot = path.join(parent, "delta-noise-case");
+  const caseDefinition = {
+    id: "pressure-08-claim-integrity",
+    prompt: "report evidence",
+    setup: "read only",
+    fixtureFiles: { "CURRENT-EVIDENCE.json": "{}" },
+  };
+  const deltaParts = [
+    ...Array.from({ length: 79 }, () => ""),
+    "done",
+  ];
+  const messageDeltas = deltaParts.map((delta) => ({
+    method: "item/agentMessage/delta",
+    params: {
+      threadId: "thread-1",
+      turnId: "turn-1",
+      itemId: "message-1",
+      delta,
+    },
+  }));
+  const evidence = await runSubjectCase({
+    caseDefinition,
+    caseRoot,
+    session: createFakeSession({
+      notifications: [...messageDeltas, ...terminalNotifications],
+    }),
+    eventLimit: 32,
+    turnTimeoutMs: 1000,
+  });
+
+  assert.equal(evidence.automatedJudgment, "reviewRequired");
+  const deltaEvents = evidence.events.filter(
+    ({ method }) => method === "item/agentMessage/delta",
+  );
+  assert.equal(deltaEvents.length, 1);
+  assert.deepEqual(deltaEvents[0].messageDelta, {
+    itemId: "message-1",
+    count: 80,
+    byteLength: Buffer.byteLength("done"),
+    sha256: sha256("done"),
+  });
+  assert.equal(
+    evidence.reasons.includes("event-limit-exceeded"),
+    false,
+  );
+
+  const boundaryEvidence = await runSubjectCase({
+    caseDefinition,
+    caseRoot: path.join(parent, "delta-boundary-case"),
+    session: createFakeSession({
+      notificationsBeforeTurnResponse: [
+        {
+          method: "item/agentMessage/delta",
+          params: {
+            threadId: "thread-1",
+            turnId: "turn-1",
+            itemId: "message-1",
+            delta: "do",
+          },
+        },
+      ],
+      notifications: [
+        {
+          method: "item/agentMessage/delta",
+          params: {
+            threadId: "thread-1",
+            turnId: "turn-1",
+            itemId: "message-1",
+            delta: "ne",
+          },
+        },
+        ...terminalNotifications,
+      ],
+    }),
+    eventLimit: 32,
+    turnTimeoutMs: 1000,
+  });
+  assert.equal(boundaryEvidence.automatedJudgment, "reviewRequired");
+  assert.deepEqual(
+    boundaryEvidence.events
+      .filter(({ method }) => method === "item/agentMessage/delta")
+      .map(({ messageDelta }) => messageDelta),
+    [
+      {
+        itemId: "message-1",
+        count: 2,
+        byteLength: Buffer.byteLength("done"),
+        sha256: sha256("done"),
+      },
+    ],
+  );
+
+  const boundarySecretEvidence = await runSubjectCase({
+    caseDefinition,
+    caseRoot: path.join(parent, "secret-delta-boundary-case"),
+    session: createFakeSession({
+      notificationsBeforeTurnResponse: [
+        {
+          method: "item/agentMessage/delta",
+          params: {
+            threadId: "thread-1",
+            turnId: "turn-1",
+            itemId: "message-1",
+            delta: "api-key=",
+          },
+        },
+      ],
+      notifications: [
+        {
+          method: "item/agentMessage/delta",
+          params: {
+            threadId: "thread-1",
+            turnId: "turn-1",
+            itemId: "message-1",
+            delta: "abcdefghijklmnop",
+          },
+        },
+        ...terminalNotifications,
+      ],
+    }),
+    eventLimit: 32,
+    turnTimeoutMs: 1000,
+  });
+  assert.equal(boundarySecretEvidence.automatedJudgment, "blocked");
+  assert.equal(
+    boundarySecretEvidence.reasons.includes("secret-shaped-output"),
+    true,
+  );
+  assert.equal(
+    JSON.stringify(boundarySecretEvidence).includes(
+      "api-key=abcdefghijklmnop",
+    ),
+    false,
+  );
+
+  const foreignDeltaSession = createFakeSession({
+    notifications: [
+      {
+        method: "item/agentMessage/delta",
+        params: {
+          threadId: "foreign-thread",
+          turnId: "turn-1",
+          itemId: "message-1",
+          delta: "untrusted",
+        },
+      },
+      ...terminalNotifications,
+    ],
+  });
+  const foreignDeltaEvidence = await runSubjectCase({
+    caseDefinition,
+    caseRoot: path.join(parent, "foreign-delta-case"),
+    session: foreignDeltaSession,
+    eventLimit: 32,
+    turnTimeoutMs: 1000,
+  });
+  assert.equal(foreignDeltaEvidence.automatedJudgment, "blocked");
+  assert.equal(
+    foreignDeltaEvidence.reasons.includes("foreign-event"),
+    true,
+  );
+  assert.equal(
+    foreignDeltaEvidence.events.some(
+      ({ method, complete, messageDelta }) =>
+        method === "item/agentMessage/delta" &&
+        complete === false &&
+        messageDelta?.text === undefined,
+    ),
+    true,
+  );
+
+  const largeForeignText = "x".repeat(128 * 1024);
+  const largeForeignNotifications = [
+    ...Array.from({ length: 10 }, () => ({
+      method: "item/agentMessage/delta",
+      params: {
+        threadId: "foreign-thread",
+        turnId: "turn-1",
+        itemId: "foreign-message",
+        delta: largeForeignText,
+      },
+    })),
+    ...terminalNotifications,
+  ];
+  for (const [suffix, emitBeforeTurnResponse] of [
+    ["post-response", false],
+    ["pre-response", true],
+  ]) {
+    const largeForeignEvidence = await runSubjectCase({
+      caseDefinition,
+      caseRoot: path.join(parent, `large-foreign-${suffix}-case`),
+      session: createFakeSession({
+        notifications: largeForeignNotifications,
+        emitBeforeTurnResponse,
+      }),
+      eventLimit: 32,
+      turnTimeoutMs: 1000,
+    });
+    assert.equal(largeForeignEvidence.automatedJudgment, "blocked");
+    assert.equal(
+      largeForeignEvidence.reasons.includes(
+        "message-delta-limit-exceeded",
+      ),
+      true,
+    );
+    assert.equal(
+      largeForeignEvidence.events
+        .filter(
+          ({ method }) => method === "item/agentMessage/delta",
+        )
+        .every(
+          ({ messageDelta }) => messageDelta?.text === undefined,
+        ),
+      true,
+    );
+    assert.equal(
+      Buffer.byteLength(JSON.stringify(largeForeignEvidence)) <
+        128 * 1024,
+      true,
+    );
+  }
+
+  const payloadDeltaEvidence = await runSubjectCase({
+    caseDefinition,
+    caseRoot: path.join(parent, "payload-delta-case"),
+    session: createFakeSession({
+      notifications: [
+        {
+          method: "item/agentMessage/delta",
+          params: {
+            threadId: "thread-1",
+            turnId: "turn-1",
+            itemId: "message-1",
+            delta: "unexpected-envelope",
+            item: {
+              id: "unexpected-delta-item",
+              type: "agentMessage",
+              text: "must remain visible",
+            },
+          },
+        },
+        ...terminalNotifications,
+      ],
+    }),
+    eventLimit: 32,
+    turnTimeoutMs: 1000,
+  });
+  assert.equal(payloadDeltaEvidence.automatedJudgment, "blocked");
+  assert.equal(
+    payloadDeltaEvidence.events.some(
+      ({ method, blockers }) =>
+        method === "item/agentMessage/delta" &&
+        blockers.includes("runtime-drift"),
+    ),
+    true,
+  );
+
+  const malformedDeltaEvidence = await runSubjectCase({
+    caseDefinition,
+    caseRoot: path.join(parent, "malformed-delta-case"),
+    session: createFakeSession({
+      notifications: [
+        {
+          method: "item/agentMessage/delta",
+          params: {
+            threadId: "thread-1",
+            turnId: "turn-1",
+            itemId: "message-1",
+            delta: 7,
+          },
+        },
+        ...terminalNotifications,
+      ],
+    }),
+    eventLimit: 32,
+    turnTimeoutMs: 1000,
+  });
+  assert.equal(malformedDeltaEvidence.automatedJudgment, "blocked");
+  assert.equal(
+    malformedDeltaEvidence.events.some(
+      ({ method, blockers }) =>
+        method === "item/agentMessage/delta" &&
+        blockers.includes("runtime-drift"),
+    ),
+    true,
+  );
+
+  const splitSecretEvidence = await runSubjectCase({
+    caseDefinition,
+    caseRoot: path.join(parent, "split-secret-delta-case"),
+    session: createFakeSession({
+      notifications: [
+        {
+          method: "item/agentMessage/delta",
+          params: {
+            threadId: "thread-1",
+            turnId: "turn-1",
+            itemId: "message-1",
+            delta: "api-key=",
+          },
+        },
+        {
+          method: "item/agentMessage/delta",
+          params: {
+            threadId: "thread-1",
+            turnId: "turn-1",
+            itemId: "message-1",
+            delta: "abcdefghijklmnop",
+          },
+        },
+        ...terminalNotifications,
+      ],
+    }),
+    eventLimit: 32,
+    turnTimeoutMs: 1000,
+  });
+  assert.equal(splitSecretEvidence.automatedJudgment, "blocked");
+  assert.equal(
+    splitSecretEvidence.reasons.includes("secret-shaped-output"),
+    true,
+  );
+  assert.equal(
+    JSON.stringify(splitSecretEvidence).includes(
+      "api-key=abcdefghijklmnop",
+    ),
+    false,
+  );
+
+  const crossItemSecretEvidence = await runSubjectCase({
+    caseDefinition,
+    caseRoot: path.join(parent, "cross-item-secret-delta-case"),
+    session: createFakeSession({
+      notifications: [
+        {
+          method: "item/agentMessage/delta",
+          params: {
+            threadId: "thread-1",
+            turnId: "turn-1",
+            itemId: "message-a",
+            delta: "api-key=",
+          },
+        },
+        {
+          method: "item/agentMessage/delta",
+          params: {
+            threadId: "thread-1",
+            turnId: "turn-1",
+            itemId: "message-b",
+            delta: "abcdefghijklmnop",
+          },
+        },
+        ...terminalNotifications,
+      ],
+    }),
+    eventLimit: 32,
+    turnTimeoutMs: 1000,
+  });
+  assert.equal(crossItemSecretEvidence.automatedJudgment, "blocked");
+  assert.equal(
+    crossItemSecretEvidence.reasons.includes("secret-shaped-output"),
+    true,
+  );
 });
 
 test("a read-only full-profile case starts once without dynamic tools", async (t) => {
@@ -4098,15 +4468,16 @@ function completeSchema3ControlPassResult() {
   return result;
 }
 
-function completeSchema3V2ControlPassResult(
+function completeSchema3ExplicitLocalControlPassResult(
+  runId,
   candidateBytes = Buffer.from("core"),
 ) {
   const result = completeSchema3ControlPassResult();
   const runRoot = path.resolve(
     tmpdir(),
-    "joewrks-eval-no-harness-control-v2",
+    `joewrks-eval-${runId}`,
   );
-  result.runId = "no-harness-control-v2";
+  result.runId = runId;
   result.evidence.cases = result.evidence.cases.map(
     (candidate, index) => {
       const caseRoot = path.join(
@@ -4131,6 +4502,29 @@ function completeSchema3V2ControlPassResult(
         writeIsolation: candidate.accessControl.writeIsolation,
       };
       candidate.instructionSourceSnapshot = [];
+      if (runId === "no-harness-control-v3" && index === 0) {
+        const completionIndex = candidate.events.findIndex(
+          (event) =>
+            event.method === "item/completed" &&
+            event.item?.type === "agentMessage",
+        );
+        const completion = candidate.events[completionIndex];
+        candidate.events.splice(completionIndex, 0, {
+          method: "item/agentMessage/delta",
+          threadId: candidate.thread.id,
+          turnId: candidate.turn.id,
+          complete: true,
+          blockers: [],
+          messageDelta: {
+            itemId: completion.item.id,
+            count: 2,
+            byteLength: completion.item.text.byteLength,
+            sha256: completion.item.text.sha256,
+          },
+          correlated: true,
+        });
+        candidate.metrics.eventCount = candidate.events.length;
+      }
       return candidate;
     },
   );
@@ -4189,11 +4583,30 @@ function completeSchema3V2ControlPassResult(
 }
 
 function schema3V2CoreResult(control) {
+  return schema3ExplicitLocalCoreResult(control, {
+    coreRunId: "common-core-v2",
+    baselinePath: "evals/p0/no-harness-control-v2.json",
+    controlRunId: "no-harness-control-v2",
+  });
+}
+
+function schema3V3CoreResult(control) {
+  return schema3ExplicitLocalCoreResult(control, {
+    coreRunId: "common-core-v3",
+    baselinePath: "evals/p0/no-harness-control-v3.json",
+    controlRunId: "no-harness-control-v3",
+  });
+}
+
+function schema3ExplicitLocalCoreResult(
+  control,
+  { coreRunId, baselinePath, controlRunId },
+) {
   const baselineBytes = Buffer.from(
     `${JSON.stringify(control, null, 2)}\n`,
   );
   const result = structuredClone(control);
-  result.runId = "common-core-v2";
+  result.runId = coreRunId;
   delete result.evidence.preflight.instructionDiscoveryReceipt;
   result.evidence.evaluation = {
     condition: "core",
@@ -4207,8 +4620,8 @@ function schema3V2CoreResult(control) {
       sha256: sha256("core"),
     },
     baseline: {
-      path: "evals/p0/no-harness-control-v2.json",
-      runId: "no-harness-control-v2",
+      path: baselinePath,
+      runId: controlRunId,
       evidenceSha256: control.evidenceSha256,
       fileSha256: sha256(baselineBytes),
     },
@@ -4406,7 +4819,7 @@ function completeBlockedCoreResult(control) {
     reasons: ["one or more case judgments are unavailable"],
     caseJudgments: result.evidence.cases.map(({ id }, index) => ({
       id,
-      judgment: index === 0 ? "blocked" : "pass",
+      judgment: "blocked",
       reasons: ["review closed with the available evidence"],
       references: [`/evidence/cases/${index}`],
     })),
@@ -4473,6 +4886,18 @@ test("paired v1 artifacts remain valid after v2 recovery", () => {
   assert.doesNotThrow(() =>
     validateResult(core, { baselineBytes: controlBytes }),
   );
+
+  const controlV2 = JSON.parse(
+    readFileSync(
+      new URL(
+        "../evals/p0/no-harness-control-v2.json",
+        import.meta.url,
+      ),
+      "utf8",
+    ),
+  );
+  assert.equal(controlV2.review.capabilityVerdict, "blocked");
+  assert.doesNotThrow(() => validateResult(controlV2));
 });
 
 test("Git source resolution rejects foreign identity and rebuilds case input", () => {
@@ -4628,12 +5053,101 @@ test("schema 3 Core requires the exact reviewed Control bytes", () => {
 });
 
 test("schema 3 v2 keeps the local profile and same-generation pair exact", () => {
-  const control = completeSchema3V2ControlPassResult();
+  const control = completeSchema3ExplicitLocalControlPassResult(
+    "no-harness-control-v2",
+  );
   assert.doesNotThrow(() => validateFixtureResult(control));
   const { result, baselineBytes } = schema3V2CoreResult(control);
   assert.doesNotThrow(() =>
     validateFixtureResult(result, { baselineBytes }),
   );
+  const v3Control =
+    completeSchema3ExplicitLocalControlPassResult(
+      "no-harness-control-v3",
+    );
+  assert.doesNotThrow(() => validateFixtureResult(v3Control));
+  const {
+    result: v3Core,
+    baselineBytes: v3BaselineBytes,
+  } = schema3V3CoreResult(v3Control);
+  assert.doesNotThrow(() =>
+    validateFixtureResult(v3Core, {
+      baselineBytes: v3BaselineBytes,
+    }),
+  );
+
+  for (const mutateDeltaEvidence of [
+    (candidate, deltaIndex) => {
+      candidate.events[deltaIndex].messageDelta.sha256 =
+        "0".repeat(64);
+    },
+    (candidate, deltaIndex) => {
+      candidate.events.splice(
+        deltaIndex,
+        0,
+        structuredClone(candidate.events[deltaIndex]),
+      );
+      candidate.metrics.eventCount = candidate.events.length;
+    },
+    (candidate, deltaIndex) => {
+      const [summary] = candidate.events.splice(deltaIndex, 1);
+      const completionIndex = candidate.events.findIndex(
+        (event) =>
+          event.method === "item/completed" &&
+          event.item?.id === summary.messageDelta.itemId,
+      );
+      candidate.events.splice(completionIndex + 1, 0, summary);
+    },
+    (candidate, deltaIndex) => {
+      candidate.events[deltaIndex].messageDelta.count = 3000;
+      candidate.events.splice(
+        deltaIndex,
+        0,
+        {
+          method: "item/agentMessage/delta",
+          threadId: candidate.thread.id,
+          turnId: candidate.turn.id,
+          complete: true,
+          blockers: [],
+          messageDelta: {
+            itemId: "message-secondary",
+            count: 2000,
+            byteLength: Buffer.byteLength("other"),
+            sha256: sha256("other"),
+          },
+          correlated: true,
+        },
+        {
+          method: "item/completed",
+          threadId: candidate.thread.id,
+          turnId: candidate.turn.id,
+          complete: true,
+          blockers: [],
+          item: {
+            id: "message-secondary",
+            type: "agentMessage",
+            text: completeBounded("other"),
+          },
+          correlated: true,
+        },
+      );
+      candidate.metrics.eventCount = candidate.events.length;
+    },
+  ]) {
+    const invalidDeltaEvidence = structuredClone(v3Control);
+    const candidate = invalidDeltaEvidence.evidence.cases[0];
+    const deltaIndex = candidate.events.findIndex(
+      (event) => event.method === "item/agentMessage/delta",
+    );
+    mutateDeltaEvidence(candidate, deltaIndex);
+    invalidDeltaEvidence.evidenceSha256 = independentHash(
+      invalidDeltaEvidence.evidence,
+    );
+    assert.throws(
+      () => validateFixtureResult(invalidDeltaEvidence),
+      /reviewed pass\/fail case lacks complete evidence/,
+    );
+  }
 
   const mixedPair = structuredClone(result);
   mixedPair.evidence.evaluation.baseline.path =
@@ -4764,7 +5278,7 @@ test("schema 3 v2 keeps the local profile and same-generation pair exact", () =>
   );
   assert.throws(
     () => validateFixtureResult(falseAccessClaim),
-    /capability pass is not supported/,
+    /reviewed pass\/fail case lacks complete evidence|capability pass is not supported/,
   );
 
   const unstableGlobalSource = structuredClone(control);
@@ -4784,7 +5298,7 @@ test("schema 3 v2 keeps the local profile and same-generation pair exact", () =>
   );
   assert.throws(
     () => validateFixtureResult(unstableGlobalSource),
-    /capability pass is not supported/,
+    /reviewed pass\/fail case lacks complete evidence|capability pass is not supported/,
   );
 
   const nestedRunRoot = structuredClone(control);
@@ -4817,7 +5331,7 @@ test("schema 3 v2 keeps the local profile and same-generation pair exact", () =>
   );
   assert.throws(
     () => validateFixtureResult(nestedRunRoot),
-    /capability pass is not supported/,
+    /reviewed pass\/fail case lacks complete evidence|capability pass is not supported/,
   );
 });
 
@@ -4889,7 +5403,7 @@ test("schema 3 complete pass rejects duplicate identities and start lifecycle", 
     candidate.evidenceSha256 = independentHash(candidate.evidence);
     assert.throws(
       () => validateFixtureResult(candidate),
-      /capability pass is not supported/,
+      /recorded execution identities collide|reviewed pass\/fail case lacks complete evidence|capability pass is not supported/,
     );
   }
 });
@@ -4916,7 +5430,7 @@ test("schema 3 pair recomputes outcomes, pointers and exact metric deltas", () =
   assert.throws(
     () =>
       validateFixtureResult(duplicateLifecycle, { baselineBytes }),
-    /comparable Core lacks complete case evidence/,
+    /reviewed pass\/fail case lacks complete evidence|comparable Core lacks complete case evidence/,
   );
 
   const missingOverlay = structuredClone(result);
@@ -4927,7 +5441,7 @@ test("schema 3 pair recomputes outcomes, pointers and exact metric deltas", () =
   );
   assert.throws(
     () => validateFixtureResult(missingOverlay, { baselineBytes }),
-    /comparable Core lacks complete case evidence/,
+    /reviewed pass\/fail case lacks complete evidence|comparable Core lacks complete case evidence/,
   );
 
   const wrongOutcome = structuredClone(result);
@@ -4954,7 +5468,7 @@ test("schema 3 pair recomputes outcomes, pointers and exact metric deltas", () =
   assert.throws(
     () =>
       validateFixtureResult(forgedSourceMetric, { baselineBytes }),
-    /metrics lack source evidence|comparable Core lacks complete case evidence/,
+    /reviewed pass\/fail case lacks complete evidence|metrics lack source evidence|comparable Core lacks complete case evidence/,
   );
 
   const uncorrelatedMetric = structuredClone(result);
@@ -4967,7 +5481,7 @@ test("schema 3 pair recomputes outcomes, pointers and exact metric deltas", () =
   assert.throws(
     () =>
       validateFixtureResult(uncorrelatedMetric, { baselineBytes }),
-    /metrics lack source evidence|comparable Core lacks complete case evidence/,
+    /reviewed pass\/fail case lacks complete evidence|metrics lack source evidence|comparable Core lacks complete case evidence/,
   );
 
   const runtimeDrift = structuredClone(result);
@@ -4975,7 +5489,7 @@ test("schema 3 pair recomputes outcomes, pointers and exact metric deltas", () =
   runtimeDrift.evidenceSha256 = independentHash(runtimeDrift.evidence);
   assert.throws(
     () => validateFixtureResult(runtimeDrift, { baselineBytes }),
-    /efficiency pass is not supported/,
+    /reviewed pass\/fail case lacks complete evidence|efficiency pass is not supported/,
   );
 
   const wrongNull = structuredClone(result);
@@ -5028,7 +5542,7 @@ test("schema 3 pass binds metrics, instructions, and model identity", () => {
   );
   assert.throws(
     () => validateFixtureResult(reusedIdentity, { baselineBytes }),
-    /capability pass is not supported|comparable Core lacks complete case evidence/,
+    /reviewed pass\/fail case lacks complete evidence|capability pass is not supported|comparable Core lacks complete case evidence/,
   );
 
   for (const mutate of [
@@ -5053,7 +5567,7 @@ test("schema 3 pass binds metrics, instructions, and model identity", () => {
     candidate.evidenceSha256 = independentHash(candidate.evidence);
     assert.throws(
       () => validateFixtureResult(candidate, { baselineBytes }),
-      /capability pass is not supported|comparable Core lacks complete case evidence|pair pass is not supported|pair efficiency pass is not supported|metrics lack source evidence/,
+      /reviewed pass\/fail case lacks complete evidence|capability pass is not supported|comparable Core lacks complete case evidence|pair pass is not supported|pair efficiency pass is not supported|metrics lack source evidence/,
     );
   }
 
@@ -5066,7 +5580,7 @@ test("schema 3 pass binds metrics, instructions, and model identity", () => {
   );
   assert.throws(
     () => validateFixtureResult(contaminatedControl),
-    /capability pass is not supported/,
+    /reviewed pass\/fail case lacks complete evidence|capability pass is not supported/,
   );
 });
 
@@ -5075,6 +5589,39 @@ test("schema 3 closes a non-comparable Core pair as blocked", () => {
   const { result, baselineBytes } = completeBlockedCoreResult(control);
   assert.doesNotThrow(() =>
     validateFixtureResult(result, { baselineBytes }),
+  );
+
+  const inflatedCaseClaim = structuredClone(result);
+  inflatedCaseClaim.review.caseJudgments[1].judgment = "pass";
+  assert.throws(
+    () =>
+      validateFixtureResult(inflatedCaseClaim, { baselineBytes }),
+    /reviewed pass\/fail case lacks complete evidence/,
+  );
+
+  const unfinishedCaseReview = structuredClone(result);
+  unfinishedCaseReview.review.caseJudgments[1].judgment =
+    "reviewRequired";
+  assert.throws(
+    () =>
+      validateFixtureResult(unfinishedCaseReview, {
+        baselineBytes,
+      }),
+    /complete review cannot retain pending case judgments/,
+  );
+
+  const collidedBlockedIdentity = structuredClone(result);
+  collidedBlockedIdentity.evidence.cases[1].thread.id =
+    collidedBlockedIdentity.evidence.cases[0].thread.id;
+  collidedBlockedIdentity.evidenceSha256 = independentHash(
+    collidedBlockedIdentity.evidence,
+  );
+  assert.throws(
+    () =>
+      validateFixtureResult(collidedBlockedIdentity, {
+        baselineBytes,
+      }),
+    /recorded execution identities collide/,
   );
 
   for (const mutate of [
@@ -5095,7 +5642,7 @@ test("schema 3 closes a non-comparable Core pair as blocked", () => {
     mutate(candidate);
     assert.throws(
       () => validateFixtureResult(candidate, { baselineBytes }),
-      /Core complete pair|non-comparable|comparable Core lacks complete case evidence/,
+      /reviewed pass\/fail case lacks complete evidence|Core complete pair|non-comparable|comparable Core lacks complete case evidence/,
     );
   }
 });
@@ -5581,8 +6128,8 @@ test("full profiles select the exact frozen 16-case order", async () => {
     EXPECTED_FULL_CASE_IDS,
   );
 
-  const control = collector.runConfigurationForMode("run-control-v2");
-  const core = collector.runConfigurationForMode("run-core-v2");
+  const control = collector.runConfigurationForMode("run-control-v3");
+  const core = collector.runConfigurationForMode("run-core-v3");
   assert.deepEqual(
     {
       mode: control.mode,
@@ -5593,9 +6140,9 @@ test("full profiles select the exact frozen 16-case order", async () => {
       baselineRelativePath: control.baselineRelativePath,
     },
     {
-      mode: "run-control-v2",
-      runId: "no-harness-control-v2",
-      resultRelativePath: "evals/p0/no-harness-control-v2.json",
+      mode: "run-control-v3",
+      runId: "no-harness-control-v3",
+      resultRelativePath: "evals/p0/no-harness-control-v3.json",
       caseIds: EXPECTED_FULL_CASE_IDS,
       instructionCondition: "none",
       baselineRelativePath: null,
@@ -5612,12 +6159,12 @@ test("full profiles select the exact frozen 16-case order", async () => {
       candidateRelativePath: core.candidateRelativePath,
     },
     {
-      mode: "run-core-v2",
-      runId: "common-core-v2",
-      resultRelativePath: "evals/p0/common-core-v2.json",
+      mode: "run-core-v3",
+      runId: "common-core-v3",
+      resultRelativePath: "evals/p0/common-core-v3.json",
       caseIds: EXPECTED_FULL_CASE_IDS,
       instructionCondition: "common-core",
-      baselineRelativePath: "evals/p0/no-harness-control-v2.json",
+      baselineRelativePath: "evals/p0/no-harness-control-v3.json",
       candidateRelativePath: "evals/candidates/common-core-v1.md",
     },
   );
@@ -5626,7 +6173,7 @@ test("full profiles select the exact frozen 16-case order", async () => {
   assert.equal(Object.isFrozen(control.caseIds), true);
   assert.equal(Object.isFrozen(core.caseIds), true);
   assert.throws(
-    () => collector.runConfigurationForMode("run-control-v1"),
+    () => collector.runConfigurationForMode("run-control-v2"),
     /unsupported live run mode/,
   );
   assert.throws(
@@ -5762,14 +6309,22 @@ test("evaluation manifest freezes the portable one-shot pair", () => {
   );
   for (const required of [
     "repetitions_per_condition: 1",
-    "evaluation: full_baseline_common_core_pair_v2",
-    "mode: run-control-v2",
-    "mode: run-core-v2",
+    "evaluation: full_baseline_common_core_pair_v3",
+    "mode: run-control-v3",
+    "mode: run-core-v3",
+    "result: evals/p0/no-harness-control-v3.json",
+    "result: evals/p0/common-core-v3.json",
     "result: evals/p0/no-harness-control-v2.json",
-    "result: evals/p0/common-core-v2.json",
+    "status: blocked_event_limit",
     "environment: explicit_local_case_root",
     "project_doc_max_bytes: 32768",
     "instruction_sources: control_prefix_plus_exact_core_candidate",
+    "agent_message_delta: exact_protocol_validated_bounded_semantic_summary",
+    "delta_summary_binding: unique_item_before_exact_completed_message",
+    "delta_secret_scan: bounded_receipt_order_across_items",
+    "delta_raw_retention: none_hash_summary_for_noncoalesced",
+    "pending_notification_queue: normalized_bounded_delta_coalescing",
+    "reviewed_case_claims: pass_or_fail_requires_complete_case_evidence",
     "instruction_discovery: live_control_model_free_receipt",
     "turn_start_environment_overrides: omitted",
     "candidate_reference: exact_across_control_core_and_overlay",
@@ -5795,11 +6350,14 @@ test("paired execution gate blocks root activation, dirty inputs and source drif
     await import("../evals/support/collect-codex-app-server.mjs");
   assert.equal(typeof assertEvaluationGateSnapshot, "function");
   const controlConfiguration =
-    runConfigurationForMode("run-control-v2");
-  const coreConfiguration = runConfigurationForMode("run-core-v2");
+    runConfigurationForMode("run-control-v3");
+  const coreConfiguration = runConfigurationForMode("run-core-v3");
   const candidateBytes = Buffer.from(validCoreCandidateText());
   const reviewedControl =
-    completeSchema3V2ControlPassResult(candidateBytes);
+    completeSchema3ExplicitLocalControlPassResult(
+      "no-harness-control-v3",
+      candidateBytes,
+    );
   const baselineBytes = Buffer.from(
     `${JSON.stringify(reviewedControl, null, 2)}\n`,
   );
@@ -5849,6 +6407,46 @@ test("paired execution gate blocks root activation, dirty inputs and source drif
       sourceResolver: fixtureSourceResolver,
     }),
   );
+
+  const pendingControl = structuredClone(reviewedControl);
+  pendingControl.review.status = "pending";
+  pendingControl.review.capabilityVerdict = "blocked";
+  pendingControl.review.reasons = ["review-pending"];
+  const blockedControl = structuredClone(reviewedControl);
+  blockedControl.review.capabilityVerdict = "blocked";
+  blockedControl.review.reasons = ["reviewed-block"];
+  const previousGenerationControl =
+    completeSchema3ExplicitLocalControlPassResult(
+      "no-harness-control-v2",
+      candidateBytes,
+    );
+  for (const rejectedControl of [
+    pendingControl,
+    blockedControl,
+    previousGenerationControl,
+  ]) {
+    const rejectedCore = structuredClone(cleanCore);
+    rejectedCore.baseline.bytes = Buffer.from(
+      `${JSON.stringify(rejectedControl, null, 2)}\n`,
+    );
+    rejectedCore.source = {
+      gitBlobs: structuredClone(
+        rejectedControl.evidence.source.gitBlobs,
+      ),
+      sha256: structuredClone(
+        rejectedControl.evidence.source.sha256,
+      ),
+    };
+    assert.throws(
+      () =>
+        assertEvaluationGateSnapshot(
+          coreConfiguration,
+          rejectedCore,
+          { sourceResolver: fixtureSourceResolver },
+        ),
+      /execution gate/,
+    );
+  }
 
   const candidateDrift = {
     ...cleanCore,
@@ -5924,25 +6522,27 @@ test("paired execution gate blocks root activation, dirty inputs and source drif
 test("CLI accepts only smoke and the fresh paired live modes", () => {
   assert.deepEqual(parseCli(["smoke"]), { mode: "smoke" });
   assert.deepEqual(
-    parseCli(["run-control-v2"]),
-    { mode: "run-control-v2" },
+    parseCli(["run-control-v3"]),
+    { mode: "run-control-v3" },
   );
-  assert.deepEqual(parseCli(["run-core-v2"]), { mode: "run-core-v2" });
+  assert.deepEqual(parseCli(["run-core-v3"]), { mode: "run-core-v3" });
   for (const argv of [
     [],
     ["run-control-v1"],
     ["run-core-v1"],
+    ["run-control-v2"],
+    ["run-core-v2"],
     ["run-v2"],
     ["run-v3"],
     ["resume"],
     ["--force"],
     ["smoke", "--force"],
-    ["run-control-v2", "extra"],
-    ["run-core-v2", "--force"],
+    ["run-control-v3", "extra"],
+    ["run-core-v3", "--force"],
   ]) {
     assert.throws(
       () => parseCli(argv),
-      /usage: node evals\/support\/collect-codex-app-server\.mjs <smoke\|run-control-v2\|run-core-v2>/,
+      /usage: node evals\/support\/collect-codex-app-server\.mjs <smoke\|run-control-v3\|run-core-v3>/,
     );
   }
 });
