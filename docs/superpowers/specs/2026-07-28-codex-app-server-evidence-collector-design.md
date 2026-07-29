@@ -125,8 +125,8 @@ Node.js 표준 라이브러리로 App Server stdio JSON-RPC를 직접 사용한�
 
 - Collector는 현재 HEAD와 같은 Git blob인 source bytes를 메모리에 고정한다. P0 계약은 그 bytes로 만든 격리 temp tree에서 실행하고, case와 mock도 같은 snapshot bytes로 materialize한다.
 - MCP 비활성화 argv에는 원래 URL·command·args·header·environment를 복사하지 않는다. transport 종류에 맞는 inert placeholder와 `enabled=false`만 쓴다.
-- 원래 MCP inventory에서 만든 같은 inert projection을 `doctor`, disabled inventory와 App Server에 공통 적용한다. 선택적 로컬 MCP의 host-side 불통을 평가 runtime 장애로 오판하지 않는다.
-- `mcpServerStatus/list` 응답에는 readiness 필드가 없다. 모든 MCP를 비활성화한 run에서는 global 또는 thread-scoped 목록에 항목이 하나라도 있으면 model 전 차단한다. 모든 페이지와 cursor를 검증한다.
+- 원래 MCP inventory에서 만든 같은 inert projection과 실행 전용 `features.plugins=false`, `features.apps=false`, `features.hooks=false`를 `doctor`, disabled inventory와 App Server에 공통 적용한다. 사용자 설치·설정은 수정하지 않으며 제거된 no-op `features.plugin_hooks`는 쓰지 않는다.
+- `mcpServerStatus/list`는 비활성화된 configured server도 열거한다. `detail: full`인 global/thread-scoped 모든 페이지에서 이름 집합이 disabled inventory와 정확히 같고 tool/resource/resource-template 수가 각각 0이며 `serverInfo`가 없는 경우만 inert로 인정한다. `authStatus`는 0.145.0 enum만 허용하고 차단 증거의 `serverInfo` 값은 존재 마커만 남긴다. 누락·추가 이름이나 capability가 하나라도 있으면 model 전 차단한다.
 - exact case cwd의 `hooks/list`를 `thread/start` 전에 검사한다. enabled hook, warning, error, malformed/중복 cwd 응답은 모두 차단한다.
 - `ThreadStartResponse`의 model, provider, approval policy, reviewer, sandbox, cwd, runtime roots와 instruction sources는 중첩 `thread`가 아니라 응답 최상위 effective 값으로 검증한다.
 - `thread/start`와 `turn/start`에는 `environments: []`를 명시해 기본 environment 선택을 막는다. approval 요청은 method별 유효한 거절 응답만 반환한다.
@@ -137,7 +137,7 @@ Node.js 표준 라이브러리로 App Server stdio JSON-RPC를 직접 사용한�
 - preflight는 named profile 아래에서 workspace read 성공, sibling Collector-control sentinel과 외부 평가 자산 read 실패, workspace write 실패와 controller 확인, loopback controller reachability 성공 뒤 sandbox network 실패를 각각 실제 `command/exec`로 입증한다. 각 case도 동적 workspace root에 대해 sibling control/read·write 증명을 반복한다. frozen rubric과 실행 시 존재한 Codex config/auth/credential label manifest는 config 전후 상태 및 모든 proof와 일치해야 한다.
 - Codex 0.145.0 elevated Windows sandbox는 custom `outputBytesCap`을 거부하므로 `command/exec` request에서 이 필드를 생략한다. 수집된 output은 Collector가 UTF-8 64 KiB로 별도 제한한다.
 - JSONL 입력은 wire 순서대로 직렬 처리한다. broker probe 뒤와 각 case 직전에 session-fatal·pending notification·global blocker를 다시 확인한다.
-- 알림은 좁은 allowlist와 payload schema로 처리한다. `thread/status/changed`의 `idle`·`notLoaded`·유효한 `active[]`만 수동 상태이며 `systemError`·approval/user-input 대기는 차단한다. `windowsSandbox/setupCompleted`는 `mode: elevated`, `success: true`만 허용한다. `item/started|completed`에는 유효한 item type과 ID가 필수다. unknown, malformed item, hook, warning/error, MCP startup, approval, runtime drift는 fail-closed이며 foreign/missing thread·turn ID는 terminal 또는 command evidence가 될 수 없다.
+- 알림은 좁은 allowlist와 payload schema로 처리한다. `remoteControl/status/changed`는 0.145.0 초기화 직후의 필수 snapshot이므로 model 전 적어도 한 번 관찰해야 하며, `disabled`이면서 `environmentId: null`인 유효 payload만 허용하고 식별자는 보존하지 않는다. 미관찰, `connecting|connected|errored`, attached environment와 malformed payload는 차단한다. case는 notification cursor를 먼저 고정한 직후 snapshot을 검사해 그 사이 상태 변경을 놓치지 않는다. `thread/status/changed`의 `idle`·`notLoaded`·유효한 `active[]`만 수동 상태이며 `systemError`·approval/user-input 대기는 차단한다. `windowsSandbox/setupCompleted`는 `mode: elevated`, `success: true`만 허용한다. `item/started|completed`에는 유효한 item type과 ID가 필수다. unknown, malformed item, hook, warning/error, MCP startup, approval, runtime drift는 fail-closed이며 foreign/missing thread·turn ID는 terminal 또는 command evidence가 될 수 없다.
 - p0-02 state는 subject workspace의 파일이 아니다. Collector 메모리의 bounded named-pipe broker만 effect를 commit하며 첫 write 응답을 commit 뒤 끊는다. thin PowerShell client에는 state 쓰기 권한이 없다.
 - broker는 연결 수와 연결 lifetime을 제한한다. close는 listener를 먼저 닫고 불완전 socket을 거부·파기한 뒤 완료 요청과 직렬 queue만 drain한다. close는 idempotent하며 Collector probe는 sequence 1의 첫 이벤트이자 정확히 한 번이어야 하고 subject의 추가 probe도 차단한다.
 - 두 case 모두 named exact-read/network-disabled profile을 사용한다. p0-02는 model turn 전에 같은 profile의 `command/exec`로 pipe reachability를 검증한다.
@@ -256,7 +256,7 @@ subject를 시작하기 전에 같은 App Server connection에서 다음을 수�
 
 결과에는 이름, 버전, enabled 상태와 오류만 보존한다. auth token, secret, 전체 config와 직접 연락·결제 식별자는 저장하지 않는다.
 
-App Server 시작 전 같은 package binary의 `mcp list --json`으로 configured server 이름과 transport 종류를 읽는다. 0.145.0에서는 `mcp_servers.<name>.enabled=false`만 덮어쓰면 기존 transport가 사라져 config가 거부되므로 사용하지 않는다. 각 서버마다 secret·header·environment 값은 복사하지 않고, 유효성 검사에 필요한 최소 transport 필드와 `enabled=false`를 하나의 inline TOML table로 다시 만들어 child-process argv 한 항목으로 전달한다. 이 버전의 `-c` dotted-path parser는 quoted key segment의 따옴표를 서버 이름 자체로 취급하므로 이름은 TOML bare key 문자만 허용하며, 다른 이름은 추정한 escaping으로 실행하지 않고 차단한다. 같은 argv로 다시 실행한 `mcp list --json`에서 원래 이름 집합이 유지되고 모두 `enabled: false`인지 확인한 뒤에만 App Server를 시작한다. `mcp_servers={}` 전체 override도 기존 table을 확실히 지우지 못하므로 사용하지 않는다.
+App Server 시작 전 같은 package binary의 `mcp list --json`으로 configured server 이름과 transport 종류를 읽는다. 0.145.0에서는 `mcp_servers.<name>.enabled=false`만 덮어쓰면 기존 transport가 사라져 config가 거부되므로 사용하지 않는다. 각 서버마다 secret·header·environment 값은 복사하지 않고, 유효성 검사에 필요한 최소 transport 필드와 `enabled=false`를 하나의 inline TOML table로 다시 만들어 child-process argv 한 항목으로 전달한다. 이 버전의 `-c` dotted-path parser는 quoted key segment의 따옴표를 서버 이름 자체로 취급하므로 이름은 1~128자의 TOML bare key 문자이면서 secret 형태가 아닌 경우만 허용하고, 거부 오류에 원문 이름을 반사하지 않는다. 다른 이름은 추정한 escaping으로 실행하지 않고 차단한다. 같은 argv로 다시 실행한 `mcp list --json`에서 원래 이름 집합이 유지되고 모두 `enabled: false`인지 확인한 뒤에만 App Server를 시작한다. `mcp_servers={}` 전체 override도 기존 table을 확실히 지우지 못하므로 사용하지 않는다.
 
 model, reasoning effort와 service tier는 override하지 않고 사용자 기본값의 실제 응답값을 기록한다. reroute event나 두 subject 사이의 예상하지 않은 runtime 차이가 있으면 동일 조건이라고 추정하지 않고 evidence limitation 또는 capability block으로 남긴다.
 
@@ -267,10 +267,10 @@ model, reasoning effort와 service tier는 override하지 않고 사용자 기�
 1. rubric-free input과 SHA-256을 만든다.
 2. subject case root와 그 밖의 Collector control root를 각각 exclusive create한다.
 3. fixture를 materialize하고 실제 bytes의 before snapshot을 만든다.
-4. exact case cwd의 hook과 global MCP 목록이 비어 있음을 확인한 뒤, 현재 대화를 fork·resume하지 않고 named exact-read/network-disabled, approval-never 새 thread를 시작한다. `dynamicTools`와 `selectedCapabilityRoots`는 각각 빈 배열이며 input에는 text 외 mention·skill item을 넣지 않는다.
+4. exact case cwd의 hook이 비어 있고 global MCP status가 exact configured-name/capability-zero 계약을 만족함을 확인한 뒤, 현재 대화를 fork·resume하지 않고 named exact-read/network-disabled, approval-never 새 thread를 시작한다. `dynamicTools`와 `selectedCapabilityRoots`는 각각 빈 배열이며 input에는 text 외 mention·skill item을 넣지 않는다.
 5. 응답 최상위의 effective thread metadata에서 active named profile과 runtime root까지 검증한 뒤 thread ID와 metadata를 control root의 checkpoint에 기록한다.
 6. 같은 case root에서 workspace fixture read 성공, sibling control sentinel과 외부 평가 자산 read 실패, workspace write 실패를 다시 입증한다.
-7. thread-scoped MCP 목록도 비어 있고 위험 알림이 없을 때만 turn으로 진행한다.
+7. thread-scoped MCP status도 같은 inert 계약을 만족하고 위험 알림이 없을 때만 turn으로 진행한다.
 8. 합성 write case는 Collector 소유 named-pipe broker 접근을 같은 named profile의 model-free command로 먼저 검증한다.
 9. typed notification을 turn terminal state까지 수집한다. case당 제한은 180초와 typed event 256개다.
 10. 시간 또는 event 제한을 넘으면 같은 turn을 한 번 interrupt하고 새 thread나 turn을 만들지 않는다.
@@ -295,7 +295,7 @@ Collector는 다음 model-free 증거가 모두 있을 때만 subject tool surfa
 1. 생성 schema가 `thread/start.dynamicTools`와 `thread/start.selectedCapabilityRoots`를 지원한다.
 2. thread request가 두 필드에 각각 빈 배열을 보냈고 text 외 mention·skill input item을 보내지 않았다.
 3. `mcp list --json`에서 발견한 모든 server에 최소 transport 필드와 `enabled=false`를 함께 가진 version-matched inline-table argv override를 적용했고, 같은 argv의 재조회에서 이름 집합이 유지되고 모두 disabled이며 config warning이 없다.
-4. global/thread-scoped MCP 목록이 비어 있고 모든 MCP startup notification state와 connector request/tool item이 없다.
+4. global/thread-scoped MCP status가 exact configured-name/capability-zero 계약을 만족하고 모든 MCP startup notification state와 connector request/tool item이 없다.
 5. subject의 실행 item type은 허용된 `commandExecution`과 공개 message뿐이다.
 
 MCP startup notification 자체가 비활성화 계약 위반이다. 위 조건 중 하나를 확인할 수 없거나 MCP·connector tool call이 관찰되면 우회하지 않고 `blocked: uncontrolled-tool-surface`로 판정한다. 구현 계획은 실행 버전의 generated schema와 effective config를 이용해 정확한 MCP-disable key를 먼저 확인해야 하며, 추정한 key로 model을 실행하면 안 된다.

@@ -38,7 +38,7 @@
 - [x] HEAD와 일치하는 source bytes를 메모리에 고정하고 P0 계약·case·mock을 그 snapshot에서만 실행/materialize한다.
 - [x] `ThreadStartResponse` 최상위 effective metadata와 중첩 thread identity를 교차 검증한다.
 - [x] exact cwd hook inventory를 thread 전에 검사하고 enabled/error/warning/malformed 응답을 차단한다.
-- [x] MCP 목록을 모든 페이지에서 검사한다. 목록 항목 또는 startup notification이 하나라도 있으면 model 전에 차단한다.
+- [x] `detail: full` MCP status의 모든 페이지를 검사한다. configured 이름 집합이 다르거나 tool/resource/template/serverInfo capability가 하나라도 있거나 startup notification이 오면 model 전에 차단한다. `authStatus`는 version-matched enum만 허용하고 untrusted server-info 문자열은 증거에 보존하지 않는다.
 - [x] 알림 allowlist와 thread/turn ID 상관관계를 적용하고 foreign/ambiguous terminal을 증거로 인정하지 않는다.
 - [x] checkpoint를 subject root 밖에 두고 materialized fixture bytes를 turn 전후 각각 snapshot해 exact equality를 검사한다.
 - [x] p0-02의 `workspaceWrite + state.json`을 제거하고 named exact-read profile과 Collector 소유 named-pipe broker로 교체한다.
@@ -55,12 +55,15 @@
 - [x] capability pass에 현재 검증 source SHA, `cases.json`에서 재구성한 exact input·fixture manifest, 검증 mock의 exact 경로·SHA, exact request identity, probe-first P0 counter/event 구조, runtime/preflight/source/inventory/case/repository/config deep equality와 reviewer의 최종 `pass|fail`, 이유와 존재하는 exact case JSON Pointer를 모두 요구한다.
 - [x] 2026-07-29 managed runner의 2차 model-free smoke는 바깥 샌드박스가 홈을 `CodexSandboxOffline`로 치환하고 socket을 OS 10013으로 차단해 App Server·model 전에 정확히 중단됐다. 결과 파일은 없고 조건 완화 재시도도 하지 않았다.
 - [x] 선택적 `basic-memory-local` 불통 경고가 평가를 막지 않도록 기존 inert MCP projection을 `doctor`에도 적용하고 회귀 테스트를 추가한다.
-- [ ] 수정된 현재 HEAD를 host/unrestricted runner에서 model-free smoke로 정확히 한 번 검증한다.
+- [x] 2026-07-29 host smoke는 doctor를 통과한 뒤 설치 Ponytail hook, `codex_apps`, 비활성 configured MCP 레코드와 정상 `remoteControl/status/changed` snapshot을 runtime control 위반으로 오판해 model 전에 중단됐다. 결과 파일과 model turn은 없었다.
+- [x] 사용자 설정을 바꾸지 않는 실행 전용 `plugins/apps/hooks=false`, exact configured-name/capability-zero MCP 검증과 payload-aware remote-control 상태 검증을 회귀 테스트로 고정한다.
+- [x] 초기 remote-control snapshot 미관찰도 차단하고 case cursor를 먼저 고정해 상태 변경 race를 닫는다. MCP status는 `detail: full`로 resources/templates까지 실제 조회한다.
+- [ ] 이 수정이 커밋된 새 HEAD를 host/unrestricted runner에서 model-free smoke로 정확히 한 번 검증한다.
 - [ ] smoke가 통과한 뒤에만 별도 사용자 확인을 받고 `run-v2`를 한 번 실행한다.
 
 ## Current Offline Verification
 
-2026-07-28 현재 `node --check` 통과, Collector `node:test` 58/58 통과, PowerShell P0 evaluation contract 통과다. safe environment와 named-profile `-c` TOML argv는 별도의 model-free `codex mcp list --json` parse check에서 exit `0`, 빈 stderr와 5개 parsed record를 확인했다. 이는 App Server, model turn 또는 2차 smoke 실행이 아니다.
+2026-07-29 현재 `node --check`, Collector `node:test` 61/61과 PowerShell P0 evaluation contract가 통과했다. host의 model-free App Server 진단에서 실행 전용 feature 차단 뒤 hook 0개, `codex_apps` 제거, configured MCP 5개의 capability count 0과 `serverInfo: null`, 정식 초기 remote-control notification method를 확인했다. 이는 model turn 또는 수정 후 최종 smoke 실행이 아니다.
 
 ## Files
 
@@ -233,7 +236,9 @@ git -C "D:\JOEWRKS\작업하네스" commit -m "test: define Collector evidence c
 
 **Interfaces:**
 - `buildMcpDisableArgs(inventory) -> string[]`
+- `buildRuntimeIsolationArgs(inventory) -> string[]`
 - `verifyDisabledMcp(before, after) -> void`
+- `verifyMcpRuntimeIsInert(configured, runtimeStatus) -> void`
 - `createJsonlClient({ readable, writable, onNotification, onServerRequest })`
 - `runBuffered(executable, args, options) -> ProcessResult`
 - `prepareRuntime(runRoot) -> RuntimeEvidence`
@@ -253,9 +258,9 @@ test("MCP overrides retain minimum transport but omit secrets", () => {
   ]);
   assert.deepEqual(args, [
     "-c",
-    "mcp_servers.figma={enabled=false,url=\"https://mcp.figma.com/mcp\"}",
+    "mcp_servers.figma={enabled=false,url=\"http://127.0.0.1/\"}",
     "-c",
-    "mcp_servers.node_repl={enabled=false,command=\"C:\\\\runtime\\\\node.exe\",args=[]}",
+    "mcp_servers.node_repl={enabled=false,command=\"C:\\\\Windows\\\\System32\\\\cmd.exe\",args=[]}",
   ]);
   assert.doesNotMatch(args.join(" "), /Authorization|SECRET|secret/);
   assert.throws(
@@ -342,30 +347,30 @@ node --test "D:\JOEWRKS\작업하네스\tests\codex-app-server-collector.tests.m
 `buildMcpDisableArgs` must emit one `-c` pair per server:
 
 ```text
-streamable_http/sse -> mcp_servers.<bare-name>={enabled=false,url="<url>"}
-stdio               -> mcp_servers.<bare-name>={enabled=false,command="<command>",args=["<arg>"]}
+streamable_http/sse -> mcp_servers.<bare-name>={enabled=false,url="http://127.0.0.1/"}
+stdio               -> mcp_servers.<bare-name>={enabled=false,command="C:\\Windows\\System32\\cmd.exe",args=[]}
 ```
 
-Codex 0.145.0의 `-c` dotted-path parser는 quoted key segment의 따옴표를 서버 이름에 포함하므로 사용하지 않는다. 이름은 TOML bare key 문자(`A-Z`, `a-z`, `0-9`, `_`, `-`)만 허용하고 다른 이름은 추정하지 않고 차단한다. Value에는 JSON-compatible double-quoted TOML strings를 사용하고 control character나 unknown transport를 거부한다. 다른 inventory field는 포함하지 않는다.
+Codex 0.145.0의 `-c` dotted-path parser는 quoted key segment의 따옴표를 서버 이름에 포함하므로 사용하지 않는다. 이름은 1~128자의 TOML bare key 문자(`A-Z`, `a-z`, `0-9`, `_`, `-`)이면서 secret 형태가 아닌 경우만 허용하고, 거부 오류에는 원문을 넣지 않는다. 다른 이름은 추정하지 않고 차단한다. Value에는 JSON-compatible double-quoted TOML strings를 사용하고 control character나 unknown transport를 거부한다. 다른 inventory field는 포함하지 않는다.
 
 `prepareRuntime` order:
 
 1. Canonicalize the standalone binary.
 2. Require exact version and both package-local helper files.
 3. Build an explicit OS-runtime environment allowlist and the `joewrks-eval-exact-read-v2` permission argv; retain environment key names and permission policy hash, never values.
-4. Read original `mcp list --json`, build inert overrides, re-read with the same safe environment and argv, and require identical names plus `enabled: false` for all.
-5. Run `doctor --json` with that same MCP-disabled argv; retain only schema/version/overall status and statuses for `auth.credentials`, `config.load`, `installation`, `mcp.config`, both provider reachability checks, `runtime.provenance`, `sandbox.helpers`; require `ok`.
+4. Read original `mcp list --json`, build inert per-server overrides plus `features.plugins=false`, `features.apps=false`, `features.hooks=false`, re-read with the same safe environment and argv, and require identical names plus `enabled: false` for all.
+5. Run `doctor --json` with that same runtime-isolation argv; retain only schema/version/overall status and statuses for `auth.credentials`, `config.load`, `installation`, `mcp.config`, both provider reachability checks, `runtime.provenance`, `sandbox.helpers`; require `ok`.
 6. Generate experimental schema inside the exclusive run root and hash `codex_app_server_protocol.schemas.json`.
-7. Require schema support for `dynamicTools`, `selectedCapabilityRoots`, `permissions`, `permissionProfile`, `command/exec`, `windowsSandbox/readiness`, four inventory methods and `mcpServerStatus/list`.
-8. Retain only MCP name, transport type and disabled status.
+7. Require schema support for `dynamicTools`, `selectedCapabilityRoots`, `permissions`, `permissionProfile`, `command/exec`, `windowsSandbox/readiness`, four inventory methods, `mcpServerStatus/list` and `remoteControl/status/changed`.
+8. Retain the three disabled feature controls and only MCP name, transport type and disabled status.
 
 Start App Server with:
 
 ```js
 [
   "app-server",
+  ...runtimeIsolationArgs,
   ...permissionArgs,
-  ...mcpDisableArgs,
   "--strict-config",
   "--stdio",
 ]
@@ -465,7 +470,7 @@ For each case:
 7. Prove the materialized workspace target is readable, sibling Collector-control sentinel and frozen rubric/config/auth targets are denied, and a case-local write sentinel cannot be created using `command/exec.permissionProfile`. Cross-check the protected-label manifest recorded in config state.
 8. For p0-02, start the Collector-owned broker and prove the thin client can reach it with model-free `command/exec` under the same named profile. Then call `turn/start` once for either case with `permissions: EVALUATION_PERMISSION_PROFILE`.
 9. Collect until `turn/completed`, 180 seconds or 256 events. On limit, call `turn/interrupt` once and do not create another turn/thread.
-10. Query every `mcpServerStatus/list` page globally before thread, thread-scoped before turn and after turn. Any entry/startup notification, connector/tool item, approval, hook, warning, unknown item, runtime drift, required truncation or missing/foreign terminal blocks the case.
+10. Query every `mcpServerStatus/list` page with `detail: full` globally before thread, thread-scoped before turn and after turn. A name-set mismatch, nonzero tool/resource/template capability, non-null server info, startup notification, connector/tool item, approval, hook, warning, unknown item, runtime drift, required truncation or missing/foreign terminal blocks the case. Require an observed disabled/detached initial remote-control snapshot; cursor-before-snapshot ordering makes later status changes replayable.
 11. Take the after fixture snapshot and require exact equality with before. Read p0-02 state only from the in-memory broker ledger.
 12. Complete evidence gives `automatedJudgment: reviewRequired`; insufficient evidence gives `blocked`. Semantic pass/fail remains for the reviewer.
 
@@ -574,13 +579,13 @@ node "D:\JOEWRKS\작업하네스\evals\support\collect-codex-app-server.mjs" smo
 git -C "D:\JOEWRKS\작업하네스" status --short --untracked-files=all
 ```
 
-Codex 0.145.0 elevated Windows sandbox rejects a custom `outputBytesCap`, so every `command/exec` request omits it. Require exact stdout, empty stderr, inner exit `0`, workspace/sibling-control/external-read/write/network isolation proofs, empty MCP status, no enabled/error/warning hook, no blocking notification and identical repository/config before/after. Smoke creates no v2 result and no model turn. If elevated readiness is unavailable, report blocked; do not run setup automatically. The user may separately choose `codex sandbox setup --elevated --current-user`. For any blocker, preserve diagnostics and do not retry with relaxed conditions.
+Codex 0.145.0 elevated Windows sandbox rejects a custom `outputBytesCap`, so every `command/exec` request omits it. Require exact stdout, empty stderr, inner exit `0`, workspace/sibling-control/external-read/write/network isolation proofs, exact configured-name/capability-zero MCP status, no enabled/error/warning hook, disabled/detached remote-control snapshot, no blocking notification and identical repository/config before/after. Smoke creates no v2 result and no model turn. If elevated readiness is unavailable, report blocked; do not run setup automatically. The user may separately choose `codex sandbox setup --elevated --current-user`. For any blocker, preserve diagnostics and do not retry with relaxed conditions.
 
 - [ ] **Step 4: Run v2 once only after explicit user confirmation**
 
 `run-v2` uses the same connection for preflight, `skills/list`, `plugin/installed`, `hooks/list`, all `permissionProfile/list` pages, `mcpServerStatus/list` and both cases. 효율성을 위해 process를 재시작하지 않는 대신 각 case의 동적 root에서 workspace read와 sibling control/external read/workspace write denial을 다시 증명한다.
 
-Before the first model and after each case, re-read canonical HEAD/status/content hash and user config hash. Changed source/config, any MCP entry/startup, hook/runtime drift, foreign event, external tool call, secret-shaped output or session-fatal ambiguity stops later cases. A controlled preflight/case failure writes one truthful blocked result; source mismatch or pre-existing result writes nothing.
+Before the first model and after each case, re-read canonical HEAD/status/content hash and user config hash. Changed source/config, MCP capability/name drift or startup, hook/runtime drift, foreign event, external tool call, secret-shaped output or session-fatal ambiguity stops later cases. A controlled preflight/case failure writes one truthful blocked result; source mismatch or pre-existing result writes nothing.
 
 Command:
 

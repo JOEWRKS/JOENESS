@@ -22,6 +22,7 @@ import {
   buildDoctorArgs,
   buildEvaluationPermissionArgs,
   buildMcpDisableArgs,
+  buildRuntimeIsolationArgs,
   buildSubjectInput,
   collectRuntimeInventory,
   createExclusiveRunRoot,
@@ -41,6 +42,7 @@ import {
   proveReadIsolation,
   proveWriteIsolation,
   readWindowsSandboxReadiness,
+  remoteControlSnapshotIsSafe,
   requestSyntheticWriteBroker,
   runBuffered,
   runSubjectCase,
@@ -50,8 +52,16 @@ import {
   stableStringify,
   validateResult,
   verifyDisabledMcp,
+  verifyMcpRuntimeIsInert,
   writeResultExclusive,
 } from "../evals/support/collect-codex-app-server.mjs";
+
+const SAFE_REMOTE_CONTROL_SNAPSHOT = {
+  seen: true,
+  complete: true,
+  status: "disabled",
+  environmentAttached: false,
+};
 
 test("App Server environment and named profile exclude ambient secrets", () => {
   const environment = buildAppServerEnvironment({
@@ -645,8 +655,17 @@ test("MCP overrides retain minimum transport but omit secrets", () => {
   );
   assert.deepEqual(buildDoctorArgs(originalMcp), [
     "doctor",
-    ...args,
+    ...buildRuntimeIsolationArgs(originalMcp),
     "--json",
+  ]);
+  assert.deepEqual(buildRuntimeIsolationArgs(originalMcp), [
+    "-c",
+    "features.plugins=false",
+    "-c",
+    "features.apps=false",
+    "-c",
+    "features.hooks=false",
+    ...args,
   ]);
   assert.throws(
     () =>
@@ -660,6 +679,19 @@ test("MCP overrides retain minimum transport but omit secrets", () => {
         },
       ]),
     /bare TOML key/,
+  );
+  assert.throws(
+    () =>
+      buildMcpDisableArgs([
+        {
+          name: "sk_abcdefghijklmnop",
+          transport: {
+            type: "stdio",
+            command: "ignored",
+          },
+        },
+      ]),
+    /^Error: MCP name is not a safe bare TOML key$/u,
   );
 });
 
@@ -675,6 +707,50 @@ test("MCP disabled inventory preserves names and has no enabled server", () => {
     () => verifyDisabledMcp(before, [{ name: "a", enabled: false }]),
     /name set/,
   );
+});
+
+test("MCP runtime accepts exact configured records only when inert", () => {
+  const configured = [
+    { name: "basic-memory-local" },
+    { name: "figma" },
+  ];
+  const inert = configured.map(({ name }) => ({
+    name,
+    authStatus: "unsupported",
+    toolCount: 0,
+    resourceCount: 0,
+    resourceTemplateCount: 0,
+    serverInfo: null,
+  }));
+  assert.doesNotThrow(() => verifyMcpRuntimeIsInert(configured, inert));
+  assert.throws(
+    () => verifyMcpRuntimeIsInert(configured, inert.slice(0, 1)),
+    /name set/,
+  );
+  assert.throws(
+    () =>
+      verifyMcpRuntimeIsInert(configured, [
+        ...inert,
+        { ...inert[0], name: "unexpected" },
+      ]),
+    /name set/,
+  );
+  for (const patch of [
+    { authStatus: "future" },
+    { toolCount: 1 },
+    { resourceCount: 1 },
+    { resourceTemplateCount: 1 },
+    { serverInfo: { name: "server", version: "1" } },
+  ]) {
+    assert.throws(
+      () =>
+        verifyMcpRuntimeIsInert(configured, [
+          { ...inert[0], ...patch },
+          inert[1],
+        ]),
+      /not inert/,
+    );
+  }
 });
 
 test("JSONL RPC correlates response IDs and records notifications", async () => {
@@ -795,7 +871,9 @@ function createFakeSession({
   onCommandExec,
   onTurnStart,
   turnStartError,
+  mcpInventory = [],
   mcpEntries = [],
+  remoteControlSnapshot = SAFE_REMOTE_CONTROL_SNAPSHOT,
   hooksResponse,
   threadResponsePatch = {},
   emitBeforeTurnResponse = false,
@@ -809,6 +887,8 @@ function createFakeSession({
   };
   return {
     calls,
+    mcpInventory,
+    remoteControlSnapshot: structuredClone(remoteControlSnapshot),
     client: {
       async request(method, params) {
         calls.push({ method, params });
@@ -1078,7 +1158,7 @@ test("fixture mutation during a turn blocks the case", async (t) => {
   );
 });
 
-test("effective thread drift and any MCP entry abort before model turn", async (t) => {
+test("effective thread drift and unexpected MCP entry abort before model turn", async (t) => {
   const parent = await createTestRoot(t);
   const driftSession = createFakeSession({
     threadResponsePatch: { approvalPolicy: "on-request" },
@@ -1131,6 +1211,34 @@ test("effective thread drift and any MCP entry abort before model turn", async (
   );
   assert.equal(
     mcpSession.calls.some(({ method }) => method === "turn/start"),
+    false,
+  );
+
+  const remoteSession = createFakeSession({
+    remoteControlSnapshot: {
+      seen: false,
+      complete: false,
+      status: null,
+      environmentAttached: false,
+    },
+  });
+  await assert.rejects(
+    () =>
+      runSubjectCase({
+        caseDefinition: {
+          id: "pressure-08-claim-integrity",
+          prompt: "report evidence",
+          setup: "read only",
+          fixtureFiles: { "CURRENT-EVIDENCE.json": "{}" },
+        },
+        caseRoot: path.join(parent, "remote-case"),
+        session: remoteSession,
+        turnTimeoutMs: 1000,
+      }),
+    /remote control/i,
+  );
+  assert.equal(
+    remoteSession.calls.some(({ method }) => method === "thread/start"),
     false,
   );
 });
@@ -1211,6 +1319,7 @@ test("MCP pagination preserves scope and rejects repeated cursors", async () => 
     calls.every(({ params }) => params.threadId === "thread-1"),
     true,
   );
+  assert.equal(calls.every(({ params }) => params.detail === "full"), true);
 
   await assert.rejects(
     () =>
@@ -1220,6 +1329,93 @@ test("MCP pagination preserves scope and rejects repeated cursors", async () => 
         },
       }),
     /repeated a cursor/,
+  );
+
+  await assert.rejects(
+    () =>
+      listMcpServerStatus({
+        async request() {
+          return {
+            data: [
+              {
+                name: "malformed",
+                authStatus: "unsupported",
+                tools: {},
+                resources: [],
+                resourceTemplates: [],
+                serverInfo: { name: "missing-version" },
+              },
+            ],
+            nextCursor: null,
+          };
+        },
+      }),
+    /invalid server/,
+  );
+
+  const active = await listMcpServerStatus({
+    async request() {
+      return {
+        data: [
+          {
+            name: "active",
+            authStatus: "unsupported",
+            tools: {},
+            resources: [],
+            resourceTemplates: [],
+            serverInfo: {
+              name: "token=MCP_SERVER_SECRET_123456",
+              version: "1",
+            },
+          },
+        ],
+        nextCursor: null,
+      };
+    },
+  });
+  assert.deepEqual(active[0].serverInfo, { present: true });
+  assert.doesNotMatch(JSON.stringify(active), /MCP_SERVER_SECRET_123456/);
+
+  await assert.rejects(
+    () =>
+      listMcpServerStatus({
+        async request() {
+          return {
+            data: [
+              {
+                name: "malformed-auth",
+                authStatus: "token=MCP_AUTH_SECRET_123456",
+                tools: {},
+                resources: [],
+                resourceTemplates: [],
+              },
+            ],
+            nextCursor: null,
+          };
+        },
+      }),
+    /invalid server/,
+  );
+
+  await assert.rejects(
+    () =>
+      listMcpServerStatus({
+        async request() {
+          return {
+            data: [
+              {
+                name: "sk_abcdefghijklmnop",
+                authStatus: "unsupported",
+                tools: {},
+                resources: [],
+                resourceTemplates: [],
+              },
+            ],
+            nextCursor: null,
+          };
+        },
+      }),
+    /invalid server/,
   );
 });
 
@@ -1264,10 +1460,39 @@ test("runtime inventory rejects malformed endpoint envelopes", async () => {
     platformOs: "windows",
   };
   assert.equal(
-    (await collectRuntimeInventory(clientWith(), cwd, initialize))
+    (
+      await collectRuntimeInventory(
+        clientWith(),
+        cwd,
+        initialize,
+        [],
+      )
+    )
       .controlBlockers.length,
     0,
   );
+  const configuredMcp = [{ name: "basic-memory-local" }];
+  const configuredInventory = await collectRuntimeInventory(
+    clientWith({
+      "mcpServerStatus/list": {
+        data: [
+          {
+            name: "basic-memory-local",
+            authStatus: "unsupported",
+            tools: {},
+            resources: [],
+            resourceTemplates: [],
+          },
+        ],
+        nextCursor: null,
+      },
+    }),
+    cwd,
+    initialize,
+    configuredMcp,
+  );
+  assert.equal(configuredInventory.controlBlockers.length, 0);
+  assert.equal(configuredInventory.mcp.records.length, 1);
   for (const method of [
     "skills/list",
     "plugin/installed",
@@ -1740,6 +1965,124 @@ test("unknown, hook, warning and MCP startup notifications fail closed", () => {
     });
     assert.equal(event.complete, false, method);
     assert.equal(event.blockers.includes(expected), true, method);
+  }
+});
+
+test("remote control status permits only a disabled detached snapshot", () => {
+  const disabled = normalizeEvent({
+    method: "remoteControl/status/changed",
+    params: {
+      status: "disabled",
+      serverName: "Codex",
+      installationId: "installation-1",
+      environmentId: null,
+    },
+  });
+  assert.equal(disabled.complete, true);
+  assert.deepEqual(disabled.remoteControl, {
+    status: "disabled",
+    environmentAttached: false,
+  });
+  assert.doesNotMatch(JSON.stringify(disabled), /installation-1|Codex/);
+
+  for (const params of [
+    {
+      status: "connecting",
+      serverName: "Codex",
+      installationId: "installation-1",
+      environmentId: null,
+    },
+    {
+      status: "connected",
+      serverName: "Codex",
+      installationId: "installation-1",
+      environmentId: "environment-1",
+    },
+    {
+      status: "errored",
+      serverName: "Codex",
+      installationId: "installation-1",
+      environmentId: null,
+    },
+  ]) {
+    const event = normalizeEvent({
+      method: "remoteControl/status/changed",
+      params,
+    });
+    assert.equal(event.complete, false, params.status);
+    assert.equal(
+      event.blockers.includes("uncontrolled-control-plane"),
+      true,
+      params.status,
+    );
+  }
+
+  for (const params of [
+    {
+      status: "disabled",
+      serverName: "",
+      installationId: "installation-1",
+      environmentId: null,
+    },
+    {
+      status: "future",
+      serverName: "Codex",
+      installationId: "installation-1",
+      environmentId: null,
+    },
+    {
+      status: "disabled",
+      serverName: "Codex",
+      installationId: "installation-1",
+    },
+  ]) {
+    const event = normalizeEvent({
+      method: "remoteControl/status/changed",
+      params,
+    });
+    assert.equal(event.complete, false);
+    assert.equal(event.blockers.includes("runtime-drift"), true);
+  }
+
+  const malformedSecret = normalizeEvent({
+    method: "remoteControl/status/changed",
+    params: {
+      status: "token=REMOTE_CONTROL_SECRET_123456",
+      serverName: "Codex",
+      installationId: "installation-1",
+      environmentId: null,
+    },
+  });
+  assert.doesNotMatch(
+    JSON.stringify(malformedSecret),
+    /REMOTE_CONTROL_SECRET_123456/,
+  );
+
+  assert.equal(
+    remoteControlSnapshotIsSafe({
+      seen: true,
+      complete: true,
+      status: "disabled",
+      environmentAttached: false,
+    }),
+    true,
+  );
+  for (const snapshot of [
+    null,
+    {
+      seen: false,
+      complete: false,
+      status: null,
+      environmentAttached: false,
+    },
+    {
+      seen: true,
+      complete: false,
+      status: "connected",
+      environmentAttached: true,
+    },
+  ]) {
+    assert.equal(remoteControlSnapshotIsSafe(snapshot), false);
   }
 });
 
@@ -2326,6 +2669,7 @@ function completePassEvidence() {
         complete: true,
       },
       mcp: { records: [] },
+      remoteControl: structuredClone(SAFE_REMOTE_CONTROL_SNAPSHOT),
       controlBlockers: [],
     },
     preflight: {
@@ -2417,6 +2761,11 @@ function completePassEvidence() {
       protocolSchema: { sha256: "f".repeat(64) },
       appServerEnvironment: {
         keys: ["Path", "SystemRoot", "USERPROFILE"],
+      },
+      featureControls: {
+        plugins: false,
+        apps: false,
+        hooks: false,
       },
       permissionProfile: {
         id: EVALUATION_PERMISSION_PROFILE,
@@ -2524,6 +2873,9 @@ test("capability pass requires every automated and control gate", () => {
     },
     (candidate) => {
       candidate.evidence.inventory.controlBlockers.push("hook");
+    },
+    (candidate) => {
+      candidate.evidence.inventory.remoteControl.seen = false;
     },
     (candidate) => {
       candidate.evidence.cases[0].automatedJudgment = "blocked";
@@ -2712,6 +3064,35 @@ test("capability pass requires every automated and control gate", () => {
       /capability pass is not supported|review judgment lacks evidence/,
     );
   }
+});
+
+test("capability pass accepts exact inert configured MCP status", () => {
+  const result = completeReviewedPassResult();
+  result.evidence.runtime.mcpInventory = [
+    {
+      name: "basic-memory-local",
+      transport: "stdio",
+      enabled: false,
+    },
+  ];
+  const inertStatus = [
+    {
+      name: "basic-memory-local",
+      authStatus: "unsupported",
+      toolCount: 0,
+      resourceCount: 0,
+      resourceTemplateCount: 0,
+      serverInfo: null,
+    },
+  ];
+  result.evidence.inventory.mcp.records = structuredClone(inertStatus);
+  for (const candidate of result.evidence.cases) {
+    for (const phase of ["before", "afterThreadStart", "after"]) {
+      candidate.mcpStatus[phase] = structuredClone(inertStatus);
+    }
+  }
+  result.evidenceSha256 = independentHash(result.evidence);
+  assert.doesNotThrow(() => validateResult(result));
 });
 
 test(

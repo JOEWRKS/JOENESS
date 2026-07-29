@@ -775,6 +775,14 @@ export function requestSyntheticWriteBroker(
   });
 }
 
+function mcpNameIsSafe(name) {
+  return (
+    typeof name === "string" &&
+    /^[A-Za-z0-9_-]{1,128}$/u.test(name) &&
+    !SECRET_PATTERN.test(name)
+  );
+}
+
 export function buildMcpDisableArgs(inventory) {
   if (!Array.isArray(inventory)) {
     throw new TypeError("MCP inventory must be an array");
@@ -784,14 +792,11 @@ export function buildMcpDisableArgs(inventory) {
   const result = [];
   for (const server of inventory) {
     const name = server?.name;
-    if (
-      typeof name !== "string" ||
-      !/^[A-Za-z0-9_-]+$/u.test(name)
-    ) {
-      throw new Error(`MCP name is not a safe bare TOML key: ${name}`);
+    if (!mcpNameIsSafe(name)) {
+      throw new Error("MCP name is not a safe bare TOML key");
     }
     if (seen.has(name)) {
-      throw new Error(`duplicate MCP name: ${name}`);
+      throw new Error("duplicate MCP name");
     }
     seen.add(name);
 
@@ -806,7 +811,7 @@ export function buildMcpDisableArgs(inventory) {
       inlineTable =
         '{enabled=false,command="C:\\\\Windows\\\\System32\\\\cmd.exe",args=[]}';
     } else {
-      throw new Error(`unknown MCP transport: ${transport?.type}`);
+      throw new Error("unknown MCP transport");
     }
 
     result.push("-c", `mcp_servers.${name}=${inlineTable}`);
@@ -814,17 +819,29 @@ export function buildMcpDisableArgs(inventory) {
   return result;
 }
 
+export function buildRuntimeIsolationArgs(inventory) {
+  return [
+    "-c",
+    "features.plugins=false",
+    "-c",
+    "features.apps=false",
+    "-c",
+    "features.hooks=false",
+    ...buildMcpDisableArgs(inventory),
+  ];
+}
+
 export function buildDoctorArgs(inventory) {
-  return ["doctor", ...buildMcpDisableArgs(inventory), "--json"];
+  return ["doctor", ...buildRuntimeIsolationArgs(inventory), "--json"];
 }
 
 function uniqueNames(inventory, label) {
   if (!Array.isArray(inventory)) {
     throw new TypeError(`${label} MCP inventory must be an array`);
   }
-  const names = inventory.map(({ name }) => name);
+  const names = inventory.map((entry) => entry?.name);
   if (
-    names.some((name) => typeof name !== "string" || name.length === 0) ||
+    names.some((name) => !mcpNameIsSafe(name)) ||
     new Set(names).size !== names.length
   ) {
     throw new Error(`${label} MCP inventory has an invalid name set`);
@@ -841,6 +858,63 @@ export function verifyDisabledMcp(before, after) {
   if (after.some(({ enabled }) => enabled !== false)) {
     throw new Error("disabled MCP inventory contains an enabled server");
   }
+}
+
+const MCP_AUTH_STATUSES = new Set([
+  "unsupported",
+  "notLoggedIn",
+  "bearerToken",
+  "oAuth",
+]);
+
+export function verifyMcpRuntimeIsInert(configured, runtimeStatus) {
+  const configuredNames = uniqueNames(configured, "configured").sort();
+  const runtimeNames = uniqueNames(runtimeStatus, "runtime status").sort();
+  if (JSON.stringify(configuredNames) !== JSON.stringify(runtimeNames)) {
+    throw new Error("runtime MCP name set differs from configured name set");
+  }
+  if (
+    runtimeStatus.some(
+      ({
+        authStatus,
+        toolCount,
+        resourceCount,
+        resourceTemplateCount,
+        serverInfo,
+      }) =>
+        !MCP_AUTH_STATUSES.has(authStatus) ||
+        toolCount !== 0 ||
+        resourceCount !== 0 ||
+        resourceTemplateCount !== 0 ||
+        serverInfo !== null,
+    )
+  ) {
+    throw new Error("runtime MCP status is not inert");
+  }
+}
+
+function mcpRuntimeIsInert(configured, runtimeStatus) {
+  try {
+    verifyMcpRuntimeIsInert(configured, runtimeStatus);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+export function remoteControlSnapshotIsSafe(snapshot) {
+  return (
+    exactKeys(snapshot, [
+      "complete",
+      "environmentAttached",
+      "seen",
+      "status",
+    ]) === true &&
+    snapshot.seen === true &&
+    snapshot.complete === true &&
+    snapshot.status === "disabled" &&
+    snapshot.environmentAttached === false
+  );
 }
 
 export function createJsonlClient({
@@ -1118,6 +1192,7 @@ const REQUIRED_SCHEMA_TOKENS = [
   '"hooks/list"',
   '"permissionProfile/list"',
   '"mcpServerStatus/list"',
+  '"remoteControl/status/changed"',
   '"windowsSandbox/readiness"',
 ];
 
@@ -1164,11 +1239,11 @@ export async function prepareRuntime(runRoot) {
     }),
     "original MCP inventory",
   );
-  const mcpDisableArgs = buildMcpDisableArgs(originalMcp);
+  const runtimeIsolationArgs = buildRuntimeIsolationArgs(originalMcp);
   const disabledMcp = parseJsonProcess(
     await runBuffered(
       executable,
-      ["mcp", ...mcpDisableArgs, "list", "--json"],
+      ["mcp", ...runtimeIsolationArgs, "list", "--json"],
       { env: appServerEnvironment },
     ),
     "disabled MCP inventory",
@@ -1250,7 +1325,12 @@ export async function prepareRuntime(runRoot) {
       windowsSandbox: "elevated",
       shellEnvironmentPolicy: "core-default-excludes",
     },
-    mcpDisableArgs,
+    runtimeIsolationArgs,
+    featureControls: {
+      plugins: false,
+      apps: false,
+      hooks: false,
+    },
     mcpInventory: disabledMcp.map((server) => ({
       name: server.name,
       transport: server.transport?.type,
@@ -1276,12 +1356,28 @@ export async function openAppServer(runtime, callbacks = {}) {
   const notificationListeners = new Set();
   const notificationHistory = [];
   let notificationSequence = 0;
+  let remoteControlSnapshot = {
+    seen: false,
+    complete: false,
+    status: null,
+    environmentAttached: false,
+  };
   async function dispatchNotification(message) {
+    const event = normalizeEvent(message);
     notificationSequence += 1;
     notificationHistory.push({
       sequence: notificationSequence,
-      event: normalizeEvent(message),
+      event,
     });
+    if (event.method === "remoteControl/status/changed") {
+      remoteControlSnapshot = {
+        seen: true,
+        complete: event.complete,
+        status: event.remoteControl?.status ?? null,
+        environmentAttached:
+          event.remoteControl?.environmentAttached === true,
+      };
+    }
     if (notificationHistory.length > EVENT_LIMIT * 2) {
       notificationHistory.shift();
     }
@@ -1295,7 +1391,7 @@ export async function openAppServer(runtime, callbacks = {}) {
     runtime.executable,
     [
       "app-server",
-      ...runtime.mcpDisableArgs,
+      ...runtime.runtimeIsolationArgs,
       ...runtime.permissionArgs,
       "--strict-config",
       "--stdio",
@@ -1380,6 +1476,10 @@ export async function openAppServer(runtime, callbacks = {}) {
       process: child,
       client,
       initializeResult,
+      mcpInventory: runtime.mcpInventory,
+      get remoteControlSnapshot() {
+        return { ...remoteControlSnapshot };
+      },
       subscribe(listener, { afterCursor = notificationSequence } = {}) {
         const firstAvailable = notificationHistory[0]?.sequence ??
           notificationSequence + 1;
@@ -1481,6 +1581,7 @@ const PASSIVE_NOTIFICATION_METHODS = new Set([
   "item/reasoning/summaryTextDelta",
   "item/reasoning/textDelta",
   "item/started",
+  "remoteControl/status/changed",
   "serverRequest/resolved",
   "thread/started",
   "thread/status/changed",
@@ -1517,6 +1618,7 @@ const SESSION_FATAL_REASONS = new Set([
   "runtime-warning",
   "sandbox-setup-failed",
   "secret-shaped-output",
+  "uncontrolled-control-plane",
   "uncontrolled-tool-surface",
   "unknown-item-type",
   "unknown-notification",
@@ -1577,6 +1679,33 @@ export function normalizeEvent(notification) {
         ? "approval-requested"
         : "uncontrolled-tool-surface",
     );
+  } else if (method === "remoteControl/status/changed") {
+    const environmentId = params.environmentId;
+    const validStatus = [
+      "disabled",
+      "connecting",
+      "connected",
+      "errored",
+    ].includes(params.status);
+    const validShape =
+      validStatus &&
+      typeof params.serverName === "string" &&
+      params.serverName.length > 0 &&
+      typeof params.installationId === "string" &&
+      params.installationId.length > 0 &&
+      Object.hasOwn(params, "environmentId") &&
+      (environmentId === null ||
+        (typeof environmentId === "string" && environmentId.length > 0));
+    event.remoteControl = {
+      status: validStatus ? params.status : null,
+      environmentAttached:
+        typeof environmentId === "string" && environmentId.length > 0,
+    };
+    if (!validShape) {
+      event.blockers.push("runtime-drift");
+    } else if (params.status !== "disabled" || environmentId !== null) {
+      event.blockers.push("uncontrolled-control-plane");
+    }
   } else if (params.item && typeof params.item.type === "string") {
     const item = params.item;
     if (
@@ -1987,14 +2116,17 @@ function sanitizedMcpStatus(response) {
   }
   return response.data.map((entry) => {
     if (
-      typeof entry?.name !== "string" ||
-      !entry.name ||
-      typeof entry.authStatus !== "string" ||
+      !mcpNameIsSafe(entry?.name) ||
+      !MCP_AUTH_STATUSES.has(entry.authStatus) ||
       !entry.tools ||
       typeof entry.tools !== "object" ||
       Array.isArray(entry.tools) ||
       !Array.isArray(entry.resources) ||
-      !Array.isArray(entry.resourceTemplates)
+      !Array.isArray(entry.resourceTemplates) ||
+      (entry.serverInfo !== null &&
+        entry.serverInfo !== undefined &&
+        (typeof entry.serverInfo?.name !== "string" ||
+          typeof entry.serverInfo?.version !== "string"))
     ) {
       throw new Error("MCP status response contains an invalid server");
     }
@@ -2007,10 +2139,7 @@ function sanitizedMcpStatus(response) {
       serverInfo:
         typeof entry.serverInfo?.name === "string" &&
         typeof entry.serverInfo?.version === "string"
-          ? {
-              name: entry.serverInfo.name,
-              version: entry.serverInfo.version,
-            }
+          ? { present: true }
           : null,
     };
   });
@@ -2024,7 +2153,7 @@ export async function listMcpServerStatus(client, threadId = null) {
   for (let page = 0; page < 100; page += 1) {
     const params = {
       cursor,
-      detail: "toolsAndAuthOnly",
+      detail: "full",
       limit: 100,
     };
     if (threadId !== null) {
@@ -2038,7 +2167,7 @@ export async function listMcpServerStatus(client, threadId = null) {
     const pageEntries = sanitizedMcpStatus(response);
     for (const entry of pageEntries) {
       if (names.has(entry.name)) {
-        throw new Error(`MCP status contains duplicate server: ${entry.name}`);
+        throw new Error("MCP status contains a duplicate server");
       }
       names.add(entry.name);
       entries.push(entry);
@@ -2085,7 +2214,8 @@ export async function runSubjectCase({
   }
   if (
     !session?.client?.request ||
-    typeof session.subscribe !== "function"
+    typeof session.subscribe !== "function" ||
+    !Array.isArray(session.mcpInventory)
   ) {
     throw new TypeError("case run requires an App Server session");
   }
@@ -2094,6 +2224,9 @@ export async function runSubjectCase({
   )
     ? session.notificationCursor
     : 0;
+  if (!remoteControlSnapshotIsSafe(session.remoteControlSnapshot)) {
+    throw new Error("remote control status is not safely disabled");
+  }
   if (
     comparablePath(controlRoot) === comparablePath(caseRoot) ||
     isPathInside(caseRoot, controlRoot)
@@ -2278,8 +2411,8 @@ export async function runSubjectCase({
       session.client.request("hooks/list", { cwds: [caseRoot] }, 15_000),
     ]);
     hookControl = evaluateHooksInventory(hooksResponse, caseRoot);
-    if (mcpBefore.length) {
-      throw new Error("global MCP status is not empty before thread start");
+    if (!mcpRuntimeIsInert(session.mcpInventory, mcpBefore)) {
+      throw new Error("global MCP status is not inert before thread start");
     }
     if (!hookControl.complete) {
       throw new Error(
@@ -2358,7 +2491,7 @@ export async function runSubjectCase({
       threadId,
     );
     if (
-      mcpAfterThreadStart.length ||
+      !mcpRuntimeIsInert(session.mcpInventory, mcpAfterThreadStart) ||
       reasons.length ||
       sessionFatal
     ) {
@@ -2478,7 +2611,7 @@ export async function runSubjectCase({
     }
 
     const mcpAfter = await listMcpServerStatus(session.client, threadId);
-    if (mcpAfter.length) {
+    if (!mcpRuntimeIsInert(session.mcpInventory, mcpAfter)) {
       reasons.push("uncontrolled-tool-surface");
     }
 
@@ -2733,6 +2866,7 @@ function caseEvidenceIsComplete(
   candidate,
   requiredReadTargetLabels,
   frozenIdentity,
+  expectedMcpInventory,
 ) {
   const events = candidate?.events;
   const command = events?.find(
@@ -2798,7 +2932,7 @@ function caseEvidenceIsComplete(
     candidate.hookControl.blockers.length !== 0 ||
     !mcp ||
     !["before", "afterThreadStart", "after"].every(
-      (key) => Array.isArray(mcp[key]) && mcp[key].length === 0,
+      (key) => mcpRuntimeIsInert(expectedMcpInventory, mcp[key]),
     ) ||
     !materializedFilesAreComplete(fixtures) ||
     !materializedFilesAreComplete(fixtureSnapshot?.before) ||
@@ -3066,6 +3200,10 @@ function passEvidenceIsComplete(evidence, frozenIdentity) {
       (id) => doctor.checks[id]?.status === "ok",
     ) &&
     /^[0-9a-f]{64}$/u.test(runtime.protocolSchema?.sha256) &&
+    exactKeys(runtime.featureControls, ["apps", "hooks", "plugins"]) &&
+    Object.values(runtime.featureControls).every(
+      (enabled) => enabled === false,
+    ) &&
     Array.isArray(runtime.mcpInventory) &&
     runtime.mcpInventory.every(
       (entry) =>
@@ -3159,7 +3297,8 @@ function passEvidenceIsComplete(evidence, frozenIdentity) {
     Array.isArray(inventory.hooks.hooks) &&
     inventory.hooks.hooks.every(({ enabled }) => enabled === false) &&
     Array.isArray(inventory.mcp?.records) &&
-    inventory.mcp.records.length === 0 &&
+    mcpRuntimeIsInert(runtime.mcpInventory, inventory.mcp.records) &&
+    remoteControlSnapshotIsSafe(inventory.remoteControl) &&
     Array.isArray(inventory.controlBlockers) &&
     inventory.controlBlockers.length === 0
   );
@@ -3341,6 +3480,7 @@ export function validateResult(result) {
             candidate,
             requiredReadTargetLabels,
             frozenIdentity,
+            result.evidence.runtime?.mcpInventory,
           ),
       ) ||
       result.evidence.capabilityCandidate !== "reviewRequired" ||
@@ -3675,6 +3815,7 @@ function runtimeEvidence(runtime) {
     appServerEnvironment: {
       keys: Object.keys(runtime.appServerEnvironment).sort(),
     },
+    featureControls: runtime.featureControls,
     permissionProfile: runtime.permissionProfile,
     mcpInventory: runtime.mcpInventory,
   };
@@ -4021,7 +4162,10 @@ async function runSmoke() {
     ]);
     const hookControl = evaluateHooksInventory(hooksResponse, smokeRoot);
     controlBlockers.push(...hookControl.blockers);
-    if (mcpBefore.length) {
+    if (!remoteControlSnapshotIsSafe(session.remoteControlSnapshot)) {
+      controlBlockers.push("remote-control-unverified");
+    }
+    if (!mcpRuntimeIsInert(runtime.mcpInventory, mcpBefore)) {
       controlBlockers.push("uncontrolled-tool-surface");
     }
     if (!evaluationPermissionProfileIsAvailable(permissionProfiles)) {
@@ -4030,8 +4174,11 @@ async function runSmoke() {
     if (readiness.status !== "ready") {
       controlBlockers.push("windows-sandbox-not-ready");
     }
-    if (uniqueReasons(controlBlockers).length) {
-      throw new Error("smoke runtime controls are not isolated");
+    const initialControlBlockers = uniqueReasons(controlBlockers);
+    if (initialControlBlockers.length) {
+      throw new Error(
+        `smoke runtime controls are not isolated: ${initialControlBlockers.join(", ")}`,
+      );
     }
     const readSentinel = path.join(smokeRoot, "read-sentinel.txt");
     await writeFile(readSentinel, "read-only sentinel", {
@@ -4085,11 +4232,17 @@ async function runSmoke() {
       15_000,
     );
     const mcpAfter = await listMcpServerStatus(session.client);
-    if (mcpAfter.length) {
+    if (!remoteControlSnapshotIsSafe(session.remoteControlSnapshot)) {
+      controlBlockers.push("remote-control-unverified");
+    }
+    if (!mcpRuntimeIsInert(runtime.mcpInventory, mcpAfter)) {
       controlBlockers.push("uncontrolled-tool-surface");
     }
-    if (uniqueReasons(controlBlockers).length) {
-      throw new Error("smoke observed runtime control drift");
+    const finalControlBlockers = uniqueReasons(controlBlockers);
+    if (finalControlBlockers.length) {
+      throw new Error(
+        `smoke observed runtime control drift: ${finalControlBlockers.join(", ")}`,
+      );
     }
     await session.close();
     const preflight = evaluatePreflight({
@@ -4122,7 +4275,9 @@ async function runSmoke() {
       verdict: "pass",
       codexVersion: runtime.version,
       protocolSchemaSha256: runtime.protocolSchema.sha256,
+      featureControls: runtime.featureControls,
       configuredMcp: runtime.mcpInventory,
+      remoteControl: session.remoteControlSnapshot,
       hooks: hookControl,
       windowsSandboxReadiness: readiness,
       readIsolation,
@@ -4367,7 +4522,12 @@ function evaluationPermissionProfileIsAvailable(permissionProfiles) {
   );
 }
 
-export async function collectRuntimeInventory(client, cwd, initializeResult) {
+export async function collectRuntimeInventory(
+  client,
+  cwd,
+  initializeResult,
+  expectedMcpInventory = [],
+) {
   const [skills, plugins, hooks, permissionProfiles, mcpEntries] =
     await Promise.all([
       client.request(
@@ -4419,7 +4579,7 @@ export async function collectRuntimeInventory(client, cwd, initializeResult) {
       controlBlockers.push(`${name}-inventory-truncated`);
     }
   }
-  if (mcpEntries.length) {
+  if (!mcpRuntimeIsInert(expectedMcpInventory, mcpEntries)) {
     controlBlockers.push("uncontrolled-tool-surface");
   }
   return {
@@ -4582,7 +4742,12 @@ async function runV2() {
       session.client,
       runRoot,
       session.initializeResult,
+      runtime.mcpInventory,
     );
+    inventory.remoteControl = session.remoteControlSnapshot;
+    if (!remoteControlSnapshotIsSafe(inventory.remoteControl)) {
+      inventory.controlBlockers.push("remote-control-unverified");
+    }
     globalControlBlockers.push(...inventory.controlBlockers);
     const [repositoryReady, configReady] = await Promise.all([
       captureRepositoryState(),
