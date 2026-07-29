@@ -933,9 +933,12 @@ export function createJsonlClient({
   let closed = false;
   let fatalError = null;
   let resolveInputClose;
-  const inputClosed = new Promise((resolve) => {
+  let rejectInputClose;
+  const inputClosed = new Promise((resolve, reject) => {
     resolveInputClose = resolve;
+    rejectInputClose = reject;
   });
+  void inputClosed.catch(() => {});
 
   function writeMessage(message) {
     if (closed || writable.destroyed) {
@@ -1031,7 +1034,10 @@ export function createJsonlClient({
         }
         resolveInputClose();
       },
-      () => resolveInputClose(),
+      (error) => {
+        fail(error);
+        rejectInputClose(error);
+      },
     );
   });
   readable.once("error", fail);
@@ -1661,15 +1667,39 @@ function itemIdentity(item) {
   return result;
 }
 
+function sanitizeEventId(value) {
+  if (value === undefined) {
+    return { value: undefined, blocker: null };
+  }
+  if (
+    typeof value === "string" &&
+    /^[A-Za-z0-9._:-]{1,128}$/u.test(value) &&
+    !SECRET_PATTERN.test(value)
+  ) {
+    return { value, blocker: null };
+  }
+  return {
+    value: null,
+    blocker:
+      typeof value === "string" && SECRET_PATTERN.test(value)
+        ? "secret-shaped-output"
+        : "runtime-drift",
+  };
+}
+
 export function normalizeEvent(notification) {
   const method = notification?.method;
   const params = notification?.params ?? {};
+  const threadIdentity = sanitizeEventId(
+    params.threadId ?? params.thread?.id,
+  );
+  const turnIdentity = sanitizeEventId(params.turnId ?? params.turn?.id);
   const event = {
     method,
-    threadId: params.threadId ?? params.thread?.id,
-    turnId: params.turnId ?? params.turn?.id,
+    threadId: threadIdentity.value,
+    turnId: turnIdentity.value,
     complete: true,
-    blockers: [],
+    blockers: [threadIdentity.blocker, turnIdentity.blocker].filter(Boolean),
   };
 
   if (BLOCKING_NOTIFICATION_METHODS.has(method)) {

@@ -58,7 +58,7 @@
 - [x] 2026-07-29 host smoke는 doctor를 통과한 뒤 설치 Ponytail hook, `codex_apps`, 비활성 configured MCP 레코드와 정상 `remoteControl/status/changed` snapshot을 runtime control 위반으로 오판해 model 전에 중단됐다. 결과 파일과 model turn은 없었다.
 - [x] 사용자 설정을 바꾸지 않는 실행 전용 `plugins/apps/hooks=false`, exact configured-name/capability-zero MCP 검증과 payload-aware remote-control 상태 검증을 회귀 테스트로 고정한다.
 - [x] 초기 remote-control snapshot 미관찰도 차단하고 case cursor를 먼저 고정해 상태 변경 race를 닫는다. MCP status는 `detail: full`로 resources/templates까지 실제 조회한다.
-- [x] 차단된 MCP startup 알림의 untrusted name/status는 고정 marker로 축약하고, App Server 종료 시 JSONL handler queue를 drain한 뒤 최종 remote-control/global blocker를 다시 판정한다.
+- [x] 차단된 MCP startup 알림의 untrusted name/status는 고정 marker로 축약하고, App Server 종료 시 JSONL handler queue를 drain한 뒤 최종 remote-control/global blocker를 다시 판정한다. queue 실패는 종료 실패이며 thread/turn ID도 bounded non-secret 값만 보존한다.
 - [ ] 이 수정이 커밋된 새 HEAD를 host/unrestricted runner에서 model-free smoke로 정확히 한 번 검증한다.
 - [ ] smoke가 통과한 뒤에만 별도 사용자 확인을 받고 `run-v2`를 한 번 실행한다.
 

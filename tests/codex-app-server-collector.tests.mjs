@@ -831,6 +831,17 @@ test("JSONL drain waits for queued notifications before shutdown", async () => {
   );
   await client.waitForInputClose();
   assert.equal(handled, true);
+
+  const malformedReadable = new PassThrough();
+  const malformedClient = createJsonlClient({
+    readable: malformedReadable,
+    writable: new PassThrough(),
+  });
+  malformedReadable.end("{not-json}\n");
+  await assert.rejects(
+    () => malformedClient.waitForInputClose(),
+    /JSON|Unexpected token/u,
+  );
 });
 
 test("approval denial responses match each protocol method", () => {
@@ -2086,11 +2097,13 @@ test("remote control status permits only a disabled detached snapshot", () => {
       serverName: "Codex",
       installationId: "installation-1",
       environmentId: null,
+      threadId: "token=REMOTE_THREAD_SECRET_123456",
+      turnId: "token=REMOTE_TURN_SECRET_123456",
     },
   });
   assert.doesNotMatch(
     JSON.stringify(malformedSecret),
-    /REMOTE_CONTROL_SECRET_123456/,
+    /REMOTE_(?:CONTROL|THREAD|TURN)_SECRET_123456/u,
   );
 
   assert.equal(
