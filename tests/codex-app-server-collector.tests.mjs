@@ -2190,7 +2190,7 @@ test("unknown items and secret-shaped output fail closed without disclosure", ()
   assert.doesNotMatch(JSON.stringify(privateKey), /BEGIN PRIVATE KEY/);
 });
 
-test("completed public messages require non-empty text", () => {
+test("completed agent messages require non-empty text", () => {
   for (const text of [undefined, "", "   "]) {
     const item = { id: "message-1", type: "agentMessage" };
     if (text !== undefined) {
@@ -2203,6 +2203,26 @@ test("completed public messages require non-empty text", () => {
     assert.equal(event.complete, false);
     assert.equal(event.blockers.includes("required-output-missing"), true);
   }
+});
+
+test("completed user message without output text is passive input lifecycle evidence", () => {
+  const event = normalizeEvent({
+    method: "item/completed",
+    params: {
+      threadId: "thread-1",
+      turnId: "turn-1",
+      item: {
+        id: "user-message-1",
+        type: "userMessage",
+      },
+    },
+  });
+  assert.equal(event.complete, true);
+  assert.deepEqual(event.blockers, []);
+  assert.deepEqual(event.item, {
+    id: "user-message-1",
+    type: "userMessage",
+  });
 });
 
 test("completed command evidence requires status and integer exit code", () => {
@@ -2265,6 +2285,15 @@ test("unknown, hook, warning and MCP startup notifications fail closed", () => {
     JSON.stringify(mcpStartup),
     /MCP_(?:STARTUP|STATUS)_SECRET_123456/u,
   );
+});
+
+test("account rate limit updates are passive runtime telemetry", () => {
+  const event = normalizeEvent({
+    method: "account/rateLimits/updated",
+    params: {},
+  });
+  assert.equal(event.complete, true);
+  assert.deepEqual(event.blockers, []);
 });
 
 test("remote control status permits only a disabled detached snapshot", () => {

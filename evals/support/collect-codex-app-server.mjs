@@ -1792,6 +1792,7 @@ const PUBLIC_MESSAGE_TYPES = new Set(["agentMessage", "userMessage"]);
 const SECRET_PATTERN =
   /(?:-----BEGIN [A-Z0-9 ]*PRIVATE KEY-----|authorization\s*:|bearer\s+[A-Za-z0-9._~+/=-]{12,}|(?:api[-_]?key|token|password|secret|cookie)\s*(?:[:=]|\s)\s*["']?[A-Za-z0-9._~+/=-]{8,}|(?:AKIA|ASIA)[A-Z0-9]{16}|(?:sk|ghp|github_pat)_[A-Za-z0-9_-]{12,}|eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}|ssh-(?:rsa|ed25519)\s+[A-Za-z0-9+/=]{20,})/iu;
 const PASSIVE_NOTIFICATION_METHODS = new Set([
+  "account/rateLimits/updated",
   "item/agentMessage/delta",
   "item/commandExecution/outputDelta",
   "item/completed",
@@ -2065,7 +2066,10 @@ export function normalizeEvent(
         if (text.value.truncated) {
           event.blockers.push("required-output-truncated");
         }
-      } else if (method === "item/completed") {
+      } else if (
+        method === "item/completed" &&
+        item.type === "agentMessage"
+      ) {
         event.blockers.push("required-output-missing");
       }
     } else if (UNCONTROLLED_ITEM_TYPES.has(item.type)) {
