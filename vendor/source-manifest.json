@@ -14,6 +14,17 @@
       ]
     }
   },
+  "behaviorEvidence": {
+    "pairVersion": 1,
+    "mode": "run-pair-v1",
+    "resultPath": "evals/design-frontend/router-pair-v1.json",
+    "runIds": {"control":"design-router-control-v1","candidate":"design-router-candidate-v1"},
+    "evaluator": {"path":"evals/design-frontend/collect-router-evaluation.mjs","sha256":"d6e018b1e807c90c51050c32ab8e78469b87a7ed77cc7fe2bb45056887618e0f"},
+    "cases": {"path":"evals/design-frontend/cases.json","sha256":"8a940cd84b4f2cbf265154c060941734ad6e983d0f49cb7dd5d06fc3df5ee1f7"},
+    "router": {"path":"skills/joewrks-design-frontend/SKILL.md","sha256":"e725a4b53b45c1f9403ace63e44c439aa570e9cc52640e3e766ff42f6e2dab55"},
+    "p0Baseline": {"path":"evals/p0/common-core-v5.json","sha256":"05631b136be55626987f7deed16ec8bf4c34b38880e4764b2375051f42249316"},
+    "syntheticLimitation": "Selection evidence only; no live Figma connection or browser result is proven."
+  },
   "sources": {
     "ui-ux-pro-max": {
       "repository": "nextlevelbuilder/ui-ux-pro-max-skill", "url": "https://github.com/nextlevelbuilder/ui-ux-pro-max-skill", "commit": "3b5df7547964f0cb3424de74cff55b69039250d3", "upstreamPath": ".claude/skills/ui-ux-pro-max/**", "archiveSha256": "ba29a4e0e380a0017f833a1041f558972a55fbad81d056c3d9a549e1609f0841", "activationMode": "non-discoverable-router-only",
