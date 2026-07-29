@@ -814,6 +814,10 @@ export function buildMcpDisableArgs(inventory) {
   return result;
 }
 
+export function buildDoctorArgs(inventory) {
+  return ["doctor", ...buildMcpDisableArgs(inventory), "--json"];
+}
+
 function uniqueNames(inventory, label) {
   if (!Array.isArray(inventory)) {
     throw new TypeError(`${label} MCP inventory must be an array`);
@@ -1154,8 +1158,25 @@ export async function prepareRuntime(runRoot) {
     throw new Error(`protocol-version-drift: ${version}`);
   }
 
+  const originalMcp = parseJsonProcess(
+    await runBuffered(executable, ["mcp", "list", "--json"], {
+      env: appServerEnvironment,
+    }),
+    "original MCP inventory",
+  );
+  const mcpDisableArgs = buildMcpDisableArgs(originalMcp);
+  const disabledMcp = parseJsonProcess(
+    await runBuffered(
+      executable,
+      ["mcp", ...mcpDisableArgs, "list", "--json"],
+      { env: appServerEnvironment },
+    ),
+    "disabled MCP inventory",
+  );
+  verifyDisabledMcp(originalMcp, disabledMcp);
+
   const doctor = parseJsonProcess(
-    await runBuffered(executable, ["doctor", "--json"], {
+    await runBuffered(executable, buildDoctorArgs(originalMcp), {
       env: appServerEnvironment,
     }),
     "codex doctor",
@@ -1204,23 +1225,6 @@ export async function prepareRuntime(runRoot) {
       `App Server schema is missing required protocol support: ${missingSchemaTokens.join(", ")}`,
     );
   }
-
-  const originalMcp = parseJsonProcess(
-    await runBuffered(executable, ["mcp", "list", "--json"], {
-      env: appServerEnvironment,
-    }),
-    "original MCP inventory",
-  );
-  const mcpDisableArgs = buildMcpDisableArgs(originalMcp);
-  const disabledMcp = parseJsonProcess(
-    await runBuffered(
-      executable,
-      ["mcp", ...mcpDisableArgs, "list", "--json"],
-      { env: appServerEnvironment },
-    ),
-    "disabled MCP inventory",
-  );
-  verifyDisabledMcp(originalMcp, disabledMcp);
 
   return {
     runRoot: await realpath(runRoot),

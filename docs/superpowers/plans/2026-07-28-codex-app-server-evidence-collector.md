@@ -21,7 +21,7 @@
 - `:minimal`의 OS 실행 필수 read roots는 명시된 한계다. workspace read 성공과 frozen rubric·Codex config/auth/credential read 실패를 실제로 확인하고 “workspace만 읽는다”고 주장하지 않는다.
 - 동적 root proof는 sibling Collector-control sentinel denial까지 포함해 상위 run root의 오적용을 구분한다. protected target은 path가 아니라 존재 label manifest로 config 전후 및 각 proof를 교차검증한다.
 - Codex 0.145.0 elevated Windows sandbox의 `command/exec`에는 custom `outputBytesCap`을 보내지 않는다. evidence normalizer가 output을 별도로 제한한다.
-- MCP는 이름별 최소 transport inline table과 `enabled=false`를 같은 argv 항목으로 전달한다. token, header와 environment 값은 복사·저장하지 않는다.
+- MCP는 이름별 최소 transport inline table과 `enabled=false`를 같은 argv 항목으로 전달한다. token, header와 environment 값은 복사·저장하지 않는다. 같은 비활성화 projection을 `doctor`에도 먼저 적용한다.
 - `dynamicTools: []`, `selectedCapabilityRoots: []`, `ephemeral: true`, text-only input을 강제한다.
 - test와 `smoke`는 모델을 호출하지 않는다. `run-v2`만 실제 model turn을 만들 수 있다.
 - 자동 재시도, 새 thread fallback, resume, `--force`, 결과 덮어쓰기와 권한 확대를 구현하지 않는다.
@@ -53,7 +53,9 @@
 - [x] initialize와 skills/plugins/permission inventory schema를 검증해 malformed 응답, empty-message skills error와 same-page를 포함한 missing/duplicate named profile을 차단한다.
 - [x] item/thread status와 elevated Windows sandbox setup notification payload를 검증하고 malformed/waiting/system-error/setup-failure를 차단한다.
 - [x] capability pass에 현재 검증 source SHA, `cases.json`에서 재구성한 exact input·fixture manifest, 검증 mock의 exact 경로·SHA, exact request identity, probe-first P0 counter/event 구조, runtime/preflight/source/inventory/case/repository/config deep equality와 reviewer의 최종 `pass|fail`, 이유와 존재하는 exact case JSON Pointer를 모두 요구한다.
-- [ ] 현재 HEAD로 2차 model-free smoke를 한 번 실행한다.
+- [x] 2026-07-29 managed runner의 2차 model-free smoke는 바깥 샌드박스가 홈을 `CodexSandboxOffline`로 치환하고 socket을 OS 10013으로 차단해 App Server·model 전에 정확히 중단됐다. 결과 파일은 없고 조건 완화 재시도도 하지 않았다.
+- [x] 선택적 `basic-memory-local` 불통 경고가 평가를 막지 않도록 기존 inert MCP projection을 `doctor`에도 적용하고 회귀 테스트를 추가한다.
+- [ ] 수정된 현재 HEAD를 host/unrestricted runner에서 model-free smoke로 정확히 한 번 검증한다.
 - [ ] smoke가 통과한 뒤에만 별도 사용자 확인을 받고 `run-v2`를 한 번 실행한다.
 
 ## Current Offline Verification
@@ -351,10 +353,10 @@ Codex 0.145.0의 `-c` dotted-path parser는 quoted key segment의 따옴표를 �
 1. Canonicalize the standalone binary.
 2. Require exact version and both package-local helper files.
 3. Build an explicit OS-runtime environment allowlist and the `joewrks-eval-exact-read-v2` permission argv; retain environment key names and permission policy hash, never values.
-4. Run `doctor --json` under that environment; retain only schema/version/overall status and statuses for `auth.credentials`, `config.load`, `installation`, `mcp.config`, both provider reachability checks, `runtime.provenance`, `sandbox.helpers`; require `ok`.
-5. Generate experimental schema inside the exclusive run root and hash `codex_app_server_protocol.schemas.json`.
-6. Require schema support for `dynamicTools`, `selectedCapabilityRoots`, `permissions`, `permissionProfile`, `command/exec`, `windowsSandbox/readiness`, four inventory methods and `mcpServerStatus/list`.
-7. Read original `mcp list --json`, build overrides, re-read with the same safe environment and argv, and require identical names plus `enabled: false` for all.
+4. Read original `mcp list --json`, build inert overrides, re-read with the same safe environment and argv, and require identical names plus `enabled: false` for all.
+5. Run `doctor --json` with that same MCP-disabled argv; retain only schema/version/overall status and statuses for `auth.credentials`, `config.load`, `installation`, `mcp.config`, both provider reachability checks, `runtime.provenance`, `sandbox.helpers`; require `ok`.
+6. Generate experimental schema inside the exclusive run root and hash `codex_app_server_protocol.schemas.json`.
+7. Require schema support for `dynamicTools`, `selectedCapabilityRoots`, `permissions`, `permissionProfile`, `command/exec`, `windowsSandbox/readiness`, four inventory methods and `mcpServerStatus/list`.
 8. Retain only MCP name, transport type and disabled status.
 
 Start App Server with:
@@ -553,7 +555,7 @@ git -C "D:\JOEWRKS\작업하네스" commit -m "feat: gate Collector live executi
 
 - [x] **Step 3: Run the historical model-free smoke once (첫 실행은 MCP override 이름 보존 오류를 정확히 차단; 완화 없이 수정함)**
 
-현재 `smoke`는 thread/turn을 만들지 않는다. elevated readiness와 exact named profile inventory를 확인하고, bounded `command/exec`들로 echo, workspace read, 외부 평가 자산 read denial, workspace write denial과 loopback network denial을 각각 입증한다. 대표 echo request는 다음과 같다.
+현재 `smoke`는 thread/turn을 만들지 않는다. live smoke와 `run-v2`는 사용자 홈을 치환하거나 outbound socket을 막는 parent sandbox 안에서 실행하지 않는다. host runner를 쓰더라도 subject App Server의 exact-read/network-disabled profile은 그대로 유지한다. elevated readiness와 exact named profile inventory를 확인하고, bounded `command/exec`들로 echo, workspace read, 외부 평가 자산 read denial, workspace write denial과 loopback network denial을 각각 입증한다. 대표 echo request는 다음과 같다.
 
 ```js
 {

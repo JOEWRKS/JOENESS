@@ -19,6 +19,7 @@ import {
   approvalDenialResponse,
   boundUtf8,
   buildAppServerEnvironment,
+  buildDoctorArgs,
   buildEvaluationPermissionArgs,
   buildMcpDisableArgs,
   buildSubjectInput,
@@ -612,7 +613,7 @@ test("PowerShell mock is a working broker client", async (t) => {
 });
 
 test("MCP overrides retain minimum transport but omit secrets", () => {
-  const args = buildMcpDisableArgs([
+  const originalMcp = [
     {
       name: "figma",
       transport: {
@@ -630,7 +631,8 @@ test("MCP overrides retain minimum transport but omit secrets", () => {
         env: { SECRET: "secret" },
       },
     },
-  ]);
+  ];
+  const args = buildMcpDisableArgs(originalMcp);
   assert.deepEqual(args, [
     "-c",
     'mcp_servers.figma={enabled=false,url="http://127.0.0.1/"}',
@@ -641,6 +643,11 @@ test("MCP overrides retain minimum transport but omit secrets", () => {
     args.join(" "),
     /Authorization|SECRET|secret|api-key|mcp\.figma\.com|runtime\\node/,
   );
+  assert.deepEqual(buildDoctorArgs(originalMcp), [
+    "doctor",
+    ...args,
+    "--json",
+  ]);
   assert.throws(
     () =>
       buildMcpDisableArgs([

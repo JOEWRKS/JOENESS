@@ -1,6 +1,6 @@
 # Codex App Server Evidence Collector 설계
 
-**상태:** 사용자 설계 승인 — 구현 및 오프라인 검증 완료, 2차 model-free smoke 대기
+**상태:** 사용자 설계 승인 — 구현 및 오프라인 검증 완료, ambient-runner 차단 수정 후 host model-free smoke 대기
 
 **기준 명세:** `docs/superpowers/specs/2026-07-28-no-harness-baseline-capability-spike-design.md`
 
@@ -125,6 +125,7 @@ Node.js 표준 라이브러리로 App Server stdio JSON-RPC를 직접 사용한�
 
 - Collector는 현재 HEAD와 같은 Git blob인 source bytes를 메모리에 고정한다. P0 계약은 그 bytes로 만든 격리 temp tree에서 실행하고, case와 mock도 같은 snapshot bytes로 materialize한다.
 - MCP 비활성화 argv에는 원래 URL·command·args·header·environment를 복사하지 않는다. transport 종류에 맞는 inert placeholder와 `enabled=false`만 쓴다.
+- 원래 MCP inventory에서 만든 같은 inert projection을 `doctor`, disabled inventory와 App Server에 공통 적용한다. 선택적 로컬 MCP의 host-side 불통을 평가 runtime 장애로 오판하지 않는다.
 - `mcpServerStatus/list` 응답에는 readiness 필드가 없다. 모든 MCP를 비활성화한 run에서는 global 또는 thread-scoped 목록에 항목이 하나라도 있으면 model 전 차단한다. 모든 페이지와 cursor를 검증한다.
 - exact case cwd의 `hooks/list`를 `thread/start` 전에 검사한다. enabled hook, warning, error, malformed/중복 cwd 응답은 모두 차단한다.
 - `ThreadStartResponse`의 model, provider, approval policy, reviewer, sandbox, cwd, runtime roots와 instruction sources는 중첩 `thread`가 아니라 응답 최상위 effective 값으로 검증한다.
@@ -435,7 +436,7 @@ v2에는 crash recovery engine이나 같은 명세 안의 재평가 경로를 �
 16. reviewer 이유 누락과 stale/foreign/nonexistent case reference를 거부한다.
 17. result의 필수 필드와 enum을 검증한다.
 
-live smoke는 명시적 command로만 실행한다.
+live smoke는 명시적 command로만 실행한다. parent runner가 사용자 홈을 다른 sandbox home으로 치환하거나 host outbound network를 막는 경우에는 실행하지 않는다. host/unrestricted runner를 사용해도 subject runtime의 named exact-read/network-disabled profile은 완화하지 않는다.
 
 - matching package binary
 - elevated sandbox readiness와 exact named permission profile
