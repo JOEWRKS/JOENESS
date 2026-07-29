@@ -62,12 +62,12 @@
 - [x] `environments: []`, case별 dynamic tool, forbidden runtime/event controls, direct broker handler와 public TCP proof로 전환한 수정본의 최신 오프라인 검증을 완료한다.
 - [x] 2026-07-29 새 HEAD의 host smoke는 model-free `thread/start`까지 도달한 뒤, `environments: []`와 동시에 보낸 호환용 `runtimeWorkspaceRoots: [cwd]`가 무효인데도 응답 `[cwd]`를 기대한 Collector 자체 계약 때문에 차단됐다. 결과 파일과 model turn은 없었다.
 - [x] Codex 0.145.0의 명시적 environment selection이 roots를 소유하는 계약에 맞춰 `thread/start`·`turn/start`의 무효 top-level `runtimeWorkspaceRoots`를 제거하고 응답 roots `[]`를 fail-closed 검증한다.
-- [ ] 이 수정이 커밋된 새 HEAD를 host/unrestricted runner에서 model-free smoke로 정확히 한 번 검증한다.
+- [x] 수정 커밋 `0019118`을 host/unrestricted runner에서 model-free smoke로 정확히 한 번 검증했다. Codex 0.145.0, exact empty runtime roots, 격리 proof와 repository/config 불변 조건이 모두 통과했고 model turn·`turn/start`·v2 결과는 없었다.
 - [ ] smoke가 통과한 뒤에만 별도 사용자 확인을 받고 `run-v2`를 한 번 실행한다.
 
 ## Current Offline Verification
 
-2026-07-29 environment/dynamic-tool/public-TCP 전환과 explicit-empty-environment roots 계약 수정본은 `node --check`, Collector `node:test` 64/64, PowerShell P0 evaluation contract와 `git diff --check`를 통과했다. 이전 host smoke는 model-free `thread/start`에서 Collector 자체 roots 기대치 때문에 차단됐고 결과 파일과 model turn을 만들지 않았다. 현재 수정본은 아직 커밋된 새 HEAD의 최종 smoke를 실행하지 않았다.
+2026-07-29 environment/dynamic-tool/public-TCP 전환과 explicit-empty-environment roots 계약 수정본은 `node --check`, Collector `node:test` 64/64, PowerShell P0 evaluation contract와 `git diff --check`를 통과했다. 이전 host smoke는 model-free `thread/start`에서 Collector 자체 roots 기대치 때문에 차단됐고 결과 파일과 model turn을 만들지 않았다. 수정 커밋 `0019118`의 후속 host smoke는 한 번에 통과했으며 `runtimeWorkspaceRoots: []`, model/turn 미실행, v2 결과 미생성, repository/config 불변을 확인했다.
 
 ## Files
 
