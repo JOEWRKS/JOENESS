@@ -218,9 +218,26 @@ test("only the write case receives one direct controlled dynamic tool", () => {
   assert.equal(tools[0].name, EVALUATION_DYNAMIC_TOOL_NAME);
   assert.equal(tools[0].deferLoading, false);
   assert.equal(tools[0].inputSchema.additionalProperties, false);
+  assert.equal(Object.hasOwn(tools[0].inputSchema, "allOf"), false);
+  const liveTools = buildCaseDynamicTools(
+    { id: "p0-02-unknown-write" },
+    { requireWriteKey: true },
+  );
+  assert.deepEqual(
+    liveTools[0].inputSchema.allOf[0].then.required,
+    ["idempotencyKey"],
+  );
   assert.throws(
     () => buildCaseDynamicTools({ id: "unexpected" }),
     /unsupported case/,
+  );
+  assert.throws(
+    () =>
+      buildCaseDynamicTools(
+        { id: "p0-02-unknown-write" },
+        { requireWriteKey: "yes" },
+      ),
+    /boolean/,
   );
 });
 
@@ -584,6 +601,7 @@ test("controlled dynamic tool exposes unknown outcome then exact state recovery"
         arguments: {
           operation: "ReadState",
           targetKey: "fixture-service:account-17",
+          idempotencyKey: "request-001",
         },
       },
     },
@@ -3128,6 +3146,32 @@ test("connector, dynamic, web, collab and file items block tool control", () => 
   );
   assert.equal(inconsistentDynamicResult.complete, false);
   assert.deepEqual(inconsistentDynamicResult.blockers, ["runtime-drift"]);
+
+  for (const [idempotencyKey, blockers] of [
+    ["request-001", []],
+    ["request-002", ["uncontrolled-tool-surface"]],
+  ]) {
+    const readState = normalizeEvent(
+      {
+        method: "item/started",
+        params: {
+          item: {
+            id: `read-${idempotencyKey}`,
+            type: "dynamicToolCall",
+            tool: EVALUATION_DYNAMIC_TOOL_NAME,
+            arguments: {
+              operation: "ReadState",
+              targetKey: "fixture-service:account-17",
+              idempotencyKey,
+            },
+            status: "inProgress",
+          },
+        },
+      },
+      { allowedDynamicToolName: EVALUATION_DYNAMIC_TOOL_NAME },
+    );
+    assert.deepEqual(readState.blockers, blockers);
+  }
 });
 
 test("unknown items and secret-shaped output fail closed without disclosure", () => {
@@ -3637,6 +3681,7 @@ test("independent state overrides a subject success claim", async (t) => {
         arguments: {
           operation: "ReadState",
           targetKey,
+          idempotencyKey: "request-001",
         },
       },
     ],
@@ -3693,6 +3738,10 @@ test("independent state overrides a subject success claim", async (t) => {
     ],
   );
   assert.equal(
+    evidence.dynamicToolRequests[1].idempotencyKey,
+    "request-001",
+  );
+  assert.equal(
     evidence.events.filter(({ item }) => item?.type === "dynamicToolCall")
       .length,
     4,
@@ -3706,6 +3755,13 @@ test("independent state overrides a subject success claim", async (t) => {
     request: { operation: "Probe" },
     response: { status: "ok", operation: "Probe" },
   });
+  const threadCall = session.calls.find(
+    ({ method }) => method === "thread/start",
+  );
+  assert.deepEqual(
+    threadCall.params.dynamicTools[0].inputSchema.allOf[0].then.required,
+    ["idempotencyKey"],
+  );
   const turnCall = session.calls.find(({ method }) => method === "turn/start");
   assert.equal(
     turnCall.params.permissions,
@@ -4488,7 +4544,12 @@ function completeSchema3ExplicitLocalControlPassResult(
       candidate.thread.runtimeWorkspaceRoots = [caseRoot];
       candidate.thread.request = buildThreadStartRequest(
         caseRoot,
-        buildCaseDynamicTools(FROZEN_CASE_DEFINITIONS[candidate.id]),
+        buildCaseDynamicTools(
+          FROZEN_CASE_DEFINITIONS[candidate.id],
+          {
+            requireWriteKey: runId === "no-harness-control-v4",
+          },
+        ),
       );
       candidate.turn.request = {
         threadId: candidate.thread.id,
@@ -4502,7 +4563,12 @@ function completeSchema3ExplicitLocalControlPassResult(
         writeIsolation: candidate.accessControl.writeIsolation,
       };
       candidate.instructionSourceSnapshot = [];
-      if (runId === "no-harness-control-v3" && index === 0) {
+      if (
+        ["no-harness-control-v3", "no-harness-control-v4"].includes(
+          runId,
+        ) &&
+        index === 0
+      ) {
         const completionIndex = candidate.events.findIndex(
           (event) =>
             event.method === "item/completed" &&
@@ -4595,6 +4661,14 @@ function schema3V3CoreResult(control) {
     coreRunId: "common-core-v3",
     baselinePath: "evals/p0/no-harness-control-v3.json",
     controlRunId: "no-harness-control-v3",
+  });
+}
+
+function schema3V4CoreResult(control) {
+  return schema3ExplicitLocalCoreResult(control, {
+    coreRunId: "common-core-v4",
+    baselinePath: "evals/p0/no-harness-control-v4.json",
+    controlRunId: "no-harness-control-v4",
   });
 }
 
@@ -4868,7 +4942,7 @@ test("historical v3 validates from its recorded Git objects after source evoluti
   assert.doesNotThrow(() => validateResult(result));
 });
 
-test("paired v1 artifacts remain valid after v2 recovery", () => {
+test("paired v1 artifacts and blocked controls remain valid after recovery", () => {
   const controlBytes = readFileSync(
     new URL(
       "../evals/p0/no-harness-control-v1.json",
@@ -4898,6 +4972,24 @@ test("paired v1 artifacts remain valid after v2 recovery", () => {
   );
   assert.equal(controlV2.review.capabilityVerdict, "blocked");
   assert.doesNotThrow(() => validateResult(controlV2));
+
+  const controlV3 = JSON.parse(
+    readFileSync(
+      new URL(
+        "../evals/p0/no-harness-control-v3.json",
+        import.meta.url,
+      ),
+      "utf8",
+    ),
+  );
+  assert.equal(controlV3.review.capabilityVerdict, "blocked");
+  assert.equal(
+    controlV3.review.caseJudgments.filter(
+      ({ judgment }) => judgment === "pass",
+    ).length,
+    15,
+  );
+  assert.doesNotThrow(() => validateResult(controlV3));
 });
 
 test("Git source resolution rejects foreign identity and rebuilds case input", () => {
@@ -5052,7 +5144,7 @@ test("schema 3 Core requires the exact reviewed Control bytes", () => {
   );
 });
 
-test("schema 3 v2 keeps the local profile and same-generation pair exact", () => {
+test("schema 3 v2-v4 keep local profiles and same-generation pairs exact", () => {
   const control = completeSchema3ExplicitLocalControlPassResult(
     "no-harness-control-v2",
   );
@@ -5073,6 +5165,23 @@ test("schema 3 v2 keeps the local profile and same-generation pair exact", () =>
   assert.doesNotThrow(() =>
     validateFixtureResult(v3Core, {
       baselineBytes: v3BaselineBytes,
+    }),
+  );
+  const v4Control =
+    completeSchema3ExplicitLocalControlPassResult(
+      "no-harness-control-v4",
+    );
+  v4Control.evidence.cases.at(-1).dynamicToolRequests[1]
+    .idempotencyKey = "request-001";
+  v4Control.evidenceSha256 = independentHash(v4Control.evidence);
+  assert.doesNotThrow(() => validateFixtureResult(v4Control));
+  const {
+    result: v4Core,
+    baselineBytes: v4BaselineBytes,
+  } = schema3V4CoreResult(v4Control);
+  assert.doesNotThrow(() =>
+    validateFixtureResult(v4Core, {
+      baselineBytes: v4BaselineBytes,
     }),
   );
 
@@ -6128,8 +6237,8 @@ test("full profiles select the exact frozen 16-case order", async () => {
     EXPECTED_FULL_CASE_IDS,
   );
 
-  const control = collector.runConfigurationForMode("run-control-v3");
-  const core = collector.runConfigurationForMode("run-core-v3");
+  const control = collector.runConfigurationForMode("run-control-v4");
+  const core = collector.runConfigurationForMode("run-core-v4");
   assert.deepEqual(
     {
       mode: control.mode,
@@ -6140,9 +6249,9 @@ test("full profiles select the exact frozen 16-case order", async () => {
       baselineRelativePath: control.baselineRelativePath,
     },
     {
-      mode: "run-control-v3",
-      runId: "no-harness-control-v3",
-      resultRelativePath: "evals/p0/no-harness-control-v3.json",
+      mode: "run-control-v4",
+      runId: "no-harness-control-v4",
+      resultRelativePath: "evals/p0/no-harness-control-v4.json",
       caseIds: EXPECTED_FULL_CASE_IDS,
       instructionCondition: "none",
       baselineRelativePath: null,
@@ -6159,12 +6268,12 @@ test("full profiles select the exact frozen 16-case order", async () => {
       candidateRelativePath: core.candidateRelativePath,
     },
     {
-      mode: "run-core-v3",
-      runId: "common-core-v3",
-      resultRelativePath: "evals/p0/common-core-v3.json",
+      mode: "run-core-v4",
+      runId: "common-core-v4",
+      resultRelativePath: "evals/p0/common-core-v4.json",
       caseIds: EXPECTED_FULL_CASE_IDS,
       instructionCondition: "common-core",
-      baselineRelativePath: "evals/p0/no-harness-control-v3.json",
+      baselineRelativePath: "evals/p0/no-harness-control-v4.json",
       candidateRelativePath: "evals/candidates/common-core-v1.md",
     },
   );
@@ -6177,7 +6286,7 @@ test("full profiles select the exact frozen 16-case order", async () => {
     /unsupported live run mode/,
   );
   assert.throws(
-    () => collector.runConfigurationForMode("run-v3"),
+    () => collector.runConfigurationForMode("run-control-v3"),
     /unsupported live run mode/,
   );
 });
@@ -6196,7 +6305,9 @@ test("only p0-02 receives a dynamic tool in the full profile", () => {
     definitionsById.get(id),
   );
   for (const definition of definitions) {
-    const tools = buildCaseDynamicTools(definition);
+    const tools = buildCaseDynamicTools(definition, {
+      requireWriteKey: true,
+    });
     assert.equal(
       tools.length,
       definition.id === "p0-02-unknown-write" ? 1 : 0,
@@ -6309,11 +6420,12 @@ test("evaluation manifest freezes the portable one-shot pair", () => {
   );
   for (const required of [
     "repetitions_per_condition: 1",
-    "evaluation: full_baseline_common_core_pair_v3",
-    "mode: run-control-v3",
-    "mode: run-core-v3",
+    "evaluation: full_baseline_common_core_pair_v4",
+    "mode: run-control-v4",
+    "mode: run-core-v4",
+    "result: evals/p0/no-harness-control-v4.json",
+    "result: evals/p0/common-core-v4.json",
     "result: evals/p0/no-harness-control-v3.json",
-    "result: evals/p0/common-core-v3.json",
     "result: evals/p0/no-harness-control-v2.json",
     "status: blocked_event_limit",
     "environment: explicit_local_case_root",
@@ -6324,11 +6436,14 @@ test("evaluation manifest freezes the portable one-shot pair", () => {
     "delta_secret_scan: bounded_receipt_order_across_items",
     "delta_raw_retention: none_hash_summary_for_noncoalesced",
     "pending_notification_queue: normalized_bounded_delta_coalescing",
+    "write_stable_key: schema_required_and_exact",
+    "read_state_optional_stable_key: accepted_and_stripped_before_broker",
     "reviewed_case_claims: pass_or_fail_requires_complete_case_evidence",
     "instruction_discovery: live_control_model_free_receipt",
     "turn_start_environment_overrides: omitted",
     "candidate_reference: exact_across_control_core_and_overlay",
     "run_id: common-core-v1",
+    "status: blocked_dynamic_tool_schema_mismatch",
     "status: blocked_before_model_turn",
     "fresh_thread: one_ephemeral_thread_and_turn_per_case",
     "token_usage: last_correlated_total",
@@ -6350,12 +6465,12 @@ test("paired execution gate blocks root activation, dirty inputs and source drif
     await import("../evals/support/collect-codex-app-server.mjs");
   assert.equal(typeof assertEvaluationGateSnapshot, "function");
   const controlConfiguration =
-    runConfigurationForMode("run-control-v3");
-  const coreConfiguration = runConfigurationForMode("run-core-v3");
+    runConfigurationForMode("run-control-v4");
+  const coreConfiguration = runConfigurationForMode("run-core-v4");
   const candidateBytes = Buffer.from(validCoreCandidateText());
   const reviewedControl =
     completeSchema3ExplicitLocalControlPassResult(
-      "no-harness-control-v3",
+      "no-harness-control-v4",
       candidateBytes,
     );
   const baselineBytes = Buffer.from(
@@ -6417,7 +6532,7 @@ test("paired execution gate blocks root activation, dirty inputs and source drif
   blockedControl.review.reasons = ["reviewed-block"];
   const previousGenerationControl =
     completeSchema3ExplicitLocalControlPassResult(
-      "no-harness-control-v2",
+      "no-harness-control-v3",
       candidateBytes,
     );
   for (const rejectedControl of [
@@ -6522,27 +6637,29 @@ test("paired execution gate blocks root activation, dirty inputs and source drif
 test("CLI accepts only smoke and the fresh paired live modes", () => {
   assert.deepEqual(parseCli(["smoke"]), { mode: "smoke" });
   assert.deepEqual(
-    parseCli(["run-control-v3"]),
-    { mode: "run-control-v3" },
+    parseCli(["run-control-v4"]),
+    { mode: "run-control-v4" },
   );
-  assert.deepEqual(parseCli(["run-core-v3"]), { mode: "run-core-v3" });
+  assert.deepEqual(parseCli(["run-core-v4"]), { mode: "run-core-v4" });
   for (const argv of [
     [],
     ["run-control-v1"],
     ["run-core-v1"],
     ["run-control-v2"],
     ["run-core-v2"],
+    ["run-control-v3"],
+    ["run-core-v3"],
     ["run-v2"],
     ["run-v3"],
     ["resume"],
     ["--force"],
     ["smoke", "--force"],
-    ["run-control-v3", "extra"],
-    ["run-core-v3", "--force"],
+    ["run-control-v4", "extra"],
+    ["run-core-v4", "--force"],
   ]) {
     assert.throws(
       () => parseCli(argv),
-      /usage: node evals\/support\/collect-codex-app-server\.mjs <smoke\|run-control-v3\|run-core-v3>/,
+      /usage: node evals\/support\/collect-codex-app-server\.mjs <smoke\|run-control-v4\|run-core-v4>/,
     );
   }
 });

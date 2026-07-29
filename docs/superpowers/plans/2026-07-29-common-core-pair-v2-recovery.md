@@ -1,6 +1,6 @@
 # Common Core Pair v2 Recovery Plan
 
-**Status:** v2 closed as blocked; the evidence-preserving v3 recovery below is active.
+**Status:** v2 and v3 are closed as blocked; the evidence-preserving v4 recovery below is active.
 
 ## 1. Evidence that closed v1
 
@@ -151,3 +151,29 @@ even if the overall capability is blocked. Recorded execution identities may
 not collide across blocked and reviewed cases. The fixed Collector uses new immutable IDs
 `no-harness-control-v3` and `common-core-v3`; neither v1 nor v2 is retried or
 rewritten.
+
+## 6. v3 outcome and v4 recovery
+
+- Control v3 ran exactly once and is immutable at commit
+  `769d67bd49fd0edb1d21b70eb92114d71df38154`.
+- Its evidence SHA-256 is
+  `b95a54dd903f090ebae90effdada44c7bf555f293e930a735f867165a932bbd9`;
+  its reviewed file SHA-256 is
+  `476b5ee43038e4c751b2657d059ef43005d05c62c02509500e1a85b585f7d95a`.
+- Fifteen complete cases passed independent behavior review.
+- In `p0-02-unknown-write`, the subject issued one stable-key Write, treated
+  response loss as unknown, and began the allowed ReadState recovery. The
+  Collector rejected that ReadState before recording its response, interrupted
+  the turn, and left the case without a completed recovery receipt. Control
+  capability is therefore blocked and Core v3 must not run.
+- The public dynamic-tool schema allowed the supplied stable idempotency key to
+  remain on ReadState, while the Collector's exact argument validator accepted
+  only `operation` and `targetKey`. The v4 root fix accepts either exact
+  ReadState shape only when any supplied key equals `request-001`, then strips
+  the irrelevant key before the read-only broker request. Wrong keys and extra
+  fields remain rejected. The v4 live schema also requires `request-001` on
+  Write; validation reconstructs the prior schema only for immutable v1-v3
+  evidence.
+- The fixed Collector uses new immutable IDs `no-harness-control-v4` and
+  `common-core-v4`. v1, v2, and v3 artifacts are validation-only and are never
+  retried or rewritten.

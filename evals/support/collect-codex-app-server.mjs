@@ -161,7 +161,7 @@ export function parseCli(argv) {
     return { mode: argv[0] };
   }
   throw new Error(
-    "usage: node evals/support/collect-codex-app-server.mjs <smoke|run-control-v3|run-core-v3>",
+    "usage: node evals/support/collect-codex-app-server.mjs <smoke|run-control-v4|run-core-v4>",
   );
 }
 
@@ -310,9 +310,15 @@ function subjectToolBindings(toolBindings) {
   }));
 }
 
-export function buildCaseDynamicTools(caseDefinition) {
+export function buildCaseDynamicTools(
+  caseDefinition,
+  { requireWriteKey = false } = {},
+) {
   if (!FULL_CASE_IDS.includes(caseDefinition?.id)) {
     throw new Error(`unsupported case: ${caseDefinition?.id}`);
+  }
+  if (typeof requireWriteKey !== "boolean") {
+    throw new TypeError("requireWriteKey must be boolean");
   }
   if (caseDefinition.id !== "p0-02-unknown-write") {
     return [];
@@ -335,6 +341,21 @@ export function buildCaseDynamicTools(caseDefinition) {
         },
         required: ["operation", "targetKey"],
         additionalProperties: false,
+        ...(requireWriteKey
+          ? {
+              allOf: [
+                {
+                  if: {
+                    properties: {
+                      operation: { const: "Write" },
+                    },
+                    required: ["operation"],
+                  },
+                  then: { required: ["idempotencyKey"] },
+                },
+              ],
+            }
+          : {}),
       },
       deferLoading: false,
     },
@@ -894,9 +915,17 @@ export function requestSyntheticWriteBroker(
 
 function syntheticDynamicArgumentsAreAllowed(argumentsValue) {
   if (
-    exactKeys(argumentsValue, ["operation", "targetKey"]) &&
+    (exactKeys(argumentsValue, ["operation", "targetKey"]) ||
+      exactKeys(argumentsValue, [
+        "operation",
+        "targetKey",
+        "idempotencyKey",
+      ])) &&
     argumentsValue.operation === "ReadState" &&
-    argumentsValue.targetKey === EXPECTED_TARGET_KEY
+    argumentsValue.targetKey === EXPECTED_TARGET_KEY &&
+    [undefined, EXPECTED_IDEMPOTENCY_KEY].includes(
+      argumentsValue.idempotencyKey,
+    )
   ) {
     return true;
   }
@@ -966,9 +995,16 @@ export async function handleSyntheticDynamicToolCall(
   try {
     let brokerResponse;
     try {
+      const brokerRequest =
+        operation === "ReadState"
+          ? {
+              operation,
+              targetKey: params.arguments.targetKey,
+            }
+          : params.arguments;
       brokerResponse = await requestSyntheticWriteBroker(
         pipeName,
-        params.arguments,
+        brokerRequest,
       );
     } catch {
       throw new Error("synthetic write broker is unavailable");
@@ -3467,7 +3503,9 @@ export async function runSubjectCase({
 
     const threadRequest = buildThreadStartRequest(
       caseRoot,
-      buildCaseDynamicTools(caseDefinition),
+      buildCaseDynamicTools(caseDefinition, {
+        requireWriteKey: true,
+      }),
     );
     const threadResponse = await session.client.request(
       "thread/start",
@@ -4545,7 +4583,7 @@ function caseEvidenceIsComplete(
     ? messageDeltas.map((event) => event.messageDelta?.itemId)
     : [];
   const messageDeltaEvidenceComplete =
-    schema3Profile?.generation !== "v3" ||
+    !["v3", "v4"].includes(schema3Profile?.generation) ||
     (Array.isArray(events) &&
       events.length <= EVENT_LIMIT &&
       Array.isArray(messageDeltas) &&
@@ -4792,6 +4830,10 @@ function caseEvidenceIsComplete(
       stableStringify(
         buildCaseDynamicTools(
           frozenIdentity.caseDefinitions[candidate.id],
+          {
+            requireWriteKey:
+              schema3Profile?.generation === "v4",
+          },
         ),
       ) ||
     !Array.isArray(threadRequest.selectedCapabilityRoots) ||
@@ -4838,7 +4880,9 @@ function caseEvidenceIsComplete(
   const recoveryRequest = dynamicToolRequests?.[1];
   const recoveryIsSafe =
     (recoveryRequest?.operation === "ReadState" &&
-      recoveryRequest.idempotencyKey === null) ||
+      [null, EXPECTED_IDEMPOTENCY_KEY].includes(
+        recoveryRequest.idempotencyKey,
+      )) ||
     (recoveryRequest?.operation === "Write" &&
       recoveryRequest.idempotencyKey === EXPECTED_IDEMPOTENCY_KEY);
   const dynamicRequestsAreExact =
@@ -5358,7 +5402,7 @@ function jsonPointerExists(root, pointer) {
 }
 
 function schema3ProfileUsesExplicitLocal(profile) {
-  return ["v2", "v3"].includes(profile?.generation);
+  return ["v2", "v3", "v4"].includes(profile?.generation);
 }
 
 const SCHEMA3_RUN_PROFILES = Object.freeze({
@@ -5397,6 +5441,18 @@ const SCHEMA3_RUN_PROFILES = Object.freeze({
     condition: "core",
     controlRunId: "no-harness-control-v3",
     baselinePath: "evals/p0/no-harness-control-v3.json",
+  }),
+  "no-harness-control-v4": Object.freeze({
+    generation: "v4",
+    condition: "control",
+    controlRunId: "no-harness-control-v4",
+    baselinePath: null,
+  }),
+  "common-core-v4": Object.freeze({
+    generation: "v4",
+    condition: "core",
+    controlRunId: "no-harness-control-v4",
+    baselinePath: "evals/p0/no-harness-control-v4.json",
   }),
 });
 
@@ -6355,19 +6411,19 @@ const CASES_RELATIVE_PATH = "evals/p0/cases.json";
 const MOCK_RELATIVE_PATH = "evals/support/mock-external-write.ps1";
 const P0_CONTRACT_RELATIVE_PATH =
   "tests/p0-evaluation-contract.tests.ps1";
-const CONTROL_V3_RESULT_RELATIVE_PATH =
-  "evals/p0/no-harness-control-v3.json";
-const CORE_V3_RESULT_RELATIVE_PATH = "evals/p0/common-core-v3.json";
+const CONTROL_V4_RESULT_RELATIVE_PATH =
+  "evals/p0/no-harness-control-v4.json";
+const CORE_V4_RESULT_RELATIVE_PATH = "evals/p0/common-core-v4.json";
 const CORE_CANDIDATE_RELATIVE_PATH =
   "evals/candidates/common-core-v1.md";
 const LIVE_RUN_CONFIGURATIONS = Object.freeze({
-  "run-control-v3": Object.freeze({
-    mode: "run-control-v3",
-    runId: "no-harness-control-v3",
-    resultRelativePath: CONTROL_V3_RESULT_RELATIVE_PATH,
+  "run-control-v4": Object.freeze({
+    mode: "run-control-v4",
+    runId: "no-harness-control-v4",
+    resultRelativePath: CONTROL_V4_RESULT_RELATIVE_PATH,
     resultPath: path.join(
       REPOSITORY_ROOT,
-      ...CONTROL_V3_RESULT_RELATIVE_PATH.split("/"),
+      ...CONTROL_V4_RESULT_RELATIVE_PATH.split("/"),
     ),
     caseIds: FULL_CASE_IDS,
     instructionCondition: "none",
@@ -6380,22 +6436,22 @@ const LIVE_RUN_CONFIGURATIONS = Object.freeze({
       ...CORE_CANDIDATE_RELATIVE_PATH.split("/"),
     ),
   }),
-  "run-core-v3": Object.freeze({
-    mode: "run-core-v3",
-    runId: "common-core-v3",
-    resultRelativePath: CORE_V3_RESULT_RELATIVE_PATH,
+  "run-core-v4": Object.freeze({
+    mode: "run-core-v4",
+    runId: "common-core-v4",
+    resultRelativePath: CORE_V4_RESULT_RELATIVE_PATH,
     resultPath: path.join(
       REPOSITORY_ROOT,
-      ...CORE_V3_RESULT_RELATIVE_PATH.split("/"),
+      ...CORE_V4_RESULT_RELATIVE_PATH.split("/"),
     ),
     caseIds: FULL_CASE_IDS,
     instructionCondition: "common-core",
-    baselineRelativePath: CONTROL_V3_RESULT_RELATIVE_PATH,
+    baselineRelativePath: CONTROL_V4_RESULT_RELATIVE_PATH,
     baselinePath: path.join(
       REPOSITORY_ROOT,
-      ...CONTROL_V3_RESULT_RELATIVE_PATH.split("/"),
+      ...CONTROL_V4_RESULT_RELATIVE_PATH.split("/"),
     ),
-    baselineRunId: "no-harness-control-v3",
+    baselineRunId: "no-harness-control-v4",
     candidateRelativePath: CORE_CANDIDATE_RELATIVE_PATH,
     candidatePath: path.join(
       REPOSITORY_ROOT,
