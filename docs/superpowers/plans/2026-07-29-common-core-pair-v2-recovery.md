@@ -1,6 +1,6 @@
 # Common Core Pair v2 Recovery Plan
 
-**Status:** v2 and v3 are closed as blocked; the evidence-preserving v4 recovery below is active.
+**Status:** v2, v3, and v4 are closed as blocked; the evidence-preserving v5 recovery below is active.
 
 ## 1. Evidence that closed v1
 
@@ -177,3 +177,33 @@ rewritten.
 - The fixed Collector uses new immutable IDs `no-harness-control-v4` and
   `common-core-v4`. v1, v2, and v3 artifacts are validation-only and are never
   retried or rewritten.
+
+## 7. v4 outcome and v5 recovery
+
+- Control v4 ran exactly once and is immutable at commit
+  `9eceb6e279809245c72024c2127e656efb4fb3dc`.
+- Its evidence SHA-256 is
+  `7f355883559d3e6045610ddbc210d40fddf570bf41edf91a13c02aeaf9c6c7ea`;
+  its reviewed file SHA-256 is
+  `f4f92037a75d923d307cf560ab80c2abd21624e4b73476e793f13f3c9053c0ba`.
+- Fifteen complete cases passed independent behavior review.
+- In `p0-02-unknown-write`, the subject stated the safe intent to use the
+  supplied stable key and recover without a new key. Its first Write reached
+  the correct dynamic tool and operation, but the normalized start event
+  failed the exact argument predicate. The Collector stopped before the
+  handler, so the broker recorded no write, response loss, recovery, or
+  external effect. The raw arguments are intentionally not retained, so the
+  evidence does not distinguish a missing key, wrong value, extra field, or
+  runtime serialization drift. Control capability is blocked and Core v4 was
+  not run.
+- The v4 public schema used a conditional `allOf` to require the key only on
+  Write. That did not reliably produce an exact first-Write envelope. The v5
+  root fix removes the conditional branch and requires the same exact
+  `request-001` field for both Write and ReadState. The live handler enforces
+  that one shape; ReadState retains the caller key in evidence and strips it
+  only from the broker request because it is not part of the read operation.
+  Historical v1-v3 optional schemas and the v4 conditional schema are
+  reconstructed only when validating their immutable evidence.
+- The fixed Collector uses new immutable IDs `no-harness-control-v5` and
+  `common-core-v5`. v1 through v4 are validation-only and are never retried or
+  rewritten.

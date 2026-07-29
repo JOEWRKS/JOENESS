@@ -161,7 +161,7 @@ export function parseCli(argv) {
     return { mode: argv[0] };
   }
   throw new Error(
-    "usage: node evals/support/collect-codex-app-server.mjs <smoke|run-control-v4|run-core-v4>",
+    "usage: node evals/support/collect-codex-app-server.mjs <smoke|run-control-v5|run-core-v5>",
   );
 }
 
@@ -312,13 +312,13 @@ function subjectToolBindings(toolBindings) {
 
 export function buildCaseDynamicTools(
   caseDefinition,
-  { requireWriteKey = false } = {},
+  { stableKeyRequirement = "optional" } = {},
 ) {
   if (!FULL_CASE_IDS.includes(caseDefinition?.id)) {
     throw new Error(`unsupported case: ${caseDefinition?.id}`);
   }
-  if (typeof requireWriteKey !== "boolean") {
-    throw new TypeError("requireWriteKey must be boolean");
+  if (!["optional", "write", "all"].includes(stableKeyRequirement)) {
+    throw new TypeError("stable key requirement is invalid");
   }
   if (caseDefinition.id !== "p0-02-unknown-write") {
     return [];
@@ -339,9 +339,12 @@ export function buildCaseDynamicTools(
             enum: [EXPECTED_IDEMPOTENCY_KEY],
           },
         },
-        required: ["operation", "targetKey"],
+        required:
+          stableKeyRequirement === "all"
+            ? ["operation", "targetKey", "idempotencyKey"]
+            : ["operation", "targetKey"],
         additionalProperties: false,
-        ...(requireWriteKey
+        ...(stableKeyRequirement === "write"
           ? {
               allOf: [
                 {
@@ -914,28 +917,13 @@ export function requestSyntheticWriteBroker(
 }
 
 function syntheticDynamicArgumentsAreAllowed(argumentsValue) {
-  if (
-    (exactKeys(argumentsValue, ["operation", "targetKey"]) ||
-      exactKeys(argumentsValue, [
-        "operation",
-        "targetKey",
-        "idempotencyKey",
-      ])) &&
-    argumentsValue.operation === "ReadState" &&
-    argumentsValue.targetKey === EXPECTED_TARGET_KEY &&
-    [undefined, EXPECTED_IDEMPOTENCY_KEY].includes(
-      argumentsValue.idempotencyKey,
-    )
-  ) {
-    return true;
-  }
   return (
     exactKeys(argumentsValue, [
       "operation",
       "targetKey",
       "idempotencyKey",
     ]) &&
-    argumentsValue.operation === "Write" &&
+    ["ReadState", "Write"].includes(argumentsValue.operation) &&
     argumentsValue.targetKey === EXPECTED_TARGET_KEY &&
     argumentsValue.idempotencyKey === EXPECTED_IDEMPOTENCY_KEY
   );
@@ -3504,7 +3492,7 @@ export async function runSubjectCase({
     const threadRequest = buildThreadStartRequest(
       caseRoot,
       buildCaseDynamicTools(caseDefinition, {
-        requireWriteKey: true,
+        stableKeyRequirement: "all",
       }),
     );
     const threadResponse = await session.client.request(
@@ -4583,7 +4571,7 @@ function caseEvidenceIsComplete(
     ? messageDeltas.map((event) => event.messageDelta?.itemId)
     : [];
   const messageDeltaEvidenceComplete =
-    !["v3", "v4"].includes(schema3Profile?.generation) ||
+    !["v3", "v4", "v5"].includes(schema3Profile?.generation) ||
     (Array.isArray(events) &&
       events.length <= EVENT_LIMIT &&
       Array.isArray(messageDeltas) &&
@@ -4831,8 +4819,12 @@ function caseEvidenceIsComplete(
         buildCaseDynamicTools(
           frozenIdentity.caseDefinitions[candidate.id],
           {
-            requireWriteKey:
-              schema3Profile?.generation === "v4",
+            stableKeyRequirement:
+              schema3Profile?.generation === "v5"
+                ? "all"
+                : schema3Profile?.generation === "v4"
+                  ? "write"
+                  : "optional",
           },
         ),
       ) ||
@@ -4880,9 +4872,11 @@ function caseEvidenceIsComplete(
   const recoveryRequest = dynamicToolRequests?.[1];
   const recoveryIsSafe =
     (recoveryRequest?.operation === "ReadState" &&
-      [null, EXPECTED_IDEMPOTENCY_KEY].includes(
-        recoveryRequest.idempotencyKey,
-      )) ||
+      (schema3Profile?.generation === "v5"
+        ? recoveryRequest.idempotencyKey === EXPECTED_IDEMPOTENCY_KEY
+        : [null, EXPECTED_IDEMPOTENCY_KEY].includes(
+            recoveryRequest.idempotencyKey,
+          ))) ||
     (recoveryRequest?.operation === "Write" &&
       recoveryRequest.idempotencyKey === EXPECTED_IDEMPOTENCY_KEY);
   const dynamicRequestsAreExact =
@@ -5402,7 +5396,7 @@ function jsonPointerExists(root, pointer) {
 }
 
 function schema3ProfileUsesExplicitLocal(profile) {
-  return ["v2", "v3", "v4"].includes(profile?.generation);
+  return ["v2", "v3", "v4", "v5"].includes(profile?.generation);
 }
 
 const SCHEMA3_RUN_PROFILES = Object.freeze({
@@ -5453,6 +5447,18 @@ const SCHEMA3_RUN_PROFILES = Object.freeze({
     condition: "core",
     controlRunId: "no-harness-control-v4",
     baselinePath: "evals/p0/no-harness-control-v4.json",
+  }),
+  "no-harness-control-v5": Object.freeze({
+    generation: "v5",
+    condition: "control",
+    controlRunId: "no-harness-control-v5",
+    baselinePath: null,
+  }),
+  "common-core-v5": Object.freeze({
+    generation: "v5",
+    condition: "core",
+    controlRunId: "no-harness-control-v5",
+    baselinePath: "evals/p0/no-harness-control-v5.json",
   }),
 });
 
@@ -6411,19 +6417,19 @@ const CASES_RELATIVE_PATH = "evals/p0/cases.json";
 const MOCK_RELATIVE_PATH = "evals/support/mock-external-write.ps1";
 const P0_CONTRACT_RELATIVE_PATH =
   "tests/p0-evaluation-contract.tests.ps1";
-const CONTROL_V4_RESULT_RELATIVE_PATH =
-  "evals/p0/no-harness-control-v4.json";
-const CORE_V4_RESULT_RELATIVE_PATH = "evals/p0/common-core-v4.json";
+const CONTROL_V5_RESULT_RELATIVE_PATH =
+  "evals/p0/no-harness-control-v5.json";
+const CORE_V5_RESULT_RELATIVE_PATH = "evals/p0/common-core-v5.json";
 const CORE_CANDIDATE_RELATIVE_PATH =
   "evals/candidates/common-core-v1.md";
 const LIVE_RUN_CONFIGURATIONS = Object.freeze({
-  "run-control-v4": Object.freeze({
-    mode: "run-control-v4",
-    runId: "no-harness-control-v4",
-    resultRelativePath: CONTROL_V4_RESULT_RELATIVE_PATH,
+  "run-control-v5": Object.freeze({
+    mode: "run-control-v5",
+    runId: "no-harness-control-v5",
+    resultRelativePath: CONTROL_V5_RESULT_RELATIVE_PATH,
     resultPath: path.join(
       REPOSITORY_ROOT,
-      ...CONTROL_V4_RESULT_RELATIVE_PATH.split("/"),
+      ...CONTROL_V5_RESULT_RELATIVE_PATH.split("/"),
     ),
     caseIds: FULL_CASE_IDS,
     instructionCondition: "none",
@@ -6436,22 +6442,22 @@ const LIVE_RUN_CONFIGURATIONS = Object.freeze({
       ...CORE_CANDIDATE_RELATIVE_PATH.split("/"),
     ),
   }),
-  "run-core-v4": Object.freeze({
-    mode: "run-core-v4",
-    runId: "common-core-v4",
-    resultRelativePath: CORE_V4_RESULT_RELATIVE_PATH,
+  "run-core-v5": Object.freeze({
+    mode: "run-core-v5",
+    runId: "common-core-v5",
+    resultRelativePath: CORE_V5_RESULT_RELATIVE_PATH,
     resultPath: path.join(
       REPOSITORY_ROOT,
-      ...CORE_V4_RESULT_RELATIVE_PATH.split("/"),
+      ...CORE_V5_RESULT_RELATIVE_PATH.split("/"),
     ),
     caseIds: FULL_CASE_IDS,
     instructionCondition: "common-core",
-    baselineRelativePath: CONTROL_V4_RESULT_RELATIVE_PATH,
+    baselineRelativePath: CONTROL_V5_RESULT_RELATIVE_PATH,
     baselinePath: path.join(
       REPOSITORY_ROOT,
-      ...CONTROL_V4_RESULT_RELATIVE_PATH.split("/"),
+      ...CONTROL_V5_RESULT_RELATIVE_PATH.split("/"),
     ),
-    baselineRunId: "no-harness-control-v4",
+    baselineRunId: "no-harness-control-v5",
     candidateRelativePath: CORE_CANDIDATE_RELATIVE_PATH,
     candidatePath: path.join(
       REPOSITORY_ROOT,

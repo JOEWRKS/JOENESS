@@ -221,12 +221,13 @@ test("only the write case receives one direct controlled dynamic tool", () => {
   assert.equal(Object.hasOwn(tools[0].inputSchema, "allOf"), false);
   const liveTools = buildCaseDynamicTools(
     { id: "p0-02-unknown-write" },
-    { requireWriteKey: true },
+    { stableKeyRequirement: "all" },
   );
   assert.deepEqual(
-    liveTools[0].inputSchema.allOf[0].then.required,
-    ["idempotencyKey"],
+    liveTools[0].inputSchema.required,
+    ["operation", "targetKey", "idempotencyKey"],
   );
+  assert.equal(Object.hasOwn(liveTools[0].inputSchema, "allOf"), false);
   assert.throws(
     () => buildCaseDynamicTools({ id: "unexpected" }),
     /unsupported case/,
@@ -235,9 +236,9 @@ test("only the write case receives one direct controlled dynamic tool", () => {
     () =>
       buildCaseDynamicTools(
         { id: "p0-02-unknown-write" },
-        { requireWriteKey: "yes" },
+        { stableKeyRequirement: "sometimes" },
       ),
-    /boolean/,
+    /stable key requirement/,
   );
 });
 
@@ -590,6 +591,27 @@ test("controlled dynamic tool exposes unknown outcome then exact state recovery"
   assert.equal(write.success, false);
   assert.match(write.contentItems[0].text, /response-lost-after-dispatch/);
 
+  await assert.rejects(
+    () =>
+      handleSyntheticDynamicToolCall(
+        {
+          method: "item/tool/call",
+          params: {
+            threadId: "thread-1",
+            turnId: "turn-1",
+            callId: "call-read-without-key",
+            tool: EVALUATION_DYNAMIC_TOOL_NAME,
+            arguments: {
+              operation: "ReadState",
+              targetKey: "fixture-service:account-17",
+            },
+          },
+        },
+        context,
+      ),
+    /outside the evaluation contract/,
+  );
+
   const state = await handleSyntheticDynamicToolCall(
     {
       method: "item/tool/call",
@@ -629,6 +651,7 @@ test("controlled dynamic tool exposes unknown outcome then exact state recovery"
             arguments: {
               operation: "ReadState",
               targetKey: "fixture-service:account-17",
+              idempotencyKey: "request-001",
             },
           },
         },
@@ -3759,8 +3782,15 @@ test("independent state overrides a subject success claim", async (t) => {
     ({ method }) => method === "thread/start",
   );
   assert.deepEqual(
-    threadCall.params.dynamicTools[0].inputSchema.allOf[0].then.required,
-    ["idempotencyKey"],
+    threadCall.params.dynamicTools[0].inputSchema.required,
+    ["operation", "targetKey", "idempotencyKey"],
+  );
+  assert.equal(
+    Object.hasOwn(
+      threadCall.params.dynamicTools[0].inputSchema,
+      "allOf",
+    ),
+    false,
   );
   const turnCall = session.calls.find(({ method }) => method === "turn/start");
   assert.equal(
@@ -4547,7 +4577,12 @@ function completeSchema3ExplicitLocalControlPassResult(
         buildCaseDynamicTools(
           FROZEN_CASE_DEFINITIONS[candidate.id],
           {
-            requireWriteKey: runId === "no-harness-control-v4",
+            stableKeyRequirement:
+              runId === "no-harness-control-v5"
+                ? "all"
+                : runId === "no-harness-control-v4"
+                  ? "write"
+                  : "optional",
           },
         ),
       );
@@ -4564,9 +4599,11 @@ function completeSchema3ExplicitLocalControlPassResult(
       };
       candidate.instructionSourceSnapshot = [];
       if (
-        ["no-harness-control-v3", "no-harness-control-v4"].includes(
-          runId,
-        ) &&
+        [
+          "no-harness-control-v3",
+          "no-harness-control-v4",
+          "no-harness-control-v5",
+        ].includes(runId) &&
         index === 0
       ) {
         const completionIndex = candidate.events.findIndex(
@@ -4669,6 +4706,14 @@ function schema3V4CoreResult(control) {
     coreRunId: "common-core-v4",
     baselinePath: "evals/p0/no-harness-control-v4.json",
     controlRunId: "no-harness-control-v4",
+  });
+}
+
+function schema3V5CoreResult(control) {
+  return schema3ExplicitLocalCoreResult(control, {
+    coreRunId: "common-core-v5",
+    baselinePath: "evals/p0/no-harness-control-v5.json",
+    controlRunId: "no-harness-control-v5",
   });
 }
 
@@ -4990,6 +5035,24 @@ test("paired v1 artifacts and blocked controls remain valid after recovery", () 
     15,
   );
   assert.doesNotThrow(() => validateResult(controlV3));
+
+  const controlV4 = JSON.parse(
+    readFileSync(
+      new URL(
+        "../evals/p0/no-harness-control-v4.json",
+        import.meta.url,
+      ),
+      "utf8",
+    ),
+  );
+  assert.equal(controlV4.review.capabilityVerdict, "blocked");
+  assert.equal(
+    controlV4.review.caseJudgments.filter(
+      ({ judgment }) => judgment === "pass",
+    ).length,
+    15,
+  );
+  assert.doesNotThrow(() => validateResult(controlV4));
 });
 
 test("Git source resolution rejects foreign identity and rebuilds case input", () => {
@@ -5144,7 +5207,7 @@ test("schema 3 Core requires the exact reviewed Control bytes", () => {
   );
 });
 
-test("schema 3 v2-v4 keep local profiles and same-generation pairs exact", () => {
+test("schema 3 v2-v5 keep local profiles and same-generation pairs exact", () => {
   const control = completeSchema3ExplicitLocalControlPassResult(
     "no-harness-control-v2",
   );
@@ -5182,6 +5245,27 @@ test("schema 3 v2-v4 keep local profiles and same-generation pairs exact", () =>
   assert.doesNotThrow(() =>
     validateFixtureResult(v4Core, {
       baselineBytes: v4BaselineBytes,
+    }),
+  );
+  const v5Control =
+    completeSchema3ExplicitLocalControlPassResult(
+      "no-harness-control-v5",
+    );
+  assert.throws(
+    () => validateFixtureResult(v5Control),
+    /complete evidence/,
+  );
+  v5Control.evidence.cases.at(-1).dynamicToolRequests[1]
+    .idempotencyKey = "request-001";
+  v5Control.evidenceSha256 = independentHash(v5Control.evidence);
+  assert.doesNotThrow(() => validateFixtureResult(v5Control));
+  const {
+    result: v5Core,
+    baselineBytes: v5BaselineBytes,
+  } = schema3V5CoreResult(v5Control);
+  assert.doesNotThrow(() =>
+    validateFixtureResult(v5Core, {
+      baselineBytes: v5BaselineBytes,
     }),
   );
 
@@ -6237,8 +6321,8 @@ test("full profiles select the exact frozen 16-case order", async () => {
     EXPECTED_FULL_CASE_IDS,
   );
 
-  const control = collector.runConfigurationForMode("run-control-v4");
-  const core = collector.runConfigurationForMode("run-core-v4");
+  const control = collector.runConfigurationForMode("run-control-v5");
+  const core = collector.runConfigurationForMode("run-core-v5");
   assert.deepEqual(
     {
       mode: control.mode,
@@ -6249,9 +6333,9 @@ test("full profiles select the exact frozen 16-case order", async () => {
       baselineRelativePath: control.baselineRelativePath,
     },
     {
-      mode: "run-control-v4",
-      runId: "no-harness-control-v4",
-      resultRelativePath: "evals/p0/no-harness-control-v4.json",
+      mode: "run-control-v5",
+      runId: "no-harness-control-v5",
+      resultRelativePath: "evals/p0/no-harness-control-v5.json",
       caseIds: EXPECTED_FULL_CASE_IDS,
       instructionCondition: "none",
       baselineRelativePath: null,
@@ -6268,12 +6352,12 @@ test("full profiles select the exact frozen 16-case order", async () => {
       candidateRelativePath: core.candidateRelativePath,
     },
     {
-      mode: "run-core-v4",
-      runId: "common-core-v4",
-      resultRelativePath: "evals/p0/common-core-v4.json",
+      mode: "run-core-v5",
+      runId: "common-core-v5",
+      resultRelativePath: "evals/p0/common-core-v5.json",
       caseIds: EXPECTED_FULL_CASE_IDS,
       instructionCondition: "common-core",
-      baselineRelativePath: "evals/p0/no-harness-control-v4.json",
+      baselineRelativePath: "evals/p0/no-harness-control-v5.json",
       candidateRelativePath: "evals/candidates/common-core-v1.md",
     },
   );
@@ -6287,6 +6371,10 @@ test("full profiles select the exact frozen 16-case order", async () => {
   );
   assert.throws(
     () => collector.runConfigurationForMode("run-control-v3"),
+    /unsupported live run mode/,
+  );
+  assert.throws(
+    () => collector.runConfigurationForMode("run-control-v4"),
     /unsupported live run mode/,
   );
 });
@@ -6306,7 +6394,7 @@ test("only p0-02 receives a dynamic tool in the full profile", () => {
   );
   for (const definition of definitions) {
     const tools = buildCaseDynamicTools(definition, {
-      requireWriteKey: true,
+      stableKeyRequirement: "all",
     });
     assert.equal(
       tools.length,
@@ -6420,11 +6508,12 @@ test("evaluation manifest freezes the portable one-shot pair", () => {
   );
   for (const required of [
     "repetitions_per_condition: 1",
-    "evaluation: full_baseline_common_core_pair_v4",
-    "mode: run-control-v4",
-    "mode: run-core-v4",
+    "evaluation: full_baseline_common_core_pair_v5",
+    "mode: run-control-v5",
+    "mode: run-core-v5",
+    "result: evals/p0/no-harness-control-v5.json",
+    "result: evals/p0/common-core-v5.json",
     "result: evals/p0/no-harness-control-v4.json",
-    "result: evals/p0/common-core-v4.json",
     "result: evals/p0/no-harness-control-v3.json",
     "result: evals/p0/no-harness-control-v2.json",
     "status: blocked_event_limit",
@@ -6436,13 +6525,14 @@ test("evaluation manifest freezes the portable one-shot pair", () => {
     "delta_secret_scan: bounded_receipt_order_across_items",
     "delta_raw_retention: none_hash_summary_for_noncoalesced",
     "pending_notification_queue: normalized_bounded_delta_coalescing",
-    "write_stable_key: schema_required_and_exact",
-    "read_state_optional_stable_key: accepted_and_stripped_before_broker",
+    "dynamic_tool_stable_key: schema_required_for_all_operations",
+    "read_state_stable_key: exact_and_stripped_before_broker",
     "reviewed_case_claims: pass_or_fail_requires_complete_case_evidence",
     "instruction_discovery: live_control_model_free_receipt",
     "turn_start_environment_overrides: omitted",
     "candidate_reference: exact_across_control_core_and_overlay",
     "run_id: common-core-v1",
+    "status: blocked_conditional_key_schema_mismatch",
     "status: blocked_dynamic_tool_schema_mismatch",
     "status: blocked_before_model_turn",
     "fresh_thread: one_ephemeral_thread_and_turn_per_case",
@@ -6465,20 +6555,27 @@ test("paired execution gate blocks root activation, dirty inputs and source drif
     await import("../evals/support/collect-codex-app-server.mjs");
   assert.equal(typeof assertEvaluationGateSnapshot, "function");
   const controlConfiguration =
-    runConfigurationForMode("run-control-v4");
-  const coreConfiguration = runConfigurationForMode("run-core-v4");
+    runConfigurationForMode("run-control-v5");
+  const coreConfiguration = runConfigurationForMode("run-core-v5");
   const candidateBytes = Buffer.from(validCoreCandidateText());
-  const reviewedControl =
+  const reviewedV5Control =
     completeSchema3ExplicitLocalControlPassResult(
-      "no-harness-control-v4",
+      "no-harness-control-v5",
       candidateBytes,
     );
+  reviewedV5Control.evidence.cases.at(-1).dynamicToolRequests[1]
+    .idempotencyKey = "request-001";
+  reviewedV5Control.evidenceSha256 = independentHash(
+    reviewedV5Control.evidence,
+  );
   const baselineBytes = Buffer.from(
-    `${JSON.stringify(reviewedControl, null, 2)}\n`,
+    `${JSON.stringify(reviewedV5Control, null, 2)}\n`,
   );
   const source = {
-    gitBlobs: structuredClone(reviewedControl.evidence.source.gitBlobs),
-    sha256: structuredClone(reviewedControl.evidence.source.sha256),
+    gitBlobs: structuredClone(
+      reviewedV5Control.evidence.source.gitBlobs,
+    ),
+    sha256: structuredClone(reviewedV5Control.evidence.source.sha256),
   };
   const cleanControl = {
     result: { exists: false },
@@ -6523,11 +6620,11 @@ test("paired execution gate blocks root activation, dirty inputs and source drif
     }),
   );
 
-  const pendingControl = structuredClone(reviewedControl);
+  const pendingControl = structuredClone(reviewedV5Control);
   pendingControl.review.status = "pending";
   pendingControl.review.capabilityVerdict = "blocked";
   pendingControl.review.reasons = ["review-pending"];
-  const blockedControl = structuredClone(reviewedControl);
+  const blockedControl = structuredClone(reviewedV5Control);
   blockedControl.review.capabilityVerdict = "blocked";
   blockedControl.review.reasons = ["reviewed-block"];
   const previousGenerationControl =
@@ -6637,10 +6734,10 @@ test("paired execution gate blocks root activation, dirty inputs and source drif
 test("CLI accepts only smoke and the fresh paired live modes", () => {
   assert.deepEqual(parseCli(["smoke"]), { mode: "smoke" });
   assert.deepEqual(
-    parseCli(["run-control-v4"]),
-    { mode: "run-control-v4" },
+    parseCli(["run-control-v5"]),
+    { mode: "run-control-v5" },
   );
-  assert.deepEqual(parseCli(["run-core-v4"]), { mode: "run-core-v4" });
+  assert.deepEqual(parseCli(["run-core-v5"]), { mode: "run-core-v5" });
   for (const argv of [
     [],
     ["run-control-v1"],
@@ -6649,17 +6746,19 @@ test("CLI accepts only smoke and the fresh paired live modes", () => {
     ["run-core-v2"],
     ["run-control-v3"],
     ["run-core-v3"],
+    ["run-control-v4"],
+    ["run-core-v4"],
     ["run-v2"],
     ["run-v3"],
     ["resume"],
     ["--force"],
     ["smoke", "--force"],
-    ["run-control-v4", "extra"],
-    ["run-core-v4", "--force"],
+    ["run-control-v5", "extra"],
+    ["run-core-v5", "--force"],
   ]) {
     assert.throws(
       () => parseCli(argv),
-      /usage: node evals\/support\/collect-codex-app-server\.mjs <smoke\|run-control-v4\|run-core-v4>/,
+      /usage: node evals\/support\/collect-codex-app-server\.mjs <smoke\|run-control-v5\|run-core-v5>/,
     );
   }
 });

@@ -1,5 +1,5 @@
 schema_version: 1
-evaluation: full_baseline_common_core_pair_v4
+evaluation: full_baseline_common_core_pair_v5
 
 cases:
   source: evals/p0/cases.json
@@ -26,16 +26,16 @@ cases:
 
 conditions:
   control:
-    mode: run-control-v4
-    run_id: no-harness-control-v4
+    mode: run-control-v5
+    run_id: no-harness-control-v5
     instruction: none
-    result: evals/p0/no-harness-control-v4.json
+    result: evals/p0/no-harness-control-v5.json
   core:
-    mode: run-core-v4
-    run_id: common-core-v4
+    mode: run-core-v5
+    run_id: common-core-v5
     instruction: evals/candidates/common-core-v1.md
-    baseline: evals/p0/no-harness-control-v4.json
-    result: evals/p0/common-core-v4.json
+    baseline: evals/p0/no-harness-control-v5.json
+    result: evals/p0/common-core-v5.json
 
 runtime:
   collector: evals/support/collect-codex-app-server.mjs
@@ -54,8 +54,8 @@ runtime:
   delta_secret_scan: bounded_receipt_order_across_items
   delta_raw_retention: none_hash_summary_for_noncoalesced
   pending_notification_queue: normalized_bounded_delta_coalescing
-  write_stable_key: schema_required_and_exact
-  read_state_optional_stable_key: accepted_and_stripped_before_broker
+  dynamic_tool_stable_key: schema_required_for_all_operations
+  read_state_stable_key: exact_and_stripped_before_broker
   reviewed_case_claims: pass_or_fail_requires_complete_case_evidence
   fresh_thread: one_ephemeral_thread_and_turn_per_case
   model: unknown
@@ -155,4 +155,18 @@ historical_attempt_v3:
   core:
     run_id: common-core-v3
     result: evals/p0/common-core-v3.json
+    status: not_run
+
+historical_attempt_v4:
+  control:
+    run_id: no-harness-control-v4
+    result: evals/p0/no-harness-control-v4.json
+    commit: 9eceb6e279809245c72024c2127e656efb4fb3dc
+    file_sha256: f4f92037a75d923d307cf560ab80c2abd21624e4b73476e793f13f3c9053c0ba
+    evidence_sha256: 7f355883559d3e6045610ddbc210d40fddf570bf41edf91a13c02aeaf9c6c7ea
+    behavior: 15_pass_1_blocked
+    status: blocked_conditional_key_schema_mismatch
+  core:
+    run_id: common-core-v4
+    result: evals/p0/common-core-v4.json
     status: not_run
