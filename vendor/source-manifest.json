@@ -1,6 +1,19 @@
 {
   "schemaVersion": 1,
   "evaluation": { "state": "candidate", "tests": ["tests/design-vendor-integrity.tests.mjs", "vendor/ui-ux-pro-max/scripts/validate_data.py", "vendor/ui-ux-pro-max/scripts/tests/test_core.py"] },
+  "activeSkills": {
+    "joewrks-design-frontend": {
+      "authorship": "joewrks-canonical",
+      "evaluationState": "candidate",
+      "sourceDependencies": ["ui-ux-pro-max", "apple-design"],
+      "intentionalDifferences": ["Local activation and routing contract.", "Local OpenAI product metadata."],
+      "validatorSha256": "5347a0a09cfb546bba1c0d1a30dae0a233d9a05f57bd4e7877155c588bcdabf7",
+      "files": [
+        {"localPath":"skills/joewrks-design-frontend/SKILL.md","bytes":6506,"sha256":"0c04fb20391f0fa446dceab6484b3e558e89d08903f15e97c321b62f0dd88c6f","exactUpstreamCopy":false},
+        {"localPath":"skills/joewrks-design-frontend/agents/openai.yaml","bytes":263,"sha256":"3d0bc6bf72b93b3bd185852f080b19caeb17aed45f582df339d61c2633f81892","exactUpstreamCopy":false}
+      ]
+    }
+  },
   "sources": {
     "ui-ux-pro-max": {
       "repository": "nextlevelbuilder/ui-ux-pro-max-skill", "url": "https://github.com/nextlevelbuilder/ui-ux-pro-max-skill", "commit": "3b5df7547964f0cb3424de74cff55b69039250d3", "upstreamPath": ".claude/skills/ui-ux-pro-max/**", "archiveSha256": "ba29a4e0e380a0017f833a1041f558972a55fbad81d056c3d9a549e1609f0841", "activationMode": "non-discoverable-router-only",

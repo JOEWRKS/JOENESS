@@ -55,6 +55,30 @@ const EXPECTED_SOURCES = {
     licenseSha256: '4ff5bdb7887ec1435c9cab0e8d1a7caee704d894d65c2a008ccc68b1cc2f260b',
   },
 };
+const EXPECTED_ACTIVE_SKILL = {
+  authorship: 'joewrks-canonical',
+  evaluationState: 'candidate',
+  sourceDependencies: ['ui-ux-pro-max', 'apple-design'],
+  intentionalDifferences: [
+    'Local activation and routing contract.',
+    'Local OpenAI product metadata.',
+  ],
+  validatorSha256: '5347a0a09cfb546bba1c0d1a30dae0a233d9a05f57bd4e7877155c588bcdabf7',
+  files: [
+    {
+      localPath: 'skills/joewrks-design-frontend/SKILL.md',
+      bytes: 6506,
+      sha256: '0c04fb20391f0fa446dceab6484b3e558e89d08903f15e97c321b62f0dd88c6f',
+      exactUpstreamCopy: false,
+    },
+    {
+      localPath: 'skills/joewrks-design-frontend/agents/openai.yaml',
+      bytes: 263,
+      sha256: '3d0bc6bf72b93b3bd185852f080b19caeb17aed45f582df339d61c2633f81892',
+      exactUpstreamCopy: false,
+    },
+  ],
+};
 
 function sha256(file) {
   return createHash('sha256').update(readFileSync(file)).digest('hex');
@@ -95,6 +119,7 @@ test('vendor bundle is exactly the pinned non-discoverable source set', () => {
     ],
   });
   assert.deepEqual(Object.keys(manifest.sources).sort(), Object.keys(EXPECTED_SOURCES).sort());
+  assert.deepEqual(manifest.activeSkills, { 'joewrks-design-frontend': EXPECTED_ACTIVE_SKILL });
   assert.deepEqual(manifest.sources['ui-ux-pro-max'].upstreamAuditNotes, [
     'SKILL.md reports 98 UX and 104 icon rows; the pinned data contains 99 and 105.',
     'styles.csv omits No=54; search behavior is unaffected.',
@@ -138,6 +163,11 @@ test('vendor bundle is exactly the pinned non-discoverable source set', () => {
       assert.equal(sha256(localFile), file.sha256, `wrong hash: ${file.localPath}`);
     }
   }
+  for (const file of EXPECTED_ACTIVE_SKILL.files) {
+    const localFile = path.join(ROOT, ...file.localPath.split('/'));
+    assert.equal(lstatSync(localFile).size, file.bytes, `wrong active byte length: ${file.localPath}`);
+    assert.equal(sha256(localFile), file.sha256, `wrong active hash: ${file.localPath}`);
+  }
 });
 
 test('Common Core remains byte-identical', () => {
@@ -145,6 +175,7 @@ test('Common Core remains byte-identical', () => {
   assert.equal(sha256(AGENTS), '5aebc74bc795891c43bf785d9b34ae4d35d4a40bf46eddef3f6246d75919a495');
 });
 
-test('Git preserves exact vendor bytes on checkout', () => {
+test('Git preserves exact vendor and active skill bytes on checkout', () => {
+  assert.match(readFileSync(GITATTRIBUTES, 'utf8'), /^\/skills\/joewrks-design-frontend\/\*\* text eol=lf$/m);
   assert.match(readFileSync(GITATTRIBUTES, 'utf8'), /^vendor\/\*\* -text$/m);
 });

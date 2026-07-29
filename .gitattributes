@@ -4,4 +4,5 @@
 /tests/p0-evaluation-contract.tests.ps1 text eol=lf
 /evals/design-frontend/*.json text eol=lf
 /tests/design-frontend-routing.tests.mjs text eol=lf
+/skills/joewrks-design-frontend/** text eol=lf
 vendor/** -text
