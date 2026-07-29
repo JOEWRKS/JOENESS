@@ -1691,9 +1691,13 @@ export function normalizeEvent(notification) {
   const method = notification?.method;
   const params = notification?.params ?? {};
   const threadIdentity = sanitizeEventId(
-    params.threadId ?? params.thread?.id,
+    Object.hasOwn(params, "threadId")
+      ? params.threadId
+      : params.thread?.id,
   );
-  const turnIdentity = sanitizeEventId(params.turnId ?? params.turn?.id);
+  const turnIdentity = sanitizeEventId(
+    Object.hasOwn(params, "turnId") ? params.turnId : params.turn?.id,
+  );
   const event = {
     method,
     threadId: threadIdentity.value,

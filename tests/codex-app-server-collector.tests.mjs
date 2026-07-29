@@ -2106,6 +2106,20 @@ test("remote control status permits only a disabled detached snapshot", () => {
     /REMOTE_(?:CONTROL|THREAD|TURN)_SECRET_123456/u,
   );
 
+  const nullIds = normalizeEvent({
+    method: "remoteControl/status/changed",
+    params: {
+      status: "disabled",
+      serverName: "Codex",
+      installationId: "installation-1",
+      environmentId: null,
+      threadId: null,
+      turnId: null,
+    },
+  });
+  assert.equal(nullIds.complete, false);
+  assert.equal(nullIds.blockers.includes("runtime-drift"), true);
+
   assert.equal(
     remoteControlSnapshotIsSafe({
       seen: true,
