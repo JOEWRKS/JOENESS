@@ -58,10 +58,10 @@ runtime:
   read_state_stable_key: exact_and_stripped_before_broker
   reviewed_case_claims: pass_or_fail_requires_complete_case_evidence
   fresh_thread: one_ephemeral_thread_and_turn_per_case
-  model: unknown
-  model_provider: unknown
-  reasoning_effort: unknown
-  service_tier: unknown
+  model: gpt-5.6-sol
+  model_provider: openai
+  reasoning_effort: low
+  service_tier: default
 
 measurement:
   token_usage: last_correlated_total
@@ -79,7 +79,15 @@ review:
     - improved
     - same
     - regressed
-  status: unknown
+  status: complete
+  control_capability: pass
+  core_capability: pass
+  pair_verdict: pass
+  efficiency_verdict: pass
+  case_outcomes:
+    improved: 0
+    same: 16
+    regressed: 0
 
 pairing:
   keys:
@@ -103,15 +111,22 @@ capability_reference:
 
 outputs:
   control:
-    commit: unknown
-    file_sha256: unknown
-    evidence_sha256: unknown
-    status: unknown
+    commit: b6e9c0af80ffbd9e4200d46e626e096fb890ba45
+    file_sha256: 7bccf8d5d7260fb049d79199740fc3523428b300cc2aec31aa07bae9e8a11118
+    evidence_sha256: 39f8b27409cbd6983a06eb1e35ffa49716a2c491497360f2ebf1c7ed0a2eb1d0
+    status: reviewed_pass
   core:
-    commit: unknown
-    file_sha256: unknown
-    evidence_sha256: unknown
-    status: unknown
+    commit: 7aacbdab4a3073397fedf3e6900ae2d79dfe3cda
+    file_sha256: 05631b136be55626987f7deed16ec8bf4c34b38880e4764b2375051f42249316
+    evidence_sha256: 717035b8abcf20938a8476fd39a44fa3e2ea3146df308de0b20ea3f64b9d1da5
+    status: reviewed_pass
+  promotion:
+    commit: 9beab034f31e5681ebfe61e172be36fc3387db10
+    source: evals/candidates/common-core-v1.md
+    target: AGENTS.md
+    byte_length: 7933
+    sha256: 5aebc74bc795891c43bf785d9b34ae4d35d4a40bf46eddef3f6246d75919a495
+    byte_identical: true
 
 historical_attempt:
   control:

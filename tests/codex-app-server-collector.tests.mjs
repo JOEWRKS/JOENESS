@@ -6496,6 +6496,87 @@ test("evaluation manifest freezes the portable one-shot pair", () => {
     new URL("../evals/manifest.yaml", import.meta.url),
     "utf8",
   );
+  const block = (text, key, indent = 0) => {
+    const lines = text.split(/\r?\n/u);
+    const marker = `${" ".repeat(indent)}${key}:`;
+    const start = lines.indexOf(marker);
+    assert.notEqual(start, -1, marker);
+    let end = start + 1;
+    const childIndent = " ".repeat(indent + 2);
+    while (
+      end < lines.length &&
+      (lines[end] === "" || lines[end].startsWith(childIndent))
+    ) {
+      end += 1;
+    }
+    return lines.slice(start + 1, end).join("\n");
+  };
+  const assertReviewedPairCompletion = (text) => {
+    const runtime = block(text, "runtime");
+    assert.match(runtime, /^  model: gpt-5\.6-sol$/mu);
+    assert.match(runtime, /^  model_provider: openai$/mu);
+    assert.match(runtime, /^  reasoning_effort: low$/mu);
+    assert.match(runtime, /^  service_tier: default$/mu);
+
+    const review = block(text, "review");
+    assert.match(review, /^  status: complete$/mu);
+    assert.match(review, /^  control_capability: pass$/mu);
+    assert.match(review, /^  core_capability: pass$/mu);
+    assert.match(review, /^  pair_verdict: pass$/mu);
+    assert.match(review, /^  efficiency_verdict: pass$/mu);
+    const outcomes = block(review, "case_outcomes", 2);
+    assert.match(outcomes, /^    improved: 0$/mu);
+    assert.match(outcomes, /^    same: 16$/mu);
+    assert.match(outcomes, /^    regressed: 0$/mu);
+
+    const outputs = block(text, "outputs");
+    const control = block(outputs, "control", 2);
+    assert.match(
+      control,
+      /^    commit: b6e9c0af80ffbd9e4200d46e626e096fb890ba45$/mu,
+    );
+    assert.match(
+      control,
+      /^    file_sha256: 7bccf8d5d7260fb049d79199740fc3523428b300cc2aec31aa07bae9e8a11118$/mu,
+    );
+    assert.match(
+      control,
+      /^    evidence_sha256: 39f8b27409cbd6983a06eb1e35ffa49716a2c491497360f2ebf1c7ed0a2eb1d0$/mu,
+    );
+    assert.match(control, /^    status: reviewed_pass$/mu);
+
+    const core = block(outputs, "core", 2);
+    assert.match(
+      core,
+      /^    commit: 7aacbdab4a3073397fedf3e6900ae2d79dfe3cda$/mu,
+    );
+    assert.match(
+      core,
+      /^    file_sha256: 05631b136be55626987f7deed16ec8bf4c34b38880e4764b2375051f42249316$/mu,
+    );
+    assert.match(
+      core,
+      /^    evidence_sha256: 717035b8abcf20938a8476fd39a44fa3e2ea3146df308de0b20ea3f64b9d1da5$/mu,
+    );
+    assert.match(core, /^    status: reviewed_pass$/mu);
+
+    const promotion = block(outputs, "promotion", 2);
+    assert.match(
+      promotion,
+      /^    commit: 9beab034f31e5681ebfe61e172be36fc3387db10$/mu,
+    );
+    assert.match(
+      promotion,
+      /^    source: evals\/candidates\/common-core-v1\.md$/mu,
+    );
+    assert.match(promotion, /^    target: AGENTS\.md$/mu);
+    assert.match(promotion, /^    byte_length: 7933$/mu);
+    assert.match(
+      promotion,
+      /^    sha256: 5aebc74bc795891c43bf785d9b34ae4d35d4a40bf46eddef3f6246d75919a495$/mu,
+    );
+    assert.match(promotion, /^    byte_identical: true$/mu);
+  };
   const orderBlock = manifest.match(
     /  order:\r?\n(?<items>(?:    - .+\r?\n){16})/u,
   );
@@ -6540,10 +6621,20 @@ test("evaluation manifest freezes the portable one-shot pair", () => {
     "review: independent_evidence_scoped_behavior_and_pair_review",
     "artifact_commit: 5ff0b6efc50dd8f6a80512d0cb18c2943ae36072",
     "evidence_sha256: f189d24521f76e0976fab33da672dcd79f3ef1c1a4607861ee7c1a26075b188e",
-    "status: unknown",
   ]) {
     assert.equal(manifest.includes(required), true, required);
   }
+  assertReviewedPairCompletion(manifest);
+  assert.throws(
+    () =>
+      assertReviewedPairCompletion(
+        manifest.replace(
+          "file_sha256: 7bccf8d5d7260fb049d79199740fc3523428b300cc2aec31aa07bae9e8a11118",
+          "file_sha256: 05631b136be55626987f7deed16ec8bf4c34b38880e4764b2375051f42249316",
+        ),
+      ),
+    /7bccf8d5/u,
+  );
   assert.doesNotMatch(
     manifest,
     /(?:[A-Za-z]:[\\/]|\/Users\/|\/home\/)/u,

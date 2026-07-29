@@ -1,6 +1,12 @@
 # Full Baseline Control과 Common-Core Pair 설계
 
-**상태:** 구현 전 사용자 승인 대기
+**상태:** 구현·독립 검토 완료 — Control/Core v5 16/16 `pass`, pair·efficiency `pass`, byte-identical Common Core 승격 완료
+
+**Control 결과:** `evals/p0/no-harness-control-v5.json` at `b6e9c0af80ffbd9e4200d46e626e096fb890ba45`
+
+**Core 결과:** `evals/p0/common-core-v5.json` at `7aacbdab4a3073397fedf3e6900ae2d79dfe3cda`
+
+**승격 결과:** `AGENTS.md` at `9beab034f31e5681ebfe61e172be36fc3387db10`
 
 **기준 명세:** `docs/superpowers/specs/2026-07-27-common-work-harness-design.md`
 
