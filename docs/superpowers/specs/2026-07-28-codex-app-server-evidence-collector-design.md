@@ -1,6 +1,6 @@
 # Codex App Server Evidence Collector 설계
 
-**상태:** environment/dynamic-tool/public-TCP 전환 구현 및 최신 오프라인 검증 완료 — 커밋된 새 HEAD의 host model-free smoke 대기
+**상태:** smoke와 v2 one-shot 완료 — v2 capability `blocked`, 증거 보존 및 protocol compatibility 회귀 수정 완료, 같은 v2 재실행 금지
 
 **기준 명세:** `docs/superpowers/specs/2026-07-28-no-harness-baseline-capability-spike-design.md`
 

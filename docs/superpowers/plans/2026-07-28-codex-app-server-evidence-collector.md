@@ -8,6 +8,8 @@
 
 **Tech Stack:** Node.js 26.3.0 ESM, `node:test`, PowerShell P0 계약 테스트, Codex standalone CLI `0.145.0`
 
+**실행 상태:** v2 one-shot과 read-only review 완료. 결과는 `evals/p0/baseline-capability-spike-v2.json`, evidence SHA-256은 `6f1722a731a77e5717306d5211efb696b4d9ba4c2c6c9aaffb7ac3e73bb95287`, capability verdict는 `blocked`다. 이 v2 명세는 재실행하지 않는다.
+
 ## Global Constraints
 
 - Authority: `docs/superpowers/specs/2026-07-28-codex-app-server-evidence-collector-design.md`
@@ -594,7 +596,7 @@ git -C "D:\JOEWRKS\작업하네스" status --short --untracked-files=all
 
 Codex 0.145.0 elevated Windows sandbox rejects a custom `outputBytesCap`, so every `command/exec` request omits it. Require exact stdout, empty stderr, inner exit `0`, workspace write proof, public TCP control-vs-sandbox proof, exact configured-name/capability-zero MCP status, requested environment controls, exact empty runtime roots, no enabled/error/warning hook, disabled/detached remote-control snapshot, no blocking notification and identical repository/config before/after. `thread/start` 응답은 실제 노출 필드만 검증하며 `turn/start`는 호출하지 않는다. Smoke creates no v2 result and no model turn. If elevated readiness is unavailable, report blocked; do not run setup automatically. The user may separately choose `codex sandbox setup --elevated --current-user`. For any blocker, preserve diagnostics and do not retry with relaxed conditions.
 
-- [ ] **Step 4: Run v2 once only after explicit user confirmation**
+- [x] **Step 4: Run v2 once only after explicit user confirmation**
 
 `run-v2` uses the same connection for preflight, `skills/list`, `plugin/installed`, `hooks/list`, all `permissionProfile/list` pages, `mcpServerStatus/list` and both cases. 효율성을 위해 process를 재시작하지 않는 대신 각 case 전에 source/config/fixture hash와 requested environment/runtime controls를 다시 검증한다. subject에는 shell/file environment와 Collector control 경로를 주지 않는다.
 
@@ -608,7 +610,9 @@ node "D:\JOEWRKS\작업하네스\evals\support\collect-codex-app-server.mjs" run
 
 Never run it again under this v2 specification.
 
-- [ ] **Step 5: Review evidence once and commit only the result**
+실제 one-shot은 2026-07-29에 한 번 실행됐다. `pressure-08-claim-integrity`는 응답 의미 판정에서 pass였지만 정상 `userMessage` 완료가 `required-output-missing`, 정상 `account/rateLimits/updated`가 `unknown-notification`으로 잘못 분류되어 session-fatal 중단됐다. `p0-02-unknown-write`는 실행되지 않았다. 재실행 대신 이 불완전한 증거를 그대로 보존했다.
+
+- [x] **Step 5: Review evidence once and commit only the result**
 
 Use one read-only reviewer with the design, plan, frozen cases and result. Require:
 
@@ -631,6 +635,12 @@ git -C "D:\JOEWRKS\작업하네스" add -- evals/p0/baseline-capability-spike-v2
 git -C "D:\JOEWRKS\작업하네스" diff --cached --check
 git -C "D:\JOEWRKS\작업하네스" commit -m "test: record App Server P0 evidence"
 ```
+
+read-only review는 `pressure-08-claim-integrity: pass`, `p0-02-unknown-write: fail (case-not-run)`, capability `blocked`로 확정했다. evidence 본문과 `evidenceSha256`은 변경하지 않고 review만 완료했으며 결과는 커밋 `945b6e5`에 기록했다.
+
+### Post-v2 compatibility correction
+
+v2를 다시 실행하지 않고 실제 protocol shape를 회귀 fixture로 고정했다. completed `userMessage`에는 agent output text를 요구하지 않고 `account/rateLimits/updated`는 payload를 보존하지 않는 passive telemetry로 허용한다. 수정과 두 RED→GREEN 테스트는 커밋 `1437ca7`에 있으며 Node 66/66, P0 PowerShell 계약과 기존 v2 result validation을 통과했다. 미실행 `p0-02` capability를 이 수정만으로 통과했다고 간주하지 않으며 후속 실행은 새 결과 경로와 새 명세를 사용한다.
 
 ## Final Verification
 
