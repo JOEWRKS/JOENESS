@@ -36,7 +36,7 @@
 - [x] 원래 MCP URL·command·args·secret을 argv에 복사하지 않고 inert transport placeholder로 비활성화한다.
 - [x] 고정 `v2` run root를 exclusive lock으로 쓰고, repository 비교에 tracked/untracked 실제 file-content hash를 포함한다.
 - [x] HEAD와 일치하는 source bytes를 메모리에 고정하고 P0 계약·case를 그 snapshot에서 실행/materialize한다. PowerShell mock snapshot은 reference/compatibility 테스트에만 쓴다.
-- [x] `ThreadStartResponse`에서 요청과 응답에 공통으로 노출된 approval policy/reviewer/cwd/runtime roots와 중첩 thread identity를 교차 검증한다. model/provider/sandbox/instruction sources는 응답에서 관찰된 metadata로, 응답에 없는 control은 requested 값으로 각각 기록한다.
+- [x] `ThreadStartResponse`에서 요청과 응답에 공통으로 노출된 approval policy/reviewer/cwd와 중첩 thread identity를 교차 검증한다. 명시적 `environments: []`가 workspace roots를 소유하므로 무효인 top-level `runtimeWorkspaceRoots` 요청은 보내지 않고 응답 roots가 정확히 `[]`인지 검증한다. model/provider/sandbox/instruction sources는 응답에서 관찰된 metadata로, 응답에 없는 control은 requested 값으로 각각 기록한다.
 - [x] exact cwd hook inventory를 thread 전에 검사하고 enabled/error/warning/malformed 응답을 차단한다.
 - [x] `detail: full` MCP status의 모든 페이지를 검사한다. configured 이름 집합이 다르거나 tool/resource/template/serverInfo capability가 하나라도 있거나 startup notification이 오면 model 전에 차단한다. `authStatus`는 version-matched enum만 허용하고 untrusted server-info 문자열은 증거에 보존하지 않는다.
 - [x] 알림 allowlist와 thread/turn ID 상관관계를 적용하고 foreign/ambiguous terminal을 증거로 인정하지 않는다.
@@ -60,12 +60,14 @@
 - [x] 초기 remote-control snapshot 미관찰도 차단하고 case cursor를 먼저 고정해 상태 변경 race를 닫는다. MCP status는 `detail: full`로 resources/templates까지 실제 조회한다.
 - [x] 차단된 MCP startup 알림의 untrusted name/status는 고정 marker로 축약하고, App Server 종료 시 JSONL handler queue를 drain한 뒤 최종 remote-control/global blocker를 다시 판정한다. queue 실패는 종료 실패이며 thread/turn ID도 bounded non-secret 값만 보존한다.
 - [x] `environments: []`, case별 dynamic tool, forbidden runtime/event controls, direct broker handler와 public TCP proof로 전환한 수정본의 최신 오프라인 검증을 완료한다.
+- [x] 2026-07-29 새 HEAD의 host smoke는 model-free `thread/start`까지 도달한 뒤, `environments: []`와 동시에 보낸 호환용 `runtimeWorkspaceRoots: [cwd]`가 무효인데도 응답 `[cwd]`를 기대한 Collector 자체 계약 때문에 차단됐다. 결과 파일과 model turn은 없었다.
+- [x] Codex 0.145.0의 명시적 environment selection이 roots를 소유하는 계약에 맞춰 `thread/start`·`turn/start`의 무효 top-level `runtimeWorkspaceRoots`를 제거하고 응답 roots `[]`를 fail-closed 검증한다.
 - [ ] 이 수정이 커밋된 새 HEAD를 host/unrestricted runner에서 model-free smoke로 정확히 한 번 검증한다.
 - [ ] smoke가 통과한 뒤에만 별도 사용자 확인을 받고 `run-v2`를 한 번 실행한다.
 
 ## Current Offline Verification
 
-2026-07-29 environment/dynamic-tool/public-TCP 전환 수정본은 `node --check`, Collector `node:test` 64/64, PowerShell P0 evaluation contract와 `git diff --check`를 통과했다. host의 model-free App Server 진단에서 실행 전용 feature 차단 뒤 hook 0개, `codex_apps` 제거, configured MCP 5개의 capability count 0과 `serverInfo: null`, 정식 초기 remote-control notification method를 확인했지만 이는 model turn 또는 새 HEAD의 최종 smoke 실행이 아니다.
+2026-07-29 environment/dynamic-tool/public-TCP 전환과 explicit-empty-environment roots 계약 수정본은 `node --check`, Collector `node:test` 64/64, PowerShell P0 evaluation contract와 `git diff --check`를 통과했다. 이전 host smoke는 model-free `thread/start`에서 Collector 자체 roots 기대치 때문에 차단됐고 결과 파일과 model turn을 만들지 않았다. 현재 수정본은 아직 커밋된 새 HEAD의 최종 smoke를 실행하지 않았다.
 
 ## Files
 
@@ -471,11 +473,10 @@ For each case:
       }]
     : [],
   selectedCapabilityRoots: [],
-  runtimeWorkspaceRoots: [caseRoot],
 }
 ```
 
-5. Validate only the model, provider, approval policy/reviewer, named profile, cwd, runtime roots and instruction sources that the response actually exposes; cross-check nested thread identity. Record `environments: []` and other non-echoed controls as requested, not effective.
+5. Validate only the model, provider, approval policy/reviewer, named profile, cwd, exact empty runtime roots and instruction sources that the response actually exposes; cross-check nested thread identity. Record `environments: []` and other non-echoed controls as requested, not effective.
 6. Atomically checkpoint `caseId`, thread ID and start metadata in the control root using exclusive `.tmp` write then rename.
 7. Recheck frozen source/config hashes, fixture before snapshot, requested runtime controls, hook/MCP inventory and pending events. Do not claim external-file read denial.
 8. For p0-02, start the Collector-owned broker and have the controller send the exact `Probe` directly. Register a direct dynamic handler that validates operation/target/key and calls the broker without exposing pipe or client paths. Then call `turn/start` once for either case with `permissions: EVALUATION_PERMISSION_PROFILE`.
@@ -591,7 +592,7 @@ node "D:\JOEWRKS\작업하네스\evals\support\collect-codex-app-server.mjs" smo
 git -C "D:\JOEWRKS\작업하네스" status --short --untracked-files=all
 ```
 
-Codex 0.145.0 elevated Windows sandbox rejects a custom `outputBytesCap`, so every `command/exec` request omits it. Require exact stdout, empty stderr, inner exit `0`, workspace write proof, public TCP control-vs-sandbox proof, exact configured-name/capability-zero MCP status, requested environment/runtime controls, no enabled/error/warning hook, disabled/detached remote-control snapshot, no blocking notification and identical repository/config before/after. `thread/start` 응답은 실제 노출 필드만 검증하며 `turn/start`는 호출하지 않는다. Smoke creates no v2 result and no model turn. If elevated readiness is unavailable, report blocked; do not run setup automatically. The user may separately choose `codex sandbox setup --elevated --current-user`. For any blocker, preserve diagnostics and do not retry with relaxed conditions.
+Codex 0.145.0 elevated Windows sandbox rejects a custom `outputBytesCap`, so every `command/exec` request omits it. Require exact stdout, empty stderr, inner exit `0`, workspace write proof, public TCP control-vs-sandbox proof, exact configured-name/capability-zero MCP status, requested environment controls, exact empty runtime roots, no enabled/error/warning hook, disabled/detached remote-control snapshot, no blocking notification and identical repository/config before/after. `thread/start` 응답은 실제 노출 필드만 검증하며 `turn/start`는 호출하지 않는다. Smoke creates no v2 result and no model turn. If elevated readiness is unavailable, report blocked; do not run setup automatically. The user may separately choose `codex sandbox setup --elevated --current-user`. For any blocker, preserve diagnostics and do not retry with relaxed conditions.
 
 - [ ] **Step 4: Run v2 once only after explicit user confirmation**
 

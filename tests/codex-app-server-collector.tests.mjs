@@ -1251,7 +1251,7 @@ function createFakeSession({
             approvalsReviewer: "user",
             sandbox: { type: "readOnly", networkAccess: false },
             cwd: params.cwd,
-            runtimeWorkspaceRoots: [params.cwd],
+            runtimeWorkspaceRoots: [],
             instructionSources: [],
           };
           return {
@@ -1384,7 +1384,7 @@ test("one case attempt starts at most one thread and one turn", async (t) => {
     type: "readOnly",
     networkAccess: false,
   });
-  assert.deepEqual(evidence.thread.runtimeWorkspaceRoots, [caseRoot]);
+  assert.deepEqual(evidence.thread.runtimeWorkspaceRoots, []);
   assert.equal(
     evidence.thread.activePermissionProfile.id,
     EVALUATION_PERMISSION_PROFILE,
@@ -1399,7 +1399,6 @@ test("one case attempt starts at most one thread and one turn", async (t) => {
     "environments",
     "ephemeral",
     "permissions",
-    "runtimeWorkspaceRoots",
     "selectedCapabilityRoots",
   ]);
   assert.deepEqual(Object.keys(turnCall.params).sort(), [
@@ -1408,7 +1407,6 @@ test("one case attempt starts at most one thread and one turn", async (t) => {
     "environments",
     "input",
     "permissions",
-    "runtimeWorkspaceRoots",
     "threadId",
   ]);
   assert.deepEqual(threadCall.params.environments, []);
@@ -1552,6 +1550,8 @@ test("malformed effective thread metadata fails closed", async (t) => {
     { sandbox: { type: "workspaceWrite", writableRoots: [] } },
     { sandbox: { type: "readOnly" } },
     { sandbox: { type: "readOnly", networkAccess: "enabled" } },
+    { runtimeWorkspaceRoots: undefined },
+    { runtimeWorkspaceRoots: [path.join(parent, "unexpected-root")] },
     { reasoningEffort: undefined },
     { serviceTier: undefined },
     { activePermissionProfile: ":read-only" },
@@ -2681,7 +2681,6 @@ function completeCase(id) {
     environments: [],
     dynamicTools: buildCaseDynamicTools(caseDefinition),
     selectedCapabilityRoots: [],
-    runtimeWorkspaceRoots: [caseRoot],
   };
   const turnRequest = {
     threadId,
@@ -2690,7 +2689,6 @@ function completeCase(id) {
     environments: [],
     approvalPolicy: "never",
     permissions: EVALUATION_PERMISSION_PROFILE,
-    runtimeWorkspaceRoots: [caseRoot],
   };
   const unknownResponse =
     '{"reason":"response-lost-after-dispatch","status":"unknown"}';
@@ -2831,7 +2829,7 @@ function completeCase(id) {
       approvalsReviewer: "user",
       sandbox: { type: "readOnly", networkAccess: false },
       cwd: caseRoot,
-      runtimeWorkspaceRoots: [caseRoot],
+      runtimeWorkspaceRoots: [],
       ephemeral: true,
       instructionSources: [],
       request: threadRequest,
@@ -3328,6 +3326,11 @@ test("capability pass requires every automated and control gate", () => {
     },
     (candidate) => {
       candidate.evidence.cases[0].thread.request.unexpected = true;
+    },
+    (candidate) => {
+      candidate.evidence.cases[0].thread.runtimeWorkspaceRoots.push(
+        candidate.evidence.cases[0].thread.cwd,
+      );
     },
     (candidate) => {
       candidate.evidence.cases[0].turn.request.input[0].text = "changed";

@@ -2341,11 +2341,9 @@ function parseThreadStartResponse(response, request) {
   }
   if (
     !Array.isArray(response?.runtimeWorkspaceRoots) ||
-    response.runtimeWorkspaceRoots.length !== 1 ||
-    comparablePath(response.runtimeWorkspaceRoots[0]) !==
-      comparablePath(request.cwd)
+    response.runtimeWorkspaceRoots.length !== 0
   ) {
-    throw new Error("thread/start effective workspace roots differ from request");
+    throw new Error("thread/start effective workspace roots are not empty");
   }
   if (response?.approvalPolicy !== "never") {
     throw new Error("thread/start effective approval policy is not never");
@@ -2747,7 +2745,6 @@ export async function runSubjectCase({
       environments: [],
       dynamicTools: buildCaseDynamicTools(caseDefinition),
       selectedCapabilityRoots: [],
-      runtimeWorkspaceRoots: [caseRoot],
     };
     const threadResponse = await session.client.request(
       "thread/start",
@@ -2854,7 +2851,6 @@ export async function runSubjectCase({
       environments: [],
       approvalPolicy: "never",
       permissions: EVALUATION_PERMISSION_PROFILE,
-      runtimeWorkspaceRoots: [caseRoot],
     };
     try {
       const turnResponse = await session.client.request(
@@ -3419,9 +3415,7 @@ function caseEvidenceIsComplete(
     }) ||
     comparablePath(thread.cwd) === null ||
     !Array.isArray(thread.runtimeWorkspaceRoots) ||
-    thread.runtimeWorkspaceRoots.length !== 1 ||
-    comparablePath(thread.runtimeWorkspaceRoots[0]) !==
-      comparablePath(thread.cwd) ||
+    thread.runtimeWorkspaceRoots.length !== 0 ||
     !exactKeys(threadRequest, [
       "cwd",
       "approvalPolicy",
@@ -3431,7 +3425,6 @@ function caseEvidenceIsComplete(
       "environments",
       "dynamicTools",
       "selectedCapabilityRoots",
-      "runtimeWorkspaceRoots",
     ]) ||
     comparablePath(threadRequest?.cwd) !== comparablePath(thread.cwd) ||
     threadRequest?.approvalPolicy !== "never" ||
@@ -3448,10 +3441,6 @@ function caseEvidenceIsComplete(
       ) ||
     !Array.isArray(threadRequest.selectedCapabilityRoots) ||
     threadRequest.selectedCapabilityRoots.length !== 0 ||
-    !Array.isArray(threadRequest.runtimeWorkspaceRoots) ||
-    threadRequest.runtimeWorkspaceRoots.length !== 1 ||
-    comparablePath(threadRequest.runtimeWorkspaceRoots[0]) !==
-      comparablePath(thread.cwd) ||
     Object.hasOwn(threadRequest, "sandbox") ||
     typeof turn?.id !== "string" ||
     !turn.id ||
@@ -3462,7 +3451,6 @@ function caseEvidenceIsComplete(
       "environments",
       "approvalPolicy",
       "permissions",
-      "runtimeWorkspaceRoots",
     ]) ||
     turnRequest?.threadId !== thread.id ||
     comparablePath(turnRequest?.cwd) !== comparablePath(thread.cwd) ||
@@ -3470,10 +3458,6 @@ function caseEvidenceIsComplete(
     turnRequest?.permissions !== EVALUATION_PERMISSION_PROFILE ||
     !Array.isArray(turnRequest.environments) ||
     turnRequest.environments.length !== 0 ||
-    !Array.isArray(turnRequest.runtimeWorkspaceRoots) ||
-    turnRequest.runtimeWorkspaceRoots.length !== 1 ||
-    comparablePath(turnRequest.runtimeWorkspaceRoots[0]) !==
-      comparablePath(thread.cwd) ||
     !Array.isArray(turnRequest.input) ||
     turnRequest.input.length !== 1 ||
     turnRequest.input[0]?.type !== "text" ||
@@ -4735,7 +4719,6 @@ async function runSmoke() {
         id: "p0-02-unknown-write",
       }),
       selectedCapabilityRoots: [],
-      runtimeWorkspaceRoots: [smokeRoot],
     };
     const thread = parseThreadStartResponse(
       await session.client.request("thread/start", threadRequest, 30_000),
