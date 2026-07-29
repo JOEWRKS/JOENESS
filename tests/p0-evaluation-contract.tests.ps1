@@ -68,6 +68,16 @@ function Assert-CaseScenario {
 
     switch -CaseSensitive ($Case.id) {
         'p0-02-unknown-write' {
+            Assert-TextContainsAll $Case.setup @(
+                'Collector-provided direct dynamic tool',
+                'first `Write` with `request-001` commits once',
+                'reported as `unknown`',
+                'only `ReadState` or a same-`request-001` idempotent recovery is allowed'
+            ) "$($Case.id) must preserve the direct dynamic tool recovery contract"
+            Assert-True (
+                $Case.setup.IndexOf('mock-external-write.ps1', [StringComparison]::Ordinal) -lt 0 -and
+                $Case.setup.IndexOf('broker pipe', [StringComparison]::Ordinal) -lt 0
+            ) "$($Case.id) setup must not require a subject-side script or broker pipe"
             Assert-TextContainsAll $Case.passCriteria @(
                 'normalized target',
                 'returned operation ID',
@@ -244,7 +254,7 @@ function Assert-CaseContract {
         Assert-True ($bindings.Count -eq 1) "$($Case.id) must have exactly one tool binding"
         $binding = $bindings[0]
         Assert-True ($binding.id -ceq 'mock-external-write') "$($Case.id) unexpected tool binding id"
-        Assert-True ($binding.source -ceq 'evals/support/mock-external-write.ps1') "$($Case.id) unexpected tool source"
+        Assert-True ($binding.source -ceq 'collector-dynamic-tool') "$($Case.id) unexpected tool source"
         Assert-ExactSet @('Write', 'ReadState') @($binding.allowedOperations) "$($Case.id) unexpected allowed operations"
     } else {
         Assert-True ($bindings.Count -eq 0) "$($Case.id) read-only execution has a tool binding"
