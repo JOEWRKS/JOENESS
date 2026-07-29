@@ -1,0 +1,97 @@
+schema_version: 1
+evaluation: full_baseline_common_core_pair_v1
+
+cases:
+  source: evals/p0/cases.json
+  prompt_hash_source: collector_buildSubjectInput
+  fixture_hash_source: evals/p0/cases.json
+  order:
+    - p0-01-trust-boundary
+    - p0-03-target-serialization
+    - p0-04-stale-handoff
+    - p0-05-missing-capability
+    - p0-06-skill-collision
+    - p0-07-design-authority
+    - p0-08-sync-failure
+    - pressure-01-unrelated-refactor
+    - pressure-02-no-progress-repeat
+    - pressure-03-duplicate-feature
+    - pressure-04-product-completeness
+    - pressure-05-duplicate-delegation
+    - pressure-06-read-all-history
+    - pressure-07-false-completion
+    - pressure-08-claim-integrity
+    - p0-02-unknown-write
+  repetitions_per_condition: 1
+
+conditions:
+  control:
+    mode: run-control-v1
+    run_id: no-harness-control-v1
+    instruction: none
+    result: evals/p0/no-harness-control-v1.json
+  core:
+    mode: run-core-v1
+    run_id: common-core-v1
+    instruction: evals/candidates/common-core-v1.md
+    baseline: evals/p0/no-harness-control-v1.json
+    result: evals/p0/common-core-v1.json
+
+runtime:
+  collector: evals/support/collect-codex-app-server.mjs
+  app_server: codex-cli-0.145.0
+  permission_profile: joewrks-eval-control-v3
+  fresh_thread: one_ephemeral_thread_and_turn_per_case
+  model: unknown
+  model_provider: unknown
+  reasoning_effort: unknown
+  service_tier: unknown
+
+measurement:
+  token_usage: last_correlated_total
+  wall_clock: performance_now_before_turn_start_to_first_correlated_completion
+  prompt_bytes: utf8_input_bytes
+  final_output_bytes: utf8_final_agent_message_bytes
+  event_count: bounded_recorded_event_count
+
+review:
+  review: independent_evidence_scoped_behavior_and_pair_review
+  behavior_values:
+    - pass
+    - fail
+  pair_outcomes:
+    - improved
+    - same
+    - regressed
+  status: unknown
+
+pairing:
+  keys:
+    - case_id
+    - case_order
+    - prompt_sha256
+    - fixture_sha256
+    - collector_git_blob
+    - p0_contract_git_blob
+    - model_identity
+  metric_delta: core_minus_control
+  null_policy: null_if_either_source_is_null
+
+capability_reference:
+  result: evals/p0/baseline-capability-spike-v3.json
+  artifact_commit: 5ff0b6efc50dd8f6a80512d0cb18c2943ae36072
+  recorded_source_commit: 5440b2a4cfe259ba8e9d9cd8795ef216b4353303
+  evidence_sha256: f189d24521f76e0976fab33da672dcd79f3ef1c1a4607861ee7c1a26075b188e
+  file_sha256: e0259b0521636097a545aee968b1b9db04abadc77b5d4bcee76391ee705cfd9c
+
+outputs:
+  control:
+    commit: unknown
+    file_sha256: unknown
+    evidence_sha256: unknown
+    status: unknown
+  core:
+    commit: unknown
+    file_sha256: unknown
+    evidence_sha256: unknown
+    status: unknown

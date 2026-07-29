@@ -1,4 +1,4 @@
-import { spawn } from "node:child_process";
+import { spawn, spawnSync } from "node:child_process";
 import { createHash, randomUUID } from "node:crypto";
 import { constants as fsConstants, readFileSync } from "node:fs";
 import {
@@ -21,10 +21,41 @@ import path from "node:path";
 import { createInterface } from "node:readline";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
-export const CASE_IDS = [
+export const CASE_IDS = Object.freeze([
   "pressure-08-claim-integrity",
   "p0-02-unknown-write",
-];
+]);
+export const FULL_CASE_IDS = Object.freeze([
+  "p0-01-trust-boundary",
+  "p0-03-target-serialization",
+  "p0-04-stale-handoff",
+  "p0-05-missing-capability",
+  "p0-06-skill-collision",
+  "p0-07-design-authority",
+  "p0-08-sync-failure",
+  "pressure-01-unrelated-refactor",
+  "pressure-02-no-progress-repeat",
+  "pressure-03-duplicate-feature",
+  "pressure-04-product-completeness",
+  "pressure-05-duplicate-delegation",
+  "pressure-06-read-all-history",
+  "pressure-07-false-completion",
+  "pressure-08-claim-integrity",
+  "p0-02-unknown-write",
+]);
+const CASE_METRIC_KEYS = Object.freeze([
+  "inputTokens",
+  "cachedInputTokens",
+  "outputTokens",
+  "reasoningOutputTokens",
+  "totalTokens",
+  "promptBytes",
+  "finalOutputBytes",
+  "eventCount",
+  "wallClockMs",
+  "contextWindowTokens",
+]);
+const TOKEN_USAGE_KEYS = Object.freeze(CASE_METRIC_KEYS.slice(0, 5));
 export const EXPECTED_CODEX_VERSION = "codex-cli 0.145.0";
 export const OUTPUT_LIMIT_BYTES = 64 * 1024;
 export const EVENT_LIMIT = 256;
@@ -121,12 +152,13 @@ export function buildAppServerEnvironment(source = process.env) {
 export function parseCli(argv) {
   if (
     argv.length === 1 &&
-    (argv[0] === "smoke" || argv[0] === "run-v3")
+    (argv[0] === "smoke" ||
+      Object.hasOwn(LIVE_RUN_CONFIGURATIONS, argv[0]))
   ) {
     return { mode: argv[0] };
   }
   throw new Error(
-    "usage: node evals/support/collect-codex-app-server.mjs <smoke|run-v3>",
+    "usage: node evals/support/collect-codex-app-server.mjs <smoke|run-control-v1|run-core-v1>",
   );
 }
 
@@ -143,6 +175,11 @@ export function gitBlobHash(value, algorithm = "sha1") {
     .update(`blob ${bytes.length}\0`)
     .update(bytes)
     .digest("hex");
+}
+
+export function gitBlobMatchesAll(value, algorithm, expectedHashes) {
+  const actual = gitBlobHash(value, algorithm);
+  return expectedHashes.every((expected) => actual === expected);
 }
 
 function sortJson(value) {
@@ -215,12 +252,20 @@ export function boundUtf8(value, limitBytes = OUTPUT_LIMIT_BYTES) {
   };
 }
 
-export function selectCases(contract) {
+export function selectCases(contract, caseIds = CASE_IDS) {
+  if (
+    !Array.isArray(caseIds) ||
+    caseIds.length === 0 ||
+    caseIds.some((id) => typeof id !== "string" || !id) ||
+    new Set(caseIds).size !== caseIds.length
+  ) {
+    throw new Error("case IDs must be a nonempty unique string array");
+  }
   const allCases = [
     ...(Array.isArray(contract?.pressureCases) ? contract.pressureCases : []),
     ...(Array.isArray(contract?.p0Cases) ? contract.p0Cases : []),
   ];
-  return CASE_IDS.map((id) => {
+  return caseIds.map((id) => {
     const matches = allCases.filter((candidate) => candidate?.id === id);
     if (matches.length !== 1) {
       throw new Error(`case ${id} must appear exactly once`);
@@ -263,11 +308,11 @@ function subjectToolBindings(toolBindings) {
 }
 
 export function buildCaseDynamicTools(caseDefinition) {
-  if (caseDefinition?.id === "pressure-08-claim-integrity") {
-    return [];
-  }
-  if (caseDefinition?.id !== "p0-02-unknown-write") {
+  if (!FULL_CASE_IDS.includes(caseDefinition?.id)) {
     throw new Error(`unsupported case: ${caseDefinition?.id}`);
+  }
+  if (caseDefinition.id !== "p0-02-unknown-write") {
+    return [];
   }
   return [
     {
@@ -1838,6 +1883,7 @@ const SESSION_FATAL_REASONS = new Set([
   "runtime-warning",
   "sandbox-setup-failed",
   "secret-shaped-output",
+  "token-usage-decreased",
   "uncontrolled-control-plane",
   "uncontrolled-tool-surface",
   "unknown-item-type",
@@ -1889,9 +1935,44 @@ function sanitizeEventId(value) {
   };
 }
 
+function normalizedTokenBreakdown(value) {
+  if (
+    !value ||
+    typeof value !== "object" ||
+    !TOKEN_USAGE_KEYS.every(
+      (key) => Number.isSafeInteger(value[key]) && value[key] >= 0,
+    ) ||
+    (Object.hasOwn(value, "cacheWriteInputTokens") &&
+      (!Number.isSafeInteger(value.cacheWriteInputTokens) ||
+        value.cacheWriteInputTokens < 0))
+  ) {
+    return null;
+  }
+  return Object.fromEntries(
+    TOKEN_USAGE_KEYS.map((key) => [key, value[key]]),
+  );
+}
+
+function normalizedTokenUsage(value) {
+  const last = normalizedTokenBreakdown(value?.last);
+  const total = normalizedTokenBreakdown(value?.total);
+  const contextWindowTokens = value?.modelContextWindow ?? null;
+  if (
+    last === null ||
+    total === null ||
+    (contextWindowTokens !== null &&
+      (!Number.isSafeInteger(contextWindowTokens) ||
+        contextWindowTokens < 0))
+  ) {
+    return null;
+  }
+  return { total, contextWindowTokens };
+}
+
 function classifyEventScope(event) {
   const method = String(event?.method);
   const turnScoped =
+    method === "thread/tokenUsage/updated" ||
     /^(?:item|turn)\//u.test(method) ||
     ["error", "guardianWarning", "model/rerouted"].includes(method) ||
     typeof event?.turnId === "string";
@@ -1971,6 +2052,19 @@ export function normalizeEvent(
       event.blockers.push("runtime-drift");
     } else if (params.status !== "disabled" || environmentId !== null) {
       event.blockers.push("uncontrolled-control-plane");
+    }
+  } else if (method === "thread/tokenUsage/updated") {
+    const tokenUsage = normalizedTokenUsage(params.tokenUsage);
+    if (
+      tokenUsage === null ||
+      typeof event.threadId !== "string" ||
+      !event.threadId ||
+      typeof event.turnId !== "string" ||
+      !event.turnId
+    ) {
+      event.blockers.push("runtime-drift");
+    } else {
+      event.tokenUsage = tokenUsage;
     }
   } else if (params.item && typeof params.item.type === "string") {
     const item = params.item;
@@ -2138,6 +2232,18 @@ export function normalizeEvent(
     event.mcpServer = { reported: true };
   }
 
+  if (SECRET_PATTERN.test(stableStringify(event))) {
+    return {
+      method: "collector/redacted",
+      threadId: threadIdentity.value,
+      turnId: turnIdentity.value,
+      redacted: true,
+      complete: false,
+      blockers: [
+        ...new Set([...event.blockers, "secret-shaped-output"]),
+      ],
+    };
+  }
   event.blockers = [...new Set(event.blockers)];
   event.complete = event.blockers.length === 0;
   return event;
@@ -2510,10 +2616,13 @@ export async function runSubjectCase({
     `control-${path.basename(caseRoot)}`,
   ),
   session,
+  instructionOverlay = null,
+  expectedModelIdentity = null,
+  requireMetrics = false,
   turnTimeoutMs = TURN_TIMEOUT_MS,
   eventLimit = EVENT_LIMIT,
 }) {
-  if (!CASE_IDS.includes(caseDefinition?.id)) {
+  if (!FULL_CASE_IDS.includes(caseDefinition?.id)) {
     throw new Error(`unsupported case: ${caseDefinition?.id}`);
   }
   if (
@@ -2543,8 +2652,50 @@ export async function runSubjectCase({
   ) {
     throw new Error("control root must be outside the subject workspace");
   }
+  if (
+    instructionOverlay !== null &&
+    (!exactKeys(instructionOverlay, ["bytes", "sourcePath"]) ||
+      !Buffer.isBuffer(instructionOverlay.bytes) ||
+      instructionOverlay.sourcePath !== CORE_CANDIDATE_RELATIVE_PATH)
+  ) {
+    throw new Error("instruction overlay is invalid");
+  }
+  if (
+    expectedModelIdentity !== null &&
+    (!exactKeys(expectedModelIdentity, [
+      "model",
+      "modelProvider",
+      "reasoningEffort",
+      "serviceTier",
+    ]) ||
+      !observedRuntimeSettingIsSafe(expectedModelIdentity.model) ||
+      !observedRuntimeSettingIsSafe(expectedModelIdentity.modelProvider) ||
+      !observedRuntimeSettingIsSafe(
+        expectedModelIdentity.reasoningEffort,
+        { nullable: true },
+      ) ||
+      !observedRuntimeSettingIsSafe(expectedModelIdentity.serviceTier, {
+        nullable: true,
+      }))
+  ) {
+    throw new Error("expected model identity is invalid");
+  }
+  if (typeof requireMetrics !== "boolean") {
+    throw new TypeError("requireMetrics must be a boolean");
+  }
 
   await materializeCase(caseDefinition, caseRoot);
+  let instructionOverlayBefore = null;
+  let instructionPath = null;
+  if (instructionOverlay !== null) {
+    validateCoreCandidate(instructionOverlay.bytes);
+    instructionPath = path.join(caseRoot, "AGENTS.md");
+    await writeFile(instructionPath, instructionOverlay.bytes, { flag: "wx" });
+    instructionOverlayBefore = {
+      byteLength: instructionOverlay.bytes.length,
+      sha256: sha256(instructionOverlay.bytes),
+    };
+  }
   const fixturePaths = Object.keys(caseDefinition.fixtureFiles ?? {});
   const fixturesBefore = await snapshotMaterializedFiles(
     caseRoot,
@@ -2584,6 +2735,10 @@ export async function runSubjectCase({
   let accessControl = null;
   let dynamicRequestTurnId = null;
   let releaseDynamicToolHandler = null;
+  let lastTokenTotal = null;
+  let lastContextWindowTokens = null;
+  let turnStartedAt = null;
+  let turnCompletedAt = null;
   const terminalPromise = new Promise((resolve) => {
     resolveTerminal = resolve;
   });
@@ -2621,7 +2776,11 @@ export async function runSubjectCase({
     addReasons(event.blockers);
   }
 
-  function processNotification(notification, allowQueue = true) {
+  function processNotification(
+    notification,
+    allowQueue = true,
+    receivedAt = performance.now(),
+  ) {
     const event =
       notification?.method === "collector/replayedEvent"
         ? structuredClone(notification.params.event)
@@ -2641,7 +2800,7 @@ export async function runSubjectCase({
       ((threadScoped && typeof event.threadId === "string" && !threadId) ||
         (turnScoped && typeof event.turnId === "string" && !turnId))
     ) {
-      pendingNotifications.push(notification);
+      pendingNotifications.push({ notification, receivedAt });
       return;
     }
 
@@ -2664,6 +2823,20 @@ export async function runSubjectCase({
         correlated = false;
       }
     }
+    if (correlated && event.tokenUsage) {
+      if (
+        lastTokenTotal !== null &&
+        TOKEN_USAGE_KEYS.some(
+          (key) => event.tokenUsage.total[key] < lastTokenTotal[key],
+        )
+      ) {
+        event.blockers.push("token-usage-decreased");
+      } else {
+        lastTokenTotal = event.tokenUsage.total;
+        lastContextWindowTokens =
+          event.tokenUsage.contextWindowTokens;
+      }
+    }
     event.blockers = uniqueReasons(event.blockers);
     event.complete = event.blockers.length === 0;
     event.correlated = threadScoped || turnScoped ? correlated : null;
@@ -2679,6 +2852,7 @@ export async function runSubjectCase({
     if (event.method === "turn/completed" && correlated) {
       terminalCount += 1;
       if (terminalCount === 1) {
+        turnCompletedAt = receivedAt;
         terminalEvent = event;
         resolveTerminal(event);
       } else {
@@ -2691,8 +2865,8 @@ export async function runSubjectCase({
 
   function flushPendingNotifications() {
     const pending = pendingNotifications.splice(0);
-    for (const notification of pending) {
-      processNotification(notification);
+    for (const item of pending) {
+      processNotification(item.notification, false, item.receivedAt);
     }
   }
 
@@ -2762,12 +2936,29 @@ export async function runSubjectCase({
     threadId = threadEvidence.id;
     flushPendingNotifications();
     const instructionSources = threadEvidence.instructionSources;
-    if (
-      instructionSources.some((source) =>
-        /(^|[\\/])JOEWRKS([\\/]|$)/iu.test(source),
-      )
+    if (instructionOverlay === null) {
+      if (instructionSources.length !== 0) {
+        throw new Error("Control instruction source is not empty");
+      }
+    } else if (
+      instructionSources.length !== 1 ||
+      comparablePath(instructionSources[0]) !==
+        comparablePath(instructionPath)
     ) {
-      throw new Error("JOEWRKS project instruction source was loaded");
+      throw new Error("Core instruction source is not the exact overlay");
+    }
+    const observedModelIdentity = {
+      model: threadEvidence.model,
+      modelProvider: threadEvidence.modelProvider,
+      reasoningEffort: threadEvidence.reasoningEffort,
+      serviceTier: threadEvidence.serviceTier,
+    };
+    if (
+      expectedModelIdentity !== null &&
+      stableStringify(observedModelIdentity) !==
+        stableStringify(expectedModelIdentity)
+    ) {
+      throw new Error("thread/start model identity drifted");
     }
     const mcpAfterThreadStart = await listMcpServerStatus(
       session.client,
@@ -2857,6 +3048,7 @@ export async function runSubjectCase({
       permissions: EVALUATION_PERMISSION_PROFILE,
     };
     try {
+      turnStartedAt = performance.now();
       const turnResponse = await session.client.request(
         "turn/start",
         turnRequest,
@@ -2964,6 +3156,29 @@ export async function runSubjectCase({
       after: fixturesAfter,
       unchanged: fixturesUnchanged,
     };
+    let instructionOverlaySnapshot = null;
+    if (instructionOverlay !== null) {
+      const [after] = await snapshotMaterializedFiles(caseRoot, [
+        "AGENTS.md",
+      ]);
+      const instructionOverlayAfter = {
+        byteLength: after.byteLength,
+        sha256: after.sha256,
+      };
+      const unchanged =
+        stableStringify(instructionOverlayBefore) ===
+        stableStringify(instructionOverlayAfter);
+      if (!unchanged) {
+        reasons.push("instruction-overlay-mutated");
+      }
+      instructionOverlaySnapshot = {
+        sourcePath: instructionOverlay.sourcePath,
+        target: "AGENTS.md",
+        before: instructionOverlayBefore,
+        after: instructionOverlayAfter,
+        unchanged,
+      };
+    }
     let stateEvidence = null;
     if (caseDefinition.id === "p0-02-unknown-write") {
       let brokerSnapshot;
@@ -2982,14 +3197,50 @@ export async function runSubjectCase({
       }
       stateEvidence.fixtures = fixturesAfter;
       stateEvidence.fixtureSnapshot = fixtureSnapshot;
+      stateEvidence.instructionOverlay = instructionOverlaySnapshot;
       addReasons(stateEvidence.reasons);
     } else {
       stateEvidence = {
         fixtures: fixturesAfter,
         fixtureSnapshot,
+        instructionOverlay: instructionOverlaySnapshot,
       };
     }
 
+    const finalMessage = events.findLast(
+      (event) =>
+        event.method === "item/completed" &&
+        event.correlated === true &&
+        event.item?.type === "agentMessage",
+    );
+    const wallClockMs =
+      Number.isFinite(turnStartedAt) &&
+      Number.isFinite(turnCompletedAt) &&
+      turnCompletedAt >= turnStartedAt
+        ? turnCompletedAt - turnStartedAt
+        : null;
+    const metrics = {
+      ...Object.fromEntries(
+        TOKEN_USAGE_KEYS.map((key) => [
+          key,
+          lastTokenTotal?.[key] ?? null,
+        ]),
+      ),
+      promptBytes: Buffer.byteLength(input.text),
+      finalOutputBytes: finalMessage?.item?.text?.byteLength ?? null,
+      eventCount: events.length,
+      wallClockMs,
+      contextWindowTokens: lastContextWindowTokens,
+    };
+    if (requireMetrics && lastTokenTotal === null) {
+      reasons.push("token-usage-missing");
+    }
+    if (
+      requireMetrics &&
+      (metrics.finalOutputBytes === null || metrics.wallClockMs === null)
+    ) {
+      reasons.push("metrics-evidence-missing");
+    }
     const finalReasons = uniqueReasons(reasons);
     return {
       id: caseDefinition.id,
@@ -2997,6 +3248,7 @@ export async function runSubjectCase({
       thread: threadEvidence,
       turn: { id: turnId, request: turnRequest },
       events,
+      metrics,
       dynamicToolRequests,
       state: stateEvidence,
       brokerProbe,
@@ -3663,7 +3915,11 @@ function compactInventoryIsComplete(value) {
   );
 }
 
-function passEvidenceIsComplete(evidence, frozenIdentity) {
+function passEvidenceIsComplete(
+  evidence,
+  frozenIdentity,
+  expectedCaseIds = CASE_IDS,
+) {
   const runtime = evidence?.runtime;
   const doctor = runtime?.doctor;
   const environmentKeys = runtime?.appServerEnvironment?.keys;
@@ -3682,7 +3938,7 @@ function passEvidenceIsComplete(evidence, frozenIdentity) {
       }))
     : [];
   const caseRuntimeIsConsistent =
-    caseRuntimeIdentities.length === CASE_IDS.length &&
+    caseRuntimeIdentities.length === expectedCaseIds.length &&
     caseRuntimeIdentities.every(
       (identity) =>
         stableStringify(identity) ===
@@ -3886,9 +4142,457 @@ function jsonPointerExists(root, pointer) {
   return current !== undefined;
 }
 
-export function validateResult(result) {
-  if (result?.schemaVersion !== 2) {
-    throw new Error("result schemaVersion must be 2");
+function validateSchema3Evaluation(result) {
+  const evaluation = result?.evidence?.evaluation;
+  if (
+    !exactKeys(evaluation, [
+      "condition",
+      "caseIds",
+      "instructionOverlay",
+      "baseline",
+      "metrics",
+    ]) ||
+    !["control", "core"].includes(evaluation.condition) ||
+    !Array.isArray(evaluation.caseIds) ||
+    stableStringify(evaluation.caseIds) !== stableStringify(FULL_CASE_IDS) ||
+    !exactKeys(evaluation.metrics, ["tokenUsage", "wallClock"]) ||
+    evaluation.metrics.tokenUsage !== "last-correlated-total" ||
+    evaluation.metrics.wallClock !==
+      "performance-now-before-turn-start-to-first-correlated-completion"
+  ) {
+    throw new Error("schema 3 evaluation has an invalid shape");
+  }
+
+  if (evaluation.condition === "control") {
+    if (
+      result.runId !== "no-harness-control-v1" ||
+      evaluation.instructionOverlay !== null ||
+      evaluation.baseline !== null
+    ) {
+      throw new Error("schema 3 Control identity is invalid");
+    }
+    return "control";
+  }
+
+  if (
+    result.runId !== "common-core-v1" ||
+    !exactKeys(evaluation.instructionOverlay, [
+      "sourcePath",
+      "byteLength",
+      "sha256",
+    ]) ||
+    evaluation.instructionOverlay.sourcePath !==
+      CORE_CANDIDATE_RELATIVE_PATH ||
+    !Number.isSafeInteger(evaluation.instructionOverlay.byteLength) ||
+    evaluation.instructionOverlay.byteLength < 1 ||
+    !/^[0-9a-f]{64}$/u.test(evaluation.instructionOverlay.sha256) ||
+    !exactKeys(evaluation.baseline, [
+      "path",
+      "runId",
+      "evidenceSha256",
+      "fileSha256",
+    ]) ||
+    evaluation.baseline.path !== CONTROL_RESULT_RELATIVE_PATH ||
+    evaluation.baseline.runId !== "no-harness-control-v1" ||
+    !/^[0-9a-f]{64}$/u.test(evaluation.baseline.evidenceSha256) ||
+    !/^[0-9a-f]{64}$/u.test(evaluation.baseline.fileSha256)
+  ) {
+    throw new Error("schema 3 Core identity is invalid");
+  }
+  return "core";
+}
+
+function parseReviewedControl(
+  evaluation,
+  baselineBytes,
+  sourceResolver,
+) {
+  if (!Buffer.isBuffer(baselineBytes)) {
+    throw new Error("schema 3 Core requires exact baseline bytes");
+  }
+  if (sha256(baselineBytes) !== evaluation.baseline.fileSha256) {
+    throw new Error("schema 3 Core baseline file hash does not match");
+  }
+  let control;
+  try {
+    control = JSON.parse(baselineBytes.toString("utf8"));
+  } catch {
+    throw new Error("schema 3 Core baseline bytes are not valid JSON");
+  }
+  if (
+    control?.schemaVersion !== 3 ||
+    control.runId !== evaluation.baseline.runId ||
+    control.runId !== "no-harness-control-v1" ||
+    control?.evidence?.evaluation?.condition !== "control" ||
+    control.evidenceSha256 !== evaluation.baseline.evidenceSha256
+  ) {
+    throw new Error("schema 3 Core baseline evidence identity does not match");
+  }
+  validateResult(control, { sourceResolver });
+  if (
+    control.review?.status !== "complete" ||
+    control.review?.capabilityVerdict !== "pass" ||
+    control.review?.pair !== null
+  ) {
+    throw new Error("schema 3 Core baseline is not a reviewed Control pass");
+  }
+  return control;
+}
+
+function metricObjectIsValid(metrics) {
+  return (
+    exactKeys(metrics, CASE_METRIC_KEYS) &&
+    CASE_METRIC_KEYS.every((key) => {
+      const value = metrics[key];
+      if (value === null) {
+        return [
+          "inputTokens",
+          "cachedInputTokens",
+          "outputTokens",
+          "reasoningOutputTokens",
+          "totalTokens",
+          "contextWindowTokens",
+        ].includes(key);
+      }
+      return key === "wallClockMs"
+        ? Number.isFinite(value) && value >= 0
+        : Number.isSafeInteger(value) && value >= 0;
+    })
+  );
+}
+
+function caseModelIdentity(candidate) {
+  return {
+    model: candidate?.thread?.model,
+    modelProvider: candidate?.thread?.modelProvider,
+    reasoningEffort: candidate?.thread?.reasoningEffort,
+    serviceTier: candidate?.thread?.serviceTier,
+  };
+}
+
+function schema3MetricsAreComplete(candidate) {
+  const events = candidate?.events;
+  const tokenEvents = events?.filter(
+    ({ method }) => method === "thread/tokenUsage/updated",
+  );
+  const finalMessage = events
+    ?.filter(
+      (event) =>
+        event.method === "item/completed" &&
+        event.correlated === true &&
+        event.item?.type === "agentMessage",
+    )
+    .at(-1);
+  const lastTokenUsage = tokenEvents?.at(-1)?.tokenUsage;
+  const totals = tokenEvents?.map(({ tokenUsage }) =>
+    normalizedTokenBreakdown(tokenUsage?.total),
+  );
+  const metrics = candidate?.metrics;
+  return !(
+    !metricObjectIsValid(metrics) ||
+    metrics.totalTokens === null ||
+    !Array.isArray(tokenEvents) ||
+    tokenEvents.length === 0 ||
+    totals.some((total) => total === null) ||
+    tokenEvents.some(
+      (event) =>
+        !caseEventIsAdmissible(
+          event,
+          candidate.thread?.id,
+          candidate.turn?.id,
+          candidate.id === "p0-02-unknown-write"
+            ? EVALUATION_DYNAMIC_TOOL_NAME
+            : null,
+        ) ||
+        !exactKeys(event.tokenUsage, [
+          "total",
+          "contextWindowTokens",
+        ]) ||
+        (event.tokenUsage.contextWindowTokens !== null &&
+          (!Number.isSafeInteger(
+            event.tokenUsage.contextWindowTokens,
+          ) ||
+            event.tokenUsage.contextWindowTokens < 0)),
+    ) ||
+    totals.some(
+      (total, index) =>
+        index > 0 &&
+        TOKEN_USAGE_KEYS.some(
+          (key) => total[key] < totals[index - 1][key],
+        ),
+    ) ||
+    TOKEN_USAGE_KEYS.some(
+      (key) => metrics[key] !== lastTokenUsage.total[key],
+    ) ||
+    metrics.contextWindowTokens !==
+      lastTokenUsage.contextWindowTokens ||
+    metrics.promptBytes !== Buffer.byteLength(candidate.input.text) ||
+    metrics.finalOutputBytes !== finalMessage?.item?.text?.byteLength ||
+    metrics.eventCount !== events.length
+  );
+}
+
+function schema3CaseEvidenceIsComplete(
+  candidate,
+  condition,
+  evaluation,
+  expectedModelIdentity,
+  baselineCandidate,
+) {
+  if (
+    !schema3MetricsAreComplete(candidate) ||
+    stableStringify(caseModelIdentity(candidate)) !==
+      stableStringify(expectedModelIdentity) ||
+    (baselineCandidate !== null &&
+      stableStringify(caseModelIdentity(candidate)) !==
+        stableStringify(caseModelIdentity(baselineCandidate)))
+  ) {
+    return false;
+  }
+
+  if (condition === "control") {
+    return (
+      candidate.thread.instructionSources.length === 0 &&
+      candidate.state?.instructionOverlay === null
+    );
+  }
+
+  const overlay = candidate.state?.instructionOverlay;
+  const expectedSnapshot = {
+    byteLength: evaluation.instructionOverlay.byteLength,
+    sha256: evaluation.instructionOverlay.sha256,
+  };
+  return (
+    candidate.thread.instructionSources.length === 1 &&
+    comparablePath(candidate.thread.instructionSources[0]) ===
+      comparablePath(path.join(candidate.thread.cwd, "AGENTS.md")) &&
+    exactKeys(overlay, [
+      "sourcePath",
+      "target",
+      "before",
+      "after",
+      "unchanged",
+    ]) &&
+    overlay.sourcePath === evaluation.instructionOverlay.sourcePath &&
+    overlay.target === "AGENTS.md" &&
+    stableStringify(overlay.before) ===
+      stableStringify(expectedSnapshot) &&
+    stableStringify(overlay.after) ===
+      stableStringify(expectedSnapshot) &&
+    overlay.unchanged === true
+  );
+}
+
+function expectedMetricDelta(controlMetrics, coreMetrics) {
+  if (
+    !metricObjectIsValid(controlMetrics) ||
+    !metricObjectIsValid(coreMetrics)
+  ) {
+    throw new Error("schema 3 pair source metrics are invalid");
+  }
+  return Object.fromEntries(
+    CASE_METRIC_KEYS.map((key) => [
+      key,
+      controlMetrics[key] === null || coreMetrics[key] === null
+        ? null
+        : coreMetrics[key] - controlMetrics[key],
+    ]),
+  );
+}
+
+function pairReferencesAreValid(references, root, caseIndex) {
+  const prefix = `/evidence/cases/${caseIndex}`;
+  return (
+    Array.isArray(references) &&
+    references.length > 0 &&
+    references.every(
+      (reference) =>
+        typeof reference === "string" &&
+        (reference === prefix || reference.startsWith(`${prefix}/`)) &&
+        jsonPointerExists(root, reference),
+    )
+  );
+}
+
+function validateSchema3Pair(result, condition, control) {
+  const pair = result.review.pair;
+  if (condition === "control") {
+    if (pair !== null) {
+      throw new Error("schema 3 Control pair must be null");
+    }
+    return;
+  }
+  if (
+    !exactKeys(pair, [
+      "status",
+      "verdict",
+      "efficiencyVerdict",
+      "reasons",
+      "caseComparisons",
+    ]) ||
+    !["pending", "complete"].includes(pair.status) ||
+    !["blocked", "pass"].includes(pair.verdict) ||
+    !["pending", "blocked", "pass"].includes(pair.efficiencyVerdict) ||
+    !Array.isArray(pair.reasons) ||
+    pair.reasons.some(
+      (reason) => typeof reason !== "string" || !reason.trim(),
+    ) ||
+    !Array.isArray(pair.caseComparisons)
+  ) {
+    throw new Error("schema 3 Core pair has an invalid shape");
+  }
+  if (result.review.status === "pending") {
+    if (
+      pair.status !== "pending" ||
+      pair.verdict !== "blocked" ||
+      pair.efficiencyVerdict !== "pending" ||
+      pair.reasons.length !== 1 ||
+      pair.reasons[0] !== "review-pending" ||
+      pair.caseComparisons.length !== 0
+    ) {
+      throw new Error("schema 3 Core pending pair is invalid");
+    }
+    return;
+  }
+  const comparable = [control, result].every(
+    (candidate) =>
+      candidate.review.caseJudgments.length === FULL_CASE_IDS.length &&
+      candidate.review.caseJudgments.every(({ judgment }) =>
+        ["pass", "fail"].includes(judgment),
+      ),
+  );
+  if (!comparable) {
+    if (
+      pair.status !== "complete" ||
+      pair.verdict !== "blocked" ||
+      pair.efficiencyVerdict !== "blocked" ||
+      pair.reasons.length === 0 ||
+      pair.caseComparisons.length !== 0 ||
+      result.review.capabilityVerdict !== "blocked"
+    ) {
+      throw new Error("schema 3 non-comparable Core pair is invalid");
+    }
+    return;
+  }
+  if (
+    pair.status !== "complete" ||
+    !["blocked", "pass"].includes(pair.efficiencyVerdict) ||
+    pair.caseComparisons.length !== FULL_CASE_IDS.length
+  ) {
+    throw new Error("schema 3 Core complete pair is invalid");
+  }
+  if (
+    [control, result].some((candidate) =>
+      candidate.evidence.cases.some(
+        (caseEvidence) => !schema3MetricsAreComplete(caseEvidence),
+      ),
+    )
+  ) {
+    throw new Error("schema 3 pair metrics lack source evidence");
+  }
+
+  for (let index = 0; index < FULL_CASE_IDS.length; index += 1) {
+    const comparison = pair.caseComparisons[index];
+    const controlJudgment = control.review.caseJudgments[index];
+    const coreJudgment = result.review.caseJudgments[index];
+    const expectedOutcome =
+      controlJudgment.judgment === "fail" &&
+      coreJudgment.judgment === "pass"
+        ? "improved"
+        : controlJudgment.judgment === "pass" &&
+            coreJudgment.judgment === "fail"
+          ? "regressed"
+          : "same";
+    if (
+      !exactKeys(comparison, [
+        "id",
+        "outcome",
+        "reasons",
+        "controlReferences",
+        "coreReferences",
+        "metricDelta",
+      ]) ||
+      comparison.id !== FULL_CASE_IDS[index] ||
+      comparison.outcome !== expectedOutcome
+    ) {
+      throw new Error(`schema 3 pair outcome is invalid: ${FULL_CASE_IDS[index]}`);
+    }
+    if (
+      !Array.isArray(comparison.reasons) ||
+      comparison.reasons.length === 0 ||
+      comparison.reasons.some(
+        (reason) => typeof reason !== "string" || !reason.trim(),
+      ) ||
+      !pairReferencesAreValid(
+        comparison.controlReferences,
+        control,
+        index,
+      ) ||
+      !pairReferencesAreValid(
+        comparison.coreReferences,
+        result,
+        index,
+      )
+    ) {
+      throw new Error(
+        `schema 3 pair reference is invalid: ${FULL_CASE_IDS[index]}`,
+      );
+    }
+    const delta = expectedMetricDelta(
+      control.evidence.cases[index].metrics,
+      result.evidence.cases[index].metrics,
+    );
+    if (
+      !exactKeys(comparison.metricDelta, CASE_METRIC_KEYS) ||
+      stableStringify(comparison.metricDelta) !== stableStringify(delta)
+    ) {
+      throw new Error(
+        `schema 3 metric delta is invalid: ${FULL_CASE_IDS[index]}`,
+      );
+    }
+  }
+
+  if (
+    pair.efficiencyVerdict === "pass" &&
+    stableStringify(result.evidence.runtime) !==
+      stableStringify(control.evidence.runtime)
+  ) {
+    throw new Error("schema 3 pair efficiency pass is not supported");
+  }
+
+  if (
+    pair.verdict === "pass" &&
+    (result.review.capabilityVerdict !== "pass" ||
+      pair.efficiencyVerdict !== "pass" ||
+      result.review.caseJudgments.some(
+        ({ judgment }) => judgment !== "pass",
+      ) ||
+      pair.caseComparisons.some(
+        ({ outcome }) => outcome === "regressed",
+      ) ||
+      result.evidence.unexpectedChanges.length !== 0 ||
+      result.evidence.evidenceLimitations.length !== 0)
+  ) {
+    throw new Error("schema 3 pair pass is not supported");
+  }
+}
+
+export function validateResult(
+  result,
+  {
+    sourceResolver = defaultGitSourceResolver,
+    baselineBytes = null,
+  } = {},
+) {
+  if (typeof sourceResolver !== "function") {
+    throw new TypeError("sourceResolver must be a function");
+  }
+  if (![2, 3].includes(result?.schemaVersion)) {
+    throw new Error("result schemaVersion must be 2 or 3");
+  }
+  const schema3 = result.schemaVersion === 3;
+  if (!schema3 && baselineBytes !== null) {
+    throw new Error("schema 2 result does not accept baseline bytes");
   }
   if (typeof result.runId !== "string" || !result.runId) {
     throw new Error("result runId is required");
@@ -3907,6 +4611,7 @@ export function validateResult(result) {
       throw new Error(`result evidence is missing ${key}`);
     }
   }
+  const expectedCaseIds = schema3 ? FULL_CASE_IDS : CASE_IDS;
   if (
     typeof result.evidenceSha256 !== "string" ||
     !/^[0-9a-f]{64}$/u.test(result.evidenceSha256) ||
@@ -3914,18 +4619,39 @@ export function validateResult(result) {
   ) {
     throw new Error("result evidence hash does not match");
   }
+  const condition = schema3 ? validateSchema3Evaluation(result) : null;
+  if (condition === "control" && baselineBytes !== null) {
+    throw new Error("schema 3 Control does not accept baseline bytes");
+  }
+  const baselineResult =
+    condition === "core"
+      ? parseReviewedControl(
+          result.evidence.evaluation,
+          baselineBytes,
+          sourceResolver,
+        )
+      : null;
+  if (
+    condition === "core" &&
+    (stableStringify(result.evidence.source?.gitBlobs) !==
+      stableStringify(baselineResult.evidence.source?.gitBlobs) ||
+      stableStringify(result.evidence.source?.sha256) !==
+        stableStringify(baselineResult.evidence.source?.sha256))
+  ) {
+    throw new Error("schema 3 Core source drifted from Control");
+  }
 
   const cases = result.evidence.cases;
   if (!Array.isArray(cases)) {
     throw new Error("result evidence cases must be an array");
   }
-  for (const id of CASE_IDS) {
+  for (const id of expectedCaseIds) {
     if (cases.filter((candidate) => candidate?.id === id).length !== 1) {
       throw new Error(`required case must appear exactly once: ${id}`);
     }
   }
   if (
-    cases.length !== CASE_IDS.length ||
+    cases.length !== expectedCaseIds.length ||
     cases.some(
       ({ automatedJudgment }) =>
         !["reviewRequired", "blocked"].includes(automatedJudgment),
@@ -3948,6 +4674,18 @@ export function validateResult(result) {
   }
 
   const review = result.review;
+  if (
+    schema3 &&
+    !exactKeys(review, [
+      "status",
+      "caseJudgments",
+      "capabilityVerdict",
+      "reasons",
+      "pair",
+    ])
+  ) {
+    throw new Error("schema 3 review has an invalid shape");
+  }
   if (!review || !["pending", "complete"].includes(review.status)) {
     throw new Error("review status has an invalid enum");
   }
@@ -3973,8 +4711,43 @@ export function validateResult(result) {
   ) {
     throw new Error("review case judgment has an invalid enum");
   }
+  if (schema3) {
+    if (
+      cases.some(
+        (candidate, index) =>
+          candidate.id !== expectedCaseIds[index],
+      )
+    ) {
+      throw new Error("schema 3 case order does not match the profile");
+    }
+    if (
+      review.caseJudgments.length !== expectedCaseIds.length ||
+      review.caseJudgments.some(
+        (judgment, index) =>
+          !exactKeys(judgment, [
+            "id",
+            "judgment",
+            "reasons",
+            "references",
+          ]) ||
+          judgment.id !== expectedCaseIds[index] ||
+          !Array.isArray(judgment.reasons) ||
+          !Array.isArray(judgment.references) ||
+          judgment.references.length === 0 ||
+          !judgment.references.every(
+            (reference) =>
+              typeof reference === "string" &&
+              (reference === `/evidence/cases/${index}` ||
+                reference.startsWith(`/evidence/cases/${index}/`)) &&
+              jsonPointerExists(result, reference),
+          ),
+      )
+    ) {
+      throw new Error("schema 3 review case order is invalid");
+    }
+  }
   if (review.status === "complete") {
-    for (const id of CASE_IDS) {
+    for (const id of expectedCaseIds) {
       const matches = review.caseJudgments.filter(
         (judgment) => judgment?.id === id,
       );
@@ -3985,7 +4758,8 @@ export function validateResult(result) {
       const caseIndex = cases.findIndex((candidate) => candidate.id === id);
       const referencePrefix = `/evidence/cases/${caseIndex}`;
       if (
-        !["pass", "fail"].includes(judgment.judgment) ||
+        (!schema3 &&
+          !["pass", "fail"].includes(judgment.judgment)) ||
         !Array.isArray(judgment.reasons) ||
         judgment.reasons.length === 0 ||
         judgment.reasons.some(
@@ -4005,8 +4779,15 @@ export function validateResult(result) {
       }
     }
   }
+  if (schema3) {
+    validateSchema3Pair(result, condition, baselineResult);
+  }
   if (review.capabilityVerdict === "pass") {
-    const frozenIdentity = loadFrozenEvidenceIdentity();
+    const frozenIdentity = resolveFrozenEvidenceIdentity(
+      result.evidence.source,
+      expectedCaseIds,
+      sourceResolver,
+    );
     const requiredSensitiveTargetLabels = Array.isArray(
       result.evidence.config?.before?.sensitiveTargetLabels,
     )
@@ -4015,23 +4796,38 @@ export function validateResult(result) {
           "collector-control",
         ]
       : [];
+    const schema3ModelIdentity = schema3
+      ? caseModelIdentity(cases[0])
+      : null;
     if (
       review.status !== "complete" ||
-      review.caseJudgments.length !== CASE_IDS.length ||
+      review.caseJudgments.length !== expectedCaseIds.length ||
       review.caseJudgments.some(
         ({ judgment }) => !["pass", "fail"].includes(judgment),
       ) ||
       cases.some(
-        (candidate) =>
+        (candidate, index) =>
           !caseEvidenceIsComplete(
             candidate,
             requiredSensitiveTargetLabels,
             frozenIdentity,
             result.evidence.runtime?.mcpInventory,
-          ),
+          ) ||
+          (schema3 &&
+            !schema3CaseEvidenceIsComplete(
+              candidate,
+              condition,
+              result.evidence.evaluation,
+              schema3ModelIdentity,
+              baselineResult?.evidence?.cases?.[index] ?? null,
+            )),
       ) ||
       result.evidence.capabilityCandidate !== "reviewRequired" ||
-      !passEvidenceIsComplete(result.evidence, frozenIdentity) ||
+      !passEvidenceIsComplete(
+        result.evidence,
+        frozenIdentity,
+        expectedCaseIds,
+      ) ||
       result.evidence.unexpectedChanges.length !== 0 ||
       result.evidence.evidenceLimitations.length !== 0
     ) {
@@ -4040,8 +4836,12 @@ export function validateResult(result) {
   }
 }
 
-export async function writeResultExclusive(resultPath, result) {
-  validateResult(result);
+export async function writeResultExclusive(
+  resultPath,
+  result,
+  validationOptions,
+) {
+  validateResult(result, validationOptions);
   await writeFile(
     resultPath,
     `${JSON.stringify(result, null, 2)}\n`,
@@ -4057,16 +4857,51 @@ const CASES_RELATIVE_PATH = "evals/p0/cases.json";
 const MOCK_RELATIVE_PATH = "evals/support/mock-external-write.ps1";
 const P0_CONTRACT_RELATIVE_PATH =
   "tests/p0-evaluation-contract.tests.ps1";
-const RUN_V3_RESULT_RELATIVE_PATH =
-  "evals/p0/baseline-capability-spike-v3.json";
-const RUN_V3_CONFIGURATION = Object.freeze({
-  mode: "run-v3",
-  runId: "v3",
-  resultRelativePath: RUN_V3_RESULT_RELATIVE_PATH,
-  resultPath: path.join(
-    REPOSITORY_ROOT,
-    ...RUN_V3_RESULT_RELATIVE_PATH.split("/"),
-  ),
+const CONTROL_RESULT_RELATIVE_PATH =
+  "evals/p0/no-harness-control-v1.json";
+const CORE_RESULT_RELATIVE_PATH = "evals/p0/common-core-v1.json";
+const CORE_CANDIDATE_RELATIVE_PATH =
+  "evals/candidates/common-core-v1.md";
+const LIVE_RUN_CONFIGURATIONS = Object.freeze({
+  "run-control-v1": Object.freeze({
+    mode: "run-control-v1",
+    runId: "no-harness-control-v1",
+    resultRelativePath: CONTROL_RESULT_RELATIVE_PATH,
+    resultPath: path.join(
+      REPOSITORY_ROOT,
+      ...CONTROL_RESULT_RELATIVE_PATH.split("/"),
+    ),
+    caseIds: FULL_CASE_IDS,
+    instructionCondition: "none",
+    baselineRelativePath: null,
+    baselinePath: null,
+    candidateRelativePath: CORE_CANDIDATE_RELATIVE_PATH,
+    candidatePath: path.join(
+      REPOSITORY_ROOT,
+      ...CORE_CANDIDATE_RELATIVE_PATH.split("/"),
+    ),
+  }),
+  "run-core-v1": Object.freeze({
+    mode: "run-core-v1",
+    runId: "common-core-v1",
+    resultRelativePath: CORE_RESULT_RELATIVE_PATH,
+    resultPath: path.join(
+      REPOSITORY_ROOT,
+      ...CORE_RESULT_RELATIVE_PATH.split("/"),
+    ),
+    caseIds: FULL_CASE_IDS,
+    instructionCondition: "common-core",
+    baselineRelativePath: CONTROL_RESULT_RELATIVE_PATH,
+    baselinePath: path.join(
+      REPOSITORY_ROOT,
+      ...CONTROL_RESULT_RELATIVE_PATH.split("/"),
+    ),
+    candidateRelativePath: CORE_CANDIDATE_RELATIVE_PATH,
+    candidatePath: path.join(
+      REPOSITORY_ROOT,
+      ...CORE_CANDIDATE_RELATIVE_PATH.split("/"),
+    ),
+  }),
 });
 const VERIFIED_SOURCE_PATHS = [
   COLLECTOR_RELATIVE_PATH,
@@ -4076,24 +4911,243 @@ const VERIFIED_SOURCE_PATHS = [
 ];
 
 export function runConfigurationForMode(mode) {
-  if (mode !== RUN_V3_CONFIGURATION.mode) {
+  if (!Object.hasOwn(LIVE_RUN_CONFIGURATIONS, mode)) {
     throw new Error(`unsupported live run mode: ${mode}`);
   }
-  return RUN_V3_CONFIGURATION;
+  return LIVE_RUN_CONFIGURATIONS[mode];
 }
 
-function loadFrozenEvidenceIdentity() {
-  const snapshots = Object.fromEntries(
-    VERIFIED_SOURCE_PATHS.map((relativePath) => [
+const CORE_REQUIRED_HEADINGS = Object.freeze([
+  "# Common Work Core",
+  "## 1. Request Contract",
+  "## 2. Trust and Instruction Boundaries",
+  "## 3. Existing Work and Current Evidence",
+  "## 4. Read Investigation and Write Authority",
+  "## 5. Duplicate Effects and Recovery",
+  "## 6. Progress, Delegation, and Minimal Implementation",
+  "## 7. Completion and Handoff",
+]);
+
+export function validateCoreCandidate(bytes) {
+  if (!Buffer.isBuffer(bytes) || bytes.length === 0) {
+    throw new Error("Core candidate must be nonempty bytes");
+  }
+  const text = bytes.toString("utf8");
+  if (!Buffer.from(text, "utf8").equals(bytes)) {
+    throw new Error("Core candidate must be valid UTF-8");
+  }
+  const lines = text.split(/\r?\n/u);
+  if (lines.length > 200) {
+    throw new Error("Core candidate exceeds 200 lines");
+  }
+  let previousIndex = -1;
+  for (const heading of CORE_REQUIRED_HEADINGS) {
+    const matches = lines
+      .map((line, index) => (line === heading ? index : -1))
+      .filter((index) => index !== -1);
+    if (matches.length !== 1 || matches[0] <= previousIndex) {
+      throw new Error(`Core candidate required heading is invalid: ${heading}`);
+    }
+    previousIndex = matches[0];
+  }
+  if (
+    /(?:\b[A-Za-z]:[\\/]|(?:^|[\s"'`])\/(?:Users|home)\/|\\\\[^\\\s]+\\Users\\)/iu.test(
+      text,
+    )
+  ) {
+    throw new Error("Core candidate contains a personal path");
+  }
+  if (
+    /\b(?:installed|installation|version|runtime state|plugin state|service tier)\b/iu.test(
+      text,
+    )
+  ) {
+    throw new Error("Core candidate contains runtime state");
+  }
+  if (
+    /\b(?:joewrks-assumption-checking|joewrks-surgical-changes|joewrks-handoff|joewrks-design-frontend|ui ux pro max|apple design)\b/iu.test(
+      text,
+    )
+  ) {
+    throw new Error("Core candidate activates an unmaterialized skill");
+  }
+  return {
+    byteLength: bytes.length,
+    sha256: sha256(bytes),
+    lineCount: lines.length,
+  };
+}
+
+function gatePathIsAbsent(value) {
+  return (
+    value?.exists === false &&
+    value.tracked !== true &&
+    value.headExists !== true
+  );
+}
+
+export function assertEvaluationGateSnapshot(
+  configuration,
+  snapshot,
+  { sourceResolver = defaultGitSourceResolver } = {},
+) {
+  const expected = runConfigurationForMode(configuration?.mode);
+  if (
+    configuration !== expected ||
+    !gatePathIsAbsent(snapshot?.result) ||
+    !gatePathIsAbsent(snapshot?.rootInstruction)
+  ) {
+    throw new Error("execution gate found an active or invalid run input");
+  }
+  if (configuration.instructionCondition === "none") {
+    if (!gatePathIsAbsent(snapshot?.candidate)) {
+      throw new Error("execution gate found a Control candidate");
+    }
+    return {
+      baselineBytes: null,
+      candidateBytes: null,
+      candidate: null,
+      expectedModelIdentity: null,
+    };
+  }
+  if (
+    snapshot?.candidate?.exists !== true ||
+    snapshot.candidate.tracked !== true ||
+    snapshot.candidate.clean !== true ||
+    !Buffer.isBuffer(snapshot.candidate.bytes) ||
+    snapshot?.baseline?.exists !== true ||
+    snapshot.baseline.tracked !== true ||
+    snapshot.baseline.clean !== true ||
+    !Buffer.isBuffer(snapshot.baseline.bytes)
+  ) {
+    throw new Error("execution gate requires clean tracked Core inputs");
+  }
+
+  let candidate;
+  let baseline;
+  try {
+    candidate = validateCoreCandidate(snapshot.candidate.bytes);
+    baseline = JSON.parse(snapshot.baseline.bytes.toString("utf8"));
+    validateResult(baseline, { sourceResolver });
+  } catch (error) {
+    throw new Error("execution gate rejected Core input", { cause: error });
+  }
+  if (
+    baseline?.schemaVersion !== 3 ||
+    baseline.runId !== "no-harness-control-v1" ||
+    baseline.evidence?.evaluation?.condition !== "control" ||
+    baseline.review?.status !== "complete" ||
+    baseline.review?.capabilityVerdict !== "pass" ||
+    stableStringify(snapshot.source?.gitBlobs) !==
+      stableStringify(baseline.evidence.source?.gitBlobs) ||
+    stableStringify(snapshot.source?.sha256) !==
+      stableStringify(baseline.evidence.source?.sha256)
+  ) {
+    throw new Error("execution gate detected Control or source drift");
+  }
+  const firstThread = baseline.evidence.cases[0]?.thread;
+  return {
+    baselineBytes: snapshot.baseline.bytes,
+    candidateBytes: snapshot.candidate.bytes,
+    candidate,
+    expectedModelIdentity: {
+      model: firstThread?.model,
+      modelProvider: firstThread?.modelProvider,
+      reasoningEffort: firstThread?.reasoningEffort,
+      serviceTier: firstThread?.serviceTier,
+    },
+  };
+}
+
+function runGitSync(args, { encoding = "utf8" } = {}) {
+  const result = spawnSync(
+    "git",
+    ["-C", REPOSITORY_ROOT, ...args],
+    {
+      cwd: REPOSITORY_ROOT,
+      encoding,
+      windowsHide: true,
+      maxBuffer: 16 * 1024 * 1024,
+    },
+  );
+  if (result.error || result.status !== 0 || result.signal !== null) {
+    throw new Error("recorded Git source could not be resolved");
+  }
+  return result.stdout;
+}
+
+export function defaultGitSourceResolver({ commit, paths }) {
+  if (
+    typeof commit !== "string" ||
+    !/^[0-9a-f]{40}(?:[0-9a-f]{24})?$/u.test(commit)
+  ) {
+    throw new Error("recorded source commit is invalid");
+  }
+  if (
+    !Array.isArray(paths) ||
+    stableStringify(paths) !== stableStringify(VERIFIED_SOURCE_PATHS)
+  ) {
+    throw new Error("recorded source paths are not the frozen set");
+  }
+  if (runGitSync(["cat-file", "-t", commit]).trim() !== "commit") {
+    throw new Error("recorded source object is not a commit");
+  }
+  const objectFormat = runGitSync([
+    "rev-parse",
+    "--show-object-format",
+  ]).trim();
+  if (!["sha1", "sha256"].includes(objectFormat)) {
+    throw new Error("recorded Git object format is unsupported");
+  }
+  const files = Object.fromEntries(
+    paths.map((relativePath) => [
       relativePath,
-      readFileSync(
-        path.join(REPOSITORY_ROOT, ...relativePath.split("/")),
-      ),
+      runGitSync(["show", `${commit}:${relativePath}`], {
+        encoding: null,
+      }),
     ]),
   );
+  return { objectFormat, files };
+}
+
+function resolveFrozenEvidenceIdentity(
+  source,
+  caseIds,
+  sourceResolver,
+) {
+  const resolved = sourceResolver({
+    commit: source?.head,
+    paths: [...VERIFIED_SOURCE_PATHS],
+  });
+  if (
+    !exactKeys(resolved, ["objectFormat", "files"]) ||
+    !["sha1", "sha256"].includes(resolved.objectFormat) ||
+    !exactKeys(resolved.files, VERIFIED_SOURCE_PATHS)
+  ) {
+    throw new Error("recorded source resolver returned an invalid shape");
+  }
+  const snapshots = {};
+  for (const relativePath of VERIFIED_SOURCE_PATHS) {
+    const bytes = resolved.files[relativePath];
+    if (!Buffer.isBuffer(bytes)) {
+      throw new Error(`recorded source is not bytes: ${relativePath}`);
+    }
+    const expectedGitHash = gitBlobHash(bytes, resolved.objectFormat);
+    const gitIdentity = source?.gitBlobs?.[relativePath];
+    if (
+      !exactKeys(gitIdentity, ["workingGitHash", "headGitHash"]) ||
+      gitIdentity.workingGitHash !== expectedGitHash ||
+      gitIdentity.headGitHash !== expectedGitHash ||
+      source?.sha256?.[relativePath] !== sha256(bytes)
+    ) {
+      throw new Error(`recorded source identity mismatch: ${relativePath}`);
+    }
+    snapshots[relativePath] = bytes;
+  }
   const caseDefinitions = Object.fromEntries(
     selectCases(
       JSON.parse(snapshots[CASES_RELATIVE_PATH].toString("utf8")),
+      caseIds,
     ).map((definition) => [definition.id, definition]),
   );
   return {
@@ -4136,16 +5190,31 @@ async function captureVerifiedSources() {
       ]),
       `tracked source ${relativePath}`,
     );
+    const [headHashResult, indexHashResult] = await Promise.all([
+      runGit(["rev-parse", `HEAD:${relativePath}`]),
+      runGit(["rev-parse", `:${relativePath}`]),
+    ]);
     const headGitHash = requireSuccessfulProcess(
-      await runGit(["rev-parse", `HEAD:${relativePath}`]),
+      headHashResult,
       `HEAD hash ${relativePath}`,
+    ).trim();
+    const indexGitHash = requireSuccessfulProcess(
+      indexHashResult,
+      `index hash ${relativePath}`,
     ).trim();
     const bytes = await readFile(
       path.join(REPOSITORY_ROOT, ...relativePath.split("/")),
     );
     const capturedGitHash = gitBlobHash(bytes, objectFormat);
-    if (capturedGitHash !== headGitHash) {
-      throw new Error(`source does not match current HEAD: ${relativePath}`);
+    if (
+      !gitBlobMatchesAll(bytes, objectFormat, [
+        headGitHash,
+        indexGitHash,
+      ])
+    ) {
+      throw new Error(
+        `source does not match current index and HEAD: ${relativePath}`,
+      );
     }
     snapshots[relativePath] = bytes;
     gitBlobs[relativePath] = {
@@ -4328,14 +5397,117 @@ async function runP0Contract(sourceSnapshots) {
   }
 }
 
-async function captureExecutionGate(configuration = null) {
+async function captureGatePath(absolutePath, relativePath = null) {
+  if (absolutePath === null) {
+    return { exists: false };
+  }
+  let bytes;
+  try {
+    const fileStat = await lstat(absolutePath);
+    if (
+      !fileStat.isFile() ||
+      fileStat.isSymbolicLink() ||
+      !isPathInside(REPOSITORY_ROOT, await realpath(absolutePath))
+    ) {
+      throw new Error("execution gate path is not a repository file");
+    }
+    bytes = await readFile(absolutePath);
+  } catch (error) {
+    if (error?.code === "ENOENT") {
+      if (relativePath === null) {
+        return { exists: false };
+      }
+      const [indexEntry, headEntry] = await Promise.all([
+        runGit([
+          "ls-files",
+          "--error-unmatch",
+          "--",
+          relativePath,
+        ]),
+        runGit(["cat-file", "-e", `HEAD:${relativePath}`]),
+      ]);
+      return {
+        exists: false,
+        tracked: indexEntry.processExitCode === 0,
+        headExists: headEntry.processExitCode === 0,
+      };
+    }
+    throw error;
+  }
+  if (relativePath === null) {
+    return { exists: true };
+  }
+  const tracked = await runGit([
+    "ls-files",
+    "--error-unmatch",
+    "--",
+    relativePath,
+  ]);
+  if (tracked.processExitCode !== 0 || tracked.stderr !== "") {
+    return { exists: true, tracked: false, clean: false, bytes };
+  }
+  const [objectFormat, headHash, indexHash] = await Promise.all([
+    runGit(["rev-parse", "--show-object-format"]),
+    runGit(["rev-parse", `HEAD:${relativePath}`]),
+    runGit(["rev-parse", `:${relativePath}`]),
+  ]);
+  const format = requireSuccessfulProcess(
+    objectFormat,
+    "Git object format",
+  ).trim();
+  const expectedHash = requireSuccessfulProcess(
+    headHash,
+    `HEAD hash ${relativePath}`,
+  ).trim();
+  const expectedIndexHash = requireSuccessfulProcess(
+    indexHash,
+    `index hash ${relativePath}`,
+  ).trim();
+  return {
+    exists: true,
+    tracked: true,
+    clean: gitBlobMatchesAll(bytes, format, [
+      expectedHash,
+      expectedIndexHash,
+    ]),
+    bytes,
+  };
+}
+
+export async function captureExecutionGate(configuration = null) {
+  const verifiedSources = await captureVerifiedSources();
+  let evaluation = null;
   if (configuration !== null) {
-    await pathMustNotExist(
-      configuration.resultPath,
-      `${configuration.runId} result`,
+    const snapshot = {
+      result: await captureGatePath(
+        configuration.resultPath,
+        configuration.resultRelativePath,
+      ),
+      rootInstruction: await captureGatePath(
+        path.join(REPOSITORY_ROOT, "AGENTS.md"),
+        "AGENTS.md",
+      ),
+      candidate: await captureGatePath(
+        configuration.candidatePath,
+        configuration.candidateRelativePath,
+      ),
+      baseline:
+        configuration.baselinePath === null
+          ? { exists: false }
+          : await captureGatePath(
+              configuration.baselinePath,
+              configuration.baselineRelativePath,
+            ),
+      source: {
+        gitBlobs: verifiedSources.gitBlobs,
+        sha256: verifiedSources.sha256ByPath,
+      },
+    };
+    evaluation = assertEvaluationGateSnapshot(
+      configuration,
+      snapshot,
     );
   }
-  const verifiedSources = await captureVerifiedSources();
   const [repository, config, p0] = await Promise.all([
     captureRepositoryState(),
     captureConfigState(),
@@ -4348,6 +5520,7 @@ async function captureExecutionGate(configuration = null) {
     sourceGit: verifiedSources.gitBlobs,
     sourceSha256: verifiedSources.sha256ByPath,
     sourceSnapshots: verifiedSources.snapshots,
+    evaluation,
   };
 }
 
@@ -5126,12 +6299,23 @@ function blockedCase(id, reason) {
 
 async function runConfiguredEvaluation(configuration) {
   const gateBefore = await captureExecutionGate(configuration);
-  const { mode, runId, resultPath } = configuration;
+  const { mode, runId, resultPath, caseIds } = configuration;
+  const condition =
+    configuration.instructionCondition === "none" ? "control" : "core";
+  const instructionOverlay =
+    condition === "core"
+      ? {
+          bytes: gateBefore.evaluation.candidateBytes,
+          sourcePath: configuration.candidateRelativePath,
+        }
+      : null;
+  let expectedModelIdentity =
+    gateBefore.evaluation.expectedModelIdentity;
   const runRoot = await createExclusiveRunRoot(runId);
   const casesContract = JSON.parse(
     gateBefore.sourceSnapshots[CASES_RELATIVE_PATH].toString("utf8"),
   );
-  const caseDefinitions = selectCases(casesContract);
+  const caseDefinitions = selectCases(casesContract, caseIds);
   const cases = [];
   const limitations = [];
   const unexpectedChanges = [];
@@ -5281,16 +6465,19 @@ async function runConfiguredEvaluation(configuration) {
           ? EVALUATION_DYNAMIC_TOOL_NAME
           : null;
       try {
-        cases.push(
-          await runSubjectCase({
-            caseDefinition: definition,
-            caseRoot: path.join(
-              runRoot,
-              `case-${index + 1}-${definition.id}`,
-            ),
-            session,
-          }),
-        );
+        const caseEvidence = await runSubjectCase({
+          caseDefinition: definition,
+          caseRoot: path.join(
+            runRoot,
+            `case-${index + 1}-${definition.id}`,
+          ),
+          session,
+          instructionOverlay,
+          expectedModelIdentity,
+          requireMetrics: true,
+        });
+        cases.push(caseEvidence);
+        expectedModelIdentity ??= caseModelIdentity(caseEvidence);
       } catch (error) {
         cases.push(blockedCase(definition.id, safeError(error)));
         caseFailed = true;
@@ -5343,13 +6530,13 @@ async function runConfiguredEvaluation(configuration) {
     }
   }
 
-  for (const id of CASE_IDS) {
+  for (const id of caseIds) {
     if (!cases.some((candidate) => candidate.id === id)) {
       cases.push(blockedCase(id, "case-not-run"));
     }
   }
   cases.sort(
-    (left, right) => CASE_IDS.indexOf(left.id) - CASE_IDS.indexOf(right.id),
+    (left, right) => caseIds.indexOf(left.id) - caseIds.indexOf(right.id),
   );
   limitations.push(...globalControlBlockers);
 
@@ -5379,6 +6566,36 @@ async function runConfiguredEvaluation(configuration) {
 
   const uniqueLimitations = uniqueReasons(limitations);
   const uniqueUnexpectedChanges = uniqueReasons(unexpectedChanges);
+  const evaluation = {
+    condition,
+    caseIds: [...caseIds],
+    instructionOverlay:
+      condition === "core"
+        ? {
+            sourcePath: configuration.candidateRelativePath,
+            byteLength: gateBefore.evaluation.candidate.byteLength,
+            sha256: gateBefore.evaluation.candidate.sha256,
+          }
+        : null,
+    baseline:
+      condition === "core"
+        ? {
+            path: configuration.baselineRelativePath,
+            runId: "no-harness-control-v1",
+            evidenceSha256: JSON.parse(
+              gateBefore.evaluation.baselineBytes.toString("utf8"),
+            ).evidenceSha256,
+            fileSha256: sha256(
+              gateBefore.evaluation.baselineBytes,
+            ),
+          }
+        : null,
+    metrics: {
+      tokenUsage: "last-correlated-total",
+      wallClock:
+        "performance-now-before-turn-start-to-first-correlated-completion",
+    },
+  };
   const evidence = {
     source: {
       ...gateBefore.repository,
@@ -5390,6 +6607,7 @@ async function runConfiguredEvaluation(configuration) {
     preflight,
     inventory,
     cases,
+    evaluation,
     repository: {
       before: gateBefore.repository,
       after: repositoryAfter,
@@ -5412,7 +6630,7 @@ async function runConfiguredEvaluation(configuration) {
     evidenceLimitations: uniqueLimitations,
   };
   const result = {
-    schemaVersion: 2,
+    schemaVersion: 3,
     runId,
     recordedAt: new Date().toISOString(),
     evidence,
@@ -5427,9 +6645,21 @@ async function runConfiguredEvaluation(configuration) {
       })),
       capabilityVerdict: "blocked",
       reasons: ["review-pending"],
+      pair:
+        condition === "control"
+          ? null
+          : {
+              status: "pending",
+              verdict: "blocked",
+              efficiencyVerdict: "pending",
+              reasons: ["review-pending"],
+              caseComparisons: [],
+            },
     },
   };
-  await writeResultExclusive(resultPath, result);
+  await writeResultExclusive(resultPath, result, {
+    baselineBytes: gateBefore.evaluation.baselineBytes,
+  });
   process.stdout.write(
     `${JSON.stringify({
       mode,
