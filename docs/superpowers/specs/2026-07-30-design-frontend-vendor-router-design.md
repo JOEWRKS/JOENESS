@@ -1,6 +1,6 @@
 # Design/Frontend Vendor and Router Design
 
-**Status:** v1-v3 evidence preserved; hybrid routing revision approved, implementation not started
+**Status:** hybrid implementation and retained-evidence validation complete; hard gate passes, but implicit activation and semantic improvement remain unverified, so promotion is false and installation is limited to an explicit same-user internal pilot
 
 **Parent contract:** `docs/superpowers/specs/2026-07-27-common-work-harness-design.md`
 
