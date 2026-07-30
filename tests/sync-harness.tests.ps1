@@ -11,6 +11,22 @@ if (-not (Test-Path -LiteralPath $Implementation -PathType Leaf)) {
 
 function Assert-True { param([bool] $Condition, [string] $Message) if (-not $Condition) { throw "Assertion failed: $Message" } }
 function Assert-Equal { param($Actual, $Expected, [string] $Message) if ($Actual -cne $Expected) { throw "Assertion failed: $Message; expected [$Expected], got [$Actual]" } }
+function Test-ReadmeContract {
+    $readme = [IO.File]::ReadAllText((Join-Path $RepositoryRoot 'README.md'))
+    foreach ($required in @(
+        'powershell.exe -NoProfile -File .\harness.ps1 -Apply',
+        'powershell.exe -NoProfile -File .\harness.ps1 -Remove',
+        'personal-pilot',
+        'unknown',
+        '$joewrks-project-setup',
+        'git archive',
+        'Get-FileHash',
+        'ExecutionPolicy Bypass'
+    )) {
+        Assert-True $readme.Contains($required) "README contains $required"
+    }
+    Assert-True (($readme -split '## English').Count -eq 2) 'README keeps Korean and English sections'
+}
 function Assert-ThrowsLike {
     param([scriptblock] $Action, [string] $Pattern, [string] $Message)
     try { & $Action; throw "Assertion failed: $Message did not throw" }
@@ -1439,6 +1455,7 @@ function Test-Task2CheckRegressions {
 }
 
 Test-PublicHarnessEntry
+Test-ReadmeContract
 Test-ModeAndExitContract
 Test-RemoveContract
 Test-RemovePreflightBlockers

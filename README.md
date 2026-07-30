@@ -4,202 +4,230 @@
 
 ## 한국어
 
-모든 디자인·개발 프로젝트에 공통 적용할 작업 규칙과 선택형 작업 스킬을 관리하는 독립 프로젝트입니다.
+Windows Codex 사용자의 공통 작업 규칙과 현재 JOEWRKS 개인 스킬 묶음을 한 PowerShell 진입점으로 점검·설치·업데이트·제거합니다.
 
-현재 v1은 Windows의 Codex 환경을 대상으로 합니다. 기본 설치에는 공통 작업 규칙만 포함되며, 플러그인이나 선택형 디자인 스킬은 자동으로 설치하지 않습니다.
+> **기본 `-Apply`는 `personal-pilot` 전체를 설치합니다.** Common Work Core, candidate 상태인 `joewrks-design-frontend`와 `joewrks-project-setup`, manifest가 선택한 UI UX Pro Max runtime·Apple Design reference·고지가 함께 설치됩니다. 디자인 파일럿은 승격되거나 품질이 인증된 기능이 아닙니다. Python, Figma, browser capability 또는 외부 플러그인은 포함하거나 자동 설치·설정하지 않습니다.
 
-### 가장 빠른 사용법
+### 빠른 시작
 
-저장소 루트에서 다음 순서로 실행합니다.
+저장소 또는 검증한 ZIP의 루트에서 다음 순서로 실행합니다.
 
 ```powershell
-# 1. 변경 예정 항목만 확인합니다. 파일을 수정하지 않습니다.
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\harness.ps1 -Check
+# 1. 전체 계획을 읽기 전용으로 확인
+powershell.exe -NoProfile -File .\harness.ps1 -Check
 
-# 2. 차단 항목이 없을 때 공통 작업 규칙을 적용합니다.
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\harness.ps1 -Apply
+# 2. blocker가 없으면 personal-pilot 적용
+powershell.exe -NoProfile -File .\harness.ps1 -Apply
 
-# 3. 적용 결과가 current인지 다시 확인합니다.
+# 3. current 확인
+powershell.exe -NoProfile -File .\harness.ps1 -Check
+
+# 선택: 이 state가 소유한 설치만 제거
+powershell.exe -NoProfile -File .\harness.ps1 -Remove
+```
+
+`-Apply`도 쓰기 직전에 전체 preflight를 다시 수행하므로 `-Check`는 안전한 미리보기이지 필수 선행 단계는 아닙니다. 설치 뒤에는 새 Codex 작업을 시작해야 스킬 탐색 상태가 확실히 갱신됩니다.
+
+기존 `-IncludeDesignFrontend`는 입력 호환용 deprecated no-op입니다. 플래그 유무 모두 같은 `personal-pilot`을 선택하며, 사용하면 JSON에 다음 warning이 남습니다.
+
+```text
+DEPRECATED: -IncludeDesignFrontend no longer changes selection; personal-pilot already includes joewrks-design-frontend.
+```
+
+### 설치 위치와 상태
+
+`resolvedCodexHome`은 명시한 `-CodexHome`, 유효한 `CODEX_HOME`, `%USERPROFILE%\.codex` 순으로 결정됩니다.
+
+| 대상 | 기본 위치 |
+|---|---|
+| Common Work Core 관리 블록 | `<resolvedCodexHome>\AGENTS.md` |
+| 설치 state | `<resolvedCodexHome>\joewrks-harness-state.json` |
+| JOEWRKS 스킬 | `%USERPROFILE%\.agents\skills\joewrks-*` |
+| vendored runtime·reference | `%USERPROFILE%\.agents\vendor\...` |
+| 실행별 backup | `%LOCALAPPDATA%\JOEWRKS\work-harness\backups\<run-id>` |
+
+`-AgentsHome`과 `-BackupRoot`로 후자의 root를 명시할 수 있습니다. 신규 스킬은 `.agents`에 설치되며 legacy `<resolvedCodexHome>\skills`는 충돌 검사에만 사용됩니다.
+
+state schema v2는 `personal-pilot`, Common Core와 bundle manifest의 source identity, 관리 대상 hash, 정규화한 AgentsHome의 SHA-256 identity를 기록합니다. 개인 절대경로는 state에 저장하지 않습니다. 같은 state를 다른 AgentsHome과 함께 사용하면 적용·제거 전에 차단됩니다.
+
+### 결과와 exit code
+
+stdout은 한 JSON 결과입니다.
+
+| status | exit | 의미 |
+|---|---:|---|
+| `current` | 0 | 원하는 설치 상태와 일치 |
+| `ready` | 0 | 안전하게 적용하거나 제거할 변경이 있음 |
+| `removed` | 0 | 제거 완료 또는 설치 흔적 없는 no-op |
+| `failed` | 1 | 실행 실패 후 확인 가능한 rollback 완료 |
+| `blocked` | 2 | 충돌·drift·불명확한 소유권 등으로 쓰기 전 중단 |
+| `unknown` | 3 | unresolved target 또는 불완전 rollback으로 최종 상태를 확정할 수 없음 |
+
+`unknown`이면 자동 복구 완료로 가정하거나 새 실행을 반복하지 마십시오. JSON의 `backupPath`, `rollback`, `unresolvedTargets`와 현재 파일을 먼저 확인합니다. 실패 중 생성된 디렉터리는 외부 내용이나 검사 불확실성을 덮어쓰지 않기 위해 보수적으로 남을 수 있습니다.
+
+### 제거와 업데이트
+
+`-Remove`는 유효한 state가 소유한다고 증명하는 whole files와 Common Core marker 블록만 제거합니다. Common Core 밖의 기존 `AGENTS.md` byte를 보존하고, 외부 내용이 없어도 `AGENTS.md` 파일 자체는 남기며, state는 다른 제거가 모두 검증된 뒤 마지막에 삭제합니다. drift, 누락된 owned target, state 없는 marker·관리 namespace 같은 unowned evidence가 있으면 삭제하지 않고 `blocked`로 끝납니다.
+
+성공한 제거 뒤 남는 정확한 빈 `.agents\skills\joewrks-*` 디렉터리 skeleton은 다음 `-Apply`가 재사용할 수 있습니다. 무관한 `.agents` 파일과 디렉터리는 제거하지 않습니다.
+
+업데이트는 새 repository revision 또는 ZIP에서 `-Check` → `-Apply` → `-Check`를 다시 실행합니다. 같은 상태면 새 파일이나 backup 없이 `current`입니다. manifest에서 사라진 state-owned 파일도 현재 hash가 기록과 일치할 때만 제거합니다.
+
+소스 폴더를 지운 뒤 제거해야 한다면 설치에 사용한 exact revision archive를 보관하거나, 해당 state schema를 지원하는 compatible newer revision을 다시 받아 `-Remove`를 실행하십시오. 별도 제거 프로그램이나 자동 updater는 설치되지 않습니다.
+
+### 프로젝트별 설정
+
+프로젝트 파일은 설치 과정에서 자동으로 바뀌지 않습니다. 해당 프로젝트에서 `$joewrks-project-setup`을 명시적으로 호출하고 helper의 `check`를 먼저 실행합니다. `check`는 Git root와 `AGENTS.md` snapshot을 읽기 전용으로 확인합니다. 그 프로젝트에 대한 명시적 `apply` 요청이 있을 때만 snapshot을 다시 검증하고 루트 `AGENTS.md`의 JOEWRKS project marker 블록 하나를 씁니다.
+
+이 스킬은 Common Core를 복제하거나 의존성·코드·디자인을 변경하지 않으며, 다른 프로젝트나 과거 대화의 승인을 가져오지 않습니다.
+
+### Backup과 복구
+
+실제 변경 전 backup은 실행별 디렉터리에 생성되고 자동 삭제되지 않습니다. 이전 state와 사용자 `AGENTS.md` 내용이 포함될 수 있으므로 개인 정보처럼 취급하십시오. 성공한 설치·제거를 확인하고 수동 복구 필요가 끝난 뒤 사용자가 직접 삭제합니다. 이전 backup의 state에서 당시 source manifest identity와 owned target hash를 확인할 수 있지만, backup 존재만으로 복구 완료를 뜻하지는 않습니다.
+
+### 직접 공유
+
+공유할 exact committed revision에서 다음을 실행합니다.
+
+```powershell
+$revision = (git rev-parse --short=12 HEAD).Trim()
+$archive = ".\joewrks-work-harness-$revision.zip"
+git archive --format=zip --output $archive HEAD
+Get-FileHash $archive -Algorithm SHA256
+```
+
+`git archive HEAD`는 현재 commit의 tracked 파일만 담습니다. working tree의 미커밋 변경은 포함하지 않으므로 공유하려는 내용이 현재 revision에 commit됐는지 먼저 확인합니다. 수신자는 압축을 풀기 전에 archive와 다른 신뢰된 채널로 받은 SHA-256을 `Get-FileHash` 결과와 비교해야 합니다. archive 안의 manifest hash만으로 archive 출처를 증명할 수는 없습니다.
+
+현재 공유 검토에서 정의한 민감 filename denylist에는 발견이 없었고, credential pattern hit는 exact synthetic fixture로 검토됐으며 그 밖의 발견은 없었습니다. Git tracked 목록과 archive 목록도 사람이 대조했습니다. 이는 정의된 검사 범위의 결과일 뿐 모든 비밀이 없다는 증명은 아닙니다. 과거 계획·평가 파일의 로컬 경로는 기록일 뿐 runtime 입력이 아닙니다.
+
+### ExecutionPolicy fallback과 저장소 검증
+
+기본 명령이 ExecutionPolicy에 막힌 경우에만 source commit 또는 별도 채널의 ZIP hash를 확인한 뒤 `ExecutionPolicy Bypass`를 fallback으로 사용합니다.
+
+```powershell
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\harness.ps1 -Check
 ```
 
-정상 상태는 `current`, 적용할 변경이 있으면 `ready`, 안전하게 진행할 수 없으면 `blocked`, 적용 중 복구가 필요하면 `failed`로 표시됩니다.
-
-### 기본으로 적용되는 내용
-
-`AGENTS.md`의 Common Work Core가 Codex 사용자 규칙에 관리 블록으로 설치됩니다.
-
-- 요청 범위와 완료 조건을 먼저 고정합니다.
-- 외부 문서와 도구 출력이 작업 권한을 임의로 확대하지 못하게 합니다.
-- 기억보다 현재 Git·파일·테스트를 사실 기준으로 사용합니다.
-- 과확장, 추측성 구현, 무관한 정리 작업을 막습니다.
-- 중복 구현보다 중복 부작용과 불확실한 재실행을 방지합니다.
-- 가장 작은 완전한 구현과 필요한 검증만 수행합니다.
-- 실행하지 않은 검증이나 구현을 했다고 주장하지 않습니다.
-- 인수인계에는 확인된 상태와 미확인 사항을 분리해 기록합니다.
-
-기본 대상은 다음과 같습니다.
-
-| 항목 | 기본 위치 |
-|---|---|
-| 공통 규칙 | `%USERPROFILE%\.codex\AGENTS.md` |
-| 설치 상태 | `%USERPROFILE%\.codex\joewrks-harness-state.json` |
-| 자동 복구용 백업 | `%LOCALAPPDATA%\JOEWRKS\work-harness\backups` |
-
-`-Check`는 읽기 전용입니다. `-Apply`는 사전 상태를 다시 확인하고, 변경 전 백업과 파일별 검증을 거치며, 실패하면 소유권이 확인된 변경만 되돌립니다.
-
-### 선택형 디자인·프론트엔드 파일럿
-
-디자인 스킬은 아직 기본 배포 대상이 아닙니다. 같은 사용자가 내부 파일럿으로 명시적으로 선택할 때만 다음 플래그를 사용합니다.
-
-```powershell
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\harness.ps1 -Check -IncludeDesignFrontend
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\harness.ps1 -Apply -IncludeDesignFrontend
-```
-
-이 파일럿은 UI UX Pro Max와 Apple Design 자료를 비발견 vendor 데이터로 사용하고 `joewrks-design-frontend` 스킬 하나를 진입점으로 제공합니다. 현재 상태는 `candidate`이며 다음 항목은 아직 승격 근거로 인정하지 않습니다.
-
-- 암시적 호출의 안정성
-- 실제 결과물의 의미 있는 품질 향상
-- 사람의 결과 검토 대체
-- Figma 및 브라우저 검증 완료
-
-Figma 같은 외부 플러그인은 저장소에 포함하거나 설정을 자동 변경하지 않습니다. 필요한 작업에서 사용자가 설치한 기능을 별도로 확인해 사용합니다.
-
-### 파일 구조
-
-| 경로 | 역할 |
-|---|---|
-| `README.md` | 처음 보는 사용자를 위한 안내서 |
-| `AGENTS.md` | 실제 공통 작업 규칙 |
-| `harness.ps1` | 설치·점검용 공개 진입점 |
-| `skills/` | 선택형 역할 스킬 |
-| `vendor/` | 고정된 외부 스킬 원본과 실행 자료 |
-| `evals/` | 하네스 효과와 라우팅 평가 증거 |
-| `tests/` | 회귀 및 안전성 검사 |
-| `docs/` | 설계 명세와 구현 이력 |
-| `scripts/` | 공개 진입점이 호출하는 내부 구현 |
-
-일반 사용자는 `README.md`, `AGENTS.md`, `harness.ps1`만 알면 됩니다. `scripts/`, `evals/`, `tests/`, `docs/`는 구현과 검증을 위한 내부 영역입니다.
-
-### 업데이트
-
-저장소를 최신 상태로 받은 뒤 다시 `-Check`, `-Apply`, `-Check` 순서로 실행합니다. 이미 같은 버전이 적용돼 있으면 추가 파일 변경이나 새 백업 없이 `current`로 끝납니다.
-
-고급 사용자는 `-CodexHome`, `-AgentsHome`, `-BackupRoot`로 대상 경로를 명시할 수 있습니다. 공유 환경에서는 먼저 별도 테스트 경로로 `-Check`와 `-Apply`를 검증한 후 실제 사용자 경로에 적용하십시오.
-
-현재 명시적인 제거 명령은 제공하지 않습니다. `-Apply` 실패 시 자동 복구는 지원하지만, 설치 해제는 상태 파일과 관리 블록의 소유권을 확인하는 별도 절차가 필요합니다.
-
-### 저장소 검증
-
-배포 전 최소 검증은 다음과 같습니다.
+저장소 자체의 격리된 회귀 검사는 재현성을 위해 Bypass를 사용합니다. Node와 Python은 이 저장소 검증 또는 선택적인 UI UX 검색에만 쓰이며 PowerShell 설치기의 필수 runtime이 아닙니다.
 
 ```powershell
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\tests\sync-harness.tests.ps1
-node --test .\tests\*.tests.mjs
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\tests\p0-evaluation-contract.tests.ps1
-python -B .\vendor\ui-ux-pro-max\scripts\validate_data.py
-python -B -m unittest discover -s .\vendor\ui-ux-pro-max\scripts\tests -p "test_*.py"
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\tests\project-setup.tests.ps1
+node --test .\tests\design-vendor-integrity.tests.mjs
 ```
 
 ---
 
 ## English
 
-This is an independent project for managing shared working rules and optional task skills across design and development projects.
+This project checks, installs, updates, and removes shared working rules and the current JOEWRKS personal skill bundle for Windows Codex through one PowerShell entry point.
 
-Version 1 currently targets Codex on Windows. The default installation includes only the shared working rules; it does not automatically install plugins or optional design skills.
+> **The default `-Apply` installs the full `personal-pilot`.** It includes the Common Work Core, the candidate `joewrks-design-frontend` and `joewrks-project-setup` skills, and the manifest-selected UI UX Pro Max runtime, Apple Design reference, and notices. The design pilot is not promoted or quality-certified. Python, Figma, browser capabilities, and external plugins are neither bundled nor installed or configured automatically.
 
 ### Quick start
 
-Run these commands in order from the repository root.
+Run these commands in order from the root of the repository or a verified ZIP:
 
 ```powershell
-# 1. Preview the planned changes. This does not modify any files.
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\harness.ps1 -Check
+# 1. Read-only preview of the full plan
+powershell.exe -NoProfile -File .\harness.ps1 -Check
 
-# 2. Apply the shared working rules when there are no blockers.
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\harness.ps1 -Apply
+# 2. Apply the personal-pilot when no blocker is reported
+powershell.exe -NoProfile -File .\harness.ps1 -Apply
 
-# 3. Check again and confirm that the result is current.
+# 3. Confirm current
+powershell.exe -NoProfile -File .\harness.ps1 -Check
+
+# Optional: remove only content owned by this state
+powershell.exe -NoProfile -File .\harness.ps1 -Remove
+```
+
+`-Apply` repeats the full preflight immediately before writing, so `-Check` is a safe preview rather than a mandatory installation step. Start a new Codex task after installation so skill discovery is refreshed.
+
+The deprecated `-IncludeDesignFrontend` flag is now a compatibility no-op. With or without it, the selected bundle is the same `personal-pilot`; supplying it adds this JSON warning:
+
+```text
+DEPRECATED: -IncludeDesignFrontend no longer changes selection; personal-pilot already includes joewrks-design-frontend.
+```
+
+### Paths and state
+
+`resolvedCodexHome` is resolved from explicit `-CodexHome`, a valid `CODEX_HOME`, then `%USERPROFILE%\.codex`.
+
+| Target | Default location |
+|---|---|
+| Common Work Core managed block | `<resolvedCodexHome>\AGENTS.md` |
+| Installation state | `<resolvedCodexHome>\joewrks-harness-state.json` |
+| JOEWRKS skills | `%USERPROFILE%\.agents\skills\joewrks-*` |
+| Vendored runtime and references | `%USERPROFILE%\.agents\vendor\...` |
+| Per-run backups | `%LOCALAPPDATA%\JOEWRKS\work-harness\backups\<run-id>` |
+
+`-AgentsHome` and `-BackupRoot` can override the latter roots. New skills go under `.agents`; legacy `<resolvedCodexHome>\skills` is inspected only for collisions.
+
+State schema v2 records `personal-pilot`, the Common Core and bundle-manifest source identities, owned hashes, and a SHA-256 identity of the normalized AgentsHome. It does not store personal absolute paths. Pairing the same state with another AgentsHome is blocked before apply or remove.
+
+### Results and exit codes
+
+stdout is one JSON result.
+
+| status | exit | Meaning |
+|---|---:|---|
+| `current` | 0 | Installed state matches the desired state |
+| `ready` | 0 | Safe apply or remove changes are available |
+| `removed` | 0 | Removal completed, or no installed evidence existed |
+| `failed` | 1 | The operation failed and rollback was verified complete |
+| `blocked` | 2 | A collision, drift, or uncertain ownership stopped all writes |
+| `unknown` | 3 | An unresolved target or incomplete rollback prevents a final-state claim |
+
+For `unknown`, do not assume recovery or blindly rerun. Inspect `backupPath`, `rollback`, `unresolvedTargets`, and the current files first. Directories created during a failed operation may remain conservatively when external content or inspection uncertainty prevents safe cleanup.
+
+### Remove and update
+
+`-Remove` deletes only whole files and the Common Core marker block proven to be owned by valid state. It preserves the exact bytes outside that block, keeps `AGENTS.md` even when the remaining external content is empty, and removes state last after every other removal is verified. Drift, a missing owned target, or unowned evidence such as a marker or managed namespace without state causes `blocked` without deletion.
+
+An exact empty `.agents\skills\joewrks-*` directory skeleton left after successful removal can be reused by a later `-Apply`. Unrelated `.agents` files and directories are preserved.
+
+To update, use a new repository revision or ZIP and run `-Check` → `-Apply` → `-Check`. An already-current bundle creates no new files or backup. A state-owned file removed from the new manifest is deleted only if its current hash still matches recorded ownership.
+
+If the source folder is gone, keep the exact revision archive used for installation or obtain a compatible newer revision that supports the state schema, then run `-Remove`. No separate uninstaller or automatic updater is installed.
+
+### Per-project setup
+
+Installation never mutates project files automatically. Explicitly invoke `$joewrks-project-setup` for the target project and run its helper `check` first. The check resolves the Git root and `AGENTS.md` snapshot without writing. Only an explicit `apply` request for that project allows the helper to revalidate the snapshot and write the single JOEWRKS project marker block in the root `AGENTS.md`.
+
+The skill does not copy the Common Core, install dependencies, change code or design, or reuse authorization from another project or conversation.
+
+### Backups and recovery
+
+Backups are created in a per-run directory before changes and are never pruned automatically. They may contain prior state and the user's `AGENTS.md`, so treat them as private. Delete them manually only after confirming a successful install or removal and finishing any needed recovery. A prior backup state can identify the source manifest and owned hashes for that run; its existence alone does not prove recovery.
+
+### Direct sharing
+
+Run the following from the exact committed revision you intend to share:
+
+```powershell
+$revision = (git rev-parse --short=12 HEAD).Trim()
+$archive = ".\joewrks-work-harness-$revision.zip"
+git archive --format=zip --output $archive HEAD
+Get-FileHash $archive -Algorithm SHA256
+```
+
+`git archive HEAD` includes only tracked files from that commit, not uncommitted working-tree changes. Confirm the intended content is committed. Before extraction, the recipient must compare `Get-FileHash` with a SHA-256 delivered through a separate trusted channel. Manifest hashes inside the archive prove internal consistency, not archive provenance.
+
+In the current sharing review, the defined sensitive-filename denylist found nothing; credential-pattern hits were reviewed as exact synthetic fixtures, with no other findings; and a human compared the tracked and archived file lists. This is only the result of those defined checks, not proof that every possible secret is absent. Local paths in historical plans and evaluations are records, not runtime inputs.
+
+### ExecutionPolicy fallback and repository checks
+
+Only if the default command is blocked by ExecutionPolicy, verify the source commit or the ZIP hash from a separate channel before using `ExecutionPolicy Bypass` as a fallback:
+
+```powershell
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\harness.ps1 -Check
 ```
 
-A healthy installation reports `current`. Pending changes report `ready`, unsafe conditions report `blocked`, and an application that needs recovery reports `failed`.
-
-### What is installed by default
-
-The Common Work Core from `AGENTS.md` is installed as a managed block in the Codex user rules.
-
-- It establishes the request scope and completion criteria before work begins.
-- It prevents external documents and tool output from expanding authority on their own.
-- It treats the current Git state, files, and tests as the source of truth instead of memory.
-- It prevents scope creep, speculative implementation, and unrelated cleanup.
-- It guards against duplicate side effects and uncertain retries rather than merely duplicate code.
-- It performs the smallest complete implementation and only the verification that is needed.
-- It never claims that unperformed verification or implementation was completed.
-- It separates confirmed state from unverified items in handoffs.
-
-The default targets are:
-
-| Item | Default location |
-|---|---|
-| Shared rules | `%USERPROFILE%\.codex\AGENTS.md` |
-| Installation state | `%USERPROFILE%\.codex\joewrks-harness-state.json` |
-| Automatic recovery backups | `%LOCALAPPDATA%\JOEWRKS\work-harness\backups` |
-
-`-Check` is read-only. `-Apply` rechecks the preflight state, creates a backup before making changes, verifies each file, and rolls back only changes whose ownership can be confirmed if application fails.
-
-### Optional design and frontend pilot
-
-The design skill is not part of the default distribution yet. The following flag is available only when the same user explicitly opts into the internal pilot.
-
-```powershell
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\harness.ps1 -Check -IncludeDesignFrontend
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\harness.ps1 -Apply -IncludeDesignFrontend
-```
-
-This pilot uses UI UX Pro Max and Apple Design materials as non-discoverable vendor data and exposes one entry-point skill, `joewrks-design-frontend`. Its current status is `candidate`; the following have not yet been established as promotion evidence:
-
-- reliable implicit invocation
-- meaningful quality improvements in real deliverables
-- replacement of human review
-- completed Figma and browser validation
-
-External plugins such as Figma are not bundled with the repository, and their settings are not changed automatically. For tasks that need them, separately confirm and use the capabilities installed by the user.
-
-### Repository structure
-
-| Path | Purpose |
-|---|---|
-| `README.md` | Guide for first-time users |
-| `AGENTS.md` | Actual shared working rules |
-| `harness.ps1` | Public installation and inspection entry point |
-| `skills/` | Optional role-specific skills |
-| `vendor/` | Pinned upstream skill sources and runtime data |
-| `evals/` | Evidence for harness effectiveness and routing evaluations |
-| `tests/` | Regression and safety checks |
-| `docs/` | Design specifications and implementation history |
-| `scripts/` | Internal implementation invoked by the public entry point |
-
-Most users only need to know about `README.md`, `AGENTS.md`, and `harness.ps1`. The `scripts/`, `evals/`, `tests/`, and `docs/` directories are internal areas used for implementation and verification.
-
-### Updating
-
-After updating the repository, run `-Check`, `-Apply`, and `-Check` again in that order. If the same version is already installed, the command finishes with `current` without changing files or creating another backup.
-
-Advanced users can set target paths with `-CodexHome`, `-AgentsHome`, and `-BackupRoot`. In shared environments, first verify `-Check` and `-Apply` against separate test paths before applying them to real user paths.
-
-There is currently no explicit uninstall command. Automatic recovery is supported when `-Apply` fails, but uninstalling requires a separate procedure that verifies ownership of the state file and managed block.
-
-### Repository validation
-
-Run at least the following checks before distribution:
+Isolated repository regression commands may retain Bypass for reproducibility. Node and Python are used only for repository verification or optional UI UX search; they are not required by the PowerShell installer.
 
 ```powershell
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\tests\sync-harness.tests.ps1
-node --test .\tests\*.tests.mjs
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\tests\p0-evaluation-contract.tests.ps1
-python -B .\vendor\ui-ux-pro-max\scripts\validate_data.py
-python -B -m unittest discover -s .\vendor\ui-ux-pro-max\scripts\tests -p "test_*.py"
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\tests\project-setup.tests.ps1
+node --test .\tests\design-vendor-integrity.tests.mjs
 ```
