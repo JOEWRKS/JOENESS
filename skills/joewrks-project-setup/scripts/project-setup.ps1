@@ -281,8 +281,16 @@ function Invoke-JoewrksProjectSetup {
         try {
             $final = Get-ProjectFileSnapshot $target
             $finalHash = if ($final.Exists) { $final.Hash } else { 'absent' }
+            $matchesOriginal = $final.Exists -eq $snapshot.Exists -and (-not $final.Exists -or $final.Hash -ceq $snapshot.Hash)
+            if (-not $matchesOriginal) {
+                if (-not $unresolved.Contains($target)) { $null = $unresolved.Add($target) }
+                $restored.Clear()
+                $removed.Clear()
+            }
         } catch {
             if (-not $unresolved.Contains($target)) { $null = $unresolved.Add($target) }
+            $restored.Clear()
+            $removed.Clear()
             $finalHash = $null
         }
         $rollback = [pscustomobject] @{

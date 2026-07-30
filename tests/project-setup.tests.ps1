@@ -251,6 +251,28 @@ function Test-RootAndReparseBlockers {
         if (Test-Path -LiteralPath $alias) { [IO.Directory]::Delete($alias) }
         Remove-ProjectFixture $f
     }
+
+    $f = New-ProjectFixture
+    try {
+        $junctionSource = Join-Path $f.Root 'junction-source'
+        [IO.Directory]::CreateDirectory($junctionSource) | Out-Null
+        $targetJunction = Join-Path $f.Project 'AGENTS.md'
+        New-Item -ItemType Junction -Path $targetJunction -Target $junctionSource | Out-Null
+        $raw = Invoke-RawProjectHelper @('-Check', '-ProjectPath', $f.Project)
+        Assert-Equal $raw.ExitCode 2 'reparse AGENTS.md target exits 2'
+        Assert-Equal $raw.Result.status 'blocked' 'reparse AGENTS.md target is blocked'
+        [IO.Directory]::Delete($targetJunction)
+
+        $overrideJunction = Join-Path $f.Project 'AGENTS.override.md'
+        New-Item -ItemType Junction -Path $overrideJunction -Target $junctionSource | Out-Null
+        $raw = Invoke-RawProjectHelper @('-Check', '-ProjectPath', $f.Project)
+        Assert-Equal $raw.ExitCode 2 'reparse AGENTS.override.md exits 2'
+        Assert-Equal $raw.Result.status 'blocked' 'reparse AGENTS.override.md is blocked'
+    } finally {
+        if (Test-Path -LiteralPath $targetJunction) { [IO.Directory]::Delete($targetJunction) }
+        if (Test-Path -LiteralPath $overrideJunction) { [IO.Directory]::Delete($overrideJunction) }
+        Remove-ProjectFixture $f
+    }
 }
 
 function Test-RawCliValidation {
@@ -285,6 +307,40 @@ function Test-ConditionalRollback {
         Assert-Equal $failed.rollback.status 'complete' 'verified rollback is reported'
         Assert-True (-not (Test-Path -LiteralPath $target)) 'verified rollback removes newly created target'
 
+        $originalBytes = $Utf8Bom.GetPreamble() + $Utf8NoBom.GetBytes("outside`r`n")
+        [IO.File]::WriteAllBytes($target, $originalBytes)
+        $checkResult = Invoke-JoewrksProjectSetup -Check -ProjectPath $f.Project
+        $restored = Invoke-JoewrksProjectSetup -Apply -ProjectPath $f.Project -ExpectedRoot $checkResult.projectRoot `
+            -ExpectedTargetHash $checkResult.targetHash -ManagedBodyBase64 (ConvertTo-BodyBase64 'body') `
+            -AfterReplace { throw 'test existing-file rollback' }
+        Assert-Equal $restored.status 'failed' 'existing-file rollback returns failed'
+        Assert-Equal $restored.rollback.status 'complete' 'existing-file rollback is complete'
+        Assert-True (@($restored.rollback.restoredTargets) -contains $target) 'existing target is reported restored'
+        Assert-BytesEqual ([IO.File]::ReadAllBytes($target)) $originalBytes 'existing target restores exact pre-write bytes'
+
+        $raceBytes = $Utf8NoBom.GetBytes('post-rollback concurrent edit')
+        $script:RollbackRaceTarget = $target
+        $script:RollbackRaceBytes = $raceBytes
+        $finalSnapshotLine = ([IO.File]::ReadAllLines($Implementation, [Text.Encoding]::UTF8) |
+            Select-String '\$final = Get-ProjectFileSnapshot \$target' | Select-Object -First 1).LineNumber
+        $raceBreakpoint = Set-PSBreakpoint -Script $Implementation -Line $finalSnapshotLine -Action {
+            [IO.File]::WriteAllBytes($script:RollbackRaceTarget, $script:RollbackRaceBytes)
+        }
+        try {
+            $checkResult = Invoke-JoewrksProjectSetup -Check -ProjectPath $f.Project
+            $raced = Invoke-JoewrksProjectSetup -Apply -ProjectPath $f.Project -ExpectedRoot $checkResult.projectRoot `
+                -ExpectedTargetHash $checkResult.targetHash -ManagedBodyBase64 (ConvertTo-BodyBase64 'new body') `
+                -AfterReplace { throw 'test post-rollback race' }
+        } finally {
+            Remove-PSBreakpoint -Breakpoint $raceBreakpoint
+        }
+        Assert-Equal $raced.status 'unknown' 'post-rollback concurrent edit returns unknown'
+        Assert-Equal $raced.rollback.status 'incomplete' 'post-rollback concurrent edit makes rollback incomplete'
+        Assert-True (@($raced.unresolvedTargets) -contains $target) 'post-rollback concurrent target is unresolved'
+        Assert-True (@($raced.rollback.restoredTargets) -notcontains $target) 'unverified restoration is not retained'
+        Assert-BytesEqual ([IO.File]::ReadAllBytes($target)) $raceBytes 'post-rollback concurrent edit is preserved'
+
+        [IO.File]::Delete($target)
         $checkResult = Invoke-JoewrksProjectSetup -Check -ProjectPath $f.Project
         $concurrentBytes = $Utf8NoBom.GetBytes('concurrent edit')
         $unknown = Invoke-JoewrksProjectSetup -Apply -ProjectPath $f.Project -ExpectedRoot $checkResult.projectRoot `
