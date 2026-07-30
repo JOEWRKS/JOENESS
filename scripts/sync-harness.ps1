@@ -56,20 +56,63 @@ function Resolve-HarnessPath {
     [IO.Path]::GetFullPath($(if ([string]::IsNullOrWhiteSpace($Value)) { $Fallback } else { $Value }))
 }
 
+function Get-HarnessSafeRelativePath {
+    param([string] $Value, [string] $Label)
+    if ([string]::IsNullOrWhiteSpace($Value) -or [IO.Path]::IsPathRooted($Value)) {
+        throw "$Label is not relative: $Value"
+    }
+    $segments = @($Value -split '[\\/]')
+    foreach ($segment in $segments) {
+        if ([string]::IsNullOrEmpty($segment) -or $segment -in @('.', '..')) {
+            throw "$Label is not normalized: $Value"
+        }
+        if ($segment.Contains(':')) { throw "$Label contains an alternate data stream separator: $Value" }
+        if ($segment.IndexOfAny([IO.Path]::GetInvalidFileNameChars()) -ge 0) {
+            throw "$Label contains an invalid character: $Value"
+        }
+        if ($segment.EndsWith('.') -or $segment.EndsWith(' ')) {
+            throw "$Label has a trailing dot or space: $Value"
+        }
+        $baseName = $segment.Split('.')[0]
+        if ($baseName -match '\A(?i:CON|PRN|AUX|NUL|COM[1-9]|LPT[1-9])\z') {
+            throw "$Label contains a Windows reserved name: $Value"
+        }
+    }
+    $segments -join '/'
+}
+
+function Assert-HarnessNoReparsePoint {
+    param([string] $Root, [string] $Path, [string] $Label)
+    $rootFull = [IO.Path]::GetFullPath($Root).TrimEnd('\', '/')
+    $pathFull = [IO.Path]::GetFullPath($Path)
+    $relative = $pathFull.Substring($rootFull.Length).TrimStart('\', '/')
+    $current = $rootFull
+    foreach ($segment in @($relative -split '[\\/]')) {
+        if (Test-Path -LiteralPath $current) {
+            $item = Get-Item -LiteralPath $current -Force
+            if (($item.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0) {
+                throw "$Label contains a reparse point: $current"
+            }
+        }
+        if (-not [string]::IsNullOrEmpty($segment)) { $current = Join-Path $current $segment }
+    }
+    if (Test-Path -LiteralPath $current) {
+        $item = Get-Item -LiteralPath $current -Force
+        if (($item.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0) {
+            throw "$Label contains a reparse point: $current"
+        }
+    }
+}
+
 function Resolve-HarnessSourceFile {
     param([string] $Root, [string] $RelativePath)
-    if ([string]::IsNullOrWhiteSpace($RelativePath) -or [IO.Path]::IsPathRooted($RelativePath)) {
-        throw "Source path is not relative: $RelativePath"
-    }
-    $segments = $RelativePath -split '[\\/]'
-    if ($segments -contains '' -or $segments -contains '.' -or $segments -contains '..') {
-        throw "Source path is not a normalized file path: $RelativePath"
-    }
+    $relative = Get-HarnessSafeRelativePath $RelativePath 'Source path'
     $rootPath = [IO.Path]::GetFullPath($Root).TrimEnd('\', '/') + [IO.Path]::DirectorySeparatorChar
-    $path = [IO.Path]::GetFullPath((Join-Path $Root ($segments -join [IO.Path]::DirectorySeparatorChar)))
+    $path = [IO.Path]::GetFullPath((Join-Path $Root ($relative -replace '/', [IO.Path]::DirectorySeparatorChar)))
     if (-not $path.StartsWith($rootPath, [StringComparison]::OrdinalIgnoreCase)) {
         throw "Source path escapes the repository: $RelativePath"
     }
+    Assert-HarnessNoReparsePoint $Root $path 'Source path'
     $path
 }
 
@@ -102,12 +145,26 @@ function Get-HarnessManifestSelections {
             foreach ($file in @($source.Value.files)) { $null = $selected.Add($file) }
         }
     }
-    $seen = @{}
+    $normalized = [Collections.Generic.List[object]]::new()
+    $exactDestinations = [Collections.Generic.HashSet[string]]::new([StringComparer]::Ordinal)
+    $caseInsensitiveDestinations = [Collections.Generic.HashSet[string]]::new([StringComparer]::OrdinalIgnoreCase)
     foreach ($entry in $selected) {
-        $relative = ([string] $entry.localPath).Replace('\', '/')
+        $relative = Get-HarnessSafeRelativePath ([string] $entry.localPath) 'Manifest destination'
+        if (-not $exactDestinations.Add($relative)) { throw "Duplicate source-manifest destination: $relative" }
+        if (-not $caseInsensitiveDestinations.Add($relative)) { throw "Case-insensitive destination collision: $relative" }
+        $null = $normalized.Add([pscustomobject] @{ RelativePath = $relative; Entry = $entry })
+    }
+    foreach ($destination in $normalized) {
+        foreach ($otherDestination in $normalized) {
+            if ($destination.RelativePath -cne $otherDestination.RelativePath -and $otherDestination.RelativePath.StartsWith($destination.RelativePath + '/', [StringComparison]::OrdinalIgnoreCase)) {
+                throw "Manifest file-directory collision: $($destination.RelativePath)"
+            }
+        }
+    }
+    foreach ($destination in $normalized) {
+        $relative = $destination.RelativePath
+        $entry = $destination.Entry
         $path = Resolve-HarnessSourceFile $Root $relative
-        if ($seen.ContainsKey($relative)) { throw "Duplicate source-manifest path: $relative" }
-        $seen[$relative] = $true
         [pscustomobject] @{
             RelativePath = $relative
             Path = $path
@@ -284,6 +341,22 @@ function Invoke-JoewrksHarnessSync {
     $stateSnapshot = $null
     $stateSourceIdentities = $null
     $optionalSnapshots = @{}
+    $targetPathSafetyBlocked = $false
+
+    foreach ($target in @(
+        [pscustomobject] @{ Root = $resolvedCodexHome; Path = $agentsPath; Label = 'Common Core target' },
+        [pscustomobject] @{ Root = $resolvedCodexHome; Path = $statePath; Label = 'State target' },
+        [pscustomobject] @{ Root = $resolvedAgentsHome; Path = $resolvedAgentsHome; Label = 'Agents home' },
+        [pscustomobject] @{ Root = $resolvedAgentsHome; Path = $managedSkillFile; Label = 'Optional target' },
+        [pscustomobject] @{ Root = $resolvedBackupRoot; Path = $resolvedBackupRoot; Label = 'Backup root' }
+    )) {
+        try {
+            Assert-HarnessNoReparsePoint $target.Root $target.Path $target.Label
+        } catch {
+            $targetPathSafetyBlocked = $true
+            $null = $blockers.Add([pscustomobject] @{ kind = 'targetSafety'; message = $_.Exception.Message })
+        }
+    }
 
     try {
         $manifestPath = Resolve-HarnessSourceFile $sourceRoot 'vendor/source-manifest.json'
@@ -323,7 +396,7 @@ function Invoke-JoewrksHarnessSync {
     $state = $null
     $stateCoreHash = $null
     $stateWholeFiles = @{}
-    if (Test-Path -LiteralPath $statePath) {
+    if (-not $targetPathSafetyBlocked -and (Test-Path -LiteralPath $statePath)) {
         try {
             if (-not (Test-Path -LiteralPath $statePath -PathType Leaf)) { throw "State path is not a file: $statePath" }
             $stateRead = Read-HarnessUtf8 $statePath
@@ -416,7 +489,7 @@ function Invoke-JoewrksHarnessSync {
     }
 
     $plannedAgentBytes = $null
-    if ($null -ne $sourceCore) {
+    if ($null -ne $sourceCore -and -not $targetPathSafetyBlocked) {
         try {
             if ((Test-Path -LiteralPath $agentsPath) -and -not (Test-Path -LiteralPath $agentsPath -PathType Leaf)) {
                 throw "AGENTS.md path is not a file: $agentsPath"
@@ -489,26 +562,31 @@ function Invoke-JoewrksHarnessSync {
 
     $currentOptionalPaths = @{}
     foreach ($entry in $optionalEntries) {
-        $currentOptionalPaths[$entry.RelativePath] = $true
-        $targetPath = Resolve-HarnessSourceFile $resolvedAgentsHome $entry.RelativePath
-        $owned = $stateWholeFiles.ContainsKey($entry.RelativePath)
-        $targetExists = Test-Path -LiteralPath $targetPath
-        $targetIsFile = Test-Path -LiteralPath $targetPath -PathType Leaf
-        if (-not $optionalSnapshots.ContainsKey($entry.RelativePath) -and (-not $targetExists -or $targetIsFile)) {
-            $optionalSnapshots[$entry.RelativePath] = Get-HarnessFileSnapshot $targetPath
-        }
-        if ($IncludeDesignFrontend) {
-            if ($targetExists -and -not $owned) {
-                $null = $blockers.Add([pscustomobject] @{ kind = 'optionalCollision'; message = "Unmanaged optional target exists: $($entry.RelativePath)" })
-            } elseif (-not $targetExists) {
-                $null = $changes.Add([pscustomobject] @{ kind = 'designFrontend'; action = 'install'; target = $entry.RelativePath; planned = $true })
-            } elseif ($targetIsFile -and $entry.Hash -cne $stateWholeFiles[$entry.RelativePath]) {
-                $null = $changes.Add([pscustomobject] @{ kind = 'designFrontend'; action = 'update'; target = $entry.RelativePath; planned = $true })
+        try {
+            $currentOptionalPaths[$entry.RelativePath] = $true
+            $targetPath = Resolve-HarnessSourceFile $resolvedAgentsHome $entry.RelativePath
+            $owned = $stateWholeFiles.ContainsKey($entry.RelativePath)
+            $targetExists = Test-Path -LiteralPath $targetPath
+            $targetIsFile = Test-Path -LiteralPath $targetPath -PathType Leaf
+            if (-not $optionalSnapshots.ContainsKey($entry.RelativePath) -and (-not $targetExists -or $targetIsFile)) {
+                $optionalSnapshots[$entry.RelativePath] = Get-HarnessFileSnapshot $targetPath
             }
-        } elseif ($priorOptionalOptIn -and $owned -and $entry.Hash -cne $stateWholeFiles[$entry.RelativePath]) {
-            $null = $changes.Add([pscustomobject] @{ kind = 'designFrontend'; action = 'sourceUpdateAvailable'; target = $entry.RelativePath; planned = $false })
-        } elseif ($priorOptionalOptIn -and -not $owned) {
-            $null = $changes.Add([pscustomobject] @{ kind = 'designFrontend'; action = 'sourceUpdateAvailable'; target = $entry.RelativePath; planned = $false })
+            if ($IncludeDesignFrontend) {
+                if ($targetExists -and -not $owned) {
+                    $null = $blockers.Add([pscustomobject] @{ kind = 'optionalCollision'; message = "Unmanaged optional target exists: $($entry.RelativePath)" })
+                } elseif (-not $targetExists) {
+                    $null = $changes.Add([pscustomobject] @{ kind = 'designFrontend'; action = 'install'; target = $entry.RelativePath; planned = $true })
+                } elseif ($targetIsFile -and $entry.Hash -cne $stateWholeFiles[$entry.RelativePath]) {
+                    $null = $changes.Add([pscustomobject] @{ kind = 'designFrontend'; action = 'update'; target = $entry.RelativePath; planned = $true })
+                }
+            } elseif ($priorOptionalOptIn -and $owned -and $entry.Hash -cne $stateWholeFiles[$entry.RelativePath]) {
+                $null = $changes.Add([pscustomobject] @{ kind = 'designFrontend'; action = 'sourceUpdateAvailable'; target = $entry.RelativePath; planned = $false })
+            } elseif ($priorOptionalOptIn -and -not $owned) {
+                $null = $changes.Add([pscustomobject] @{ kind = 'designFrontend'; action = 'sourceUpdateAvailable'; target = $entry.RelativePath; planned = $false })
+            }
+        } catch {
+            $targetPathSafetyBlocked = $true
+            $null = $blockers.Add([pscustomobject] @{ kind = 'targetSafety'; message = $_.Exception.Message })
         }
     }
     if ($IncludeDesignFrontend) {
@@ -520,12 +598,14 @@ function Invoke-JoewrksHarnessSync {
     }
 
     $skillRoots = @((Join-Path $resolvedAgentsHome 'skills'), (Join-Path $resolvedCodexHome 'skills'))
-    foreach ($collision in @(Get-HarnessFrontmatterCollisions $skillRoots $managedSkillFile $priorOptionalOptIn)) {
-        $null = $blockers.Add([pscustomobject] @{ kind = 'duplicateSkill'; message = $collision })
+    if (-not $targetPathSafetyBlocked) {
+        foreach ($collision in @(Get-HarnessFrontmatterCollisions $skillRoots $managedSkillFile $priorOptionalOptIn)) {
+            $null = $blockers.Add([pscustomobject] @{ kind = 'duplicateSkill'; message = $collision })
+        }
     }
 
     $plannedChanges = @($changes | Where-Object { $_.planned })
-    if ($plannedChanges.Count -gt 0) {
+    if ($plannedChanges.Count -gt 0 -and $blockers.Count -eq 0) {
         $writeParents = @($agentsPath, $statePath)
         if ($IncludeDesignFrontend) {
             $writeParents += @($optionalEntries | ForEach-Object { Resolve-HarnessSourceFile $resolvedAgentsHome $_.RelativePath })

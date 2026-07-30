@@ -11,6 +11,15 @@ if (-not (Test-Path -LiteralPath $Implementation -PathType Leaf)) {
 
 function Assert-True { param([bool] $Condition, [string] $Message) if (-not $Condition) { throw "Assertion failed: $Message" } }
 function Assert-Equal { param($Actual, $Expected, [string] $Message) if ($Actual -cne $Expected) { throw "Assertion failed: $Message; expected [$Expected], got [$Actual]" } }
+function Assert-ThrowsLike {
+    param([scriptblock] $Action, [string] $Pattern, [string] $Message)
+    try { & $Action; throw "Assertion failed: $Message did not throw" }
+    catch {
+        if ($_.Exception.Message -notlike $Pattern) {
+            throw "Assertion failed: $Message; expected [$Pattern], got [$($_.Exception.Message)]"
+        }
+    }
+}
 function Get-Hash { param([string] $Path) (Get-FileHash -LiteralPath $Path -Algorithm SHA256).Hash.ToLowerInvariant() }
 function Write-Utf8 { param([string] $Path, [string] $Text) [IO.Directory]::CreateDirectory((Split-Path -Parent $Path)) | Out-Null; [IO.File]::WriteAllText($Path, $Text, (New-Object Text.UTF8Encoding($false))) }
 function Write-Bytes { param([string] $Path, [byte[]] $Bytes) [IO.Directory]::CreateDirectory((Split-Path -Parent $Path)) | Out-Null; [IO.File]::WriteAllBytes($Path, $Bytes) }
@@ -217,6 +226,98 @@ function Assert-BlockedBeforeWrites {
     $run = Invoke-Harness $Fixture Apply; Assert-True ($run.ExitCode -ne 0) "$Message exits nonzero"; $result = Read-Result $run $Message; Assert-Equal $result.status 'blocked' "$Message reports blocked"
     if ($BlockerKind) { Assert-True (@($result.blockers).kind -contains $BlockerKind) "$Message reports $BlockerKind" }
     Assert-TreeEqual (Get-TreeHashes $Fixture.CodexHome) $codex "$Message creates no Codex writes"; Assert-TreeEqual (Get-TreeHashes $Fixture.AgentsHome) $agents "$Message creates no agents writes"; Assert-Equal (Test-Path -LiteralPath $Fixture.BackupRoot) $backupExists "$Message creates no backup directory"; Assert-TreeEqual (Get-TreeHashes $Fixture.BackupRoot) $backups "$Message creates no backup files"
+}
+
+function Test-ManifestPathSafety {
+    . $Implementation
+    $cases = @(
+        @{ Path = 'C:\absolute.txt'; Pattern = '*relative*' },
+        @{ Path = '\\server\share.txt'; Pattern = '*relative*' },
+        @{ Path = '\\?\C:\device.txt'; Pattern = '*relative*' },
+        @{ Path = '../escape.txt'; Pattern = '*normalized*' },
+        @{ Path = 'safe/file.txt:stream'; Pattern = '*alternate data stream*' },
+        @{ Path = 'safe/na*me.txt'; Pattern = '*invalid character*' },
+        @{ Path = 'safe/CON.txt'; Pattern = '*reserved*' },
+        @{ Path = 'safe/name. '; Pattern = '*trailing dot or space*' }
+    )
+    foreach ($case in $cases) {
+        Assert-ThrowsLike {
+            Get-HarnessSafeRelativePath $case.Path 'test path'
+        } $case.Pattern "rejects $($case.Path)"
+    }
+
+    $f = New-Fixture
+    $junction = $null
+    try {
+        $manifestPath = Join-Path $f.SourceRoot 'vendor\source-manifest.json'
+        $exactDuplicateManifest = ([IO.File]::ReadAllText($manifestPath) | ConvertFrom-Json)
+        $exactFile = $exactDuplicateManifest.activeSkills.'joewrks-design-frontend'.files[0]
+        $exactDuplicateManifest.activeSkills.'joewrks-design-frontend'.files = @($exactFile, $exactFile)
+        Assert-ThrowsLike {
+            Get-HarnessManifestSelections $exactDuplicateManifest $f.SourceRoot
+        } '*duplicate*' 'exact duplicate blocks'
+
+        $caseAliasManifest = ([IO.File]::ReadAllText($manifestPath) | ConvertFrom-Json)
+        $firstFile = $caseAliasManifest.activeSkills.'joewrks-design-frontend'.files[0]
+        $aliasFile = [pscustomobject] @{
+            localPath = ([string] $firstFile.localPath).ToUpperInvariant()
+            bytes = $firstFile.bytes
+            sha256 = $firstFile.sha256
+            exactUpstreamCopy = $firstFile.exactUpstreamCopy
+        }
+        $caseAliasManifest.activeSkills.'joewrks-design-frontend'.files = @($firstFile, $aliasFile)
+        Assert-ThrowsLike {
+            Get-HarnessManifestSelections $caseAliasManifest $f.SourceRoot
+        } '*case-insensitive destination*' 'case-only aliases block'
+
+        $prefixManifest = [pscustomobject] @{
+            activeSkills = [pscustomobject] @{
+                'collision-test' = [pscustomobject] @{
+                    sourceDependencies = @()
+                    files = @(
+                        [pscustomobject] @{ localPath = 'skills/collision'; bytes = 1; sha256 = ('0' * 64); exactUpstreamCopy = $false },
+                        [pscustomobject] @{ localPath = 'skills/collision/file.txt'; bytes = 1; sha256 = ('0' * 64); exactUpstreamCopy = $false }
+                    )
+                }
+            }
+            sources = [pscustomobject] @{}
+        }
+        Assert-ThrowsLike {
+            Get-HarnessManifestSelections $prefixManifest $f.SourceRoot
+        } '*file-directory collision*' 'file-directory prefix collision blocks'
+
+        $real = Join-Path $f.Root 'real-vendor'
+        $junction = Join-Path $f.SourceRoot 'linked-vendor'
+        [IO.Directory]::CreateDirectory($real) | Out-Null
+        New-Item -ItemType Junction -Path $junction -Target $real | Out-Null
+        Assert-ThrowsLike {
+            Resolve-HarnessSourceFile $f.SourceRoot 'linked-vendor/file.txt'
+        } '*reparse point*' 'source junction blocks'
+    } finally {
+        if ($junction -and (Test-Path -LiteralPath $junction)) { [IO.Directory]::Delete($junction) }
+        Remove-Fixture $f
+    }
+
+    $targetFixture = New-Fixture
+    $targetJunction = $null
+    try {
+        $realTarget = Join-Path $targetFixture.Root 'real-target-vendor'
+        [IO.Directory]::CreateDirectory($targetFixture.AgentsHome) | Out-Null
+        [IO.Directory]::CreateDirectory($realTarget) | Out-Null
+        $targetJunction = Join-Path $targetFixture.AgentsHome 'vendor'
+        New-Item -ItemType Junction -Path $targetJunction -Target $realTarget | Out-Null
+        $beforeTarget = Get-TreeHashes $realTarget
+        $targetCheck = Invoke-Harness $targetFixture Check -IncludeDesignFrontend
+        $targetResult = Read-Result $targetCheck 'target junction check'
+        Assert-Equal $targetResult.status 'blocked' 'target junction blocks full check'
+        Assert-True (@($targetResult.blockers | Where-Object { $_.message -like '*reparse point*' }).Count -gt 0) 'target junction is reported'
+        Assert-TreeEqual (Get-TreeHashes $realTarget) $beforeTarget 'target junction check writes nothing'
+        Assert-True (-not (Test-Path -LiteralPath $targetFixture.State)) 'target junction writes no state'
+        Assert-True (-not (Test-Path -LiteralPath $targetFixture.BackupRoot)) 'target junction creates no backup'
+    } finally {
+        if ($targetJunction -and (Test-Path -LiteralPath $targetJunction)) { [IO.Directory]::Delete($targetJunction) }
+        Remove-Fixture $targetFixture
+    }
 }
 
 function Test-PreflightBlockers {
@@ -504,6 +605,7 @@ function Test-Task2CheckRegressions {
 }
 
 Test-PublicHarnessEntry
+Test-ManifestPathSafety
 Test-Task2CheckRegressions
 Test-EmptyCheckAndApply
 Test-AgentEncodingAndCoreUpdate
