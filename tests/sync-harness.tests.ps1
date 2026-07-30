@@ -78,13 +78,19 @@ function New-Fixture {
 function Remove-Fixture { param($Fixture) if (Test-Path -LiteralPath $Fixture.Root) { [IO.Directory]::Delete($Fixture.Root, $true) } }
 
 function Invoke-Harness {
-    param($Fixture, [ValidateSet('Check', 'Apply')] [string] $Mode, [switch] $IncludeDesignFrontend, [switch] $PublicEntry, [switch] $UseEnvironmentCodexHome, [string[]] $ExtraArguments = @())
+    param($Fixture, [ValidateSet('Check', 'Apply', 'Remove')] [string] $Mode, [switch] $IncludeDesignFrontend, [switch] $PublicEntry, [switch] $UseEnvironmentCodexHome, [string[]] $ExtraArguments = @())
+    $arguments = @("-$Mode")
+    if (-not $UseEnvironmentCodexHome) { $arguments += @('-CodexHome', $Fixture.CodexHome) }
+    $arguments += @('-AgentsHome', $Fixture.AgentsHome, '-BackupRoot', $Fixture.BackupRoot)
+    if ($IncludeDesignFrontend) { $arguments += '-IncludeDesignFrontend' }
+    Invoke-HarnessRaw $Fixture $arguments -PublicEntry:$PublicEntry -UseEnvironmentCodexHome:$UseEnvironmentCodexHome -ExtraArguments $ExtraArguments
+}
+
+function Invoke-HarnessRaw {
+    param($Fixture, [string[]] $Arguments, [switch] $PublicEntry, [switch] $UseEnvironmentCodexHome, [string[]] $ExtraArguments = @())
     $out = Join-Path $Fixture.Root 'stdout.txt'; $err = Join-Path $Fixture.Root 'stderr.txt'
     $scriptPath = if ($PublicEntry) { Join-Path $RepositoryRoot 'harness.ps1' } else { $Fixture.Script }
-    $commandArgs = @('-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', $scriptPath, "-$Mode")
-    if (-not $UseEnvironmentCodexHome) { $commandArgs += @('-CodexHome', $Fixture.CodexHome) }
-    $commandArgs += @('-AgentsHome', $Fixture.AgentsHome, '-BackupRoot', $Fixture.BackupRoot)
-    if ($IncludeDesignFrontend) { $commandArgs += '-IncludeDesignFrontend' }
+    $commandArgs = @('-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', $scriptPath) + $Arguments
     $oldPreference = $ErrorActionPreference
     $oldCodexHome = $env:CODEX_HOME
     try {
@@ -147,6 +153,11 @@ function Write-V1FixtureState {
 function Test-PublicHarnessEntry {
     $f = New-Fixture
     try {
+        $emptyRemove = Invoke-Harness $f Remove -PublicEntry
+        Assert-Equal $emptyRemove.ExitCode 0 'public entry empty remove succeeds'
+        Assert-Equal (Read-Result $emptyRemove 'public entry empty remove').status 'removed' 'public entry forwards empty remove'
+        Assert-True (-not (Test-Path -LiteralPath $f.BackupRoot)) 'public entry empty remove creates no backup'
+
         $check = Invoke-Harness $f Check -PublicEntry
         Assert-Equal $check.ExitCode 0 'public entry check succeeds'
         Assert-Equal (Read-Result $check 'public entry check').status 'ready' 'public entry forwards check'
@@ -165,8 +176,13 @@ function Test-PublicHarnessEntry {
         Assert-Equal @($pilotResult.warnings).Count 1 'public entry exposes one compatibility warning'
 
         $invalid = Invoke-Harness $f Check -PublicEntry -ExtraArguments @('-Apply')
-        Assert-True ($invalid.ExitCode -ne 0) 'public entry preserves blocked exit status'
+        Assert-Equal $invalid.ExitCode 2 'public entry preserves blocked exit status'
         Assert-Equal (Read-Result $invalid 'public entry invalid invocation').status 'blocked' 'public entry preserves blocked result'
+
+        $remove = Invoke-Harness $f Remove -PublicEntry
+        Assert-Equal $remove.ExitCode 0 'public entry owned remove succeeds'
+        Assert-Equal (Read-Result $remove 'public entry owned remove').status 'removed' 'public entry forwards owned remove'
+        Assert-True (-not (Test-Path -LiteralPath $f.State)) 'public entry owned remove deletes state'
     } finally { Remove-Fixture $f }
 }
 
@@ -266,6 +282,202 @@ function Assert-PilotDisclosure {
     Assert-Equal $Pilot.semanticImprovement 'not-asserted' "$Message does not assert semantic improvement"
     Assert-Equal $Pilot.figma 'task-time-verification-not-certified' "$Message does not certify Figma"
     Assert-Equal $Pilot.browser 'task-time-verification-not-certified' "$Message does not certify browser behavior"
+}
+
+function Assert-OneJsonResult {
+    param($Run, [string] $Message)
+    $lines = @($Run.StdOut -split "\r?\n" | Where-Object { -not [string]::IsNullOrWhiteSpace($_) })
+    Assert-Equal $lines.Count 1 "$Message emits exactly one JSON result"
+    Read-Result $Run $Message
+}
+
+function Test-ModeAndExitContract {
+    $f = New-Fixture
+    try {
+        foreach ($case in @(
+            @{ Name = 'no mode'; Arguments = @('-CodexHome', $f.CodexHome, '-AgentsHome', $f.AgentsHome, '-BackupRoot', $f.BackupRoot) },
+            @{ Name = 'Check plus Apply'; Arguments = @('-Check', '-Apply', '-CodexHome', $f.CodexHome, '-AgentsHome', $f.AgentsHome, '-BackupRoot', $f.BackupRoot) },
+            @{ Name = 'Check plus Remove'; Arguments = @('-Check', '-Remove', '-CodexHome', $f.CodexHome, '-AgentsHome', $f.AgentsHome, '-BackupRoot', $f.BackupRoot) },
+            @{ Name = 'Apply plus Remove'; Arguments = @('-Apply', '-Remove', '-CodexHome', $f.CodexHome, '-AgentsHome', $f.AgentsHome, '-BackupRoot', $f.BackupRoot) }
+        )) {
+            $run = Invoke-HarnessRaw $f $case.Arguments
+            Assert-Equal $run.ExitCode 2 "$($case.Name) exits blocked"
+            Assert-Equal (Assert-OneJsonResult $run $case.Name).status 'blocked' "$($case.Name) reports blocked"
+            Assert-True (-not (Test-Path -LiteralPath $f.CodexHome)) "$($case.Name) creates no Codex target"
+            Assert-True (-not (Test-Path -LiteralPath $f.AgentsHome)) "$($case.Name) creates no Agents target"
+            Assert-True (-not (Test-Path -LiteralPath $f.BackupRoot)) "$($case.Name) creates no backup"
+        }
+
+        . $f.Script
+        $command = Get-Command Invoke-JoewrksHarnessSync
+        $parameters = $command.Parameters
+        foreach ($mode in @('Check', 'Apply', 'Remove')) {
+            Assert-True $parameters.ContainsKey($mode) "inner function exposes $mode"
+        }
+        Assert-Equal (($command.ParameterSets.Name | Sort-Object) -join ',') 'Apply,Check,Remove' 'inner function exposes exactly three modes'
+        Assert-Equal (Get-HarnessExitCode 'current') 0 'current maps to exit 0'
+        Assert-Equal (Get-HarnessExitCode 'ready') 0 'ready maps to exit 0'
+        Assert-Equal (Get-HarnessExitCode 'removed') 0 'removed maps to exit 0'
+        Assert-Equal (Get-HarnessExitCode 'failed') 1 'failed maps to exit 1'
+        Assert-Equal (Get-HarnessExitCode 'blocked') 2 'blocked maps to exit 2'
+        Assert-Equal (Get-HarnessExitCode 'unknown') 3 'unknown maps to exit 3'
+        Assert-Equal (Get-HarnessExitCode 'unexpected') 3 'unexpected status maps to exit 3'
+    } finally { Remove-Fixture $f }
+}
+
+function Test-RemoveContract {
+    $f = New-Fixture
+    try {
+        $empty = Invoke-Harness $f Remove
+        Assert-Equal $empty.ExitCode 0 'empty remove succeeds'
+        $emptyResult = Read-Result $empty 'empty remove'
+        Assert-Equal $emptyResult.status 'removed' 'empty remove is a no-op'
+        Assert-True (-not (Test-Path -LiteralPath $f.CodexHome)) 'empty remove creates no Codex target'
+        Assert-True (-not (Test-Path -LiteralPath $f.AgentsHome)) 'empty remove creates no Agents target'
+        Assert-True (-not (Test-Path -LiteralPath $f.BackupRoot)) 'empty remove creates no backup'
+    } finally { Remove-Fixture $f }
+
+    $f = New-Fixture
+    try {
+        $agentsPath = Join-Path $f.CodexHome 'AGENTS.md'
+        $externalBytes = [Text.Encoding]::UTF8.GetPreamble() + (New-Object Text.UTF8Encoding($false)).GetBytes("external prefix`r`nexternal suffix`r`n")
+        Write-Bytes $agentsPath $externalBytes
+        Assert-Equal (Invoke-Harness $f Apply).ExitCode 0 'owned remove baseline apply succeeds'
+        $installedAgentsBytes = [IO.File]::ReadAllBytes($agentsPath)
+        $stateBytes = [IO.File]::ReadAllBytes($f.State)
+        $ownedFiles = Get-OptionalFiles $f.SourceRoot
+        $ownedBytes = @{}
+        foreach ($relative in $ownedFiles) { $ownedBytes[$relative] = [IO.File]::ReadAllBytes((Join-Path $f.AgentsHome $relative)) }
+        $externalPath = Join-Path $f.AgentsHome 'external.txt'
+        Write-Utf8 $externalPath 'external'
+
+        . $f.Script
+        $orderedTargets = [Collections.Generic.List[string]]::new()
+        $callback = { param($operation) $orderedTargets.Add([string] $operation.TargetPath) }.GetNewClosure()
+        $removed = Invoke-JoewrksHarnessSync -Remove -CodexHome $f.CodexHome -AgentsHome $f.AgentsHome -BackupRoot $f.BackupRoot -AfterReplace $callback
+        Assert-Equal $removed.status 'removed' 'owned remove reports removed'
+        Assert-True (-not (Test-Path -LiteralPath $f.State)) 'owned remove removes state'
+        Assert-BytesEqual ([IO.File]::ReadAllBytes($agentsPath)) $externalBytes 'owned remove preserves external AGENTS bytes'
+        Assert-Equal ([IO.File]::ReadAllText($externalPath)) 'external' 'owned remove preserves unrelated AgentsHome file'
+        foreach ($relative in $ownedFiles) {
+            Assert-True (-not (Test-Path -LiteralPath (Join-Path $f.AgentsHome $relative))) "owned remove deletes state-owned file: $relative"
+            Assert-BytesEqual ([IO.File]::ReadAllBytes((Join-Path $removed.backupPath (Join-Path 'agents' $relative)))) $ownedBytes[$relative] "owned remove backs up exact owned bytes: $relative"
+        }
+        Assert-BytesEqual ([IO.File]::ReadAllBytes((Join-Path $removed.backupPath 'codex\AGENTS.md'))) $installedAgentsBytes 'owned remove backs up exact AGENTS bytes'
+        Assert-BytesEqual ([IO.File]::ReadAllBytes((Join-Path $removed.backupPath 'codex\joewrks-harness-state.json'))) $stateBytes 'owned remove backs up exact state bytes'
+        Assert-Equal $orderedTargets[$orderedTargets.Count - 1] $f.State 'remove deletes state last'
+        Assert-Equal $orderedTargets[$orderedTargets.Count - 2] $agentsPath 'remove removes Common Core after whole files'
+
+        $beforeSecondRemove = Get-TreeEntries $f.Root
+        $second = Invoke-Harness $f Remove
+        Assert-Equal $second.ExitCode 2 'second remove with retained managed directories blocks'
+        Assert-Equal (Read-Result $second 'second remove').status 'blocked' 'second remove does not infer ownership for retained directories'
+        Assert-StringSetEqual (Get-TreeEntries $f.Root) $beforeSecondRemove 'blocked second remove creates no files or backup'
+    } finally { Remove-Fixture $f }
+
+    $f = New-Fixture
+    try {
+        Assert-Equal (Invoke-Harness $f Apply).ExitCode 0 'empty AGENTS remove baseline apply succeeds'
+        $agentsPath = Join-Path $f.CodexHome 'AGENTS.md'
+        $removed = Invoke-Harness $f Remove
+        Assert-Equal $removed.ExitCode 0 'empty AGENTS remove succeeds'
+        Assert-True (Test-Path -LiteralPath $agentsPath -PathType Leaf) 'remove preserves AGENTS.md when external bytes are empty'
+        Assert-Equal ([IO.File]::ReadAllBytes($agentsPath)).Length 0 'preserved AGENTS.md is empty'
+    } finally { Remove-Fixture $f }
+}
+
+function Test-RemovePreflightBlockers {
+    foreach ($case in @(
+        @{ Name = 'orphan marker'; Prepare = { param($f) Write-Utf8 (Join-Path $f.CodexHome 'AGENTS.md') "$BeginMarker`nforeign`n$EndMarker" } },
+        @{ Name = 'orphan managed skill namespace'; Prepare = { param($f) Write-Utf8 (Join-Path $f.AgentsHome 'skills\joewrks-project-setup\external.txt') 'external' } }
+    )) {
+        $f = New-Fixture
+        try {
+            & $case.Prepare $f
+            $before = Get-TreeEntries $f.Root
+            $run = Invoke-Harness $f Remove
+            Assert-Equal $run.ExitCode 2 "$($case.Name) exits blocked"
+            Assert-Equal (Read-Result $run $case.Name).status 'blocked' "$($case.Name) blocks without inferred ownership"
+            Assert-StringSetEqual (Get-TreeEntries $f.Root) $before "$($case.Name) causes zero writes"
+            Assert-True (-not (Test-Path -LiteralPath $f.BackupRoot)) "$($case.Name) creates no backup"
+        } finally { Remove-Fixture $f }
+    }
+
+    foreach ($case in @(
+        @{ Name = 'drifted owned target'; Prepare = { param($f) Add-Content -LiteralPath (Join-Path $f.AgentsHome 'skills\joewrks-design-frontend\SKILL.md') -Value 'drift' } },
+        @{ Name = 'drifted owned Common Core'; Prepare = { param($f) $path = Join-Path $f.CodexHome 'AGENTS.md'; Write-Utf8 $path ([IO.File]::ReadAllText($path).Replace('# Common Work Core', '# Drifted Common Work Core')) } },
+        @{ Name = 'missing owned target'; Prepare = { param($f) [IO.File]::Delete((Join-Path $f.AgentsHome 'skills\joewrks-design-frontend\SKILL.md')) } },
+        @{ Name = 'missing owned AGENTS'; Prepare = { param($f) [IO.File]::Delete((Join-Path $f.CodexHome 'AGENTS.md')) } }
+    )) {
+        $f = New-Fixture
+        try {
+            Assert-Equal (Invoke-Harness $f Apply).ExitCode 0 "$($case.Name) baseline apply succeeds"
+            & $case.Prepare $f
+            $beforeCodex = Get-TreeEntries $f.CodexHome
+            $beforeAgents = Get-TreeEntries $f.AgentsHome
+            $beforeBackups = Get-TreeEntries $f.BackupRoot
+            $run = Invoke-Harness $f Remove
+            Assert-Equal $run.ExitCode 2 "$($case.Name) exits blocked"
+            Assert-Equal (Read-Result $run $case.Name).status 'blocked' "$($case.Name) blocks removal"
+            Assert-StringSetEqual (Get-TreeEntries $f.CodexHome) $beforeCodex "$($case.Name) leaves Codex bytes"
+            Assert-StringSetEqual (Get-TreeEntries $f.AgentsHome) $beforeAgents "$($case.Name) leaves Agents bytes"
+            Assert-StringSetEqual (Get-TreeEntries $f.BackupRoot) $beforeBackups "$($case.Name) creates no backup"
+        } finally { Remove-Fixture $f }
+    }
+
+    $f = New-Fixture
+    try {
+        Assert-Equal (Invoke-Harness $f Apply).ExitCode 0 'remove root identity baseline apply succeeds'
+        $originalAgentsHome = $f.AgentsHome
+        $beforeCodex = Get-TreeEntries $f.CodexHome
+        $beforeAgents = Get-TreeEntries $originalAgentsHome
+        $f.AgentsHome = Join-Path $f.Root 'other-agents'
+        $run = Invoke-Harness $f Remove
+        Assert-Equal $run.ExitCode 2 'remove root identity mismatch exits blocked'
+        $result = Read-Result $run 'remove root identity mismatch'
+        Assert-Equal $result.status 'blocked' 'remove root identity mismatch blocks'
+        Assert-True (@($result.blockers).kind -contains 'rootIdentity') 'remove root identity mismatch is reported'
+        Assert-StringSetEqual (Get-TreeEntries $f.CodexHome) $beforeCodex 'remove root identity mismatch leaves Codex bytes'
+        Assert-StringSetEqual (Get-TreeEntries $originalAgentsHome) $beforeAgents 'remove root identity mismatch leaves owned Agents bytes'
+        Assert-True (-not (Test-Path -LiteralPath $f.AgentsHome)) 'remove root identity mismatch creates no alternate AgentsHome'
+    } finally { Remove-Fixture $f }
+}
+
+function Test-RemoveRollback {
+    $f = New-Fixture
+    try {
+        Assert-Equal (Invoke-Harness $f Apply).ExitCode 0 'complete remove rollback baseline apply succeeds'
+        $beforeCodex = Get-TreeEntries $f.CodexHome
+        $beforeAgents = Get-TreeEntries $f.AgentsHome
+        . $f.Script
+        $result = Invoke-JoewrksHarnessSync -Remove -CodexHome $f.CodexHome -AgentsHome $f.AgentsHome -BackupRoot $f.BackupRoot -AfterReplace { param($operation) throw 'mid-remove failure' }
+        Assert-Equal $result.status 'failed' 'complete remove rollback reports failed'
+        Assert-Equal $result.rollback.status 'complete' 'mid-remove rollback completes'
+        Assert-StringSetEqual (Get-TreeEntries $f.CodexHome) $beforeCodex 'complete remove rollback restores exact Codex tree'
+        Assert-StringSetEqual (Get-TreeEntries $f.AgentsHome) $beforeAgents 'complete remove rollback restores exact Agents tree'
+    } finally { Remove-Fixture $f }
+
+    $f = New-Fixture
+    try {
+        Assert-Equal (Invoke-Harness $f Apply).ExitCode 0 'unknown remove rollback baseline apply succeeds'
+        $beforeState = [IO.File]::ReadAllBytes($f.State)
+        $changedBytes = [Text.Encoding]::UTF8.GetBytes('concurrent replacement')
+        $capture = @{ Path = $null }
+        . $f.Script
+        $callback = {
+            param($operation)
+            $capture.Path = [string] $operation.TargetPath
+            Write-Bytes $capture.Path $changedBytes
+            throw 'concurrent remove edit'
+        }.GetNewClosure()
+        $result = Invoke-JoewrksHarnessSync -Remove -CodexHome $f.CodexHome -AgentsHome $f.AgentsHome -BackupRoot $f.BackupRoot -AfterReplace $callback
+        Assert-Equal $result.status 'unknown' 'incomplete remove rollback reports unknown'
+        Assert-Equal $result.rollback.status 'incomplete' 'concurrent remove rollback is incomplete'
+        Assert-True (@($result.unresolvedTargets) -contains $capture.Path) 'concurrent remove rollback reports unresolved target'
+        Assert-BytesEqual ([IO.File]::ReadAllBytes($capture.Path)) $changedBytes 'concurrent replacement is not overwritten'
+        Assert-BytesEqual ([IO.File]::ReadAllBytes($f.State)) $beforeState 'unknown remove preserves exact state bytes'
+        Assert-Equal (Get-HarnessExitCode $result.status) 3 'unknown remove maps to exit 3'
+    } finally { Remove-Fixture $f }
 }
 
 function Test-EmptyCheckAndApply {
@@ -729,7 +941,7 @@ function Test-V1StateMigration {
             param($replacement)
             if ($replacement.TargetPath -ine $f.State) { throw 'failure during V1 target migration' }
         }
-        Assert-Equal $result.status 'failed' 'V1 target migration failure is reported'
+        Assert-Equal $result.status 'unknown' 'V1 target migration incomplete rollback is unknown'
         Assert-Equal $result.rollback.status 'incomplete' 'V1 target migration preserves created directories for inspection'
         Assert-BytesEqual ([IO.File]::ReadAllBytes($f.State)) $beforeState 'target failure leaves exact V1 state bytes'
         Assert-TreeEqual (Get-TreeHashes $f.CodexHome) $beforeTree.codex 'target failure restores the V1 Codex tree'
@@ -757,7 +969,7 @@ function Test-V1StateMigration {
             param($replacement)
             if ($replacement.TargetPath -ieq $f.State) { throw 'failure after V2 state replacement' }
         }
-        Assert-Equal $failedAfterState.status 'failed' 'state-write failure is reported'
+        Assert-Equal $failedAfterState.status 'unknown' 'state-write incomplete rollback is unknown'
         Assert-Equal $failedAfterState.rollback.status 'incomplete' 'state-write rollback preserves created directories for inspection'
         Assert-BytesEqual ([IO.File]::ReadAllBytes($f.State)) $beforeState 'exact V1 state bytes return'
         Assert-TreeEqual (Get-TreeHashes $f.CodexHome) $beforeTree.codex 'Codex tree returns to V1'
@@ -784,7 +996,7 @@ function Test-CreatedDirectoryRollbackResidue {
                 throw 'external file prevents created-directory cleanup'
             }
         }
-        Assert-Equal $result.status 'failed' 'created-directory cleanup failure keeps Task 4 failed status'
+        Assert-Equal $result.status 'unknown' 'created-directory residue makes status unknown'
         Assert-Equal $result.rollback.status 'incomplete' 'surviving created directories make rollback incomplete'
         foreach ($directory in $createdDirectories) {
             Assert-True (Test-Path -LiteralPath $directory -PathType Container) "external residue preserves created directory: $directory"
@@ -939,7 +1151,7 @@ function Test-ConcurrentDisappearanceBeforeDelete {
             param($replacement)
             if (-not $replacement.DesiredExists -and $replacement.TargetPath -ieq $obsoletePath) { throw 'test failure after concurrent disappearance' }
         }
-        Assert-Equal $result.status 'failed' 'concurrent disappearance reports failed'
+        Assert-Equal $result.status 'unknown' 'concurrent disappearance reports unknown'
         Assert-Equal $result.rollback.status 'incomplete' 'unowned concurrent disappearance is unresolved'
         Assert-True (@($result.unresolvedTargets) -contains $obsoletePath) 'concurrent disappearance reports the target unresolved'
         Assert-True (-not (Test-Path -LiteralPath $obsoletePath)) 'rollback does not recreate a file deleted by another actor'
@@ -970,7 +1182,7 @@ function Test-DeterministicRollback {
     try {
         . $f.Script; Assert-True ((Get-Command Invoke-JoewrksHarnessSync).Parameters.ContainsKey('AfterReplace')) 'dot-sourced function exposes internal callback'
         $result = Invoke-JoewrksHarnessSync -Apply -CodexHome $f.CodexHome -AgentsHome $f.AgentsHome -BackupRoot $f.BackupRoot -AfterReplace { param($replacement) throw 'test failure' }
-        Assert-Equal $result.status 'failed' 'callback failure reports failed'; Assert-True (-not (Test-Path -LiteralPath $f.State)) 'rollback removes unwritten state'; Assert-True (-not (Test-Path -LiteralPath (Join-Path $f.CodexHome 'AGENTS.md'))) 'rollback restores absent target'
+        Assert-Equal $result.status 'unknown' 'callback failure with created-directory residue reports unknown'; Assert-True (-not (Test-Path -LiteralPath $f.State)) 'rollback removes unwritten state'; Assert-True (-not (Test-Path -LiteralPath (Join-Path $f.CodexHome 'AGENTS.md'))) 'rollback restores absent target'
         Assert-True ((Invoke-Harness $f Check -ExtraArguments @('-AfterReplace', 'nope')).ExitCode -ne 0) 'CLI exposes no callback switch'
     } finally { Remove-Fixture $f }
     $f = New-Fixture
@@ -978,7 +1190,7 @@ function Test-DeterministicRollback {
         . $f.Script
         $changedBytes = [Text.Encoding]::UTF8.GetBytes('changed again'); $changedPathFile = Join-Path $f.Root 'changed-target.txt'
         $result = Invoke-JoewrksHarnessSync -Apply -CodexHome $f.CodexHome -AgentsHome $f.AgentsHome -BackupRoot $f.BackupRoot -AfterReplace { param($replacement) Write-Bytes $replacement.TargetPath $changedBytes; [IO.File]::WriteAllText($changedPathFile, $replacement.TargetPath); throw 'test concurrent edit' }
-        Assert-Equal $result.status 'failed' 'concurrent callback failure reports failed'; Assert-True (@($result.unresolvedTargets).Count -gt 0) 'changed-again target is unresolved, not overwritten'; Assert-BytesEqual ([IO.File]::ReadAllBytes([IO.File]::ReadAllText($changedPathFile))) $changedBytes 'rollback preserves externally changed bytes'
+        Assert-Equal $result.status 'unknown' 'concurrent callback failure reports unknown'; Assert-True (@($result.unresolvedTargets).Count -gt 0) 'changed-again target is unresolved, not overwritten'; Assert-BytesEqual ([IO.File]::ReadAllBytes([IO.File]::ReadAllText($changedPathFile))) $changedBytes 'rollback preserves externally changed bytes'
     } finally { Remove-Fixture $f }
 }
 
@@ -993,7 +1205,7 @@ function Test-UncommittedIdenticalCreation {
             Write-Bytes $externalTarget $externalBytes
         }.GetNewClosure()
         $result = Invoke-JoewrksHarnessSync -Apply -IncludeDesignFrontend -CodexHome $f.CodexHome -AgentsHome $f.AgentsHome -BackupRoot $f.BackupRoot -AfterReplace $callback
-        Assert-Equal $result.status 'failed' 'identical concurrent creation reports failed'
+        Assert-Equal $result.status 'unknown' 'identical concurrent creation reports unknown'
         Assert-True (@($result.unresolvedTargets) -contains $externalTarget) 'identical concurrent creation is unresolved'
         Assert-BytesEqual ([IO.File]::ReadAllBytes($externalTarget)) $externalBytes 'uncommitted identical concurrent creation is preserved'
         Assert-True (-not (Test-Path -LiteralPath (Join-Path $f.CodexHome 'AGENTS.md'))) 'earlier committed target still rolls back'
@@ -1020,7 +1232,7 @@ function Test-MultiTargetRollback {
             if ($replacements.Count -eq 2) { throw 'test multi-target failure' }
         }.GetNewClosure()
         $result = Invoke-JoewrksHarnessSync -Apply -IncludeDesignFrontend -CodexHome $f.CodexHome -AgentsHome $f.AgentsHome -BackupRoot $f.BackupRoot -AfterReplace $callback
-        Assert-Equal $result.status 'failed' 'multi-target callback failure reports failed'
+        Assert-Equal $result.status 'unknown' 'multi-target callback failure reports unknown'
         Assert-PilotDisclosure $result.designFrontendPilot 'default-personal-pilot' 'failed personal-pilot apply'
         Assert-Equal $replacements.Count 2 'failure occurs after two replacements'
         Assert-Equal $result.rollback.status 'incomplete' 'multi-target rollback preserves created directories for inspection'
@@ -1070,6 +1282,10 @@ function Test-Task2CheckRegressions {
 }
 
 Test-PublicHarnessEntry
+Test-ModeAndExitContract
+Test-RemoveContract
+Test-RemovePreflightBlockers
+Test-RemoveRollback
 Test-ManifestPathSafety
 Test-ReparsePlanningBoundaries
 Test-Task2CheckRegressions

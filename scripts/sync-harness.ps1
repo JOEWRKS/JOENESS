@@ -2,6 +2,7 @@
 param(
     [switch] $Check,
     [switch] $Apply,
+    [switch] $Remove,
     [switch] $IncludeDesignFrontend,
     [string] $CodexHome,
     [string] $AgentsHome,
@@ -23,6 +24,17 @@ function Get-HarnessPathIdentity {
     param([string] $Path)
     $normalized = [IO.Path]::GetFullPath($Path).TrimEnd('\', '/').Replace('/', '\').ToUpperInvariant()
     Get-HarnessSha256 ([Text.Encoding]::UTF8.GetBytes($normalized))
+}
+
+function Get-HarnessExitCode {
+    param([string] $Status)
+    switch ($Status) {
+        { $_ -in @('current', 'ready', 'removed') } { return 0 }
+        'failed' { return 1 }
+        'blocked' { return 2 }
+        'unknown' { return 3 }
+        default { return 3 }
+    }
 }
 
 function Read-HarnessUtf8 {
@@ -343,16 +355,20 @@ function Get-HarnessFrontmatterCollisions {
 }
 
 function Invoke-JoewrksHarnessSync {
-    [CmdletBinding(DefaultParameterSetName = 'Check')]
+    [CmdletBinding()]
     param(
         [Parameter(Mandatory, ParameterSetName = 'Check')] [switch] $Check,
         [Parameter(Mandatory, ParameterSetName = 'Apply')] [switch] $Apply,
+        [Parameter(Mandatory, ParameterSetName = 'Remove')] [switch] $Remove,
         [switch] $IncludeDesignFrontend,
         [string] $CodexHome,
         [string] $AgentsHome,
         [string] $BackupRoot,
         [scriptblock] $AfterReplace
     )
+
+    $modeCount = ([int] $Check.IsPresent) + ([int] $Apply.IsPresent) + ([int] $Remove.IsPresent)
+    if ($modeCount -ne 1) { throw 'Specify exactly one of -Check, -Apply, or -Remove.' }
 
     $userProfile = if ([string]::IsNullOrWhiteSpace($env:USERPROFILE)) { [Environment]::GetFolderPath('UserProfile') } else { $env:USERPROFILE }
     $localAppData = if ([string]::IsNullOrWhiteSpace($env:LOCALAPPDATA)) { [Environment]::GetFolderPath('LocalApplicationData') } else { $env:LOCALAPPDATA }
@@ -580,7 +596,79 @@ function Invoke-JoewrksHarnessSync {
     } else {
         $stateSnapshot = [pscustomobject] @{ Exists = $false; Hash = $null; Bytes = [byte[]] @() }
     }
-    if (-not $targetPathSafetyBlocked -and (Test-Path -LiteralPath $overridePath -PathType Leaf)) {
+    $removeAgentBytes = $null
+    if ($Remove) {
+        if ($null -eq $state -and -not $stateSnapshot.Exists) {
+            if (Test-Path -LiteralPath $agentsPath) {
+                try {
+                    if (-not (Test-Path -LiteralPath $agentsPath -PathType Leaf)) { throw "AGENTS.md path is not a file: $agentsPath" }
+                    $agentBytes = [IO.File]::ReadAllBytes($agentsPath)
+                    $beginCount = @(Get-HarnessByteOffsets $agentBytes ([Text.Encoding]::UTF8.GetBytes($script:HarnessBeginMarker))).Count
+                    $endCount = @(Get-HarnessByteOffsets $agentBytes ([Text.Encoding]::UTF8.GetBytes($script:HarnessEndMarker))).Count
+                    if ($beginCount -gt 0 -or $endCount -gt 0) {
+                        $null = $blockers.Add([pscustomobject] @{ kind = 'unownedEvidence'; message = "Unowned Common Core marker exists: $agentsPath" })
+                    }
+                } catch {
+                    $null = $blockers.Add([pscustomobject] @{ kind = 'commonCorePreflight'; message = $_.Exception.Message })
+                }
+            }
+            foreach ($relative in @($manifestSkillRelativePaths.Values)) {
+                try {
+                    $skillPath = Split-Path -Parent (Resolve-HarnessSourceFile $resolvedAgentsHome ([string] $relative))
+                    if (Test-Path -LiteralPath $skillPath) {
+                        $null = $blockers.Add([pscustomobject] @{ kind = 'unownedEvidence'; message = "Known managed skill namespace exists without state: $skillPath" })
+                    }
+                } catch {
+                    $null = $blockers.Add([pscustomobject] @{ kind = 'targetSafety'; message = $_.Exception.Message })
+                }
+            }
+        } elseif ($null -ne $state) {
+            try {
+                if (-not (Test-Path -LiteralPath $agentsPath -PathType Leaf)) { throw "Installed Common Core target is missing: $agentsPath" }
+                $target = Read-HarnessUtf8 $agentsPath
+                $agentSnapshot = [pscustomobject] @{ Exists = $true; Hash = Get-HarnessSha256 $target.Bytes; Bytes = $target.Bytes }
+                $beginBytes = [Text.Encoding]::UTF8.GetBytes($script:HarnessBeginMarker)
+                $endBytes = [Text.Encoding]::UTF8.GetBytes($script:HarnessEndMarker)
+                $beginOffsets = @(Get-HarnessByteOffsets $target.Bytes $beginBytes)
+                $endOffsets = @(Get-HarnessByteOffsets $target.Bytes $endBytes)
+                if ($beginOffsets.Count -ne 1 -or $endOffsets.Count -ne 1 -or $endOffsets[0] -lt $beginOffsets[0]) {
+                    throw 'Installed Common Core markers are missing, duplicate, or misordered'
+                }
+                $blockLength = $endOffsets[0] + $endBytes.Length - $beginOffsets[0]
+                $existingBlock = Get-HarnessByteSlice $target.Bytes $beginOffsets[0] $blockLength
+                if ((Get-HarnessSha256 $existingBlock) -cne $stateCoreHash) { throw 'Installed Common Core block drifted from prior state' }
+                $prefix = Get-HarnessByteSlice $target.Bytes 0 $beginOffsets[0]
+                $suffixStart = $endOffsets[0] + $endBytes.Length
+                $suffix = Get-HarnessByteSlice $target.Bytes $suffixStart ($target.Bytes.Length - $suffixStart)
+                $removeAgentBytes = [byte[]] @($prefix + $suffix)
+                $null = $changes.Add([pscustomobject] @{ kind = 'commonCore'; action = 'remove'; target = 'AGENTS.md'; planned = $true })
+            } catch {
+                $null = $blockers.Add([pscustomobject] @{ kind = 'commonCorePreflight'; message = $_.Exception.Message })
+            }
+            foreach ($relative in @($stateWholeFiles.Keys)) {
+                try {
+                    $targetPath = Resolve-HarnessSourceFile $resolvedAgentsHome $relative
+                    $snapshot = Get-HarnessFileSnapshot $targetPath
+                    $optionalSnapshots[$relative] = $snapshot
+                    if (-not $snapshot.Exists) { throw "Installed optional target is missing: $relative" }
+                    if ($snapshot.Hash -cne $stateWholeFiles[$relative]) { throw "Installed optional target drifted: $relative" }
+                    $null = $changes.Add([pscustomobject] @{ kind = 'designFrontend'; action = 'remove'; target = $relative; planned = $true })
+                } catch {
+                    $null = $blockers.Add([pscustomobject] @{ kind = 'optionalDrift'; message = $_.Exception.Message })
+                }
+            }
+            if ($blockers.Count -eq 0) {
+                if ((Test-Path -LiteralPath $resolvedBackupRoot) -and -not (Test-Path -LiteralPath $resolvedBackupRoot -PathType Container)) {
+                    $null = $blockers.Add([pscustomobject] @{ kind = 'backupCollision'; message = "Backup root is not a directory: $resolvedBackupRoot" })
+                } else {
+                    $collision = Get-HarnessParentFileCollision $resolvedBackupRoot
+                    if ($collision) {
+                        $null = $blockers.Add([pscustomobject] @{ kind = 'backupCollision'; message = "Backup parent is not a directory: $collision" })
+                    }
+                }
+            }
+        }
+    } elseif (-not $targetPathSafetyBlocked -and (Test-Path -LiteralPath $overridePath -PathType Leaf)) {
         try {
             if ((Get-Item -LiteralPath $overridePath).Length -gt 0) {
                 $null = $blockers.Add([pscustomobject] @{ kind = 'overrideShadow'; message = "Nonempty override blocks Common Core: $overridePath" })
@@ -591,7 +679,7 @@ function Invoke-JoewrksHarnessSync {
     }
 
     $plannedAgentBytes = $null
-    if ($null -ne $sourceCore -and -not $targetPathSafetyBlocked) {
+    if (-not $Remove -and $null -ne $sourceCore -and -not $targetPathSafetyBlocked) {
         try {
             if ((Test-Path -LiteralPath $agentsPath) -and -not (Test-Path -LiteralPath $agentsPath -PathType Leaf)) {
                 throw "AGENTS.md path is not a file: $agentsPath"
@@ -650,7 +738,7 @@ function Invoke-JoewrksHarnessSync {
         }
     }
 
-    foreach ($relative in @($stateWholeFiles.Keys)) {
+    foreach ($relative in @($(if ($Remove) { @() } else { $stateWholeFiles.Keys }))) {
         try {
             $targetPath = Resolve-HarnessSourceFile $resolvedAgentsHome $relative
             $snapshot = Get-HarnessFileSnapshot $targetPath
@@ -663,7 +751,7 @@ function Invoke-JoewrksHarnessSync {
     }
 
     $currentOptionalPaths = @{}
-    foreach ($entry in $optionalEntries) {
+    foreach ($entry in @($(if ($Remove) { @() } else { $optionalEntries }))) {
         try {
             $currentOptionalPaths[$entry.RelativePath] = $true
             $targetPath = Resolve-HarnessSourceFile $resolvedAgentsHome $entry.RelativePath
@@ -685,14 +773,14 @@ function Invoke-JoewrksHarnessSync {
             $null = $blockers.Add([pscustomobject] @{ kind = 'targetSafety'; message = $_.Exception.Message })
         }
     }
-    foreach ($relative in @($stateWholeFiles.Keys)) {
+    foreach ($relative in @($(if ($Remove) { @() } else { $stateWholeFiles.Keys }))) {
         if (-not $currentOptionalPaths.ContainsKey($relative)) {
             $null = $changes.Add([pscustomobject] @{ kind = 'designFrontend'; action = 'remove'; target = $relative; planned = $true })
         }
     }
 
     $managedSkillFiles = @{}
-    foreach ($skillName in @($manifestSkillRelativePaths.Keys)) {
+    foreach ($skillName in @($(if ($Remove) { @() } else { $manifestSkillRelativePaths.Keys }))) {
         try {
             $relative = [string] $manifestSkillRelativePaths[$skillName]
             $managedSkillFile = Resolve-HarnessSourceFile $resolvedAgentsHome $relative
@@ -706,14 +794,14 @@ function Invoke-JoewrksHarnessSync {
         }
     }
     $skillRoots = @((Join-Path $resolvedAgentsHome 'skills'), $codexSkillsPath)
-    if (-not $targetPathSafetyBlocked) {
+    if (-not $Remove -and -not $targetPathSafetyBlocked) {
         foreach ($collision in @(Get-HarnessFrontmatterCollisions $skillRoots $managedSkillFiles)) {
             $null = $blockers.Add([pscustomobject] @{ kind = 'duplicateSkill'; message = $collision })
         }
     }
 
     $plannedChanges = @($changes | Where-Object { $_.planned })
-    if ($plannedChanges.Count -gt 0 -and $blockers.Count -eq 0) {
+    if (-not $Remove -and $plannedChanges.Count -gt 0 -and $blockers.Count -eq 0) {
         $writeParents = @($agentsPath, $statePath)
         $writeParents += @($optionalEntries | ForEach-Object { Resolve-HarnessSourceFile $resolvedAgentsHome $_.RelativePath })
         $writeParents += @($stateWholeFiles.Keys | ForEach-Object { Resolve-HarnessSourceFile $resolvedAgentsHome $_ })
@@ -733,7 +821,15 @@ function Invoke-JoewrksHarnessSync {
         }
     }
 
-    $status = if ($blockers.Count -gt 0) { 'blocked' } elseif ($plannedChanges.Count -gt 0) { 'ready' } else { 'current' }
+    $status = if ($blockers.Count -gt 0) {
+        'blocked'
+    } elseif ($Remove) {
+        if ($null -eq $state) { 'removed' } else { 'ready' }
+    } elseif ($plannedChanges.Count -gt 0) {
+        'ready'
+    } else {
+        'current'
+    }
     $targets = [pscustomobject] @{
         codexHome = $resolvedCodexHome
         agentsHome = $resolvedAgentsHome
@@ -763,7 +859,7 @@ function Invoke-JoewrksHarnessSync {
         }
     }
 
-    if (-not $Apply -or $status -ne 'ready') {
+    if ((-not $Apply -and -not $Remove) -or $status -ne 'ready') {
         return [pscustomobject] @{
             status = $status
             bundleSelection = $bundleSelection
@@ -780,60 +876,9 @@ function Invoke-JoewrksHarnessSync {
         }
     }
 
-    $desiredWholeFiles = [ordered] @{}
-    foreach ($entry in $optionalEntries) { $desiredWholeFiles[$entry.RelativePath] = $entry.Hash }
-    $sourceIdentities = [ordered] @{
-        commonCore = [ordered] @{
-            path = ([string] $coreEntry.path).Replace('\', '/')
-            sha256 = ([string] $coreEntry.sha256).ToLowerInvariant()
-        }
-        bundleManifest = [ordered] @{
-            path = 'vendor/source-manifest.json'
-            sha256 = $manifestHash
-        }
-    }
-    $desiredState = [ordered] @{
-        schemaVersion = 2
-        bundleSelection = $bundleSelection
-        agentsHomeIdentitySha256 = Get-HarnessPathIdentity $resolvedAgentsHome
-        sourceIdentities = $sourceIdentities
-        managedBlocks = [ordered] @{ 'AGENTS.md' = $blockHash }
-        wholeFileTargets = $desiredWholeFiles
-    }
-    $stateJson = $desiredState | ConvertTo-Json -Depth 16
-    $stateBytes = (New-Object Text.UTF8Encoding($false)).GetBytes($stateJson + "`n")
-
     $operations = [Collections.Generic.List[object]]::new()
-    $plannedAgentHash = Get-HarnessSha256 $plannedAgentBytes
-    if (-not $agentSnapshot.Exists -or $agentSnapshot.Hash -cne $plannedAgentHash) {
-        $null = $operations.Add([pscustomobject] @{
-            TargetPath = $agentsPath
-            DesiredExists = $true
-            DesiredBytes = $plannedAgentBytes
-            AppliedHash = $plannedAgentHash
-            Snapshot = $agentSnapshot
-            BackupRelativePath = 'codex\AGENTS.md'
-            BackupPath = $null
-            Committed = $false
-        })
-    }
-    foreach ($entry in $optionalEntries) {
-        $snapshot = $optionalSnapshots[$entry.RelativePath]
-        if (-not $snapshot.Exists -or $snapshot.Hash -cne $entry.Hash) {
-            $null = $operations.Add([pscustomobject] @{
-                TargetPath = Resolve-HarnessSourceFile $resolvedAgentsHome $entry.RelativePath
-                DesiredExists = $true
-                DesiredBytes = $entry.Bytes
-                AppliedHash = $entry.Hash
-                Snapshot = $snapshot
-                BackupRelativePath = Join-Path 'agents' ($entry.RelativePath -replace '/', '\')
-                BackupPath = $null
-                Committed = $false
-            })
-        }
-    }
-    foreach ($relative in @($stateWholeFiles.Keys | Sort-Object)) {
-        if (-not $currentOptionalPaths.ContainsKey($relative)) {
+    if ($Remove) {
+        foreach ($relative in @($stateWholeFiles.Keys | Sort-Object)) {
             $null = $operations.Add([pscustomobject] @{
                 TargetPath = Resolve-HarnessSourceFile $resolvedAgentsHome $relative
                 DesiredExists = $false
@@ -846,19 +891,107 @@ function Invoke-JoewrksHarnessSync {
                 Unresolved = $false
             })
         }
-    }
-    $stateHash = Get-HarnessSha256 $stateBytes
-    if (-not $stateSnapshot.Exists -or $stateSnapshot.Hash -cne $stateHash) {
+        $removeAgentHash = Get-HarnessSha256 $removeAgentBytes
+        $null = $operations.Add([pscustomobject] @{
+            TargetPath = $agentsPath
+            DesiredExists = $true
+            DesiredBytes = $removeAgentBytes
+            AppliedHash = $removeAgentHash
+            Snapshot = $agentSnapshot
+            BackupRelativePath = 'codex\AGENTS.md'
+            BackupPath = $null
+            Committed = $false
+        })
         $null = $operations.Add([pscustomobject] @{
             TargetPath = $statePath
-            DesiredExists = $true
-            DesiredBytes = $stateBytes
-            AppliedHash = $stateHash
+            DesiredExists = $false
+            DesiredBytes = [byte[]] @()
+            AppliedHash = $null
             Snapshot = $stateSnapshot
             BackupRelativePath = 'codex\joewrks-harness-state.json'
             BackupPath = $null
             Committed = $false
+            Unresolved = $false
         })
+    } else {
+        $desiredWholeFiles = [ordered] @{}
+        foreach ($entry in $optionalEntries) { $desiredWholeFiles[$entry.RelativePath] = $entry.Hash }
+        $sourceIdentities = [ordered] @{
+            commonCore = [ordered] @{
+                path = ([string] $coreEntry.path).Replace('\', '/')
+                sha256 = ([string] $coreEntry.sha256).ToLowerInvariant()
+            }
+            bundleManifest = [ordered] @{
+                path = 'vendor/source-manifest.json'
+                sha256 = $manifestHash
+            }
+        }
+        $desiredState = [ordered] @{
+            schemaVersion = 2
+            bundleSelection = $bundleSelection
+            agentsHomeIdentitySha256 = Get-HarnessPathIdentity $resolvedAgentsHome
+            sourceIdentities = $sourceIdentities
+            managedBlocks = [ordered] @{ 'AGENTS.md' = $blockHash }
+            wholeFileTargets = $desiredWholeFiles
+        }
+        $stateJson = $desiredState | ConvertTo-Json -Depth 16
+        $stateBytes = (New-Object Text.UTF8Encoding($false)).GetBytes($stateJson + "`n")
+        $plannedAgentHash = Get-HarnessSha256 $plannedAgentBytes
+        if (-not $agentSnapshot.Exists -or $agentSnapshot.Hash -cne $plannedAgentHash) {
+            $null = $operations.Add([pscustomobject] @{
+                TargetPath = $agentsPath
+                DesiredExists = $true
+                DesiredBytes = $plannedAgentBytes
+                AppliedHash = $plannedAgentHash
+                Snapshot = $agentSnapshot
+                BackupRelativePath = 'codex\AGENTS.md'
+                BackupPath = $null
+                Committed = $false
+            })
+        }
+        foreach ($entry in $optionalEntries) {
+            $snapshot = $optionalSnapshots[$entry.RelativePath]
+            if (-not $snapshot.Exists -or $snapshot.Hash -cne $entry.Hash) {
+                $null = $operations.Add([pscustomobject] @{
+                    TargetPath = Resolve-HarnessSourceFile $resolvedAgentsHome $entry.RelativePath
+                    DesiredExists = $true
+                    DesiredBytes = $entry.Bytes
+                    AppliedHash = $entry.Hash
+                    Snapshot = $snapshot
+                    BackupRelativePath = Join-Path 'agents' ($entry.RelativePath -replace '/', '\')
+                    BackupPath = $null
+                    Committed = $false
+                })
+            }
+        }
+        foreach ($relative in @($stateWholeFiles.Keys | Sort-Object)) {
+            if (-not $currentOptionalPaths.ContainsKey($relative)) {
+                $null = $operations.Add([pscustomobject] @{
+                    TargetPath = Resolve-HarnessSourceFile $resolvedAgentsHome $relative
+                    DesiredExists = $false
+                    DesiredBytes = [byte[]] @()
+                    AppliedHash = $null
+                    Snapshot = $optionalSnapshots[$relative]
+                    BackupRelativePath = Join-Path 'agents' ($relative -replace '/', '\')
+                    BackupPath = $null
+                    Committed = $false
+                    Unresolved = $false
+                })
+            }
+        }
+        $stateHash = Get-HarnessSha256 $stateBytes
+        if (-not $stateSnapshot.Exists -or $stateSnapshot.Hash -cne $stateHash) {
+            $null = $operations.Add([pscustomobject] @{
+                TargetPath = $statePath
+                DesiredExists = $true
+                DesiredBytes = $stateBytes
+                AppliedHash = $stateHash
+                Snapshot = $stateSnapshot
+                BackupRelativePath = 'codex\joewrks-harness-state.json'
+                BackupPath = $null
+                Committed = $false
+            })
+        }
     }
 
     $runId = ([DateTime]::UtcNow.ToString('yyyyMMddTHHmmssfffffffZ') + '-' + [guid]::NewGuid().ToString('N'))
@@ -910,7 +1043,7 @@ function Invoke-JoewrksHarnessSync {
             }
         }
         return [pscustomobject] @{
-            status = 'current'
+            status = if ($Remove) { 'removed' } else { 'current' }
             bundleSelection = $bundleSelection
             warnings = @($warnings)
             changesRequired = $false
@@ -995,12 +1128,12 @@ function Invoke-JoewrksHarnessSync {
             unresolvedTargets = @($unresolved)
         }
         return [pscustomobject] @{
-            status = 'failed'
+            status = if ($unresolved.Count -eq 0) { 'failed' } else { 'unknown' }
             bundleSelection = $bundleSelection
             warnings = @($warnings)
             changesRequired = $true
             changes = @($changes)
-            blockers = @([pscustomobject] @{ kind = 'applyFailure'; message = $failureMessage })
+            blockers = @([pscustomobject] @{ kind = if ($Remove) { 'removeFailure' } else { 'applyFailure' }; message = $failureMessage })
             targets = $targets
             capabilities = $capabilities
             designFrontendPilot = $designFrontendPilot
@@ -1013,7 +1146,8 @@ function Invoke-JoewrksHarnessSync {
 
 if ($MyInvocation.InvocationName -ne '.') {
     try {
-        if ($Check -eq $Apply) { throw 'Specify exactly one of -Check or -Apply.' }
+        $modeCount = ([int] $Check.IsPresent) + ([int] $Apply.IsPresent) + ([int] $Remove.IsPresent)
+        if ($modeCount -ne 1) { throw 'Specify exactly one of -Check, -Apply, or -Remove.' }
         $result = Invoke-JoewrksHarnessSync @PSBoundParameters
     } catch {
         $invocationWarnings = @()
@@ -1032,5 +1166,5 @@ if ($MyInvocation.InvocationName -ne '.') {
         }
     }
     $result | ConvertTo-Json -Compress -Depth 16
-    if ($result.status -in @('blocked', 'failed')) { exit 1 }
+    exit (Get-HarnessExitCode $result.status)
 }
