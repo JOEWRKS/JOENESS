@@ -74,7 +74,8 @@ function Get-HarnessSafeRelativePath {
             throw "$Label has a trailing dot or space: $Value"
         }
         $baseName = $segment.Split('.')[0]
-        if ($baseName -match '\A(?i:CON|PRN|AUX|NUL|COM[1-9]|LPT[1-9])\z') {
+        $deviceNumber = '1-9' + [char]0x00b9 + [char]0x00b2 + [char]0x00b3
+        if ($baseName -match ("\A(?i:CON|PRN|AUX|NUL|COM[$deviceNumber]|LPT[$deviceNumber])\z")) {
             throw "$Label contains a Windows reserved name: $Value"
         }
     }
@@ -88,16 +89,16 @@ function Assert-HarnessNoReparsePoint {
     $relative = $pathFull.Substring($rootFull.Length).TrimStart('\', '/')
     $current = $rootFull
     foreach ($segment in @($relative -split '[\\/]')) {
-        if (Test-Path -LiteralPath $current) {
-            $item = Get-Item -LiteralPath $current -Force
+        $item = Get-Item -LiteralPath $current -Force -ErrorAction SilentlyContinue
+        if ($null -ne $item) {
             if (($item.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0) {
                 throw "$Label contains a reparse point: $current"
             }
         }
         if (-not [string]::IsNullOrEmpty($segment)) { $current = Join-Path $current $segment }
     }
-    if (Test-Path -LiteralPath $current) {
-        $item = Get-Item -LiteralPath $current -Force
+    $item = Get-Item -LiteralPath $current -Force -ErrorAction SilentlyContinue
+    if ($null -ne $item) {
         if (($item.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0) {
             throw "$Label contains a reparse point: $current"
         }
@@ -329,6 +330,7 @@ function Invoke-JoewrksHarnessSync {
     $overridePath = Join-Path $resolvedCodexHome 'AGENTS.override.md'
     $statePath = Join-Path $resolvedCodexHome 'joewrks-harness-state.json'
     $optionalRoot = $resolvedAgentsHome
+    $codexSkillsPath = Join-Path $resolvedCodexHome 'skills'
     $managedSkillFile = Join-Path $optionalRoot 'skills\joewrks-design-frontend\SKILL.md'
     $blockers = [Collections.Generic.List[object]]::new()
     $changes = [Collections.Generic.List[object]]::new()
@@ -345,7 +347,9 @@ function Invoke-JoewrksHarnessSync {
 
     foreach ($target in @(
         [pscustomobject] @{ Root = $resolvedCodexHome; Path = $agentsPath; Label = 'Common Core target' },
+        [pscustomobject] @{ Root = $resolvedCodexHome; Path = $overridePath; Label = 'Common Core override' },
         [pscustomobject] @{ Root = $resolvedCodexHome; Path = $statePath; Label = 'State target' },
+        [pscustomobject] @{ Root = $resolvedCodexHome; Path = $codexSkillsPath; Label = 'Codex skills' },
         [pscustomobject] @{ Root = $resolvedAgentsHome; Path = $resolvedAgentsHome; Label = 'Agents home' },
         [pscustomobject] @{ Root = $resolvedAgentsHome; Path = $managedSkillFile; Label = 'Optional target' },
         [pscustomobject] @{ Root = $resolvedBackupRoot; Path = $resolvedBackupRoot; Label = 'Backup root' }
@@ -478,7 +482,7 @@ function Invoke-JoewrksHarnessSync {
     }
     $priorOptionalOptIn = $stateWholeFiles.Count -gt 0
 
-    if (Test-Path -LiteralPath $overridePath -PathType Leaf) {
+    if (-not $targetPathSafetyBlocked -and (Test-Path -LiteralPath $overridePath -PathType Leaf)) {
         try {
             if ((Get-Item -LiteralPath $overridePath).Length -gt 0) {
                 $null = $blockers.Add([pscustomobject] @{ kind = 'overrideShadow'; message = "Nonempty override blocks Common Core: $overridePath" })
@@ -597,7 +601,7 @@ function Invoke-JoewrksHarnessSync {
         }
     }
 
-    $skillRoots = @((Join-Path $resolvedAgentsHome 'skills'), (Join-Path $resolvedCodexHome 'skills'))
+    $skillRoots = @((Join-Path $resolvedAgentsHome 'skills'), $codexSkillsPath)
     if (-not $targetPathSafetyBlocked) {
         foreach ($collision in @(Get-HarnessFrontmatterCollisions $skillRoots $managedSkillFile $priorOptionalOptIn)) {
             $null = $blockers.Add([pscustomobject] @{ kind = 'duplicateSkill'; message = $collision })

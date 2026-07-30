@@ -238,6 +238,12 @@ function Test-ManifestPathSafety {
         @{ Path = 'safe/file.txt:stream'; Pattern = '*alternate data stream*' },
         @{ Path = 'safe/na*me.txt'; Pattern = '*invalid character*' },
         @{ Path = 'safe/CON.txt'; Pattern = '*reserved*' },
+        @{ Path = ('safe/COM' + [char]0x00b9 + '.txt'); Pattern = '*reserved*' },
+        @{ Path = ('safe/COM' + [char]0x00b2 + '.txt'); Pattern = '*reserved*' },
+        @{ Path = ('safe/COM' + [char]0x00b3 + '.txt'); Pattern = '*reserved*' },
+        @{ Path = ('safe/LPT' + [char]0x00b9 + '.txt'); Pattern = '*reserved*' },
+        @{ Path = ('safe/LPT' + [char]0x00b2 + '.txt'); Pattern = '*reserved*' },
+        @{ Path = ('safe/LPT' + [char]0x00b3 + '.txt'); Pattern = '*reserved*' },
         @{ Path = 'safe/name. '; Pattern = '*trailing dot or space*' }
     )
     foreach ($case in $cases) {
@@ -293,6 +299,19 @@ function Test-ManifestPathSafety {
         Assert-ThrowsLike {
             Resolve-HarnessSourceFile $f.SourceRoot 'linked-vendor/file.txt'
         } '*reparse point*' 'source junction blocks'
+
+        $danglingTarget = Join-Path $f.Root 'removed-vendor'
+        $danglingJunction = Join-Path $f.SourceRoot 'dangling-vendor'
+        [IO.Directory]::CreateDirectory($danglingTarget) | Out-Null
+        New-Item -ItemType Junction -Path $danglingJunction -Target $danglingTarget | Out-Null
+        [IO.Directory]::Delete($danglingTarget)
+        try {
+            Assert-ThrowsLike {
+                Resolve-HarnessSourceFile $f.SourceRoot 'dangling-vendor/file.txt'
+            } '*reparse point*' 'dangling source junction blocks'
+        } finally {
+            [IO.Directory]::Delete($danglingJunction)
+        }
     } finally {
         if ($junction -and (Test-Path -LiteralPath $junction)) { [IO.Directory]::Delete($junction) }
         Remove-Fixture $f
@@ -317,6 +336,35 @@ function Test-ManifestPathSafety {
     } finally {
         if ($targetJunction -and (Test-Path -LiteralPath $targetJunction)) { [IO.Directory]::Delete($targetJunction) }
         Remove-Fixture $targetFixture
+    }
+}
+
+function Test-ReparsePlanningBoundaries {
+    $cases = @(
+        @{ Name = 'Codex override junction'; Home = 'CodexHome'; Relative = 'AGENTS.override.md' },
+        @{ Name = 'Codex skills junction'; Home = 'CodexHome'; Relative = 'skills' },
+        @{ Name = 'backup root junction'; Home = 'BackupRoot'; Relative = $null }
+    )
+    foreach ($case in $cases) {
+        $f = New-Fixture
+        $junction = $null
+        try {
+            $root = [string] $f.PSObject.Properties[$case.Home].Value
+            $junction = if ($case.Relative) { Join-Path $root $case.Relative } else { $root }
+            $realTarget = Join-Path $f.Root ('real-' + $case.Name)
+            [IO.Directory]::CreateDirectory((Split-Path -Parent $junction)) | Out-Null
+            [IO.Directory]::CreateDirectory($realTarget) | Out-Null
+            New-Item -ItemType Junction -Path $junction -Target $realTarget | Out-Null
+            $beforeTarget = Get-TreeHashes $realTarget
+            $result = Read-Result (Invoke-Harness $f Check) $case.Name
+            Assert-Equal $result.status 'blocked' "$($case.Name) blocks check"
+            Assert-True (@($result.blockers | Where-Object { $_.message -like '*reparse point*' }).Count -gt 0) "$($case.Name) is reported"
+            Assert-TreeEqual (Get-TreeHashes $realTarget) $beforeTarget "$($case.Name) check writes nothing"
+            Assert-True (-not (Test-Path -LiteralPath $f.State)) "$($case.Name) writes no state"
+        } finally {
+            if ($junction -and (Test-Path -LiteralPath $junction)) { [IO.Directory]::Delete($junction) }
+            Remove-Fixture $f
+        }
     }
 }
 
@@ -606,6 +654,7 @@ function Test-Task2CheckRegressions {
 
 Test-PublicHarnessEntry
 Test-ManifestPathSafety
+Test-ReparsePlanningBoundaries
 Test-Task2CheckRegressions
 Test-EmptyCheckAndApply
 Test-AgentEncodingAndCoreUpdate
