@@ -1,6 +1,6 @@
 # Design/Frontend Vendor and Router Design
 
-**Status:** approved master-spec tranche, implementation pending
+**Status:** v1 evidence preserved; outcome-based v2 amendment approved
 
 **Parent contract:** `docs/superpowers/specs/2026-07-27-common-work-harness-design.md`
 
@@ -175,14 +175,33 @@ Hard-negative coverage:
 Required assertions:
 
 - all five positives select the router and all five negatives avoid it;
-- only required UI UX domains and Apple sections are loaded;
-- Figma is selected only for the contractually required cases;
+- positive cases select the relevant UI UX and Apple sources, while the exact
+  query wording, section wording, operation order, and harmless read count
+  remain observable evidence rather than a prescribed script;
+- required Figma and browser capabilities are selected when the task needs
+  them, but tool availability is never treated as authorization or a
+  checklist;
 - missing required Figma capability is not hidden;
 - approved Figma/project design authority defeats conflicting recommendations;
 - no default Superpowers or Ponytail invocation occurs;
 - no download, install, persistence, unrelated write, or duplicated side
   effect occurs;
 - no verification action is claimed without evidence.
+
+The evaluator is a release-time audit tool, not part of the runtime prompt.
+Its synthetic operation vocabulary records what the model selected; it does
+not instruct the model to call every operation. Exact source arguments and
+operation counts may inform review, but they block promotion only when they
+prove a hard-negative activation, duplicate action, unauthorized write,
+unsupported claim, scope change, or missing required capability.
+
+The v1 pair is retained as failed evidence. It cannot decide router quality
+because the evaluator required top-level terminal identities that the runtime
+did not emit, correlated global notifications as turn-scoped events, treated
+normal paths and domain language as secret output, and exposed `FigmaWrite`
+as though it were an allowed checklist item. V2 corrects that instrument and
+evaluates the proportional candidate as a fresh pair. It is not a causal
+performance comparison with v1.
 
 Structural tests also verify the skill name/folder match, frontmatter,
 one-level references, absence of personal paths and `${CLAUDE_PLUGIN_ROOT}`,
