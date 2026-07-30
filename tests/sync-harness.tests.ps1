@@ -123,12 +123,26 @@ function Get-ExternalAgentBytes {
 
 function Assert-BytesEqual { param([byte[]] $Actual, [byte[]] $Expected, [string] $Message) Assert-Equal ([Convert]::ToBase64String($Actual)) ([Convert]::ToBase64String($Expected)) $Message }
 function Assert-StringSetEqual { param([string[]] $Actual, [string[]] $Expected, [string] $Message) Assert-Equal (($Actual | Sort-Object) -join "`n") (($Expected | Sort-Object) -join "`n") $Message }
+function Assert-PilotDisclosure {
+    param($Pilot, [string] $Selection, [string] $Message)
+    Assert-True ($null -ne $Pilot) "$Message discloses the pilot"
+    Assert-Equal $Pilot.selection $Selection "$Message distinguishes pilot selection"
+    Assert-Equal $Pilot.state 'candidate' "$Message reports candidate state"
+    Assert-Equal $Pilot.hardGate 'pass' "$Message reports the manifest hard gate"
+    Assert-Equal $Pilot.promotionPass $false "$Message does not claim promotion"
+    Assert-Equal $Pilot.classification 'implicit-unverified' "$Message reports unverified classification"
+    Assert-Equal $Pilot.outcomeReview 'human-review-required' "$Message requires human outcome review"
+    Assert-Equal $Pilot.semanticImprovement 'not-asserted' "$Message does not assert semantic improvement"
+    Assert-Equal $Pilot.figma 'task-time-verification-not-certified' "$Message does not certify Figma"
+    Assert-Equal $Pilot.browser 'task-time-verification-not-certified' "$Message does not certify browser behavior"
+}
 
 function Test-EmptyCheckAndApply {
     $f = New-Fixture
     try {
         $check = Invoke-Harness $f Check; Assert-Equal $check.ExitCode 0 'empty check succeeds'
         $result = Read-Result $check 'empty check'; Assert-Equal $result.status 'ready' 'empty check is ready'; Assert-True ([bool]$result.changesRequired) 'empty check needs changes'
+        Assert-Equal $result.designFrontendPilot $null 'core-only check has no pilot disclosure'
         Assert-True ((@($result.changes) | ConvertTo-Json -Depth 8) -match '(?i)common.?core') 'empty check plans Common Core'
         Assert-True (-not (Test-Path -LiteralPath $f.CodexHome)) 'check creates no target/state'; Assert-True (-not (Test-Path -LiteralPath $f.AgentsHome)) 'check creates no agents directory'; Assert-True (-not (Test-Path -LiteralPath $f.BackupRoot)) 'check creates no backup'
         $apply = Invoke-Harness $f Apply; Assert-Equal $apply.ExitCode 0 'first apply succeeds'; Assert-Equal (Read-Result $apply 'first apply').status 'current' 'first apply is current'
@@ -181,12 +195,15 @@ function Test-PreflightBlockers {
 function Test-OptionalBundleStateAndDrift {
     $f = New-Fixture
     try {
+        $explicit = Read-Result (Invoke-Harness $f Check -IncludeDesignFrontend) 'explicit pilot check'
+        Assert-Equal $explicit.status 'ready' 'explicit pilot check is ready'
+        Assert-PilotDisclosure $explicit.designFrontendPilot 'explicit-request' 'explicit pilot check'
         Assert-Equal (Invoke-Harness $f Apply).ExitCode 0 'default apply succeeds'; Assert-True (-not (Test-Path -LiteralPath $f.AgentsHome)) 'default apply installs no optional files'
         Assert-Equal (Invoke-Harness $f Apply -IncludeDesignFrontend).ExitCode 0 'opt-in apply succeeds'
         $expectedFiles = Get-OptionalFiles $f.SourceRoot; Assert-StringSetEqual @((Get-TreeHashes $f.AgentsHome).Keys) $expectedFiles 'opt-in installs exactly the manifest-selected files'
-        $before = Get-TreeHashes $f.AgentsHome; Assert-Equal (Read-Result (Invoke-Harness $f Check) 'default check after opt-in').status 'current' 'omitted flag preserves opt-in'; Assert-Equal (Invoke-Harness $f Apply).ExitCode 0 'default apply after opt-in succeeds'; Assert-TreeEqual (Get-TreeHashes $f.AgentsHome) $before 'omitted flag does not update/remove opt-in'
+        $before = Get-TreeHashes $f.AgentsHome; $preserved = Read-Result (Invoke-Harness $f Check) 'default check after opt-in'; Assert-Equal $preserved.status 'current' 'omitted flag preserves opt-in'; Assert-PilotDisclosure $preserved.designFrontendPilot 'preserved-prior-opt-in' 'default check after opt-in'; Assert-Equal (Invoke-Harness $f Apply).ExitCode 0 'default apply after opt-in succeeds'; Assert-TreeEqual (Get-TreeHashes $f.AgentsHome) $before 'omitted flag does not update/remove opt-in'
         Add-Content -LiteralPath (Join-Path $f.AgentsHome 'skills\joewrks-design-frontend\SKILL.md') -Value 'external drift'; $drift = Get-TreeHashes $f.AgentsHome
-        $check = Invoke-Harness $f Check; Assert-Equal (Read-Result $check 'optional drift check').status 'blocked' 'installed optional drift blocks default check'; Assert-TreeEqual (Get-TreeHashes $f.AgentsHome) $drift 'optional drift check is read-only'
+        $check = Invoke-Harness $f Check; $driftResult = Read-Result $check 'optional drift check'; Assert-Equal $driftResult.status 'blocked' 'installed optional drift blocks default check'; Assert-PilotDisclosure $driftResult.designFrontendPilot 'preserved-prior-opt-in' 'optional drift check'; Assert-TreeEqual (Get-TreeHashes $f.AgentsHome) $drift 'optional drift check is read-only'
         $run = Invoke-Harness $f Apply; Assert-True ($run.ExitCode -ne 0) 'installed optional drift blocks apply'; Assert-Equal (Read-Result $run 'optional drift').status 'blocked' 'installed optional drift reports blocked'; Assert-TreeEqual (Get-TreeHashes $f.AgentsHome) $drift 'installed optional drift is not overwritten'
         $stateText = [IO.File]::ReadAllText($f.State); $state = $stateText | ConvertFrom-Json
         Assert-True ($stateText -notmatch '(?i)[a-z]:\\') 'state stores no drive letter'; Assert-True ($stateText -notmatch [regex]::Escape([Environment]::GetFolderPath('UserProfile'))) 'state stores no user profile'; Assert-True ($state.PSObject.Properties.Name -contains 'managedBlocks') 'state has block ownership'; Assert-True ($state.PSObject.Properties.Name -contains 'wholeFileTargets') 'state has whole-file ownership'
@@ -222,6 +239,7 @@ function Test-MultiTargetRollback {
         }.GetNewClosure()
         $result = Invoke-JoewrksHarnessSync -Apply -IncludeDesignFrontend -CodexHome $f.CodexHome -AgentsHome $f.AgentsHome -BackupRoot $f.BackupRoot -AfterReplace $callback
         Assert-Equal $result.status 'failed' 'multi-target callback failure reports failed'
+        Assert-PilotDisclosure $result.designFrontendPilot 'explicit-request' 'failed opt-in apply'
         Assert-Equal $replacements.Count 2 'failure occurs after two replacements'
         Assert-Equal $result.rollback.status 'complete' 'matching targets roll back completely'
         Assert-Equal @($result.unresolvedTargets).Count 0 'complete rollback has no unresolved targets'
@@ -257,6 +275,7 @@ function Test-Task2CheckRegressions {
         $result = Read-Result $run 'optional directory collision'
         Assert-True ($run.ExitCode -ne 0) 'optional directory collision exits nonzero'
         Assert-Equal $result.status 'blocked' 'optional directory collision blocks'
+        Assert-PilotDisclosure $result.designFrontendPilot 'explicit-request' 'optional directory collision'
         Assert-True ((@($result.blockers).kind -contains 'optionalCollision')) 'optional directory collision is reported'
         Assert-TreeEqual (Get-TreeHashes $f.AgentsHome) $before 'optional directory collision check is read-only'
         Assert-True (Test-Path -LiteralPath $collision -PathType Container) 'optional directory collision remains a directory'

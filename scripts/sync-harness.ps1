@@ -442,6 +442,20 @@ function Invoke-JoewrksHarnessSync {
         figma = 'checked-at-task-time'
         browser = 'checked-at-task-time'
     }
+    $designFrontendPilot = $null
+    if ($null -ne $manifest -and ($IncludeDesignFrontend -or $priorOptionalOptIn)) {
+        $designFrontendPilot = [pscustomobject] @{
+            selection = if ($IncludeDesignFrontend) { 'explicit-request' } else { 'preserved-prior-opt-in' }
+            state = [string] $manifest.evaluation.state
+            hardGate = [string] $manifest.evaluation.current.hardGate
+            promotionPass = [bool] $manifest.evaluation.current.promotionPass
+            classification = [string] $manifest.evaluation.current.classification
+            outcomeReview = [string] $manifest.evaluation.current.outcomeReview
+            semanticImprovement = [string] $manifest.evaluation.current.semanticImprovement
+            figma = 'task-time-verification-not-certified'
+            browser = 'task-time-verification-not-certified'
+        }
+    }
 
     if (-not $Apply -or $status -ne 'ready') {
         return [pscustomobject] @{
@@ -451,6 +465,7 @@ function Invoke-JoewrksHarnessSync {
             blockers = @($blockers)
             targets = $targets
             capabilities = $capabilities
+            designFrontendPilot = $designFrontendPilot
             backupPath = $null
             rollback = $null
             unresolvedTargets = @()
@@ -579,6 +594,7 @@ function Invoke-JoewrksHarnessSync {
             blockers = @()
             targets = $targets
             capabilities = $capabilities
+            designFrontendPilot = $designFrontendPilot
             backupPath = $backupPath
             rollback = $null
             unresolvedTargets = @()
@@ -633,6 +649,7 @@ function Invoke-JoewrksHarnessSync {
             blockers = @([pscustomobject] @{ kind = 'applyFailure'; message = $failureMessage })
             targets = $targets
             capabilities = $capabilities
+            designFrontendPilot = $designFrontendPilot
             backupPath = $backupPath
             rollback = $rollback
             unresolvedTargets = @($unresolved)
