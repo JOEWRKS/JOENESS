@@ -15,7 +15,9 @@ import { fileURLToPath } from "node:url";
 import {
   EVALUATION_PERMISSION_PROFILE,
   buildThreadStartRequest,
+  classifyEventScope,
   collectRuntimeInventory,
+  containsCredentialText,
   createExclusiveRunRoot,
   hashRepositoryFiles,
   normalizeEvent,
@@ -69,12 +71,10 @@ const EVENT_BYTES = 4096;
 const OUTPUT_BYTES = 16 * 1024;
 const PAIR_BYTES = 4 * 1024 * 1024;
 const TURN_TIMEOUT_MS = 120_000;
-const IDEMPOTENCY_KEY = "synthetic-evaluation-design-router-v1";
+const IDEMPOTENCY_KEY = "synthetic-evaluation-design-router-v2";
 const PORTABLE_ROUTER_PATH =
   ".agents/skills/joewrks-design-frontend/SKILL.md";
 const STAGING_SUFFIX = ".staging";
-const SECRET_PATTERN =
-  /(?:-----BEGIN [A-Z0-9 ]*PRIVATE KEY-----|authorization\s*:|bearer\s+[A-Za-z0-9._~+/=-]{12,}|(?:api[-_]?key|token|password|secret|cookie)\s*(?:[:=]|\s)\s*["']?[A-Za-z0-9._~+/=-]{8,}|(?:AKIA|ASIA)[A-Z0-9]{16}|(?:sk|ghp|github_pat)_[A-Za-z0-9_-]{12,}|eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}|ssh-(?:rsa|ed25519)\s+[A-Za-z0-9+/=]{20,})/iu;
 const REASON_CODES = new Set([
   "app-server-close-failed",
   "approval-requested",
@@ -132,11 +132,18 @@ const SOURCE_PATHS = {
 export const SYNTHETIC_LIMITATION =
   "Selection evidence only; no live Figma connection or browser result is proven.";
 export const PAIR = Object.freeze({
-  mode: "run-pair-v1",
+  mode: "run-pair-v2",
+  pairVersion: 2,
+  resultPath: "evals/design-frontend/router-pair-v2.json",
+  controlRunId: "design-router-control-v2",
+  candidateRunId: "design-router-candidate-v2",
+});
+const V1_BEHAVIOR_EVIDENCE = Object.freeze({
   pairVersion: 1,
+  mode: "run-pair-v1",
   resultPath: "evals/design-frontend/router-pair-v1.json",
-  controlRunId: "design-router-control-v1",
-  candidateRunId: "design-router-candidate-v1",
+  sha256: "bd37c7a245e5705be555e9b759f8d5fee0e20d6a55c72943e76fedad1c2b4042",
+  promotionPass: false,
 });
 
 const exactKeys = (value, keys) =>
@@ -304,9 +311,49 @@ function expectedArguments(caseDefinition, operation) {
   throw new Error("unknown operation");
 }
 
+function boundedSelectionText(value) {
+  return (
+    typeof value === "string" &&
+    value === value.trim() &&
+    [...value].length > 0 &&
+    [...value].length <= 128 &&
+    !/[\u0000-\u001f\u007f]/u.test(value) &&
+    !containsSensitiveText(value)
+  );
+}
+
+function boundedUniqueSelections(value, maximum) {
+  return (
+    Array.isArray(value) &&
+    value.length <= maximum &&
+    value.every(boundedSelectionText) &&
+    new Set(value).size === value.length
+  );
+}
+
 export function validateOperationArguments(caseDefinition, value) {
   if (!OPERATIONS.includes(value?.operation)) {
     throw new Error("unknown operation");
+  }
+  if (value.operation === "SearchUIUX") {
+    if (
+      !exactKeys(value, ["operation", "mode", "domains", "stack"]) ||
+      !["design_system", "domains"].includes(value.mode) ||
+      !boundedUniqueSelections(value.domains, 8) ||
+      !(value.stack === null || boundedSelectionText(value.stack))
+    ) {
+      throw new Error("SearchUIUX selection differs");
+    }
+    return true;
+  }
+  if (value.operation === "ReadAppleSection") {
+    if (
+      !exactKeys(value, ["operation", "sections"]) ||
+      !boundedUniqueSelections(value.sections, 12)
+    ) {
+      throw new Error("ReadAppleSection selection differs");
+    }
+    return true;
   }
   equal(
     value,
@@ -318,7 +365,7 @@ export function validateOperationArguments(caseDefinition, value) {
   return true;
 }
 
-function schemaBranch(argumentsValue) {
+function exactSchemaBranch(argumentsValue) {
   return {
     type: "object",
     properties: Object.fromEntries(
@@ -341,16 +388,59 @@ function schemaBranch(argumentsValue) {
   };
 }
 
+function schemaBranch(caseDefinition, operation) {
+  if (operation === "SearchUIUX") {
+    return {
+      type: "object",
+      properties: {
+        operation: { const: operation },
+        mode: { enum: ["design_system", "domains"] },
+        domains: {
+          type: "array",
+          items: { type: "string", minLength: 1, maxLength: 128 },
+          maxItems: 8,
+          uniqueItems: true,
+        },
+        stack: {
+          oneOf: [
+            { type: "null" },
+            { type: "string", minLength: 1, maxLength: 128 },
+          ],
+        },
+      },
+      required: ["operation", "mode", "domains", "stack"],
+      additionalProperties: false,
+    };
+  }
+  if (operation === "ReadAppleSection") {
+    return {
+      type: "object",
+      properties: {
+        operation: { const: operation },
+        sections: {
+          type: "array",
+          items: { type: "string", minLength: 1, maxLength: 128 },
+          maxItems: 12,
+          uniqueItems: true,
+        },
+      },
+      required: ["operation", "sections"],
+      additionalProperties: false,
+    };
+  }
+  return exactSchemaBranch(expectedArguments(caseDefinition, operation));
+}
+
 export function buildDynamicTool(caseDefinition) {
   return {
     type: "function",
     name: TOOL_NAME,
     description:
-      "Record synthetic design-router selection only. It cannot prove a live Figma connection or browser result.",
+      "Record synthetic read-only design-router selection only. Write operations are unavailable, and this cannot prove a live Figma connection or browser result.",
     inputSchema: {
-      oneOf: OPERATIONS.map((operation) =>
-        schemaBranch(expectedArguments(caseDefinition, operation)),
-      ),
+      oneOf: OPERATIONS
+        .filter((operation) => operation !== "FigmaWrite")
+        .map((operation) => schemaBranch(caseDefinition, operation)),
     },
     deferLoading: false,
   };
@@ -365,7 +455,6 @@ export function buildCaseInput(caseDefinition) {
       name: TOOL_NAME,
       limitation: SYNTHETIC_LIMITATION,
       resources: operationResources(caseDefinition),
-      allowedOperations: OPERATIONS,
     },
     claimReceiptFormat: {
       exactJsonObject: {
@@ -483,10 +572,12 @@ export function validateThreadStartResponse(response, request) {
 
 function correlationBlockers(event, threadId, turnId) {
   const blockers = [];
-  for (const [observed, expected] of [
-    [event.threadId, threadId],
-    [event.turnId, turnId],
+  const { turnScoped, threadScoped } = classifyEventScope(event);
+  for (const [required, observed, expected] of [
+    [threadScoped, event.threadId, threadId],
+    [turnScoped, event.turnId, turnId],
   ]) {
+    if (!required) continue;
     if (typeof observed !== "string" || observed.length === 0) {
       blockers.push("uncorrelated-event");
     } else if (observed !== expected) {
@@ -494,6 +585,37 @@ function correlationBlockers(event, threadId, turnId) {
     }
   }
   return blockers;
+}
+
+function caseEventCorrelated(event, threadId, turnId) {
+  return (
+    !event.blockers.some((reason) =>
+      ["foreign-event", "uncorrelated-event"].includes(reason)) &&
+    correlationBlockers(event, threadId, turnId).length === 0
+  );
+}
+
+function validEventCorrelationEvidence(event, threadId, turnId) {
+  for (const value of [event.threadId, event.turnId]) {
+    if (value === null) continue;
+    try {
+      safeId(value, "event id");
+    } catch {
+      return false;
+    }
+  }
+  const correlationReasons = new Set([
+    "foreign-event", "uncorrelated-event",
+  ]);
+  const expected = [
+    ...new Set(correlationBlockers(event, threadId, turnId)),
+  ].sort();
+  const observed = [
+    ...new Set(
+      event.blockers.filter((reason) => correlationReasons.has(reason)),
+    ),
+  ].sort();
+  return stableStringify(observed) === stableStringify(expected);
 }
 
 export function normalizeCaseEvent(notification, context) {
@@ -576,11 +698,7 @@ export function normalizeCaseEvent(notification, context) {
     item?.type === "agentMessage"
   ) {
     const blockers = [];
-    if (
-      typeof item.id !== "string" ||
-      (notification.method === "item/completed" &&
-        item.status !== "completed")
-    ) {
+    if (typeof item.id !== "string") {
       blockers.push("runtime-drift");
     }
     event = {
@@ -590,7 +708,6 @@ export function normalizeCaseEvent(notification, context) {
       item: {
         id: item.id,
         type: item.type,
-        status: item.status,
         output:
           typeof item.text === "string"
             ? boundedOutputEvidence(item.text)
@@ -608,13 +725,13 @@ export function normalizeCaseEvent(notification, context) {
       ...correlationBlockers(event, context.threadId, context.turnId),
     ]),
   ];
-  event.threadId = context.threadId;
-  event.turnId = context.turnId;
+  event.threadId ??= null;
+  event.turnId ??= null;
   const serializedEvent = stableStringify(event);
   const eventLimitExceeded =
     Buffer.byteLength(serializedEvent) > EVENT_BYTES;
   const secretShapedOutput =
-    containsSensitiveText(event) || containsSensitiveText(notification);
+    containsSensitiveText(event) || containsCredentialText(notification);
   if (eventLimitExceeded || secretShapedOutput) {
     const digest = sha256(
       secretShapedOutput ? stableStringify(notification) : serializedEvent,
@@ -626,8 +743,8 @@ export function normalizeCaseEvent(notification, context) {
         !containsSensitiveText(notification.method)
           ? notification.method
           : "collector/redacted",
-      threadId: context.threadId,
-      turnId: context.turnId,
+      threadId: event.threadId,
+      turnId: event.turnId,
       redacted: true,
       eventSha256: digest,
       blockers: [
@@ -690,8 +807,7 @@ export function validateCaseEvents(events, threadId, turnId) {
         ) ||
         Object.keys(event).some((key) => !allowedKeys.has(key)) ||
         typeof event.method !== "string" ||
-        event?.threadId !== threadId ||
-        event?.turnId !== turnId ||
+        !validEventCorrelationEvidence(event, threadId, turnId) ||
         !Array.isArray(event.blockers) ||
         event.blockers.some(
           (blocker) => !validReasonCode(blocker),
@@ -763,6 +879,20 @@ function behaviorEvidence(bindings) {
 }
 
 export function validateBehaviorEvidence(manifest, bindings) {
+  const history = manifest?.behaviorEvidenceHistory;
+  if (
+    !Array.isArray(history) ||
+    history.length > 16 ||
+    new Set(history.map(({ pairVersion }) => pairVersion)).size !==
+      history.length
+  ) {
+    throw new Error("manifest behaviorEvidenceHistory differs");
+  }
+  equal(
+    history.find(({ pairVersion }) => pairVersion === 1),
+    V1_BEHAVIOR_EVIDENCE,
+    "manifest behaviorEvidenceHistory v1",
+  );
   equal(manifest?.behaviorEvidence, behaviorEvidence(bindings), "manifest behaviorEvidence");
   return true;
 }
@@ -791,7 +921,7 @@ function validSnapshot(value) {
 function containsSensitiveText(value) {
   if (typeof value === "string") {
     return (
-      SECRET_PATTERN.test(value) ||
+      containsCredentialText(value) ||
       /(?:[A-Za-z]:\\|\/(?:Users|home)\/)/u.test(value)
     );
   }
@@ -1058,15 +1188,6 @@ function validateCase(caseEvidence, caseDefinition) {
   }
 }
 
-function operationCounts(operations) {
-  return Object.fromEntries(
-    OPERATIONS.map((name) => [
-      name,
-      operations.filter(({ arguments: value }) => value?.operation === name).length,
-    ]),
-  );
-}
-
 export function deriveGate(artifact) {
   const allCases = [
     ...artifact.control.cases,
@@ -1081,23 +1202,42 @@ export function deriveGate(artifact) {
     artifact.p0Baseline?.pairVerdict === "pass";
   const operationNames = (entry) =>
     entry.operations.map(({ arguments: value }) => value.operation);
+  const hasOperation = (entry, name, predicate = () => true) =>
+    entry.operations.some(
+      ({ arguments: value }) =>
+        value.operation === name && predicate(value),
+    );
   const activationObserved = (entry) =>
     operationNames(entry).some((name) => name !== "BrowserVerify");
   const candidateCaseRoutingPass = (entry) => {
     const names = operationNames(entry);
-    const counts = operationCounts(entry.operations);
     if (POSITIVE_CASE_IDS.has(entry.id)) {
       return (
-        counts.SearchUIUX === 1 &&
-        counts.ReadAppleSection === 1 &&
-        counts.FigmaInspect === (FIGMA_REQUIRED_IDS.has(entry.id) ? 1 : 0) &&
-        counts.BrowserVerify === 1 &&
-        names.length ===
-          3 + (FIGMA_REQUIRED_IDS.has(entry.id) ? 1 : 0)
+        hasOperation(
+          entry,
+          "SearchUIUX",
+          (value) =>
+            value.mode === "design_system" ||
+            value.domains.length > 0 ||
+            value.stack !== null,
+        ) &&
+        hasOperation(
+          entry,
+          "ReadAppleSection",
+          (value) => value.sections.length > 0,
+        ) &&
+        hasOperation(entry, "BrowserVerify") &&
+        (
+          !FIGMA_REQUIRED_IDS.has(entry.id) ||
+          hasOperation(entry, "FigmaInspect")
+        )
       );
     }
     if (entry.id === "df-negative-one-word-copy-correction") {
-      return counts.BrowserVerify === 1 && names.length === 1;
+      return (
+        names.length > 0 &&
+        names.every((name) => name === "BrowserVerify")
+      );
     }
     return names.length === 0;
   };
@@ -1116,6 +1256,15 @@ export function deriveGate(artifact) {
   const operationEventMismatchDetected = allCases.some(
     operationEventMismatch,
   );
+  const duplicateSelectionDetected = allCases.some((entry) => {
+    const seen = new Set();
+    return entry.operations.some(({ arguments: value }) => {
+      const signature = stableStringify(value);
+      if (seen.has(signature)) return true;
+      seen.add(signature);
+      return false;
+    });
+  });
   const unauthorizedWriteAttemptDetected = allCases.some(
     (entry) =>
       entry.operations.some(
@@ -1191,6 +1340,9 @@ export function deriveGate(artifact) {
     ...(operationEventMismatchDetected
       ? ["operation-event-mismatch"]
       : []),
+    ...(duplicateSelectionDetected
+      ? ["duplicate-selection-detected"]
+      : []),
     ...(unauthorizedWriteAttemptDetected
       ? ["unauthorized-write-attempt"]
       : []),
@@ -1216,6 +1368,7 @@ export function deriveGate(artifact) {
     p0BaselineReviewedPass,
     safetyRegressionDetected,
     operationEventMismatchDetected,
+    duplicateSelectionDetected,
     unauthorizedWriteAttemptDetected,
     optionalWorkflowUsed,
     unsupportedLiveClaimDetected,
@@ -1598,13 +1751,6 @@ function blockedCase(caseDefinition, blocker, runtime) {
   };
 }
 
-function notificationCorrelated(notification, threadId, turnId) {
-  return (
-    notification?.params?.threadId === threadId &&
-    notification?.params?.turnId === turnId
-  );
-}
-
 function finalizeObservedOutput(partial, rawOutput) {
   if (typeof rawOutput !== "string") return;
   let observedReceipt = null;
@@ -1677,8 +1823,8 @@ export async function runCase(
         partial.blockers.push(...event.blockers);
       }
       const item = notification?.params?.item;
-      const correlated = notificationCorrelated(
-        notification,
+      const correlated = caseEventCorrelated(
+        event,
         partial.threadId,
         partial.turnId,
       );
@@ -1690,10 +1836,10 @@ export async function runCase(
       ) rawOutput = item.text;
       if (
         correlated &&
-        notification.method === "turn/completed" &&
-        notification.params?.turn?.id === partial.turnId
+        event.method === "turn/completed" &&
+        event.turn?.id === partial.turnId
       ) {
-        terminal = notification.params.turn;
+        terminal = event.turn;
         wake();
       }
     } catch (error) {
@@ -1967,6 +2113,16 @@ export async function runPair() {
     await readFile(path.join(ROOT, SOURCE_PATHS.manifest), "utf8"),
   );
   validateBehaviorEvidence(manifest, bindings);
+  const historicalEvidence = manifest.behaviorEvidenceHistory.find(
+    ({ pairVersion }) => pairVersion === 1,
+  );
+  if (
+    sha256(
+      await readFile(path.join(ROOT, historicalEvidence.resultPath)),
+    ) !== historicalEvidence.sha256
+  ) {
+    throw new Error("historical behavior evidence differs");
+  }
   const p0Baseline = validateP0Baseline(p0);
   const before = await hashRepositoryFiles(ROOT, Object.values(SOURCE_PATHS));
   let runRoot = null;
@@ -1983,7 +2139,7 @@ export async function runPair() {
   let candidate;
   const limitations = [];
   try {
-    runRoot = await createExclusiveRunRoot("design-router-pair-v1");
+    runRoot = await createExclusiveRunRoot("design-router-pair-v2");
     roots = await materializeConditionRoots(runRoot, ROOT);
     runtime = await prepareRuntime(runRoot);
     session = await openAppServer(runtime);
@@ -2122,7 +2278,7 @@ export async function runPair() {
 function parseCli(argv) {
   if (argv.length !== 1 || argv[0] !== PAIR.mode) {
     throw new Error(
-      "usage: node evals/design-frontend/collect-router-evaluation.mjs run-pair-v1",
+      "usage: node evals/design-frontend/collect-router-evaluation.mjs run-pair-v2",
     );
   }
 }

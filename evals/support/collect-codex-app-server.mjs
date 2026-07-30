@@ -1907,7 +1907,7 @@ const UNCONTROLLED_ITEM_TYPES = new Set([
 ]);
 const PUBLIC_MESSAGE_TYPES = new Set(["agentMessage", "userMessage"]);
 const SECRET_PATTERN =
-  /(?:-----BEGIN [A-Z0-9 ]*PRIVATE KEY-----|authorization\s*:|bearer\s+[A-Za-z0-9._~+/=-]{12,}|(?:api[-_]?key|token|password|secret|cookie)\s*(?:[:=]|\s)\s*["']?[A-Za-z0-9._~+/=-]{8,}|(?:AKIA|ASIA)[A-Z0-9]{16}|(?:sk|ghp|github_pat)_[A-Za-z0-9_-]{12,}|eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}|ssh-(?:rsa|ed25519)\s+[A-Za-z0-9+/=]{20,})/iu;
+  /(?:-----BEGIN [A-Z0-9 ]*PRIVATE KEY-----|authorization\s*:|bearer\s+[A-Za-z0-9._~+/=-]{12,}|(?:api[-_]?key|token|password|secret|cookie)\s*[:=]\s*["']?[A-Za-z0-9._~+/=-]{8,}|--(?:api[-_]?key|token|password|secret|cookie)(?:\s+|=)\s*["']?[A-Za-z0-9._~+/=-]{8,}|(?:AKIA|ASIA)[A-Z0-9]{16}|(?:sk|ghp|github_pat)_[A-Za-z0-9_-]{12,}|eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}|ssh-(?:rsa|ed25519)\s+[A-Za-z0-9+/=]{20,})/iu;
 const PASSIVE_NOTIFICATION_METHODS = new Set([
   "account/rateLimits/updated",
   "item/agentMessage/delta",
@@ -1964,9 +1964,18 @@ const SESSION_FATAL_REASONS = new Set([
   "user-input-requested",
 ]);
 
+export function containsCredentialText(value) {
+  if (typeof value === "string") return SECRET_PATTERN.test(value);
+  if (Array.isArray(value)) return value.some(containsCredentialText);
+  if (value !== null && typeof value === "object") {
+    return Object.values(value).some(containsCredentialText);
+  }
+  return false;
+}
+
 function boundedEvidenceText(value) {
   const bounded = boundUtf8(value);
-  if (!SECRET_PATTERN.test(value)) {
+  if (!containsCredentialText(value)) {
     return { value: bounded, blockers: [] };
   }
   return {
@@ -1995,14 +2004,14 @@ function sanitizeEventId(value) {
   if (
     typeof value === "string" &&
     /^[A-Za-z0-9._:-]{1,128}$/u.test(value) &&
-    !SECRET_PATTERN.test(value)
+    !containsCredentialText(value)
   ) {
     return { value, blocker: null };
   }
   return {
     value: null,
     blocker:
-      typeof value === "string" && SECRET_PATTERN.test(value)
+      typeof value === "string" && containsCredentialText(value)
         ? "secret-shaped-output"
         : "runtime-drift",
   };
@@ -2042,7 +2051,7 @@ function normalizedTokenUsage(value) {
   return { total, contextWindowTokens };
 }
 
-function classifyEventScope(event) {
+export function classifyEventScope(event) {
   const method = String(event?.method);
   const turnScoped =
     method === "thread/tokenUsage/updated" ||

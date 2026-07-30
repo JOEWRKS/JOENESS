@@ -31,28 +31,7 @@
 - Consumes: the existing routing matrix and authority order.
 - Produces: one discoverable router whose inactive rows remain hard boundaries while active rows describe minimum relevant capabilities rather than an exact ceremony.
 
-- [ ] **Step 1: Write the failing router-contract assertions**
-
-Add assertions to `joewrks-design-frontend candidate matches the routing contract`:
-
-```js
-assert.match(router, /guide.*not.*checklist|not.*fixed.*script/i);
-assert.match(router, /depth.*proportion|proportion.*task/i);
-assert.match(router, /tool availability.*(?:not|never).*authoriz/i);
-assert.doesNotMatch(router, /Apply the matching row exactly/i);
-```
-
-- [ ] **Step 2: Run the focused test and confirm RED**
-
-Run:
-
-```powershell
-node --test --test-name-pattern "candidate matches the routing contract" tests/design-frontend-routing.tests.mjs
-```
-
-Expected: FAIL because the current skill says `Apply the matching row exactly` and lacks the proportional-work wording.
-
-- [ ] **Step 3: Replace only the prescriptive wording**
+- [ ] **Step 1: Replace only the prescriptive wording**
 
 Keep the routing matrix, inactive rows, authority order, Figma authorization, browser evidence, dependency boundary, and duplicate-write protection. Replace the exact-row sentence with:
 
@@ -65,24 +44,26 @@ Tool availability never authorizes or requires its use.
 
 In the workflow, retain the named relevant source categories but allow the agent to choose equivalent query wording and read depth. Do not add a new section, role, or skill.
 
-- [ ] **Step 4: Run the focused and full static router tests**
+- [ ] **Step 2: Run existing skill-shape checks**
+
+Do not add source-text assertions for human prose. The behavioral v2 pair is
+the consumer test; static tests should cover only the existing skill shape,
+portable paths, and hard safety wording. Full source integrity remains RED
+until Task 2 updates the manifest binding in the same atomic change.
 
 Run:
 
 ```powershell
-node --test --test-name-pattern "fixtures|candidate matches|condition materialization" tests/design-frontend-routing.tests.mjs
-node --test tests/design-vendor-integrity.tests.mjs tests/design-frontend-routing.tests.mjs
+node --test --test-name-pattern "candidate matches|condition materialization" tests/design-frontend-routing.tests.mjs
+python "C:\Users\tjdwo\.codex\skills\.system\skill-creator\scripts\quick_validate.py" "skills\joewrks-design-frontend"
 ```
 
-Expected: all selected tests and the full static suite PASS.
+Expected: selected tests and skill validation PASS.
 
-- [ ] **Step 5: Commit the proportional router contract**
+- [ ] **Step 3: Carry the router into the atomic v2 change**
 
-Stage only the three listed files and commit:
-
-```text
-docs: make design routing outcome based
-```
+Do not create a standalone router commit with a stale source-manifest binding.
+Task 2 commits the router, evaluator, tests, collector, and manifest together.
 
 ---
 
@@ -91,8 +72,10 @@ docs: make design routing outcome based
 **Files:**
 - Modify: `evals/support/collect-codex-app-server.mjs`
 - Modify: `evals/design-frontend/collect-router-evaluation.mjs`
+- Modify: `skills/joewrks-design-frontend/SKILL.md`
 - Modify: `tests/design-frontend-routing.tests.mjs`
 - Modify: `tests/codex-app-server-collector.tests.mjs`
+- Modify: `tests/design-vendor-integrity.tests.mjs`
 - Modify: `vendor/source-manifest.json`
 
 **Interfaces:**
@@ -124,7 +107,7 @@ notify({
 Run:
 
 ```powershell
-node --test --test-name-pattern "canonical nested terminal|event scope|benign token language|outcome gate" tests/design-frontend-routing.tests.mjs tests/codex-app-server-collector.tests.mjs
+node --test --test-name-pattern "canonical nested terminal|event scope|normal thread paths|benign token language|bounded semantic source selections|outcome gate" tests/design-frontend-routing.tests.mjs tests/codex-app-server-collector.tests.mjs
 ```
 
 Expected failures:
@@ -196,7 +179,7 @@ source bytes.
 Run:
 
 ```powershell
-node --test --test-name-pattern "canonical nested terminal|event scope|benign token language|outcome gate|pair configuration" tests/design-frontend-routing.tests.mjs tests/codex-app-server-collector.tests.mjs
+node --test --test-name-pattern "canonical nested terminal|event scope|normal thread paths|benign token language|bounded semantic source selections|outcome gate|pair configuration" tests/design-frontend-routing.tests.mjs tests/codex-app-server-collector.tests.mjs
 node --test tests/*.tests.mjs
 powershell -ExecutionPolicy Bypass -File tests/p0-evaluation-contract.tests.ps1
 python vendor/ui-ux-pro-max/scripts/validate_data.py
@@ -206,12 +189,12 @@ python "C:\Users\tjdwo\.codex\skills\.system\skill-creator\scripts\quick_validat
 
 Expected: every check PASS, v1 hash unchanged, v2 artifact absent, and `README.md` remains untracked.
 
-- [ ] **Step 9: Commit the v2 evaluator**
+- [ ] **Step 9: Commit the v2 router and evaluator**
 
-Stage only the five listed files and commit:
+Stage the seven implementation files above and this plan:
 
 ```text
-test: make design router evaluation outcome based
+feat: add outcome-based design router v2
 ```
 
 ---

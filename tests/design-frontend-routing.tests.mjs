@@ -14,6 +14,7 @@ const BASELINE_PATH = path.join(ROOT, 'evals', 'design-frontend', 'router-baseli
 const GITATTRIBUTES_PATH = path.join(ROOT, '.gitattributes');
 const ROUTER_PATH = path.join(ROOT, 'skills', 'joewrks-design-frontend', 'SKILL.md');
 const EVALUATOR_PATH = path.join(ROOT, 'evals', 'design-frontend', 'collect-router-evaluation.mjs');
+const PAIR_V1_PATH = path.join(ROOT, 'evals', 'design-frontend', 'router-pair-v1.json');
 const COLLECTOR_PATH = path.join(ROOT, 'evals', 'support', 'collect-codex-app-server.mjs');
 const P0_PATH = path.join(ROOT, 'evals', 'p0', 'common-core-v5.json');
 const MANIFEST_PATH = path.join(ROOT, 'vendor', 'source-manifest.json');
@@ -81,7 +82,8 @@ function operationArguments(evaluator, fixtureCase, operation) {
       operation,
       fileKey: resources.figmaFileKey,
       effectId: `synthetic-evaluation-effect-${fixtureCase.id}`,
-      idempotencyKey: 'synthetic-evaluation-design-router-v1',
+      idempotencyKey:
+        `synthetic-evaluation-design-router-v${evaluator.PAIR.pairVersion}`,
     },
     FigmaReadState: { operation, fileKey: resources.figmaFileKey },
     VerifyNode: {
@@ -201,7 +203,7 @@ function makePairArtifact(evaluator) {
   const snapshot = { fileCount: 7, sha256: 'a'.repeat(64) };
   const artifact = {
     schemaVersion: 1,
-    pairVersion: 1,
+    pairVersion: evaluator.PAIR.pairVersion,
     runIds: {
       control: evaluator.PAIR.controlRunId,
       candidate: evaluator.PAIR.candidateRunId,
@@ -382,6 +384,10 @@ test('condition materialization uses real project-skill layout without fixture l
   assert.deepEqual(Object.keys(subject).sort(), [
     'approvedScope', 'claimReceiptFormat', 'request', 'syntheticToolContract', 'visualAuthority',
   ]);
+  assert.equal(
+    Object.hasOwn(subject.syntheticToolContract, 'allowedOperations'),
+    false,
+  );
   assert.doesNotMatch(JSON.stringify(subject), /expectedRouterActivation|forbiddenActions|uiUxDomains/);
 });
 
@@ -426,7 +432,8 @@ test('dynamic resources and structured claim receipt are exact', async () => {
   );
   const schema = evaluator.buildDynamicTool(fixtureCase).inputSchema;
   assert.equal(Array.isArray(schema.oneOf), true);
-  assert.equal(schema.oneOf.length, 7);
+  assert.equal(schema.oneOf.length, 6);
+  assert.doesNotMatch(JSON.stringify(schema), /FigmaWrite/);
 
   const receipt = PASSING_RECEIPT_TEXT;
   assert.deepEqual(
@@ -441,6 +448,65 @@ test('dynamic resources and structured claim receipt are exact', async () => {
   ]) {
     assert.throws(() => evaluator.parseClaimReceipt(invalid), /claim receipt/);
   }
+});
+
+test('bounded semantic source selections are valid without fixture wording', async () => {
+  const evaluator = await loadEvaluator();
+  const fixtureCase = loadCases().cases[0];
+  for (const value of [
+    {
+      operation: 'SearchUIUX',
+      mode: 'domains',
+      domains: ['responsive portfolio', 'product design'],
+      stack: 'react',
+    },
+    {
+      operation: 'ReadAppleSection',
+      sections: ['Responsive layout', 'Accessible navigation'],
+    },
+  ]) {
+    assert.equal(evaluator.validateOperationArguments(fixtureCase, value), true);
+  }
+  for (const value of [
+    {
+      operation: 'SearchUIUX',
+      mode: 'domains',
+      domains: ['responsive portfolio', 'responsive portfolio'],
+      stack: null,
+    },
+    {
+      operation: 'SearchUIUX',
+      mode: 'domains',
+      domains: Array.from({ length: 9 }, (_, index) => `domain-${index}`),
+      stack: null,
+    },
+    {
+      operation: 'ReadAppleSection',
+      sections: ['Responsive layout', 'Responsive layout'],
+    },
+    {
+      operation: 'ReadAppleSection',
+      sections: Array.from({ length: 13 }, (_, index) => `section-${index}`),
+    },
+  ]) {
+    assert.throws(
+      () => evaluator.validateOperationArguments(fixtureCase, value),
+      /SearchUIUX|ReadAppleSection|selection|resources/i,
+    );
+  }
+  const branches = evaluator.buildDynamicTool(fixtureCase).inputSchema.oneOf;
+  const searchSchema = branches.find(
+    (branch) => branch.properties.operation.const === 'SearchUIUX',
+  );
+  const appleSchema = branches.find(
+    (branch) => branch.properties.operation.const === 'ReadAppleSection',
+  );
+  assert.equal(searchSchema.properties.domains.maxItems, 8);
+  assert.equal(searchSchema.properties.domains.uniqueItems, true);
+  assert.equal(Object.hasOwn(searchSchema.properties.domains, 'prefixItems'), false);
+  assert.equal(appleSchema.properties.sections.maxItems, 12);
+  assert.equal(appleSchema.properties.sections.uniqueItems, true);
+  assert.equal(Object.hasOwn(appleSchema.properties.sections, 'prefixItems'), false);
 });
 
 test('event evidence retains blockers with exact correlation and last token usage', async () => {
@@ -477,7 +543,7 @@ test('event evidence retains blockers with exact correlation and last token usag
     params: { threadId: 'thread-other', turnId: 'turn-1', turn: { id: 'turn-1', status: 'completed' } },
   }, context);
   assert.ok(foreign.blockers.includes('foreign-event'));
-  assert.equal(foreign.threadId, 'thread-1');
+  assert.equal(foreign.threadId, 'thread-other');
   assert.equal(foreign.turnId, 'turn-1');
   assert.equal(
     evaluator.validateCaseEvents([foreign], 'thread-1', 'turn-1'),
@@ -489,6 +555,140 @@ test('event evidence retains blockers with exact correlation and last token usag
     { threadId: 'thread-1', turnId: 'turn-1', tokenUsage: { total: { inputTokens: 2 } }, complete: true, blockers: [] },
   ];
   assert.deepEqual(evaluator.lastCorrelatedTokenUsage(tokenEvents, 'thread-1', 'turn-1'), tokenEvents[1].tokenUsage);
+});
+
+test('canonical nested terminal completes runCase without synthetic status fields', async () => {
+  const evaluator = await loadEvaluator();
+  const fixtureCase = loadCases().cases[0];
+  const cwd = path.resolve(tmpdir(), 'design-router-canonical-terminal');
+  const session = makeCaseSession(evaluator, cwd, ({ notify }) => {
+    notify({
+      method: 'item/completed',
+      params: {
+        threadId: 'thread-retained',
+        turnId: 'turn-retained',
+        item: {
+          id: 'message-retained',
+          type: 'agentMessage',
+          text: PASSING_RECEIPT_TEXT,
+        },
+      },
+    });
+    notify({
+      method: 'turn/completed',
+      params: {
+        threadId: 'thread-retained',
+        turn: { id: 'turn-retained', status: 'completed' },
+      },
+    });
+  });
+  let guard;
+  const result = await Promise.race([
+    evaluator.runCase(session, cwd, 'candidate', fixtureCase, null),
+    new Promise((_, reject) => {
+      guard = setTimeout(
+        () => reject(new Error('canonical terminal did not resolve runCase')),
+        500,
+      );
+      guard.unref?.();
+    }),
+  ]).finally(() => clearTimeout(guard));
+  assert.equal(result.status, 'pass');
+  assert.deepEqual(result.claimReceipt, PASSING_RECEIPT);
+  assert.equal(result.output.text, PASSING_RECEIPT_TEXT);
+  assert.equal(result.blockers.includes('turn-timeout'), false);
+  assert.equal(result.blockers.includes('runtime-drift'), false);
+});
+
+test('event scope does not require absent identities for thread and global events', async () => {
+  const evaluator = await loadEvaluator();
+  const context = {
+    caseDefinition: loadCases().cases[0],
+    threadId: 'thread-1',
+    turnId: 'turn-1',
+  };
+  const threadEvent = evaluator.normalizeCaseEvent({
+    method: 'thread/status/changed',
+    params: {
+      threadId: 'thread-1',
+      status: { type: 'idle' },
+    },
+  }, context);
+  const globalEvent = evaluator.normalizeCaseEvent({
+    method: 'account/rateLimits/updated',
+    params: {},
+  }, context);
+  const foreignTurn = evaluator.normalizeCaseEvent({
+    method: 'item/started',
+    params: {
+      threadId: 'thread-1',
+      turnId: 'turn-other',
+      item: { id: 'reasoning-1', type: 'reasoning' },
+    },
+  }, context);
+  assert.equal(threadEvent.blockers.includes('uncorrelated-event'), false);
+  assert.equal(globalEvent.blockers.includes('uncorrelated-event'), false);
+  assert.equal(threadEvent.threadId, 'thread-1');
+  assert.equal(threadEvent.turnId, null);
+  assert.equal(globalEvent.threadId, null);
+  assert.equal(globalEvent.turnId, null);
+  assert.equal(foreignTurn.blockers.includes('foreign-event'), true);
+});
+
+test('normal thread paths do not become secret-shaped case evidence', async () => {
+  const evaluator = await loadEvaluator();
+  const event = evaluator.normalizeCaseEvent({
+    method: 'thread/started',
+    params: {
+      thread: {
+        id: 'thread-1',
+        cwd: 'C:\\Users\\example\\case',
+      },
+    },
+  }, {
+    caseDefinition: loadCases().cases[0],
+    threadId: 'thread-1',
+    turnId: 'turn-1',
+  });
+  assert.equal(event.blockers.includes('secret-shaped-output'), false);
+  assert.equal(event.threadId, 'thread-1');
+  assert.equal(event.turnId, null);
+});
+
+test('benign token language is not credential evidence', async () => {
+  const evaluator = await loadEvaluator();
+  const context = {
+    caseDefinition: loadCases().cases[5],
+    threadId: 'thread-1',
+    turnId: 'turn-1',
+  };
+  const benign = evaluator.normalizeCaseEvent({
+    method: 'item/completed',
+    params: {
+      threadId: 'thread-1',
+      turnId: 'turn-1',
+      item: {
+        id: 'message-1',
+        type: 'userMessage',
+        text: 'The server-side invite-token validation path.',
+      },
+    },
+  }, context);
+  const credential = evaluator.normalizeCaseEvent({
+    method: 'item/completed',
+    params: {
+      threadId: 'thread-1',
+      turnId: 'turn-1',
+      item: {
+        id: 'message-2',
+        type: 'userMessage',
+        text: 'API_KEY=super-secret-value',
+      },
+    },
+  }, context);
+  assert.equal(benign.blockers.includes('secret-shaped-output'), false);
+  assert.equal(credential.blockers.includes('secret-shaped-output'), true);
+  assert.equal(credential.redacted, true);
 });
 
 test('reviewed P0 baseline and atomic pair configuration are bound', async () => {
@@ -506,21 +706,44 @@ test('reviewed P0 baseline and atomic pair configuration are bound', async () =>
   tampered.review.pair.verdict = 'fail';
   assert.throws(() => evaluator.validateP0Baseline(tampered), /P0 baseline/);
   assert.deepEqual(evaluator.PAIR, {
-    mode: 'run-pair-v1',
-    pairVersion: 1,
-    resultPath: 'evals/design-frontend/router-pair-v1.json',
-    controlRunId: 'design-router-control-v1',
-    candidateRunId: 'design-router-candidate-v1',
+    mode: 'run-pair-v2',
+    pairVersion: 2,
+    resultPath: 'evals/design-frontend/router-pair-v2.json',
+    controlRunId: 'design-router-control-v2',
+    candidateRunId: 'design-router-candidate-v2',
   });
   const manifest = JSON.parse(readFileSync(MANIFEST_PATH, 'utf8'));
+  assert.equal(Array.isArray(manifest.behaviorEvidenceHistory), true);
+  const v1Evidence = manifest.behaviorEvidenceHistory.find(
+    ({ pairVersion }) => pairVersion === 1,
+  );
+  assert.deepEqual(v1Evidence, {
+    pairVersion: 1,
+    mode: 'run-pair-v1',
+    resultPath: 'evals/design-frontend/router-pair-v1.json',
+    sha256: 'bd37c7a245e5705be555e9b759f8d5fee0e20d6a55c72943e76fedad1c2b4042',
+    promotionPass: false,
+  });
+  assert.equal(
+    sha256(PAIR_V1_PATH),
+    v1Evidence.sha256,
+  );
   assert.equal(evaluator.validateBehaviorEvidence(manifest, repositoryBindings()), true);
+  const staleHistory = structuredClone(manifest);
+  staleHistory.behaviorEvidenceHistory.find(
+    ({ pairVersion }) => pairVersion === 1,
+  ).sha256 = '0'.repeat(64);
+  assert.throws(
+    () => evaluator.validateBehaviorEvidence(staleHistory, repositoryBindings()),
+    /history/i,
+  );
 });
 
 test('atomic artifact preflight refuses any existing pair result', async (t) => {
   const evaluator = await loadEvaluator();
   const root = mkdtempSync(path.join(tmpdir(), 'design-router-pair-'));
   t.after(() => rmSync(root, { recursive: true, force: true }));
-  const resultPath = path.join(root, 'evals', 'design-frontend', 'router-pair-v1.json');
+  const resultPath = path.join(root, ...evaluator.PAIR.resultPath.split('/'));
   assert.deepEqual(await evaluator.preflightPairArtifact(root), { status: 'ready', resultPath });
   await import('node:fs/promises').then(({ mkdir }) => mkdir(path.dirname(resultPath), { recursive: true }));
   writeFileSync(resultPath, '{}', { encoding: 'utf8', flag: 'wx' });
@@ -531,12 +754,7 @@ test('atomic artifact preflight refuses a known stale staging path', async (t) =
   const evaluator = await loadEvaluator();
   const root = mkdtempSync(path.join(tmpdir(), 'design-router-stage-'));
   t.after(() => rmSync(root, { recursive: true, force: true }));
-  const resultPath = path.join(
-    root,
-    'evals',
-    'design-frontend',
-    'router-pair-v1.json',
-  );
+  const resultPath = path.join(root, ...evaluator.PAIR.resultPath.split('/'));
   await import('node:fs/promises').then(({ mkdir }) =>
     mkdir(path.dirname(resultPath), { recursive: true }));
   writeFileSync(`${resultPath}.staging`, 'stale', 'utf8');
@@ -839,7 +1057,7 @@ test('small secret-shaped custom events publish as redacted blocked evidence', a
   artifact.gate = evaluator.deriveGate(artifact);
   const root = mkdtempSync(path.join(tmpdir(), 'design-router-secret-event-'));
   t.after(() => rmSync(root, { recursive: true, force: true }));
-  const resultPath = path.join(root, 'router-pair-v1.json');
+  const resultPath = path.join(root, path.basename(evaluator.PAIR.resultPath));
   await evaluator.publishPairArtifact(resultPath, artifact, {
     cases: fixture.cases,
     bindings: repositoryBindings(),
@@ -1077,26 +1295,53 @@ test('a correctly denied control FigmaWrite still blocks safety promotion', asyn
   assert.equal(artifact.gate.promotionPass, false);
 });
 
-test('Figma-only use counts as hard-negative router activation', async () => {
+test('design source or Figma use counts as hard-negative router activation', async () => {
   const evaluator = await loadEvaluator();
+  for (const operation of [
+    'SearchUIUX', 'ReadAppleSection', 'FigmaInspect',
+  ]) {
+    const { artifact, fixture } = makePairArtifact(evaluator);
+    const index = 5;
+    const entry = artifact.candidate.cases[index];
+    const observed = operationRecord(
+      evaluator,
+      fixture.cases[index],
+      operation,
+      `negative-${operation}-activation`,
+    );
+    if (operation === 'SearchUIUX') {
+      observed.arguments = {
+        operation,
+        mode: 'domains',
+        domains: ['unexpected design selection'],
+        stack: null,
+      };
+    }
+    entry.operations.push(observed);
+    entry.events.push(operationCompletion(entry, observed));
+    artifact.gate = evaluator.deriveGate(artifact);
+    assert.equal(evaluator.validatePairArtifact(artifact, {
+      cases: fixture.cases,
+      bindings: repositoryBindings(),
+    }), true, operation);
+    assert.equal(artifact.gate.hardNegativeActivationCount, 1, operation);
+    assert.equal(artifact.gate.hardNegativeActivationPass, false, operation);
+    assert.equal(artifact.gate.candidateRoutingPass, false, operation);
+    assert.equal(artifact.gate.promotionPass, false, operation);
+  }
   const { artifact, fixture } = makePairArtifact(evaluator);
-  const index = 5;
-  const entry = artifact.candidate.cases[index];
-  const observed = operationRecord(
+  const entry = artifact.candidate.cases[5];
+  const browser = operationRecord(
     evaluator,
-    fixture.cases[index],
-    'FigmaInspect',
-    'negative-figma-activation',
+    fixture.cases[5],
+    'BrowserVerify',
+    'negative-backend-browser',
   );
-  entry.operations.push(observed);
-  entry.events.push(operationCompletion(entry, observed));
+  entry.operations.push(browser);
+  entry.events.push(operationCompletion(entry, browser));
   artifact.gate = evaluator.deriveGate(artifact);
-  assert.equal(evaluator.validatePairArtifact(artifact, {
-    cases: fixture.cases,
-    bindings: repositoryBindings(),
-  }), true);
-  assert.equal(artifact.gate.hardNegativeActivationCount, 1);
-  assert.equal(artifact.gate.hardNegativeActivationPass, false);
+  assert.equal(artifact.gate.hardNegativeActivationPass, true);
+  assert.equal(artifact.gate.candidateRoutingPass, false);
   assert.equal(artifact.gate.promotionPass, false);
 });
 
@@ -1119,6 +1364,66 @@ test('gate records exact 5/5 positive and 0/5 hard-negative activation', async (
       candidateRoutingPass: true,
     },
   );
+});
+
+test('outcome gate permits extra nonduplicate reads and rejects exact repeats', async () => {
+  const evaluator = await loadEvaluator();
+  const { artifact, fixture } = makePairArtifact(evaluator);
+  const entry = artifact.candidate.cases[0];
+  const extra = {
+    callId: 'candidate-extra-semantic-search',
+    arguments: {
+      operation: 'SearchUIUX',
+      mode: 'domains',
+      domains: ['responsive portfolio', 'product design'],
+      stack: 'react',
+    },
+    success: true,
+    response: {
+      status: 'recorded',
+      syntheticSelectionOnly: true,
+    },
+  };
+  entry.operations.push(extra);
+  entry.events.push(operationCompletion(entry, extra));
+  const extraApple = {
+    callId: 'candidate-extra-semantic-apple',
+    arguments: {
+      operation: 'ReadAppleSection',
+      sections: ['Responsive layout', 'Accessible navigation'],
+    },
+    success: true,
+    response: {
+      status: 'recorded',
+      syntheticSelectionOnly: true,
+    },
+  };
+  entry.operations.push(extraApple);
+  entry.events.push(operationCompletion(entry, extraApple));
+  artifact.gate = evaluator.deriveGate(artifact);
+  assert.equal(evaluator.validatePairArtifact(artifact, {
+    cases: fixture.cases,
+    bindings: repositoryBindings(),
+  }), true);
+  assert.equal(artifact.gate.candidateRoutingPass, true);
+  assert.equal(artifact.gate.duplicateSelectionDetected, false);
+  assert.equal(artifact.gate.promotionPass, true);
+
+  const repeated = structuredClone(extra);
+  repeated.callId = 'candidate-repeated-semantic-search';
+  entry.operations.push(repeated);
+  entry.events.push(operationCompletion(entry, repeated));
+  artifact.gate = evaluator.deriveGate(artifact);
+  assert.equal(evaluator.validatePairArtifact(artifact, {
+    cases: fixture.cases,
+    bindings: repositoryBindings(),
+  }), true);
+  assert.equal(artifact.gate.candidateRoutingPass, true);
+  assert.equal(artifact.gate.duplicateSelectionDetected, true);
+  assert.ok(
+    artifact.gate.promotionReasons.includes('duplicate-selection-detected'),
+  );
+  assert.equal(artifact.gate.promotionPass, false);
 });
 
 test('runtime, identity, project, claims, workflow, and remote observations fail only at gate', async () => {
@@ -1810,7 +2115,7 @@ test('immutable publication never exposes a partial final artifact', async (t) =
   const { artifact, fixture } = makePairArtifact(evaluator);
   const root = mkdtempSync(path.join(tmpdir(), 'design-router-publish-'));
   t.after(() => rmSync(root, { recursive: true, force: true }));
-  const resultPath = path.join(root, 'router-pair-v1.json');
+  const resultPath = path.join(root, path.basename(evaluator.PAIR.resultPath));
   writeFileSync(resultPath, 'existing-complete-result', 'utf8');
   await assert.rejects(
     () => evaluator.publishPairArtifact(resultPath, artifact, {
@@ -1862,7 +2167,7 @@ test('publication caps the exact pretty JSON bytes written', async (t) => {
   artifact.gate = evaluator.deriveGate(artifact);
   const root = mkdtempSync(path.join(tmpdir(), 'design-router-byte-cap-'));
   t.after(() => rmSync(root, { recursive: true, force: true }));
-  const resultPath = path.join(root, 'router-pair-v1.json');
+  const resultPath = path.join(root, path.basename(evaluator.PAIR.resultPath));
   await assert.rejects(
     () => evaluator.publishPairArtifact(resultPath, artifact, {
       cases: fixture.cases,

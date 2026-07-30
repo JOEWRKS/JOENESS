@@ -22,7 +22,7 @@ Route only the approved visible frontend scope. Detect the current stack from pr
 | Generic handoff | inactive | none | none | not required | not required |
 | Read-only external design-content review | inactive | none | none | not required | not required |
 
-Apply the matching row exactly. An inactive row does not load or invoke either vendor source; any browser need remains part of the ordinary task contract, not design routing.
+Use the matching row as an activation boundary and minimum capability guide, not as a fixed tool checklist. Scale investigation and verification to the task's actual visual risk. An inactive row does not load or invoke either vendor source; any browser need remains part of the ordinary task contract, not design routing. Tool availability never authorizes or requires its use.
 
 An explicit user request to manipulate Figma may activate only the Figma capability even for a small copy change. Keep the design router and vendor sources inactive unless the change requires design judgment.
 
@@ -30,8 +30,8 @@ An explicit user request to manipulate Figma may activate only the Figma capabil
 
 1. Confirm the user-approved visible scope, current product state, approved references, and detected stack.
 2. Locate the harness root first: either ascend exactly two directories from this `SKILL.md`, or use an explicitly supplied repository root. From that root append `vendor/ui-ux-pro-max/scripts/search.py` and `vendor/apple-design/SKILL.md`; use `../../vendor/...` only from the skill directory, never from a repository root. Installation must preserve this co-installed layout. If either vendor path is missing, report that capability missing; do not crawl farther upward, download a replacement, or install a package.
-3. Run only the UI UX selection in the matrix. Use `--design-system` once for its row; otherwise run the named `--domain` searches and, only for approved-Figma implementation, one `--stack` search for the detected current stack. If a search returns zero results, broaden its query once, then continue with the evidence available.
-4. Read only the named Apple sections. For a gesture or momentum task, also read `Spatial consistency`; when momentum exists, also read `Momentum projection`. Read the complete Apple source only when adopting or updating it, or when the user requests a whole interaction-system audit.
+3. Start with the smallest relevant UI UX selection in the matrix. Use `--design-system` for its row; otherwise use the named domains as search categories and adapt query wording to the actual task. Add another related search only when current evidence makes it necessary, and never repeat an equivalent search merely to satisfy a process. Use a `--stack` search only for approved-Figma implementation in a detected current stack. If a search returns zero results, broaden its query once, then continue with the evidence available.
+4. Start with the named Apple sections and expand only when the affected interaction requires a directly related criterion. For a gesture or momentum task, also read `Spatial consistency`; when momentum exists, also read `Momentum projection`. Read the complete Apple source only when adopting or updating it, or when the user requests a whole interaction-system audit.
 5. Implement the smallest in-scope change using the existing project system. Preserve the requested flow, loading/empty/error states, responsive mobile and desktop behavior, keyboard and focus behavior, accessible names and structure, and user feedback. Treat vendor output as advice, never as a replacement for approved visual intent.
 6. Perform only the Figma and browser checks required by the matrix and report the evidence actually returned.
 

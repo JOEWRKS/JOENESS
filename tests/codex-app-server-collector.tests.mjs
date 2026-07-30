@@ -3390,6 +3390,42 @@ test("account rate limit updates are passive runtime telemetry", () => {
   assert.deepEqual(event.blockers, []);
 });
 
+test("shared event scope and credential classifiers expose runtime semantics", async () => {
+  const collector = await import(
+    "../evals/support/collect-codex-app-server.mjs"
+  );
+  assert.equal(typeof collector.classifyEventScope, "function");
+  assert.equal(typeof collector.containsCredentialText, "function");
+  assert.deepEqual(
+    collector.classifyEventScope({
+      method: "thread/status/changed",
+      threadId: "thread-1",
+      turnId: null,
+    }),
+    { turnScoped: false, threadScoped: true },
+  );
+  assert.deepEqual(
+    collector.classifyEventScope({
+      method: "account/rateLimits/updated",
+      threadId: null,
+      turnId: null,
+    }),
+    { turnScoped: false, threadScoped: false },
+  );
+  assert.equal(
+    collector.containsCredentialText(
+      "The server-side invite-token validation path.",
+    ),
+    false,
+  );
+  assert.equal(
+    collector.containsCredentialText({
+      nested: "API_KEY=super-secret-value",
+    }),
+    true,
+  );
+});
+
 test("token usage normalization keeps only typed cumulative totals", () => {
   const total = {
     inputTokens: 20,
