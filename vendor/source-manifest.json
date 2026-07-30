@@ -1,6 +1,23 @@
 {
   "schemaVersion": 1,
-  "evaluation": { "state": "candidate", "tests": ["tests/design-vendor-integrity.tests.mjs", "vendor/ui-ux-pro-max/scripts/validate_data.py", "vendor/ui-ux-pro-max/scripts/tests/test_core.py"] },
+  "evaluation": {
+    "state": "candidate",
+    "tests": ["tests/design-vendor-integrity.tests.mjs", "vendor/ui-ux-pro-max/scripts/validate_data.py", "vendor/ui-ux-pro-max/scripts/tests/test_core.py"],
+    "current": {
+      "mode": "run-hybrid-v1",
+      "version": 1,
+      "artifact": {"path":"evals/design-frontend/router-hybrid-v1.json","sha256":"10ddbd6d14bf3153e53561314245607d36c7d950af231585a8b5ae78fc590554"},
+      "collector": {"path":"evals/design-frontend/collect-hybrid-router-evaluation.mjs","sha256":"24e04d090c5c7535718878d0e9cd40a2c8324e1bd52c362ba292e68585e9ac12"},
+      "cases": {"path":"evals/design-frontend/cases.json","sha256":"8a940cd84b4f2cbf265154c060941734ad6e983d0f49cb7dd5d06fc3df5ee1f7"},
+      "router": {"path":"skills/joewrks-design-frontend/SKILL.md","sha256":"0694f0d0880c079ab50b2af2621ef37f9745eae356f0c9ebc5a1351cd0d8a67d"},
+      "commonCore": {"path":"AGENTS.md","sha256":"5aebc74bc795891c43bf785d9b34ae4d35d4a40bf46eddef3f6246d75919a495"},
+      "classification": "implicit-unverified",
+      "hardGate": "pass",
+      "outcomeReview": "human-review-required",
+      "semanticImprovement": "not-asserted",
+      "promotionPass": false
+    }
+  },
   "activeSkills": {
     "joewrks-design-frontend": {
       "authorship": "joewrks-canonical",
@@ -50,7 +67,7 @@
   },
   "sources": {
     "ui-ux-pro-max": {
-      "repository": "nextlevelbuilder/ui-ux-pro-max-skill", "url": "https://github.com/nextlevelbuilder/ui-ux-pro-max-skill", "commit": "3b5df7547964f0cb3424de74cff55b69039250d3", "upstreamPath": ".claude/skills/ui-ux-pro-max/**", "archiveSha256": "ba29a4e0e380a0017f833a1041f558972a55fbad81d056c3d9a549e1609f0841", "activationMode": "non-discoverable-router-only",
+      "repository": "nextlevelbuilder/ui-ux-pro-max-skill", "url": "https://github.com/nextlevelbuilder/ui-ux-pro-max-skill", "commit": "3b5df7547964f0cb3424de74cff55b69039250d3", "upstreamPath": ".claude/skills/ui-ux-pro-max/**", "archiveSha256": "ba29a4e0e380a0017f833a1041f558972a55fbad81d056c3d9a549e1609f0841", "activationMode": "non-discoverable-router-only", "evaluationStatus": "validated", "enforcingTests": ["tests/design-vendor-integrity.tests.mjs", "vendor/ui-ux-pro-max/scripts/validate_data.py", "vendor/ui-ux-pro-max/scripts/tests/test_core.py"],
       "upstreamAuditNotes": ["SKILL.md reports 98 UX and 104 icon rows; the pinned data contains 99 and 105.", "styles.csv omits No=54; search behavior is unaffected."],
       "license": { "name": "MIT", "upstreamPath": "LICENSE", "sha256": "738f69dfa83db5c347c678fb9d90e560877059f0de93a327c39001bff92dc014" },
       "files": [
@@ -101,7 +118,7 @@
       ]
     },
     "apple-design": {
-      "repository": "emilkowalski/skills", "url": "https://github.com/emilkowalski/skills", "commit": "e695d13cb298db0f46d5ef05be2ad13fa12908a6", "upstreamPath": "skills/apple-design/SKILL.md", "archiveSha256": "870b5b75ddc1763b5f8bb19cbac2c2478b54e12c8a42ec8627c189f95c286670", "activationMode": "non-discoverable-router-only",
+      "repository": "emilkowalski/skills", "url": "https://github.com/emilkowalski/skills", "commit": "e695d13cb298db0f46d5ef05be2ad13fa12908a6", "upstreamPath": "skills/apple-design/SKILL.md", "archiveSha256": "870b5b75ddc1763b5f8bb19cbac2c2478b54e12c8a42ec8627c189f95c286670", "activationMode": "non-discoverable-router-only", "evaluationStatus": "validated", "enforcingTests": ["tests/design-vendor-integrity.tests.mjs"],
       "license": { "name": "MIT", "upstreamPath": "LICENSE", "sha256": "4ff5bdb7887ec1435c9cab0e8d1a7caee704d894d65c2a008ccc68b1cc2f260b" },
       "files": [
         {"localPath":"vendor/apple-design/SKILL.md","bytes":22715,"sha256":"11840b24a11d7f94f39c6aaab074750ae4e4de4ef54ee4b1dd97e16ebd485e61","exactUpstreamCopy":true},

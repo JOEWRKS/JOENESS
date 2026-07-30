@@ -3,6 +3,7 @@ import { createHash } from 'node:crypto';
 import { existsSync, lstatSync, readFileSync, readdirSync } from 'node:fs';
 import path from 'node:path';
 import test from 'node:test';
+import { pathToFileURL } from 'node:url';
 
 const ROOT = path.resolve(import.meta.dirname, '..');
 const VENDOR = path.join(ROOT, 'vendor');
@@ -79,6 +80,49 @@ const EXPECTED_ACTIVE_SKILL = {
     },
   ],
 };
+const EXPECTED_HYBRID_EVALUATION = {
+  mode: 'run-hybrid-v1',
+  version: 1,
+  artifact: {
+    path: 'evals/design-frontend/router-hybrid-v1.json',
+    sha256: '10ddbd6d14bf3153e53561314245607d36c7d950af231585a8b5ae78fc590554',
+  },
+  collector: {
+    path: 'evals/design-frontend/collect-hybrid-router-evaluation.mjs',
+    sha256: '24e04d090c5c7535718878d0e9cd40a2c8324e1bd52c362ba292e68585e9ac12',
+  },
+  cases: {
+    path: 'evals/design-frontend/cases.json',
+    sha256: '8a940cd84b4f2cbf265154c060941734ad6e983d0f49cb7dd5d06fc3df5ee1f7',
+  },
+  router: {
+    path: 'skills/joewrks-design-frontend/SKILL.md',
+    sha256: '0694f0d0880c079ab50b2af2621ef37f9745eae356f0c9ebc5a1351cd0d8a67d',
+  },
+  commonCore: {
+    path: 'AGENTS.md',
+    sha256: '5aebc74bc795891c43bf785d9b34ae4d35d4a40bf46eddef3f6246d75919a495',
+  },
+  classification: 'implicit-unverified',
+  hardGate: 'pass',
+  outcomeReview: 'human-review-required',
+  semanticImprovement: 'not-asserted',
+  promotionPass: false,
+};
+const EXPECTED_SOURCE_EVALUATION = {
+  'ui-ux-pro-max': {
+    evaluationStatus: 'validated',
+    enforcingTests: [
+      'tests/design-vendor-integrity.tests.mjs',
+      'vendor/ui-ux-pro-max/scripts/validate_data.py',
+      'vendor/ui-ux-pro-max/scripts/tests/test_core.py',
+    ],
+  },
+  'apple-design': {
+    evaluationStatus: 'validated',
+    enforcingTests: ['tests/design-vendor-integrity.tests.mjs'],
+  },
+};
 
 function sha256(file) {
   return createHash('sha256').update(readFileSync(file)).digest('hex');
@@ -110,14 +154,12 @@ test('vendor bundle is exactly the pinned non-discoverable source set', () => {
   const manifest = JSON.parse(manifestText);
 
   assert.equal(manifest.schemaVersion, 1);
-  assert.deepEqual(manifest.evaluation, {
-    state: 'candidate',
-    tests: [
-      'tests/design-vendor-integrity.tests.mjs',
-      'vendor/ui-ux-pro-max/scripts/validate_data.py',
-      'vendor/ui-ux-pro-max/scripts/tests/test_core.py',
-    ],
-  });
+  assert.equal(manifest.evaluation.state, 'candidate');
+  assert.deepEqual(manifest.evaluation.tests, [
+    'tests/design-vendor-integrity.tests.mjs',
+    'vendor/ui-ux-pro-max/scripts/validate_data.py',
+    'vendor/ui-ux-pro-max/scripts/tests/test_core.py',
+  ]);
   assert.deepEqual(Object.keys(manifest.sources).sort(), Object.keys(EXPECTED_SOURCES).sort());
   assert.deepEqual(manifest.activeSkills, { 'joewrks-design-frontend': EXPECTED_ACTIVE_SKILL });
   assert.deepEqual(manifest.sources['ui-ux-pro-max'].upstreamAuditNotes, [
@@ -173,6 +215,45 @@ test('vendor bundle is exactly the pinned non-discoverable source set', () => {
 test('Common Core remains byte-identical', () => {
   assert.equal(lstatSync(AGENTS).size, 7933);
   assert.equal(sha256(AGENTS), '5aebc74bc795891c43bf785d9b34ae4d35d4a40bf46eddef3f6246d75919a495');
+});
+
+test('candidate ledger binds the reviewed hybrid artifact without promoting implicit routing', async () => {
+  const manifest = JSON.parse(readFileSync(MANIFEST, 'utf8'));
+  const current = manifest.evaluation.current;
+  assert.deepEqual(current, EXPECTED_HYBRID_EVALUATION);
+
+  for (const [name, expected] of Object.entries(EXPECTED_SOURCE_EVALUATION)) {
+    assert.equal(manifest.sources[name].evaluationStatus, expected.evaluationStatus);
+    assert.deepEqual(manifest.sources[name].enforcingTests, expected.enforcingTests);
+  }
+
+  for (const [key, evidence] of Object.entries({
+    artifact: current.artifact,
+    collector: current.collector,
+    cases: current.cases,
+    router: current.router,
+    commonCore: current.commonCore,
+  })) {
+    const localFile = path.join(ROOT, ...evidence.path.split('/'));
+    assert.ok(existsSync(localFile), `missing ${key}: ${evidence.path}`);
+    assert.equal(sha256(localFile), evidence.sha256, `wrong ${key} hash: ${evidence.path}`);
+  }
+
+  const artifact = JSON.parse(readFileSync(path.join(ROOT, ...current.artifact.path.split('/')), 'utf8'));
+  const { validateArtifact } = await import(pathToFileURL(path.join(ROOT, ...current.collector.path.split('/'))));
+  assert.equal(validateArtifact(artifact), true);
+  assert.equal(artifact.implicit.classification, current.classification);
+  assert.equal(artifact.hardGate.status, current.hardGate);
+  assert.equal(current.promotionPass, false);
+  for (const comparison of artifact.outcomeComparisons) {
+    assert.equal(comparison.reviewStatus, current.outcomeReview);
+    assert.equal(comparison.semanticImprovement, current.semanticImprovement);
+  }
+
+  for (const historical of manifest.behaviorEvidenceHistory) {
+    const localFile = path.join(ROOT, ...historical.resultPath.split('/'));
+    assert.equal(sha256(localFile), historical.sha256, `historical evidence changed: ${historical.resultPath}`);
+  }
 });
 
 test('Git preserves exact vendor and active skill bytes on checkout', () => {
