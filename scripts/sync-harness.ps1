@@ -107,7 +107,12 @@ function Assert-HarnessNoReparsePoint {
     $relative = $pathFull.Substring($rootFull.Length).TrimStart('\', '/')
     $current = $rootFull
     foreach ($segment in @($relative -split '[\\/]')) {
-        $item = Get-Item -LiteralPath $current -Force -ErrorAction SilentlyContinue
+        $item = $null
+        try {
+            $item = Get-Item -LiteralPath $current -Force -ErrorAction Stop
+        } catch [Management.Automation.ItemNotFoundException] {
+            $item = $null
+        }
         if ($null -ne $item) {
             if (($item.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0) {
                 throw "$Label contains a reparse point: $current"
@@ -115,7 +120,12 @@ function Assert-HarnessNoReparsePoint {
         }
         if (-not [string]::IsNullOrEmpty($segment)) { $current = Join-Path $current $segment }
     }
-    $item = Get-Item -LiteralPath $current -Force -ErrorAction SilentlyContinue
+    $item = $null
+    try {
+        $item = Get-Item -LiteralPath $current -Force -ErrorAction Stop
+    } catch [Management.Automation.ItemNotFoundException] {
+        $item = $null
+    }
     if ($null -ne $item) {
         if (($item.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0) {
             throw "$Label contains a reparse point: $current"

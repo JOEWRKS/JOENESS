@@ -475,6 +475,34 @@ function Test-CleanSkeletonAdversaries {
         Remove-Fixture $f
     }
 
+    $f = New-Fixture
+    try {
+        [IO.Directory]::CreateDirectory($f.AgentsHome) | Out-Null
+        $skillsParent = Join-Path $f.AgentsHome 'skills'
+        $before = Get-TreeEntries $f.Root
+        . $f.Script
+        $results = & {
+            function Get-Item {
+                [CmdletBinding()]
+                param([string[]] $LiteralPath, [switch] $Force)
+                if (@($LiteralPath).Count -eq 1 -and $LiteralPath[0] -ieq $skillsParent) {
+                    Write-Error 'injected parent inspection error'
+                    return
+                }
+                Microsoft.PowerShell.Management\Get-Item @PSBoundParameters
+            }
+            [pscustomobject] @{
+                Remove = Invoke-JoewrksHarnessSync -Remove -CodexHome $f.CodexHome -AgentsHome $f.AgentsHome -BackupRoot $f.BackupRoot
+                Apply = Invoke-JoewrksHarnessSync -Apply -CodexHome $f.CodexHome -AgentsHome $f.AgentsHome -BackupRoot $f.BackupRoot
+            }
+        }
+        Assert-Equal $results.Remove.status 'blocked' 'parent inspection error blocks no-state remove'
+        Assert-Equal (Get-HarnessExitCode $results.Remove.status) 2 'parent inspection error remove maps to exit 2'
+        Assert-Equal $results.Apply.status 'blocked' 'parent inspection error blocks apply'
+        Assert-StringSetEqual (Get-TreeEntries $f.Root) $before 'parent inspection error causes zero target writes'
+        Assert-True (-not (Test-Path -LiteralPath $f.BackupRoot)) 'parent inspection error creates no backup'
+    } finally { Remove-Fixture $f }
+
     foreach ($case in @(
         @{
             Name = 'file in expected skeleton directory'
