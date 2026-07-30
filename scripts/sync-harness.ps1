@@ -223,7 +223,7 @@ function Assert-HarnessFileSnapshot {
 }
 
 function New-HarnessTargetDirectory {
-    param([string] $Path, [Collections.Generic.List[object]] $CreatedDirectories)
+    param([string] $Path, [Collections.Generic.List[string]] $CreatedDirectories)
     if (Test-Path -LiteralPath $Path) {
         if (-not (Test-Path -LiteralPath $Path -PathType Container)) { throw "Target parent is not a directory: $Path" }
         return
@@ -237,45 +237,13 @@ function New-HarnessTargetDirectory {
     if (-not (Test-Path -LiteralPath $current -PathType Container)) { throw "Target parent is not a directory: $current" }
     for ($i = $missing.Count - 1; $i -ge 0; $i--) {
         $directory = $missing[$i]
-        $parent = Split-Path -Parent $directory
-        $temporary = Join-Path $parent ('.joewrks-directory-' + [guid]::NewGuid().ToString('N') + '.tmp')
-        $ownershipId = [guid]::NewGuid().ToString('N')
-        $markerName = '.joewrks-directory-' + $ownershipId + '.owner'
-        $markerBytes = [Text.Encoding]::UTF8.GetBytes($ownershipId)
-        try {
-            [IO.Directory]::CreateDirectory($temporary) | Out-Null
-            [IO.File]::WriteAllBytes((Join-Path $temporary $markerName), $markerBytes)
-            [IO.Directory]::Move($temporary, $directory)
-            if ($null -ne $CreatedDirectories) {
-                $CreatedDirectories.Add([pscustomobject] @{
-                    Path = $directory
-                    MarkerName = $markerName
-                    MarkerHash = Get-HarnessSha256 $markerBytes
-                })
-            }
-        } finally {
-            if (Test-Path -LiteralPath $temporary -PathType Container) { [IO.Directory]::Delete($temporary, $true) }
-        }
+        [IO.Directory]::CreateDirectory($directory) | Out-Null
+        if ($null -ne $CreatedDirectories) { $CreatedDirectories.Add($directory) }
     }
-}
-
-function Test-HarnessDirectoryOwnership {
-    param([string] $Path, $Evidence, [switch] $OtherwiseEmpty)
-    if (-not (Test-Path -LiteralPath $Path -PathType Container)) { return $false }
-    $item = Get-Item -LiteralPath $Path -Force
-    if (($item.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0) { return $false }
-    $markerPath = Join-Path $Path $Evidence.MarkerName
-    if (-not (Test-Path -LiteralPath $markerPath -PathType Leaf)) { return $false }
-    if ((Get-HarnessSha256 ([IO.File]::ReadAllBytes($markerPath))) -cne $Evidence.MarkerHash) { return $false }
-    if ($OtherwiseEmpty) {
-        $children = @(Get-ChildItem -LiteralPath $Path -Force)
-        if ($children.Count -ne 1 -or $children[0].FullName -ine $markerPath) { return $false }
-    }
-    $true
 }
 
 function Set-HarnessFile {
-    param($Operation, [Collections.Generic.List[object]] $CreatedDirectories)
+    param($Operation, [Collections.Generic.List[string]] $CreatedDirectories)
     $temporaryPath = $null
     $tombstonePath = $null
     try {
@@ -900,7 +868,7 @@ function Invoke-JoewrksHarnessSync {
     $removed = [Collections.Generic.List[string]]::new()
     $unresolved = [Collections.Generic.List[string]]::new()
     $unresolvedSeen = @{}
-    $createdDirectories = [Collections.Generic.List[object]]::new()
+    $createdDirectories = [Collections.Generic.List[string]]::new()
     try {
         [IO.Directory]::CreateDirectory($backupPath) | Out-Null
         foreach ($operation in $operations) {
@@ -941,17 +909,6 @@ function Invoke-JoewrksHarnessSync {
                 throw
             }
         }
-        foreach ($evidence in $createdDirectories) {
-            if (-not (Test-HarnessDirectoryOwnership $evidence.Path $evidence)) {
-                throw "Created target directory ownership changed: $($evidence.Path)"
-            }
-        }
-        foreach ($evidence in $createdDirectories) {
-            $markerPath = Join-Path $evidence.Path $evidence.MarkerName
-            [IO.File]::Delete($markerPath)
-            if (Test-Path -LiteralPath $markerPath) { throw "Created target directory marker still exists: $markerPath" }
-        }
-
         return [pscustomobject] @{
             status = 'current'
             bundleSelection = $bundleSelection
@@ -1018,42 +975,15 @@ function Invoke-JoewrksHarnessSync {
             }
         }
         for ($i = $createdDirectories.Count - 1; $i -ge 0; $i--) {
-            $evidence = $createdDirectories[$i]
-            $directory = $evidence.Path
-            $directoryTombstone = $null
+            $directory = $createdDirectories[$i]
             try {
-                if (-not (Test-HarnessDirectoryOwnership $directory $evidence -OtherwiseEmpty)) {
-                    throw "Created target directory ownership changed: $directory"
-                }
-                $directoryTombstone = Join-Path (Split-Path -Parent $directory) ('.' + [IO.Path]::GetFileName($directory) + '.joewrks-' + [guid]::NewGuid().ToString('N') + '.delete')
-                [IO.Directory]::Move($directory, $directoryTombstone)
-                if (-not (Test-HarnessDirectoryOwnership $directoryTombstone $evidence -OtherwiseEmpty)) {
-                    if (-not (Test-Path -LiteralPath $directory)) {
-                        [IO.Directory]::Move($directoryTombstone, $directory)
-                        $directoryTombstone = $null
-                    }
-                    throw "Moved target directory ownership changed: $directory"
-                }
-                [IO.File]::Delete((Join-Path $directoryTombstone $evidence.MarkerName))
-                [IO.Directory]::Delete($directoryTombstone, $false)
-                $directoryTombstone = $null
-                if (Test-Path -LiteralPath $directory) { throw "Created target directory was replaced during cleanup: $directory" }
-                $null = $removed.Add($directory)
+                if (-not (Test-Path -LiteralPath $directory)) { continue }
             } catch {
-                if ($directoryTombstone -and (Test-Path -LiteralPath $directoryTombstone -PathType Container)) {
-                    try {
-                        if (Test-HarnessDirectoryOwnership $directoryTombstone $evidence -OtherwiseEmpty) {
-                            [IO.File]::Delete((Join-Path $directoryTombstone $evidence.MarkerName))
-                            [IO.Directory]::Delete($directoryTombstone, $false)
-                        } elseif (-not (Test-Path -LiteralPath $directory)) {
-                            [IO.Directory]::Move($directoryTombstone, $directory)
-                        }
-                    } catch {}
-                }
-                if (-not $unresolvedSeen.ContainsKey($directory)) {
-                    $unresolvedSeen[$directory] = $true
-                    $null = $unresolved.Add($directory)
-                }
+                # Inspection failure is handled by the unresolved path below.
+            }
+            if (-not $unresolvedSeen.ContainsKey($directory)) {
+                $unresolvedSeen[$directory] = $true
+                $null = $unresolved.Add($directory)
             }
         }
         $rollback = [pscustomobject] @{
