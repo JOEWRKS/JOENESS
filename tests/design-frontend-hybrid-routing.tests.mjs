@@ -24,14 +24,34 @@ const COLLECTOR = path.join(
   'design-frontend',
   'collect-hybrid-router-evaluation.mjs',
 );
+const STRICT_VALIDATOR = path.join(
+  ROOT,
+  'evals',
+  'design-frontend',
+  'validate-hybrid-router-evidence.mjs',
+);
+const HYBRID_ARTIFACT = path.join(
+  ROOT,
+  'evals',
+  'design-frontend',
+  'router-hybrid-v1.json',
+);
 const CASES = JSON.parse(readFileSync(CASES_PATH, 'utf8')).cases;
 const collector = existsSync(COLLECTOR)
   ? await import(pathToFileURL(COLLECTOR))
+  : null;
+const strictValidator = existsSync(STRICT_VALIDATOR)
+  ? await import(pathToFileURL(STRICT_VALIDATOR))
   : null;
 
 function requireCollector() {
   assert.ok(collector, 'hybrid router collector module is required');
   return collector;
+}
+
+function requireStrictValidator() {
+  assert.ok(strictValidator, 'strict hybrid evidence validator is required');
+  return strictValidator;
 }
 
 function activationRun(caseId, repetition, status) {
@@ -68,6 +88,93 @@ const output = (text) => ({
   byteLength: Buffer.byteLength(text),
   sha256: createHash('sha256').update(text).digest('hex'),
   truncated: false,
+});
+
+function hybridArtifact() {
+  return JSON.parse(readFileSync(HYBRID_ARTIFACT, 'utf8'));
+}
+
+function withFirstRun(artifact, change) {
+  artifact.implicit.runs[0] = {
+    ...artifact.implicit.runs[0],
+    ...change,
+  };
+  return artifact;
+}
+
+test('strict hybrid evidence validation rejects unsupported retained claims', () => {
+  const { validateHybridRouterEvidence } = requireStrictValidator();
+  assert.equal(validateHybridRouterEvidence(hybridArtifact()), true);
+
+  const claims = [
+    ['Figma', 'I verified the design in Figma.', /unsupported retained-output failures/i],
+    ['browser', 'I tested the design in the browser.', /unsupported retained-output failures/i],
+    ['tests', 'All tests passed.', /unsupported retained-output failures/i],
+    ['completion', 'I implemented the flow.', /unsupported retained-output failures/i],
+    ['contrast/WCAG', 'I checked contrast and verified WCAG AA compliance.', /contrast|WCAG/i],
+  ];
+  for (const [name, text, expected] of claims) {
+    const artifact = withFirstRun(hybridArtifact(), { output: output(text) });
+    assert.equal(requireCollector().validateArtifact(artifact), true, name);
+    assert.throws(
+      () => validateHybridRouterEvidence(artifact),
+      expected,
+      name,
+    );
+  }
+});
+
+test('strict hybrid evidence validation requires runtime isolation and valid snapshots', () => {
+  const { validateHybridRouterEvidence } = requireStrictValidator();
+  const mutations = [
+    ['missing runtime', (artifact) => { artifact.runtime = {}; }, /runtime/i],
+    ['wrong permission profile', (artifact) => {
+      artifact.runtime.isolation.permissionProfile = 'workspace-write';
+    }, /runtime|isolation/i],
+    ['malformed repository hash', (artifact) => {
+      artifact.repository.before.files.sha256 = 'not-a-sha256';
+      artifact.repository.after.files.sha256 = 'not-a-sha256';
+    }, /repository|sha256/i],
+    ['malformed evaluation-root hash', (artifact) => {
+      artifact.repository.evaluationRoots.before.control.sha256 = 'bad';
+      artifact.repository.evaluationRoots.after.control.sha256 = 'bad';
+    }, /repository|sha256/i],
+    ['changed repository snapshot', (artifact) => {
+      artifact.repository.after.files.sha256 = 'f'.repeat(64);
+      artifact.repository.unchanged = false;
+      artifact.hardGate = {
+        status: 'fail',
+        failures: ['repository-drift'],
+      };
+    }, /repository|equality/i],
+  ];
+  for (const [name, mutate, expected] of mutations) {
+    const artifact = hybridArtifact();
+    mutate(artifact);
+    assert.equal(requireCollector().validateArtifact(artifact), true, name);
+    assert.throws(
+      () => validateHybridRouterEvidence(artifact),
+      expected,
+      name,
+    );
+  }
+});
+
+test('strict hybrid evidence validation rejects event-only failures absent retained events', () => {
+  const { validateHybridRouterEvidence } = requireStrictValidator();
+  const artifact = withFirstRun(hybridArtifact(), {
+    hardFailures: ['unauthorized-write'],
+  });
+  artifact.hardGate = {
+    status: 'fail',
+    failures: ['unauthorized-write'],
+  };
+
+  assert.equal(requireCollector().validateArtifact(artifact), true);
+  assert.throws(
+    () => validateHybridRouterEvidence(artifact),
+    /unsubstantiated event-only failure/i,
+  );
 });
 
 test('design frontend skill uses the hybrid design-routing contract', () => {

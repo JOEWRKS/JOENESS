@@ -91,6 +91,15 @@ const EXPECTED_HYBRID_EVALUATION = {
     path: 'evals/design-frontend/collect-hybrid-router-evaluation.mjs',
     sha256: '24e04d090c5c7535718878d0e9cd40a2c8324e1bd52c362ba292e68585e9ac12',
   },
+  validator: {
+    path: 'evals/design-frontend/validate-hybrid-router-evidence.mjs',
+    sha256: '4ae8a2fd461456af9568bd8f6c33a1697620ac90d5e5a501a304c3f9775e134d',
+  },
+  validation: {
+    state: 'retained-evidence-validated',
+    scope: 'Retained output claims, runtime isolation and inventory, repository and materialized-root snapshots.',
+    limitation: 'V1 retains no normalized command, file, or tool events; event-only failures are rejected as unsubstantiated, so this is not event-level certification.',
+  },
   cases: {
     path: 'evals/design-frontend/cases.json',
     sha256: '8a940cd84b4f2cbf265154c060941734ad6e983d0f49cb7dd5d06fc3df5ee1f7',
@@ -276,6 +285,7 @@ test('candidate ledger binds the reviewed hybrid artifact without promoting impl
   for (const [key, evidence] of Object.entries({
     artifact: current.artifact,
     collector: current.collector,
+    validator: current.validator,
     cases: current.cases,
     router: current.router,
     commonCore: current.commonCore,
@@ -286,8 +296,8 @@ test('candidate ledger binds the reviewed hybrid artifact without promoting impl
   }
 
   const artifact = JSON.parse(readFileSync(path.join(ROOT, ...current.artifact.path.split('/')), 'utf8'));
-  const { validateArtifact } = await import(pathToFileURL(path.join(ROOT, ...current.collector.path.split('/'))));
-  assert.equal(validateArtifact(artifact), true);
+  const { validateHybridRouterEvidence } = await import(pathToFileURL(path.join(ROOT, ...current.validator.path.split('/'))));
+  assert.equal(validateHybridRouterEvidence(artifact), true);
   assert.equal(artifact.implicit.classification, current.classification);
   assert.equal(artifact.hardGate.status, current.hardGate);
   assert.equal(current.promotionPass, false);

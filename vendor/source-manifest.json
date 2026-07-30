@@ -8,6 +8,12 @@
       "version": 1,
       "artifact": {"path":"evals/design-frontend/router-hybrid-v1.json","sha256":"10ddbd6d14bf3153e53561314245607d36c7d950af231585a8b5ae78fc590554"},
       "collector": {"path":"evals/design-frontend/collect-hybrid-router-evaluation.mjs","sha256":"24e04d090c5c7535718878d0e9cd40a2c8324e1bd52c362ba292e68585e9ac12"},
+      "validator": {"path":"evals/design-frontend/validate-hybrid-router-evidence.mjs","sha256":"4ae8a2fd461456af9568bd8f6c33a1697620ac90d5e5a501a304c3f9775e134d"},
+      "validation": {
+        "state": "retained-evidence-validated",
+        "scope": "Retained output claims, runtime isolation and inventory, repository and materialized-root snapshots.",
+        "limitation": "V1 retains no normalized command, file, or tool events; event-only failures are rejected as unsubstantiated, so this is not event-level certification."
+      },
       "cases": {"path":"evals/design-frontend/cases.json","sha256":"8a940cd84b4f2cbf265154c060941734ad6e983d0f49cb7dd5d06fc3df5ee1f7"},
       "router": {"path":"skills/joewrks-design-frontend/SKILL.md","sha256":"0694f0d0880c079ab50b2af2621ef37f9745eae356f0c9ebc5a1351cd0d8a67d"},
       "commonCore": {"path":"AGENTS.md","sha256":"5aebc74bc795891c43bf785d9b34ae4d35d4a40bf46eddef3f6246d75919a495"},
