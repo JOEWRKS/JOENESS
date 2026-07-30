@@ -977,7 +977,9 @@ function Invoke-JoewrksHarnessSync {
         for ($i = $createdDirectories.Count - 1; $i -ge 0; $i--) {
             $directory = $createdDirectories[$i]
             try {
-                if (-not (Test-Path -LiteralPath $directory)) { continue }
+                Get-Item -LiteralPath $directory -Force -ErrorAction Stop | Out-Null
+            } catch [Management.Automation.ItemNotFoundException] {
+                continue
             } catch {
                 # Inspection failure is handled by the unresolved path below.
             }

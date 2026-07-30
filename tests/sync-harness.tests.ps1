@@ -793,6 +793,54 @@ function Test-CreatedDirectoryRollbackResidue {
         Assert-True (Test-Path -LiteralPath $externalPath -PathType Leaf) 'created-directory cleanup preserves an external file'
         Assert-StringSetEqual @((Get-TreeHashes $f.AgentsHome).Keys) @('skills\joewrks-design-frontend\external.txt') 'failed rollback leaves no run-created marker or managed file'
     } finally { Remove-Fixture $f }
+
+    $f = New-Fixture
+    $danglingDirectory = Join-Path $f.AgentsHome 'skills\joewrks-design-frontend'
+    try {
+        Write-V1FixtureState $f
+        $danglingTarget = Join-Path $f.Root 'removed-junction-target'
+        $absentDirectory = Join-Path $f.AgentsHome 'skills\joewrks-project-setup\agents'
+        $testPathBehavior = @{ TreatDanglingAsUnreachable = $false }
+        . $f.Script
+        $result = & {
+            # Windows PowerShell 5.1 treats a dangling junction itself as reachable; emulate runtimes that do not.
+            function Test-Path {
+                param(
+                    [string[]] $LiteralPath,
+                    [Microsoft.PowerShell.Commands.TestPathType] $PathType
+                )
+                if ($testPathBehavior.TreatDanglingAsUnreachable -and @($LiteralPath).Count -eq 1 -and $LiteralPath[0] -ieq $danglingDirectory) {
+                    return $false
+                }
+                Microsoft.PowerShell.Management\Test-Path @PSBoundParameters
+            }
+            Invoke-JoewrksHarnessSync -Apply -CodexHome $f.CodexHome -AgentsHome $f.AgentsHome -BackupRoot $f.BackupRoot -AfterReplace {
+                param($replacement)
+                if ($replacement.TargetPath -ieq $f.State) {
+                    [IO.Directory]::Delete($danglingDirectory, $true)
+                    [IO.Directory]::CreateDirectory($danglingTarget) | Out-Null
+                    New-Item -ItemType Junction -Path $danglingDirectory -Target $danglingTarget | Out-Null
+                    [IO.Directory]::Delete($danglingTarget)
+                    [IO.Directory]::Delete($absentDirectory, $true)
+                    $testPathBehavior.TreatDanglingAsUnreachable = $true
+                    throw 'created directories become dangling and absent residues'
+                }
+            }
+        }
+        $danglingEntry = Get-Item -LiteralPath $danglingDirectory -Force -ErrorAction SilentlyContinue
+        Assert-True ($null -ne $danglingEntry) 'dangling created-directory entry survives rollback'
+        Assert-True (($danglingEntry.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0) 'surviving dangling entry remains a junction'
+        Assert-True ($null -eq (Get-Item -LiteralPath $danglingTarget -Force -ErrorAction SilentlyContinue)) 'dangling junction target remains absent'
+        Assert-Equal (@($result.unresolvedTargets | Where-Object { $_ -ieq $danglingDirectory }).Count) 1 'dangling created directory is reported unresolved once'
+        Assert-True ($null -eq (Get-Item -LiteralPath $absentDirectory -Force -ErrorAction SilentlyContinue)) 'absent created-directory entry remains absent'
+        Assert-Equal (@($result.unresolvedTargets | Where-Object { $_ -ieq $absentDirectory }).Count) 0 'truly absent created directory is not reported unresolved'
+    } finally {
+        $danglingEntry = Get-Item -LiteralPath $danglingDirectory -Force -ErrorAction SilentlyContinue
+        if ($null -ne $danglingEntry -and ($danglingEntry.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0) {
+            [IO.Directory]::Delete($danglingDirectory)
+        }
+        Remove-Fixture $f
+    }
 }
 
 function Test-HomeResolutionAndIdentity {
