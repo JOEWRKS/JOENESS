@@ -190,6 +190,9 @@ function vendorFiles(directory, relative = 'vendor') {
     const localPath = `${relative}/${entry.name}`;
     const stat = lstatSync(file);
     assert.equal(stat.isSymbolicLink(), false, `vendor path is a symlink: ${localPath}`);
+    if ((stat.isDirectory() && entry.name === '__pycache__') || (!stat.isDirectory() && entry.name.endsWith('.pyc'))) {
+      return [];
+    }
     return stat.isDirectory() ? vendorFiles(file, localPath) : [localPath];
   });
 }
