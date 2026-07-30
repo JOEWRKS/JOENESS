@@ -397,6 +397,10 @@ function Test-ManifestSkillCollisions {
         @{
             Name = 'legacy project directory collision'
             Action = { param($f) Write-Utf8 (Join-Path $f.CodexHome 'skills\joewrks-project-setup\SKILL.md') 'unmanaged' }
+        },
+        @{
+            Name = 'exact project directory without managed skill file'
+            Action = { param($f) Write-Utf8 (Join-Path $f.AgentsHome 'skills\joewrks-project-setup\unrelated.txt') 'unmanaged' }
         }
     )
     foreach ($case in $cases) {

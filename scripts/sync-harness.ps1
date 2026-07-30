@@ -618,7 +618,7 @@ function Invoke-JoewrksHarnessSync {
         try {
             $relative = [string] $manifestSkillRelativePaths[$skillName]
             $managedSkillFile = Resolve-HarnessSourceFile $resolvedAgentsHome $relative
-            $managedSkillFiles[$skillName] = $managedSkillFile
+            $managedSkillFiles[$skillName] = if ($stateWholeFiles.ContainsKey($relative)) { $managedSkillFile } else { $null }
             if ((Test-Path -LiteralPath $managedSkillFile) -and -not $stateWholeFiles.ContainsKey($relative)) {
                 $null = $blockers.Add([pscustomobject] @{ kind = 'duplicateSkill'; message = "Duplicate skill directory: $(Split-Path -Parent $managedSkillFile)" })
             }
