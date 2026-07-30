@@ -256,12 +256,12 @@ function Invoke-JoewrksHarnessSync {
             if ($bytes.Length -ne [long] $entry.bytes) { throw "Source size mismatch: $relative" }
             $hash = Get-HarnessSha256 $bytes
             if ($hash -cne ([string] $entry.sha256).ToLowerInvariant()) { throw "Source hash mismatch: $relative" }
-            $null = $optionalEntries.Add([pscustomobject] @{ RelativePath = $relative; SourcePath = $path; Hash = $hash })
+            $null = $optionalEntries.Add([pscustomobject] @{ RelativePath = $relative; Hash = $hash; Bytes = $bytes })
         }
         $null = $optionalEntries.Add([pscustomobject] @{
             RelativePath = 'vendor/source-manifest.json'
-            SourcePath = $manifestPath
             Hash = $manifestHash
+            Bytes = $manifestRead.Bytes
         })
     } catch {
         $null = $blockers.Add([pscustomobject] @{ kind = 'sourceIntegrity'; message = $_.Exception.Message })
@@ -508,7 +508,7 @@ function Invoke-JoewrksHarnessSync {
             if (-not $snapshot.Exists -or $snapshot.Hash -cne $entry.Hash) {
                 $null = $operations.Add([pscustomobject] @{
                     TargetPath = Resolve-HarnessSourceFile $resolvedAgentsHome $entry.RelativePath
-                    DesiredBytes = [IO.File]::ReadAllBytes($entry.SourcePath)
+                    DesiredBytes = $entry.Bytes
                     AppliedHash = $entry.Hash
                     Snapshot = $snapshot
                     BackupRelativePath = Join-Path 'agents' ($entry.RelativePath -replace '/', '\')
