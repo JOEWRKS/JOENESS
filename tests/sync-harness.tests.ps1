@@ -18,10 +18,10 @@ function Write-Bytes { param([string] $Path, [byte[]] $Bytes) [IO.Directory]::Cr
 function Get-OptionalFiles {
     param([string] $SourceRoot)
     $manifest = Get-Content -Raw -LiteralPath (Join-Path $SourceRoot 'vendor\source-manifest.json') | ConvertFrom-Json
-    $paths = @('vendor/source-manifest.json')
+    $paths = @('vendor\source-manifest.json')
     foreach ($skill in @($manifest.activeSkills.PSObject.Properties.Value)) {
-        $paths += @($skill.files | ForEach-Object { $_.localPath })
-        foreach ($source in @($skill.sourceDependencies)) { $paths += @($manifest.sources.$source.files | ForEach-Object { $_.localPath }) }
+        $paths += @($skill.files | ForEach-Object { $_.localPath -replace '/', '\' })
+        foreach ($source in @($skill.sourceDependencies)) { $paths += @($manifest.sources.$source.files | ForEach-Object { $_.localPath -replace '/', '\' }) }
     }
     @($paths | Sort-Object -Unique)
 }
@@ -52,8 +52,13 @@ function Invoke-Harness {
     $out = Join-Path $Fixture.Root 'stdout.txt'; $err = Join-Path $Fixture.Root 'stderr.txt'
     $commandArgs = @('-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', $Fixture.Script, "-$Mode", '-CodexHome', $Fixture.CodexHome, '-AgentsHome', $Fixture.AgentsHome, '-BackupRoot', $Fixture.BackupRoot)
     if ($IncludeDesignFrontend) { $commandArgs += '-IncludeDesignFrontend' }
-    & powershell.exe @commandArgs @ExtraArguments 1> $out 2> $err
-    $run = [pscustomobject]@{ ExitCode = $LASTEXITCODE; StdOut = [IO.File]::ReadAllText($out); StdErr = [IO.File]::ReadAllText($err) }
+    $oldPreference = $ErrorActionPreference
+    try {
+        $ErrorActionPreference = 'Continue'
+        & powershell.exe @commandArgs @ExtraArguments 1> $out 2> $err
+        $exitCode = $LASTEXITCODE
+    } finally { $ErrorActionPreference = $oldPreference }
+    $run = [pscustomobject]@{ ExitCode = $exitCode; StdOut = [IO.File]::ReadAllText($out); StdErr = [IO.File]::ReadAllText($err) }
     Remove-Item -LiteralPath $out, $err -Force
     $run
 }
@@ -205,6 +210,27 @@ function Test-DeterministicRollback {
     } finally { Remove-Fixture $f }
 }
 
+function Test-MultiTargetRollback {
+    $f = New-Fixture
+    try {
+        . $f.Script
+        $replacements = [Collections.Generic.List[string]]::new()
+        $callback = {
+            param($replacement)
+            $replacements.Add([string] $replacement.TargetPath)
+            if ($replacements.Count -eq 2) { throw 'test multi-target failure' }
+        }.GetNewClosure()
+        $result = Invoke-JoewrksHarnessSync -Apply -IncludeDesignFrontend -CodexHome $f.CodexHome -AgentsHome $f.AgentsHome -BackupRoot $f.BackupRoot -AfterReplace $callback
+        Assert-Equal $result.status 'failed' 'multi-target callback failure reports failed'
+        Assert-Equal $replacements.Count 2 'failure occurs after two replacements'
+        Assert-Equal $result.rollback.status 'complete' 'matching targets roll back completely'
+        Assert-Equal @($result.unresolvedTargets).Count 0 'complete rollback has no unresolved targets'
+        Assert-Equal (Get-TreeHashes $f.CodexHome).Count 0 'multi-target rollback removes created Codex files'
+        Assert-Equal (Get-TreeHashes $f.AgentsHome).Count 0 'multi-target rollback removes created optional files'
+        Assert-True (-not (Test-Path -LiteralPath $f.State)) 'state remains unwritten when an earlier target fails'
+    } finally { Remove-Fixture $f }
+}
+
 function Test-Task2CheckRegressions {
     $f = New-Fixture
     try {
@@ -244,4 +270,5 @@ Test-AgentEncodingAndCoreUpdate
 Test-PreflightBlockers
 Test-OptionalBundleStateAndDrift
 Test-DeterministicRollback
+Test-MultiTargetRollback
 Write-Host 'PASS sync-harness contract'
