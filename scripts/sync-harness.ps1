@@ -161,10 +161,19 @@ function Assert-HarnessFileSnapshot {
 function Set-HarnessFile {
     param($Operation)
     $temporaryPath = $null
+    $tombstonePath = $null
     try {
         if (-not $Operation.DesiredExists) {
             Assert-HarnessFileSnapshot $Operation.TargetPath $Operation.Snapshot
-            [IO.File]::Delete($Operation.TargetPath)
+            $directory = Split-Path -Parent $Operation.TargetPath
+            $tombstonePath = Join-Path $directory ('.' + [IO.Path]::GetFileName($Operation.TargetPath) + '.joewrks-' + [guid]::NewGuid().ToString('N') + '.delete')
+            [IO.File]::Move($Operation.TargetPath, $tombstonePath)
+            if ((Get-HarnessSha256 ([IO.File]::ReadAllBytes($tombstonePath))) -cne $Operation.Snapshot.Hash) {
+                throw "Moved target changed after preflight: $($Operation.TargetPath)"
+            }
+            [IO.File]::Delete($tombstonePath)
+            if (Test-Path -LiteralPath $tombstonePath) { throw "Deleted tombstone still exists: $tombstonePath" }
+            $tombstonePath = $null
             $Operation.Committed = $true
             if (Test-Path -LiteralPath $Operation.TargetPath) { throw "Deleted target still exists: $($Operation.TargetPath)" }
             return
@@ -188,6 +197,18 @@ function Set-HarnessFile {
             throw "Applied file verification failed: $($Operation.TargetPath)"
         }
     } finally {
+        if ($tombstonePath -and (Test-Path -LiteralPath $tombstonePath -PathType Leaf)) {
+            if (-not (Test-Path -LiteralPath $Operation.TargetPath)) {
+                try {
+                    [IO.File]::Move($tombstonePath, $Operation.TargetPath)
+                    $tombstonePath = $null
+                } catch {
+                    $Operation.Unresolved = $true
+                }
+            } else {
+                $Operation.Unresolved = $true
+            }
+        }
         if ($temporaryPath -and (Test-Path -LiteralPath $temporaryPath -PathType Leaf)) { Remove-Item -LiteralPath $temporaryPath -Force }
     }
 }
@@ -328,7 +349,7 @@ function Invoke-JoewrksHarnessSync {
             Assert-HarnessObjectShape $state.sourceIdentities $identityNames 'State sourceIdentities'
             Assert-HarnessObjectShape $state.sourceIdentities.commonCore @('path', 'sha256') 'State commonCore source identity'
             if ([string] $state.sourceIdentities.commonCore.path -cne 'AGENTS.md') { throw 'State commonCore source path is invalid' }
-            $stateCommonSourceHash = Get-HarnessValidSha256 $state.sourceIdentities.commonCore.sha256 'State commonCore source hash'
+            $null = Get-HarnessValidSha256 $state.sourceIdentities.commonCore.sha256 'State commonCore source hash'
 
             if ($stateWholeFiles.Count -gt 0) {
                 $installedManifestRelative = 'vendor/source-manifest.json'
@@ -352,10 +373,8 @@ function Invoke-JoewrksHarnessSync {
                 }
                 $installedManifest = $installedManifestRead.Text | ConvertFrom-Json
                 $installedCore = $installedManifest.evaluation.current.commonCore
-                if ([string] $installedCore.path -cne 'AGENTS.md' -or
-                    (Get-HarnessValidSha256 $installedCore.sha256 'Installed manifest Common Core hash') -cne $stateCommonSourceHash) {
-                    throw 'State commonCore identity does not match its installed manifest'
-                }
+                if ([string] $installedCore.path -cne 'AGENTS.md') { throw 'Installed manifest Common Core path is invalid' }
+                $null = Get-HarnessValidSha256 $installedCore.sha256 'Installed manifest Common Core hash'
 
                 $expectedWholeFiles = @{}
                 foreach ($selection in @(Get-HarnessManifestSelections $installedManifest $resolvedAgentsHome)) {
@@ -646,6 +665,7 @@ function Invoke-JoewrksHarnessSync {
                     BackupRelativePath = Join-Path 'agents' ($relative -replace '/', '\')
                     BackupPath = $null
                     Committed = $false
+                    Unresolved = $false
                 })
             }
         }
@@ -692,6 +712,9 @@ function Invoke-JoewrksHarnessSync {
                 if (-not ($applied -contains $operation)) {
                     if ($operation.Committed) {
                         $null = $applied.Add($operation)
+                    } elseif (($operation.PSObject.Properties.Name -contains 'Unresolved') -and $operation.Unresolved) {
+                        $unresolvedSeen[$operation.TargetPath] = $true
+                        $null = $unresolved.Add($operation.TargetPath)
                     } else {
                         try {
                             $current = Get-HarnessFileSnapshot $operation.TargetPath
@@ -761,6 +784,7 @@ function Invoke-JoewrksHarnessSync {
                         AppliedHash = $null
                         Snapshot = $current
                         Committed = $false
+                        Unresolved = $false
                     })
                     $null = $removed.Add($operation.TargetPath)
                 }

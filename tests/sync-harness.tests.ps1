@@ -48,9 +48,10 @@ function New-Fixture {
 function Remove-Fixture { param($Fixture) if (Test-Path -LiteralPath $Fixture.Root) { [IO.Directory]::Delete($Fixture.Root, $true) } }
 
 function Invoke-Harness {
-    param($Fixture, [ValidateSet('Check', 'Apply')] [string] $Mode, [switch] $IncludeDesignFrontend, [string[]] $ExtraArguments = @())
+    param($Fixture, [ValidateSet('Check', 'Apply')] [string] $Mode, [switch] $IncludeDesignFrontend, [switch] $PublicEntry, [string[]] $ExtraArguments = @())
     $out = Join-Path $Fixture.Root 'stdout.txt'; $err = Join-Path $Fixture.Root 'stderr.txt'
-    $commandArgs = @('-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', $Fixture.Script, "-$Mode", '-CodexHome', $Fixture.CodexHome, '-AgentsHome', $Fixture.AgentsHome, '-BackupRoot', $Fixture.BackupRoot)
+    $scriptPath = if ($PublicEntry) { Join-Path $RepositoryRoot 'harness.ps1' } else { $Fixture.Script }
+    $commandArgs = @('-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', $scriptPath, "-$Mode", '-CodexHome', $Fixture.CodexHome, '-AgentsHome', $Fixture.AgentsHome, '-BackupRoot', $Fixture.BackupRoot)
     if ($IncludeDesignFrontend) { $commandArgs += '-IncludeDesignFrontend' }
     $oldPreference = $ErrorActionPreference
     try {
@@ -61,6 +62,29 @@ function Invoke-Harness {
     $run = [pscustomobject]@{ ExitCode = $exitCode; StdOut = [IO.File]::ReadAllText($out); StdErr = [IO.File]::ReadAllText($err) }
     Remove-Item -LiteralPath $out, $err -Force
     $run
+}
+
+function Test-PublicHarnessEntry {
+    $f = New-Fixture
+    try {
+        $check = Invoke-Harness $f Check -PublicEntry
+        Assert-Equal $check.ExitCode 0 'public entry check succeeds'
+        Assert-Equal (Read-Result $check 'public entry check').status 'ready' 'public entry forwards check'
+        Assert-True (-not (Test-Path -LiteralPath $f.CodexHome)) 'public entry check remains read-only'
+
+        $apply = Invoke-Harness $f Apply -PublicEntry
+        Assert-Equal $apply.ExitCode 0 'public entry apply succeeds'
+        Assert-Equal (Read-Result $apply 'public entry apply').status 'current' 'public entry forwards apply'
+        Assert-True (Test-Path -LiteralPath (Join-Path $f.CodexHome 'AGENTS.md') -PathType Leaf) 'public entry apply installs Common Core'
+
+        $pilot = Invoke-Harness $f Check -IncludeDesignFrontend -PublicEntry
+        Assert-Equal $pilot.ExitCode 0 'public entry forwards the optional pilot flag'
+        Assert-PilotDisclosure (Read-Result $pilot 'public entry pilot check').designFrontendPilot 'explicit-request' 'public entry pilot check'
+
+        $invalid = Invoke-Harness $f Check -PublicEntry -ExtraArguments @('-Apply')
+        Assert-True ($invalid.ExitCode -ne 0) 'public entry preserves blocked exit status'
+        Assert-Equal (Read-Result $invalid 'public entry invalid invocation').status 'blocked' 'public entry preserves blocked result'
+    } finally { Remove-Fixture $f }
 }
 
 function Read-Result {
@@ -286,6 +310,24 @@ function Test-OptionalBundleStateAndDrift {
     } finally { Remove-Fixture $f }
 }
 
+function Test-PreservedOptionalAfterCoreUpdate {
+    $f = New-Fixture
+    try {
+        Assert-Equal (Invoke-Harness $f Apply -IncludeDesignFrontend).ExitCode 0 'preserved optional baseline apply succeeds'
+        $beforeOptional = Get-TreeHashes $f.AgentsHome
+        Set-SourceCore $f ((Get-Content -Raw -LiteralPath (Join-Path $f.SourceRoot 'AGENTS.md')) + "`n# core-only update")
+
+        Assert-Equal (Invoke-Harness $f Apply).ExitCode 0 'core-only update after opt-in succeeds'
+        Assert-TreeEqual (Get-TreeHashes $f.AgentsHome) $beforeOptional 'core-only update preserves optional files and installed manifest'
+
+        $check = Invoke-Harness $f Check
+        Assert-Equal $check.ExitCode 0 'check after preserved optional core update succeeds'
+        $result = Read-Result $check 'check after preserved optional core update'
+        Assert-Equal $result.status 'current' 'preserved optional state remains valid after a core-only update'
+        Assert-PilotDisclosure $result.designFrontendPilot 'preserved-prior-opt-in' 'check after preserved optional core update'
+    } finally { Remove-Fixture $f }
+}
+
 function Test-ObsoleteOptionalReconciliation {
     $f = New-Fixture
     try {
@@ -320,6 +362,33 @@ function Test-ObsoleteOptionalReconciliation {
         $state = Get-Content -Raw -LiteralPath $f.State | ConvertFrom-Json
         Assert-True (-not ($state.wholeFileTargets.PSObject.Properties.Name -contains $obsoleteRelative)) 'state drops obsolete optional ownership'
         Assert-StringSetEqual @((Get-TreeHashes $f.AgentsHome).Keys) (Get-OptionalFiles $f.SourceRoot) 'explicit update leaves exactly the current manifest-selected unit'
+    } finally { Remove-Fixture $f }
+}
+
+function Test-ConcurrentDisappearanceBeforeDelete {
+    $f = New-Fixture
+    try {
+        Assert-Equal (Invoke-Harness $f Apply -IncludeDesignFrontend).ExitCode 0 'delete-race baseline apply succeeds'
+        $obsoleteRelative = 'skills/joewrks-design-frontend/agents/openai.yaml'
+        $obsoletePath = Join-Path $f.AgentsHome ($obsoleteRelative -replace '/', '\')
+        Remove-SourceOptionalEntry $f $obsoleteRelative
+
+        . $f.Script
+        $realAssertSnapshot = ${function:Assert-HarnessFileSnapshot}
+        function Assert-HarnessFileSnapshot {
+            param([string] $Path, $Snapshot)
+            & $realAssertSnapshot $Path $Snapshot
+            if ($Path -ieq $obsoletePath) { [IO.File]::Delete($Path) }
+        }
+
+        $result = Invoke-JoewrksHarnessSync -Apply -IncludeDesignFrontend -CodexHome $f.CodexHome -AgentsHome $f.AgentsHome -BackupRoot $f.BackupRoot -AfterReplace {
+            param($replacement)
+            if (-not $replacement.DesiredExists -and $replacement.TargetPath -ieq $obsoletePath) { throw 'test failure after concurrent disappearance' }
+        }
+        Assert-Equal $result.status 'failed' 'concurrent disappearance reports failed'
+        Assert-Equal $result.rollback.status 'incomplete' 'unowned concurrent disappearance is unresolved'
+        Assert-True (@($result.unresolvedTargets) -contains $obsoletePath) 'concurrent disappearance reports the target unresolved'
+        Assert-True (-not (Test-Path -LiteralPath $obsoletePath)) 'rollback does not recreate a file deleted by another actor'
     } finally { Remove-Fixture $f }
 }
 
@@ -434,12 +503,15 @@ function Test-Task2CheckRegressions {
     } finally { Remove-Fixture $f }
 }
 
+Test-PublicHarnessEntry
 Test-Task2CheckRegressions
 Test-EmptyCheckAndApply
 Test-AgentEncodingAndCoreUpdate
 Test-PreflightBlockers
 Test-StateTrust
 Test-OptionalBundleStateAndDrift
+Test-ConcurrentDisappearanceBeforeDelete
+Test-PreservedOptionalAfterCoreUpdate
 Test-ObsoleteOptionalReconciliation
 Test-ExistingTargetRollback
 Test-DeterministicRollback
