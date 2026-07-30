@@ -310,9 +310,14 @@ function Set-HarnessFile {
 }
 
 function Get-HarnessSkillSkeletonState {
-    param([string] $Root, [string[]] $AllowedDirectories)
+    param([string] $BoundaryRoot, [string] $Root, [string[]] $AllowedDirectories)
     $allowed = [Collections.Generic.HashSet[string]]::new([StringComparer]::OrdinalIgnoreCase)
     foreach ($path in $AllowedDirectories) { $null = $allowed.Add([IO.Path]::GetFullPath($path).TrimEnd('\', '/')) }
+    try {
+        Assert-HarnessNoReparsePoint $BoundaryRoot $Root 'Managed skill skeleton'
+    } catch {
+        return [pscustomobject] @{ Exists = $true; Reusable = $false; Message = $_.Exception.Message }
+    }
     try {
         $rootItem = Get-Item -LiteralPath $Root -Force -ErrorAction Stop
     } catch [Management.Automation.ItemNotFoundException] {
@@ -682,7 +687,7 @@ function Invoke-JoewrksHarnessSync {
             }
             foreach ($skillName in @($manifestSkillSkeletons.Keys)) {
                 $skeleton = $manifestSkillSkeletons[$skillName]
-                $skeletonState = Get-HarnessSkillSkeletonState $skeleton.RootPath $skeleton.AllowedDirectories
+                $skeletonState = Get-HarnessSkillSkeletonState $resolvedAgentsHome $skeleton.RootPath $skeleton.AllowedDirectories
                 if ($skeletonState.Exists -and -not $skeletonState.Reusable) {
                     $null = $blockers.Add([pscustomobject] @{ kind = 'unownedEvidence'; message = $skeletonState.Message })
                 }
@@ -850,7 +855,7 @@ function Invoke-JoewrksHarnessSync {
             $relative = [string] $manifestSkillRelativePaths[$skillName]
             $managedSkillFile = Resolve-HarnessSourceFile $resolvedAgentsHome $relative
             $skeleton = $manifestSkillSkeletons[$skillName]
-            $skeletonState = Get-HarnessSkillSkeletonState $skeleton.RootPath $skeleton.AllowedDirectories
+            $skeletonState = Get-HarnessSkillSkeletonState $resolvedAgentsHome $skeleton.RootPath $skeleton.AllowedDirectories
             $reusableSkeleton = -not $stateWholeFiles.ContainsKey($relative) -and $skeletonState.Exists -and $skeletonState.Reusable
             $managedSkillFiles[$skillName] = if ($stateWholeFiles.ContainsKey($relative) -or $reusableSkeleton) { $managedSkillFile } else { $null }
             if (-not $stateWholeFiles.ContainsKey($relative) -and $skeletonState.Exists -and -not $skeletonState.Reusable) {

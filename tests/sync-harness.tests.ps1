@@ -448,6 +448,33 @@ function Test-RemovePreflightBlockers {
 }
 
 function Test-CleanSkeletonAdversaries {
+    $f = New-Fixture
+    $skillsJunction = Join-Path $f.AgentsHome 'skills'
+    try {
+        $junctionTarget = Join-Path $f.Root 'absent-namespace-parent-reparse-target'
+        [IO.Directory]::CreateDirectory($f.AgentsHome) | Out-Null
+        [IO.Directory]::CreateDirectory($junctionTarget) | Out-Null
+        New-Item -ItemType Junction -Path $skillsJunction -Target $junctionTarget | Out-Null
+        $before = Get-TreeEntries $f.Root
+
+        $remove = Invoke-Harness $f Remove
+        Assert-Equal $remove.ExitCode 2 'absent namespace below a reparse parent blocks no-state remove'
+        Assert-Equal (Read-Result $remove 'absent namespace below a reparse parent remove').status 'blocked' 'reparse parent remove is blocked'
+        Assert-StringSetEqual (Get-TreeEntries $f.Root) $before 'reparse parent remove causes zero writes'
+        Assert-True (-not (Test-Path -LiteralPath $f.BackupRoot)) 'reparse parent remove creates no backup'
+
+        $apply = Invoke-Harness $f Apply
+        Assert-Equal $apply.ExitCode 2 'absent namespace below a reparse parent blocks apply'
+        Assert-Equal (Read-Result $apply 'absent namespace below a reparse parent apply').status 'blocked' 'reparse parent apply is blocked'
+        Assert-StringSetEqual (Get-TreeEntries $f.Root) $before 'reparse parent apply causes zero writes'
+    } finally {
+        $entry = Get-Item -LiteralPath $skillsJunction -Force -ErrorAction SilentlyContinue
+        if ($null -ne $entry -and ($entry.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0) {
+            [IO.Directory]::Delete($skillsJunction)
+        }
+        Remove-Fixture $f
+    }
+
     foreach ($case in @(
         @{
             Name = 'file in expected skeleton directory'
