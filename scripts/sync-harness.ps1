@@ -1,7 +1,7 @@
-[CmdletBinding(DefaultParameterSetName = 'None')]
+[CmdletBinding()]
 param(
-    [Parameter(ParameterSetName = 'Check')] [switch] $Check,
-    [Parameter(ParameterSetName = 'Apply')] [switch] $Apply,
+    [switch] $Check,
+    [switch] $Apply,
     [switch] $IncludeDesignFrontend,
     [string] $CodexHome,
     [string] $AgentsHome,
@@ -290,13 +290,14 @@ function Invoke-JoewrksHarnessSync {
     foreach ($entry in $optionalEntries) {
         $targetPath = Resolve-HarnessSourceFile $resolvedAgentsHome $entry.RelativePath
         $owned = $stateWholeFiles.ContainsKey($entry.RelativePath)
-        $targetExists = Test-Path -LiteralPath $targetPath -PathType Leaf
+        $targetExists = Test-Path -LiteralPath $targetPath
+        $targetIsFile = Test-Path -LiteralPath $targetPath -PathType Leaf
         if ($IncludeDesignFrontend) {
             if ($targetExists -and -not $owned) {
                 $null = $blockers.Add([pscustomobject] @{ kind = 'optionalCollision'; message = "Unmanaged optional target exists: $($entry.RelativePath)" })
             } elseif (-not $targetExists) {
                 $null = $changes.Add([pscustomobject] @{ kind = 'designFrontend'; action = 'install'; target = $entry.RelativePath; planned = $true })
-            } elseif ($entry.Hash -cne $stateWholeFiles[$entry.RelativePath]) {
+            } elseif ($targetIsFile -and $entry.Hash -cne $stateWholeFiles[$entry.RelativePath]) {
                 $null = $changes.Add([pscustomobject] @{ kind = 'designFrontend'; action = 'update'; target = $entry.RelativePath; planned = $true })
             }
         } elseif ($priorOptionalOptIn -and $owned -and $entry.Hash -cne $stateWholeFiles[$entry.RelativePath]) {

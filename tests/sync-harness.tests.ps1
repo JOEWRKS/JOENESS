@@ -205,6 +205,40 @@ function Test-DeterministicRollback {
     } finally { Remove-Fixture $f }
 }
 
+function Test-Task2CheckRegressions {
+    $f = New-Fixture
+    try {
+        $out = Join-Path $f.Root 'dual-stdout.txt'; $err = Join-Path $f.Root 'dual-stderr.txt'
+        $oldPreference = $ErrorActionPreference
+        try {
+            $ErrorActionPreference = 'Continue'
+            & powershell.exe -NoProfile -ExecutionPolicy Bypass -File $f.Script -Check -Apply -CodexHome $f.CodexHome -AgentsHome $f.AgentsHome -BackupRoot $f.BackupRoot 1> $out 2> $err
+        } finally { $ErrorActionPreference = $oldPreference }
+        $run = [pscustomobject]@{ ExitCode = $LASTEXITCODE; StdOut = [IO.File]::ReadAllText($out); StdErr = [IO.File]::ReadAllText($err) }
+        Assert-True ($run.ExitCode -ne 0) 'dual mode exits nonzero'
+        Assert-Equal (Read-Result $run 'dual mode').status 'blocked' 'dual mode reports one JSON failure'
+        Assert-True (-not (Test-Path -LiteralPath $f.CodexHome)) 'dual mode creates no Codex target'
+        Assert-True (-not (Test-Path -LiteralPath $f.AgentsHome)) 'dual mode creates no agents target'
+        Assert-True (-not (Test-Path -LiteralPath $f.BackupRoot)) 'dual mode creates no backup'
+    } finally { Remove-Fixture $f }
+
+    $f = New-Fixture
+    try {
+        $collision = Join-Path $f.AgentsHome 'vendor\source-manifest.json'
+        [IO.Directory]::CreateDirectory($collision) | Out-Null
+        $before = Get-TreeHashes $f.AgentsHome
+        $run = Invoke-Harness $f Check -IncludeDesignFrontend
+        $result = Read-Result $run 'optional directory collision'
+        Assert-True ($run.ExitCode -ne 0) 'optional directory collision exits nonzero'
+        Assert-Equal $result.status 'blocked' 'optional directory collision blocks'
+        Assert-True ((@($result.blockers).kind -contains 'optionalCollision')) 'optional directory collision is reported'
+        Assert-TreeEqual (Get-TreeHashes $f.AgentsHome) $before 'optional directory collision check is read-only'
+        Assert-True (Test-Path -LiteralPath $collision -PathType Container) 'optional directory collision remains a directory'
+        Assert-True (-not (Test-Path -LiteralPath $f.BackupRoot)) 'optional directory collision creates no backup'
+    } finally { Remove-Fixture $f }
+}
+
+Test-Task2CheckRegressions
 Test-EmptyCheckAndApply
 Test-AgentEncodingAndCoreUpdate
 Test-PreflightBlockers
