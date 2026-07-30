@@ -772,6 +772,26 @@ function Test-CreatedDirectoryRollbackProof {
         Assert-True (@($result.unresolvedTargets) -contains $createdParent) 'nonempty created directory is reported unresolved'
         Assert-True (Test-Path -LiteralPath $externalPath -PathType Leaf) 'created-directory cleanup preserves an external file'
     } finally { Remove-Fixture $f }
+
+    $f = New-Fixture
+    try {
+        Write-V1FixtureState $f
+        $createdParent = Join-Path $f.AgentsHome 'skills\joewrks-design-frontend'
+        . $f.Script
+        $result = Invoke-JoewrksHarnessSync -Apply -CodexHome $f.CodexHome -AgentsHome $f.AgentsHome -BackupRoot $f.BackupRoot -AfterReplace {
+            param($replacement)
+            if ($replacement.TargetPath.StartsWith($createdParent, [StringComparison]::OrdinalIgnoreCase)) {
+                [IO.Directory]::Delete($createdParent, $true)
+                [IO.Directory]::CreateDirectory($createdParent) | Out-Null
+                throw 'external empty directory replaces the run-created instance'
+            }
+        }
+        Assert-Equal $result.status 'failed' 'empty-directory replacement keeps Task 4 failed status'
+        Assert-Equal $result.rollback.status 'incomplete' 'empty-directory replacement makes rollback incomplete'
+        Assert-True (@($result.unresolvedTargets) -contains $createdParent) 'empty-directory replacement is reported unresolved'
+        Assert-True (Test-Path -LiteralPath $createdParent -PathType Container) 'rollback preserves the empty replacement directory'
+        Assert-Equal (@(Get-ChildItem -LiteralPath $createdParent -Force).Count) 0 'preserved replacement directory remains empty'
+    } finally { Remove-Fixture $f }
 }
 
 function Test-HomeResolutionAndIdentity {
