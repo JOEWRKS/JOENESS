@@ -35,11 +35,32 @@ function Get-OptionalFiles {
     @($paths | Sort-Object -Unique)
 }
 
+function Get-V1SelectedFiles {
+    param($Manifest)
+    $paths = @()
+    foreach ($skill in @($Manifest.activeSkills.PSObject.Properties.Value)) {
+        $paths += @($skill.files | ForEach-Object { ([string] $_.localPath).Replace('/', '\') })
+        foreach ($sourceName in @($skill.sourceDependencies)) {
+            $source = $Manifest.sources.PSObject.Properties[[string] $sourceName].Value
+            $paths += @($source.files | ForEach-Object { ([string] $_.localPath).Replace('/', '\') })
+        }
+    }
+    @($paths | Sort-Object -Unique)
+}
+
 function Copy-RelativeFile {
     param([string] $FromRoot, [string] $ToRoot, [string] $RelativePath)
     $destination = Join-Path $ToRoot $RelativePath
     [IO.Directory]::CreateDirectory((Split-Path -Parent $destination)) | Out-Null
     [IO.File]::Copy((Join-Path $FromRoot $RelativePath), $destination, $true)
+}
+
+function Get-PathIdentity {
+    param([string] $Path)
+    $normalized = [IO.Path]::GetFullPath($Path).TrimEnd('\', '/').Replace('/', '\').ToUpperInvariant()
+    $sha = [Security.Cryptography.SHA256]::Create()
+    try { ([BitConverter]::ToString($sha.ComputeHash([Text.Encoding]::UTF8.GetBytes($normalized)))).Replace('-', '').ToLowerInvariant() }
+    finally { $sha.Dispose() }
 }
 
 function New-Fixture {
@@ -57,20 +78,70 @@ function New-Fixture {
 function Remove-Fixture { param($Fixture) if (Test-Path -LiteralPath $Fixture.Root) { [IO.Directory]::Delete($Fixture.Root, $true) } }
 
 function Invoke-Harness {
-    param($Fixture, [ValidateSet('Check', 'Apply')] [string] $Mode, [switch] $IncludeDesignFrontend, [switch] $PublicEntry, [string[]] $ExtraArguments = @())
+    param($Fixture, [ValidateSet('Check', 'Apply')] [string] $Mode, [switch] $IncludeDesignFrontend, [switch] $PublicEntry, [switch] $UseEnvironmentCodexHome, [string[]] $ExtraArguments = @())
     $out = Join-Path $Fixture.Root 'stdout.txt'; $err = Join-Path $Fixture.Root 'stderr.txt'
     $scriptPath = if ($PublicEntry) { Join-Path $RepositoryRoot 'harness.ps1' } else { $Fixture.Script }
-    $commandArgs = @('-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', $scriptPath, "-$Mode", '-CodexHome', $Fixture.CodexHome, '-AgentsHome', $Fixture.AgentsHome, '-BackupRoot', $Fixture.BackupRoot)
+    $commandArgs = @('-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', $scriptPath, "-$Mode")
+    if (-not $UseEnvironmentCodexHome) { $commandArgs += @('-CodexHome', $Fixture.CodexHome) }
+    $commandArgs += @('-AgentsHome', $Fixture.AgentsHome, '-BackupRoot', $Fixture.BackupRoot)
     if ($IncludeDesignFrontend) { $commandArgs += '-IncludeDesignFrontend' }
     $oldPreference = $ErrorActionPreference
+    $oldCodexHome = $env:CODEX_HOME
     try {
+        if ($UseEnvironmentCodexHome) { $env:CODEX_HOME = $Fixture.CodexHome }
         $ErrorActionPreference = 'Continue'
         & powershell.exe @commandArgs @ExtraArguments 1> $out 2> $err
         $exitCode = $LASTEXITCODE
-    } finally { $ErrorActionPreference = $oldPreference }
+    } finally {
+        $ErrorActionPreference = $oldPreference
+        $env:CODEX_HOME = $oldCodexHome
+    }
     $run = [pscustomobject]@{ ExitCode = $exitCode; StdOut = [IO.File]::ReadAllText($out); StdErr = [IO.File]::ReadAllText($err) }
     Remove-Item -LiteralPath $out, $err -Force
     $run
+}
+
+function Write-V1FixtureState {
+    param($Fixture, [switch] $WithBundle)
+    $manifestPath = Join-Path $Fixture.SourceRoot 'vendor\source-manifest.json'
+    $legacyManifest = [IO.File]::ReadAllText($manifestPath) | ConvertFrom-Json
+    $legacyManifest.activeSkills.PSObject.Properties.Remove('joewrks-project-setup')
+    $legacyManifest.activeSkills.'joewrks-design-frontend'.PSObject.Properties.Remove('activationPolicy')
+    $legacyManifestText = $legacyManifest | ConvertTo-Json -Depth 100
+    $corePath = Join-Path $Fixture.SourceRoot 'AGENTS.md'
+    $core = [IO.File]::ReadAllText($corePath).TrimEnd("`r", "`n")
+    $block = "$BeginMarker`n$core`n$EndMarker"
+    $agentsPath = Join-Path $Fixture.CodexHome 'AGENTS.md'
+    Write-Utf8 $agentsPath $block
+
+    $sourceIdentities = [ordered] @{
+        commonCore = [ordered] @{ path = 'AGENTS.md'; sha256 = Get-Hash $corePath }
+    }
+    $wholeFileTargets = [ordered] @{}
+    if ($WithBundle) {
+        Assert-Equal (($legacyManifest.activeSkills.PSObject.Properties.Name | Sort-Object) -join ',') 'joewrks-design-frontend' 'V1 fixture has only the historical design skill'
+        Assert-True (-not ($legacyManifest.activeSkills.'joewrks-design-frontend'.PSObject.Properties.Name -contains 'activationPolicy')) 'V1 fixture predates activationPolicy'
+        foreach ($relative in Get-V1SelectedFiles $legacyManifest) {
+            Copy-RelativeFile $Fixture.SourceRoot $Fixture.AgentsHome $relative
+            $canonical = $relative.Replace('\', '/')
+            $wholeFileTargets[$canonical] = Get-Hash (Join-Path $Fixture.AgentsHome $relative)
+        }
+        $installedManifest = Join-Path $Fixture.AgentsHome 'vendor\source-manifest.json'
+        Write-Utf8 $installedManifest ($legacyManifestText + "`n")
+        $wholeFileTargets['vendor/source-manifest.json'] = Get-Hash $installedManifest
+        $sourceIdentities.designFrontend = [ordered] @{
+            path = 'vendor/source-manifest.json'
+            sha256 = $wholeFileTargets['vendor/source-manifest.json']
+        }
+    }
+
+    $state = [ordered] @{
+        schemaVersion = 1
+        sourceIdentities = $sourceIdentities
+        managedBlocks = [ordered] @{ 'AGENTS.md' = Get-Hash $agentsPath }
+        wholeFileTargets = $wholeFileTargets
+    }
+    Write-Utf8 $Fixture.State (($state | ConvertTo-Json -Depth 16) + "`n")
 }
 
 function Test-PublicHarnessEntry {
@@ -85,10 +156,13 @@ function Test-PublicHarnessEntry {
         Assert-Equal $apply.ExitCode 0 'public entry apply succeeds'
         Assert-Equal (Read-Result $apply 'public entry apply').status 'current' 'public entry forwards apply'
         Assert-True (Test-Path -LiteralPath (Join-Path $f.CodexHome 'AGENTS.md') -PathType Leaf) 'public entry apply installs Common Core'
+        Assert-StringSetEqual @((Get-TreeHashes $f.AgentsHome).Keys) (Get-OptionalFiles $f.SourceRoot) 'public entry installs the personal pilot bundle'
 
         $pilot = Invoke-Harness $f Check -IncludeDesignFrontend -PublicEntry
-        Assert-Equal $pilot.ExitCode 0 'public entry forwards the optional pilot flag'
-        Assert-PilotDisclosure (Read-Result $pilot 'public entry pilot check').designFrontendPilot 'explicit-request' 'public entry pilot check'
+        Assert-Equal $pilot.ExitCode 0 'public entry accepts the compatibility flag'
+        $pilotResult = Read-Result $pilot 'public entry pilot check'
+        Assert-PilotDisclosure $pilotResult.designFrontendPilot 'default-personal-pilot' 'public entry pilot check'
+        Assert-Equal @($pilotResult.warnings).Count 1 'public entry exposes one compatibility warning'
 
         $invalid = Invoke-Harness $f Check -PublicEntry -ExtraArguments @('-Apply')
         Assert-True ($invalid.ExitCode -ne 0) 'public entry preserves blocked exit status'
@@ -190,11 +264,20 @@ function Test-EmptyCheckAndApply {
     try {
         $check = Invoke-Harness $f Check; Assert-Equal $check.ExitCode 0 'empty check succeeds'
         $result = Read-Result $check 'empty check'; Assert-Equal $result.status 'ready' 'empty check is ready'; Assert-True ([bool]$result.changesRequired) 'empty check needs changes'
-        Assert-Equal $result.designFrontendPilot $null 'core-only check has no pilot disclosure'
+        Assert-Equal $result.bundleSelection 'personal-pilot' 'default selects personal pilot'
+        Assert-Equal @($result.warnings).Count 0 'default check has no warnings'
+        Assert-PilotDisclosure $result.designFrontendPilot 'default-personal-pilot' 'default check'
         Assert-True ((@($result.changes) | ConvertTo-Json -Depth 8) -match '(?i)common.?core') 'empty check plans Common Core'
         Assert-True (-not (Test-Path -LiteralPath $f.CodexHome)) 'check creates no target/state'; Assert-True (-not (Test-Path -LiteralPath $f.AgentsHome)) 'check creates no agents directory'; Assert-True (-not (Test-Path -LiteralPath $f.BackupRoot)) 'check creates no backup'
-        $apply = Invoke-Harness $f Apply; Assert-Equal $apply.ExitCode 0 'first apply succeeds'; Assert-Equal (Read-Result $apply 'first apply').status 'current' 'first apply is current'
-        $agents = Join-Path $f.CodexHome 'AGENTS.md'; Assert-True (Test-Path -LiteralPath $agents) 'apply creates Common Core target'; Assert-True (Test-Path -LiteralPath $f.State) 'apply creates state'; Assert-True (-not (Test-Path -LiteralPath $f.AgentsHome)) 'default apply creates no optional target'
+        $apply = Invoke-Harness $f Apply; Assert-Equal $apply.ExitCode 0 'first apply succeeds'; $applyResult = Read-Result $apply 'first apply'; Assert-Equal $applyResult.status 'current' 'first apply is current'; Assert-Equal $applyResult.bundleSelection 'personal-pilot' 'apply reports personal pilot'
+        $agents = Join-Path $f.CodexHome 'AGENTS.md'; Assert-True (Test-Path -LiteralPath $agents) 'apply creates Common Core target'; Assert-True (Test-Path -LiteralPath $f.State) 'apply creates state'
+        Assert-StringSetEqual @((Get-TreeHashes $f.AgentsHome).Keys) (Get-OptionalFiles $f.SourceRoot) 'default installs full manifest unit'
+        $state = Get-Content -Raw -LiteralPath $f.State | ConvertFrom-Json
+        Assert-Equal (($state.PSObject.Properties.Name | Sort-Object) -join ',') 'agentsHomeIdentitySha256,bundleSelection,managedBlocks,schemaVersion,sourceIdentities,wholeFileTargets' 'state v2 has exact top-level keys'
+        Assert-Equal (($state.sourceIdentities.PSObject.Properties.Name | Sort-Object) -join ',') 'bundleManifest,commonCore' 'state v2 has exact source identity keys'
+        Assert-Equal $state.schemaVersion 2 'apply writes schema v2'
+        Assert-Equal $state.bundleSelection 'personal-pilot' 'state records bundle selection'
+        Assert-Equal $state.agentsHomeIdentitySha256 (Get-PathIdentity $f.AgentsHome) 'state binds normalized AgentsHome identity'
         $agentBytes = [IO.File]::ReadAllBytes($agents); $beginBytes = [Text.Encoding]::UTF8.GetBytes($BeginMarker); $endBytes = [Text.Encoding]::UTF8.GetBytes($EndMarker); Assert-Equal (Count-Bytes $agentBytes $beginBytes) 1 'apply creates exactly one managed block begin marker'; Assert-Equal (Count-Bytes $agentBytes $endBytes) 1 'apply creates exactly one managed block end marker'; Assert-True ((Find-Bytes $agentBytes $beginBytes) -lt (Find-Bytes $agentBytes $endBytes)) 'apply orders the managed block begin marker before its end marker'
         Assert-Equal (Read-Result (Invoke-Harness $f Check) 'post-apply check').status 'current' 'post-apply check is current'
         $before = Get-TreeHashes $f.CodexHome; $backupExists = Test-Path -LiteralPath $f.BackupRoot; $backups = Get-TreeHashes $f.BackupRoot; Assert-Equal (Invoke-Harness $f Apply).ExitCode 0 'second apply succeeds'
@@ -428,7 +511,7 @@ function Test-StateTrust {
         Assert-BlockedBeforeWrites $f {
             param($fixture)
             $state = Get-Content -Raw -LiteralPath $fixture.State | ConvertFrom-Json
-            $state.schemaVersion = 2
+            $state.schemaVersion = 3
             Write-Utf8 $fixture.State ($state | ConvertTo-Json -Depth 16)
         } 'wrong state schema' 'invalidState'
     } finally { Remove-Fixture $f }
@@ -452,9 +535,9 @@ function Test-StateTrust {
         Assert-BlockedBeforeWrites $f {
             param($fixture)
             $state = Get-Content -Raw -LiteralPath $fixture.State | ConvertFrom-Json
-            $state.sourceIdentities.designFrontend.path = 'unrelated.json'
+            $state.sourceIdentities.bundleManifest.path = 'unrelated.json'
             Write-Utf8 $fixture.State ($state | ConvertTo-Json -Depth 16)
-        } 'unrelated design source identity' 'invalidState'
+        } 'unrelated bundle source identity' 'invalidState'
         Write-Bytes $f.State $cleanState
         Assert-BlockedBeforeWrites $f {
             param($fixture)
@@ -477,23 +560,40 @@ function Test-StateTrust {
 function Test-OptionalBundleStateAndDrift {
     $f = New-Fixture
     try {
+        $default = Read-Result (Invoke-Harness $f Check) 'default pilot check'
         $explicit = Read-Result (Invoke-Harness $f Check -IncludeDesignFrontend) 'explicit pilot check'
+        Assert-Equal $default.status 'ready' 'default pilot check is ready'
+        Assert-PilotDisclosure $default.designFrontendPilot 'default-personal-pilot' 'default pilot check'
+        Assert-Equal @($default.warnings).Count 0 'default pilot check has no warnings'
         Assert-Equal $explicit.status 'ready' 'explicit pilot check is ready'
-        Assert-PilotDisclosure $explicit.designFrontendPilot 'explicit-request' 'explicit pilot check'
-        Assert-Equal (Invoke-Harness $f Apply).ExitCode 0 'default apply succeeds'; Assert-True (-not (Test-Path -LiteralPath $f.AgentsHome)) 'default apply installs no optional files'
-        Assert-Equal (Invoke-Harness $f Apply -IncludeDesignFrontend).ExitCode 0 'opt-in apply succeeds'
-        $expectedFiles = Get-OptionalFiles $f.SourceRoot; Assert-StringSetEqual @((Get-TreeHashes $f.AgentsHome).Keys) $expectedFiles 'opt-in installs exactly the manifest-selected files'
+        Assert-PilotDisclosure $explicit.designFrontendPilot 'default-personal-pilot' 'explicit pilot check'
+        Assert-Equal @($explicit.warnings).Count 1 'compatibility flag emits one warning'
+        Assert-Equal ([string]$explicit.warnings) 'DEPRECATED: -IncludeDesignFrontend no longer changes selection; personal-pilot already includes joewrks-design-frontend.' 'compatibility flag emits the exact warning'
+        Assert-Equal (($default.changes | ConvertTo-Json -Compress -Depth 8)) (($explicit.changes | ConvertTo-Json -Compress -Depth 8)) 'compatibility flag leaves planned targets unchanged'
+
+        Assert-Equal (Invoke-Harness $f Apply).ExitCode 0 'default apply succeeds'
+        $expectedFiles = Get-OptionalFiles $f.SourceRoot; Assert-StringSetEqual @((Get-TreeHashes $f.AgentsHome).Keys) $expectedFiles 'default installs exactly the manifest-selected files'
         $installedDesign = Join-Path $f.AgentsHome 'skills\joewrks-design-frontend\SKILL.md'
         $installedRoot = Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $installedDesign))
         Assert-True (Test-Path (Join-Path $installedRoot 'vendor\ui-ux-pro-max\scripts\search.py')) 'installed UIUX runtime resolves'
         Assert-True (Test-Path (Join-Path $installedRoot 'vendor\apple-design\SKILL.md')) 'installed Apple reference resolves'
         Assert-True (Test-Path (Join-Path $f.AgentsHome 'skills\joewrks-project-setup\scripts\project-setup.ps1')) 'project helper installs'
-        $before = Get-TreeHashes $f.AgentsHome; $preserved = Read-Result (Invoke-Harness $f Check) 'default check after opt-in'; Assert-Equal $preserved.status 'current' 'omitted flag preserves opt-in'; Assert-PilotDisclosure $preserved.designFrontendPilot 'preserved-prior-opt-in' 'default check after opt-in'; Assert-Equal (Invoke-Harness $f Apply).ExitCode 0 'default apply after opt-in succeeds'; Assert-TreeEqual (Get-TreeHashes $f.AgentsHome) $before 'omitted flag does not update/remove opt-in'
+        $before = Get-TreeHashes $f.AgentsHome
+        $beforeState = [IO.File]::ReadAllBytes($f.State)
+        $compatApply = Read-Result (Invoke-Harness $f Apply -IncludeDesignFrontend) 'compatibility no-op apply'
+        Assert-Equal $compatApply.status 'current' 'compatibility flag apply is current'
+        Assert-Equal ([string]$compatApply.warnings) 'DEPRECATED: -IncludeDesignFrontend no longer changes selection; personal-pilot already includes joewrks-design-frontend.' 'compatibility apply emits the exact warning'
+        Assert-TreeEqual (Get-TreeHashes $f.AgentsHome) $before 'compatibility flag changes no target hashes'
+        Assert-BytesEqual ([IO.File]::ReadAllBytes($f.State)) $beforeState 'compatibility flag changes no desired state bytes'
         Add-Content -LiteralPath (Join-Path $f.AgentsHome 'skills\joewrks-design-frontend\SKILL.md') -Value 'external drift'; $drift = Get-TreeHashes $f.AgentsHome
-        $check = Invoke-Harness $f Check; $driftResult = Read-Result $check 'optional drift check'; Assert-Equal $driftResult.status 'blocked' 'installed optional drift blocks default check'; Assert-PilotDisclosure $driftResult.designFrontendPilot 'preserved-prior-opt-in' 'optional drift check'; Assert-TreeEqual (Get-TreeHashes $f.AgentsHome) $drift 'optional drift check is read-only'
+        $check = Invoke-Harness $f Check; $driftResult = Read-Result $check 'optional drift check'; Assert-Equal $driftResult.status 'blocked' 'installed optional drift blocks default check'; Assert-PilotDisclosure $driftResult.designFrontendPilot 'default-personal-pilot' 'optional drift check'; Assert-TreeEqual (Get-TreeHashes $f.AgentsHome) $drift 'optional drift check is read-only'
         $run = Invoke-Harness $f Apply; Assert-True ($run.ExitCode -ne 0) 'installed optional drift blocks apply'; Assert-Equal (Read-Result $run 'optional drift').status 'blocked' 'installed optional drift reports blocked'; Assert-TreeEqual (Get-TreeHashes $f.AgentsHome) $drift 'installed optional drift is not overwritten'
         $stateText = [IO.File]::ReadAllText($f.State); $state = $stateText | ConvertFrom-Json
-        Assert-True ($stateText -notmatch '(?i)[a-z]:\\') 'state stores no drive letter'; Assert-True ($stateText -notmatch [regex]::Escape([Environment]::GetFolderPath('UserProfile'))) 'state stores no user profile'; Assert-True ($state.PSObject.Properties.Name -contains 'managedBlocks') 'state has block ownership'; Assert-True ($state.PSObject.Properties.Name -contains 'wholeFileTargets') 'state has whole-file ownership'
+        Assert-True ($stateText -notmatch '(?i)[a-z]:\\') 'state stores no drive letter'
+        Assert-True ($stateText -notmatch [regex]::Escape([Environment]::GetFolderPath('UserProfile'))) 'state stores no user profile'
+        Assert-True ($stateText -notmatch [regex]::Escape($f.CodexHome)) 'state stores no CodexHome path'
+        Assert-True ($stateText -notmatch [regex]::Escape($f.AgentsHome)) 'state stores no AgentsHome path'
+        Assert-Equal (($state.PSObject.Properties.Name | Sort-Object) -join ',') 'agentsHomeIdentitySha256,bundleSelection,managedBlocks,schemaVersion,sourceIdentities,wholeFileTargets' 'state keeps exact v2 keys'
     } finally { Remove-Fixture $f }
 }
 
@@ -501,17 +601,123 @@ function Test-PreservedOptionalAfterCoreUpdate {
     $f = New-Fixture
     try {
         Assert-Equal (Invoke-Harness $f Apply -IncludeDesignFrontend).ExitCode 0 'preserved optional baseline apply succeeds'
-        $beforeOptional = Get-TreeHashes $f.AgentsHome
+        $designSkill = Join-Path $f.AgentsHome 'skills\joewrks-design-frontend\SKILL.md'
+        $beforeDesignSkill = Get-Hash $designSkill
         Set-SourceCore $f ((Get-Content -Raw -LiteralPath (Join-Path $f.SourceRoot 'AGENTS.md')) + "`n# core-only update")
 
         Assert-Equal (Invoke-Harness $f Apply).ExitCode 0 'core-only update after opt-in succeeds'
-        Assert-TreeEqual (Get-TreeHashes $f.AgentsHome) $beforeOptional 'core-only update preserves optional files and installed manifest'
+        Assert-Equal (Get-Hash $designSkill) $beforeDesignSkill 'core update preserves unchanged design skill bytes'
+        Assert-StringSetEqual @((Get-TreeHashes $f.AgentsHome).Keys) (Get-OptionalFiles $f.SourceRoot) 'core update keeps the current manifest-selected unit'
 
         $check = Invoke-Harness $f Check
         Assert-Equal $check.ExitCode 0 'check after preserved optional core update succeeds'
         $result = Read-Result $check 'check after preserved optional core update'
         Assert-Equal $result.status 'current' 'preserved optional state remains valid after a core-only update'
-        Assert-PilotDisclosure $result.designFrontendPilot 'preserved-prior-opt-in' 'check after preserved optional core update'
+        Assert-PilotDisclosure $result.designFrontendPilot 'default-personal-pilot' 'check after preserved optional core update'
+    } finally { Remove-Fixture $f }
+}
+
+function Test-V1StateMigration {
+    foreach ($case in @(
+        @{ Name = 'core-only'; WithBundle = $false },
+        @{ Name = 'design-opt-in'; WithBundle = $true }
+    )) {
+        $f = New-Fixture
+        try {
+            Write-V1FixtureState $f -WithBundle:$case.WithBundle
+            $beforeState = [IO.File]::ReadAllBytes($f.State)
+            $beforeCodex = Get-TreeHashes $f.CodexHome
+            $beforeAgents = Get-TreeHashes $f.AgentsHome
+            $check = Read-Result (Invoke-Harness $f Check) "$($case.Name) V1 migration check"
+            Assert-Equal $check.status 'ready' "$($case.Name) V1 migration is ready"
+            Assert-Equal $check.bundleSelection 'personal-pilot' "$($case.Name) V1 migration selects the personal pilot"
+            Assert-BytesEqual ([IO.File]::ReadAllBytes($f.State)) $beforeState "$($case.Name) check leaves exact V1 state bytes"
+            Assert-TreeEqual (Get-TreeHashes $f.CodexHome) $beforeCodex "$($case.Name) check leaves the Codex tree"
+            Assert-TreeEqual (Get-TreeHashes $f.AgentsHome) $beforeAgents "$($case.Name) check leaves the Agents tree"
+
+            $apply = Read-Result (Invoke-Harness $f Apply) "$($case.Name) V1 migration apply"
+            Assert-Equal $apply.status 'current' "$($case.Name) V1 migration succeeds"
+            $state = Get-Content -Raw -LiteralPath $f.State | ConvertFrom-Json
+            Assert-Equal (($state.PSObject.Properties.Name | Sort-Object) -join ',') 'agentsHomeIdentitySha256,bundleSelection,managedBlocks,schemaVersion,sourceIdentities,wholeFileTargets' "$($case.Name) migration writes exact V2 keys"
+            Assert-Equal (($state.sourceIdentities.PSObject.Properties.Name | Sort-Object) -join ',') 'bundleManifest,commonCore' "$($case.Name) migration writes exact source identity keys"
+            Assert-Equal $state.schemaVersion 2 "$($case.Name) migration writes schema V2"
+            Assert-Equal $state.agentsHomeIdentitySha256 (Get-PathIdentity $f.AgentsHome) "$($case.Name) migration binds AgentsHome"
+            Assert-True (Test-Path -LiteralPath (Join-Path $f.AgentsHome 'skills\joewrks-project-setup\SKILL.md')) "$($case.Name) migration installs the project skill"
+            Assert-StringSetEqual @((Get-TreeHashes $f.AgentsHome).Keys) (Get-OptionalFiles $f.SourceRoot) "$($case.Name) migration installs the full manifest unit"
+        } finally { Remove-Fixture $f }
+    }
+
+    $f = New-Fixture
+    try {
+        Write-V1FixtureState $f
+        $beforeTree = @{ codex = Get-TreeHashes $f.CodexHome; agents = Get-TreeHashes $f.AgentsHome }
+        $beforeState = [IO.File]::ReadAllBytes($f.State)
+        . $f.Script
+        $result = Invoke-JoewrksHarnessSync -Apply -CodexHome $f.CodexHome -AgentsHome $f.AgentsHome -BackupRoot $f.BackupRoot -AfterReplace {
+            param($replacement)
+            if ($replacement.TargetPath -ine $f.State) { throw 'failure during V1 target migration' }
+        }
+        Assert-Equal $result.status 'failed' 'V1 target migration failure is reported'
+        Assert-Equal $result.rollback.status 'complete' 'V1 target migration rollback completes'
+        Assert-BytesEqual ([IO.File]::ReadAllBytes($f.State)) $beforeState 'target failure leaves exact V1 state bytes'
+        Assert-TreeEqual (Get-TreeHashes $f.CodexHome) $beforeTree.codex 'target failure restores the V1 Codex tree'
+        Assert-TreeEqual (Get-TreeHashes $f.AgentsHome) $beforeTree.agents 'target failure restores the V1 Agents tree'
+    } finally { Remove-Fixture $f }
+
+    $f = New-Fixture
+    try {
+        Write-V1FixtureState $f -WithBundle
+        $beforeTree = @{ codex = Get-TreeHashes $f.CodexHome; agents = Get-TreeHashes $f.AgentsHome }
+        $beforeState = [IO.File]::ReadAllBytes($f.State)
+        . $f.Script
+        $failedAfterState = Invoke-JoewrksHarnessSync -Apply -CodexHome $f.CodexHome -AgentsHome $f.AgentsHome -BackupRoot $f.BackupRoot -AfterReplace {
+            param($replacement)
+            if ($replacement.TargetPath -ieq $f.State) { throw 'failure after V2 state replacement' }
+        }
+        Assert-Equal $failedAfterState.status 'failed' 'state-write failure is reported'
+        Assert-Equal $failedAfterState.rollback.status 'complete' 'state-write rollback completes'
+        Assert-BytesEqual ([IO.File]::ReadAllBytes($f.State)) $beforeState 'exact V1 state bytes return'
+        Assert-TreeEqual (Get-TreeHashes $f.CodexHome) $beforeTree.codex 'Codex tree returns to V1'
+        Assert-TreeEqual (Get-TreeHashes $f.AgentsHome) $beforeTree.agents 'Agents tree returns to V1'
+    } finally { Remove-Fixture $f }
+}
+
+function Test-HomeResolutionAndIdentity {
+    $f = New-Fixture
+    try {
+        $result = Read-Result (Invoke-Harness $f Apply -UseEnvironmentCodexHome) 'CODEX_HOME apply'
+        Assert-Equal $result.status 'current' 'environment CODEX_HOME apply succeeds'
+        Assert-True (Test-Path -LiteralPath (Join-Path $f.CodexHome 'AGENTS.md')) 'environment CODEX_HOME receives Common Core'
+        Assert-True (Test-Path -LiteralPath $f.State) 'environment CODEX_HOME receives state'
+    } finally { Remove-Fixture $f }
+
+    $f = New-Fixture
+    $oldCodexHome = $env:CODEX_HOME
+    try {
+        $env:CODEX_HOME = Join-Path $f.Root 'wrong-environment-codex'
+        Assert-Equal (Invoke-Harness $f Apply).ExitCode 0 'explicit CodexHome apply succeeds'
+        Assert-True (Test-Path -LiteralPath $f.State) 'explicit CodexHome receives state'
+        Assert-True (-not (Test-Path -LiteralPath $env:CODEX_HOME)) 'explicit CodexHome overrides environment CODEX_HOME'
+    } finally {
+        $env:CODEX_HOME = $oldCodexHome
+        Remove-Fixture $f
+    }
+
+    $f = New-Fixture
+    try {
+        Assert-Equal (Invoke-Harness $f Apply).ExitCode 0 'AgentsHome identity baseline apply succeeds'
+        $beforeCodex = Get-TreeHashes $f.CodexHome
+        $beforeAgents = Get-TreeHashes $f.AgentsHome
+        $beforeState = [IO.File]::ReadAllBytes($f.State)
+        $otherAgentsHome = Join-Path $f.Root 'other-agents'
+        $f.AgentsHome = $otherAgentsHome
+        $result = Read-Result (Invoke-Harness $f Check) 'different AgentsHome check'
+        Assert-Equal $result.status 'blocked' 'different AgentsHome blocks'
+        Assert-True (@($result.blockers).kind -contains 'rootIdentity') 'different AgentsHome reports rootIdentity'
+        Assert-BytesEqual ([IO.File]::ReadAllBytes($f.State)) $beforeState 'identity blocker leaves state bytes'
+        Assert-TreeEqual (Get-TreeHashes $f.CodexHome) $beforeCodex 'identity blocker leaves Codex tree'
+        Assert-TreeEqual (Get-TreeHashes (Join-Path $f.Root 'agents')) $beforeAgents 'identity blocker leaves original Agents tree'
+        Assert-True (-not (Test-Path -LiteralPath $otherAgentsHome)) 'identity blocker creates no alternate AgentsHome'
     } finally { Remove-Fixture $f }
 }
 
@@ -646,7 +852,7 @@ function Test-MultiTargetRollback {
         }.GetNewClosure()
         $result = Invoke-JoewrksHarnessSync -Apply -IncludeDesignFrontend -CodexHome $f.CodexHome -AgentsHome $f.AgentsHome -BackupRoot $f.BackupRoot -AfterReplace $callback
         Assert-Equal $result.status 'failed' 'multi-target callback failure reports failed'
-        Assert-PilotDisclosure $result.designFrontendPilot 'explicit-request' 'failed opt-in apply'
+        Assert-PilotDisclosure $result.designFrontendPilot 'default-personal-pilot' 'failed personal-pilot apply'
         Assert-Equal $replacements.Count 2 'failure occurs after two replacements'
         Assert-Equal $result.rollback.status 'complete' 'matching targets roll back completely'
         Assert-Equal @($result.unresolvedTargets).Count 0 'complete rollback has no unresolved targets'
@@ -682,7 +888,7 @@ function Test-Task2CheckRegressions {
         $result = Read-Result $run 'optional directory collision'
         Assert-True ($run.ExitCode -ne 0) 'optional directory collision exits nonzero'
         Assert-Equal $result.status 'blocked' 'optional directory collision blocks'
-        Assert-PilotDisclosure $result.designFrontendPilot 'explicit-request' 'optional directory collision'
+        Assert-PilotDisclosure $result.designFrontendPilot 'default-personal-pilot' 'optional directory collision'
         Assert-True ((@($result.blockers).kind -contains 'optionalCollision')) 'optional directory collision is reported'
         Assert-TreeEqual (Get-TreeHashes $f.AgentsHome) $before 'optional directory collision check is read-only'
         Assert-True (Test-Path -LiteralPath $collision -PathType Container) 'optional directory collision remains a directory'
@@ -699,6 +905,8 @@ Test-AgentEncodingAndCoreUpdate
 Test-PreflightBlockers
 Test-ManifestSkillCollisions
 Test-StateTrust
+Test-V1StateMigration
+Test-HomeResolutionAndIdentity
 Test-OptionalBundleStateAndDrift
 Test-ConcurrentDisappearanceBeforeDelete
 Test-PreservedOptionalAfterCoreUpdate
