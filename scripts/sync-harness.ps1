@@ -274,8 +274,7 @@ function Set-HarnessFile {
 function Get-HarnessFrontmatterCollisions {
     param(
         [string[]] $SkillRoots,
-        [string] $ManagedSkillFile,
-        [bool] $ManagedOptionalBundle
+        [hashtable] $ManagedSkillFiles
     )
     $collisions = [Collections.Generic.List[string]]::new()
     foreach ($root in $SkillRoots) {
@@ -283,21 +282,31 @@ function Get-HarnessFrontmatterCollisions {
         foreach ($directory in Get-ChildItem -LiteralPath $root -Directory -Recurse) {
             $relative = $directory.FullName.Substring($root.Length).TrimStart('\', '/')
             if (($relative -split '[\\/]') -contains '.system') { continue }
-            if ($directory.Name -ieq 'joewrks-design-frontend') {
-                $managedDirectory = Split-Path -Parent $ManagedSkillFile
-                if (-not ($ManagedOptionalBundle -and $directory.FullName -ieq $managedDirectory)) {
-                    $null = $collisions.Add("Duplicate skill directory: $($directory.FullName)")
+            foreach ($skillName in @($ManagedSkillFiles.Keys)) {
+                if ($directory.Name -ieq $skillName) {
+                    $managedSkillFile = [string] $ManagedSkillFiles[$skillName]
+                    $managedDirectory = if ([string]::IsNullOrWhiteSpace($managedSkillFile)) { $null } else { Split-Path -Parent $managedSkillFile }
+                    if ($null -eq $managedDirectory -or $directory.FullName -ine $managedDirectory) {
+                        $null = $collisions.Add("Duplicate skill directory: $($directory.FullName)")
+                    }
                 }
             }
         }
         foreach ($skillFile in Get-ChildItem -LiteralPath $root -Filter 'SKILL.md' -File -Recurse) {
             $relative = $skillFile.FullName.Substring($root.Length).TrimStart('\', '/')
             if (($relative -split '[\\/]') -contains '.system') { continue }
-            if ($ManagedOptionalBundle -and $skillFile.FullName -ieq $ManagedSkillFile) { continue }
+            $isManaged = @($ManagedSkillFiles.Values | Where-Object {
+                -not [string]::IsNullOrWhiteSpace([string] $_) -and $skillFile.FullName -ieq [string] $_
+            }).Count -gt 0
+            if ($isManaged) { continue }
             try {
                 $text = (Read-HarnessUtf8 $skillFile.FullName).Text
-                if ($text -match '(?ms)\A---\s*\r?\n.*?^\s*name\s*:\s*[''"]?joewrks-design-frontend[''"]?\s*$.*?^---\s*$') {
-                    $null = $collisions.Add("Duplicate skill frontmatter name: $($skillFile.FullName)")
+                foreach ($skillName in @($ManagedSkillFiles.Keys)) {
+                    $pattern = '(?ms)\A---\s*\r?\n.*?^\s*name\s*:\s*[''"]?' + [regex]::Escape([string] $skillName) + '[''"]?\s*$.*?^---\s*$'
+                    if ($text -match $pattern) {
+                        $null = $collisions.Add("Duplicate skill frontmatter name: $($skillFile.FullName)")
+                        break
+                    }
                 }
             } catch {
                 $null = $collisions.Add("Cannot inspect skill frontmatter as UTF-8: $($skillFile.FullName)")
@@ -331,10 +340,10 @@ function Invoke-JoewrksHarnessSync {
     $statePath = Join-Path $resolvedCodexHome 'joewrks-harness-state.json'
     $optionalRoot = $resolvedAgentsHome
     $codexSkillsPath = Join-Path $resolvedCodexHome 'skills'
-    $managedSkillFile = Join-Path $optionalRoot 'skills\joewrks-design-frontend\SKILL.md'
     $blockers = [Collections.Generic.List[object]]::new()
     $changes = [Collections.Generic.List[object]]::new()
     $optionalEntries = [Collections.Generic.List[object]]::new()
+    $manifestSkillRelativePaths = @{}
     $manifest = $null
     $manifestHash = $null
     $sourceCore = $null
@@ -351,7 +360,6 @@ function Invoke-JoewrksHarnessSync {
         [pscustomobject] @{ Root = $resolvedCodexHome; Path = $statePath; Label = 'State target' },
         [pscustomobject] @{ Root = $resolvedCodexHome; Path = $codexSkillsPath; Label = 'Codex skills' },
         [pscustomobject] @{ Root = $resolvedAgentsHome; Path = $resolvedAgentsHome; Label = 'Agents home' },
-        [pscustomobject] @{ Root = $resolvedAgentsHome; Path = $managedSkillFile; Label = 'Optional target' },
         [pscustomobject] @{ Root = $resolvedBackupRoot; Path = $resolvedBackupRoot; Label = 'Backup root' }
     )) {
         try {
@@ -368,6 +376,10 @@ function Invoke-JoewrksHarnessSync {
         $manifestRead = Read-HarnessUtf8 $manifestPath
         $manifestHash = Get-HarnessSha256 $manifestRead.Bytes
         $manifest = $manifestRead.Text | ConvertFrom-Json
+        foreach ($skillProperty in @($manifest.activeSkills.PSObject.Properties)) {
+            $skillName = [string] $skillProperty.Name
+            $manifestSkillRelativePaths[$skillName] = Get-HarnessSafeRelativePath "skills/$skillName/SKILL.md" 'Manifest skill path'
+        }
         $coreEntry = $manifest.evaluation.current.commonCore
         $corePath = Resolve-HarnessSourceFile $sourceRoot ([string] $coreEntry.path)
         if (-not (Test-Path -LiteralPath $corePath -PathType Leaf)) { throw "Missing Common Core source: $($coreEntry.path)" }
@@ -601,9 +613,23 @@ function Invoke-JoewrksHarnessSync {
         }
     }
 
+    $managedSkillFiles = @{}
+    foreach ($skillName in @($manifestSkillRelativePaths.Keys)) {
+        try {
+            $relative = [string] $manifestSkillRelativePaths[$skillName]
+            $managedSkillFile = Resolve-HarnessSourceFile $resolvedAgentsHome $relative
+            $managedSkillFiles[$skillName] = $managedSkillFile
+            if ((Test-Path -LiteralPath $managedSkillFile) -and -not $stateWholeFiles.ContainsKey($relative)) {
+                $null = $blockers.Add([pscustomobject] @{ kind = 'duplicateSkill'; message = "Duplicate skill directory: $(Split-Path -Parent $managedSkillFile)" })
+            }
+        } catch {
+            $targetPathSafetyBlocked = $true
+            $null = $blockers.Add([pscustomobject] @{ kind = 'targetSafety'; message = $_.Exception.Message })
+        }
+    }
     $skillRoots = @((Join-Path $resolvedAgentsHome 'skills'), $codexSkillsPath)
     if (-not $targetPathSafetyBlocked) {
-        foreach ($collision in @(Get-HarnessFrontmatterCollisions $skillRoots $managedSkillFile $priorOptionalOptIn)) {
+        foreach ($collision in @(Get-HarnessFrontmatterCollisions $skillRoots $managedSkillFiles)) {
             $null = $blockers.Add([pscustomobject] @{ kind = 'duplicateSkill'; message = $collision })
         }
     }

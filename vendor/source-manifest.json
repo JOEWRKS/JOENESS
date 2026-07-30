@@ -28,12 +28,26 @@
     "joewrks-design-frontend": {
       "authorship": "joewrks-canonical",
       "evaluationState": "candidate",
+      "activationPolicy": "hybrid-personal-pilot",
       "sourceDependencies": ["ui-ux-pro-max", "apple-design"],
       "intentionalDifferences": ["Local activation and routing contract.", "Local OpenAI product metadata."],
       "validatorSha256": "5347a0a09cfb546bba1c0d1a30dae0a233d9a05f57bd4e7877155c588bcdabf7",
       "files": [
         {"localPath":"skills/joewrks-design-frontend/SKILL.md","bytes":2685,"sha256":"0694f0d0880c079ab50b2af2621ef37f9745eae356f0c9ebc5a1351cd0d8a67d","exactUpstreamCopy":false},
         {"localPath":"skills/joewrks-design-frontend/agents/openai.yaml","bytes":263,"sha256":"3d0bc6bf72b93b3bd185852f080b19caeb17aed45f582df339d61c2633f81892","exactUpstreamCopy":false}
+      ]
+    },
+    "joewrks-project-setup": {
+      "authorship": "joewrks-canonical",
+      "evaluationState": "candidate",
+      "activationPolicy": "explicit-only",
+      "sourceDependencies": [],
+      "intentionalDifferences": ["Explicit-only project inspection and deterministic managed-block writer."],
+      "validatorSha256": "5347a0a09cfb546bba1c0d1a30dae0a233d9a05f57bd4e7877155c588bcdabf7",
+      "files": [
+        {"localPath":"skills/joewrks-project-setup/SKILL.md","bytes":1738,"sha256":"bc3633b4292d78be8ad4ff11dff15118ca1794f500079f3775593f630d961d8f","exactUpstreamCopy":false},
+        {"localPath":"skills/joewrks-project-setup/agents/openai.yaml","bytes":259,"sha256":"66255619bf9e17fcc30734229be7930d2e1e3da6c6d8062cabcb32db15e3c18e","exactUpstreamCopy":false},
+        {"localPath":"skills/joewrks-project-setup/scripts/project-setup.ps1","bytes":15896,"sha256":"15867af10dfe572fc94d01dd2d97d70ccde160e1e832d11c1b39f78f40155d86","exactUpstreamCopy":false}
       ]
     }
   },

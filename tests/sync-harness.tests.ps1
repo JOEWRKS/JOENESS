@@ -388,6 +388,35 @@ function Test-PreflightBlockers {
     } finally { Remove-Fixture $f }
 }
 
+function Test-ManifestSkillCollisions {
+    $cases = @(
+        @{
+            Name = 'current design frontmatter collision'
+            Action = { param($f) Write-Utf8 (Join-Path $f.AgentsHome 'skills\other\SKILL.md') "---`nname: joewrks-design-frontend`n---" }
+        },
+        @{
+            Name = 'legacy project directory collision'
+            Action = { param($f) Write-Utf8 (Join-Path $f.CodexHome 'skills\joewrks-project-setup\SKILL.md') 'unmanaged' }
+        }
+    )
+    foreach ($case in $cases) {
+        $f = New-Fixture
+        try {
+            & $case.Action $f
+            $codex = Get-TreeHashes $f.CodexHome
+            $agents = Get-TreeHashes $f.AgentsHome
+            $run = Invoke-Harness $f Check -IncludeDesignFrontend
+            $result = Read-Result $run $case.Name
+            Assert-True ($run.ExitCode -ne 0) "$($case.Name) exits nonzero"
+            Assert-Equal $result.status 'blocked' "$($case.Name) reports blocked"
+            Assert-True (@($result.blockers).kind -contains 'duplicateSkill') "$($case.Name) reports duplicateSkill"
+            Assert-TreeEqual (Get-TreeHashes $f.CodexHome) $codex "$($case.Name) check creates no Codex writes"
+            Assert-TreeEqual (Get-TreeHashes $f.AgentsHome) $agents "$($case.Name) check creates no agents writes"
+            Assert-True (-not (Test-Path -LiteralPath $f.BackupRoot)) "$($case.Name) creates no backup"
+        } finally { Remove-Fixture $f }
+    }
+}
+
 function Test-StateTrust {
     $f = New-Fixture
     try {
@@ -450,6 +479,11 @@ function Test-OptionalBundleStateAndDrift {
         Assert-Equal (Invoke-Harness $f Apply).ExitCode 0 'default apply succeeds'; Assert-True (-not (Test-Path -LiteralPath $f.AgentsHome)) 'default apply installs no optional files'
         Assert-Equal (Invoke-Harness $f Apply -IncludeDesignFrontend).ExitCode 0 'opt-in apply succeeds'
         $expectedFiles = Get-OptionalFiles $f.SourceRoot; Assert-StringSetEqual @((Get-TreeHashes $f.AgentsHome).Keys) $expectedFiles 'opt-in installs exactly the manifest-selected files'
+        $installedDesign = Join-Path $f.AgentsHome 'skills\joewrks-design-frontend\SKILL.md'
+        $installedRoot = Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $installedDesign))
+        Assert-True (Test-Path (Join-Path $installedRoot 'vendor\ui-ux-pro-max\scripts\search.py')) 'installed UIUX runtime resolves'
+        Assert-True (Test-Path (Join-Path $installedRoot 'vendor\apple-design\SKILL.md')) 'installed Apple reference resolves'
+        Assert-True (Test-Path (Join-Path $f.AgentsHome 'skills\joewrks-project-setup\scripts\project-setup.ps1')) 'project helper installs'
         $before = Get-TreeHashes $f.AgentsHome; $preserved = Read-Result (Invoke-Harness $f Check) 'default check after opt-in'; Assert-Equal $preserved.status 'current' 'omitted flag preserves opt-in'; Assert-PilotDisclosure $preserved.designFrontendPilot 'preserved-prior-opt-in' 'default check after opt-in'; Assert-Equal (Invoke-Harness $f Apply).ExitCode 0 'default apply after opt-in succeeds'; Assert-TreeEqual (Get-TreeHashes $f.AgentsHome) $before 'omitted flag does not update/remove opt-in'
         Add-Content -LiteralPath (Join-Path $f.AgentsHome 'skills\joewrks-design-frontend\SKILL.md') -Value 'external drift'; $drift = Get-TreeHashes $f.AgentsHome
         $check = Invoke-Harness $f Check; $driftResult = Read-Result $check 'optional drift check'; Assert-Equal $driftResult.status 'blocked' 'installed optional drift blocks default check'; Assert-PilotDisclosure $driftResult.designFrontendPilot 'preserved-prior-opt-in' 'optional drift check'; Assert-TreeEqual (Get-TreeHashes $f.AgentsHome) $drift 'optional drift check is read-only'
@@ -659,6 +693,7 @@ Test-Task2CheckRegressions
 Test-EmptyCheckAndApply
 Test-AgentEncodingAndCoreUpdate
 Test-PreflightBlockers
+Test-ManifestSkillCollisions
 Test-StateTrust
 Test-OptionalBundleStateAndDrift
 Test-ConcurrentDisappearanceBeforeDelete

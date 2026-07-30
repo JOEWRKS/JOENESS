@@ -59,6 +59,7 @@ const EXPECTED_SOURCES = {
 const EXPECTED_ACTIVE_SKILL = {
   authorship: 'joewrks-canonical',
   evaluationState: 'candidate',
+  activationPolicy: 'hybrid-personal-pilot',
   sourceDependencies: ['ui-ux-pro-max', 'apple-design'],
   intentionalDifferences: [
     'Local activation and routing contract.',
@@ -76,6 +77,36 @@ const EXPECTED_ACTIVE_SKILL = {
       localPath: 'skills/joewrks-design-frontend/agents/openai.yaml',
       bytes: 263,
       sha256: '3d0bc6bf72b93b3bd185852f080b19caeb17aed45f582df339d61c2633f81892',
+      exactUpstreamCopy: false,
+    },
+  ],
+};
+const EXPECTED_PROJECT_SETUP_SKILL = {
+  authorship: 'joewrks-canonical',
+  evaluationState: 'candidate',
+  activationPolicy: 'explicit-only',
+  sourceDependencies: [],
+  intentionalDifferences: [
+    'Explicit-only project inspection and deterministic managed-block writer.',
+  ],
+  validatorSha256: '5347a0a09cfb546bba1c0d1a30dae0a233d9a05f57bd4e7877155c588bcdabf7',
+  files: [
+    {
+      localPath: 'skills/joewrks-project-setup/SKILL.md',
+      bytes: 1738,
+      sha256: 'bc3633b4292d78be8ad4ff11dff15118ca1794f500079f3775593f630d961d8f',
+      exactUpstreamCopy: false,
+    },
+    {
+      localPath: 'skills/joewrks-project-setup/agents/openai.yaml',
+      bytes: 259,
+      sha256: '66255619bf9e17fcc30734229be7930d2e1e3da6c6d8062cabcb32db15e3c18e',
+      exactUpstreamCopy: false,
+    },
+    {
+      localPath: 'skills/joewrks-project-setup/scripts/project-setup.ps1',
+      bytes: 15896,
+      sha256: '15867af10dfe572fc94d01dd2d97d70ccde160e1e832d11c1b39f78f40155d86',
       exactUpstreamCopy: false,
     },
   ],
@@ -219,7 +250,36 @@ test('vendor bundle is exactly the pinned non-discoverable source set', () => {
     'vendor/ui-ux-pro-max/scripts/tests/test_core.py',
   ]);
   assert.deepEqual(Object.keys(manifest.sources).sort(), Object.keys(EXPECTED_SOURCES).sort());
-  assert.deepEqual(manifest.activeSkills, { 'joewrks-design-frontend': EXPECTED_ACTIVE_SKILL });
+  assert.deepEqual(Object.keys(manifest.activeSkills).sort(), [
+    'joewrks-design-frontend',
+    'joewrks-project-setup',
+  ]);
+  const projectSetup = manifest.activeSkills['joewrks-project-setup'];
+  assert.ok(projectSetup, 'missing joewrks-project-setup active skill');
+  assert.equal(
+    manifest.activeSkills['joewrks-design-frontend'].activationPolicy,
+    'hybrid-personal-pilot',
+  );
+  assert.equal(projectSetup.activationPolicy, 'explicit-only');
+  assert.equal(projectSetup.evaluationState, 'candidate');
+  assert.deepEqual(projectSetup.sourceDependencies, []);
+  assert.deepEqual(
+    projectSetup.files.map(({ localPath }) => localPath),
+    EXPECTED_PROJECT_SETUP_SKILL.files.map(({ localPath }) => localPath),
+  );
+
+  for (const skillName of ['joewrks-design-frontend', 'joewrks-project-setup']) {
+    for (const entry of manifest.activeSkills[skillName].files) {
+      const text = readFileSync(path.join(ROOT, entry.localPath), 'utf8');
+      assert.doesNotMatch(
+        text,
+        /(?:^|[\s'"`(])(?:[A-Za-z]:[\\/]|\/Users\/|\/home\/)/m,
+        `${entry.localPath} contains a personal absolute path`,
+      );
+    }
+  }
+  assert.deepEqual(manifest.activeSkills['joewrks-design-frontend'], EXPECTED_ACTIVE_SKILL);
+  assert.deepEqual(projectSetup, EXPECTED_PROJECT_SETUP_SKILL);
   assert.deepEqual(manifest.sources['ui-ux-pro-max'].upstreamAuditNotes, [
     'SKILL.md reports 98 UX and 104 icon rows; the pinned data contains 99 and 105.',
     'styles.csv omits No=54; search behavior is unaffected.',
@@ -263,10 +323,12 @@ test('vendor bundle is exactly the pinned non-discoverable source set', () => {
       assert.equal(sha256(localFile), file.sha256, `wrong hash: ${file.localPath}`);
     }
   }
-  for (const file of EXPECTED_ACTIVE_SKILL.files) {
-    const localFile = path.join(ROOT, ...file.localPath.split('/'));
-    assert.equal(lstatSync(localFile).size, file.bytes, `wrong active byte length: ${file.localPath}`);
-    assert.equal(sha256(localFile), file.sha256, `wrong active hash: ${file.localPath}`);
+  for (const skill of [EXPECTED_ACTIVE_SKILL, EXPECTED_PROJECT_SETUP_SKILL]) {
+    for (const file of skill.files) {
+      const localFile = path.join(ROOT, ...file.localPath.split('/'));
+      assert.equal(lstatSync(localFile).size, file.bytes, `wrong active byte length: ${file.localPath}`);
+      assert.equal(sha256(localFile), file.sha256, `wrong active hash: ${file.localPath}`);
+    }
   }
 });
 
