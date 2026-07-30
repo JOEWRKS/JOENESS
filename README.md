@@ -58,7 +58,7 @@ stdout은 한 JSON 결과입니다.
 |---|---:|---|
 | `current` | 0 | 원하는 설치 상태와 일치 |
 | `ready` | 0 | 안전하게 적용하거나 제거할 변경이 있음 |
-| `removed` | 0 | 제거 완료 또는 설치 흔적 없는 no-op |
+| `removed` | 0 | state-owned 제거 완료 또는 아래 no-state no-op |
 | `failed` | 1 | 실행 실패 후 확인 가능한 rollback 완료 |
 | `blocked` | 2 | 충돌·drift·불명확한 소유권 등으로 쓰기 전 중단 |
 | `unknown` | 3 | unresolved target 또는 불완전 rollback으로 최종 상태를 확정할 수 없음 |
@@ -68,6 +68,8 @@ stdout은 한 JSON 결과입니다.
 ### 제거와 업데이트
 
 `-Remove`는 유효한 state가 소유한다고 증명하는 whole files와 Common Core marker 블록만 제거합니다. Common Core 밖의 기존 `AGENTS.md` byte를 보존하고, 외부 내용이 없어도 `AGENTS.md` 파일 자체는 남기며, state는 다른 제거가 모두 검증된 뒤 마지막에 삭제합니다. drift, 누락된 owned target, state 없는 marker·관리 namespace 같은 unowned evidence가 있으면 삭제하지 않고 `blocked`로 끝납니다.
+
+no-state `removed`는 유효한 state나 알려진 차단 증거를 찾지 못했고 관리 파일을 변경하지 않았다는 뜻일 뿐, 인식하지 못한 vendor residue까지 모두 없다는 증명은 아닙니다.
 
 성공한 제거 뒤 남는 정확한 빈 `.agents\skills\joewrks-*` 디렉터리 skeleton은 다음 `-Apply`가 재사용할 수 있습니다. 무관한 `.agents` 파일과 디렉터리는 제거하지 않습니다.
 
@@ -98,7 +100,7 @@ Get-FileHash $archive -Algorithm SHA256
 
 `git archive HEAD`는 현재 commit의 tracked 파일만 담습니다. working tree의 미커밋 변경은 포함하지 않으므로 공유하려는 내용이 현재 revision에 commit됐는지 먼저 확인합니다. 수신자는 압축을 풀기 전에 archive와 다른 신뢰된 채널로 받은 SHA-256을 `Get-FileHash` 결과와 비교해야 합니다. archive 안의 manifest hash만으로 archive 출처를 증명할 수는 없습니다.
 
-현재 공유 검토에서 정의한 민감 filename denylist에는 발견이 없었고, credential pattern hit는 exact synthetic fixture로 검토됐으며 그 밖의 발견은 없었습니다. Git tracked 목록과 archive 목록도 사람이 대조했습니다. 이는 정의된 검사 범위의 결과일 뿐 모든 비밀이 없다는 증명은 아닙니다. 과거 계획·평가 파일의 로컬 경로는 기록일 뿐 runtime 입력이 아닙니다.
+공유 전에는 exact HEAD archive를 대상으로 민감 filename denylist, 알려진 credential pattern, Git tracked/archive 파일 목록을 검사하고 결과를 기록해야 합니다. pattern hit는 exact synthetic fixture인지 사람이 확인하고, 그 밖의 미검토 발견은 모두 해결한 뒤 공유합니다. 이 bounded review를 완료해도 모든 비밀이 없다는 증명은 아닙니다. 과거 계획·평가 파일의 로컬 경로는 기록일 뿐 runtime 입력이 아닙니다.
 
 ### ExecutionPolicy fallback과 저장소 검증
 
@@ -174,16 +176,18 @@ stdout is one JSON result.
 |---|---:|---|
 | `current` | 0 | Installed state matches the desired state |
 | `ready` | 0 | Safe apply or remove changes are available |
-| `removed` | 0 | Removal completed, or no installed evidence existed |
+| `removed` | 0 | State-owned removal completed, or the no-state no-op below |
 | `failed` | 1 | The operation failed and rollback was verified complete |
 | `blocked` | 2 | A collision, drift, or uncertain ownership stopped all writes |
-| `unknown` | 3 | An unresolved target or incomplete rollback prevents a final-state claim |
+| `unknown` | 3 | An unresolved target or incomplete rollback prevents a final-state claim. |
 
 For `unknown`, do not assume recovery or blindly rerun. Inspect `backupPath`, `rollback`, `unresolvedTargets`, and the current files first. Directories created during a failed operation may remain conservatively when external content or inspection uncertainty prevents safe cleanup.
 
 ### Remove and update
 
 `-Remove` deletes only whole files and the Common Core marker block proven to be owned by valid state. It preserves the exact bytes outside that block, keeps `AGENTS.md` even when the remaining external content is empty, and removes state last after every other removal is verified. Drift, a missing owned target, or unowned evidence such as a marker or managed namespace without state causes `blocked` without deletion.
+
+A no-state `removed` result means no valid state or recognized blocking evidence was found and no managed files were changed; it does not prove that every unrecognized or vendor residue is absent.
 
 An exact empty `.agents\skills\joewrks-*` directory skeleton left after successful removal can be reused by a later `-Apply`. Unrelated `.agents` files and directories are preserved.
 
@@ -199,7 +203,7 @@ The skill does not copy the Common Core, install dependencies, change code or de
 
 ### Backups and recovery
 
-Backups are created in a per-run directory before changes and are never pruned automatically. They may contain prior state and the user's `AGENTS.md`, so treat them as private. Delete them manually only after confirming a successful install or removal and finishing any needed recovery. A prior backup state can identify the source manifest and owned hashes for that run; its existence alone does not prove recovery.
+Backups are created in a per-run directory before changes and are never pruned automatically. Backups may contain prior state and the user's `AGENTS.md`; treat them as private. Delete them manually only after confirming a successful install or removal and finishing any needed recovery. A prior backup state can identify the source manifest and owned hashes for that run; its existence alone does not prove recovery.
 
 ### Direct sharing
 
@@ -214,7 +218,7 @@ Get-FileHash $archive -Algorithm SHA256
 
 `git archive HEAD` includes only tracked files from that commit, not uncommitted working-tree changes. Confirm the intended content is committed. Before extraction, the recipient must compare `Get-FileHash` with a SHA-256 delivered through a separate trusted channel. Manifest hashes inside the archive prove internal consistency, not archive provenance.
 
-In the current sharing review, the defined sensitive-filename denylist found nothing; credential-pattern hits were reviewed as exact synthetic fixtures, with no other findings; and a human compared the tracked and archived file lists. This is only the result of those defined checks, not proof that every possible secret is absent. Local paths in historical plans and evaluations are records, not runtime inputs.
+Before sharing, run and record an exact-HEAD archive review and deliver the archive SHA-256 out of band. The review must scan the defined sensitive-filename denylist and known credential patterns, have a human classify exact synthetic-fixture hits, compare the Git tracked and archived file lists, and resolve every other unreviewed finding. Even this bounded review does not prove that every possible secret is absent. Local paths in historical plans and evaluations are records, not runtime inputs.
 
 ### ExecutionPolicy fallback and repository checks
 

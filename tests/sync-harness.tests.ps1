@@ -13,17 +13,24 @@ function Assert-True { param([bool] $Condition, [string] $Message) if (-not $Con
 function Assert-Equal { param($Actual, $Expected, [string] $Message) if ($Actual -cne $Expected) { throw "Assertion failed: $Message; expected [$Expected], got [$Actual]" } }
 function Test-ReadmeContract {
     $readme = [IO.File]::ReadAllText((Join-Path $RepositoryRoot 'README.md'))
-    foreach ($required in @(
+    $koreanRemovedAnchor = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('bm8tc3RhdGUgYHJlbW92ZWRg64qUIOycoO2aqO2VnCBzdGF0ZeuCmCDslYzroKTsp4Qg7LCo64uoIOymneqxsOulvCDssL7sp4Ag66q77ZaI6rOgIOq0gOumrCDtjIzsnbzsnYQg67OA6rK97ZWY7KeAIOyViuyVmOuLpOuKlCDrnLvsnbwg67+QLCDsnbjsi53tlZjsp4Ag66q77ZWcIHZlbmRvciByZXNpZHVl6rmM7KeAIOuqqOuRkCDsl4bri6TripQg7Kad66qF7J2AIOyVhOuLmeuLiOuLpC4='))
+    foreach ($command in @(
+        'powershell.exe -NoProfile -File .\harness.ps1 -Check',
         'powershell.exe -NoProfile -File .\harness.ps1 -Apply',
-        'powershell.exe -NoProfile -File .\harness.ps1 -Remove',
-        'personal-pilot',
-        'unknown',
-        '$joewrks-project-setup',
-        'git archive',
-        'Get-FileHash',
-        'ExecutionPolicy Bypass'
+        'powershell.exe -NoProfile -File .\harness.ps1 -Remove'
     )) {
-        Assert-True $readme.Contains($required) "README contains $required"
+        Assert-True $readme.Contains($command) "README quick start contains $command"
+    }
+    foreach ($anchor in @(
+        'powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\harness.ps1 -Check',
+        $koreanRemovedAnchor,
+        'A no-state `removed` result means no valid state or recognized blocking evidence was found and no managed files were changed; it does not prove that every unrecognized or vendor residue is absent.',
+        'Explicitly invoke `$joewrks-project-setup` for the target project and run its helper `check` first.',
+        'An unresolved target or incomplete rollback prevents a final-state claim.',
+        'Backups may contain prior state and the user''s `AGENTS.md`; treat them as private.',
+        'Before sharing, run and record an exact-HEAD archive review and deliver the archive SHA-256 out of band.'
+    )) {
+        Assert-True $readme.Contains($anchor) "README contains safety anchor: $anchor"
     }
     Assert-True (($readme -split '## English').Count -eq 2) 'README keeps Korean and English sections'
 }
