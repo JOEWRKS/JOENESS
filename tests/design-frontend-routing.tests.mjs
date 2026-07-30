@@ -15,6 +15,7 @@ const GITATTRIBUTES_PATH = path.join(ROOT, '.gitattributes');
 const ROUTER_PATH = path.join(ROOT, 'skills', 'joewrks-design-frontend', 'SKILL.md');
 const EVALUATOR_PATH = path.join(ROOT, 'evals', 'design-frontend', 'collect-router-evaluation.mjs');
 const PAIR_V1_PATH = path.join(ROOT, 'evals', 'design-frontend', 'router-pair-v1.json');
+const PAIR_V2_PATH = path.join(ROOT, 'evals', 'design-frontend', 'router-pair-v2.json');
 const COLLECTOR_PATH = path.join(ROOT, 'evals', 'support', 'collect-codex-app-server.mjs');
 const P0_PATH = path.join(ROOT, 'evals', 'p0', 'common-core-v5.json');
 const MANIFEST_PATH = path.join(ROOT, 'vendor', 'source-manifest.json');
@@ -706,11 +707,11 @@ test('reviewed P0 baseline and atomic pair configuration are bound', async () =>
   tampered.review.pair.verdict = 'fail';
   assert.throws(() => evaluator.validateP0Baseline(tampered), /P0 baseline/);
   assert.deepEqual(evaluator.PAIR, {
-    mode: 'run-pair-v2',
-    pairVersion: 2,
-    resultPath: 'evals/design-frontend/router-pair-v2.json',
-    controlRunId: 'design-router-control-v2',
-    candidateRunId: 'design-router-candidate-v2',
+    mode: 'run-pair-v3',
+    pairVersion: 3,
+    resultPath: 'evals/design-frontend/router-pair-v3.json',
+    controlRunId: 'design-router-control-v3',
+    candidateRunId: 'design-router-candidate-v3',
   });
   const manifest = JSON.parse(readFileSync(MANIFEST_PATH, 'utf8'));
   assert.equal(Array.isArray(manifest.behaviorEvidenceHistory), true);
@@ -728,15 +729,31 @@ test('reviewed P0 baseline and atomic pair configuration are bound', async () =>
     sha256(PAIR_V1_PATH),
     v1Evidence.sha256,
   );
-  assert.equal(evaluator.validateBehaviorEvidence(manifest, repositoryBindings()), true);
-  const staleHistory = structuredClone(manifest);
-  staleHistory.behaviorEvidenceHistory.find(
-    ({ pairVersion }) => pairVersion === 1,
-  ).sha256 = '0'.repeat(64);
-  assert.throws(
-    () => evaluator.validateBehaviorEvidence(staleHistory, repositoryBindings()),
-    /history/i,
+  const v2Evidence = manifest.behaviorEvidenceHistory.find(
+    ({ pairVersion }) => pairVersion === 2,
   );
+  assert.deepEqual(v2Evidence, {
+    pairVersion: 2,
+    mode: 'run-pair-v2',
+    resultPath: 'evals/design-frontend/router-pair-v2.json',
+    sha256: '0d2129bdaceb8ad858cb7a19c9c041a25f2d955834c94565e4ef4a73dbc4a610',
+    promotionPass: false,
+  });
+  assert.equal(
+    sha256(PAIR_V2_PATH),
+    v2Evidence.sha256,
+  );
+  assert.equal(evaluator.validateBehaviorEvidence(manifest, repositoryBindings()), true);
+  for (const pairVersion of [1, 2]) {
+    const staleHistory = structuredClone(manifest);
+    staleHistory.behaviorEvidenceHistory.find(
+      (entry) => entry.pairVersion === pairVersion,
+    ).sha256 = '0'.repeat(64);
+    assert.throws(
+      () => evaluator.validateBehaviorEvidence(staleHistory, repositoryBindings()),
+      /history/i,
+    );
+  }
 });
 
 test('atomic artifact preflight refuses any existing pair result', async (t) => {

@@ -1,6 +1,6 @@
 # Design/Frontend Vendor and Router Design
 
-**Status:** v1 evidence preserved; outcome-based v2 amendment approved
+**Status:** v1/v2 evidence preserved; v3 boundary clarification candidate
 
 **Parent contract:** `docs/superpowers/specs/2026-07-27-common-work-harness-design.md`
 
@@ -202,6 +202,16 @@ normal paths and domain language as secret output, and exposed `FigmaWrite`
 as though it were an allowed checklist item. V2 corrects that instrument and
 evaluates the proportional candidate as a fresh pair. It is not a causal
 performance comparison with v1.
+
+The v2 pair validated the corrected instrument and every safety gate, but did
+not promote the router. The candidate omitted one required Apple selection,
+activated UI UX search for a nonvisual test failure, and omitted the ordinary
+browser check required for a literal-only copy correction. V3 changes no gate
+or evaluator semantics. It clarifies the general matrix contract before any
+capability selection: active rows must satisfy every required capability,
+inactive rows do not use UI UX, Apple, or Figma, and browser verification is
+required if and only if the matching row marks it required. Query wording,
+read order, and nonduplicate read count remain flexible.
 
 Structural tests also verify the skill name/folder match, frontmatter,
 one-level references, absence of personal paths and `${CLAUDE_PLUGIN_ROOT}`,

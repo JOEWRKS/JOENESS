@@ -71,7 +71,7 @@ const EVENT_BYTES = 4096;
 const OUTPUT_BYTES = 16 * 1024;
 const PAIR_BYTES = 4 * 1024 * 1024;
 const TURN_TIMEOUT_MS = 120_000;
-const IDEMPOTENCY_KEY = "synthetic-evaluation-design-router-v2";
+const IDEMPOTENCY_KEY = "synthetic-evaluation-design-router-v3";
 const PORTABLE_ROUTER_PATH =
   ".agents/skills/joewrks-design-frontend/SKILL.md";
 const STAGING_SUFFIX = ".staging";
@@ -132,19 +132,28 @@ const SOURCE_PATHS = {
 export const SYNTHETIC_LIMITATION =
   "Selection evidence only; no live Figma connection or browser result is proven.";
 export const PAIR = Object.freeze({
-  mode: "run-pair-v2",
-  pairVersion: 2,
-  resultPath: "evals/design-frontend/router-pair-v2.json",
-  controlRunId: "design-router-control-v2",
-  candidateRunId: "design-router-candidate-v2",
+  mode: "run-pair-v3",
+  pairVersion: 3,
+  resultPath: "evals/design-frontend/router-pair-v3.json",
+  controlRunId: "design-router-control-v3",
+  candidateRunId: "design-router-candidate-v3",
 });
-const V1_BEHAVIOR_EVIDENCE = Object.freeze({
-  pairVersion: 1,
-  mode: "run-pair-v1",
-  resultPath: "evals/design-frontend/router-pair-v1.json",
-  sha256: "bd37c7a245e5705be555e9b759f8d5fee0e20d6a55c72943e76fedad1c2b4042",
-  promotionPass: false,
-});
+const REQUIRED_BEHAVIOR_EVIDENCE_HISTORY = Object.freeze([
+  {
+    pairVersion: 1,
+    mode: "run-pair-v1",
+    resultPath: "evals/design-frontend/router-pair-v1.json",
+    sha256: "bd37c7a245e5705be555e9b759f8d5fee0e20d6a55c72943e76fedad1c2b4042",
+    promotionPass: false,
+  },
+  {
+    pairVersion: 2,
+    mode: "run-pair-v2",
+    resultPath: "evals/design-frontend/router-pair-v2.json",
+    sha256: "0d2129bdaceb8ad858cb7a19c9c041a25f2d955834c94565e4ef4a73dbc4a610",
+    promotionPass: false,
+  },
+]);
 
 const exactKeys = (value, keys) =>
   value !== null &&
@@ -888,11 +897,15 @@ export function validateBehaviorEvidence(manifest, bindings) {
   ) {
     throw new Error("manifest behaviorEvidenceHistory differs");
   }
-  equal(
-    history.find(({ pairVersion }) => pairVersion === 1),
-    V1_BEHAVIOR_EVIDENCE,
-    "manifest behaviorEvidenceHistory v1",
-  );
+  for (const expected of REQUIRED_BEHAVIOR_EVIDENCE_HISTORY) {
+    equal(
+      history.find(
+        ({ pairVersion }) => pairVersion === expected.pairVersion,
+      ),
+      expected,
+      `manifest behaviorEvidenceHistory v${expected.pairVersion}`,
+    );
+  }
   equal(manifest?.behaviorEvidence, behaviorEvidence(bindings), "manifest behaviorEvidence");
   return true;
 }
@@ -2113,15 +2126,14 @@ export async function runPair() {
     await readFile(path.join(ROOT, SOURCE_PATHS.manifest), "utf8"),
   );
   validateBehaviorEvidence(manifest, bindings);
-  const historicalEvidence = manifest.behaviorEvidenceHistory.find(
-    ({ pairVersion }) => pairVersion === 1,
-  );
-  if (
-    sha256(
-      await readFile(path.join(ROOT, historicalEvidence.resultPath)),
-    ) !== historicalEvidence.sha256
-  ) {
-    throw new Error("historical behavior evidence differs");
+  for (const historicalEvidence of REQUIRED_BEHAVIOR_EVIDENCE_HISTORY) {
+    if (
+      sha256(
+        await readFile(path.join(ROOT, historicalEvidence.resultPath)),
+      ) !== historicalEvidence.sha256
+    ) {
+      throw new Error("historical behavior evidence differs");
+    }
   }
   const p0Baseline = validateP0Baseline(p0);
   const before = await hashRepositoryFiles(ROOT, Object.values(SOURCE_PATHS));
@@ -2139,7 +2151,7 @@ export async function runPair() {
   let candidate;
   const limitations = [];
   try {
-    runRoot = await createExclusiveRunRoot("design-router-pair-v2");
+    runRoot = await createExclusiveRunRoot("design-router-pair-v3");
     roots = await materializeConditionRoots(runRoot, ROOT);
     runtime = await prepareRuntime(runRoot);
     session = await openAppServer(runtime);
@@ -2278,7 +2290,7 @@ export async function runPair() {
 function parseCli(argv) {
   if (argv.length !== 1 || argv[0] !== PAIR.mode) {
     throw new Error(
-      "usage: node evals/design-frontend/collect-router-evaluation.mjs run-pair-v2",
+      "usage: node evals/design-frontend/collect-router-evaluation.mjs run-pair-v3",
     );
   }
 }

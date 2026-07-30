@@ -9,7 +9,7 @@
       "intentionalDifferences": ["Local activation and routing contract.", "Local OpenAI product metadata."],
       "validatorSha256": "5347a0a09cfb546bba1c0d1a30dae0a233d9a05f57bd4e7877155c588bcdabf7",
       "files": [
-        {"localPath":"skills/joewrks-design-frontend/SKILL.md","bytes":7641,"sha256":"0bc63a254a4cbc3d0fc79ccc154865eea5a03e308822f43bff797a7c56bdcf11","exactUpstreamCopy":false},
+        {"localPath":"skills/joewrks-design-frontend/SKILL.md","bytes":7829,"sha256":"d641c0210e02ca10cc70f1f3219eafbff99c480fb4e0f7ccca5348e6d2e14dfa","exactUpstreamCopy":false},
         {"localPath":"skills/joewrks-design-frontend/agents/openai.yaml","bytes":263,"sha256":"3d0bc6bf72b93b3bd185852f080b19caeb17aed45f582df339d61c2633f81892","exactUpstreamCopy":false}
       ]
     }
@@ -21,16 +21,23 @@
       "resultPath": "evals/design-frontend/router-pair-v1.json",
       "sha256": "bd37c7a245e5705be555e9b759f8d5fee0e20d6a55c72943e76fedad1c2b4042",
       "promotionPass": false
+    },
+    {
+      "pairVersion": 2,
+      "mode": "run-pair-v2",
+      "resultPath": "evals/design-frontend/router-pair-v2.json",
+      "sha256": "0d2129bdaceb8ad858cb7a19c9c041a25f2d955834c94565e4ef4a73dbc4a610",
+      "promotionPass": false
     }
   ],
   "behaviorEvidence": {
-    "pairVersion": 2,
-    "mode": "run-pair-v2",
-    "resultPath": "evals/design-frontend/router-pair-v2.json",
-    "runIds": {"control":"design-router-control-v2","candidate":"design-router-candidate-v2"},
-    "evaluator": {"path":"evals/design-frontend/collect-router-evaluation.mjs","sha256":"aacdb3b73c6ad28409c0284e7f113443fdf1ca06f48ae55daadbf248217e72eb"},
+    "pairVersion": 3,
+    "mode": "run-pair-v3",
+    "resultPath": "evals/design-frontend/router-pair-v3.json",
+    "runIds": {"control":"design-router-control-v3","candidate":"design-router-candidate-v3"},
+    "evaluator": {"path":"evals/design-frontend/collect-router-evaluation.mjs","sha256":"f2f13c00e22ac12dac83c91a116ee9d5de4a3530be54142b1eccf312585690b6"},
     "cases": {"path":"evals/design-frontend/cases.json","sha256":"8a940cd84b4f2cbf265154c060941734ad6e983d0f49cb7dd5d06fc3df5ee1f7"},
-    "router": {"path":"skills/joewrks-design-frontend/SKILL.md","sha256":"0bc63a254a4cbc3d0fc79ccc154865eea5a03e308822f43bff797a7c56bdcf11"},
+    "router": {"path":"skills/joewrks-design-frontend/SKILL.md","sha256":"d641c0210e02ca10cc70f1f3219eafbff99c480fb4e0f7ccca5348e6d2e14dfa"},
     "p0Baseline": {"path":"evals/p0/common-core-v5.json","sha256":"05631b136be55626987f7deed16ec8bf4c34b38880e4764b2375051f42249316"},
     "syntheticLimitation": "Selection evidence only; no live Figma connection or browser result is proven."
   },

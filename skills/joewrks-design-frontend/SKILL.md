@@ -22,7 +22,7 @@ Route only the approved visible frontend scope. Detect the current stack from pr
 | Generic handoff | inactive | none | none | not required | not required |
 | Read-only external design-content review | inactive | none | none | not required | not required |
 
-Use the matching row as an activation boundary and minimum capability guide, not as a fixed tool checklist. Scale investigation and verification to the task's actual visual risk. An inactive row does not load or invoke either vendor source; any browser need remains part of the ordinary task contract, not design routing. Tool availability never authorizes or requires its use.
+Classify the request against the matrix before selecting a capability. An active row requires at least one relevant UI UX selection, its Apple criteria, and every Figma or browser check marked required; exact wording, order, and nonduplicate read count remain flexible. An inactive row does not invoke UI UX, Apple, or Figma. Browser verification is required if and only if the matching row marks it required, including inactive rows; that check remains part of the ordinary task contract, not design routing. Tool availability never authorizes or requires its use.
 
 An explicit user request to manipulate Figma may activate only the Figma capability even for a small copy change. Keep the design router and vendor sources inactive unless the change requires design judgment.
 

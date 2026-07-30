@@ -67,8 +67,8 @@ const EXPECTED_ACTIVE_SKILL = {
   files: [
     {
       localPath: 'skills/joewrks-design-frontend/SKILL.md',
-      bytes: 7641,
-      sha256: '0bc63a254a4cbc3d0fc79ccc154865eea5a03e308822f43bff797a7c56bdcf11',
+      bytes: 7829,
+      sha256: 'd641c0210e02ca10cc70f1f3219eafbff99c480fb4e0f7ccca5348e6d2e14dfa',
       exactUpstreamCopy: false,
     },
     {
