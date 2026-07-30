@@ -123,6 +123,52 @@ const EXPECTED_SOURCE_EVALUATION = {
     enforcingTests: ['tests/design-vendor-integrity.tests.mjs'],
   },
 };
+const EXPECTED_BEHAVIOR_EVIDENCE_HISTORY = [
+  {
+    pairVersion: 1,
+    mode: 'run-pair-v1',
+    resultPath: 'evals/design-frontend/router-pair-v1.json',
+    sha256: 'bd37c7a245e5705be555e9b759f8d5fee0e20d6a55c72943e76fedad1c2b4042',
+    promotionPass: false,
+  },
+  {
+    pairVersion: 2,
+    mode: 'run-pair-v2',
+    resultPath: 'evals/design-frontend/router-pair-v2.json',
+    sha256: '0d2129bdaceb8ad858cb7a19c9c041a25f2d955834c94565e4ef4a73dbc4a610',
+    promotionPass: false,
+  },
+  {
+    pairVersion: 3,
+    mode: 'run-pair-v3',
+    resultPath: 'evals/design-frontend/router-pair-v3.json',
+    sha256: '3646ca28cfab0a6ec1ccec5bb7600715275388410d6661c031cbabcb548e2327',
+    promotionPass: false,
+  },
+];
+const EXPECTED_BEHAVIOR_EVIDENCE = {
+  pairVersion: 3,
+  mode: 'run-pair-v3',
+  resultPath: 'evals/design-frontend/router-pair-v3.json',
+  runIds: { control: 'design-router-control-v3', candidate: 'design-router-candidate-v3' },
+  evaluator: {
+    path: 'evals/design-frontend/collect-router-evaluation.mjs',
+    sha256: 'f2f13c00e22ac12dac83c91a116ee9d5de4a3530be54142b1eccf312585690b6',
+  },
+  cases: {
+    path: 'evals/design-frontend/cases.json',
+    sha256: '8a940cd84b4f2cbf265154c060941734ad6e983d0f49cb7dd5d06fc3df5ee1f7',
+  },
+  router: {
+    path: 'skills/joewrks-design-frontend/SKILL.md',
+    sha256: 'd641c0210e02ca10cc70f1f3219eafbff99c480fb4e0f7ccca5348e6d2e14dfa',
+  },
+  p0Baseline: {
+    path: 'evals/p0/common-core-v5.json',
+    sha256: '05631b136be55626987f7deed16ec8bf4c34b38880e4764b2375051f42249316',
+  },
+  syntheticLimitation: 'Selection evidence only; no live Figma connection or browser result is proven.',
+};
 
 function sha256(file) {
   return createHash('sha256').update(readFileSync(file)).digest('hex');
@@ -250,7 +296,9 @@ test('candidate ledger binds the reviewed hybrid artifact without promoting impl
     assert.equal(comparison.semanticImprovement, current.semanticImprovement);
   }
 
-  for (const historical of manifest.behaviorEvidenceHistory) {
+  assert.deepEqual(manifest.behaviorEvidenceHistory, EXPECTED_BEHAVIOR_EVIDENCE_HISTORY);
+  assert.deepEqual(manifest.behaviorEvidence, EXPECTED_BEHAVIOR_EVIDENCE);
+  for (const historical of EXPECTED_BEHAVIOR_EVIDENCE_HISTORY) {
     const localFile = path.join(ROOT, ...historical.resultPath.split('/'));
     assert.equal(sha256(localFile), historical.sha256, `historical evidence changed: ${historical.resultPath}`);
   }
