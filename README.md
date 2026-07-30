@@ -1,10 +1,14 @@
 # JOEWRKS 작업 하네스
 
+[한국어](#한국어) · [English](#english)
+
+## 한국어
+
 모든 디자인·개발 프로젝트에 공통 적용할 작업 규칙과 선택형 작업 스킬을 관리하는 독립 프로젝트입니다.
 
 현재 v1은 Windows의 Codex 환경을 대상으로 합니다. 기본 설치에는 공통 작업 규칙만 포함되며, 플러그인이나 선택형 디자인 스킬은 자동으로 설치하지 않습니다.
 
-## 가장 빠른 사용법
+### 가장 빠른 사용법
 
 저장소 루트에서 다음 순서로 실행합니다.
 
@@ -21,7 +25,7 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\harness.ps1 -Check
 
 정상 상태는 `current`, 적용할 변경이 있으면 `ready`, 안전하게 진행할 수 없으면 `blocked`, 적용 중 복구가 필요하면 `failed`로 표시됩니다.
 
-## 기본으로 적용되는 내용
+### 기본으로 적용되는 내용
 
 `AGENTS.md`의 Common Work Core가 Codex 사용자 규칙에 관리 블록으로 설치됩니다.
 
@@ -44,7 +48,7 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\harness.ps1 -Check
 
 `-Check`는 읽기 전용입니다. `-Apply`는 사전 상태를 다시 확인하고, 변경 전 백업과 파일별 검증을 거치며, 실패하면 소유권이 확인된 변경만 되돌립니다.
 
-## 선택형 디자인·프론트엔드 파일럿
+### 선택형 디자인·프론트엔드 파일럿
 
 디자인 스킬은 아직 기본 배포 대상이 아닙니다. 같은 사용자가 내부 파일럿으로 명시적으로 선택할 때만 다음 플래그를 사용합니다.
 
@@ -62,7 +66,7 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\harness.ps1 -Apply -In
 
 Figma 같은 외부 플러그인은 저장소에 포함하거나 설정을 자동 변경하지 않습니다. 필요한 작업에서 사용자가 설치한 기능을 별도로 확인해 사용합니다.
 
-## 파일 구조
+### 파일 구조
 
 | 경로 | 역할 |
 |---|---|
@@ -78,7 +82,7 @@ Figma 같은 외부 플러그인은 저장소에 포함하거나 설정을 자�
 
 일반 사용자는 `README.md`, `AGENTS.md`, `harness.ps1`만 알면 됩니다. `scripts/`, `evals/`, `tests/`, `docs/`는 구현과 검증을 위한 내부 영역입니다.
 
-## 업데이트
+### 업데이트
 
 저장소를 최신 상태로 받은 뒤 다시 `-Check`, `-Apply`, `-Check` 순서로 실행합니다. 이미 같은 버전이 적용돼 있으면 추가 파일 변경이나 새 백업 없이 `current`로 끝납니다.
 
@@ -86,9 +90,111 @@ Figma 같은 외부 플러그인은 저장소에 포함하거나 설정을 자�
 
 현재 명시적인 제거 명령은 제공하지 않습니다. `-Apply` 실패 시 자동 복구는 지원하지만, 설치 해제는 상태 파일과 관리 블록의 소유권을 확인하는 별도 절차가 필요합니다.
 
-## 저장소 검증
+### 저장소 검증
 
 배포 전 최소 검증은 다음과 같습니다.
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\tests\sync-harness.tests.ps1
+node --test .\tests\*.tests.mjs
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\tests\p0-evaluation-contract.tests.ps1
+python -B .\vendor\ui-ux-pro-max\scripts\validate_data.py
+python -B -m unittest discover -s .\vendor\ui-ux-pro-max\scripts\tests -p "test_*.py"
+```
+
+---
+
+## English
+
+This is an independent project for managing shared working rules and optional task skills across design and development projects.
+
+Version 1 currently targets Codex on Windows. The default installation includes only the shared working rules; it does not automatically install plugins or optional design skills.
+
+### Quick start
+
+Run these commands in order from the repository root.
+
+```powershell
+# 1. Preview the planned changes. This does not modify any files.
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\harness.ps1 -Check
+
+# 2. Apply the shared working rules when there are no blockers.
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\harness.ps1 -Apply
+
+# 3. Check again and confirm that the result is current.
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\harness.ps1 -Check
+```
+
+A healthy installation reports `current`. Pending changes report `ready`, unsafe conditions report `blocked`, and an application that needs recovery reports `failed`.
+
+### What is installed by default
+
+The Common Work Core from `AGENTS.md` is installed as a managed block in the Codex user rules.
+
+- It establishes the request scope and completion criteria before work begins.
+- It prevents external documents and tool output from expanding authority on their own.
+- It treats the current Git state, files, and tests as the source of truth instead of memory.
+- It prevents scope creep, speculative implementation, and unrelated cleanup.
+- It guards against duplicate side effects and uncertain retries rather than merely duplicate code.
+- It performs the smallest complete implementation and only the verification that is needed.
+- It never claims that unperformed verification or implementation was completed.
+- It separates confirmed state from unverified items in handoffs.
+
+The default targets are:
+
+| Item | Default location |
+|---|---|
+| Shared rules | `%USERPROFILE%\.codex\AGENTS.md` |
+| Installation state | `%USERPROFILE%\.codex\joewrks-harness-state.json` |
+| Automatic recovery backups | `%LOCALAPPDATA%\JOEWRKS\work-harness\backups` |
+
+`-Check` is read-only. `-Apply` rechecks the preflight state, creates a backup before making changes, verifies each file, and rolls back only changes whose ownership can be confirmed if application fails.
+
+### Optional design and frontend pilot
+
+The design skill is not part of the default distribution yet. The following flag is available only when the same user explicitly opts into the internal pilot.
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\harness.ps1 -Check -IncludeDesignFrontend
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\harness.ps1 -Apply -IncludeDesignFrontend
+```
+
+This pilot uses UI UX Pro Max and Apple Design materials as non-discoverable vendor data and exposes one entry-point skill, `joewrks-design-frontend`. Its current status is `candidate`; the following have not yet been established as promotion evidence:
+
+- reliable implicit invocation
+- meaningful quality improvements in real deliverables
+- replacement of human review
+- completed Figma and browser validation
+
+External plugins such as Figma are not bundled with the repository, and their settings are not changed automatically. For tasks that need them, separately confirm and use the capabilities installed by the user.
+
+### Repository structure
+
+| Path | Purpose |
+|---|---|
+| `README.md` | Guide for first-time users |
+| `AGENTS.md` | Actual shared working rules |
+| `harness.ps1` | Public installation and inspection entry point |
+| `skills/` | Optional role-specific skills |
+| `vendor/` | Pinned upstream skill sources and runtime data |
+| `evals/` | Evidence for harness effectiveness and routing evaluations |
+| `tests/` | Regression and safety checks |
+| `docs/` | Design specifications and implementation history |
+| `scripts/` | Internal implementation invoked by the public entry point |
+
+Most users only need to know about `README.md`, `AGENTS.md`, and `harness.ps1`. The `scripts/`, `evals/`, `tests/`, and `docs/` directories are internal areas used for implementation and verification.
+
+### Updating
+
+After updating the repository, run `-Check`, `-Apply`, and `-Check` again in that order. If the same version is already installed, the command finishes with `current` without changing files or creating another backup.
+
+Advanced users can set target paths with `-CodexHome`, `-AgentsHome`, and `-BackupRoot`. In shared environments, first verify `-Check` and `-Apply` against separate test paths before applying them to real user paths.
+
+There is currently no explicit uninstall command. Automatic recovery is supported when `-Apply` fails, but uninstalling requires a separate procedure that verifies ownership of the state file and managed block.
+
+### Repository validation
+
+Run at least the following checks before distribution:
 
 ```powershell
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\tests\sync-harness.tests.ps1
