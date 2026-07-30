@@ -73,12 +73,48 @@ function Resolve-HarnessSourceFile {
     $path
 }
 
-function Get-HarnessStateHash {
-    param($Value)
-    if ($null -eq $Value) { return $null }
-    if ($Value -is [string]) { return $Value.ToLowerInvariant() }
-    if ($Value.PSObject.Properties.Name -contains 'sha256') { return ([string] $Value.sha256).ToLowerInvariant() }
-    $null
+function Get-HarnessValidSha256 {
+    param($Value, [string] $Label)
+    if ($Value -isnot [string] -or $Value -cnotmatch '\A[0-9a-f]{64}\z') {
+        throw "$Label is not a SHA-256"
+    }
+    $Value.ToLowerInvariant()
+}
+
+function Assert-HarnessObjectShape {
+    param($Value, [string[]] $Properties, [string] $Label)
+    if ($null -eq $Value) { throw "$Label is missing" }
+    $actual = @($Value.PSObject.Properties.Name | Sort-Object -CaseSensitive)
+    $expected = @($Properties | Sort-Object -CaseSensitive)
+    if (($actual -join "`n") -cne ($expected -join "`n")) {
+        throw "$Label has an unexpected shape"
+    }
+}
+
+function Get-HarnessManifestSelections {
+    param($Manifest, [string] $Root)
+    $selected = [Collections.Generic.List[object]]::new()
+    foreach ($skill in @($Manifest.activeSkills.PSObject.Properties.Value)) {
+        foreach ($file in @($skill.files)) { $null = $selected.Add($file) }
+        foreach ($sourceName in @($skill.sourceDependencies)) {
+            $source = $Manifest.sources.PSObject.Properties[[string] $sourceName]
+            if ($null -eq $source) { throw "Missing declared source dependency: $sourceName" }
+            foreach ($file in @($source.Value.files)) { $null = $selected.Add($file) }
+        }
+    }
+    $seen = @{}
+    foreach ($entry in $selected) {
+        $relative = ([string] $entry.localPath).Replace('\', '/')
+        $path = Resolve-HarnessSourceFile $Root $relative
+        if ($seen.ContainsKey($relative)) { throw "Duplicate source-manifest path: $relative" }
+        $seen[$relative] = $true
+        [pscustomobject] @{
+            RelativePath = $relative
+            Path = $path
+            Hash = Get-HarnessValidSha256 $entry.sha256 "Manifest hash for $relative"
+            Entry = $entry
+        }
+    }
 }
 
 function Get-HarnessFileSnapshot {
@@ -124,28 +160,35 @@ function Assert-HarnessFileSnapshot {
 
 function Set-HarnessFile {
     param($Operation)
-    $directory = Split-Path -Parent $Operation.TargetPath
-    [IO.Directory]::CreateDirectory($directory) | Out-Null
-    $temporaryPath = Join-Path $directory ('.' + [IO.Path]::GetFileName($Operation.TargetPath) + '.joewrks-' + [guid]::NewGuid().ToString('N') + '.tmp')
-    $replaceBackupPath = $temporaryPath + '.replaced'
+    $temporaryPath = $null
     try {
+        if (-not $Operation.DesiredExists) {
+            Assert-HarnessFileSnapshot $Operation.TargetPath $Operation.Snapshot
+            [IO.File]::Delete($Operation.TargetPath)
+            $Operation.Committed = $true
+            if (Test-Path -LiteralPath $Operation.TargetPath) { throw "Deleted target still exists: $($Operation.TargetPath)" }
+            return
+        }
+        $directory = Split-Path -Parent $Operation.TargetPath
+        [IO.Directory]::CreateDirectory($directory) | Out-Null
+        $temporaryPath = Join-Path $directory ('.' + [IO.Path]::GetFileName($Operation.TargetPath) + '.joewrks-' + [guid]::NewGuid().ToString('N') + '.tmp')
         [IO.File]::WriteAllBytes($temporaryPath, $Operation.DesiredBytes)
         if ((Get-HarnessSha256 ([IO.File]::ReadAllBytes($temporaryPath))) -cne $Operation.AppliedHash) {
             throw "Temporary file verification failed: $($Operation.TargetPath)"
         }
         Assert-HarnessFileSnapshot $Operation.TargetPath $Operation.Snapshot
         if ($Operation.Snapshot.Exists) {
-            [IO.File]::Replace($temporaryPath, $Operation.TargetPath, $replaceBackupPath)
+            [IO.File]::Replace($temporaryPath, $Operation.TargetPath, [Management.Automation.Language.NullString]::Value)
         } else {
             [IO.File]::Move($temporaryPath, $Operation.TargetPath)
         }
+        $Operation.Committed = $true
         $actualHash = Get-HarnessSha256 ([IO.File]::ReadAllBytes($Operation.TargetPath))
         if ($actualHash -cne $Operation.AppliedHash) {
             throw "Applied file verification failed: $($Operation.TargetPath)"
         }
     } finally {
-        if (Test-Path -LiteralPath $temporaryPath -PathType Leaf) { Remove-Item -LiteralPath $temporaryPath -Force }
-        if (Test-Path -LiteralPath $replaceBackupPath -PathType Leaf) { Remove-Item -LiteralPath $replaceBackupPath -Force }
+        if ($temporaryPath -and (Test-Path -LiteralPath $temporaryPath -PathType Leaf)) { Remove-Item -LiteralPath $temporaryPath -Force }
     }
 }
 
@@ -236,26 +279,15 @@ function Invoke-JoewrksHarnessSync {
             throw "Common Core source hash mismatch: $($coreEntry.path)"
         }
 
-        $selected = [Collections.Generic.List[object]]::new()
-        foreach ($skill in @($manifest.activeSkills.PSObject.Properties.Value)) {
-            foreach ($file in @($skill.files)) { $null = $selected.Add($file) }
-            foreach ($sourceName in @($skill.sourceDependencies)) {
-                $source = $manifest.sources.PSObject.Properties[[string] $sourceName]
-                if ($null -eq $source) { throw "Missing declared source dependency: $sourceName" }
-                foreach ($file in @($source.Value.files)) { $null = $selected.Add($file) }
-            }
-        }
-        $seen = @{}
-        foreach ($entry in $selected) {
-            $relative = ([string] $entry.localPath).Replace('\', '/')
-            $path = Resolve-HarnessSourceFile $sourceRoot $relative
-            if ($seen.ContainsKey($relative)) { throw "Duplicate source-manifest path: $relative" }
-            $seen[$relative] = $true
+        foreach ($selection in @(Get-HarnessManifestSelections $manifest $sourceRoot)) {
+            $relative = $selection.RelativePath
+            $path = $selection.Path
+            $entry = $selection.Entry
             if (-not (Test-Path -LiteralPath $path -PathType Leaf)) { throw "Missing manifest source file: $relative" }
             $bytes = [IO.File]::ReadAllBytes($path)
             if ($bytes.Length -ne [long] $entry.bytes) { throw "Source size mismatch: $relative" }
             $hash = Get-HarnessSha256 $bytes
-            if ($hash -cne ([string] $entry.sha256).ToLowerInvariant()) { throw "Source hash mismatch: $relative" }
+            if ($hash -cne $selection.Hash) { throw "Source hash mismatch: $relative" }
             $null = $optionalEntries.Add([pscustomobject] @{ RelativePath = $relative; Hash = $hash; Bytes = $bytes })
         }
         $null = $optionalEntries.Add([pscustomobject] @{
@@ -276,19 +308,77 @@ function Invoke-JoewrksHarnessSync {
             $stateRead = Read-HarnessUtf8 $statePath
             $stateSnapshot = [pscustomobject] @{ Exists = $true; Hash = Get-HarnessSha256 $stateRead.Bytes; Bytes = $stateRead.Bytes }
             $state = $stateRead.Text | ConvertFrom-Json
-            $stateSourceIdentities = $state.sourceIdentities
-            foreach ($property in @($state.managedBlocks.PSObject.Properties)) {
-                $candidate = Get-HarnessStateHash $property.Value
-                if ($candidate) { $stateCoreHash = $candidate; break }
+            Assert-HarnessObjectShape $state @('schemaVersion', 'sourceIdentities', 'managedBlocks', 'wholeFileTargets') 'State'
+            if ($state.schemaVersion -isnot [int] -or $state.schemaVersion -ne 1) { throw 'Unsupported state schemaVersion' }
+            Assert-HarnessObjectShape $state.managedBlocks @('AGENTS.md') 'State managedBlocks'
+            $stateCoreHash = Get-HarnessValidSha256 $state.managedBlocks.'AGENTS.md' 'State AGENTS.md managed-block hash'
+            if ($state.wholeFileTargets -isnot [Management.Automation.PSCustomObject]) {
+                throw 'State wholeFileTargets is not an object'
             }
             foreach ($property in @($state.wholeFileTargets.PSObject.Properties)) {
                 $relative = ([string] $property.Name).Replace('\', '/')
                 $null = Resolve-HarnessSourceFile $resolvedAgentsHome $relative
-                $hash = Get-HarnessStateHash $property.Value
-                if (-not $hash) { throw "State target has no SHA-256: $relative" }
-                $stateWholeFiles[$relative] = $hash
+                if ($property.Name -cne $relative -or $stateWholeFiles.ContainsKey($relative)) {
+                    throw "State target is not uniquely normalized: $($property.Name)"
+                }
+                $stateWholeFiles[$relative] = Get-HarnessValidSha256 $property.Value "State target hash for $relative"
             }
+
+            $identityNames = if ($stateWholeFiles.Count -gt 0) { @('commonCore', 'designFrontend') } else { @('commonCore') }
+            Assert-HarnessObjectShape $state.sourceIdentities $identityNames 'State sourceIdentities'
+            Assert-HarnessObjectShape $state.sourceIdentities.commonCore @('path', 'sha256') 'State commonCore source identity'
+            if ([string] $state.sourceIdentities.commonCore.path -cne 'AGENTS.md') { throw 'State commonCore source path is invalid' }
+            $stateCommonSourceHash = Get-HarnessValidSha256 $state.sourceIdentities.commonCore.sha256 'State commonCore source hash'
+
+            if ($stateWholeFiles.Count -gt 0) {
+                $installedManifestRelative = 'vendor/source-manifest.json'
+                if (-not $stateWholeFiles.ContainsKey($installedManifestRelative)) {
+                    throw 'Optional state does not own vendor/source-manifest.json'
+                }
+                Assert-HarnessObjectShape $state.sourceIdentities.designFrontend @('path', 'sha256') 'State designFrontend source identity'
+                if ([string] $state.sourceIdentities.designFrontend.path -cne $installedManifestRelative) {
+                    throw 'State designFrontend source path is invalid'
+                }
+                $stateDesignSourceHash = Get-HarnessValidSha256 $state.sourceIdentities.designFrontend.sha256 'State designFrontend source hash'
+                if ($stateDesignSourceHash -cne $stateWholeFiles[$installedManifestRelative]) {
+                    throw 'State designFrontend identity does not match its manifest target'
+                }
+
+                $installedManifestPath = Resolve-HarnessSourceFile $resolvedAgentsHome $installedManifestRelative
+                if (-not (Test-Path -LiteralPath $installedManifestPath -PathType Leaf)) { throw 'Installed source manifest is missing' }
+                $installedManifestRead = Read-HarnessUtf8 $installedManifestPath
+                if ((Get-HarnessSha256 $installedManifestRead.Bytes) -cne $stateDesignSourceHash) {
+                    throw 'Installed source manifest drifted from state'
+                }
+                $installedManifest = $installedManifestRead.Text | ConvertFrom-Json
+                $installedCore = $installedManifest.evaluation.current.commonCore
+                if ([string] $installedCore.path -cne 'AGENTS.md' -or
+                    (Get-HarnessValidSha256 $installedCore.sha256 'Installed manifest Common Core hash') -cne $stateCommonSourceHash) {
+                    throw 'State commonCore identity does not match its installed manifest'
+                }
+
+                $expectedWholeFiles = @{}
+                foreach ($selection in @(Get-HarnessManifestSelections $installedManifest $resolvedAgentsHome)) {
+                    $expectedWholeFiles[$selection.RelativePath] = $selection.Hash
+                }
+                $expectedWholeFiles[$installedManifestRelative] = $stateDesignSourceHash
+                $actualNames = @($stateWholeFiles.Keys | Sort-Object -CaseSensitive)
+                $expectedNames = @($expectedWholeFiles.Keys | Sort-Object -CaseSensitive)
+                if (($actualNames -join "`n") -cne ($expectedNames -join "`n")) {
+                    throw 'State wholeFileTargets does not match its installed manifest'
+                }
+                foreach ($relative in $expectedNames) {
+                    if ($stateWholeFiles[$relative] -cne $expectedWholeFiles[$relative]) {
+                        throw "State target hash does not match its installed manifest: $relative"
+                    }
+                }
+            }
+            $stateSourceIdentities = $state.sourceIdentities
         } catch {
+            $state = $null
+            $stateCoreHash = $null
+            $stateWholeFiles = @{}
+            $stateSourceIdentities = $null
             $null = $blockers.Add([pscustomobject] @{ kind = 'invalidState'; message = $_.Exception.Message })
         }
     } else {
@@ -378,7 +468,9 @@ function Invoke-JoewrksHarnessSync {
         }
     }
 
+    $currentOptionalPaths = @{}
     foreach ($entry in $optionalEntries) {
+        $currentOptionalPaths[$entry.RelativePath] = $true
         $targetPath = Resolve-HarnessSourceFile $resolvedAgentsHome $entry.RelativePath
         $owned = $stateWholeFiles.ContainsKey($entry.RelativePath)
         $targetExists = Test-Path -LiteralPath $targetPath
@@ -398,6 +490,13 @@ function Invoke-JoewrksHarnessSync {
             $null = $changes.Add([pscustomobject] @{ kind = 'designFrontend'; action = 'sourceUpdateAvailable'; target = $entry.RelativePath; planned = $false })
         } elseif ($priorOptionalOptIn -and -not $owned) {
             $null = $changes.Add([pscustomobject] @{ kind = 'designFrontend'; action = 'sourceUpdateAvailable'; target = $entry.RelativePath; planned = $false })
+        }
+    }
+    if ($IncludeDesignFrontend) {
+        foreach ($relative in @($stateWholeFiles.Keys)) {
+            if (-not $currentOptionalPaths.ContainsKey($relative)) {
+                $null = $changes.Add([pscustomobject] @{ kind = 'designFrontend'; action = 'remove'; target = $relative; planned = $true })
+            }
         }
     }
 
@@ -444,10 +543,11 @@ function Invoke-JoewrksHarnessSync {
     }
     $designFrontendPilot = $null
     if ($null -ne $manifest -and ($IncludeDesignFrontend -or $priorOptionalOptIn)) {
+        $sourceIntegrityBlocked = @($blockers | Where-Object { $_.kind -eq 'sourceIntegrity' }).Count -gt 0
         $designFrontendPilot = [pscustomobject] @{
             selection = if ($IncludeDesignFrontend) { 'explicit-request' } else { 'preserved-prior-opt-in' }
             state = [string] $manifest.evaluation.state
-            hardGate = [string] $manifest.evaluation.current.hardGate
+            hardGate = if ($sourceIntegrityBlocked) { 'unverified' } else { [string] $manifest.evaluation.current.hardGate }
             promotionPass = [bool] $manifest.evaluation.current.promotionPass
             classification = [string] $manifest.evaluation.current.classification
             outcomeReview = [string] $manifest.evaluation.current.outcomeReview
@@ -473,11 +573,12 @@ function Invoke-JoewrksHarnessSync {
     }
 
     $desiredWholeFiles = [ordered] @{}
-    foreach ($relative in @($stateWholeFiles.Keys | Sort-Object)) {
-        $desiredWholeFiles[$relative] = $stateWholeFiles[$relative]
-    }
     if ($IncludeDesignFrontend) {
         foreach ($entry in $optionalEntries) { $desiredWholeFiles[$entry.RelativePath] = $entry.Hash }
+    } else {
+        foreach ($relative in @($stateWholeFiles.Keys | Sort-Object)) {
+            $desiredWholeFiles[$relative] = $stateWholeFiles[$relative]
+        }
     }
     $sourceIdentities = [ordered] @{
         commonCore = [ordered] @{
@@ -488,8 +589,7 @@ function Invoke-JoewrksHarnessSync {
     if ($desiredWholeFiles.Count -gt 0) {
         $designSourceHash = $manifestHash
         if (-not $IncludeDesignFrontend -and $null -ne $stateSourceIdentities -and $null -ne $stateSourceIdentities.designFrontend) {
-            $priorSourceHash = Get-HarnessStateHash $stateSourceIdentities.designFrontend
-            if ($priorSourceHash) { $designSourceHash = $priorSourceHash }
+            $designSourceHash = [string] $stateSourceIdentities.designFrontend.sha256
         }
         $sourceIdentities.designFrontend = [ordered] @{
             path = 'vendor/source-manifest.json'
@@ -510,11 +610,13 @@ function Invoke-JoewrksHarnessSync {
     if (-not $agentSnapshot.Exists -or $agentSnapshot.Hash -cne $plannedAgentHash) {
         $null = $operations.Add([pscustomobject] @{
             TargetPath = $agentsPath
+            DesiredExists = $true
             DesiredBytes = $plannedAgentBytes
             AppliedHash = $plannedAgentHash
             Snapshot = $agentSnapshot
             BackupRelativePath = 'codex\AGENTS.md'
             BackupPath = $null
+            Committed = $false
         })
     }
     if ($IncludeDesignFrontend) {
@@ -523,11 +625,27 @@ function Invoke-JoewrksHarnessSync {
             if (-not $snapshot.Exists -or $snapshot.Hash -cne $entry.Hash) {
                 $null = $operations.Add([pscustomobject] @{
                     TargetPath = Resolve-HarnessSourceFile $resolvedAgentsHome $entry.RelativePath
+                    DesiredExists = $true
                     DesiredBytes = $entry.Bytes
                     AppliedHash = $entry.Hash
                     Snapshot = $snapshot
                     BackupRelativePath = Join-Path 'agents' ($entry.RelativePath -replace '/', '\')
                     BackupPath = $null
+                    Committed = $false
+                })
+            }
+        }
+        foreach ($relative in @($stateWholeFiles.Keys | Sort-Object)) {
+            if (-not $currentOptionalPaths.ContainsKey($relative)) {
+                $null = $operations.Add([pscustomobject] @{
+                    TargetPath = Resolve-HarnessSourceFile $resolvedAgentsHome $relative
+                    DesiredExists = $false
+                    DesiredBytes = [byte[]] @()
+                    AppliedHash = $null
+                    Snapshot = $optionalSnapshots[$relative]
+                    BackupRelativePath = Join-Path 'agents' ($relative -replace '/', '\')
+                    BackupPath = $null
+                    Committed = $false
                 })
             }
         }
@@ -536,11 +654,13 @@ function Invoke-JoewrksHarnessSync {
     if (-not $stateSnapshot.Exists -or $stateSnapshot.Hash -cne $stateHash) {
         $null = $operations.Add([pscustomobject] @{
             TargetPath = $statePath
+            DesiredExists = $true
             DesiredBytes = $stateBytes
             AppliedHash = $stateHash
             Snapshot = $stateSnapshot
             BackupRelativePath = 'codex\joewrks-harness-state.json'
             BackupPath = $null
+            Committed = $false
         })
     }
 
@@ -570,17 +690,19 @@ function Invoke-JoewrksHarnessSync {
                 if ($null -ne $AfterReplace) { & $AfterReplace $operation | Out-Null }
             } catch {
                 if (-not ($applied -contains $operation)) {
-                    try {
-                        $current = Get-HarnessFileSnapshot $operation.TargetPath
-                        if ($current.Exists -and $current.Hash -ceq $operation.AppliedHash) {
-                            $null = $applied.Add($operation)
-                        } elseif (($current.Exists -ne $operation.Snapshot.Exists) -or ($current.Exists -and $current.Hash -cne $operation.Snapshot.Hash)) {
+                    if ($operation.Committed) {
+                        $null = $applied.Add($operation)
+                    } else {
+                        try {
+                            $current = Get-HarnessFileSnapshot $operation.TargetPath
+                            if (($current.Exists -ne $operation.Snapshot.Exists) -or ($current.Exists -and $current.Hash -cne $operation.Snapshot.Hash)) {
+                                $unresolvedSeen[$operation.TargetPath] = $true
+                                $null = $unresolved.Add($operation.TargetPath)
+                            }
+                        } catch {
                             $unresolvedSeen[$operation.TargetPath] = $true
                             $null = $unresolved.Add($operation.TargetPath)
                         }
-                    } catch {
-                        $unresolvedSeen[$operation.TargetPath] = $true
-                        $null = $unresolved.Add($operation.TargetPath)
                     }
                 }
                 throw
@@ -605,7 +727,12 @@ function Invoke-JoewrksHarnessSync {
             $operation = $applied[$i]
             try {
                 $current = Get-HarnessFileSnapshot $operation.TargetPath
-                if (-not $current.Exists -or $current.Hash -cne $operation.AppliedHash) {
+                $stillApplied = if ($operation.DesiredExists) {
+                    $current.Exists -and $current.Hash -ceq $operation.AppliedHash
+                } else {
+                    -not $current.Exists
+                }
+                if (-not $stillApplied) {
                     if (-not $unresolvedSeen.ContainsKey($operation.TargetPath)) {
                         $unresolvedSeen[$operation.TargetPath] = $true
                         $null = $unresolved.Add($operation.TargetPath)
@@ -619,14 +746,22 @@ function Invoke-JoewrksHarnessSync {
                     }
                     Set-HarnessFile ([pscustomobject] @{
                         TargetPath = $operation.TargetPath
+                        DesiredExists = $true
                         DesiredBytes = $backupBytes
                         AppliedHash = $operation.Snapshot.Hash
                         Snapshot = $current
+                        Committed = $false
                     })
                     $null = $restored.Add($operation.TargetPath)
                 } else {
-                    [IO.File]::Delete($operation.TargetPath)
-                    if (Test-Path -LiteralPath $operation.TargetPath) { throw "Created target could not be removed: $($operation.TargetPath)" }
+                    Set-HarnessFile ([pscustomobject] @{
+                        TargetPath = $operation.TargetPath
+                        DesiredExists = $false
+                        DesiredBytes = [byte[]] @()
+                        AppliedHash = $null
+                        Snapshot = $current
+                        Committed = $false
+                    })
                     $null = $removed.Add($operation.TargetPath)
                 }
             } catch {

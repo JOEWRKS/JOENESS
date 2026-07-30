@@ -92,6 +92,21 @@ function Set-SourceCore {
     Write-Utf8 $manifestPath ($manifest | ConvertTo-Json -Depth 32)
 }
 
+function Remove-SourceOptionalEntry {
+    param($Fixture, [string] $RelativePath)
+    $manifestPath = Join-Path $Fixture.SourceRoot 'vendor\source-manifest.json'
+    $manifest = Get-Content -Raw -LiteralPath $manifestPath | ConvertFrom-Json
+    $removed = $false
+    foreach ($skill in @($manifest.activeSkills.PSObject.Properties.Value)) {
+        $kept = @($skill.files | Where-Object {
+            if (([string] $_.localPath).Replace('\', '/') -ceq $RelativePath.Replace('\', '/')) { $removed = $true; $false } else { $true }
+        })
+        $skill.files = $kept
+    }
+    if (-not $removed) { throw "Fixture manifest entry not found: $RelativePath" }
+    Write-Utf8 $manifestPath ($manifest | ConvertTo-Json -Depth 32)
+}
+
 function Find-Bytes {
     param([byte[]] $Bytes, [byte[]] $Needle)
     for ($i = 0; $i -le $Bytes.Length - $Needle.Length; $i++) {
@@ -173,9 +188,10 @@ function Test-AgentEncodingAndCoreUpdate {
 }
 
 function Assert-BlockedBeforeWrites {
-    param($Fixture, [scriptblock] $Prepare, [string] $Message)
+    param($Fixture, [scriptblock] $Prepare, [string] $Message, [string] $BlockerKind)
     & $Prepare $Fixture; $codex = Get-TreeHashes $Fixture.CodexHome; $agents = Get-TreeHashes $Fixture.AgentsHome; $backupExists = Test-Path -LiteralPath $Fixture.BackupRoot; $backups = Get-TreeHashes $Fixture.BackupRoot
-    $run = Invoke-Harness $Fixture Apply; Assert-True ($run.ExitCode -ne 0) "$Message exits nonzero"; Assert-Equal (Read-Result $run $Message).status 'blocked' "$Message reports blocked"
+    $run = Invoke-Harness $Fixture Apply; Assert-True ($run.ExitCode -ne 0) "$Message exits nonzero"; $result = Read-Result $run $Message; Assert-Equal $result.status 'blocked' "$Message reports blocked"
+    if ($BlockerKind) { Assert-True (@($result.blockers).kind -contains $BlockerKind) "$Message reports $BlockerKind" }
     Assert-TreeEqual (Get-TreeHashes $Fixture.CodexHome) $codex "$Message creates no Codex writes"; Assert-TreeEqual (Get-TreeHashes $Fixture.AgentsHome) $agents "$Message creates no agents writes"; Assert-Equal (Test-Path -LiteralPath $Fixture.BackupRoot) $backupExists "$Message creates no backup directory"; Assert-TreeEqual (Get-TreeHashes $Fixture.BackupRoot) $backups "$Message creates no backup files"
 }
 
@@ -190,6 +206,66 @@ function Test-PreflightBlockers {
     foreach ($case in $cases) { $f = New-Fixture; try { Assert-BlockedBeforeWrites $f $case.Action $case.Name } finally { Remove-Fixture $f } }
     $f = New-Fixture; try { Add-Content -LiteralPath (Join-Path $f.SourceRoot 'skills\joewrks-design-frontend\SKILL.md') -Value 'bad source'; Assert-BlockedBeforeWrites $f {} 'source hash mismatch' } finally { Remove-Fixture $f }
     $f = New-Fixture; try { Set-SourceCore $f ('# oversized' + ('x' * (33KB))); Assert-BlockedBeforeWrites $f {} 'oversized planned AGENTS.md' } finally { Remove-Fixture $f }
+    $f = New-Fixture
+    try {
+        Add-Content -LiteralPath (Join-Path $f.SourceRoot 'skills\joewrks-design-frontend\SKILL.md') -Value 'bad source'
+        $result = Read-Result (Invoke-Harness $f Check -IncludeDesignFrontend) 'pilot source-integrity blocker'
+        Assert-Equal $result.status 'blocked' 'pilot source-integrity mismatch blocks'
+        Assert-Equal $result.designFrontendPilot.hardGate 'unverified' 'source-integrity blocker does not report a passing hard gate'
+    } finally { Remove-Fixture $f }
+}
+
+function Test-StateTrust {
+    $f = New-Fixture
+    try {
+        Assert-Equal (Invoke-Harness $f Apply).ExitCode 0 'schema tamper baseline apply succeeds'
+        Assert-BlockedBeforeWrites $f {
+            param($fixture)
+            $state = Get-Content -Raw -LiteralPath $fixture.State | ConvertFrom-Json
+            $state.schemaVersion = 2
+            Write-Utf8 $fixture.State ($state | ConvertTo-Json -Depth 16)
+        } 'wrong state schema' 'invalidState'
+    } finally { Remove-Fixture $f }
+
+    $f = New-Fixture
+    try {
+        Assert-Equal (Invoke-Harness $f Apply).ExitCode 0 'managed-key tamper baseline apply succeeds'
+        Assert-BlockedBeforeWrites $f {
+            param($fixture)
+            $state = Get-Content -Raw -LiteralPath $fixture.State | ConvertFrom-Json
+            $hash = [string] $state.managedBlocks.'AGENTS.md'
+            $state.managedBlocks = [pscustomobject] @{ 'OTHER.md' = $hash }
+            Write-Utf8 $fixture.State ($state | ConvertTo-Json -Depth 16)
+        } 'wrong managed block key' 'invalidState'
+    } finally { Remove-Fixture $f }
+
+    $f = New-Fixture
+    try {
+        Assert-Equal (Invoke-Harness $f Apply -IncludeDesignFrontend).ExitCode 0 'arbitrary ownership baseline apply succeeds'
+        $cleanState = [IO.File]::ReadAllBytes($f.State)
+        Assert-BlockedBeforeWrites $f {
+            param($fixture)
+            $state = Get-Content -Raw -LiteralPath $fixture.State | ConvertFrom-Json
+            $state.sourceIdentities.designFrontend.path = 'unrelated.json'
+            Write-Utf8 $fixture.State ($state | ConvertTo-Json -Depth 16)
+        } 'unrelated design source identity' 'invalidState'
+        Write-Bytes $f.State $cleanState
+        Assert-BlockedBeforeWrites $f {
+            param($fixture)
+            $state = Get-Content -Raw -LiteralPath $fixture.State | ConvertFrom-Json
+            $state.wholeFileTargets.PSObject.Properties.Remove('skills/joewrks-design-frontend/agents/openai.yaml')
+            Write-Utf8 $fixture.State ($state | ConvertTo-Json -Depth 16)
+        } 'missing manifest-selected ownership' 'invalidState'
+        Write-Bytes $f.State $cleanState
+        Assert-BlockedBeforeWrites $f {
+            param($fixture)
+            $rogue = Join-Path $fixture.AgentsHome 'unrelated.txt'
+            Write-Utf8 $rogue 'not part of the design bundle'
+            $state = Get-Content -Raw -LiteralPath $fixture.State | ConvertFrom-Json
+            $state.wholeFileTargets | Add-Member -NotePropertyName 'unrelated.txt' -NotePropertyValue (Get-Hash $rogue)
+            Write-Utf8 $fixture.State ($state | ConvertTo-Json -Depth 16)
+        } 'arbitrary whole-file ownership' 'invalidState'
+    } finally { Remove-Fixture $f }
 }
 
 function Test-OptionalBundleStateAndDrift {
@@ -210,6 +286,62 @@ function Test-OptionalBundleStateAndDrift {
     } finally { Remove-Fixture $f }
 }
 
+function Test-ObsoleteOptionalReconciliation {
+    $f = New-Fixture
+    try {
+        Assert-Equal (Invoke-Harness $f Apply -IncludeDesignFrontend).ExitCode 0 'obsolete-file baseline apply succeeds'
+        $obsoleteRelative = 'skills/joewrks-design-frontend/agents/openai.yaml'
+        $obsoletePath = Join-Path $f.AgentsHome ($obsoleteRelative -replace '/', '\')
+        $beforeAgents = Get-TreeHashes $f.AgentsHome
+        $beforeState = [IO.File]::ReadAllBytes($f.State)
+        $obsoleteBytes = [IO.File]::ReadAllBytes($obsoletePath)
+        Remove-SourceOptionalEntry $f $obsoleteRelative
+
+        $check = Read-Result (Invoke-Harness $f Check -IncludeDesignFrontend) 'obsolete-file update check'
+        Assert-Equal $check.status 'ready' 'obsolete-file update is ready'
+        Assert-True (@($check.changes | Where-Object { $_.action -eq 'remove' -and $_.target -eq $obsoleteRelative }).Count -eq 1) 'obsolete-file update plans one removal'
+
+        . $f.Script
+        $result = Invoke-JoewrksHarnessSync -Apply -IncludeDesignFrontend -CodexHome $f.CodexHome -AgentsHome $f.AgentsHome -BackupRoot $f.BackupRoot -AfterReplace {
+            param($replacement)
+            if (-not $replacement.DesiredExists -and $replacement.TargetPath -ieq $obsoletePath) { throw 'test failure after obsolete deletion' }
+        }
+        Assert-Equal $result.status 'failed' 'failure after obsolete deletion reports failed'
+        Assert-Equal $result.rollback.status 'complete' 'obsolete deletion rollback completes'
+        Assert-TreeEqual (Get-TreeHashes $f.AgentsHome) $beforeAgents 'obsolete deletion rollback restores the optional tree'
+        Assert-BytesEqual ([IO.File]::ReadAllBytes($obsoletePath)) $obsoleteBytes 'obsolete deletion rollback restores exact bytes'
+        Assert-BytesEqual ([IO.File]::ReadAllBytes($f.State)) $beforeState 'obsolete deletion rollback preserves exact prior state'
+        $obsoleteBackupPath = Join-Path $result.backupPath (Join-Path 'agents' ($obsoleteRelative -replace '/', '\'))
+        Assert-BytesEqual ([IO.File]::ReadAllBytes($obsoleteBackupPath)) $obsoleteBytes 'obsolete file backup is byte-exact'
+
+        $applyResult = Read-Result (Invoke-Harness $f Apply -IncludeDesignFrontend) 'successful obsolete-file update'
+        Assert-Equal $applyResult.status 'current' 'successful obsolete-file update is current'
+        Assert-True (-not (Test-Path -LiteralPath $obsoletePath)) 'explicit update removes obsolete optional file'
+        $state = Get-Content -Raw -LiteralPath $f.State | ConvertFrom-Json
+        Assert-True (-not ($state.wholeFileTargets.PSObject.Properties.Name -contains $obsoleteRelative)) 'state drops obsolete optional ownership'
+        Assert-StringSetEqual @((Get-TreeHashes $f.AgentsHome).Keys) (Get-OptionalFiles $f.SourceRoot) 'explicit update leaves exactly the current manifest-selected unit'
+    } finally { Remove-Fixture $f }
+}
+
+function Test-ExistingTargetRollback {
+    $f = New-Fixture
+    try {
+        Assert-Equal (Invoke-Harness $f Apply).ExitCode 0 'existing-target rollback baseline apply succeeds'
+        $agentsPath = Join-Path $f.CodexHome 'AGENTS.md'
+        $beforeAgents = [IO.File]::ReadAllBytes($agentsPath)
+        $beforeState = [IO.File]::ReadAllBytes($f.State)
+        Set-SourceCore $f ((Get-Content -Raw -LiteralPath (Join-Path $f.SourceRoot 'AGENTS.md')) + "`n# rollback probe")
+        . $f.Script
+        $result = Invoke-JoewrksHarnessSync -Apply -CodexHome $f.CodexHome -AgentsHome $f.AgentsHome -BackupRoot $f.BackupRoot -AfterReplace { param($replacement) throw 'test existing-target failure' }
+        Assert-Equal $result.status 'failed' 'existing-target callback failure reports failed'
+        Assert-Equal $result.rollback.status 'complete' 'existing-target rollback completes'
+        Assert-BytesEqual ([IO.File]::ReadAllBytes($agentsPath)) $beforeAgents 'existing-target rollback restores exact AGENTS bytes'
+        Assert-BytesEqual ([IO.File]::ReadAllBytes($f.State)) $beforeState 'existing-target rollback preserves exact state bytes'
+        $agentsBackupPath = Join-Path $result.backupPath 'codex\AGENTS.md'
+        Assert-BytesEqual ([IO.File]::ReadAllBytes($agentsBackupPath)) $beforeAgents 'existing-target backup is byte-exact'
+    } finally { Remove-Fixture $f }
+}
+
 function Test-DeterministicRollback {
     $f = New-Fixture
     try {
@@ -224,6 +356,25 @@ function Test-DeterministicRollback {
         $changedBytes = [Text.Encoding]::UTF8.GetBytes('changed again'); $changedPathFile = Join-Path $f.Root 'changed-target.txt'
         $result = Invoke-JoewrksHarnessSync -Apply -CodexHome $f.CodexHome -AgentsHome $f.AgentsHome -BackupRoot $f.BackupRoot -AfterReplace { param($replacement) Write-Bytes $replacement.TargetPath $changedBytes; [IO.File]::WriteAllText($changedPathFile, $replacement.TargetPath); throw 'test concurrent edit' }
         Assert-Equal $result.status 'failed' 'concurrent callback failure reports failed'; Assert-True (@($result.unresolvedTargets).Count -gt 0) 'changed-again target is unresolved, not overwritten'; Assert-BytesEqual ([IO.File]::ReadAllBytes([IO.File]::ReadAllText($changedPathFile))) $changedBytes 'rollback preserves externally changed bytes'
+    } finally { Remove-Fixture $f }
+}
+
+function Test-UncommittedIdenticalCreation {
+    $f = New-Fixture
+    try {
+        . $f.Script
+        $externalTarget = Join-Path $f.AgentsHome 'skills\joewrks-design-frontend\SKILL.md'
+        $externalBytes = [IO.File]::ReadAllBytes((Join-Path $f.SourceRoot 'skills\joewrks-design-frontend\SKILL.md'))
+        $callback = {
+            param($replacement)
+            Write-Bytes $externalTarget $externalBytes
+        }.GetNewClosure()
+        $result = Invoke-JoewrksHarnessSync -Apply -IncludeDesignFrontend -CodexHome $f.CodexHome -AgentsHome $f.AgentsHome -BackupRoot $f.BackupRoot -AfterReplace $callback
+        Assert-Equal $result.status 'failed' 'identical concurrent creation reports failed'
+        Assert-True (@($result.unresolvedTargets) -contains $externalTarget) 'identical concurrent creation is unresolved'
+        Assert-BytesEqual ([IO.File]::ReadAllBytes($externalTarget)) $externalBytes 'uncommitted identical concurrent creation is preserved'
+        Assert-True (-not (Test-Path -LiteralPath (Join-Path $f.CodexHome 'AGENTS.md'))) 'earlier committed target still rolls back'
+        Assert-True (-not (Test-Path -LiteralPath $f.State)) 'failed identical concurrent creation writes no state'
     } finally { Remove-Fixture $f }
 }
 
@@ -287,7 +438,11 @@ Test-Task2CheckRegressions
 Test-EmptyCheckAndApply
 Test-AgentEncodingAndCoreUpdate
 Test-PreflightBlockers
+Test-StateTrust
 Test-OptionalBundleStateAndDrift
+Test-ObsoleteOptionalReconciliation
+Test-ExistingTargetRollback
 Test-DeterministicRollback
+Test-UncommittedIdenticalCreation
 Test-MultiTargetRollback
 Write-Host 'PASS sync-harness contract'
