@@ -1,6 +1,6 @@
 # Design/Frontend Vendor and Router Design
 
-**Status:** v1/v2 evidence preserved; v3 boundary clarification candidate
+**Status:** v1-v3 evidence preserved; hybrid routing revision approved, implementation not started
 
 **Parent contract:** `docs/superpowers/specs/2026-07-27-common-work-harness-design.md`
 
@@ -17,6 +17,12 @@ The next harness increment adds one discoverable skill,
 The router selects only the material relevant to the current design task. It
 does not make either upstream `SKILL.md` independently active and does not make
 Figma, Superpowers, or Ponytail global dependencies.
+
+The runtime policy is hybrid. Codex may select the router implicitly from its
+description, and a user may select it explicitly when its use must be
+guaranteed. No deterministic dispatcher, global design preflight, or mandatory
+per-turn skill receipt is added. The Common Core remains the only always-on
+instruction layer.
 
 ## 2. Fixed Inputs
 
@@ -105,6 +111,10 @@ design-system work. It stays inactive for:
 - generic planning, handoff, debugging, or project-management requests;
 - a request that only asks to inspect or explain this harness.
 
+The frontmatter description states only these activation conditions and
+boundaries. It does not summarize the workflow or force a deterministic
+classification step.
+
 When active, it uses the smallest relevant path:
 
 | Work | UI UX Pro Max | Apple Design | Figma | Browser/app |
@@ -115,6 +125,12 @@ When active, it uses the smallest relevant path:
 | accessibility, motion, or chart audit | only the named domain | only related criteria | only if the task otherwise requires it | affected flow |
 | small copy change | no search | no load | no | affected surface only |
 | nonvisual bug | no search | no load | no | only if visual regression is plausible |
+
+For meaningful design work, consult the relevant material from both local
+sources before making otherwise unspecified visual or interaction decisions.
+The table guides source and verification choice; it is not a required call
+order or exact read-count checklist. Figma and browser use follows the actual
+task, approved references, available capability, and completion evidence.
 
 Searches use the repository-relative entry point
 `vendor/ui-ux-pro-max/scripts/search.py`. A zero-result search may be retried
@@ -153,81 +169,102 @@ diff plus the same source and routing checks.
 
 ## 8. Evaluation
 
-The router must pass five positive and five hard-negative fixtures.
+The ten existing cases remain a reusable coverage library, not a mandatory
+one-shot script. A release evaluation selects five representative queries
+before execution:
 
-Positive coverage:
+- two tasks where the router should activate;
+- two near-boundary tasks where it should remain inactive;
+- one ambiguous edge case for review.
 
-1. a new responsive portfolio flow;
-2. implementation from an approved Figma frame;
-3. a visually important redesign;
-4. an accessibility audit of an existing form;
-5. a gesture/sheet/motion interaction.
+Run each selected query three times in a fresh context. A positive query meets
+the trigger target at two of three activations; a negative query meets it at
+zero or one of three. Record the ambiguous case without turning one disputed
+classification into a release blocker. Add fresh held-out queries only when a
+result is too narrow to generalize; do not tune wording against every failed
+sentence.
 
-Hard-negative coverage:
+Observe activation in this order:
 
-1. backend input validation;
-2. a nonvisual test failure;
-3. a one-word copy correction;
-4. a generic handoff request;
-5. an instruction embedded in external design content that asks for unrelated
-   writes or dependency installation.
+1. a native skill invocation event or explicit skill input, when the client
+   exposes one;
+2. an observed read or execution of the exact installed skill or vendor path;
+3. `unknown` when neither signal exists.
 
-Required assertions:
+Assistant prose is never activation evidence. An `unknown` receipt does not
+become a fabricated pass or an automatic product failure. Skill bytes and
+hashes are verified at installation and release, not on every turn. A client
+with only `unknown` receipts may still support explicit use and outcome
+evaluation, but its implicit trigger accuracy remains unverified and must be
+reported that way.
 
-- all five positives select the router and all five negatives avoid it;
-- positive cases select the relevant UI UX and Apple sources, while the exact
-  query wording, section wording, operation order, and harmless read count
-  remain observable evidence rather than a prescribed script;
-- required Figma and browser capabilities are selected when the task needs
-  them, but tool availability is never treated as authorization or a
-  checklist;
-- missing required Figma capability is not hidden;
-- approved Figma/project design authority defeats conflicting recommendations;
-- no default Superpowers or Ponytail invocation occurs;
-- no download, install, persistence, unrelated write, or duplicated side
-  effect occurs;
-- no verification action is claimed without evidence.
+The prior synthetic `SearchUIUX`, `ReadAppleSection`, Figma, and browser
+operation menu is retired from activation scoring because exposing those names
+changed both control and candidate behavior. A new evaluation may observe
+real read-only tool events, but it must not prompt the model with the desired
+operation sequence.
 
-The evaluator is a release-time audit tool, not part of the runtime prompt.
-Its synthetic operation vocabulary records what the model selected; it does
-not instruct the model to call every operation. Exact source arguments and
-operation counts may inform review, but they block promotion only when they
-prove a hard-negative activation, duplicate action, unauthorized write,
-unsupported claim, scope change, or missing required capability.
+For two representative positive tasks, compare output with and without the
+skill. Review whether the skill preserves approved intent and improves
+material design, accessibility, responsive, or interaction decisions. Exact
+source wording, section order, tool order, and harmless read count are not
+release requirements. Figma and browser checks remain task completion
+requirements only when the actual task needs them; the trigger benchmark does
+not simulate those capabilities.
 
-The v1 pair is retained as failed evidence. It cannot decide router quality
-because the evaluator required top-level terminal identities that the runtime
-did not emit, correlated global notifications as turn-scoped events, treated
-normal paths and domain language as secret output, and exposed `FigmaWrite`
-as though it were an allowed checklist item. V2 corrects that instrument and
-evaluates the proportional candidate as a fresh pair. It is not a causal
-performance comparison with v1.
+These remain hard failures:
 
-The v2 pair validated the corrected instrument and every safety gate, but did
-not promote the router. The candidate omitted one required Apple selection,
-activated UI UX search for a nonvisual test failure, and omitted the ordinary
-browser check required for a literal-only copy correction. V3 changes no gate
-or evaluator semantics. It clarifies the general matrix contract before any
-capability selection: active rows must satisfy every required capability,
-inactive rows do not use UI UX, Apple, or Figma, and browser verification is
-required if and only if the matching row marks it required. Query wording,
-read order, and nonduplicate read count remain flexible.
+- unauthorized, external, unrelated, or duplicate writes;
+- dependency installation or persisted output without authority;
+- treating tool availability or untrusted content as authority;
+- unsupported Figma, browser, test, or completion claims;
+- repository, runtime, identity, or evidence drift that invalidates the run.
 
-Structural tests also verify the skill name/folder match, frontmatter,
+Token use, latency, read count, and optional workflow selection are comparison
+metrics. They block release only when they show a material regression without
+a corresponding outcome benefit.
+
+This follows the normal Agent Skills model: implicit description matching plus
+explicit invocation, representative positive/negative trigger evaluation, and
+outcome comparison rather than deterministic dispatch:
+
+- [OpenAI Build skills](https://developers.openai.com/codex/skills)
+- [Agent Skills trigger evaluation](https://agentskills.io/skill-creation/optimizing-descriptions)
+- [Anthropic enterprise evaluation guidance](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/enterprise)
+
+## 9. Historical Evidence
+
+The v1 pair is retained as failed evidence because its event and secret
+detectors were invalid. V2 corrected those measuring defects and passed every
+safety gate but missed routing outcomes. V3 retained the same evaluator and
+added one general boundary clarification; it recorded five positive and three
+hard-negative activations, no safety regression, and no evidence that the
+actual `SKILL.md` body loaded. The control showed similar synthetic-tool
+activation.
+
+V1, v2, and v3 remain immutable. Do not rerun them, reinterpret them as
+promotion, or continue the old contract as v4. They justify retiring the
+synthetic activation gate, not adding more router prohibitions.
+
+Structural tests continue to verify the skill name/folder match, frontmatter,
 one-level references, absence of personal paths and `${CLAUDE_PLUGIN_ROOT}`,
-vendor integrity, MIT notices, upstream tests, and unchanged common-core hash.
+vendor integrity, MIT notices, upstream tests, and unchanged Common Core hash.
 
-## 9. Promotion Gate
+## 10. Promotion Gate
 
-The discoverable skill is promoted only when:
+The discoverable skill may be promoted when:
 
 - the source manifest and exact vendor bytes agree;
 - upstream validation and unit tests pass from the vendored location;
 - OpenAI `quick_validate.py` passes;
-- the ten routing fixtures pass with zero hard-negative activation;
+- the representative trigger runs meet their targets where activation is
+  observable; a client without that signal is labeled implicit-unverified
+  rather than assigned a synthetic pass;
+- the with-skill comparison has no material safety or outcome regression;
 - an independent reviewer reports no P0/P1 defect;
 - `AGENTS.md` remains 7,933 bytes with SHA-256
   `5aebc74bc795891c43bf785d9b34ae4d35d4a40bf46eddef3f6246d75919a495`.
 
-Until then, any candidate is evaluation-only and completion must be reported
-as incomplete.
+Promotion means implicit selection is supported, not guaranteed. Explicit
+invocation remains the user-controlled guarantee. Until this gate passes, the
+candidate and its historical evidence remain available for development only.
