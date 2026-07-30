@@ -695,7 +695,9 @@ function Write-V1FixtureState {
 }
 ```
 
-core-only와 design-only opt-in 각각에서 migration 성공 후 exact v2 key set, 새 project skill 설치와 AgentsHome identity를 검증한다. target operation 중간 실패는 설치 tree와 untouched V1 state를 보존해야 한다. 별도 fixture에서는 state write 직후에 실패를 주입해 exact V1 state bytes와 전체 tree가 복구되는지 검증한다.
+core-only와 design-only opt-in 각각에서 migration 성공 후 exact v2 key set, 새 project skill 설치와 AgentsHome identity를 검증한다. target operation 중간 실패는 설치 file tree와 untouched V1 state를 보존해야 한다.
+
+> **역사 기록 — 최종 승인된 Option B로 대체됨:** 초기 초안은 state write 직후 실패가 `failed`/`complete`라고 예상했다. 최종 계약은 exact file/state bytes를 복원하되, 이번 실행이 만든 디렉터리는 삭제하지 않고 보존·unresolved 처리한다. 따라서 rollback은 `incomplete`, 최상위 status는 `unknown`이다.
 
 ```powershell
 $beforeTree = @{
@@ -703,17 +705,26 @@ $beforeTree = @{
     agents = Get-TreeHashes $f.AgentsHome
 }
 $beforeState = [IO.File]::ReadAllBytes($f.State)
+$createdDirectories = @(
+    (Join-Path $f.AgentsHome 'skills\joewrks-project-setup'),
+    (Join-Path $f.AgentsHome 'skills\joewrks-project-setup\agents'),
+    (Join-Path $f.AgentsHome 'skills\joewrks-project-setup\scripts')
+)
 . $f.Script
 $failedAfterState = Invoke-JoewrksHarnessSync -Apply -CodexHome $f.CodexHome `
     -AgentsHome $f.AgentsHome -BackupRoot $f.BackupRoot -AfterReplace {
         param($replacement)
         if ($replacement.TargetPath -ieq $f.State) { throw 'failure after V2 state replacement' }
     }
-Assert-Equal $failedAfterState.status 'failed' 'state-write failure is reported'
-Assert-Equal $failedAfterState.rollback.status 'complete' 'state-write rollback completes'
+Assert-Equal $failedAfterState.status 'unknown' 'state-write rollback with preserved directories is unknown'
+Assert-Equal $failedAfterState.rollback.status 'incomplete' 'state-write rollback preserves created directories'
 Assert-BytesEqual ([IO.File]::ReadAllBytes($f.State)) $beforeState 'exact V1 state bytes return'
 Assert-TreeEqual (Get-TreeHashes $f.CodexHome) $beforeTree.codex 'Codex tree returns to V1'
 Assert-TreeEqual (Get-TreeHashes $f.AgentsHome) $beforeTree.agents 'Agents tree returns to V1'
+foreach ($directory in $createdDirectories) {
+    Assert-True (Test-Path -LiteralPath $directory -PathType Container) "created directory is preserved: $directory"
+    Assert-Equal (@($failedAfterState.unresolvedTargets | Where-Object { $_ -ieq $directory }).Count) 1 "created directory is unresolved once: $directory"
+}
 ```
 
 이 helper가 만드는 schema가 현재 V1 parser의 네 top-level key와 design-only source-identity 규칙을 그대로 대표하므로 별도 역사 fixture 파일은 추가하지 않는다.

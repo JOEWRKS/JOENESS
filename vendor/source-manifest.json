@@ -47,7 +47,7 @@
       "files": [
         {"localPath":"skills/joewrks-project-setup/SKILL.md","bytes":1738,"sha256":"bc3633b4292d78be8ad4ff11dff15118ca1794f500079f3775593f630d961d8f","exactUpstreamCopy":false},
         {"localPath":"skills/joewrks-project-setup/agents/openai.yaml","bytes":259,"sha256":"66255619bf9e17fcc30734229be7930d2e1e3da6c6d8062cabcb32db15e3c18e","exactUpstreamCopy":false},
-        {"localPath":"skills/joewrks-project-setup/scripts/project-setup.ps1","bytes":15896,"sha256":"15867af10dfe572fc94d01dd2d97d70ccde160e1e832d11c1b39f78f40155d86","exactUpstreamCopy":false}
+        {"localPath":"skills/joewrks-project-setup/scripts/project-setup.ps1","bytes":17251,"sha256":"d02a731ef8dd8855af083204b29d6ac8b19c45c76fab45b604eecb91ea564946","exactUpstreamCopy":false}
       ]
     }
   },

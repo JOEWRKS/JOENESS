@@ -297,6 +297,7 @@ function Test-ConditionalRollback {
     try {
         . $Implementation
         Assert-True ((Get-Command Invoke-JoewrksProjectSetup).Parameters.ContainsKey('AfterReplace')) 'dot-sourced function exposes internal callback'
+        Assert-True ((Get-Command Invoke-JoewrksProjectSetup).Parameters.ContainsKey('BeforeRollbackRemove')) 'dot-sourced function exposes internal rollback-remove callback'
         $checkResult = Invoke-JoewrksProjectSetup -Check -ProjectPath $f.Project
         $target = Join-Path $f.Project 'AGENTS.md'
 
@@ -306,6 +307,20 @@ function Test-ConditionalRollback {
         Assert-Equal $failed.status 'failed' 'verified rollback returns failed'
         Assert-Equal $failed.rollback.status 'complete' 'verified rollback is reported'
         Assert-True (-not (Test-Path -LiteralPath $target)) 'verified rollback removes newly created target'
+
+        $rollbackRaceBytes = $Utf8NoBom.GetBytes('replacement immediately before rollback removal')
+        $beforeRollbackRemove = {
+            param($operation)
+            [IO.File]::WriteAllBytes($operation.TargetPath, $rollbackRaceBytes)
+        }.GetNewClosure()
+        $racedBeforeRemove = Invoke-JoewrksProjectSetup -Apply -ProjectPath $f.Project -ExpectedRoot $checkResult.projectRoot `
+            -ExpectedTargetHash $checkResult.targetHash -ManagedBodyBase64 (ConvertTo-BodyBase64 'body') `
+            -AfterReplace { throw 'test rollback-remove race' } -BeforeRollbackRemove $beforeRollbackRemove
+        Assert-Equal $racedBeforeRemove.status 'unknown' 'replacement immediately before rollback removal returns unknown'
+        Assert-Equal $racedBeforeRemove.rollback.status 'incomplete' 'replacement immediately before rollback removal makes rollback incomplete'
+        Assert-True (@($racedBeforeRemove.rollback.removedTargets) -notcontains $target) 'replacement immediately before rollback removal is not reported removed'
+        Assert-True (@($racedBeforeRemove.unresolvedTargets) -contains $target) 'replacement immediately before rollback removal reports target unresolved'
+        Assert-BytesEqual ([IO.File]::ReadAllBytes($target)) $rollbackRaceBytes 'replacement immediately before rollback removal survives'
 
         $originalBytes = $Utf8Bom.GetPreamble() + $Utf8NoBom.GetBytes("outside`r`n")
         [IO.File]::WriteAllBytes($target, $originalBytes)

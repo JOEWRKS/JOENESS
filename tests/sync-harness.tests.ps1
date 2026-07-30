@@ -413,6 +413,24 @@ function Test-RemoveContract {
     } finally { Remove-Fixture $f }
 }
 
+function Test-NoFinalNewlineRoundTrip {
+    $f = New-Fixture
+    try {
+        $agentsPath = Join-Path $f.CodexHome 'AGENTS.md'
+        $originalBytes = [byte[]] @(0x61, 0x62, 0x63)
+        Write-Bytes $agentsPath $originalBytes
+
+        $apply = Invoke-Harness $f Apply -PublicEntry
+        Assert-Equal $apply.ExitCode 0 'public apply accepts AGENTS without a final newline'
+        Assert-Equal (Read-Result $apply 'no-final-newline public apply').status 'current' 'public apply reaches current'
+
+        $remove = Invoke-Harness $f Remove -PublicEntry
+        Assert-Equal $remove.ExitCode 0 'public remove after no-final-newline apply succeeds'
+        Assert-Equal (Read-Result $remove 'no-final-newline public remove').status 'removed' 'public remove reports removed'
+        Assert-BytesEqual ([IO.File]::ReadAllBytes($agentsPath)) $originalBytes 'public Apply then Remove restores exact original bytes without adding a newline'
+    } finally { Remove-Fixture $f }
+}
+
 function Test-RemovePreflightBlockers {
     foreach ($case in @(
         @{ Name = 'orphan marker'; Prepare = { param($f) Write-Utf8 (Join-Path $f.CodexHome 'AGENTS.md') "$BeginMarker`nforeign`n$EndMarker" } },
@@ -903,6 +921,29 @@ function Test-ManifestSkillCollisions {
             Assert-True (-not (Test-Path -LiteralPath $f.BackupRoot)) "$($case.Name) creates no backup"
         } finally { Remove-Fixture $f }
     }
+
+    $f = New-Fixture
+    try {
+        $hiddenDirectory = Join-Path $f.CodexHome 'skills\hidden-legacy'
+        $hiddenSkill = Join-Path $hiddenDirectory 'SKILL.md'
+        Write-Utf8 $hiddenSkill "---`nname: joewrks-design-frontend`n---"
+        (Get-Item -LiteralPath $hiddenDirectory -Force).Attributes = (Get-Item -LiteralPath $hiddenDirectory -Force).Attributes -bor [IO.FileAttributes]::Hidden
+        (Get-Item -LiteralPath $hiddenSkill -Force).Attributes = (Get-Item -LiteralPath $hiddenSkill -Force).Attributes -bor [IO.FileAttributes]::Hidden
+        $beforeHash = Get-Hash $hiddenSkill
+        $beforeDirectoryAttributes = (Get-Item -LiteralPath $hiddenDirectory -Force).Attributes
+        $beforeFileAttributes = (Get-Item -LiteralPath $hiddenSkill -Force).Attributes
+
+        $run = Invoke-Harness $f Check -PublicEntry
+        $result = Read-Result $run 'hidden legacy skill collision'
+        Assert-Equal $run.ExitCode 2 'hidden legacy skill collision exits blocked'
+        Assert-Equal $result.status 'blocked' 'hidden legacy skill collision reports blocked'
+        Assert-True (@($result.blockers).kind -contains 'duplicateSkill') 'hidden legacy skill collision reports duplicateSkill'
+        Assert-Equal (Get-Hash $hiddenSkill) $beforeHash 'hidden legacy skill collision check preserves skill bytes'
+        Assert-Equal (Get-Item -LiteralPath $hiddenDirectory -Force).Attributes $beforeDirectoryAttributes 'hidden legacy skill collision check preserves directory attributes'
+        Assert-Equal (Get-Item -LiteralPath $hiddenSkill -Force).Attributes $beforeFileAttributes 'hidden legacy skill collision check preserves file attributes'
+        Assert-True (-not (Test-Path -LiteralPath $f.State)) 'hidden legacy skill collision check writes no state'
+        Assert-True (-not (Test-Path -LiteralPath $f.BackupRoot)) 'hidden legacy skill collision check creates no backup'
+    } finally { Remove-Fixture $f }
 }
 
 function Test-StateTrust {
@@ -915,6 +956,30 @@ function Test-StateTrust {
             $state.schemaVersion = 3
             Write-Utf8 $fixture.State ($state | ConvertTo-Json -Depth 16)
         } 'wrong state schema' 'invalidState'
+    } finally { Remove-Fixture $f }
+
+    $f = New-Fixture
+    try {
+        Assert-Equal (Invoke-Harness $f Apply -PublicEntry).ExitCode 0 'V2 Common Core identity baseline public apply succeeds'
+        $state = Get-Content -Raw -LiteralPath $f.State | ConvertFrom-Json
+        $installedHash = [string] $state.managedBlocks.'AGENTS.md'
+        $tamperedHash = if ($installedHash -ceq ('0' * 64)) { '1' * 64 } else { '0' * 64 }
+        $state.sourceIdentities.commonCore.sha256 = $tamperedHash
+        Write-Utf8 $f.State (($state | ConvertTo-Json -Depth 16) + "`n")
+        $beforeCodex = Get-TreeEntries $f.CodexHome
+        $beforeAgents = Get-TreeEntries $f.AgentsHome
+        $beforeBackups = Get-TreeEntries $f.BackupRoot
+
+        foreach ($mode in @('Check', 'Apply')) {
+            $run = Invoke-Harness $f $mode -PublicEntry
+            $result = Read-Result $run "tampered V2 Common Core identity public $mode"
+            Assert-Equal $run.ExitCode 2 "tampered V2 Common Core identity public $mode exits blocked"
+            Assert-Equal $result.status 'blocked' "tampered V2 Common Core identity public $mode reports blocked"
+            Assert-True (@($result.blockers).kind -contains 'invalidState') "tampered V2 Common Core identity public $mode reports invalidState"
+            Assert-StringSetEqual (Get-TreeEntries $f.CodexHome) $beforeCodex "tampered V2 Common Core identity public $mode leaves Codex targets and state"
+            Assert-StringSetEqual (Get-TreeEntries $f.AgentsHome) $beforeAgents "tampered V2 Common Core identity public $mode leaves Agents targets"
+            Assert-StringSetEqual (Get-TreeEntries $f.BackupRoot) $beforeBackups "tampered V2 Common Core identity public $mode creates no backup"
+        }
     } finally { Remove-Fixture $f }
 
     $f = New-Fixture
@@ -1465,6 +1530,7 @@ Test-PublicHarnessEntry
 Test-ReadmeContract
 Test-ModeAndExitContract
 Test-RemoveContract
+Test-NoFinalNewlineRoundTrip
 Test-RemovePreflightBlockers
 Test-CleanSkeletonAdversaries
 Test-RemoveRollback

@@ -365,7 +365,7 @@ function Get-HarnessFrontmatterCollisions {
     $collisions = [Collections.Generic.List[string]]::new()
     foreach ($root in $SkillRoots) {
         if (-not (Test-Path -LiteralPath $root -PathType Container)) { continue }
-        foreach ($directory in Get-ChildItem -LiteralPath $root -Directory -Recurse) {
+        foreach ($directory in Get-ChildItem -LiteralPath $root -Directory -Recurse -Force -ErrorAction Stop) {
             $relative = $directory.FullName.Substring($root.Length).TrimStart('\', '/')
             if (($relative -split '[\\/]') -contains '.system') { continue }
             foreach ($skillName in @($ManagedSkillFiles.Keys)) {
@@ -378,7 +378,7 @@ function Get-HarnessFrontmatterCollisions {
                 }
             }
         }
-        foreach ($skillFile in Get-ChildItem -LiteralPath $root -Filter 'SKILL.md' -File -Recurse) {
+        foreach ($skillFile in Get-ChildItem -LiteralPath $root -Filter 'SKILL.md' -File -Recurse -Force -ErrorAction Stop) {
             $relative = $skillFile.FullName.Substring($root.Length).TrimStart('\', '/')
             if (($relative -split '[\\/]') -contains '.system') { continue }
             $isManaged = @($ManagedSkillFiles.Values | Where-Object {
@@ -626,6 +626,9 @@ function Invoke-JoewrksHarnessSync {
                 $installedCore = $installedManifest.evaluation.current.commonCore
                 if ([string] $installedCore.path -cne 'AGENTS.md') { throw 'Installed manifest Common Core path is invalid' }
                 $installedCoreHash = Get-HarnessValidSha256 $installedCore.sha256 'Installed manifest Common Core hash'
+                if ($stateCommonCoreSourceHash -cne $installedCoreHash) {
+                    throw 'State commonCore source identity does not match its installed manifest'
+                }
                 if ($state.schemaVersion -eq 1) {
                     $installedSkillNames = @($installedManifest.activeSkills.PSObject.Properties.Name | Sort-Object -CaseSensitive)
                     if (($installedSkillNames -join "`n") -cne 'joewrks-design-frontend') {
@@ -795,10 +798,7 @@ function Invoke-JoewrksHarnessSync {
                 $plannedAgentBytes = [byte[]] @($prefix + $blockBytes + $suffix)
             } else {
                 $prefix = $target.Bytes
-                $contentOffset = if ($target.HasBom) { 3 } else { 0 }
-                $contentLength = $target.Bytes.Length - $contentOffset
-                $separator = if ($contentLength -eq 0 -or $target.Text.EndsWith("`n") -or $target.Text.EndsWith("`r")) { [byte[]] @() } else { [Text.Encoding]::UTF8.GetBytes($newline) }
-                $plannedAgentBytes = [byte[]] @($prefix + $separator + $blockBytes)
+                $plannedAgentBytes = [byte[]] @($prefix + $blockBytes)
             }
 
             if ($stateCoreHash) {

@@ -159,7 +159,8 @@ function Invoke-JoewrksProjectSetup {
         [Parameter(Mandatory, ParameterSetName = 'Apply')] [string] $ExpectedRoot,
         [Parameter(Mandatory, ParameterSetName = 'Apply')] [string] $ExpectedTargetHash,
         [Parameter(Mandatory, ParameterSetName = 'Apply')] [string] $ManagedBodyBase64,
-        [scriptblock] $AfterReplace
+        [scriptblock] $AfterReplace,
+        [scriptblock] $BeforeRollbackRemove
     )
 
     $root = $null
@@ -259,6 +260,7 @@ function Invoke-JoewrksProjectSetup {
         $restored = [Collections.Generic.List[string]]::new()
         $removed = [Collections.Generic.List[string]]::new()
         $unresolved = [Collections.Generic.List[string]]::new()
+        $rollbackTombstone = $null
         try {
             $current = Get-ProjectFileSnapshot $target
             $stillApplied = $current.Exists -and $current.Hash -ceq $appliedHash
@@ -268,14 +270,32 @@ function Invoke-JoewrksProjectSetup {
                     Set-ProjectFile $target $snapshot.Bytes $current $snapshot.Hash
                     $null = $restored.Add($target)
                 } else {
-                    [IO.File]::Delete($target)
-                    if (Test-Path -LiteralPath $target) { throw 'Rollback could not remove the new AGENTS.md' }
+                    $rollbackTombstone = Join-Path (Split-Path -Parent $target) ('.AGENTS.md.joewrks-' + [Guid]::NewGuid().ToString('N') + '.rollback')
+                    if ($null -ne $BeforeRollbackRemove) { & $BeforeRollbackRemove $operation | Out-Null }
+                    [IO.File]::Move($target, $rollbackTombstone)
+                    $moved = Get-ProjectFileSnapshot $rollbackTombstone
+                    if (-not $moved.Exists -or $moved.Hash -cne $appliedHash) {
+                        if (-not (Test-Path -LiteralPath $target)) {
+                            try { [IO.File]::Move($rollbackTombstone, $target) } catch {}
+                        }
+                        if (Test-Path -LiteralPath $rollbackTombstone) {
+                            $null = $unresolved.Add($rollbackTombstone)
+                        }
+                        throw 'Rollback removal target changed after verification'
+                    }
+                    [IO.File]::Delete($rollbackTombstone)
+                    if ((Test-Path -LiteralPath $target) -or (Test-Path -LiteralPath $rollbackTombstone)) {
+                        throw 'Rollback could not verify removal of the new AGENTS.md'
+                    }
                     $null = $removed.Add($target)
                 }
             } elseif (-not $matchesOriginal) {
                 $null = $unresolved.Add($target)
             }
         } catch {
+            if ($null -ne $rollbackTombstone -and (Test-Path -LiteralPath $rollbackTombstone) -and -not $unresolved.Contains($rollbackTombstone)) {
+                $null = $unresolved.Add($rollbackTombstone)
+            }
             if (-not $unresolved.Contains($target)) { $null = $unresolved.Add($target) }
         }
         try {
