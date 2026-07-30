@@ -370,9 +370,13 @@ function Test-RemoveContract {
 
         $beforeSecondRemove = Get-TreeEntries $f.Root
         $second = Invoke-Harness $f Remove
-        Assert-Equal $second.ExitCode 2 'second remove with retained managed directories blocks'
-        Assert-Equal (Read-Result $second 'second remove').status 'blocked' 'second remove does not infer ownership for retained directories'
-        Assert-StringSetEqual (Get-TreeEntries $f.Root) $beforeSecondRemove 'blocked second remove creates no files or backup'
+        Assert-Equal $second.ExitCode 0 'second remove with a clean managed directory skeleton succeeds'
+        Assert-Equal (Read-Result $second 'second remove').status 'removed' 'second remove treats only the exact clean skeleton as absent'
+        Assert-StringSetEqual (Get-TreeEntries $f.Root) $beforeSecondRemove 'second remove creates no files or backup'
+
+        $reapply = Invoke-Harness $f Apply
+        Assert-Equal $reapply.ExitCode 0 'apply reuses the clean managed directory skeleton'
+        Assert-Equal (Read-Result $reapply 'apply after remove').status 'current' 'apply after remove restores the bundle'
     } finally { Remove-Fixture $f }
 
     $f = New-Fixture
@@ -440,6 +444,104 @@ function Test-RemovePreflightBlockers {
         Assert-StringSetEqual (Get-TreeEntries $f.CodexHome) $beforeCodex 'remove root identity mismatch leaves Codex bytes'
         Assert-StringSetEqual (Get-TreeEntries $originalAgentsHome) $beforeAgents 'remove root identity mismatch leaves owned Agents bytes'
         Assert-True (-not (Test-Path -LiteralPath $f.AgentsHome)) 'remove root identity mismatch creates no alternate AgentsHome'
+    } finally { Remove-Fixture $f }
+}
+
+function Test-CleanSkeletonAdversaries {
+    foreach ($case in @(
+        @{
+            Name = 'file in expected skeleton directory'
+            Prepare = {
+                param($f)
+                Write-Utf8 (Join-Path $f.AgentsHome 'skills\joewrks-project-setup\agents\external.txt') 'external'
+                $null
+            }
+        },
+        @{
+            Name = 'unexpected skeleton subdirectory'
+            Prepare = {
+                param($f)
+                [IO.Directory]::CreateDirectory((Join-Path $f.AgentsHome 'skills\joewrks-project-setup\unexpected')) | Out-Null
+                $null
+            }
+        },
+        @{
+            Name = 'skill root reparse'
+            Prepare = {
+                param($f)
+                $path = Join-Path $f.AgentsHome 'skills\joewrks-project-setup'
+                [IO.Directory]::Delete($path, $true)
+                $target = Join-Path $f.Root 'root-reparse-target'
+                [IO.Directory]::CreateDirectory($target) | Out-Null
+                New-Item -ItemType Junction -Path $path -Target $target | Out-Null
+                $path
+            }
+        },
+        @{
+            Name = 'skeleton descendant reparse'
+            Prepare = {
+                param($f)
+                $path = Join-Path $f.AgentsHome 'skills\joewrks-project-setup\agents'
+                [IO.Directory]::Delete($path)
+                $target = Join-Path $f.Root 'descendant-reparse-target'
+                [IO.Directory]::CreateDirectory($target) | Out-Null
+                New-Item -ItemType Junction -Path $path -Target $target | Out-Null
+                $path
+            }
+        }
+    )) {
+        $f = New-Fixture
+        $reparsePath = $null
+        try {
+            Assert-Equal (Invoke-Harness $f Apply).ExitCode 0 "$($case.Name) baseline apply succeeds"
+            Assert-Equal (Invoke-Harness $f Remove).ExitCode 0 "$($case.Name) baseline remove succeeds"
+            $reparsePath = & $case.Prepare $f
+            $before = Get-TreeEntries $f.Root
+
+            $remove = Invoke-Harness $f Remove
+            Assert-Equal $remove.ExitCode 2 "$($case.Name) blocks no-state remove"
+            Assert-Equal (Read-Result $remove "$($case.Name) remove").status 'blocked' "$($case.Name) remove is blocked"
+            Assert-StringSetEqual (Get-TreeEntries $f.Root) $before "$($case.Name) remove causes zero writes"
+
+            $apply = Invoke-Harness $f Apply
+            Assert-Equal $apply.ExitCode 2 "$($case.Name) blocks apply reuse"
+            Assert-Equal (Read-Result $apply "$($case.Name) apply").status 'blocked' "$($case.Name) apply is blocked"
+            Assert-StringSetEqual (Get-TreeEntries $f.Root) $before "$($case.Name) apply causes zero writes"
+        } finally {
+            if ($reparsePath) {
+                $entry = Get-Item -LiteralPath $reparsePath -Force -ErrorAction SilentlyContinue
+                if ($null -ne $entry -and ($entry.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0) {
+                    [IO.Directory]::Delete($reparsePath)
+                }
+            }
+            Remove-Fixture $f
+        }
+    }
+
+    $f = New-Fixture
+    try {
+        Assert-Equal (Invoke-Harness $f Apply).ExitCode 0 'skeleton inspection-error baseline apply succeeds'
+        Assert-Equal (Invoke-Harness $f Remove).ExitCode 0 'skeleton inspection-error baseline remove succeeds'
+        $skillRoot = Join-Path $f.AgentsHome 'skills\joewrks-project-setup'
+        $before = Get-TreeEntries $f.Root
+        . $f.Script
+        $results = & {
+            function Get-ChildItem {
+                [CmdletBinding()]
+                param([string[]] $LiteralPath, [switch] $Force, [switch] $Directory, [switch] $File, [switch] $Recurse, [string] $Filter)
+                if (@($LiteralPath).Count -eq 1 -and $LiteralPath[0] -ieq $skillRoot) {
+                    throw 'injected skeleton inspection error'
+                }
+                Microsoft.PowerShell.Management\Get-ChildItem @PSBoundParameters
+            }
+            [pscustomobject] @{
+                Remove = Invoke-JoewrksHarnessSync -Remove -CodexHome $f.CodexHome -AgentsHome $f.AgentsHome -BackupRoot $f.BackupRoot
+                Apply = Invoke-JoewrksHarnessSync -Apply -CodexHome $f.CodexHome -AgentsHome $f.AgentsHome -BackupRoot $f.BackupRoot
+            }
+        }
+        Assert-Equal $results.Remove.status 'blocked' 'skeleton inspection uncertainty blocks remove'
+        Assert-Equal $results.Apply.status 'blocked' 'skeleton inspection uncertainty blocks apply'
+        Assert-StringSetEqual (Get-TreeEntries $f.Root) $before 'skeleton inspection uncertainty causes zero writes'
     } finally { Remove-Fixture $f }
 }
 
@@ -1285,6 +1387,7 @@ Test-PublicHarnessEntry
 Test-ModeAndExitContract
 Test-RemoveContract
 Test-RemovePreflightBlockers
+Test-CleanSkeletonAdversaries
 Test-RemoveRollback
 Test-ManifestPathSafety
 Test-ReparsePlanningBoundaries

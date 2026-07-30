@@ -309,6 +309,39 @@ function Set-HarnessFile {
     }
 }
 
+function Get-HarnessSkillSkeletonState {
+    param([string] $Root, [string[]] $AllowedDirectories)
+    $allowed = [Collections.Generic.HashSet[string]]::new([StringComparer]::OrdinalIgnoreCase)
+    foreach ($path in $AllowedDirectories) { $null = $allowed.Add([IO.Path]::GetFullPath($path).TrimEnd('\', '/')) }
+    try {
+        $rootItem = Get-Item -LiteralPath $Root -Force -ErrorAction Stop
+    } catch [Management.Automation.ItemNotFoundException] {
+        return [pscustomobject] @{ Exists = $false; Reusable = $true; Message = $null }
+    } catch {
+        return [pscustomobject] @{ Exists = $true; Reusable = $false; Message = "Cannot inspect managed skill skeleton: $($_.Exception.Message)" }
+    }
+    try {
+        if (-not $rootItem.PSIsContainer) { throw "Managed skill namespace is not a directory: $Root" }
+        if (($rootItem.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0) { throw "Managed skill skeleton contains a reparse point: $Root" }
+        $pending = [Collections.Generic.Queue[string]]::new()
+        $pending.Enqueue([IO.Path]::GetFullPath($Root).TrimEnd('\', '/'))
+        while ($pending.Count -gt 0) {
+            $directory = $pending.Dequeue()
+            if (-not $allowed.Contains($directory)) { throw "Managed skill skeleton contains an unexpected directory: $directory" }
+            foreach ($entry in @(Get-ChildItem -LiteralPath $directory -Force -ErrorAction Stop)) {
+                if (($entry.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0) {
+                    throw "Managed skill skeleton contains a reparse point: $($entry.FullName)"
+                }
+                if (-not $entry.PSIsContainer) { throw "Managed skill skeleton contains a file: $($entry.FullName)" }
+                $pending.Enqueue([IO.Path]::GetFullPath($entry.FullName).TrimEnd('\', '/'))
+            }
+        }
+        [pscustomobject] @{ Exists = $true; Reusable = $true; Message = $null }
+    } catch {
+        [pscustomobject] @{ Exists = $true; Reusable = $false; Message = $_.Exception.Message }
+    }
+}
+
 function Get-HarnessFrontmatterCollisions {
     param(
         [string[]] $SkillRoots,
@@ -386,6 +419,7 @@ function Invoke-JoewrksHarnessSync {
     $changes = [Collections.Generic.List[object]]::new()
     $optionalEntries = [Collections.Generic.List[object]]::new()
     $manifestSkillRelativePaths = @{}
+    $manifestSkillSkeletons = @{}
     $manifest = $null
     $manifestHash = $null
     $historicalV1WholeFiles = @{}
@@ -463,6 +497,40 @@ function Invoke-JoewrksHarnessSync {
         }
     } catch {
         $null = $blockers.Add([pscustomobject] @{ kind = 'sourceIntegrity'; message = $_.Exception.Message })
+    }
+    if ($null -ne $manifest) {
+        foreach ($skillName in @($manifestSkillRelativePaths.Keys)) {
+            try {
+                $rootRelative = Get-HarnessSafeRelativePath "skills/$skillName" 'Managed skill namespace'
+                $agentsRootPrefix = [IO.Path]::GetFullPath($resolvedAgentsHome).TrimEnd('\', '/') + [IO.Path]::DirectorySeparatorChar
+                $rootPath = [IO.Path]::GetFullPath((Join-Path $resolvedAgentsHome ($rootRelative -replace '/', [IO.Path]::DirectorySeparatorChar)))
+                if (-not $rootPath.StartsWith($agentsRootPrefix, [StringComparison]::OrdinalIgnoreCase)) {
+                    throw "Managed skill namespace escapes AgentsHome: $rootRelative"
+                }
+                $allowed = [Collections.Generic.HashSet[string]]::new([StringComparer]::OrdinalIgnoreCase)
+                $null = $allowed.Add($rootPath.TrimEnd('\', '/'))
+                foreach ($entry in @($optionalEntries | Where-Object {
+                    $_.RelativePath.StartsWith($rootRelative + '/', [StringComparison]::OrdinalIgnoreCase)
+                })) {
+                    $entryPath = [IO.Path]::GetFullPath((Join-Path $resolvedAgentsHome ($entry.RelativePath -replace '/', [IO.Path]::DirectorySeparatorChar)))
+                    if (-not $entryPath.StartsWith($agentsRootPrefix, [StringComparison]::OrdinalIgnoreCase)) {
+                        throw "Managed skill target escapes AgentsHome: $($entry.RelativePath)"
+                    }
+                    $parent = Split-Path -Parent $entryPath
+                    while ($parent.StartsWith($rootPath, [StringComparison]::OrdinalIgnoreCase)) {
+                        $null = $allowed.Add($parent.TrimEnd('\', '/'))
+                        if ($parent -ieq $rootPath) { break }
+                        $parent = Split-Path -Parent $parent
+                    }
+                }
+                $manifestSkillSkeletons[$skillName] = [pscustomobject] @{
+                    RootPath = $rootPath
+                    AllowedDirectories = @($allowed)
+                }
+            } catch {
+                $null = $blockers.Add([pscustomobject] @{ kind = 'sourceIntegrity'; message = $_.Exception.Message })
+            }
+        }
     }
 
     $state = $null
@@ -612,14 +680,11 @@ function Invoke-JoewrksHarnessSync {
                     $null = $blockers.Add([pscustomobject] @{ kind = 'commonCorePreflight'; message = $_.Exception.Message })
                 }
             }
-            foreach ($relative in @($manifestSkillRelativePaths.Values)) {
-                try {
-                    $skillPath = Split-Path -Parent (Resolve-HarnessSourceFile $resolvedAgentsHome ([string] $relative))
-                    if (Test-Path -LiteralPath $skillPath) {
-                        $null = $blockers.Add([pscustomobject] @{ kind = 'unownedEvidence'; message = "Known managed skill namespace exists without state: $skillPath" })
-                    }
-                } catch {
-                    $null = $blockers.Add([pscustomobject] @{ kind = 'targetSafety'; message = $_.Exception.Message })
+            foreach ($skillName in @($manifestSkillSkeletons.Keys)) {
+                $skeleton = $manifestSkillSkeletons[$skillName]
+                $skeletonState = Get-HarnessSkillSkeletonState $skeleton.RootPath $skeleton.AllowedDirectories
+                if ($skeletonState.Exists -and -not $skeletonState.Reusable) {
+                    $null = $blockers.Add([pscustomobject] @{ kind = 'unownedEvidence'; message = $skeletonState.Message })
                 }
             }
         } elseif ($null -ne $state) {
@@ -784,7 +849,13 @@ function Invoke-JoewrksHarnessSync {
         try {
             $relative = [string] $manifestSkillRelativePaths[$skillName]
             $managedSkillFile = Resolve-HarnessSourceFile $resolvedAgentsHome $relative
-            $managedSkillFiles[$skillName] = if ($stateWholeFiles.ContainsKey($relative)) { $managedSkillFile } else { $null }
+            $skeleton = $manifestSkillSkeletons[$skillName]
+            $skeletonState = Get-HarnessSkillSkeletonState $skeleton.RootPath $skeleton.AllowedDirectories
+            $reusableSkeleton = -not $stateWholeFiles.ContainsKey($relative) -and $skeletonState.Exists -and $skeletonState.Reusable
+            $managedSkillFiles[$skillName] = if ($stateWholeFiles.ContainsKey($relative) -or $reusableSkeleton) { $managedSkillFile } else { $null }
+            if (-not $stateWholeFiles.ContainsKey($relative) -and $skeletonState.Exists -and -not $skeletonState.Reusable) {
+                $null = $blockers.Add([pscustomobject] @{ kind = 'duplicateSkill'; message = $skeletonState.Message })
+            }
             if ((Test-Path -LiteralPath $managedSkillFile) -and -not $stateWholeFiles.ContainsKey($relative)) {
                 $null = $blockers.Add([pscustomobject] @{ kind = 'duplicateSkill'; message = "Duplicate skill directory: $(Split-Path -Parent $managedSkillFile)" })
             }
