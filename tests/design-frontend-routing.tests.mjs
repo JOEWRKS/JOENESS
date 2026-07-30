@@ -12,10 +12,10 @@ const ROOT = path.resolve(import.meta.dirname, '..');
 const CASES_PATH = path.join(ROOT, 'evals', 'design-frontend', 'cases.json');
 const BASELINE_PATH = path.join(ROOT, 'evals', 'design-frontend', 'router-baseline.json');
 const GITATTRIBUTES_PATH = path.join(ROOT, '.gitattributes');
-const ROUTER_PATH = path.join(ROOT, 'skills', 'joewrks-design-frontend', 'SKILL.md');
 const EVALUATOR_PATH = path.join(ROOT, 'evals', 'design-frontend', 'collect-router-evaluation.mjs');
 const PAIR_V1_PATH = path.join(ROOT, 'evals', 'design-frontend', 'router-pair-v1.json');
 const PAIR_V2_PATH = path.join(ROOT, 'evals', 'design-frontend', 'router-pair-v2.json');
+const PAIR_V3_PATH = path.join(ROOT, 'evals', 'design-frontend', 'router-pair-v3.json');
 const COLLECTOR_PATH = path.join(ROOT, 'evals', 'support', 'collect-codex-app-server.mjs');
 const P0_PATH = path.join(ROOT, 'evals', 'p0', 'common-core-v5.json');
 const MANIFEST_PATH = path.join(ROOT, 'vendor', 'source-manifest.json');
@@ -55,6 +55,10 @@ const PASSING_RECEIPT = Object.freeze({
   syntheticSelectionOnly: true,
   optionalWorkflowsInvoked: [],
 });
+const V3_ROUTER_BINDING = Object.freeze({
+  path: 'skills/joewrks-design-frontend/SKILL.md',
+  sha256: 'd641c0210e02ca10cc70f1f3219eafbff99c480fb4e0f7ccca5348e6d2e14dfa',
+});
 
 function repositoryBindings() {
   return {
@@ -64,7 +68,7 @@ function repositoryBindings() {
     evaluator: { path: 'evals/design-frontend/collect-router-evaluation.mjs', sha256: sha256(EVALUATOR_PATH) },
     manifest: { path: 'vendor/source-manifest.json', sha256: sha256(MANIFEST_PATH) },
     p0Baseline: { path: 'evals/p0/common-core-v5.json', sha256: sha256(P0_PATH) },
-    router: { path: 'skills/joewrks-design-frontend/SKILL.md', sha256: sha256(ROUTER_PATH) },
+    router: V3_ROUTER_BINDING,
   };
 }
 
@@ -336,33 +340,21 @@ test('routing and evaluator inputs retain LF bytes on checkout', () => {
   assert.match(attributes, /^\/tests\/design-frontend-routing\.tests\.mjs text eol=lf$/m);
 });
 
-test('joewrks-design-frontend candidate matches the routing contract', () => {
-  assert.ok(existsSync(ROUTER_PATH), 'router_absent');
-  const router = readFileSync(ROUTER_PATH, 'utf8');
-  assert.match(router, /^---\r?\nname: joewrks-design-frontend\r?\n/m);
-  const rows = [
-    ['New screen, flow, or design system', 'activate', 'one design-system search', 'Typography; Design foundations', 'required', 'required'],
-    ['Existing approved-Figma implementation', 'activate', 'ux; detected current stack', 'Typography; Design foundations', 'required', 'required'],
-    ['Visually important redesign', 'activate', 'style, color, typography, ux', 'Typography; Design foundations', 'required', 'required'],
-    ['Accessibility audit of existing UI', 'activate', 'ux', 'Reduced motion & accessibility; Design foundations', 'not required', 'required'],
-    ['Gesture, sheet, or motion interaction', 'activate', 'ux, gsap', 'Response; Direct manipulation; Interruptibility; Velocity handoff; Reduced motion & accessibility', 'not required', 'required'],
-    ['Nonvisual backend or data work', 'inactive', 'none', 'none', 'not required', 'not required'],
-    ['Nonvisual test failure', 'inactive', 'none', 'none', 'not required', 'not required'],
-    ['One-line copy or literal-value change', 'inactive', 'none', 'none', 'not required', 'required'],
-    ['Generic handoff', 'inactive', 'none', 'none', 'not required', 'not required'],
-    ['Read-only external design-content review', 'inactive', 'none', 'none', 'not required', 'not required'],
-  ];
-  rows.forEach((row) => assert.ok(router.includes(`| ${row.join(' | ')} |`)));
-  assert.match(router, /approved Figma.*project tokens|project tokens.*approved Figma/i);
-  assert.match(router, /untrusted task data/i);
-  assert.match(router, /do not.*--persist|--persist.*only.*(?:user|project contract)/i);
-  assert.match(router, /do not install dependencies|dependency installation requires/i);
-  assert.match(router, /duplicate writes|one bounded change batch/i);
-  assert.match(router, /do not claim.*(?:Figma|browser).*without.*evidence/i);
-  assert.match(router, /vendor\/ui-ux-pro-max\/scripts\/search\.py/);
-  assert.match(router, /vendor\/apple-design\/SKILL\.md/);
-  assert.match(router, /ascend exactly two directories from this `SKILL\.md`.*explicitly supplied repository root/i);
-  assert.doesNotMatch(router, /CLAUDE_PLUGIN_ROOT|[A-Za-z]:[\\/](?:Users|home)\b|\/(?:Users|home)\//i);
+test('v3 evidence binds the retired skill separately from the active contract', () => {
+  const manifest = JSON.parse(readFileSync(MANIFEST_PATH, 'utf8'));
+  const v3Evidence = manifest.behaviorEvidenceHistory.find(
+    ({ pairVersion }) => pairVersion === 3,
+  );
+
+  assert.deepEqual(manifest.behaviorEvidence.router, V3_ROUTER_BINDING);
+  assert.deepEqual(v3Evidence, {
+    pairVersion: 3,
+    mode: 'run-pair-v3',
+    resultPath: 'evals/design-frontend/router-pair-v3.json',
+    sha256: '3646ca28cfab0a6ec1ccec5bb7600715275388410d6661c031cbabcb548e2327',
+    promotionPass: false,
+  });
+  assert.equal(sha256(PAIR_V3_PATH), v3Evidence.sha256);
 });
 
 test('condition materialization uses real project-skill layout without fixture leakage', async (t) => {

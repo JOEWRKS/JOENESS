@@ -9,7 +9,7 @@
       "intentionalDifferences": ["Local activation and routing contract.", "Local OpenAI product metadata."],
       "validatorSha256": "5347a0a09cfb546bba1c0d1a30dae0a233d9a05f57bd4e7877155c588bcdabf7",
       "files": [
-        {"localPath":"skills/joewrks-design-frontend/SKILL.md","bytes":7829,"sha256":"d641c0210e02ca10cc70f1f3219eafbff99c480fb4e0f7ccca5348e6d2e14dfa","exactUpstreamCopy":false},
+        {"localPath":"skills/joewrks-design-frontend/SKILL.md","bytes":2685,"sha256":"0694f0d0880c079ab50b2af2621ef37f9745eae356f0c9ebc5a1351cd0d8a67d","exactUpstreamCopy":false},
         {"localPath":"skills/joewrks-design-frontend/agents/openai.yaml","bytes":263,"sha256":"3d0bc6bf72b93b3bd185852f080b19caeb17aed45f582df339d61c2633f81892","exactUpstreamCopy":false}
       ]
     }
@@ -27,6 +27,13 @@
       "mode": "run-pair-v2",
       "resultPath": "evals/design-frontend/router-pair-v2.json",
       "sha256": "0d2129bdaceb8ad858cb7a19c9c041a25f2d955834c94565e4ef4a73dbc4a610",
+      "promotionPass": false
+    },
+    {
+      "pairVersion": 3,
+      "mode": "run-pair-v3",
+      "resultPath": "evals/design-frontend/router-pair-v3.json",
+      "sha256": "3646ca28cfab0a6ec1ccec5bb7600715275388410d6661c031cbabcb548e2327",
       "promotionPass": false
     }
   ],
