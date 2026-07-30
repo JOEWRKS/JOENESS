@@ -97,6 +97,17 @@ function Find-Bytes {
     -1
 }
 
+function Count-Bytes {
+    param([byte[]] $Bytes, [byte[]] $Needle)
+    $count = 0
+    for ($i = 0; $i -le $Bytes.Length - $Needle.Length; $i++) {
+        $match = $true
+        for ($j = 0; $j -lt $Needle.Length; $j++) { if ($Bytes[$i + $j] -ne $Needle[$j]) { $match = $false; break } }
+        if ($match) { $count++; $i += $Needle.Length - 1 }
+    }
+    $count
+}
+
 function Get-ExternalAgentBytes {
     param([string] $Path)
     $bytes = [IO.File]::ReadAllBytes($Path); $begin = [Text.Encoding]::UTF8.GetBytes($BeginMarker); $end = [Text.Encoding]::UTF8.GetBytes($EndMarker)
@@ -106,6 +117,7 @@ function Get-ExternalAgentBytes {
 }
 
 function Assert-BytesEqual { param([byte[]] $Actual, [byte[]] $Expected, [string] $Message) Assert-Equal ([Convert]::ToBase64String($Actual)) ([Convert]::ToBase64String($Expected)) $Message }
+function Assert-StringSetEqual { param([string[]] $Actual, [string[]] $Expected, [string] $Message) Assert-Equal (($Actual | Sort-Object) -join "`n") (($Expected | Sort-Object) -join "`n") $Message }
 
 function Test-EmptyCheckAndApply {
     $f = New-Fixture
@@ -115,10 +127,11 @@ function Test-EmptyCheckAndApply {
         Assert-True ((@($result.changes) | ConvertTo-Json -Depth 8) -match '(?i)common.?core') 'empty check plans Common Core'
         Assert-True (-not (Test-Path -LiteralPath $f.CodexHome)) 'check creates no target/state'; Assert-True (-not (Test-Path -LiteralPath $f.AgentsHome)) 'check creates no agents directory'; Assert-True (-not (Test-Path -LiteralPath $f.BackupRoot)) 'check creates no backup'
         $apply = Invoke-Harness $f Apply; Assert-Equal $apply.ExitCode 0 'first apply succeeds'; Assert-Equal (Read-Result $apply 'first apply').status 'current' 'first apply is current'
-        Assert-True (Test-Path -LiteralPath (Join-Path $f.CodexHome 'AGENTS.md')) 'apply creates Common Core target'; Assert-True (Test-Path -LiteralPath $f.State) 'apply creates state'; Assert-True (-not (Test-Path -LiteralPath $f.AgentsHome)) 'default apply creates no optional target'
+        $agents = Join-Path $f.CodexHome 'AGENTS.md'; Assert-True (Test-Path -LiteralPath $agents) 'apply creates Common Core target'; Assert-True (Test-Path -LiteralPath $f.State) 'apply creates state'; Assert-True (-not (Test-Path -LiteralPath $f.AgentsHome)) 'default apply creates no optional target'
+        $agentBytes = [IO.File]::ReadAllBytes($agents); Assert-Equal (Count-Bytes $agentBytes ([Text.Encoding]::UTF8.GetBytes($BeginMarker))) 1 'apply creates exactly one managed block begin marker'; Assert-Equal (Count-Bytes $agentBytes ([Text.Encoding]::UTF8.GetBytes($EndMarker))) 1 'apply creates exactly one managed block end marker'
         Assert-Equal (Read-Result (Invoke-Harness $f Check) 'post-apply check').status 'current' 'post-apply check is current'
-        $before = Get-TreeHashes $f.CodexHome; $backups = Get-TreeHashes $f.BackupRoot; Assert-Equal (Invoke-Harness $f Apply).ExitCode 0 'second apply succeeds'
-        Assert-TreeEqual (Get-TreeHashes $f.CodexHome) $before 'second apply changes no target hashes'; Assert-TreeEqual (Get-TreeHashes $f.BackupRoot) $backups 'second apply creates no backup'
+        $before = Get-TreeHashes $f.CodexHome; $backupExists = Test-Path -LiteralPath $f.BackupRoot; $backups = Get-TreeHashes $f.BackupRoot; Assert-Equal (Invoke-Harness $f Apply).ExitCode 0 'second apply succeeds'
+        Assert-TreeEqual (Get-TreeHashes $f.CodexHome) $before 'second apply changes no target hashes'; Assert-Equal (Test-Path -LiteralPath $f.BackupRoot) $backupExists 'second apply creates no backup directory'; Assert-TreeEqual (Get-TreeHashes $f.BackupRoot) $backups 'second apply creates no backup files'
     } finally { Remove-Fixture $f }
 }
 
@@ -142,9 +155,9 @@ function Test-AgentEncodingAndCoreUpdate {
 
 function Assert-BlockedBeforeWrites {
     param($Fixture, [scriptblock] $Prepare, [string] $Message)
-    & $Prepare $Fixture; $codex = Get-TreeHashes $Fixture.CodexHome; $agents = Get-TreeHashes $Fixture.AgentsHome
+    & $Prepare $Fixture; $codex = Get-TreeHashes $Fixture.CodexHome; $agents = Get-TreeHashes $Fixture.AgentsHome; $backupExists = Test-Path -LiteralPath $Fixture.BackupRoot; $backups = Get-TreeHashes $Fixture.BackupRoot
     $run = Invoke-Harness $Fixture Apply; Assert-True ($run.ExitCode -ne 0) "$Message exits nonzero"; Assert-Equal (Read-Result $run $Message).status 'blocked' "$Message reports blocked"
-    Assert-TreeEqual (Get-TreeHashes $Fixture.CodexHome) $codex "$Message creates no Codex writes"; Assert-TreeEqual (Get-TreeHashes $Fixture.AgentsHome) $agents "$Message creates no agents writes"
+    Assert-TreeEqual (Get-TreeHashes $Fixture.CodexHome) $codex "$Message creates no Codex writes"; Assert-TreeEqual (Get-TreeHashes $Fixture.AgentsHome) $agents "$Message creates no agents writes"; Assert-Equal (Test-Path -LiteralPath $Fixture.BackupRoot) $backupExists "$Message creates no backup directory"; Assert-TreeEqual (Get-TreeHashes $Fixture.BackupRoot) $backups "$Message creates no backup files"
 }
 
 function Test-PreflightBlockers {
@@ -165,9 +178,10 @@ function Test-OptionalBundleStateAndDrift {
     try {
         Assert-Equal (Invoke-Harness $f Apply).ExitCode 0 'default apply succeeds'; Assert-True (-not (Test-Path -LiteralPath $f.AgentsHome)) 'default apply installs no optional files'
         Assert-Equal (Invoke-Harness $f Apply -IncludeDesignFrontend).ExitCode 0 'opt-in apply succeeds'
-        foreach ($file in Get-OptionalFiles $f.SourceRoot) { Assert-True (Test-Path -LiteralPath (Join-Path $f.AgentsHome $file)) "opt-in installs manifest file $file" }
+        $expectedFiles = Get-OptionalFiles $f.SourceRoot; Assert-StringSetEqual @((Get-TreeHashes $f.AgentsHome).Keys) $expectedFiles 'opt-in installs exactly the manifest-selected files'
         $before = Get-TreeHashes $f.AgentsHome; Assert-Equal (Read-Result (Invoke-Harness $f Check) 'default check after opt-in').status 'current' 'omitted flag preserves opt-in'; Assert-Equal (Invoke-Harness $f Apply).ExitCode 0 'default apply after opt-in succeeds'; Assert-TreeEqual (Get-TreeHashes $f.AgentsHome) $before 'omitted flag does not update/remove opt-in'
         Add-Content -LiteralPath (Join-Path $f.AgentsHome 'skills\joewrks-design-frontend\SKILL.md') -Value 'external drift'; $drift = Get-TreeHashes $f.AgentsHome
+        $check = Invoke-Harness $f Check; Assert-Equal (Read-Result $check 'optional drift check').status 'blocked' 'installed optional drift blocks default check'; Assert-TreeEqual (Get-TreeHashes $f.AgentsHome) $drift 'optional drift check is read-only'
         $run = Invoke-Harness $f Apply; Assert-True ($run.ExitCode -ne 0) 'installed optional drift blocks apply'; Assert-Equal (Read-Result $run 'optional drift').status 'blocked' 'installed optional drift reports blocked'; Assert-TreeEqual (Get-TreeHashes $f.AgentsHome) $drift 'installed optional drift is not overwritten'
         $stateText = [IO.File]::ReadAllText($f.State); $state = $stateText | ConvertFrom-Json
         Assert-True ($stateText -notmatch '(?i)[a-z]:\\') 'state stores no drive letter'; Assert-True ($stateText -notmatch [regex]::Escape([Environment]::GetFolderPath('UserProfile'))) 'state stores no user profile'; Assert-True ($state.PSObject.Properties.Name -contains 'managedBlocks') 'state has block ownership'; Assert-True ($state.PSObject.Properties.Name -contains 'wholeFileTargets') 'state has whole-file ownership'
@@ -185,8 +199,9 @@ function Test-DeterministicRollback {
     $f = New-Fixture
     try {
         . $f.Script
-        $result = Invoke-JoewrksHarnessSync -Apply -CodexHome $f.CodexHome -AgentsHome $f.AgentsHome -BackupRoot $f.BackupRoot -AfterReplace { param($replacement) Write-Bytes $replacement.TargetPath ([Text.Encoding]::UTF8.GetBytes('changed again')); throw 'test concurrent edit' }
-        Assert-Equal $result.status 'failed' 'concurrent callback failure reports failed'; Assert-True (@($result.unresolvedTargets).Count -gt 0) 'changed-again target is unresolved, not overwritten'
+        $changedBytes = [Text.Encoding]::UTF8.GetBytes('changed again'); $changedPathFile = Join-Path $f.Root 'changed-target.txt'
+        $result = Invoke-JoewrksHarnessSync -Apply -CodexHome $f.CodexHome -AgentsHome $f.AgentsHome -BackupRoot $f.BackupRoot -AfterReplace { param($replacement) Write-Bytes $replacement.TargetPath $changedBytes; [IO.File]::WriteAllText($changedPathFile, $replacement.TargetPath); throw 'test concurrent edit' }
+        Assert-Equal $result.status 'failed' 'concurrent callback failure reports failed'; Assert-True (@($result.unresolvedTargets).Count -gt 0) 'changed-again target is unresolved, not overwritten'; Assert-BytesEqual ([IO.File]::ReadAllBytes([IO.File]::ReadAllText($changedPathFile))) $changedBytes 'rollback preserves externally changed bytes'
     } finally { Remove-Fixture $f }
 }
 
