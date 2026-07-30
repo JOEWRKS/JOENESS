@@ -1,0 +1,7 @@
+interface:
+  display_name: "JOEWRKS Project Setup"
+  short_description: "Check or apply an explicit project contract"
+  default_prompt: "Use $joewrks-project-setup only for this explicitly requested project setup."
+
+policy:
+  allow_implicit_invocation: false
