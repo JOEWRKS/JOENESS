@@ -185,6 +185,15 @@ function Get-TreeHashes {
     $hashes
 }
 
+function Get-TreeEntries {
+    param([string] $Root)
+    if (-not (Test-Path -LiteralPath $Root)) { return @() }
+    $entries = @('D:.')
+    $entries += @(Get-ChildItem -LiteralPath $Root -Directory -Recurse | ForEach-Object { 'D:' + $_.FullName.Substring($Root.Length).TrimStart('\') })
+    $entries += @(Get-ChildItem -LiteralPath $Root -File -Recurse | ForEach-Object { 'F:' + $_.FullName.Substring($Root.Length).TrimStart('\') + '=' + (Get-Hash $_.FullName) })
+    @($entries | Sort-Object)
+}
+
 function Assert-TreeEqual {
     param([hashtable] $Actual, [hashtable] $Expected, [string] $Message)
     Assert-Equal (($Actual.GetEnumerator() | Sort-Object Name | ConvertTo-Json -Compress)) (($Expected.GetEnumerator() | Sort-Object Name | ConvertTo-Json -Compress)) $Message
@@ -617,6 +626,63 @@ function Test-PreservedOptionalAfterCoreUpdate {
     } finally { Remove-Fixture $f }
 }
 
+function Test-V1HistoricalTrust {
+    $f = New-Fixture
+    try {
+        Write-V1FixtureState $f
+        $state = Get-Content -Raw -LiteralPath $f.State | ConvertFrom-Json
+        $state.sourceIdentities.commonCore.sha256 = '0' * 64
+        Write-Utf8 $f.State (($state | ConvertTo-Json -Depth 16) + "`n")
+        $before = Get-TreeEntries $f.Root
+        $result = Read-Result (Invoke-Harness $f Check) 'V1 zero Common Core identity'
+        Assert-Equal $result.status 'blocked' 'V1 zero Common Core identity blocks'
+        Assert-True (@($result.blockers).kind -contains 'invalidState') 'V1 zero Common Core identity reports invalidState'
+        Assert-StringSetEqual (Get-TreeEntries $f.Root) $before 'V1 zero Common Core identity check is read-only'
+    } finally { Remove-Fixture $f }
+
+    $f = New-Fixture
+    try {
+        Write-V1FixtureState $f -WithBundle
+        $unrelated = Join-Path $f.AgentsHome 'unrelated.txt'
+        Write-Utf8 $unrelated 'unrelated'
+        $installedManifestPath = Join-Path $f.AgentsHome 'vendor\source-manifest.json'
+        $installedManifest = Get-Content -Raw -LiteralPath $installedManifestPath | ConvertFrom-Json
+        $installedManifest.activeSkills.'joewrks-design-frontend'.files += [pscustomobject] @{
+            localPath = 'unrelated.txt'
+            bytes = ([IO.File]::ReadAllBytes($unrelated)).Length
+            sha256 = Get-Hash $unrelated
+            exactUpstreamCopy = $false
+        }
+        Write-Utf8 $installedManifestPath (($installedManifest | ConvertTo-Json -Depth 100) + "`n")
+        $state = Get-Content -Raw -LiteralPath $f.State | ConvertFrom-Json
+        $state.wholeFileTargets | Add-Member -NotePropertyName 'unrelated.txt' -NotePropertyValue (Get-Hash $unrelated)
+        $state.wholeFileTargets.'vendor/source-manifest.json' = Get-Hash $installedManifestPath
+        $state.sourceIdentities.designFrontend.sha256 = Get-Hash $installedManifestPath
+        Write-Utf8 $f.State (($state | ConvertTo-Json -Depth 16) + "`n")
+        $before = Get-TreeEntries $f.Root
+        $result = Read-Result (Invoke-Harness $f Check) 'V1 unrelated selected file'
+        Assert-Equal $result.status 'blocked' 'V1 unrelated selected file blocks'
+        Assert-True (@($result.blockers).kind -contains 'invalidState') 'V1 unrelated selected file reports invalidState'
+        Assert-StringSetEqual (Get-TreeEntries $f.Root) $before 'V1 unrelated selected file check is read-only'
+    } finally { Remove-Fixture $f }
+
+    $f = New-Fixture
+    try {
+        Write-V1FixtureState $f -WithBundle
+        $installedManifestPath = Join-Path $f.AgentsHome 'vendor\source-manifest.json'
+        $installedManifest = Get-Content -Raw -LiteralPath $installedManifestPath | ConvertFrom-Json
+        $installedManifest.evaluation.current.commonCore.sha256 = '0' * 64
+        Write-Utf8 $installedManifestPath (($installedManifest | ConvertTo-Json -Depth 100) + "`n")
+        $state = Get-Content -Raw -LiteralPath $f.State | ConvertFrom-Json
+        $state.wholeFileTargets.'vendor/source-manifest.json' = Get-Hash $installedManifestPath
+        $state.sourceIdentities.designFrontend.sha256 = Get-Hash $installedManifestPath
+        Write-Utf8 $f.State (($state | ConvertTo-Json -Depth 16) + "`n")
+        $result = Read-Result (Invoke-Harness $f Check) 'V1 installed manifest zero Common Core identity'
+        Assert-Equal $result.status 'blocked' 'V1 installed manifest zero Common Core identity blocks'
+        Assert-True (@($result.blockers).kind -contains 'invalidState') 'V1 installed manifest zero Common Core identity reports invalidState'
+    } finally { Remove-Fixture $f }
+}
+
 function Test-V1StateMigration {
     foreach ($case in @(
         @{ Name = 'core-only'; WithBundle = $false },
@@ -650,7 +716,10 @@ function Test-V1StateMigration {
     $f = New-Fixture
     try {
         Write-V1FixtureState $f
+        [IO.Directory]::CreateDirectory((Join-Path $f.AgentsHome 'keep-empty')) | Out-Null
+        [IO.Directory]::CreateDirectory((Join-Path $f.AgentsHome 'preexisting\child')) | Out-Null
         $beforeTree = @{ codex = Get-TreeHashes $f.CodexHome; agents = Get-TreeHashes $f.AgentsHome }
+        $beforeStructure = @{ codex = Get-TreeEntries $f.CodexHome; agents = Get-TreeEntries $f.AgentsHome }
         $beforeState = [IO.File]::ReadAllBytes($f.State)
         . $f.Script
         $result = Invoke-JoewrksHarnessSync -Apply -CodexHome $f.CodexHome -AgentsHome $f.AgentsHome -BackupRoot $f.BackupRoot -AfterReplace {
@@ -662,6 +731,8 @@ function Test-V1StateMigration {
         Assert-BytesEqual ([IO.File]::ReadAllBytes($f.State)) $beforeState 'target failure leaves exact V1 state bytes'
         Assert-TreeEqual (Get-TreeHashes $f.CodexHome) $beforeTree.codex 'target failure restores the V1 Codex tree'
         Assert-TreeEqual (Get-TreeHashes $f.AgentsHome) $beforeTree.agents 'target failure restores the V1 Agents tree'
+        Assert-StringSetEqual (Get-TreeEntries $f.CodexHome) $beforeStructure.codex 'target failure restores exact V1 Codex directories'
+        Assert-StringSetEqual (Get-TreeEntries $f.AgentsHome) $beforeStructure.agents 'target failure restores exact V1 Agents directories'
     } finally { Remove-Fixture $f }
 
     $f = New-Fixture
@@ -679,6 +750,27 @@ function Test-V1StateMigration {
         Assert-BytesEqual ([IO.File]::ReadAllBytes($f.State)) $beforeState 'exact V1 state bytes return'
         Assert-TreeEqual (Get-TreeHashes $f.CodexHome) $beforeTree.codex 'Codex tree returns to V1'
         Assert-TreeEqual (Get-TreeHashes $f.AgentsHome) $beforeTree.agents 'Agents tree returns to V1'
+    } finally { Remove-Fixture $f }
+}
+
+function Test-CreatedDirectoryRollbackProof {
+    $f = New-Fixture
+    try {
+        Write-V1FixtureState $f
+        $createdParent = Join-Path $f.AgentsHome 'skills\joewrks-design-frontend'
+        $externalPath = Join-Path $createdParent 'external.txt'
+        . $f.Script
+        $result = Invoke-JoewrksHarnessSync -Apply -CodexHome $f.CodexHome -AgentsHome $f.AgentsHome -BackupRoot $f.BackupRoot -AfterReplace {
+            param($replacement)
+            if ($replacement.TargetPath.StartsWith($createdParent, [StringComparison]::OrdinalIgnoreCase)) {
+                Write-Utf8 $externalPath 'external'
+                throw 'external file prevents created-directory cleanup'
+            }
+        }
+        Assert-Equal $result.status 'failed' 'created-directory cleanup failure keeps Task 4 failed status'
+        Assert-Equal $result.rollback.status 'incomplete' 'nonempty created directory makes rollback incomplete'
+        Assert-True (@($result.unresolvedTargets) -contains $createdParent) 'nonempty created directory is reported unresolved'
+        Assert-True (Test-Path -LiteralPath $externalPath -PathType Leaf) 'created-directory cleanup preserves an external file'
     } finally { Remove-Fixture $f }
 }
 
@@ -905,7 +997,9 @@ Test-AgentEncodingAndCoreUpdate
 Test-PreflightBlockers
 Test-ManifestSkillCollisions
 Test-StateTrust
+Test-V1HistoricalTrust
 Test-V1StateMigration
+Test-CreatedDirectoryRollbackProof
 Test-HomeResolutionAndIdentity
 Test-OptionalBundleStateAndDrift
 Test-ConcurrentDisappearanceBeforeDelete

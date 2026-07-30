@@ -222,8 +222,35 @@ function Assert-HarnessFileSnapshot {
     if ($currentHash -cne $Snapshot.Hash) { throw "Target changed after preflight: $Path" }
 }
 
+function New-HarnessTargetDirectory {
+    param([string] $Path, [Collections.Generic.List[string]] $CreatedDirectories)
+    if (Test-Path -LiteralPath $Path) {
+        if (-not (Test-Path -LiteralPath $Path -PathType Container)) { throw "Target parent is not a directory: $Path" }
+        return
+    }
+    $missing = [Collections.Generic.List[string]]::new()
+    $current = [IO.Path]::GetFullPath($Path)
+    while (-not (Test-Path -LiteralPath $current)) {
+        $missing.Add($current)
+        $current = Split-Path -Parent $current
+    }
+    if (-not (Test-Path -LiteralPath $current -PathType Container)) { throw "Target parent is not a directory: $current" }
+    for ($i = $missing.Count - 1; $i -ge 0; $i--) {
+        $directory = $missing[$i]
+        $parent = Split-Path -Parent $directory
+        $temporary = Join-Path $parent ('.joewrks-directory-' + [guid]::NewGuid().ToString('N') + '.tmp')
+        try {
+            [IO.Directory]::CreateDirectory($temporary) | Out-Null
+            [IO.Directory]::Move($temporary, $directory)
+            if ($null -ne $CreatedDirectories) { $CreatedDirectories.Add($directory) }
+        } finally {
+            if (Test-Path -LiteralPath $temporary -PathType Container) { [IO.Directory]::Delete($temporary, $false) }
+        }
+    }
+}
+
 function Set-HarnessFile {
-    param($Operation)
+    param($Operation, [Collections.Generic.List[string]] $CreatedDirectories)
     $temporaryPath = $null
     $tombstonePath = $null
     try {
@@ -243,7 +270,7 @@ function Set-HarnessFile {
             return
         }
         $directory = Split-Path -Parent $Operation.TargetPath
-        [IO.Directory]::CreateDirectory($directory) | Out-Null
+        New-HarnessTargetDirectory $directory $CreatedDirectories
         $temporaryPath = Join-Path $directory ('.' + [IO.Path]::GetFileName($Operation.TargetPath) + '.joewrks-' + [guid]::NewGuid().ToString('N') + '.tmp')
         [IO.File]::WriteAllBytes($temporaryPath, $Operation.DesiredBytes)
         if ((Get-HarnessSha256 ([IO.File]::ReadAllBytes($temporaryPath))) -cne $Operation.AppliedHash) {
@@ -352,6 +379,7 @@ function Invoke-JoewrksHarnessSync {
     $manifestSkillRelativePaths = @{}
     $manifest = $null
     $manifestHash = $null
+    $historicalV1WholeFiles = @{}
     $sourceCore = $null
     $blockHash = $null
     $agentSnapshot = $null
@@ -415,6 +443,15 @@ function Invoke-JoewrksHarnessSync {
             Hash = $manifestHash
             Bytes = $manifestRead.Bytes
         })
+        $historicalDesignSkill = $manifest.activeSkills.PSObject.Properties['joewrks-design-frontend']
+        if ($null -eq $historicalDesignSkill) { throw 'Missing historical V1 design skill source' }
+        $historicalV1Manifest = [pscustomobject] @{
+            activeSkills = [pscustomobject] @{ 'joewrks-design-frontend' = $historicalDesignSkill.Value }
+            sources = $manifest.sources
+        }
+        foreach ($selection in @(Get-HarnessManifestSelections $historicalV1Manifest $sourceRoot)) {
+            $historicalV1WholeFiles[$selection.RelativePath] = $selection.Hash
+        }
     } catch {
         $null = $blockers.Add([pscustomobject] @{ kind = 'sourceIntegrity'; message = $_.Exception.Message })
     }
@@ -466,7 +503,10 @@ function Invoke-JoewrksHarnessSync {
             Assert-HarnessObjectShape $state.sourceIdentities $identityNames 'State sourceIdentities'
             Assert-HarnessObjectShape $state.sourceIdentities.commonCore @('path', 'sha256') 'State commonCore source identity'
             if ([string] $state.sourceIdentities.commonCore.path -cne 'AGENTS.md') { throw 'State commonCore source path is invalid' }
-            $null = Get-HarnessValidSha256 $state.sourceIdentities.commonCore.sha256 'State commonCore source hash'
+            $stateCommonCoreSourceHash = Get-HarnessValidSha256 $state.sourceIdentities.commonCore.sha256 'State commonCore source hash'
+            if ($state.schemaVersion -eq 1 -and ($null -eq $coreEntry -or $stateCommonCoreSourceHash -cne ([string] $coreEntry.sha256).ToLowerInvariant())) {
+                throw 'V1 State commonCore source identity is not historical'
+            }
 
             if ($stateWholeFiles.Count -gt 0) {
                 $installedManifestRelative = 'vendor/source-manifest.json'
@@ -493,12 +533,38 @@ function Invoke-JoewrksHarnessSync {
                 $installedManifest = $installedManifestRead.Text | ConvertFrom-Json
                 $installedCore = $installedManifest.evaluation.current.commonCore
                 if ([string] $installedCore.path -cne 'AGENTS.md') { throw 'Installed manifest Common Core path is invalid' }
-                $null = Get-HarnessValidSha256 $installedCore.sha256 'Installed manifest Common Core hash'
-
-                $expectedWholeFiles = @{}
-                foreach ($selection in @(Get-HarnessManifestSelections $installedManifest $resolvedAgentsHome)) {
-                    $expectedWholeFiles[$selection.RelativePath] = $selection.Hash
+                $installedCoreHash = Get-HarnessValidSha256 $installedCore.sha256 'Installed manifest Common Core hash'
+                if ($state.schemaVersion -eq 1) {
+                    $installedSkillNames = @($installedManifest.activeSkills.PSObject.Properties.Name | Sort-Object -CaseSensitive)
+                    if (($installedSkillNames -join "`n") -cne 'joewrks-design-frontend') {
+                        throw 'V1 installed manifest active skill set is not historical'
+                    }
+                    $installedDesignSkill = $installedManifest.activeSkills.'joewrks-design-frontend'
+                    if ($installedDesignSkill.PSObject.Properties.Name -contains 'activationPolicy') {
+                        throw 'V1 installed manifest design skill has a non-historical activationPolicy'
+                    }
+                    if ($null -eq $coreEntry -or $installedCoreHash -cne ([string] $coreEntry.sha256).ToLowerInvariant()) {
+                        throw 'V1 installed manifest Common Core identity is not historical'
+                    }
                 }
+
+                $installedWholeFiles = @{}
+                foreach ($selection in @(Get-HarnessManifestSelections $installedManifest $resolvedAgentsHome)) {
+                    $installedWholeFiles[$selection.RelativePath] = $selection.Hash
+                }
+                if ($state.schemaVersion -eq 1) {
+                    $installedNames = @($installedWholeFiles.Keys | Sort-Object -CaseSensitive)
+                    $historicalNames = @($historicalV1WholeFiles.Keys | Sort-Object -CaseSensitive)
+                    if (($installedNames -join "`n") -cne ($historicalNames -join "`n")) {
+                        throw 'V1 installed manifest selection is not historical'
+                    }
+                    foreach ($relative in $historicalNames) {
+                        if ($installedWholeFiles[$relative] -cne $historicalV1WholeFiles[$relative]) {
+                            throw "V1 installed manifest target hash is not historical: $relative"
+                        }
+                    }
+                }
+                $expectedWholeFiles = if ($state.schemaVersion -eq 1) { $historicalV1WholeFiles.Clone() } else { $installedWholeFiles }
                 $expectedWholeFiles[$installedManifestRelative] = $stateManifestSourceHash
                 $actualNames = @($stateWholeFiles.Keys | Sort-Object -CaseSensitive)
                 $expectedNames = @($expectedWholeFiles.Keys | Sort-Object -CaseSensitive)
@@ -809,6 +875,7 @@ function Invoke-JoewrksHarnessSync {
     $removed = [Collections.Generic.List[string]]::new()
     $unresolved = [Collections.Generic.List[string]]::new()
     $unresolvedSeen = @{}
+    $createdDirectories = [Collections.Generic.List[string]]::new()
     try {
         [IO.Directory]::CreateDirectory($backupPath) | Out-Null
         foreach ($operation in $operations) {
@@ -823,7 +890,7 @@ function Invoke-JoewrksHarnessSync {
 
         foreach ($operation in $operations) {
             try {
-                Set-HarnessFile $operation
+                Set-HarnessFile $operation $createdDirectories
                 $null = $applied.Add($operation)
                 if ($null -ne $AfterReplace) { & $AfterReplace $operation | Out-Null }
             } catch {
@@ -894,7 +961,7 @@ function Invoke-JoewrksHarnessSync {
                         AppliedHash = $operation.Snapshot.Hash
                         Snapshot = $current
                         Committed = $false
-                    })
+                    }) $createdDirectories
                     $null = $restored.Add($operation.TargetPath)
                 } else {
                     Set-HarnessFile ([pscustomobject] @{
@@ -905,13 +972,31 @@ function Invoke-JoewrksHarnessSync {
                         Snapshot = $current
                         Committed = $false
                         Unresolved = $false
-                    })
+                    }) $createdDirectories
                     $null = $removed.Add($operation.TargetPath)
                 }
             } catch {
                 if (-not $unresolvedSeen.ContainsKey($operation.TargetPath)) {
                     $unresolvedSeen[$operation.TargetPath] = $true
                     $null = $unresolved.Add($operation.TargetPath)
+                }
+            }
+        }
+        for ($i = $createdDirectories.Count - 1; $i -ge 0; $i--) {
+            $directory = $createdDirectories[$i]
+            try {
+                if (-not (Test-Path -LiteralPath $directory)) { continue }
+                if (-not (Test-Path -LiteralPath $directory -PathType Container)) { throw "Created target directory changed type: $directory" }
+                $item = Get-Item -LiteralPath $directory -Force
+                if (($item.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0) { throw "Created target directory became a reparse point: $directory" }
+                if ($null -ne (Get-ChildItem -LiteralPath $directory -Force | Select-Object -First 1)) { throw "Created target directory is not empty: $directory" }
+                [IO.Directory]::Delete($directory, $false)
+                if (Test-Path -LiteralPath $directory) { throw "Created target directory still exists: $directory" }
+                $null = $removed.Add($directory)
+            } catch {
+                if (-not $unresolvedSeen.ContainsKey($directory)) {
+                    $unresolvedSeen[$directory] = $true
+                    $null = $unresolved.Add($directory)
                 }
             }
         }
