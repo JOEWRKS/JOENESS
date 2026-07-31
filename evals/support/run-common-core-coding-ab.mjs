@@ -114,13 +114,19 @@ export const RUN_MODES = Object.freeze([
   "run-v2-coding-ab-r2",
   "run-v1-coding-ab-r2",
 ]);
+export const V9_RUN_MODES = Object.freeze([
+  "run-v1-coding-ab-v9-r1",
+  "run-v2-coding-ab-v9-r1",
+  "run-v2-coding-ab-v9-r2",
+  "run-v1-coding-ab-v9-r2",
+]);
 export const DIAGNOSTIC_MODE = "diagnose-v1-coding-patch-evidence-r1";
-const CLI_MODES = Object.freeze([...RUN_MODES, DIAGNOSTIC_MODE]);
+const CLI_MODES = Object.freeze([...RUN_MODES, ...V9_RUN_MODES, DIAGNOSTIC_MODE]);
 
 const RUN_CONFIGS = Object.freeze({
   ...Object.fromEntries(
-    RUN_MODES.map((mode) => {
-      const match = /^run-(v[12])-coding-ab-r([12])$/u.exec(mode);
+    [...RUN_MODES, ...V9_RUN_MODES].map((mode) => {
+      const match = /^run-(v[12])-coding-ab(?:-v9)?-r([12])$/u.exec(mode);
       return [
         mode,
         Object.freeze({
@@ -860,6 +866,8 @@ export function buildCodexArgs(workspace, finalOutputPath) {
     "gpt-5.6-sol",
     "--sandbox",
     "workspace-write",
+    "-c",
+    'windows.sandbox="unelevated"',
     "-c",
     'approval_policy="never"',
     "-c",

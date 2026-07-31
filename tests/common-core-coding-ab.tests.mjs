@@ -7,6 +7,7 @@ import test from "node:test";
 
 import {
   RUN_MODES,
+  V9_RUN_MODES,
   assertNoCredentialLeak,
   assertNoSymlinks,
   assertSafeImplementationFiles,
@@ -32,6 +33,22 @@ const EXPECTED_MODES = [
   "run-v2-coding-ab-r2",
   "run-v1-coding-ab-r2",
 ];
+
+const EXPECTED_V9_MODES = [
+  "run-v1-coding-ab-v9-r1",
+  "run-v2-coding-ab-v9-r1",
+  "run-v2-coding-ab-v9-r2",
+  "run-v1-coding-ab-v9-r2",
+];
+
+test("v9 coding modes use the unelevated Windows sandbox override", () => {
+  assert.deepEqual(RUN_MODES, EXPECTED_MODES);
+  assert.deepEqual(V9_RUN_MODES, EXPECTED_V9_MODES);
+  for (const mode of EXPECTED_V9_MODES) {
+    assert.deepEqual(parseCli([mode]), { mode });
+  }
+  assert.ok(buildCodexArgs("C:\\fixture", "C:\\evidence\\final.txt").includes('windows.sandbox="unelevated"'));
+});
 
 test("CLI exposes exactly two repetitions per candidate", () => {
   assert.deepEqual(RUN_MODES, EXPECTED_MODES);
