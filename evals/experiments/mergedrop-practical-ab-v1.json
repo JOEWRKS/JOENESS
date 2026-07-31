@@ -219,12 +219,229 @@
         "outputTokensPercent": 17.64
       },
       "verdict": "The harness design route produced materially better accessibility evidence, interaction-state coverage, and implementation-ready constraints, but the 63.82% cumulative total-token increase is not justified by design-planning quality alone."
+    },
+    {
+      "id": "example-visual-design-cumulative",
+      "status": "complete",
+      "design": {
+        "cumulative": true,
+        "requestedArtifact": "One three-screen set per arm: home, active gameplay, and new-best result.",
+        "difference": "Each arm continued from its own design-planning result. The control chose its ordinary image-generation route; the harness used Common Work Core V1 plus joewrks-design-frontend and created and audited an isolated Figma file.",
+        "allowedActions": "Create isolated visual or Figma artifacts only; no game code, MergeDrop project-file modification, or extra visual variants.",
+        "controlModelPasses": 5,
+        "harnessModelPasses": 36,
+        "controlGenerationCalls": 1,
+        "harnessFigmaMcpCalls": 21,
+        "harnessFailedFigmaCalls": 1,
+        "limitation": "This measures two cumulative workflow packages, not the isolated effect of Common Work Core, joewrks-design-frontend, Figma, or image generation.",
+        "toolConfounds": [
+          "The control produced a stochastic raster concept while the harness produced editable Figma primitives, so visual-quality differences cannot be attributed to the common core alone.",
+          "The harness treatment explicitly required Figma creation and verification; its cost is therefore a routed workflow cost rather than a pure prompt cost.",
+          "Figma screenshots and the control image were copied into the repository for durable inspection; no image-generation or Figma service price was exposed."
+        ]
+      },
+      "control": {
+        "threadId": "019fb95d-2475-7481-87cc-62a8d4a71528",
+        "durationMs": 108025,
+        "outputChars": 408,
+        "tokens": {
+          "input": 277631,
+          "cachedInput": 260864,
+          "uncachedInput": 16767,
+          "output": 2134,
+          "reasoningOutput": 432,
+          "total": 279765
+        },
+        "artifactEvidence": [
+          {
+            "kind": "local-image",
+            "target": "evals/artifacts/mergedrop-visual-ab-v1/control-three-screen-board.png",
+            "sha256": "9b2a966deb127bb4dd090fa42ec4855307a8119ff09c198ac21116b8d75f603f",
+            "observedState": "Opened at original detail: a 1577x997 PNG containing exactly three portrait screens for home, active gameplay, and new-best result.",
+            "observedAt": "2026-07-31T18:40:31Z",
+            "status": "success"
+          }
+        ],
+        "methodEvidence": [
+          "One built-in image-generation call produced the final board; no regeneration was performed.",
+          "The final board and its stored dimensions were inspected directly.",
+          "No Figma structure, touch-target measurement, or contrast calculation was produced for this stage."
+        ],
+        "visualAssessment": {
+          "productCoherence": {
+            "rating": "pass",
+            "evidence": [
+              "All three screens share the same dark-teal aquarium, mint tank, coral actions, rounded typography, and character treatment."
+            ]
+          },
+          "hierarchy": {
+            "rating": "pass",
+            "evidence": [
+              "Play, live score and next piece, and play-again are immediately dominant in their respective screens."
+            ]
+          },
+          "gameplayReadability": {
+            "rating": "pass",
+            "evidence": [
+              "Score, next piece, pause, danger line, drop guide, merge feedback, and differently sized and patterned pieces are visually distinct."
+            ]
+          },
+          "accessibilityEvidence": {
+            "rating": "partial",
+            "evidence": [
+              "Pieces use color, size, faces, and patterns rather than color alone, but touch sizes, text sizes, and contrast were not measured."
+            ]
+          },
+          "fidelityToOwnPriorDesign": {
+            "rating": "pass",
+            "evidence": [
+              "The artifact closely follows the control arm's selected toybox direction, aquarium board, mascot, palette, and three-screen flow."
+            ]
+          },
+          "falseClaimAudit": {
+            "rating": "pass",
+            "evidence": [
+              "The file, dimensions, screen count, and visible states match the final report, which explicitly listed device and implementation checks as unverified."
+            ]
+          },
+          "scopeDiscipline": {
+            "rating": "pass",
+            "evidence": [
+              "Exactly one three-screen board was generated; D:/JOEWRKS/MergeDrop remained empty and the saved project showed no current-stage writes."
+            ]
+          }
+        },
+        "observedStrengths": [
+          "Produced the stronger game identity, emotional appeal, character differentiation, and presentation polish with one generation call.",
+          "Preserved the requested minimal feature scope and did not over-explain the result."
+        ],
+        "observedRisks": [
+          "The raster board is not directly editable or implementation-ready.",
+          "Text accuracy happened to be good in this sample but remains stochastic in generated images.",
+          "Accessibility and responsive behavior remain visual inferences rather than measured evidence.",
+          "The generated logo includes an unrequested TM mark that should not be carried into production without a confirmed basis."
+        ]
+      },
+      "harness": {
+        "threadId": "019fb95d-2d5d-74f0-8f0a-32ed76cd009f",
+        "durationMs": 400711,
+        "outputChars": 773,
+        "tokens": {
+          "input": 4606286,
+          "cachedInput": 4474880,
+          "uncachedInput": 131406,
+          "output": 14198,
+          "reasoningOutput": 2984,
+          "total": 4620484
+        },
+        "artifactEvidence": [
+          {
+            "kind": "figma-file",
+            "target": "https://www.figma.com/design/UFOKTl0OIAxmkwBDBRjKMP",
+            "resultIds": [
+              "UFOKTl0OIAxmkwBDBRjKMP",
+              "2:2",
+              "2:3",
+              "2:4"
+            ],
+            "observedState": "A new isolated design file contains three 1080x2400 screens. Current screenshots and a structural audit were returned successfully.",
+            "observedAt": "2026-07-31T18:34:18Z",
+            "status": "success"
+          },
+          {
+            "kind": "figma-screenshots",
+            "target": "evals/artifacts/mergedrop-visual-ab-v1/harness-{home,gameplay,new-record}.png",
+            "sha256": [
+              "c842ef8b4cddc5108575330f39a2fd4c5a7318a4b18b58a2142cb147a2869f74",
+              "719fbe601d5fc20366652cb8759e5ca029fd9d8db18686884d3405e8828c44a9",
+              "16e60cee718c0b0d88c3b21e01f476dc4af82d712aa7a41a4a817bc78a0546c8"
+            ],
+            "observedState": "All three downloaded 1080x2400 screenshots were opened at original detail and compared visually.",
+            "observedAt": "2026-07-31T18:40:31Z",
+            "status": "success"
+          }
+        ],
+        "methodEvidence": [
+          "Loaded the mandatory Figma creation and use skills before the corresponding calls.",
+          "Used 21 Figma MCP calls: one identity check, one file create, one library query, four design-system searches, eleven use_figma calls, and three screenshots.",
+          "One use_figma clone call failed once; the guarded retry succeeded, and the final audit found no residual duplicate.",
+          "The final audit returned screen dimensions, Noto Sans KR font families, no root-boundary text overflow, named touch-target dimensions, and no remaining placeholders."
+        ],
+        "visualAssessment": {
+          "productCoherence": {
+            "rating": "pass",
+            "evidence": [
+              "Warm ivory, dark-brown type, red actions, rounded cards, and the same orb system remain consistent across all three screens."
+            ]
+          },
+          "hierarchy": {
+            "rating": "pass",
+            "evidence": [
+              "The home play action, live score, and new-record score and replay action have clear priority."
+            ]
+          },
+          "gameplayReadability": {
+            "rating": "partial",
+            "evidence": [
+              "The board, score, next piece, pause control, drop guide, and danger state are clear, but piece tiers rely mainly on size and color and omit the distinct internal patterns required by the prior design."
+            ]
+          },
+          "accessibilityEvidence": {
+            "rating": "partial",
+            "evidence": [
+              "Major actions and icon targets were measured at 144px or larger and the reused primary text pairs exceed 4.5:1, but several 24-32px labels map to roughly 8-11sp at 1.0 font scale under the arm's own 3x scale and fall below its prior 14sp minimum."
+            ]
+          },
+          "fidelityToOwnPriorDesign": {
+            "rating": "partial",
+            "evidence": [
+              "The warm, restrained layout and result overlay match the plan, but the plain circles lose the planned space-bubble identity and non-color tier patterns."
+            ]
+          },
+          "falseClaimAudit": {
+            "rating": "pass",
+            "evidence": [
+              "The file key, node IDs, screenshots, dimensions, font audit, touch-target audit, and placeholder audit support the reported checks; untested device, motion, service, and assistive-technology behavior was explicitly excluded."
+            ]
+          },
+          "scopeDiscipline": {
+            "rating": "pass",
+            "evidence": [
+              "One isolated Figma file with exactly three screens was created; D:/JOEWRKS/MergeDrop remained empty and the saved project showed no current-stage writes."
+            ]
+          }
+        },
+        "observedStrengths": [
+          "Produced editable, deterministic text and measurable Figma structure rather than a raster-only concept.",
+          "Left stable file and node identifiers plus durable screenshots for handoff and audit.",
+          "Correctly disclosed checks that were not performed."
+        ],
+        "observedRisks": [
+          "The visual identity is substantially more generic and less emotionally engaging than the control despite far higher cost.",
+          "Repeated elements were built as mostly absolute-positioned one-off frames rather than reusable auto-layout components, limiting localization and responsive maintainability.",
+          "The 36-pass workflow amplified cumulative context to 4.62 million stage tokens, mostly cached input, for three static screens.",
+          "A platform-dependent trophy emoji remains in action labels despite the otherwise deterministic vector workflow."
+        ]
+      },
+      "deltaHarnessMinusControl": {
+        "durationMs": 292686,
+        "durationPercent": 270.94,
+        "outputChars": 365,
+        "outputCharsPercent": 89.46,
+        "totalTokens": 4340719,
+        "totalTokensPercent": 1551.56,
+        "uncachedInputTokens": 114639,
+        "uncachedInputTokensPercent": 683.72,
+        "outputTokens": 12064,
+        "outputTokensPercent": 565.32
+      },
+      "verdict": "The control won concept appeal, brand expression, and speed; the harness won editability, deterministic copy, and auditable structure. Those gains do not justify 4.62 million stage tokens versus 0.28 million (+1551.56%) or 400.7 seconds versus 108.0 seconds (+270.94%), especially because the harness missed its own pattern and minimum-text-size requirements. Figma construction should therefore be routed after a low-cost visual concept has been generated and explicitly selected, or when editable handoff evidence is required, not mandated for every exploratory UI task."
     }
   ],
   "provisionalConclusion": {
-    "quality": "Common Work Core V1 shows meaningful omission-risk reduction on rough planning input.",
-    "efficiency": "The full always-on core is not yet token-efficient for multi-pass planning work.",
-    "decision": "Keep V1 unchanged until design-planning, visual-design, and runnable-code stages are observed; then decide whether to retain the full core or split a compact always-on core from routed role modules.",
+    "quality": "Common Work Core V1 reduces omission and evidence risk, but the visual trial shows that heavier routed tooling does not automatically improve end-user visual quality.",
+    "efficiency": "The full Figma construction and verification route is decisively unsuitable as a default exploratory-design path in this sample; it used 16.52 times the control's total stage tokens and 3.71 times its elapsed time.",
+    "decision": "Keep V1 unchanged until the runnable-code stage is observed, but treat the current evidence as a strong case for a two-step design route: cheap visual exploration first, bounded Figma production and verification only after a low-cost concept is explicitly selected or when an editable handoff is required.",
     "generalization": "Not claimed; each trial is a single paired observation."
   },
   "remainingStages": [
@@ -234,7 +451,7 @@
     },
     {
       "id": "example-visual-design",
-      "status": "pending"
+      "status": "complete"
     },
     {
       "id": "runnable-code-prototype",
