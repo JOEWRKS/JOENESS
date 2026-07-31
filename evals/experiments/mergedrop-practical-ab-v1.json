@@ -139,6 +139,86 @@
         "outputTokensPercent": 23.49
       },
       "verdict": "The harness arm was more operationally responsible and handoff-ready, but its quality gain did not clearly justify the 29.63% total-token increase and broader scope."
+    },
+    {
+      "id": "app-design-planning-cumulative",
+      "status": "complete",
+      "design": {
+        "cumulative": true,
+        "difference": "Each arm continued from its own rough-planning result. The control used the installed Product Design plugin; the harness arm used Common Work Core V1 plus the explicit joewrks-design-frontend router, UI/UX Pro Max search, Apple Design guidance, and a contrast calculation.",
+        "allowedActions": "UI/UX planning only; no Figma, image, code, or file modification.",
+        "controlModelPasses": 4,
+        "harnessModelPasses": 5,
+        "limitation": "The measured token delta includes each arm's different prior planning history and cannot isolate the design router's cost by itself."
+      },
+      "control": {
+        "threadId": "019fb95d-2475-7481-87cc-62a8d4a71528",
+        "durationMs": 81057,
+        "outputChars": 3812,
+        "tokens": {
+          "input": 169228,
+          "cachedInput": 155648,
+          "uncachedInput": 13580,
+          "output": 3050,
+          "reasoningOutput": 286,
+          "total": 172278
+        },
+        "methodEvidence": [
+          "Read the Superpowers brainstorming skill.",
+          "Read and used the installed Product Design plugin context and communication guidance.",
+          "Did not run a color-contrast calculation."
+        ],
+        "observedStrengths": [
+          "Compared three visual directions before selecting one.",
+          "Produced a clear minimal screen tree, direct one-handed flow, responsive constraints, six useful mockup states, and concise motion guidance.",
+          "Kept the result shorter than the harness arm."
+        ],
+        "observedRisks": [
+          "The implied cream label on the coral primary button would be 2.51:1 if the stated default text color is reused, below the stated 4.5:1 target.",
+          "Introduced English-only in-game copy and onboarding game-rule decisions without clearly separating user approval from design recommendation."
+        ]
+      },
+      "harness": {
+        "threadId": "019fb95d-2d5d-74f0-8f0a-32ed76cd009f",
+        "durationMs": 75387,
+        "outputChars": 4400,
+        "tokens": {
+          "input": 278634,
+          "cachedInput": 260864,
+          "uncachedInput": 17770,
+          "output": 3588,
+          "reasoningOutput": 242,
+          "total": 282222
+        },
+        "methodEvidence": [
+          "Read the joewrks-design-frontend skill and Apple Design source.",
+          "Ran four targeted UI/UX Pro Max searches.",
+          "Calculated five proposed foreground/background contrast ratios before reporting them."
+        ],
+        "observedStrengths": [
+          "Specified direct manipulation, touch sizes, safe areas, reduced motion, localization-safe typography, destructive-action confirmation, offline/login states, and system back behavior.",
+          "Verified the stated color pairs at or above 4.5:1 instead of merely claiming accessibility.",
+          "Kept the mockup set to five high-value states and did not enter Figma or implementation."
+        ],
+        "observedRisks": [
+          "Selected a single visual direction without presenting alternatives as clearly as the control arm.",
+          "Carried music and several detailed state requirements forward despite their uncertain first-release priority.",
+          "The extra routed sources and one additional model pass materially amplified cumulative token usage."
+        ]
+      },
+      "deltaHarnessMinusControl": {
+        "durationMs": -5670,
+        "durationPercent": -7.0,
+        "outputChars": 588,
+        "outputCharsPercent": 15.42,
+        "totalTokens": 109944,
+        "totalTokensPercent": 63.82,
+        "uncachedInputTokens": 4190,
+        "uncachedInputTokensPercent": 30.85,
+        "outputTokens": 538,
+        "outputTokensPercent": 17.64
+      },
+      "verdict": "The harness design route produced materially better accessibility evidence, interaction-state coverage, and implementation-ready constraints, but the 63.82% cumulative total-token increase is not justified by design-planning quality alone."
     }
   ],
   "provisionalConclusion": {
@@ -150,7 +230,7 @@
   "remainingStages": [
     {
       "id": "app-design-planning",
-      "status": "pending"
+      "status": "complete"
     },
     {
       "id": "example-visual-design",
