@@ -186,12 +186,15 @@ export function parseCli(argv) {
   if (
     argv.length === 1 &&
     (argv[0] === "smoke" ||
-      Object.hasOwn(LIVE_RUN_CONFIGURATIONS, argv[0]))
+      liveRunModes().includes(argv[0]))
   ) {
     return { mode: argv[0] };
   }
   throw new Error(
-    "usage: node evals/support/collect-codex-app-server.mjs <smoke|run-control-v7|run-core-v7>",
+    `usage: node evals/support/collect-codex-app-server.mjs <${[
+      "smoke",
+      ...liveRunModes(),
+    ].join("|")}>`,
   );
 }
 
@@ -4735,7 +4738,7 @@ function caseEvidenceIsComplete(
     ? messageDeltas.map((event) => event.messageDelta?.itemId)
     : [];
   const messageDeltaEvidenceComplete =
-    !["v3", "v4", "v5", "v6", "v7"].includes(
+    !["v3", "v4", "v5", "v6", "v7", "v8"].includes(
       schema3Profile?.generation,
     ) ||
     (Array.isArray(events) &&
@@ -4986,7 +4989,7 @@ function caseEvidenceIsComplete(
           frozenIdentity.caseDefinitions[candidate.id],
           {
             stableKeyRequirement:
-              ["v5", "v6", "v7"].includes(
+              ["v5", "v6", "v7", "v8"].includes(
                 schema3Profile?.generation,
               )
                 ? "all"
@@ -5040,7 +5043,7 @@ function caseEvidenceIsComplete(
   const recoveryRequest = dynamicToolRequests?.[1];
   const recoveryIsSafe =
     (recoveryRequest?.operation === "ReadState" &&
-      (["v5", "v6", "v7"].includes(schema3Profile?.generation)
+      (["v5", "v6", "v7", "v8"].includes(schema3Profile?.generation)
         ? recoveryRequest.idempotencyKey === EXPECTED_IDEMPOTENCY_KEY
         : [null, EXPECTED_IDEMPOTENCY_KEY].includes(
             recoveryRequest.idempotencyKey,
@@ -5573,19 +5576,58 @@ function jsonPointerExists(root, pointer) {
 }
 
 function schema3ProfileUsesExplicitLocal(profile) {
-  return ["v2", "v3", "v4", "v5", "v6", "v7"].includes(
+  return ["v2", "v3", "v4", "v5", "v6", "v7", "v8"].includes(
     profile?.generation,
   );
 }
 
 function schema3ProfileCandidateRelativePath(profile) {
+  if (typeof profile?.candidateRelativePath === "string") {
+    return profile.candidateRelativePath;
+  }
   return ["v6", "v7"].includes(profile?.generation)
     ? "evals/candidates/common-core-v2.md"
     : "evals/candidates/common-core-v1.md";
 }
 
 function schema3ProfileRequiresEmptyControlInstructions(profile) {
-  return profile?.generation === "v7";
+  return ["v7", "v8"].includes(profile?.generation);
+}
+
+function schema3ProfileRequiresCandidateMatchedControl(profile) {
+  return profile?.generation !== "v8";
+}
+
+function buildAbV8SchemaProfiles() {
+  const controlRunId = "no-harness-control-ab-v8";
+  const baselinePath = `evals/p0/${controlRunId}.json`;
+  return Object.fromEntries([
+    [
+      controlRunId,
+      Object.freeze({
+        generation: "v8",
+        condition: "control",
+        controlRunId,
+        baselinePath: null,
+        candidateRelativePath:
+          "evals/candidates/common-core-v1.md",
+      }),
+    ],
+    ...["v1", "v2"].flatMap((version) => {
+      const candidateRelativePath =
+        `evals/candidates/common-core-${version}.md`;
+      return Array.from({ length: 4 }, (_, index) => [
+        `common-core-${version}-ab-v8-r${index + 1}`,
+        Object.freeze({
+          generation: "v8",
+          condition: "core",
+          controlRunId,
+          baselinePath,
+          candidateRelativePath,
+        }),
+      ]);
+    }),
+  ]);
 }
 
 const SCHEMA3_RUN_PROFILES = Object.freeze({
@@ -5673,6 +5715,7 @@ const SCHEMA3_RUN_PROFILES = Object.freeze({
     controlRunId: "no-harness-control-v7",
     baselinePath: "evals/p0/no-harness-control-v7.json",
   }),
+  ...buildAbV8SchemaProfiles(),
 });
 
 function validateSchema3Evaluation(result) {
@@ -6264,6 +6307,7 @@ export function validateResult(
   if (
     schema3ProfileUsesExplicitLocal(schema3Profile) &&
     condition === "core" &&
+    schema3ProfileRequiresCandidateMatchedControl(schema3Profile) &&
     stableStringify(
       result.evidence.evaluation.candidateReference,
     ) !==
@@ -6640,6 +6684,84 @@ const CORE_V1_CANDIDATE_RELATIVE_PATH =
   "evals/candidates/common-core-v1.md";
 const CORE_CANDIDATE_RELATIVE_PATH =
   "evals/candidates/common-core-v2.md";
+const CORE_V1_CANDIDATE_SHA256 =
+  "5aebc74bc795891c43bf785d9b34ae4d35d4a40bf46eddef3f6246d75919a495";
+const CORE_V2_CANDIDATE_SHA256 =
+  "a17e6f056fdf89373c3e726b326922241fc76f196c6f576028ded2b687912d3f";
+function buildAbV8RunConfigurations() {
+  const controlRunId = "no-harness-control-ab-v8";
+  const controlResultRelativePath =
+    `evals/p0/${controlRunId}.json`;
+  const controlResultPath = path.join(
+    REPOSITORY_ROOT,
+    ...controlResultRelativePath.split("/"),
+  );
+  return Object.fromEntries([
+    [
+      "run-control-ab-v8",
+      Object.freeze({
+        mode: "run-control-ab-v8",
+        runId: controlRunId,
+        resultRelativePath: controlResultRelativePath,
+        resultPath: controlResultPath,
+        caseIds: FULL_CASE_IDS,
+        instructionCondition: "none",
+        baselineRelativePath: null,
+        baselinePath: null,
+        baselineRunId: null,
+        candidateRelativePath: CORE_V1_CANDIDATE_RELATIVE_PATH,
+        candidatePath: path.join(
+          REPOSITORY_ROOT,
+          ...CORE_V1_CANDIDATE_RELATIVE_PATH.split("/"),
+        ),
+        expectedCandidateSha256: CORE_V1_CANDIDATE_SHA256,
+      }),
+    ],
+    ...["v1", "v2"].flatMap((version) => {
+      const candidateRelativePath =
+        version === "v1"
+          ? CORE_V1_CANDIDATE_RELATIVE_PATH
+          : CORE_CANDIDATE_RELATIVE_PATH;
+      const expectedCandidateSha256 =
+        version === "v1"
+          ? CORE_V1_CANDIDATE_SHA256
+          : CORE_V2_CANDIDATE_SHA256;
+      const candidatePath = path.join(
+        REPOSITORY_ROOT,
+        ...candidateRelativePath.split("/"),
+      );
+      return Array.from({ length: 4 }, (_, index) => {
+        const repetition = index + 1;
+        const mode =
+          `run-core-${version}-ab-v8-r${repetition}`;
+        const runId =
+          `common-core-${version}-ab-v8-r${repetition}`;
+        const resultRelativePath = `evals/p0/${runId}.json`;
+        return [
+          mode,
+          Object.freeze({
+            mode,
+            runId,
+            resultRelativePath,
+            resultPath: path.join(
+              REPOSITORY_ROOT,
+              ...resultRelativePath.split("/"),
+            ),
+            caseIds: FULL_CASE_IDS,
+            instructionCondition: "common-core",
+            baselineRelativePath: controlResultRelativePath,
+            baselinePath: controlResultPath,
+            baselineRunId: controlRunId,
+            candidateRelativePath,
+            candidatePath,
+            expectedCandidateSha256,
+          }),
+        ];
+      });
+    }),
+  ]);
+}
+const AB_V8_RUN_CONFIGURATIONS = buildAbV8RunConfigurations();
 const LIVE_RUN_CONFIGURATIONS = Object.freeze({
   "run-control-v7": Object.freeze({
     mode: "run-control-v7",
@@ -6682,7 +6804,30 @@ const LIVE_RUN_CONFIGURATIONS = Object.freeze({
       ...CORE_CANDIDATE_RELATIVE_PATH.split("/"),
     ),
   }),
+  ...AB_V8_RUN_CONFIGURATIONS,
 });
+const LIVE_RUN_MODES = Object.freeze([
+  "run-control-v7",
+  "run-core-v7",
+  "run-control-ab-v8",
+  "run-core-v1-ab-v8-r1",
+  "run-core-v1-ab-v8-r2",
+  "run-core-v1-ab-v8-r3",
+  "run-core-v1-ab-v8-r4",
+  "run-core-v2-ab-v8-r1",
+  "run-core-v2-ab-v8-r2",
+  "run-core-v2-ab-v8-r3",
+  "run-core-v2-ab-v8-r4",
+]);
+export function liveRunModes() {
+  if (
+    stableStringify(Object.keys(LIVE_RUN_CONFIGURATIONS)) !==
+    stableStringify(LIVE_RUN_MODES)
+  ) {
+    throw new Error("live run configuration allowlist drifted");
+  }
+  return [...LIVE_RUN_MODES];
+}
 const VERIFIED_SOURCE_PATHS = [
   COLLECTOR_RELATIVE_PATH,
   CASES_RELATIVE_PATH,
@@ -6778,7 +6923,9 @@ export function assertEvaluationGateSnapshot(
   if (
     configuration !== expected ||
     !gatePathIsAbsent(snapshot?.result) ||
-    !gatePathIsAbsent(snapshot?.rootInstruction)
+    !gatePathIsAbsent(snapshot?.rootInstruction) ||
+    !Array.isArray(snapshot?.repository?.status) ||
+    snapshot.repository.status.length !== 0
   ) {
     throw new Error("execution gate found an active or invalid run input");
   }
@@ -6792,6 +6939,12 @@ export function assertEvaluationGateSnapshot(
       throw new Error("execution gate requires a clean tracked candidate");
     }
     const candidate = validateCoreCandidate(snapshot.candidate.bytes);
+    if (
+      typeof configuration.expectedCandidateSha256 === "string" &&
+      candidate.sha256 !== configuration.expectedCandidateSha256
+    ) {
+      throw new Error("execution gate rejected the frozen candidate");
+    }
     return {
       baselineBytes: null,
       candidateBytes: snapshot.candidate.bytes,
@@ -6822,6 +6975,12 @@ export function assertEvaluationGateSnapshot(
     throw new Error("execution gate rejected Core input", { cause: error });
   }
   if (
+    typeof configuration.expectedCandidateSha256 === "string" &&
+    candidate.sha256 !== configuration.expectedCandidateSha256
+  ) {
+    throw new Error("execution gate rejected the frozen candidate");
+  }
+  if (
     baseline?.schemaVersion !== 3 ||
     baseline.runId !== configuration.baselineRunId ||
     baseline.evidence?.evaluation?.condition !== "control" ||
@@ -6840,6 +6999,9 @@ export function assertEvaluationGateSnapshot(
     sha256: candidate.sha256,
   };
   if (
+    schema3ProfileRequiresCandidateMatchedControl(
+      SCHEMA3_RUN_PROFILES[configuration.runId],
+    ) &&
     stableStringify(candidateReference) !==
     stableStringify(
       baseline.evidence.evaluation.candidateReference,
@@ -7278,6 +7440,7 @@ async function captureGatePath(absolutePath, relativePath = null) {
 
 export async function captureExecutionGate(configuration = null) {
   const verifiedSources = await captureVerifiedSources();
+  const repository = await captureRepositoryState();
   let evaluation = null;
   if (configuration !== null) {
     const snapshot = {
@@ -7304,14 +7467,14 @@ export async function captureExecutionGate(configuration = null) {
         gitBlobs: verifiedSources.gitBlobs,
         sha256: verifiedSources.sha256ByPath,
       },
+      repository,
     };
     evaluation = assertEvaluationGateSnapshot(
       configuration,
       snapshot,
     );
   }
-  const [repository, config, p0] = await Promise.all([
-    captureRepositoryState(),
+  const [config, p0] = await Promise.all([
     captureConfigState(),
     runP0Contract(verifiedSources.snapshots),
   ]);

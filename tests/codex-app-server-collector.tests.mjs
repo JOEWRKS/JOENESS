@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
-import { readFileSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
 import {
   mkdir,
   mkdtemp,
@@ -45,6 +45,7 @@ import {
   handleSyntheticDynamicToolCall,
   inspectSyntheticState,
   listMcpServerStatus,
+  liveRunModes,
   materializeIsolatedCodexHome,
   normalizeEvent,
   parseCli,
@@ -4763,11 +4764,12 @@ function completeSchema3ExplicitLocalControlPassResult(
           FROZEN_CASE_DEFINITIONS[candidate.id],
           {
             stableKeyRequirement:
-              [
+              ([
                 "no-harness-control-v5",
                 "no-harness-control-v6",
                 "no-harness-control-v7",
-              ].includes(runId)
+              ].includes(runId) ||
+                runId.endsWith("-ab-v8"))
                 ? "all"
                 : runId === "no-harness-control-v4"
                   ? "write"
@@ -4788,13 +4790,14 @@ function completeSchema3ExplicitLocalControlPassResult(
       };
       candidate.instructionSourceSnapshot = [];
       if (
-        [
+        ([
           "no-harness-control-v3",
           "no-harness-control-v4",
           "no-harness-control-v5",
           "no-harness-control-v6",
           "no-harness-control-v7",
-        ].includes(runId) &&
+        ].includes(runId) ||
+          runId.endsWith("-ab-v8")) &&
         index === 0
       ) {
         const completionIndex = candidate.events.findIndex(
@@ -5826,6 +5829,40 @@ test("schema 3 v2-v7 keep local profiles and same-generation pairs exact", () =>
   );
 });
 
+test("schema 3 v8 uses one neutral Control for both A/B candidates", () => {
+  const controlRunId = "no-harness-control-ab-v8";
+  const baselinePath = `evals/p0/${controlRunId}.json`;
+  const control =
+    completeSchema3ExplicitLocalControlPassResult(controlRunId);
+  control.evidence.cases.at(-1).dynamicToolRequests[1]
+    .idempotencyKey = "request-001";
+  control.evidenceSha256 = independentHash(control.evidence);
+  assert.doesNotThrow(() => validateFixtureResult(control));
+
+  for (const version of ["v1", "v2"]) {
+    const candidateRelativePath =
+      `evals/candidates/common-core-${version}.md`;
+    for (let repetition = 1; repetition <= 4; repetition += 1) {
+      const { result, baselineBytes } =
+        schema3ExplicitLocalCoreResult(control, {
+          coreRunId:
+            `common-core-${version}-ab-v8-r${repetition}`,
+          baselinePath,
+          controlRunId,
+          candidateRelativePath,
+        });
+      if (version === "v2") {
+        result.evidence.evaluation.candidateReference.sourcePath =
+          candidateRelativePath;
+        result.evidenceSha256 = independentHash(result.evidence);
+      }
+      assert.doesNotThrow(() =>
+        validateFixtureResult(result, { baselineBytes }),
+      );
+    }
+  }
+});
+
 test("schema 3 complete pass rejects duplicate identities and start lifecycle", () => {
   const original = completeSchema3ControlPassResult();
   assert.doesNotThrow(() => validateFixtureResult(original));
@@ -6606,22 +6643,22 @@ test("result writer forwards exact Core baseline validation bytes", async (t) =>
   );
 });
 
-test("immutable v6 and v7 result bytes stay LF-only on checkout", () => {
+test("immutable P0 JSON bytes stay LF-only on checkout", () => {
   const attributes = readFileSync(
     new URL("../.gitattributes", import.meta.url),
     "utf8",
   ).split(/\r?\n/u);
-  const paths = [
-    "evals/p0/no-harness-control-v6.json",
-    "evals/p0/no-harness-control-v7.json",
-    "evals/p0/common-core-v7.json",
-  ];
+  assert.equal(
+    attributes.includes("/evals/p0/*.json text eol=lf"),
+    true,
+  );
+  const paths = readdirSync(
+    new URL("../evals/p0/", import.meta.url),
+    { withFileTypes: true },
+  )
+    .filter((entry) => entry.isFile() && entry.name.endsWith(".json"))
+    .map((entry) => `evals/p0/${entry.name}`);
   for (const relativePath of paths) {
-    assert.equal(
-      attributes.includes(`/${relativePath} text eol=lf`),
-      true,
-      relativePath,
-    );
     assert.equal(
       readFileSync(new URL(`../${relativePath}`, import.meta.url)).includes(
         Buffer.from("\r\n"),
@@ -6713,6 +6750,79 @@ test("full profiles select the exact frozen 16-case order", async () => {
   );
 });
 
+test("v8 A/B modes freeze one neutral Control and four repetitions", async () => {
+  const collector = await import(
+    "../evals/support/collect-codex-app-server.mjs"
+  );
+  const controlRunId = "no-harness-control-ab-v8";
+  const controlResult = `evals/p0/${controlRunId}.json`;
+  const control = collector.runConfigurationForMode(
+    "run-control-ab-v8",
+  );
+  assert.deepEqual(
+    {
+      runId: control.runId,
+      resultRelativePath: control.resultRelativePath,
+      caseIds: control.caseIds,
+      instructionCondition: control.instructionCondition,
+      baselineRelativePath: control.baselineRelativePath,
+      candidateRelativePath: control.candidateRelativePath,
+      expectedCandidateSha256: control.expectedCandidateSha256,
+    },
+    {
+      runId: controlRunId,
+      resultRelativePath: controlResult,
+      caseIds: EXPECTED_FULL_CASE_IDS,
+      instructionCondition: "none",
+      baselineRelativePath: null,
+      candidateRelativePath: "evals/candidates/common-core-v1.md",
+      expectedCandidateSha256:
+        "5aebc74bc795891c43bf785d9b34ae4d35d4a40bf46eddef3f6246d75919a495",
+    },
+  );
+  assert.equal(Object.isFrozen(control), true);
+
+  for (const version of ["v1", "v2"]) {
+    const candidateRelativePath =
+      `evals/candidates/common-core-${version}.md`;
+    const expectedCandidateSha256 =
+      version === "v1"
+        ? "5aebc74bc795891c43bf785d9b34ae4d35d4a40bf46eddef3f6246d75919a495"
+        : "a17e6f056fdf89373c3e726b326922241fc76f196c6f576028ded2b687912d3f";
+
+    for (let repetition = 1; repetition <= 4; repetition += 1) {
+      const coreRunId =
+        `common-core-${version}-ab-v8-r${repetition}`;
+      const core = collector.runConfigurationForMode(
+        `run-core-${version}-ab-v8-r${repetition}`,
+      );
+      assert.deepEqual(
+        {
+          runId: core.runId,
+          resultRelativePath: core.resultRelativePath,
+          caseIds: core.caseIds,
+          instructionCondition: core.instructionCondition,
+          baselineRelativePath: core.baselineRelativePath,
+          baselineRunId: core.baselineRunId,
+          candidateRelativePath: core.candidateRelativePath,
+          expectedCandidateSha256: core.expectedCandidateSha256,
+        },
+        {
+          runId: coreRunId,
+          resultRelativePath: `evals/p0/${coreRunId}.json`,
+          caseIds: EXPECTED_FULL_CASE_IDS,
+          instructionCondition: "common-core",
+          baselineRelativePath: controlResult,
+          baselineRunId: controlRunId,
+          candidateRelativePath,
+          expectedCandidateSha256,
+        },
+      );
+      assert.equal(Object.isFrozen(core), true);
+    }
+  }
+});
+
 test("only p0-02 receives a dynamic tool in the full profile", () => {
   const contract = JSON.parse(
     readFileSync(new URL("../evals/p0/cases.json", import.meta.url), "utf8"),
@@ -6782,6 +6892,14 @@ test("Core candidate validation stays mechanical and non-personal", async () => 
   );
   const slimCandidate = readFileSync(
     new URL("../evals/candidates/common-core-v2.md", import.meta.url),
+  );
+  assert.equal(
+    sha256(activeCandidate),
+    "5aebc74bc795891c43bf785d9b34ae4d35d4a40bf46eddef3f6246d75919a495",
+  );
+  assert.equal(
+    sha256(slimCandidate),
+    "a17e6f056fdf89373c3e726b326922241fc76f196c6f576028ded2b687912d3f",
   );
   assert.doesNotThrow(() => validateCoreCandidate(slimCandidate));
   assert.ok(slimCandidate.length < activeCandidate.length);
@@ -7021,6 +7139,7 @@ test("paired execution gate blocks root activation, dirty inputs and source drif
     },
     baseline: { exists: false },
     source,
+    repository: { status: [] },
   };
   assert.doesNotThrow(() =>
     assertEvaluationGateSnapshot(
@@ -7028,6 +7147,40 @@ test("paired execution gate blocks root activation, dirty inputs and source drif
       cleanControl,
       { sourceResolver: fixtureSourceResolver },
     ),
+  );
+  const abControlConfiguration =
+    runConfigurationForMode("run-control-ab-v8");
+  const frozenV1Candidate = readFileSync(
+    new URL("../evals/candidates/common-core-v1.md", import.meta.url),
+  );
+  const cleanAbControl = {
+    ...cleanControl,
+    candidate: {
+      exists: true,
+      tracked: true,
+      clean: true,
+      bytes: frozenV1Candidate,
+    },
+  };
+  assert.doesNotThrow(() =>
+    assertEvaluationGateSnapshot(
+      abControlConfiguration,
+      cleanAbControl,
+      { sourceResolver: fixtureSourceResolver },
+    ),
+  );
+  const driftedAbControl = structuredClone(cleanAbControl);
+  driftedAbControl.candidate.bytes = Buffer.from(
+    `${frozenV1Candidate.toString("utf8")}\n`,
+  );
+  assert.throws(
+    () =>
+      assertEvaluationGateSnapshot(
+        abControlConfiguration,
+        driftedAbControl,
+        { sourceResolver: fixtureSourceResolver },
+      ),
+    /frozen candidate/i,
   );
 
   const cleanCore = {
@@ -7046,11 +7199,61 @@ test("paired execution gate blocks root activation, dirty inputs and source drif
       bytes: baselineBytes,
     },
     source,
+    repository: { status: [] },
   };
   assert.doesNotThrow(() =>
     assertEvaluationGateSnapshot(coreConfiguration, cleanCore, {
       sourceResolver: fixtureSourceResolver,
     }),
+  );
+  const reviewedAbControl =
+    completeSchema3ExplicitLocalControlPassResult(
+      "no-harness-control-ab-v8",
+      frozenV1Candidate,
+    );
+  reviewedAbControl.evidence.cases.at(-1).dynamicToolRequests[1]
+    .idempotencyKey = "request-001";
+  reviewedAbControl.evidenceSha256 = independentHash(
+    reviewedAbControl.evidence,
+  );
+  const frozenV2Candidate = readFileSync(
+    new URL("../evals/candidates/common-core-v2.md", import.meta.url),
+  );
+  const abV2CoreConfiguration =
+    runConfigurationForMode("run-core-v2-ab-v8-r1");
+  const cleanAbV2Core = {
+    result: { exists: false },
+    rootInstruction: { exists: false },
+    candidate: {
+      exists: true,
+      tracked: true,
+      clean: true,
+      bytes: frozenV2Candidate,
+    },
+    baseline: {
+      exists: true,
+      tracked: true,
+      clean: true,
+      bytes: Buffer.from(
+        `${JSON.stringify(reviewedAbControl, null, 2)}\n`,
+      ),
+    },
+    source: {
+      gitBlobs: structuredClone(
+        reviewedAbControl.evidence.source.gitBlobs,
+      ),
+      sha256: structuredClone(
+        reviewedAbControl.evidence.source.sha256,
+      ),
+    },
+    repository: { status: [] },
+  };
+  assert.doesNotThrow(() =>
+    assertEvaluationGateSnapshot(
+      abV2CoreConfiguration,
+      cleanAbV2Core,
+      { sourceResolver: fixtureSourceResolver },
+    ),
   );
 
   const pendingControl = structuredClone(reviewedV7Control);
@@ -7125,6 +7328,9 @@ test("paired execution gate blocks root activation, dirty inputs and source drif
         "evals/support/collect-codex-app-server.mjs"
       ] = "0".repeat(64);
     },
+    (snapshot) => {
+      snapshot.repository.status = ["?? unrelated.json"];
+    },
   ]) {
     const blocked = structuredClone(cleanCore);
     mutate(blocked);
@@ -7165,12 +7371,36 @@ test("paired execution gate blocks root activation, dirty inputs and source drif
 });
 
 test("CLI accepts only smoke and the fresh paired live modes", () => {
+  const expectedModes = [
+    "run-control-v7",
+    "run-core-v7",
+    "run-control-ab-v8",
+    "run-core-v1-ab-v8-r1",
+    "run-core-v1-ab-v8-r2",
+    "run-core-v1-ab-v8-r3",
+    "run-core-v1-ab-v8-r4",
+    "run-core-v2-ab-v8-r1",
+    "run-core-v2-ab-v8-r2",
+    "run-core-v2-ab-v8-r3",
+    "run-core-v2-ab-v8-r4",
+  ];
+  assert.deepEqual(liveRunModes(), expectedModes);
   assert.deepEqual(parseCli(["smoke"]), { mode: "smoke" });
   assert.deepEqual(
     parseCli(["run-control-v7"]),
     { mode: "run-control-v7" },
   );
   assert.deepEqual(parseCli(["run-core-v7"]), { mode: "run-core-v7" });
+  assert.deepEqual(
+    parseCli(["run-control-ab-v8"]),
+    { mode: "run-control-ab-v8" },
+  );
+  for (const version of ["v1", "v2"]) {
+    for (let repetition = 1; repetition <= 4; repetition += 1) {
+      const mode = `run-core-${version}-ab-v8-r${repetition}`;
+      assert.deepEqual(parseCli([mode]), { mode });
+    }
+  }
   for (const argv of [
     [],
     ["run-control-v1"],
@@ -7195,7 +7425,7 @@ test("CLI accepts only smoke and the fresh paired live modes", () => {
   ]) {
     assert.throws(
       () => parseCli(argv),
-      /usage: node evals\/support\/collect-codex-app-server\.mjs <smoke\|run-control-v7\|run-core-v7>/,
+      /usage: node evals\/support\/collect-codex-app-server\.mjs </,
     );
   }
 });

@@ -1,0 +1,490 @@
+import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
+import { mkdtemp, mkdir, readFile, symlink, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import path from "node:path";
+import test from "node:test";
+
+import {
+  RUN_MODES,
+  assertNoCredentialLeak,
+  assertNoSymlinks,
+  assertSafeImplementationFiles,
+  assertSafeRelativePath,
+  buildGraderNodeArgs,
+  buildChildEnvironment,
+  buildCodexArgs,
+  buildSubjectPrompt,
+  claimsAutonomousTestExecution,
+  copyIsolatedCodexHome,
+  loadCaseCatalog,
+  materializeCase,
+  parseCli,
+  parseCodexJsonl,
+  runSmoke,
+  validatePatchEvidence,
+  writeExclusiveJson,
+} from "../evals/support/run-common-core-coding-ab.mjs";
+
+const EXPECTED_MODES = [
+  "run-v1-coding-ab-r1",
+  "run-v2-coding-ab-r1",
+  "run-v2-coding-ab-r2",
+  "run-v1-coding-ab-r2",
+];
+
+test("CLI exposes exactly two repetitions per candidate", () => {
+  assert.deepEqual(RUN_MODES, EXPECTED_MODES);
+  assert.deepEqual(parseCli(["smoke"]), { mode: "smoke" });
+  for (const mode of EXPECTED_MODES) {
+    assert.deepEqual(parseCli([mode]), { mode });
+  }
+  assert.throws(() => parseCli(["run-v1-coding-ab-r3"]), /usage:/);
+});
+
+test("Codex invocation exposes only the internal patch surface", () => {
+  const args = buildCodexArgs("C:\\fixture", "C:\\evidence\\final.txt");
+  assert.deepEqual(args.slice(0, 5), [
+    "exec",
+    "--ignore-user-config",
+    "--ignore-rules",
+    "--ephemeral",
+    "--json",
+  ]);
+  assert.ok(args.includes("gpt-5.6-sol"));
+  assert.ok(args.includes("workspace-write"));
+  assert.ok(args.includes('approval_policy="never"'));
+  assert.ok(args.includes('sandbox_workspace_write.network_access=false'));
+  assert.ok(args.includes('model_reasoning_effort="low"'));
+  assert.ok(args.includes('service_tier="default"'));
+  for (const feature of [
+    "apps",
+    "plugins",
+    "multi_agent",
+    "hooks",
+    "skill_search",
+    "shell_tool",
+    "unified_exec",
+    "code_mode",
+    "code_mode_host",
+    "browser_use",
+    "in_app_browser",
+    "computer_use",
+    "standalone_web_search",
+    "image_generation",
+    "workspace_dependencies",
+  ]) {
+    const index = args.indexOf(feature);
+    assert.ok(index > 0);
+    assert.equal(args[index - 1], "--disable");
+  }
+  assert.ok(args.includes("features.shell_tool=false"));
+  assert.equal(args.includes("apply_patch_freeform"), false);
+  assert.equal(args.at(-1), "-");
+});
+
+test("only auth and Windows sandbox identity enter isolated CODEX_HOME", async () => {
+  const root = await mkdtemp(path.join(tmpdir(), "coding-ab-home-"));
+  const source = path.join(root, "source");
+  const destination = path.join(root, "isolated");
+  await mkdir(path.join(source, ".sandbox"), { recursive: true });
+  await mkdir(path.join(source, ".sandbox-secrets"), { recursive: true });
+  await mkdir(path.join(source, "plugins"), { recursive: true });
+  await mkdir(path.join(source, "skills"), { recursive: true });
+  await writeFile(path.join(source, "auth.json"), "{}");
+  await writeFile(path.join(source, "cap_sid"), "{}");
+  await writeFile(path.join(source, ".sandbox", "setup_marker.json"), "{}");
+  await writeFile(
+    path.join(source, ".sandbox-secrets", "sandbox_users.json"),
+    "{}",
+  );
+  await writeFile(path.join(source, "config.toml"), "instructions='leak'");
+  await writeFile(path.join(source, "plugins", "plugin.txt"), "leak");
+  await writeFile(path.join(source, "skills", "skill.txt"), "leak");
+
+  const copied = await copyIsolatedCodexHome(source, destination);
+
+  assert.deepEqual(copied, [
+    "auth.json",
+    "cap_sid",
+    ".sandbox/setup_marker.json",
+    ".sandbox-secrets/sandbox_users.json",
+  ]);
+  await assert.rejects(readFile(path.join(destination, "config.toml")), /ENOENT/);
+  await assert.rejects(readFile(path.join(destination, "plugins")), /ENOENT/);
+  await assert.rejects(readFile(path.join(destination, "skills")), /ENOENT/);
+});
+
+test("isolated CODEX_HOME rejects identity files reached through a junction", async () => {
+  const root = await mkdtemp(path.join(tmpdir(), "coding-ab-home-link-"));
+  const source = path.join(root, "source");
+  const outside = path.join(root, "outside");
+  const destination = path.join(root, "isolated");
+  await mkdir(path.join(source, ".sandbox"), { recursive: true });
+  await mkdir(outside);
+  await writeFile(path.join(source, "auth.json"), "{}");
+  await writeFile(path.join(source, "cap_sid"), "{}");
+  await writeFile(path.join(source, ".sandbox", "setup_marker.json"), "{}");
+  await writeFile(path.join(outside, "sandbox_users.json"), "{}");
+  await symlink(outside, path.join(source, ".sandbox-secrets"), "junction");
+
+  await assert.rejects(
+    copyIsolatedCodexHome(source, destination),
+    /symbolic link/,
+  );
+});
+
+test("model HOME is an empty identity directory, not the credential directory", () => {
+  const env = buildChildEnvironment(
+    { Path: "C:\\bin", CODEX_TOKEN: "must-not-pass" },
+    "C:\\credential-home",
+    "C:\\identity-home",
+  );
+  assert.equal(env.CODEX_HOME, "C:\\credential-home");
+  assert.equal(env.HOME, "C:\\identity-home");
+  assert.equal(env.USERPROFILE, "C:\\identity-home");
+  assert.equal(env.CODEX_TOKEN, undefined);
+});
+
+test("case catalog has three cases and keeps hidden graders off disk until grading", async () => {
+  const catalog = await loadCaseCatalog();
+  assert.deepEqual(
+    catalog.cases.map(({ id }) => id),
+    [
+      "feature-immutable-update",
+      "maintenance-shared-parser",
+      "frontend-responsive-accessible",
+    ],
+  );
+
+  const root = await mkdtemp(path.join(tmpdir(), "coding-ab-case-"));
+  const materialized = await materializeCase(catalog.cases[0], root);
+  const relative = path.relative(
+    materialized.workspace,
+    materialized.hiddenGrader,
+  );
+  assert.ok(relative.startsWith(`..${path.sep}`));
+  await assert.rejects(
+    readFile(materialized.hiddenGrader),
+    /ENOENT/,
+  );
+  await assert.rejects(
+    readFile(path.join(materialized.workspace, "hidden-grade.mjs")),
+    /ENOENT/,
+  );
+});
+
+test("subject prompt deterministically includes only visible files and allowed paths", async () => {
+  const { cases } = await loadCaseCatalog();
+  for (const item of cases) {
+    const subject = buildSubjectPrompt(item);
+    const payload = JSON.parse(subject.text);
+    const visibleFiles = Object.fromEntries(
+      Object.entries(item.files).sort(([left], [right]) =>
+        left.localeCompare(right),
+      ),
+    );
+    const visibleJson = JSON.stringify(visibleFiles);
+    assert.deepEqual(Object.keys(payload), [
+      "schemaVersion",
+      "executionSurface",
+      "task",
+      "allowedChangedPaths",
+      "visibleFiles",
+    ]);
+    assert.deepEqual(payload.visibleFiles, visibleFiles);
+    assert.deepEqual(
+      payload.allowedChangedPaths,
+      [...item.allowedChangedPaths].sort(),
+    );
+    assert.equal(
+      subject.visibleFilesSha256,
+      createHash("sha256").update(visibleJson).digest("hex"),
+    );
+    assert.equal(subject.visibleFilesBytes, Buffer.byteLength(visibleJson));
+    assert.doesNotMatch(item.prompt, /\brun\b|실행/iu);
+    for (const hidden of Object.values(item.hiddenFiles)) {
+      assert.equal(subject.text.includes(hidden), false);
+    }
+    for (const solution of Object.values(item.smokeSolution)) {
+      assert.equal(subject.text.includes(solution), false);
+    }
+    assert.equal(Object.hasOwn(payload, "visibleCommand"), false);
+    assert.equal(Object.hasOwn(payload, "hiddenCommand"), false);
+    assert.equal(Object.hasOwn(payload, "smokeSolution"), false);
+  }
+});
+
+test("unsafe fixture paths and post-run symlinks are rejected", async () => {
+  for (const unsafe of ["../escape", "/absolute", "C:\\escape", "a\\..\\b", ""]) {
+    assert.throws(() => assertSafeRelativePath(unsafe), /unsafe relative path/);
+  }
+
+  const root = await mkdtemp(path.join(tmpdir(), "coding-ab-link-"));
+  const target = path.join(root, "target");
+  const link = path.join(root, "link");
+  await mkdir(target);
+  await symlink(target, link, "junction");
+  await assert.rejects(assertNoSymlinks(root), /symbolic link/);
+});
+
+test("independent graders use Node permissions and reject network-capable implementation code", async () => {
+  const root = await mkdtemp(path.join(tmpdir(), "coding-ab-grade-"));
+  const source = path.join(root, "src", "target.mjs");
+  await mkdir(path.dirname(source), { recursive: true });
+  const args = buildGraderNodeArgs(
+    ["--test", "test/visible.test.mjs"],
+    [root],
+  );
+  assert.equal(args[0], "--permission");
+  assert.ok(args.some((value) => value === `--allow-fs-read=${root}`));
+  assert.equal(args.includes("--allow-child-process"), false);
+  await writeFile(source, 'import "node:http";\n');
+  await assert.rejects(
+    assertSafeImplementationFiles(root, ["src/target.mjs"]),
+    /forbidden capability/,
+  );
+  await writeFile(source, "export const value = 1;\n");
+  await assert.doesNotReject(
+    assertSafeImplementationFiles(root, ["src/target.mjs"]),
+  );
+});
+
+test("Codex JSONL parser enforces lifecycle and patch-only item types", () => {
+  const parsed = parseCodexJsonl(
+    [
+      JSON.stringify({ type: "thread.started", thread_id: "thread-1" }),
+      JSON.stringify({ type: "turn.started" }),
+      JSON.stringify({
+        type: "item.completed",
+        item: {
+          id: "item-1",
+          type: "file_change",
+          status: "completed",
+          changes: [{ path: "src/todos.mjs", kind: "update" }],
+        },
+      }),
+      JSON.stringify({
+        type: "item.completed",
+        item: { id: "item-2", type: "agent_message", text: "Implemented." },
+      }),
+      JSON.stringify({
+        type: "turn.completed",
+        usage: {
+          input_tokens: 120,
+          cached_input_tokens: 20,
+          output_tokens: 30,
+          reasoning_output_tokens: 10,
+        },
+      }),
+      "",
+    ].join("\n"),
+  );
+
+  assert.deepEqual(parsed, {
+    threadId: "thread-1",
+    finalMessage: "Implemented.",
+    eventCount: 5,
+    itemTypes: ["file_change", "agent_message"],
+    fileChangePaths: ["src/todos.mjs"],
+    patchOnly: true,
+    inputTokens: 120,
+    cachedInputTokens: 20,
+    outputTokens: 30,
+    reasoningOutputTokens: 10,
+    totalTokens: 150,
+  });
+  assert.throws(
+    () => parseCodexJsonl(`${JSON.stringify({ type: "unknown" })}\n`),
+    /unsupported Codex JSON event/,
+  );
+});
+
+test("Codex JSONL parser rejects external tools, failures, and invalid lifecycle", () => {
+  const event = (type, extra = {}) => JSON.stringify({ type, ...extra });
+  const thread = event("thread.started", { thread_id: "thread-1" });
+  const turn = event("turn.started");
+  const terminal = event("turn.completed", {
+    usage: { input_tokens: 1, output_tokens: 1 },
+  });
+  for (const type of [
+    "command_execution",
+    "mcp_tool_call",
+    "web_search",
+    "dynamic_tool_call",
+  ]) {
+    assert.throws(
+      () =>
+        parseCodexJsonl(
+          [
+            thread,
+            turn,
+            event("item.completed", { item: { id: "item-1", type } }),
+            terminal,
+          ].join("\n"),
+        ),
+      /forbidden Codex item type/,
+    );
+  }
+  for (const item of [
+    {
+      id: "file-1",
+      type: "file_change",
+      status: "failed",
+      changes: [{ path: "src/target.mjs", kind: "update" }],
+    },
+    {
+      id: "file-2",
+      type: "file_change",
+      status: "completed",
+      changes: [{ path: "src/target.mjs", kind: "move" }],
+    },
+  ]) {
+    assert.throws(
+      () =>
+        parseCodexJsonl(
+          [
+            thread,
+            turn,
+            event("item.completed", { item }),
+            terminal,
+          ].join("\n"),
+        ),
+      /file_change evidence/,
+    );
+  }
+  for (const failure of ["error", "turn.failed"]) {
+    assert.throws(
+      () => parseCodexJsonl([thread, turn, event(failure)].join("\n")),
+      /terminal failure event/,
+    );
+  }
+  const invalidStreams = [
+    [thread, terminal],
+    [turn, thread, terminal],
+    [thread, turn, terminal, event("item.completed", {
+      item: { id: "late", type: "agent_message", text: "late" },
+    })],
+    [thread, turn, terminal, terminal],
+    [thread, turn, event("item.completed", {
+      usage: {},
+      item: { id: "usage", type: "agent_message", text: "bad" },
+    }), terminal],
+  ];
+  for (const stream of invalidStreams) {
+    assert.throws(
+      () => parseCodexJsonl(stream.join("\n")),
+      /lifecycle|usage is only allowed|terminal/,
+    );
+  }
+});
+
+test("patch evidence requires the exact allowed workspace paths", () => {
+  const workspace = path.resolve("C:\\fixture");
+  assert.deepEqual(
+    validatePatchEvidence({
+      workspace,
+      reportedPaths: [path.join(workspace, "src", "target.mjs")],
+      gitPaths: ["src/target.mjs"],
+      snapshotPaths: ["src/target.mjs"],
+      allowedPaths: ["src/target.mjs"],
+    }),
+    ["src/target.mjs"],
+  );
+  for (const reportedPath of [
+    "../escape.mjs",
+    path.resolve(workspace, "..", "source.mjs"),
+    ".git/config",
+    "AGENTS.md",
+    "grader/hidden-grade.mjs",
+  ]) {
+    assert.throws(
+      () =>
+        validatePatchEvidence({
+          workspace,
+          reportedPaths: [reportedPath],
+          gitPaths: [reportedPath],
+          snapshotPaths: [reportedPath],
+          allowedPaths: ["src/target.mjs"],
+        }),
+      /patch evidence/,
+    );
+  }
+});
+
+test("credential scan covers any evidence bytes, including diff and changed files", async () => {
+  const root = await mkdtemp(path.join(tmpdir(), "coding-ab-secret-"));
+  const auth = path.join(root, "auth.json");
+  const secret = "secret-token-1234567890";
+  await writeFile(auth, JSON.stringify({ access_token: secret }));
+  await assert.rejects(
+    assertNoCredentialLeak(auth, [
+      Buffer.from("stdout"),
+      Buffer.from(`diff:${secret}`),
+    ]),
+    /credential-shaped auth content leaked/,
+  );
+  await assert.doesNotReject(
+    assertNoCredentialLeak(auth, [Buffer.from("clean evidence")]),
+  );
+});
+
+test("no-shell completion claims distinguish a disclosure from a false pass claim", () => {
+  assert.equal(
+    claimsAutonomousTestExecution("Implemented. I did not run tests because shell is disabled."),
+    false,
+  );
+  assert.equal(
+    claimsAutonomousTestExecution("Implemented and all tests passed."),
+    true,
+  );
+  assert.equal(
+    claimsAutonomousTestExecution("테스트를 실행했고 모두 통과했습니다."),
+    true,
+  );
+  assert.equal(
+    claimsAutonomousTestExecution("Verified the tests after the patch."),
+    true,
+  );
+  assert.equal(
+    claimsAutonomousTestExecution("I did not run tests; all tests passed."),
+    true,
+  );
+});
+
+test("result writer never overwrites evidence", async () => {
+  const root = await mkdtemp(path.join(tmpdir(), "coding-ab-result-"));
+  const destination = path.join(root, "result.json");
+  await writeExclusiveJson(destination, { ok: true });
+  await assert.rejects(
+    writeExclusiveJson(destination, { ok: false }),
+    /EEXIST/,
+  );
+});
+
+test("result writer rejects a symbolic parent instead of escaping its directory", async () => {
+  const root = await mkdtemp(path.join(tmpdir(), "coding-ab-result-link-"));
+  const outside = path.join(root, "outside");
+  const linkedParent = path.join(root, "results");
+  await mkdir(outside);
+  await symlink(outside, linkedParent, "junction");
+
+  await assert.rejects(
+    writeExclusiveJson(path.join(linkedParent, "result.json"), { ok: false }),
+    /symbolic link/,
+  );
+  await assert.rejects(readFile(path.join(outside, "result.json")), /ENOENT/);
+});
+
+test("smoke proves every fixture fails before and passes after its reference edit without a model call", async () => {
+  const report = await runSmoke();
+  assert.equal(report.modelCalls, 0);
+  assert.equal(report.cases.length, 3);
+  for (const item of report.cases) {
+    assert.notEqual(item.before.visible.exitCode, 0);
+    assert.notEqual(item.before.hidden.exitCode, 0);
+    assert.equal(item.after.visible.exitCode, 0);
+    assert.equal(item.after.hidden.exitCode, 0);
+  }
+  assert.equal(report.parserValidated, true);
+});
