@@ -1,0 +1,164 @@
+{
+  "schemaVersion": 1,
+  "evaluation": "mergedrop-practical-ab-v1",
+  "recordedAt": "2026-08-01",
+  "status": "in_progress",
+  "purpose": "Compare ordinary and Common Work Core-assisted agents on a realistic Android game project workflow.",
+  "sourceContextAudit": {
+    "sourceThreadId": "019f2746-889b-7e63-b93e-15b94b99394b",
+    "fullHistoryUsedForRoughTrial": false,
+    "reason": "The source thread already contained a highly structured assistant-authored launch plan, so full-history access would measure retrieval and summarization rather than autonomous planning.",
+    "planningSegment": {
+      "userMessageCount": 6,
+      "userChars": 613,
+      "userListLines": 0,
+      "assistantMessageCount": 12,
+      "assistantChars": 10079,
+      "assistantHeadingLines": 17,
+      "assistantListLines": 147
+    },
+    "roughTrialInput": "Six user-authored planning messages plus two current-state facts; prior assistant plans excluded. Verbatim source text is intentionally not stored in this shareable artifact."
+  },
+  "candidate": {
+    "name": "Common Work Core V1",
+    "source": "AGENTS.md",
+    "byteLength": 7933,
+    "sha256": "5aebc74bc795891c43bf785d9b34ae4d35d4a40bf46eddef3f6246d75919a495"
+  },
+  "trials": [
+    {
+      "id": "curated-planning-brief",
+      "status": "complete",
+      "design": {
+        "commonBriefChars": 1178,
+        "coreChars": 7924,
+        "difference": "The harness arm received the exact Common Work Core after the same curated brief.",
+        "limitation": "The curated brief itself included scope, assumption, verification, and claim-integrity guidance, reducing treatment separation."
+      },
+      "control": {
+        "threadId": "019fb949-2acc-7d33-9775-a150837ecd57",
+        "durationMs": 108720,
+        "outputChars": 7703,
+        "tokens": {
+          "input": 46140,
+          "cachedInput": 32256,
+          "uncachedInput": 13884,
+          "output": 4483,
+          "reasoningOutput": 190,
+          "total": 50623
+        }
+      },
+      "harness": {
+        "threadId": "019fb949-4cad-71f0-a551-8f188a4cc5c5",
+        "durationMs": 113275,
+        "outputChars": 7936,
+        "tokens": {
+          "input": 49187,
+          "cachedInput": 34304,
+          "uncachedInput": 14883,
+          "output": 4489,
+          "reasoningOutput": 109,
+          "total": 53676
+        }
+      },
+      "deltaHarnessMinusControl": {
+        "durationMs": 4555,
+        "durationPercent": 4.19,
+        "outputChars": 233,
+        "outputCharsPercent": 3.03,
+        "totalTokens": 3053,
+        "totalTokensPercent": 6.03,
+        "uncachedInputTokens": 999,
+        "uncachedInputTokensPercent": 7.2
+      },
+      "verdict": "Small reliability and handoff improvement, but weak evidence of incremental value because the control brief already encoded several harness behaviors."
+    },
+    {
+      "id": "rough-user-memory-planning",
+      "status": "complete",
+      "design": {
+        "commonInputChars": 914,
+        "coreChars": 7924,
+        "difference": "Both arms received the same rough user-memory packet and no prior assistant plan; only the harness arm received the Common Work Core.",
+        "allowedActions": "Read-only planning and current official web research; no implementation or file modification.",
+        "modelCallsPerArm": 4
+      },
+      "control": {
+        "threadId": "019fb95d-2475-7481-87cc-62a8d4a71528",
+        "durationMs": 93123,
+        "outputChars": 3506,
+        "tokens": {
+          "input": 108567,
+          "cachedInput": 70656,
+          "uncachedInput": 37911,
+          "output": 3099,
+          "reasoningOutput": 809,
+          "total": 111666
+        },
+        "observedStrengths": [
+          "Autonomously completed a launch-oriented plan without unnecessary questions.",
+          "Produced a concise MVP, verification criteria, release sequence, and developer handoff.",
+          "Used current official platform references."
+        ],
+        "observedRisks": [
+          "Committed early to session length, a two-second loss threshold, a visual theme, and a minimum Android version without clearly routing those decisions back to the user."
+        ]
+      },
+      "harness": {
+        "threadId": "019fb95d-2d5d-74f0-8f0a-32ed76cd009f",
+        "durationMs": 100467,
+        "outputChars": 5930,
+        "tokens": {
+          "input": 140923,
+          "cachedInput": 83968,
+          "uncachedInput": 56955,
+          "output": 3827,
+          "reasoningOutput": 449,
+          "total": 144750
+        },
+        "observedStrengths": [
+          "Separated unknown account conditions from confirmed facts.",
+          "Covered offline recovery, score resubmission, signing, release evidence, data disclosure, QA, and handoff concerns.",
+          "Completed the task without an approval loop or implementation overreach."
+        ],
+        "observedRisks": [
+          "Expanded into Korean and English support, music, detailed game rules, package naming, device counts, and a compressed schedule without enough evidence that all were required now.",
+          "The longer multi-pass workflow amplified the full-core context cost."
+        ]
+      },
+      "deltaHarnessMinusControl": {
+        "durationMs": 7344,
+        "durationPercent": 7.89,
+        "outputChars": 2424,
+        "outputCharsPercent": 69.14,
+        "totalTokens": 33084,
+        "totalTokensPercent": 29.63,
+        "uncachedInputTokens": 19044,
+        "uncachedInputTokensPercent": 50.23,
+        "outputTokens": 728,
+        "outputTokensPercent": 23.49
+      },
+      "verdict": "The harness arm was more operationally responsible and handoff-ready, but its quality gain did not clearly justify the 29.63% total-token increase and broader scope."
+    }
+  ],
+  "provisionalConclusion": {
+    "quality": "Common Work Core V1 shows meaningful omission-risk reduction on rough planning input.",
+    "efficiency": "The full always-on core is not yet token-efficient for multi-pass planning work.",
+    "decision": "Keep V1 unchanged until design-planning, visual-design, and runnable-code stages are observed; then decide whether to retain the full core or split a compact always-on core from routed role modules.",
+    "generalization": "Not claimed; each trial is a single paired observation."
+  },
+  "remainingStages": [
+    {
+      "id": "app-design-planning",
+      "status": "pending"
+    },
+    {
+      "id": "example-visual-design",
+      "status": "pending"
+    },
+    {
+      "id": "runnable-code-prototype",
+      "status": "pending"
+    }
+  ]
+}
