@@ -41,6 +41,13 @@ const EXPECTED_V9_MODES = [
   "run-v1-coding-ab-v9-r2",
 ];
 
+const EXPECTED_V10_MODES = [
+  "run-v1-coding-ab-v10-r1",
+  "run-v2-coding-ab-v10-r1",
+  "run-v2-coding-ab-v10-r2",
+  "run-v1-coding-ab-v10-r2",
+];
+
 test("v9 coding modes use the unelevated Windows sandbox override", () => {
   assert.deepEqual(RUN_MODES, EXPECTED_MODES);
   assert.deepEqual(V9_RUN_MODES, EXPECTED_V9_MODES);
@@ -54,6 +61,9 @@ test("CLI exposes exactly two repetitions per candidate", () => {
   assert.deepEqual(RUN_MODES, EXPECTED_MODES);
   assert.deepEqual(parseCli(["smoke"]), { mode: "smoke" });
   for (const mode of EXPECTED_MODES) {
+    assert.deepEqual(parseCli([mode]), { mode });
+  }
+  for (const mode of EXPECTED_V10_MODES) {
     assert.deepEqual(parseCli([mode]), { mode });
   }
   assert.throws(() => parseCli(["run-v1-coding-ab-r3"]), /usage:/);
@@ -267,11 +277,19 @@ test("independent graders use Node permissions and reject network-capable implem
   );
 });
 
-test("Codex JSONL parser enforces lifecycle and patch-only item types", () => {
+test("Codex JSONL parser accepts a started then completed file_change lifecycle", () => {
   const parsed = parseCodexJsonl(
     [
       JSON.stringify({ type: "thread.started", thread_id: "thread-1" }),
       JSON.stringify({ type: "turn.started" }),
+      JSON.stringify({
+        type: "item.started",
+        item: {
+          id: "item-1",
+          type: "file_change",
+          status: "in_progress",
+        },
+      }),
       JSON.stringify({
         type: "item.completed",
         item: {
@@ -301,7 +319,7 @@ test("Codex JSONL parser enforces lifecycle and patch-only item types", () => {
   assert.deepEqual(parsed, {
     threadId: "thread-1",
     finalMessage: "Implemented.",
-    eventCount: 5,
+    eventCount: 6,
     itemTypes: ["file_change", "agent_message"],
     fileChangePaths: ["src/todos.mjs"],
     patchOnly: true,

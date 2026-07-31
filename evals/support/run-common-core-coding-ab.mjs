@@ -120,13 +120,24 @@ export const V9_RUN_MODES = Object.freeze([
   "run-v2-coding-ab-v9-r2",
   "run-v1-coding-ab-v9-r2",
 ]);
+export const V10_RUN_MODES = Object.freeze([
+  "run-v1-coding-ab-v10-r1",
+  "run-v2-coding-ab-v10-r1",
+  "run-v2-coding-ab-v10-r2",
+  "run-v1-coding-ab-v10-r2",
+]);
 export const DIAGNOSTIC_MODE = "diagnose-v1-coding-patch-evidence-r1";
-const CLI_MODES = Object.freeze([...RUN_MODES, ...V9_RUN_MODES, DIAGNOSTIC_MODE]);
+const CLI_MODES = Object.freeze([
+  ...RUN_MODES,
+  ...V9_RUN_MODES,
+  ...V10_RUN_MODES,
+  DIAGNOSTIC_MODE,
+]);
 
 const RUN_CONFIGS = Object.freeze({
   ...Object.fromEntries(
-    [...RUN_MODES, ...V9_RUN_MODES].map((mode) => {
-      const match = /^run-(v[12])-coding-ab(?:-v9)?-r([12])$/u.exec(mode);
+    [...RUN_MODES, ...V9_RUN_MODES, ...V10_RUN_MODES].map((mode) => {
+      const match = /^run-(v[12])-coding-ab(?:-v(?:9|10))?-r([12])$/u.exec(mode);
       return [
         mode,
         Object.freeze({
@@ -793,25 +804,29 @@ export function parseCodexJsonl(value) {
         finalMessage = item.text;
       }
       if (item.type === "file_change") {
-        if (
-          event.type !== "item.completed" ||
-          item.status !== "completed" ||
-          !Array.isArray(item.changes) ||
-          item.changes.length === 0
-        ) {
+        if (item.status === "failed") {
           throw new Error("Codex file_change evidence is missing paths");
         }
-        for (const change of item.changes) {
+        if (event.type === "item.completed") {
           if (
-            !isPlainObject(change) ||
-            typeof change.path !== "string" ||
-            change.path.length === 0 ||
-            Buffer.byteLength(change.path) > 4096 ||
-            !["add", "delete", "update"].includes(change.kind)
+            item.status !== "completed" ||
+            !Array.isArray(item.changes) ||
+            item.changes.length === 0
           ) {
-            throw new Error("Codex file_change evidence is invalid");
+            throw new Error("Codex file_change evidence is missing paths");
           }
-          fileChangePaths.push(change.path);
+          for (const change of item.changes) {
+            if (
+              !isPlainObject(change) ||
+              typeof change.path !== "string" ||
+              change.path.length === 0 ||
+              Buffer.byteLength(change.path) > 4096 ||
+              !["add", "delete", "update"].includes(change.kind)
+            ) {
+              throw new Error("Codex file_change evidence is invalid");
+            }
+            fileChangePaths.push(change.path);
+          }
         }
       }
     } else if (event.type === "turn.completed") {
