@@ -77,6 +77,14 @@ const BROKER_CONNECTION_MAX_MS = 5000;
 const ACTIVE_DYNAMIC_TOOL_EVIDENCE = new WeakSet();
 const EVALUATION_PERMISSION_PROFILE_VALUE =
   '{filesystem={":minimal"="read",":workspace_roots"="read"},network={enabled=false}}';
+const FORBIDDEN_EVALUATION_CONFIG_KEYS = Object.freeze([
+  "developer_instructions",
+  "experimental_realtime_start_instructions",
+  "experimental_realtime_ws_backend_prompt",
+  "experimental_realtime_ws_startup_context",
+  "instructions",
+  "model_instructions_file",
+]);
 const SAFE_APP_SERVER_ENV_KEYS = [
   "ALLUSERSPROFILE",
   "APPDATA",
@@ -135,7 +143,28 @@ export function buildEvaluationPermissionArgs() {
     'windows.sandbox="elevated"',
     "-c",
     'shell_environment_policy={inherit="core",ignore_default_excludes=false}',
+    "-c",
+    "notify=[]",
   ];
+}
+
+export function assertEvaluationSourceConfigSafe(value) {
+  if (!Buffer.isBuffer(value)) {
+    throw new TypeError("evaluation source config must be bytes");
+  }
+  const text = value.toString("utf8");
+  for (const key of FORBIDDEN_EVALUATION_CONFIG_KEYS) {
+    const quotedKey = key.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
+    const pattern = new RegExp(
+      `^[\\t ]*(?!#)(?:(?:[A-Za-z0-9_-]+|\"[^\"\\r\\n]+\"|'[^'\\r\\n]+')[\\t ]*\\.[\\t ]*)*(?:${quotedKey}|\"${quotedKey}\"|'${quotedKey}')[\\t ]*=`,
+      "mu",
+    );
+    if (pattern.test(text)) {
+      throw new Error(
+        `evaluation source config contains instruction override: ${key}`,
+      );
+    }
+  }
 }
 
 export function buildAppServerEnvironment(source = process.env) {
@@ -1506,14 +1535,18 @@ const REQUIRED_SCHEMA_TOKENS = [
 
 const ISOLATED_CODEX_HOME_SUFFIX = "-controller-codex-home";
 const ISOLATED_CODEX_HOME_FILES = Object.freeze([
-  "auth.json",
-  "config.toml",
+  Object.freeze(["auth.json"]),
+  Object.freeze(["config.toml"]),
+  Object.freeze([".sandbox", "setup_marker.json"]),
+  Object.freeze([".sandbox-secrets", "sandbox_users.json"]),
 ]);
 
 function defaultIsolatedCodexHomeParent() {
+  const sourceCodexHome =
+    process.env.CODEX_HOME || path.join(homedir(), ".codex");
   return path.join(
-    path.dirname(REPOSITORY_ROOT),
-    ".joewrks-eval-runtime",
+    sourceCodexHome,
+    ".eval-runtime",
   );
 }
 
@@ -1575,17 +1608,26 @@ export async function materializeIsolatedCodexHome(
   }
   await mkdir(isolatedCodexHome);
   try {
-    for (const name of ISOLATED_CODEX_HOME_FILES) {
-      const sourcePath = path.join(resolvedSource, name);
+    for (const parts of ISOLATED_CODEX_HOME_FILES) {
+      const name = parts.join("/");
+      const sourcePath = path.join(resolvedSource, ...parts);
       const sourceStat = await lstat(sourcePath);
       if (!sourceStat.isFile() || sourceStat.isSymbolicLink()) {
         throw new Error(`isolated Codex source is invalid: ${name}`);
       }
-      await copyFile(
-        sourcePath,
-        path.join(isolatedCodexHome, name),
-        fsConstants.COPYFILE_EXCL,
-      );
+      const destinationPath = path.join(isolatedCodexHome, ...parts);
+      await mkdir(path.dirname(destinationPath), { recursive: true });
+      if (name === "config.toml") {
+        const configBytes = await readFile(sourcePath);
+        assertEvaluationSourceConfigSafe(configBytes);
+        await writeFile(destinationPath, configBytes, { flag: "wx" });
+      } else {
+        await copyFile(
+          sourcePath,
+          destinationPath,
+          fsConstants.COPYFILE_EXCL,
+        );
+      }
     }
     return isolatedCodexHome;
   } catch (error) {
@@ -7680,6 +7722,11 @@ async function runSmoke() {
       path.join(smokeRoot, "instruction-discovery"),
       candidate.bytes,
     );
+    if (instructionDiscovery.sourceSnapshots.control.length !== 0) {
+      throw new Error(
+        "smoke Control loaded an unexpected instruction source",
+      );
+    }
     const mcpAfter = await listMcpServerStatus(
       session.client,
       instructionDiscovery.core.id,
@@ -8216,6 +8263,11 @@ async function runConfiguredEvaluation(configuration) {
         });
       controlInstructionSources =
         preflight.instructionDiscoveryReceipt.sourceSnapshots.control;
+      if (controlInstructionSources.length !== 0) {
+        throw new Error(
+          "Control loaded an unexpected instruction source",
+        );
+      }
     }
 
     inventory = await collectRuntimeInventory(

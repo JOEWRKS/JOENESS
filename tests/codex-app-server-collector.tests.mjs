@@ -17,6 +17,7 @@ import { fileURLToPath } from "node:url";
 
 import {
   approvalDenialResponse,
+  assertEvaluationSourceConfigSafe,
   boundUtf8,
   buildAppServerEnvironment,
   buildCaseDynamicTools,
@@ -135,7 +136,30 @@ test("App Server environment and named profile exclude ambient secrets", () => {
     'windows.sandbox="elevated"',
     "-c",
     'shell_environment_policy={inherit="core",ignore_default_excludes=false}',
+    "-c",
+    "notify=[]",
   ]);
+  assert.doesNotThrow(() =>
+    assertEvaluationSourceConfigSafe(
+      Buffer.from('model = "fixture"\n'),
+    ),
+  );
+  assert.throws(
+    () =>
+      assertEvaluationSourceConfigSafe(
+        Buffer.from('developer_instructions = "override"\n'),
+      ),
+    /instruction override/,
+  );
+  assert.throws(
+    () =>
+      assertEvaluationSourceConfigSafe(
+        Buffer.from(
+          '[profiles.fixture]\nmodel_instructions_file = "C:\\\\override.md"\n',
+        ),
+      ),
+    /instruction override/,
+  );
 });
 
 test("isolated Codex home copies runtime identity but excludes global instructions", async (t) => {
@@ -145,6 +169,8 @@ test("isolated Codex home copies runtime identity but excludes global instructio
   const isolatedParent = path.join(parent, "isolated-runtime");
   await mkdir(sourceCodexHome);
   await mkdir(runRoot);
+  await mkdir(path.join(sourceCodexHome, ".sandbox"));
+  await mkdir(path.join(sourceCodexHome, ".sandbox-secrets"));
   await writeFile(
     path.join(sourceCodexHome, "auth.json"),
     '{"auth":"fixture"}\n',
@@ -158,6 +184,20 @@ test("isolated Codex home copies runtime identity but excludes global instructio
   await writeFile(
     path.join(sourceCodexHome, "AGENTS.md"),
     "must-not-copy\n",
+    "utf8",
+  );
+  await writeFile(
+    path.join(sourceCodexHome, ".sandbox", "setup_marker.json"),
+    '{"version":5}\n',
+    "utf8",
+  );
+  await writeFile(
+    path.join(
+      sourceCodexHome,
+      ".sandbox-secrets",
+      "sandbox_users.json",
+    ),
+    '{"users":"fixture"}\n',
     "utf8",
   );
 
@@ -178,6 +218,24 @@ test("isolated Codex home copies runtime identity but excludes global instructio
     await readFile(path.join(isolatedCodexHome, "config.toml"), "utf8"),
     'model = "fixture"\n',
   );
+  assert.equal(
+    await readFile(
+      path.join(isolatedCodexHome, ".sandbox", "setup_marker.json"),
+      "utf8",
+    ),
+    '{"version":5}\n',
+  );
+  assert.equal(
+    await readFile(
+      path.join(
+        isolatedCodexHome,
+        ".sandbox-secrets",
+        "sandbox_users.json",
+      ),
+      "utf8",
+    ),
+    '{"users":"fixture"}\n',
+  );
   await assert.rejects(
     readFile(path.join(isolatedCodexHome, "AGENTS.md")),
     { code: "ENOENT" },
@@ -192,6 +250,34 @@ test("isolated Codex home copies runtime identity but excludes global instructio
   assert.equal(
     await readFile(path.join(sourceCodexHome, "auth.json"), "utf8"),
     '{"auth":"fixture"}\n',
+  );
+
+  const failingSource = path.join(parent, "failing-source");
+  const failingRunRoot = path.join(parent, "run-failure");
+  await mkdir(failingSource);
+  await mkdir(failingRunRoot);
+  await writeFile(
+    path.join(failingSource, "auth.json"),
+    '{"auth":"fixture"}\n',
+    "utf8",
+  );
+  await assert.rejects(
+    materializeIsolatedCodexHome(
+      failingRunRoot,
+      failingSource,
+      isolatedParent,
+    ),
+    { code: "ENOENT" },
+  );
+  await assert.rejects(
+    readFile(
+      path.join(
+        isolatedParent,
+        "run-failure-controller-codex-home",
+        "auth.json",
+      ),
+    ),
+    { code: "ENOENT" },
   );
 });
 
