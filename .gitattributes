@@ -3,6 +3,8 @@
 /evals/candidates/common-core-v1.md text eol=lf
 /evals/candidates/common-core-v2.md text eol=lf
 /evals/coding/*.json text eol=lf
+/evals/coding/archive/**/*.json text eol=lf
+/evals/coding/diagnostics/*.json text eol=lf
 /evals/coding/results/*.json text eol=lf
 /evals/experiments/*.json text eol=lf
 /evals/p0/*.json text eol=lf
