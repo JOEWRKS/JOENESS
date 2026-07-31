@@ -161,7 +161,7 @@ export function parseCli(argv) {
     return { mode: argv[0] };
   }
   throw new Error(
-    "usage: node evals/support/collect-codex-app-server.mjs <smoke|run-control-v5|run-core-v5>",
+    "usage: node evals/support/collect-codex-app-server.mjs <smoke|run-control-v6|run-core-v6>",
   );
 }
 
@@ -2912,7 +2912,10 @@ export async function runSubjectCase({
     instructionOverlay !== null &&
     (!exactKeys(instructionOverlay, ["bytes", "sourcePath"]) ||
       !Buffer.isBuffer(instructionOverlay.bytes) ||
-      instructionOverlay.sourcePath !== CORE_CANDIDATE_RELATIVE_PATH)
+      ![
+        CORE_V1_CANDIDATE_RELATIVE_PATH,
+        CORE_CANDIDATE_RELATIVE_PATH,
+      ].includes(instructionOverlay.sourcePath))
   ) {
     throw new Error("instruction overlay is invalid");
   }
@@ -4580,7 +4583,7 @@ function caseEvidenceIsComplete(
     ? messageDeltas.map((event) => event.messageDelta?.itemId)
     : [];
   const messageDeltaEvidenceComplete =
-    !["v3", "v4", "v5"].includes(schema3Profile?.generation) ||
+    !["v3", "v4", "v5", "v6"].includes(schema3Profile?.generation) ||
     (Array.isArray(events) &&
       events.length <= EVENT_LIMIT &&
       Array.isArray(messageDeltas) &&
@@ -4829,7 +4832,7 @@ function caseEvidenceIsComplete(
           frozenIdentity.caseDefinitions[candidate.id],
           {
             stableKeyRequirement:
-              schema3Profile?.generation === "v5"
+              ["v5", "v6"].includes(schema3Profile?.generation)
                 ? "all"
                 : schema3Profile?.generation === "v4"
                   ? "write"
@@ -4881,7 +4884,7 @@ function caseEvidenceIsComplete(
   const recoveryRequest = dynamicToolRequests?.[1];
   const recoveryIsSafe =
     (recoveryRequest?.operation === "ReadState" &&
-      (schema3Profile?.generation === "v5"
+      (["v5", "v6"].includes(schema3Profile?.generation)
         ? recoveryRequest.idempotencyKey === EXPECTED_IDEMPOTENCY_KEY
         : [null, EXPECTED_IDEMPOTENCY_KEY].includes(
             recoveryRequest.idempotencyKey,
@@ -5405,7 +5408,15 @@ function jsonPointerExists(root, pointer) {
 }
 
 function schema3ProfileUsesExplicitLocal(profile) {
-  return ["v2", "v3", "v4", "v5"].includes(profile?.generation);
+  return ["v2", "v3", "v4", "v5", "v6"].includes(
+    profile?.generation,
+  );
+}
+
+function schema3ProfileCandidateRelativePath(profile) {
+  return profile?.generation === "v6"
+    ? "evals/candidates/common-core-v2.md"
+    : "evals/candidates/common-core-v1.md";
 }
 
 const SCHEMA3_RUN_PROFILES = Object.freeze({
@@ -5469,6 +5480,18 @@ const SCHEMA3_RUN_PROFILES = Object.freeze({
     controlRunId: "no-harness-control-v5",
     baselinePath: "evals/p0/no-harness-control-v5.json",
   }),
+  "no-harness-control-v6": Object.freeze({
+    generation: "v6",
+    condition: "control",
+    controlRunId: "no-harness-control-v6",
+    baselinePath: null,
+  }),
+  "common-core-v6": Object.freeze({
+    generation: "v6",
+    condition: "core",
+    controlRunId: "no-harness-control-v6",
+    baselinePath: "evals/p0/no-harness-control-v6.json",
+  }),
 });
 
 function validateSchema3Evaluation(result) {
@@ -5506,7 +5529,7 @@ function validateSchema3Evaluation(result) {
       "sha256",
     ]) ||
       evaluation.candidateReference.sourcePath !==
-        CORE_CANDIDATE_RELATIVE_PATH ||
+        schema3ProfileCandidateRelativePath(profile) ||
       !Number.isSafeInteger(
         evaluation.candidateReference.byteLength,
       ) ||
@@ -5539,7 +5562,7 @@ function validateSchema3Evaluation(result) {
       "sha256",
     ]) ||
     evaluation.instructionOverlay.sourcePath !==
-      CORE_CANDIDATE_RELATIVE_PATH ||
+      schema3ProfileCandidateRelativePath(profile) ||
     !Number.isSafeInteger(evaluation.instructionOverlay.byteLength) ||
     evaluation.instructionOverlay.byteLength < 1 ||
     !/^[0-9a-f]{64}$/u.test(evaluation.instructionOverlay.sha256) ||
@@ -6426,19 +6449,21 @@ const CASES_RELATIVE_PATH = "evals/p0/cases.json";
 const MOCK_RELATIVE_PATH = "evals/support/mock-external-write.ps1";
 const P0_CONTRACT_RELATIVE_PATH =
   "tests/p0-evaluation-contract.tests.ps1";
-const CONTROL_V5_RESULT_RELATIVE_PATH =
-  "evals/p0/no-harness-control-v5.json";
-const CORE_V5_RESULT_RELATIVE_PATH = "evals/p0/common-core-v5.json";
-const CORE_CANDIDATE_RELATIVE_PATH =
+const CONTROL_V6_RESULT_RELATIVE_PATH =
+  "evals/p0/no-harness-control-v6.json";
+const CORE_V6_RESULT_RELATIVE_PATH = "evals/p0/common-core-v6.json";
+const CORE_V1_CANDIDATE_RELATIVE_PATH =
   "evals/candidates/common-core-v1.md";
+const CORE_CANDIDATE_RELATIVE_PATH =
+  "evals/candidates/common-core-v2.md";
 const LIVE_RUN_CONFIGURATIONS = Object.freeze({
-  "run-control-v5": Object.freeze({
-    mode: "run-control-v5",
-    runId: "no-harness-control-v5",
-    resultRelativePath: CONTROL_V5_RESULT_RELATIVE_PATH,
+  "run-control-v6": Object.freeze({
+    mode: "run-control-v6",
+    runId: "no-harness-control-v6",
+    resultRelativePath: CONTROL_V6_RESULT_RELATIVE_PATH,
     resultPath: path.join(
       REPOSITORY_ROOT,
-      ...CONTROL_V5_RESULT_RELATIVE_PATH.split("/"),
+      ...CONTROL_V6_RESULT_RELATIVE_PATH.split("/"),
     ),
     caseIds: FULL_CASE_IDS,
     instructionCondition: "none",
@@ -6451,22 +6476,22 @@ const LIVE_RUN_CONFIGURATIONS = Object.freeze({
       ...CORE_CANDIDATE_RELATIVE_PATH.split("/"),
     ),
   }),
-  "run-core-v5": Object.freeze({
-    mode: "run-core-v5",
-    runId: "common-core-v5",
-    resultRelativePath: CORE_V5_RESULT_RELATIVE_PATH,
+  "run-core-v6": Object.freeze({
+    mode: "run-core-v6",
+    runId: "common-core-v6",
+    resultRelativePath: CORE_V6_RESULT_RELATIVE_PATH,
     resultPath: path.join(
       REPOSITORY_ROOT,
-      ...CORE_V5_RESULT_RELATIVE_PATH.split("/"),
+      ...CORE_V6_RESULT_RELATIVE_PATH.split("/"),
     ),
     caseIds: FULL_CASE_IDS,
     instructionCondition: "common-core",
-    baselineRelativePath: CONTROL_V5_RESULT_RELATIVE_PATH,
+    baselineRelativePath: CONTROL_V6_RESULT_RELATIVE_PATH,
     baselinePath: path.join(
       REPOSITORY_ROOT,
-      ...CONTROL_V5_RESULT_RELATIVE_PATH.split("/"),
+      ...CONTROL_V6_RESULT_RELATIVE_PATH.split("/"),
     ),
-    baselineRunId: "no-harness-control-v5",
+    baselineRunId: "no-harness-control-v6",
     candidateRelativePath: CORE_CANDIDATE_RELATIVE_PATH,
     candidatePath: path.join(
       REPOSITORY_ROOT,

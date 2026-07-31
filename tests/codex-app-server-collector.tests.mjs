@@ -2041,7 +2041,7 @@ test("Core writes one exact AGENTS overlay and records an unchanged snapshot", a
     }),
     instructionOverlay: {
       bytes,
-      sourcePath: "evals/candidates/common-core-v1.md",
+      sourcePath: "evals/candidates/common-core-v2.md",
     },
     expectedBaselineInstructionSources: [
       {
@@ -2055,7 +2055,7 @@ test("Core writes one exact AGENTS overlay and records an unchanged snapshot", a
 
   assert.deepEqual(await readFile(instructionPath), bytes);
   assert.deepEqual(evidence.state.instructionOverlay, {
-    sourcePath: "evals/candidates/common-core-v1.md",
+    sourcePath: "evals/candidates/common-core-v2.md",
     target: "AGENTS.md",
     before: {
       byteLength: bytes.length,
@@ -4594,6 +4594,10 @@ function completeSchema3ExplicitLocalControlPassResult(
   runId,
   candidateBytes = Buffer.from("core"),
 ) {
+  const candidateRelativePath =
+    runId === "no-harness-control-v6"
+      ? "evals/candidates/common-core-v2.md"
+      : "evals/candidates/common-core-v1.md";
   const result = completeSchema3ControlPassResult();
   const runRoot = path.resolve(
     tmpdir(),
@@ -4614,7 +4618,9 @@ function completeSchema3ExplicitLocalControlPassResult(
           FROZEN_CASE_DEFINITIONS[candidate.id],
           {
             stableKeyRequirement:
-              runId === "no-harness-control-v5"
+              ["no-harness-control-v5", "no-harness-control-v6"].includes(
+                runId,
+              )
                 ? "all"
                 : runId === "no-harness-control-v4"
                   ? "write"
@@ -4639,6 +4645,7 @@ function completeSchema3ExplicitLocalControlPassResult(
           "no-harness-control-v3",
           "no-harness-control-v4",
           "no-harness-control-v5",
+          "no-harness-control-v6",
         ].includes(runId) &&
         index === 0
       ) {
@@ -4672,7 +4679,7 @@ function completeSchema3ExplicitLocalControlPassResult(
     ...result.evidence.evaluation,
     condition: "control",
     candidateReference: {
-      sourcePath: "evals/candidates/common-core-v1.md",
+      sourcePath: candidateRelativePath,
       byteLength: candidateBytes.length,
       sha256: sha256(candidateBytes),
     },
@@ -4753,9 +4760,23 @@ function schema3V5CoreResult(control) {
   });
 }
 
+function schema3V6CoreResult(control) {
+  return schema3ExplicitLocalCoreResult(control, {
+    coreRunId: "common-core-v6",
+    baselinePath: "evals/p0/no-harness-control-v6.json",
+    controlRunId: "no-harness-control-v6",
+    candidateRelativePath: "evals/candidates/common-core-v2.md",
+  });
+}
+
 function schema3ExplicitLocalCoreResult(
   control,
-  { coreRunId, baselinePath, controlRunId },
+  {
+    coreRunId,
+    baselinePath,
+    controlRunId,
+    candidateRelativePath = "evals/candidates/common-core-v1.md",
+  },
 ) {
   const baselineBytes = Buffer.from(
     `${JSON.stringify(control, null, 2)}\n`,
@@ -4770,7 +4791,7 @@ function schema3ExplicitLocalCoreResult(
       control.evidence.evaluation.candidateReference,
     ),
     instructionOverlay: {
-      sourcePath: "evals/candidates/common-core-v1.md",
+      sourcePath: candidateRelativePath,
       byteLength: Buffer.byteLength("core"),
       sha256: sha256("core"),
     },
@@ -5243,7 +5264,7 @@ test("schema 3 Core requires the exact reviewed Control bytes", () => {
   );
 });
 
-test("schema 3 v2-v5 keep local profiles and same-generation pairs exact", () => {
+test("schema 3 v2-v6 keep local profiles and same-generation pairs exact", () => {
   const control = completeSchema3ExplicitLocalControlPassResult(
     "no-harness-control-v2",
   );
@@ -5302,6 +5323,37 @@ test("schema 3 v2-v5 keep local profiles and same-generation pairs exact", () =>
   assert.doesNotThrow(() =>
     validateFixtureResult(v5Core, {
       baselineBytes: v5BaselineBytes,
+    }),
+  );
+  const v6Control =
+    completeSchema3ExplicitLocalControlPassResult(
+      "no-harness-control-v6",
+    );
+  assert.throws(
+    () => validateFixtureResult(v6Control),
+    /complete evidence/,
+  );
+  v6Control.evidence.cases.at(-1).dynamicToolRequests[1]
+    .idempotencyKey = "request-001";
+  v6Control.evidenceSha256 = independentHash(v6Control.evidence);
+  assert.doesNotThrow(() => validateFixtureResult(v6Control));
+  const staleV6Candidate = structuredClone(v6Control);
+  staleV6Candidate.evidence.evaluation.candidateReference.sourcePath =
+    "evals/candidates/common-core-v1.md";
+  staleV6Candidate.evidenceSha256 = independentHash(
+    staleV6Candidate.evidence,
+  );
+  assert.throws(
+    () => validateFixtureResult(staleV6Candidate),
+    /candidate reference/,
+  );
+  const {
+    result: v6Core,
+    baselineBytes: v6BaselineBytes,
+  } = schema3V6CoreResult(v6Control);
+  assert.doesNotThrow(() =>
+    validateFixtureResult(v6Core, {
+      baselineBytes: v6BaselineBytes,
     }),
   );
 
@@ -6357,8 +6409,8 @@ test("full profiles select the exact frozen 16-case order", async () => {
     EXPECTED_FULL_CASE_IDS,
   );
 
-  const control = collector.runConfigurationForMode("run-control-v5");
-  const core = collector.runConfigurationForMode("run-core-v5");
+  const control = collector.runConfigurationForMode("run-control-v6");
+  const core = collector.runConfigurationForMode("run-core-v6");
   assert.deepEqual(
     {
       mode: control.mode,
@@ -6367,14 +6419,16 @@ test("full profiles select the exact frozen 16-case order", async () => {
       caseIds: control.caseIds,
       instructionCondition: control.instructionCondition,
       baselineRelativePath: control.baselineRelativePath,
+      candidateRelativePath: control.candidateRelativePath,
     },
     {
-      mode: "run-control-v5",
-      runId: "no-harness-control-v5",
-      resultRelativePath: "evals/p0/no-harness-control-v5.json",
+      mode: "run-control-v6",
+      runId: "no-harness-control-v6",
+      resultRelativePath: "evals/p0/no-harness-control-v6.json",
       caseIds: EXPECTED_FULL_CASE_IDS,
       instructionCondition: "none",
       baselineRelativePath: null,
+      candidateRelativePath: "evals/candidates/common-core-v2.md",
     },
   );
   assert.deepEqual(
@@ -6388,13 +6442,13 @@ test("full profiles select the exact frozen 16-case order", async () => {
       candidateRelativePath: core.candidateRelativePath,
     },
     {
-      mode: "run-core-v5",
-      runId: "common-core-v5",
-      resultRelativePath: "evals/p0/common-core-v5.json",
+      mode: "run-core-v6",
+      runId: "common-core-v6",
+      resultRelativePath: "evals/p0/common-core-v6.json",
       caseIds: EXPECTED_FULL_CASE_IDS,
       instructionCondition: "common-core",
-      baselineRelativePath: "evals/p0/no-harness-control-v5.json",
-      candidateRelativePath: "evals/candidates/common-core-v1.md",
+      baselineRelativePath: "evals/p0/no-harness-control-v6.json",
+      candidateRelativePath: "evals/candidates/common-core-v2.md",
     },
   );
   assert.equal(Object.isFrozen(control), true);
@@ -6411,6 +6465,10 @@ test("full profiles select the exact frozen 16-case order", async () => {
   );
   assert.throws(
     () => collector.runConfigurationForMode("run-control-v4"),
+    /unsupported live run mode/,
+  );
+  assert.throws(
+    () => collector.runConfigurationForMode("run-control-v5"),
     /unsupported live run mode/,
   );
 });
@@ -6690,27 +6748,27 @@ test("paired execution gate blocks root activation, dirty inputs and source drif
     await import("../evals/support/collect-codex-app-server.mjs");
   assert.equal(typeof assertEvaluationGateSnapshot, "function");
   const controlConfiguration =
-    runConfigurationForMode("run-control-v5");
-  const coreConfiguration = runConfigurationForMode("run-core-v5");
+    runConfigurationForMode("run-control-v6");
+  const coreConfiguration = runConfigurationForMode("run-core-v6");
   const candidateBytes = Buffer.from(validCoreCandidateText());
-  const reviewedV5Control =
+  const reviewedV6Control =
     completeSchema3ExplicitLocalControlPassResult(
-      "no-harness-control-v5",
+      "no-harness-control-v6",
       candidateBytes,
     );
-  reviewedV5Control.evidence.cases.at(-1).dynamicToolRequests[1]
+  reviewedV6Control.evidence.cases.at(-1).dynamicToolRequests[1]
     .idempotencyKey = "request-001";
-  reviewedV5Control.evidenceSha256 = independentHash(
-    reviewedV5Control.evidence,
+  reviewedV6Control.evidenceSha256 = independentHash(
+    reviewedV6Control.evidence,
   );
   const baselineBytes = Buffer.from(
-    `${JSON.stringify(reviewedV5Control, null, 2)}\n`,
+    `${JSON.stringify(reviewedV6Control, null, 2)}\n`,
   );
   const source = {
     gitBlobs: structuredClone(
-      reviewedV5Control.evidence.source.gitBlobs,
+      reviewedV6Control.evidence.source.gitBlobs,
     ),
-    sha256: structuredClone(reviewedV5Control.evidence.source.sha256),
+    sha256: structuredClone(reviewedV6Control.evidence.source.sha256),
   };
   const cleanControl = {
     result: { exists: false },
@@ -6755,11 +6813,11 @@ test("paired execution gate blocks root activation, dirty inputs and source drif
     }),
   );
 
-  const pendingControl = structuredClone(reviewedV5Control);
+  const pendingControl = structuredClone(reviewedV6Control);
   pendingControl.review.status = "pending";
   pendingControl.review.capabilityVerdict = "blocked";
   pendingControl.review.reasons = ["review-pending"];
-  const blockedControl = structuredClone(reviewedV5Control);
+  const blockedControl = structuredClone(reviewedV6Control);
   blockedControl.review.capabilityVerdict = "blocked";
   blockedControl.review.reasons = ["reviewed-block"];
   const previousGenerationControl =
@@ -6869,10 +6927,10 @@ test("paired execution gate blocks root activation, dirty inputs and source drif
 test("CLI accepts only smoke and the fresh paired live modes", () => {
   assert.deepEqual(parseCli(["smoke"]), { mode: "smoke" });
   assert.deepEqual(
-    parseCli(["run-control-v5"]),
-    { mode: "run-control-v5" },
+    parseCli(["run-control-v6"]),
+    { mode: "run-control-v6" },
   );
-  assert.deepEqual(parseCli(["run-core-v5"]), { mode: "run-core-v5" });
+  assert.deepEqual(parseCli(["run-core-v6"]), { mode: "run-core-v6" });
   for (const argv of [
     [],
     ["run-control-v1"],
@@ -6883,17 +6941,19 @@ test("CLI accepts only smoke and the fresh paired live modes", () => {
     ["run-core-v3"],
     ["run-control-v4"],
     ["run-core-v4"],
+    ["run-control-v5"],
+    ["run-core-v5"],
     ["run-v2"],
     ["run-v3"],
     ["resume"],
     ["--force"],
     ["smoke", "--force"],
-    ["run-control-v5", "extra"],
-    ["run-core-v5", "--force"],
+    ["run-control-v6", "extra"],
+    ["run-core-v6", "--force"],
   ]) {
     assert.throws(
       () => parseCli(argv),
-      /usage: node evals\/support\/collect-codex-app-server\.mjs <smoke\|run-control-v5\|run-core-v5>/,
+      /usage: node evals\/support\/collect-codex-app-server\.mjs <smoke\|run-control-v6\|run-core-v6>/,
     );
   }
 });
