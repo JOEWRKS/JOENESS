@@ -3,6 +3,7 @@ import { createHash, randomUUID } from "node:crypto";
 import { constants as fsConstants, readFileSync } from "node:fs";
 import {
   access,
+  copyFile,
   lstat,
   mkdir,
   mkdtemp,
@@ -161,7 +162,7 @@ export function parseCli(argv) {
     return { mode: argv[0] };
   }
   throw new Error(
-    "usage: node evals/support/collect-codex-app-server.mjs <smoke|run-control-v6|run-core-v6>",
+    "usage: node evals/support/collect-codex-app-server.mjs <smoke|run-control-v7|run-core-v7>",
   );
 }
 
@@ -1503,16 +1504,90 @@ const REQUIRED_SCHEMA_TOKENS = [
   '"windowsSandbox/readiness"',
 ];
 
+const ISOLATED_CODEX_HOME_DIRECTORY = "controller-codex-home";
+const ISOLATED_CODEX_HOME_FILES = Object.freeze([
+  "auth.json",
+  "config.toml",
+]);
+
+export async function removeIsolatedCodexHome(
+  runRoot,
+  isolatedCodexHome,
+) {
+  const expected = path.join(
+    path.resolve(runRoot),
+    ISOLATED_CODEX_HOME_DIRECTORY,
+  );
+  if (comparablePath(isolatedCodexHome) !== comparablePath(expected)) {
+    throw new Error("isolated Codex home cleanup path is invalid");
+  }
+  let entry;
+  try {
+    entry = await lstat(expected);
+  } catch (error) {
+    if (error?.code === "ENOENT") {
+      return;
+    }
+    throw error;
+  }
+  if (!entry.isDirectory() || entry.isSymbolicLink()) {
+    throw new Error("isolated Codex home is not an owned directory");
+  }
+  await rm(expected, { recursive: true, force: false });
+}
+
+export async function materializeIsolatedCodexHome(
+  runRoot,
+  sourceCodexHome,
+) {
+  const resolvedRunRoot = path.resolve(runRoot);
+  const resolvedSource = path.resolve(sourceCodexHome);
+  const isolatedCodexHome = path.join(
+    resolvedRunRoot,
+    ISOLATED_CODEX_HOME_DIRECTORY,
+  );
+  const runRootStat = await lstat(resolvedRunRoot);
+  if (
+    !runRootStat.isDirectory() ||
+    runRootStat.isSymbolicLink() ||
+    comparablePath(resolvedSource) === comparablePath(isolatedCodexHome)
+  ) {
+    throw new Error("isolated Codex home roots are invalid");
+  }
+  await mkdir(isolatedCodexHome);
+  try {
+    for (const name of ISOLATED_CODEX_HOME_FILES) {
+      const sourcePath = path.join(resolvedSource, name);
+      const sourceStat = await lstat(sourcePath);
+      if (!sourceStat.isFile() || sourceStat.isSymbolicLink()) {
+        throw new Error(`isolated Codex source is invalid: ${name}`);
+      }
+      await copyFile(
+        sourcePath,
+        path.join(isolatedCodexHome, name),
+        fsConstants.COPYFILE_EXCL,
+      );
+    }
+    return isolatedCodexHome;
+  } catch (error) {
+    await removeIsolatedCodexHome(
+      resolvedRunRoot,
+      isolatedCodexHome,
+    );
+    throw error;
+  }
+}
+
 export async function prepareRuntime(runRoot) {
   const runRootStat = await stat(runRoot);
   if (!runRootStat.isDirectory()) {
     throw new Error("run root must be a directory");
   }
 
-  const codexHome =
+  const sourceCodexHome =
     process.env.CODEX_HOME || path.join(homedir(), ".codex");
   const requestedExecutable = path.join(
-    codexHome,
+    sourceCodexHome,
     "packages",
     "standalone",
     "current",
@@ -1520,7 +1595,14 @@ export async function prepareRuntime(runRoot) {
     "codex.exe",
   );
   const executable = await realpath(requestedExecutable);
-  const appServerEnvironment = buildAppServerEnvironment(process.env);
+  const isolatedCodexHome = await materializeIsolatedCodexHome(
+    runRoot,
+    sourceCodexHome,
+  );
+  const appServerEnvironment = buildAppServerEnvironment({
+    ...process.env,
+    CODEX_HOME: isolatedCodexHome,
+  });
   const permissionArgs = buildEvaluationPermissionArgs();
   const packageRoot = path.dirname(path.dirname(executable));
   const resourcesRoot = path.join(packageRoot, "codex-resources");
@@ -1528,9 +1610,12 @@ export async function prepareRuntime(runRoot) {
     setup: path.join(resourcesRoot, "codex-windows-sandbox-setup.exe"),
     commandRunner: path.join(resourcesRoot, "codex-command-runner.exe"),
   };
-  await Promise.all(
-    Object.values(helpers).map((helper) => access(helper, fsConstants.F_OK)),
-  );
+  try {
+    await Promise.all(
+      Object.values(helpers).map((helper) =>
+        access(helper, fsConstants.F_OK),
+      ),
+    );
 
   const versionResult = await runBuffered(executable, ["--version"], {
     env: appServerEnvironment,
@@ -1608,47 +1693,52 @@ export async function prepareRuntime(runRoot) {
     );
   }
 
-  return {
-    runRoot: await realpath(runRoot),
-    executable,
-    packageRoot,
-    version,
-    helpers,
-    doctor: {
-      schemaVersion: doctor.schemaVersion,
-      codexVersion: doctor.codexVersion,
-      overallStatus: doctor.overallStatus,
-      checks: doctorChecks,
-    },
-    protocolSchema: {
-      path: schemaPath,
-      sha256: sha256(schemaBytes),
-    },
-    appServerEnvironment,
-    permissionArgs,
-    permissionProfile: {
-      id: EVALUATION_PERMISSION_PROFILE,
-      policySha256: sha256(EVALUATION_PERMISSION_PROFILE_VALUE),
-      windowsSandbox: "elevated",
-      shellEnvironmentPolicy: "core-default-excludes",
-    },
-    runtimeIsolationArgs,
-    requestedFeatureControls: {
-      apps: false,
-      codeMode: false,
-      hooks: false,
-      multiAgent: false,
-      plugins: false,
-      requestUserInput: false,
-      shellTool: false,
-      webSearch: false,
-    },
-    mcpInventory: disabledMcp.map((server) => ({
-      name: server.name,
-      transport: server.transport?.type,
-      enabled: server.enabled,
-    })),
-  };
+    return {
+      runRoot: await realpath(runRoot),
+      isolatedCodexHome,
+      executable,
+      packageRoot,
+      version,
+      helpers,
+      doctor: {
+        schemaVersion: doctor.schemaVersion,
+        codexVersion: doctor.codexVersion,
+        overallStatus: doctor.overallStatus,
+        checks: doctorChecks,
+      },
+      protocolSchema: {
+        path: schemaPath,
+        sha256: sha256(schemaBytes),
+      },
+      appServerEnvironment,
+      permissionArgs,
+      permissionProfile: {
+        id: EVALUATION_PERMISSION_PROFILE,
+        policySha256: sha256(EVALUATION_PERMISSION_PROFILE_VALUE),
+        windowsSandbox: "elevated",
+        shellEnvironmentPolicy: "core-default-excludes",
+      },
+      runtimeIsolationArgs,
+      requestedFeatureControls: {
+        apps: false,
+        codeMode: false,
+        hooks: false,
+        multiAgent: false,
+        plugins: false,
+        requestUserInput: false,
+        shellTool: false,
+        webSearch: false,
+      },
+      mcpInventory: disabledMcp.map((server) => ({
+        name: server.name,
+        transport: server.transport?.type,
+        enabled: server.enabled,
+      })),
+    };
+  } catch (error) {
+    await removeIsolatedCodexHome(runRoot, isolatedCodexHome);
+    throw error;
+  }
 }
 
 export function approvalDenialResponse(method) {
@@ -4583,7 +4673,9 @@ function caseEvidenceIsComplete(
     ? messageDeltas.map((event) => event.messageDelta?.itemId)
     : [];
   const messageDeltaEvidenceComplete =
-    !["v3", "v4", "v5", "v6"].includes(schema3Profile?.generation) ||
+    !["v3", "v4", "v5", "v6", "v7"].includes(
+      schema3Profile?.generation,
+    ) ||
     (Array.isArray(events) &&
       events.length <= EVENT_LIMIT &&
       Array.isArray(messageDeltas) &&
@@ -4832,7 +4924,9 @@ function caseEvidenceIsComplete(
           frozenIdentity.caseDefinitions[candidate.id],
           {
             stableKeyRequirement:
-              ["v5", "v6"].includes(schema3Profile?.generation)
+              ["v5", "v6", "v7"].includes(
+                schema3Profile?.generation,
+              )
                 ? "all"
                 : schema3Profile?.generation === "v4"
                   ? "write"
@@ -4884,7 +4978,7 @@ function caseEvidenceIsComplete(
   const recoveryRequest = dynamicToolRequests?.[1];
   const recoveryIsSafe =
     (recoveryRequest?.operation === "ReadState" &&
-      (["v5", "v6"].includes(schema3Profile?.generation)
+      (["v5", "v6", "v7"].includes(schema3Profile?.generation)
         ? recoveryRequest.idempotencyKey === EXPECTED_IDEMPOTENCY_KEY
         : [null, EXPECTED_IDEMPOTENCY_KEY].includes(
             recoveryRequest.idempotencyKey,
@@ -5104,12 +5198,16 @@ function schema3InstructionSourcesAreStable(
   ) {
     return true;
   }
-  return cases.every(
-    (candidate) =>
+  const firstSnapshot = cases[0]?.instructionSourceSnapshot;
+  return (
+    (!schema3ProfileRequiresEmptyControlInstructions(schema3Profile) ||
+      firstSnapshot?.length === 0) &&
+    cases.every((candidate) =>
       instructionSourceSnapshotsEqual(
         candidate.instructionSourceSnapshot,
-        cases[0]?.instructionSourceSnapshot,
+        firstSnapshot,
       ),
+    )
   );
 }
 
@@ -5238,7 +5336,12 @@ function passEvidenceIsComplete(
       ? instructionDiscoveryReceiptIsComplete(
           preflight?.instructionDiscoveryReceipt,
           evidence,
-        )
+        ) &&
+        (!schema3ProfileRequiresEmptyControlInstructions(
+          schema3Profile,
+        ) ||
+          preflight.instructionDiscoveryReceipt.sourceSnapshots.control
+            .length === 0)
       : !Object.hasOwn(
           preflight,
           "instructionDiscoveryReceipt",
@@ -5408,15 +5511,19 @@ function jsonPointerExists(root, pointer) {
 }
 
 function schema3ProfileUsesExplicitLocal(profile) {
-  return ["v2", "v3", "v4", "v5", "v6"].includes(
+  return ["v2", "v3", "v4", "v5", "v6", "v7"].includes(
     profile?.generation,
   );
 }
 
 function schema3ProfileCandidateRelativePath(profile) {
-  return profile?.generation === "v6"
+  return ["v6", "v7"].includes(profile?.generation)
     ? "evals/candidates/common-core-v2.md"
     : "evals/candidates/common-core-v1.md";
+}
+
+function schema3ProfileRequiresEmptyControlInstructions(profile) {
+  return profile?.generation === "v7";
 }
 
 const SCHEMA3_RUN_PROFILES = Object.freeze({
@@ -5491,6 +5598,18 @@ const SCHEMA3_RUN_PROFILES = Object.freeze({
     condition: "core",
     controlRunId: "no-harness-control-v6",
     baselinePath: "evals/p0/no-harness-control-v6.json",
+  }),
+  "no-harness-control-v7": Object.freeze({
+    generation: "v7",
+    condition: "control",
+    controlRunId: "no-harness-control-v7",
+    baselinePath: null,
+  }),
+  "common-core-v7": Object.freeze({
+    generation: "v7",
+    condition: "core",
+    controlRunId: "no-harness-control-v7",
+    baselinePath: "evals/p0/no-harness-control-v7.json",
   }),
 });
 
@@ -5743,6 +5862,9 @@ function schema3CaseEvidenceIsComplete(
     return (
       (schema3ProfileUsesExplicitLocal(schema3Profile) ||
         candidate.thread.instructionSources.length === 0) &&
+      (!schema3ProfileRequiresEmptyControlInstructions(schema3Profile) ||
+        (candidate.thread.instructionSources.length === 0 &&
+          candidate.instructionSourceSnapshot.length === 0)) &&
       candidate.state?.instructionOverlay === null
     );
   }
@@ -6449,21 +6571,21 @@ const CASES_RELATIVE_PATH = "evals/p0/cases.json";
 const MOCK_RELATIVE_PATH = "evals/support/mock-external-write.ps1";
 const P0_CONTRACT_RELATIVE_PATH =
   "tests/p0-evaluation-contract.tests.ps1";
-const CONTROL_V6_RESULT_RELATIVE_PATH =
-  "evals/p0/no-harness-control-v6.json";
-const CORE_V6_RESULT_RELATIVE_PATH = "evals/p0/common-core-v6.json";
+const CONTROL_V7_RESULT_RELATIVE_PATH =
+  "evals/p0/no-harness-control-v7.json";
+const CORE_V7_RESULT_RELATIVE_PATH = "evals/p0/common-core-v7.json";
 const CORE_V1_CANDIDATE_RELATIVE_PATH =
   "evals/candidates/common-core-v1.md";
 const CORE_CANDIDATE_RELATIVE_PATH =
   "evals/candidates/common-core-v2.md";
 const LIVE_RUN_CONFIGURATIONS = Object.freeze({
-  "run-control-v6": Object.freeze({
-    mode: "run-control-v6",
-    runId: "no-harness-control-v6",
-    resultRelativePath: CONTROL_V6_RESULT_RELATIVE_PATH,
+  "run-control-v7": Object.freeze({
+    mode: "run-control-v7",
+    runId: "no-harness-control-v7",
+    resultRelativePath: CONTROL_V7_RESULT_RELATIVE_PATH,
     resultPath: path.join(
       REPOSITORY_ROOT,
-      ...CONTROL_V6_RESULT_RELATIVE_PATH.split("/"),
+      ...CONTROL_V7_RESULT_RELATIVE_PATH.split("/"),
     ),
     caseIds: FULL_CASE_IDS,
     instructionCondition: "none",
@@ -6476,22 +6598,22 @@ const LIVE_RUN_CONFIGURATIONS = Object.freeze({
       ...CORE_CANDIDATE_RELATIVE_PATH.split("/"),
     ),
   }),
-  "run-core-v6": Object.freeze({
-    mode: "run-core-v6",
-    runId: "common-core-v6",
-    resultRelativePath: CORE_V6_RESULT_RELATIVE_PATH,
+  "run-core-v7": Object.freeze({
+    mode: "run-core-v7",
+    runId: "common-core-v7",
+    resultRelativePath: CORE_V7_RESULT_RELATIVE_PATH,
     resultPath: path.join(
       REPOSITORY_ROOT,
-      ...CORE_V6_RESULT_RELATIVE_PATH.split("/"),
+      ...CORE_V7_RESULT_RELATIVE_PATH.split("/"),
     ),
     caseIds: FULL_CASE_IDS,
     instructionCondition: "common-core",
-    baselineRelativePath: CONTROL_V6_RESULT_RELATIVE_PATH,
+    baselineRelativePath: CONTROL_V7_RESULT_RELATIVE_PATH,
     baselinePath: path.join(
       REPOSITORY_ROOT,
-      ...CONTROL_V6_RESULT_RELATIVE_PATH.split("/"),
+      ...CONTROL_V7_RESULT_RELATIVE_PATH.split("/"),
     ),
-    baselineRunId: "no-harness-control-v6",
+    baselineRunId: "no-harness-control-v7",
     candidateRelativePath: CORE_CANDIDATE_RELATIVE_PATH,
     candidatePath: path.join(
       REPOSITORY_ROOT,
@@ -7463,9 +7585,10 @@ async function runSmoke() {
   const smokeRoot = path.join(runRoot, "smoke");
   await mkdir(smokeRoot);
   let session = null;
+  let runtime = null;
   const controlBlockers = [];
   try {
-    const runtime = await prepareRuntime(runRoot);
+    runtime = await prepareRuntime(runRoot);
     session = await openAppServer(runtime, {
       onNotification(message) {
         controlBlockers.push(...normalizeEvent(message).blockers);
@@ -7597,12 +7720,24 @@ async function runSmoke() {
       configUnchanged: true,
       resultCreated: false,
     };
+    await removeIsolatedCodexHome(
+      runtime.runRoot,
+      runtime.isolatedCodexHome,
+    );
+    runtime = null;
     assertSafeTempCleanup(runRoot);
     await rm(runRoot, { recursive: true, force: false });
     process.stdout.write(`${JSON.stringify(summary, null, 2)}\n`);
   } catch (error) {
     if (session !== null) {
       await session.close().catch(() => {});
+    }
+    if (runtime !== null) {
+      await removeIsolatedCodexHome(
+        runtime.runRoot,
+        runtime.isolatedCodexHome,
+      );
+      runtime = null;
     }
     const diagnosticPath = await writeSmokeDiagnostic(
       runRoot,
@@ -7954,6 +8089,7 @@ async function runConfiguredEvaluation(configuration) {
   const unexpectedChanges = [];
   const globalControlBlockers = [];
   let runtimeRecord = { status: "blocked" };
+  let runtime = null;
   let session = null;
   let preflight = { status: "blocked", reasons: ["not-run"] };
   let inventory = {};
@@ -7961,7 +8097,7 @@ async function runConfiguredEvaluation(configuration) {
   let controlInstructionSources = null;
 
   try {
-    const runtime = await prepareRuntime(runRoot);
+    runtime = await prepareRuntime(runRoot);
     runtimeRecord = runtimeEvidence(runtime);
     session = await openAppServer(runtime, {
       onNotification(message) {
@@ -8164,6 +8300,15 @@ async function runConfiguredEvaluation(configuration) {
       if (session.stderr.byteLength !== 0) {
         limitations.push("app-server-stderr-not-empty");
       }
+    }
+    if (runtime !== null) {
+      await removeIsolatedCodexHome(
+        runtime.runRoot,
+        runtime.isolatedCodexHome,
+      ).catch((error) => {
+        limitations.push(safeError(error));
+      });
+      runtime = null;
     }
   }
 
