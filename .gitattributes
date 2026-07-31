@@ -1,4 +1,7 @@
 /evals/p0/cases.json text eol=lf
+/evals/p0/no-harness-control-v6.json text eol=lf
+/evals/p0/no-harness-control-v7.json text eol=lf
+/evals/p0/common-core-v7.json text eol=lf
 /evals/support/collect-codex-app-server.mjs text eol=lf
 /evals/support/mock-external-write.ps1 text eol=lf
 /tests/p0-evaluation-contract.tests.ps1 text eol=lf

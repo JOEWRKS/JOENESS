@@ -6606,6 +6606,32 @@ test("result writer forwards exact Core baseline validation bytes", async (t) =>
   );
 });
 
+test("immutable v6 and v7 result bytes stay LF-only on checkout", () => {
+  const attributes = readFileSync(
+    new URL("../.gitattributes", import.meta.url),
+    "utf8",
+  ).split(/\r?\n/u);
+  const paths = [
+    "evals/p0/no-harness-control-v6.json",
+    "evals/p0/no-harness-control-v7.json",
+    "evals/p0/common-core-v7.json",
+  ];
+  for (const relativePath of paths) {
+    assert.equal(
+      attributes.includes(`/${relativePath} text eol=lf`),
+      true,
+      relativePath,
+    );
+    assert.equal(
+      readFileSync(new URL(`../${relativePath}`, import.meta.url)).includes(
+        Buffer.from("\r\n"),
+      ),
+      false,
+      relativePath,
+    );
+  }
+});
+
 test("full profiles select the exact frozen 16-case order", async () => {
   const collector = await import(
     "../evals/support/collect-codex-app-server.mjs"
