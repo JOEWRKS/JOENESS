@@ -476,6 +476,103 @@ test("result writer rejects a symbolic parent instead of escaping its directory"
   await assert.rejects(readFile(path.join(outside, "result.json")), /ENOENT/);
 });
 
+test("diagnostic mode writes one sanitized patch-evidence failure receipt", async () => {
+  const runner = await import("../evals/support/run-common-core-coding-ab.mjs");
+  assert.equal(
+    typeof runner.writePatchEvidenceFailureReceipt,
+    "function",
+    "diagnostic failure receipt writer must exist",
+  );
+  assert.equal(
+    runner.DIAGNOSTIC_MODE,
+    "diagnose-v1-coding-patch-evidence-r1",
+  );
+  assert.deepEqual(parseCli([runner.DIAGNOSTIC_MODE]), {
+    mode: runner.DIAGNOSTIC_MODE,
+  });
+
+  const root = await mkdtemp(path.join(tmpdir(), "coding-ab-diagnostic-"));
+  const authFile = path.join(root, "auth.json");
+  const destination = path.join(root, "receipts", "failure.json");
+  await writeFile(
+    authFile,
+    JSON.stringify({ access_token: "secret-token-1234567890" }),
+  );
+  const workspace = path.join(root, "case-root", "workspace");
+  let error;
+  try {
+    validatePatchEvidence({
+      workspace,
+      reportedPaths: [],
+      gitPaths: ["src/outside.mjs"],
+      snapshotPaths: ["src/target.mjs"],
+      allowedPaths: ["src/target.mjs"],
+    });
+    assert.fail("patch evidence rejection was expected");
+  } catch (caught) {
+    error = caught;
+  }
+  assert.match(error.message, /patch evidence/);
+
+  await runner.writePatchEvidenceFailureReceipt({
+    destination,
+    authFile,
+    mode: "diagnose-v1-coding-patch-evidence-r1",
+    runId: "diagnostic-run-id",
+    sourceHead: "0123456789abcdef",
+    candidateId: "v1",
+    candidateSha256: "abcdef0123456789",
+    caseId: "feature-immutable-update",
+    caseIndex: 0,
+    codexProcess: {
+      exitCode: 0,
+      signal: null,
+      wallClockMs: 1234,
+      stdout: Buffer.from('{"type":"turn.completed"}\n'),
+    },
+    diff: {
+      bytes: 12,
+      sha256: "diff-sha256",
+    },
+    error,
+  });
+
+  assert.deepEqual(JSON.parse(await readFile(destination, "utf8")), {
+    schemaVersion: 1,
+    kind: "common-core-coding-diagnostic-failure-receipt",
+    diagnostic: {
+      mode: "diagnose-v1-coding-patch-evidence-r1",
+      runId: "diagnostic-run-id",
+    },
+    source: { head: "0123456789abcdef" },
+    candidate: { id: "v1", sha256: "abcdef0123456789" },
+    case: { id: "feature-immutable-update", index: 0 },
+    failureStage: "patch-evidence-validation",
+    codex: { exitCode: 0, signal: null, wallClockMs: 1234 },
+    evidence: {
+      jsonl: {
+        bytes: 26,
+        sha256:
+          createHash("sha256")
+            .update('{"type":"turn.completed"}\n')
+            .digest("hex"),
+      },
+      diff: { bytes: 12, sha256: "diff-sha256" },
+    },
+    patchEvidence: {
+      reported: [],
+      git: ["src/outside.mjs"],
+      snapshot: ["src/target.mjs"],
+      allowed: ["src/target.mjs"],
+      reportedEmpty: true,
+      forbiddenPath: false,
+      gitOutsideAllowed: true,
+      reportedGitMismatch: true,
+      snapshotGitMismatch: true,
+    },
+  });
+});
+
 test("smoke proves every fixture fails before and passes after its reference edit without a model call", async () => {
   const report = await runSmoke();
   assert.equal(report.modelCalls, 0);

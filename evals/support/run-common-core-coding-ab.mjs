@@ -114,9 +114,11 @@ export const RUN_MODES = Object.freeze([
   "run-v2-coding-ab-r2",
   "run-v1-coding-ab-r2",
 ]);
+export const DIAGNOSTIC_MODE = "diagnose-v1-coding-patch-evidence-r1";
+const CLI_MODES = Object.freeze([...RUN_MODES, DIAGNOSTIC_MODE]);
 
-const RUN_CONFIGS = Object.freeze(
-  Object.fromEntries(
+const RUN_CONFIGS = Object.freeze({
+  ...Object.fromEntries(
     RUN_MODES.map((mode) => {
       const match = /^run-(v[12])-coding-ab-r([12])$/u.exec(mode);
       return [
@@ -130,10 +132,24 @@ const RUN_CONFIGS = Object.freeze(
       ];
     }),
   ),
-);
+  [DIAGNOSTIC_MODE]: Object.freeze({
+    id: DIAGNOSTIC_MODE,
+    candidateId: "v1",
+    repetition: 1,
+    diagnostic: true,
+    resultRelativePath:
+      "evals/coding/diagnostics/diagnose-v1-coding-patch-evidence-r1-result.json",
+    failureReceiptRelativePath:
+      "evals/coding/diagnostics/diagnose-v1-coding-patch-evidence-r1-failure-receipt.json",
+  }),
+});
 
 function sha256(value) {
   return createHash("sha256").update(value).digest("hex");
+}
+
+function jsonBytes(value) {
+  return Buffer.from(`${JSON.stringify(value, null, 2)}\n`);
 }
 
 function comparablePath(value) {
@@ -987,16 +1003,31 @@ export function validatePatchEvidence({
     relative.startsWith(".git/") ||
     relative === "grader" ||
     relative.startsWith("grader/");
+  const diagnostics = {
+    reported,
+    git,
+    snapshot,
+    allowed,
+    reportedEmpty: reported.length === 0,
+    forbiddenPath: [...reported, ...git, ...snapshot].some(forbidden),
+    gitOutsideAllowed: git.some((relative) => !allowed.includes(relative)),
+    reportedGitMismatch:
+      JSON.stringify(reported) !== JSON.stringify(git),
+    snapshotGitMismatch:
+      JSON.stringify(snapshot) !== JSON.stringify(git),
+  };
   if (
-    reported.length === 0 ||
-    reported.some(forbidden) ||
-    git.some(forbidden) ||
-    snapshot.some(forbidden) ||
-    git.some((relative) => !allowed.includes(relative)) ||
-    JSON.stringify(reported) !== JSON.stringify(git) ||
-    JSON.stringify(snapshot) !== JSON.stringify(git)
+    diagnostics.reportedEmpty ||
+    diagnostics.forbiddenPath ||
+    diagnostics.gitOutsideAllowed ||
+    diagnostics.reportedGitMismatch ||
+    diagnostics.snapshotGitMismatch
   ) {
-    throw new Error("patch evidence does not match the exact allowed paths");
+    const error = new Error(
+      "patch evidence does not match the exact allowed paths",
+    );
+    error.patchEvidence = diagnostics;
+    throw error;
   }
   return git;
 }
@@ -1287,11 +1318,15 @@ async function readBoundedFile(file, limit) {
 
 async function runLiveCase({
   item,
+  caseIndex,
   candidate,
   executable,
   codexVersion,
   sourceCodexHome,
   runId,
+  diagnosticMode,
+  failureReceiptPath,
+  sourceHead,
 }) {
   const ownedRoot = await mkdtemp(path.join(tmpdir(), "joewrks-coding-ab-"));
   const isolatedParent = path.join(sourceCodexHome, ".eval-runtime");
@@ -1375,13 +1410,34 @@ async function runLiveCase({
       beforeTree.working,
       afterTree.working,
     );
-    const validatedChangedPaths = validatePatchEvidence({
-      workspace: materialized.workspace,
-      reportedPaths: parsed.fileChangePaths,
-      gitPaths: changes.changedPaths,
-      snapshotPaths,
-      allowedPaths: item.allowedChangedPaths,
-    });
+    let validatedChangedPaths;
+    try {
+      validatedChangedPaths = validatePatchEvidence({
+        workspace: materialized.workspace,
+        reportedPaths: parsed.fileChangePaths,
+        gitPaths: changes.changedPaths,
+        snapshotPaths,
+        allowedPaths: item.allowedChangedPaths,
+      });
+    } catch (error) {
+      if (failureReceiptPath && error?.patchEvidence) {
+        await writePatchEvidenceFailureReceipt({
+          destination: failureReceiptPath,
+          authFile: path.join(isolatedCodexHome, "auth.json"),
+          mode: diagnosticMode,
+          runId,
+          sourceHead,
+          candidateId: candidate.id,
+          candidateSha256: candidate.actualSha256,
+          caseId: item.id,
+          caseIndex,
+          codexProcess,
+          diff: changes.diff,
+          error,
+        });
+      }
+      throw error;
+    }
     await assertSafeImplementationFiles(
       materialized.workspace,
       validatedChangedPaths,
@@ -1548,6 +1604,14 @@ async function runLive(mode) {
   if (await exists(resultPath)) {
     throw new Error(`result already exists: ${config.resultRelativePath}`);
   }
+  const failureReceiptPath = config.failureReceiptRelativePath
+    ? containedPath(REPOSITORY_ROOT, config.failureReceiptRelativePath)
+    : null;
+  if (failureReceiptPath && (await exists(failureReceiptPath))) {
+    throw new Error(
+      `failure receipt already exists: ${config.failureReceiptRelativePath}`,
+    );
+  }
   const [catalog, source, candidate] = await Promise.all([
     loadCaseCatalog(),
     captureSource(),
@@ -1558,15 +1622,19 @@ async function runLive(mode) {
   const { executable, version } = await resolveCodexExecutable(sourceCodexHome);
   const runId = randomUUID();
   const cases = [];
-  for (const item of catalog.cases) {
+  for (const [caseIndex, item] of catalog.cases.entries()) {
     cases.push(
       await runLiveCase({
         item,
+        caseIndex,
         candidate,
         executable,
         codexVersion: version,
         sourceCodexHome,
         runId,
+        diagnosticMode: config.diagnostic ? config.id : null,
+        failureReceiptPath,
+        sourceHead: source.head,
       }),
     );
   }
@@ -1587,7 +1655,9 @@ async function runLive(mode) {
   }
   const result = {
     schemaVersion: 1,
-    kind: "common-core-coding-ab",
+    kind: config.diagnostic
+      ? "common-core-coding-diagnostic"
+      : "common-core-coding-ab",
     id: config.id,
     runId,
     recordedAt: new Date().toISOString(),
@@ -1683,26 +1753,75 @@ async function runLive(mode) {
   return { resultPath, result };
 }
 
-export async function writeExclusiveJson(destination, value) {
+export async function writePatchEvidenceFailureReceipt({
+  destination,
+  authFile,
+  mode,
+  runId,
+  sourceHead,
+  candidateId,
+  candidateSha256,
+  caseId,
+  caseIndex,
+  codexProcess,
+  diff,
+  error,
+}) {
+  if (!error?.patchEvidence) {
+    throw new TypeError("patch evidence diagnostics are required");
+  }
+  const receipt = {
+    schemaVersion: 1,
+    kind: "common-core-coding-diagnostic-failure-receipt",
+    diagnostic: { mode, runId },
+    source: { head: sourceHead },
+    candidate: { id: candidateId, sha256: candidateSha256 },
+    case: { id: caseId, index: caseIndex },
+    failureStage: "patch-evidence-validation",
+    codex: {
+      exitCode: codexProcess.exitCode,
+      signal: codexProcess.signal,
+      wallClockMs: codexProcess.wallClockMs,
+    },
+    evidence: {
+      jsonl: {
+        bytes: codexProcess.stdout.length,
+        sha256: sha256(codexProcess.stdout),
+      },
+      diff: {
+        bytes: diff.bytes,
+        sha256: diff.sha256,
+      },
+    },
+    patchEvidence: error.patchEvidence,
+  };
+  const bytes = jsonBytes(receipt);
+  await assertNoCredentialLeak(authFile, [bytes]);
+  await writeExclusiveBytes(destination, bytes);
+}
+
+async function writeExclusiveBytes(destination, bytes) {
   const parent = path.dirname(destination);
   await mkdir(parent, { recursive: true });
   if (comparablePath(await realpath(parent)) !== comparablePath(parent)) {
     throw new Error("result parent contains a symbolic link");
   }
-  await writeFile(destination, `${JSON.stringify(value, null, 2)}\n`, {
-    flag: "wx",
-  });
+  await writeFile(destination, bytes, { flag: "wx" });
+}
+
+export async function writeExclusiveJson(destination, value) {
+  await writeExclusiveBytes(destination, jsonBytes(value));
 }
 
 export function parseCli(argv) {
   if (
     argv.length === 1 &&
-    (argv[0] === "smoke" || RUN_MODES.includes(argv[0]))
+    (argv[0] === "smoke" || CLI_MODES.includes(argv[0]))
   ) {
     return { mode: argv[0] };
   }
   throw new Error(
-    `usage: node ${RUNNER_RELATIVE_PATH} <${["smoke", ...RUN_MODES].join("|")}>`,
+    `usage: node ${RUNNER_RELATIVE_PATH} <${["smoke", ...CLI_MODES].join("|")}>`,
   );
 }
 
