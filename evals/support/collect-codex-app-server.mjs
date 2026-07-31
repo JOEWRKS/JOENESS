@@ -1504,19 +1504,28 @@ const REQUIRED_SCHEMA_TOKENS = [
   '"windowsSandbox/readiness"',
 ];
 
-const ISOLATED_CODEX_HOME_DIRECTORY = "controller-codex-home";
+const ISOLATED_CODEX_HOME_SUFFIX = "-controller-codex-home";
 const ISOLATED_CODEX_HOME_FILES = Object.freeze([
   "auth.json",
   "config.toml",
 ]);
 
+function defaultIsolatedCodexHomeParent() {
+  return path.join(
+    path.dirname(REPOSITORY_ROOT),
+    ".joewrks-eval-runtime",
+  );
+}
+
 export async function removeIsolatedCodexHome(
   runRoot,
   isolatedCodexHome,
+  isolatedParent = defaultIsolatedCodexHomeParent(),
 ) {
+  const resolvedRunRoot = path.resolve(runRoot);
   const expected = path.join(
-    path.resolve(runRoot),
-    ISOLATED_CODEX_HOME_DIRECTORY,
+    path.resolve(isolatedParent),
+    `${path.basename(resolvedRunRoot)}${ISOLATED_CODEX_HOME_SUFFIX}`,
   );
   if (comparablePath(isolatedCodexHome) !== comparablePath(expected)) {
     throw new Error("isolated Codex home cleanup path is invalid");
@@ -1539,12 +1548,14 @@ export async function removeIsolatedCodexHome(
 export async function materializeIsolatedCodexHome(
   runRoot,
   sourceCodexHome,
+  isolatedParent = defaultIsolatedCodexHomeParent(),
 ) {
   const resolvedRunRoot = path.resolve(runRoot);
   const resolvedSource = path.resolve(sourceCodexHome);
+  const resolvedIsolatedParent = path.resolve(isolatedParent);
   const isolatedCodexHome = path.join(
-    resolvedRunRoot,
-    ISOLATED_CODEX_HOME_DIRECTORY,
+    resolvedIsolatedParent,
+    `${path.basename(resolvedRunRoot)}${ISOLATED_CODEX_HOME_SUFFIX}`,
   );
   const runRootStat = await lstat(resolvedRunRoot);
   if (
@@ -1553,6 +1564,14 @@ export async function materializeIsolatedCodexHome(
     comparablePath(resolvedSource) === comparablePath(isolatedCodexHome)
   ) {
     throw new Error("isolated Codex home roots are invalid");
+  }
+  await mkdir(resolvedIsolatedParent, { recursive: true });
+  const isolatedParentStat = await lstat(resolvedIsolatedParent);
+  if (
+    !isolatedParentStat.isDirectory() ||
+    isolatedParentStat.isSymbolicLink()
+  ) {
+    throw new Error("isolated Codex home parent is invalid");
   }
   await mkdir(isolatedCodexHome);
   try {
@@ -1573,6 +1592,7 @@ export async function materializeIsolatedCodexHome(
     await removeIsolatedCodexHome(
       resolvedRunRoot,
       isolatedCodexHome,
+      resolvedIsolatedParent,
     );
     throw error;
   }

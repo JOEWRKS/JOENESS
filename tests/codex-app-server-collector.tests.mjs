@@ -142,6 +142,7 @@ test("isolated Codex home copies runtime identity but excludes global instructio
   const parent = await createTestRoot(t);
   const sourceCodexHome = path.join(parent, "source-codex-home");
   const runRoot = path.join(parent, "run");
+  const isolatedParent = path.join(parent, "isolated-runtime");
   await mkdir(sourceCodexHome);
   await mkdir(runRoot);
   await writeFile(
@@ -163,6 +164,11 @@ test("isolated Codex home copies runtime identity but excludes global instructio
   const isolatedCodexHome = await materializeIsolatedCodexHome(
     runRoot,
     sourceCodexHome,
+    isolatedParent,
+  );
+  assert.equal(
+    path.dirname(isolatedCodexHome),
+    isolatedParent,
   );
   assert.equal(
     await readFile(path.join(isolatedCodexHome, "auth.json"), "utf8"),
@@ -177,7 +183,11 @@ test("isolated Codex home copies runtime identity but excludes global instructio
     { code: "ENOENT" },
   );
 
-  await removeIsolatedCodexHome(runRoot, isolatedCodexHome);
+  await removeIsolatedCodexHome(
+    runRoot,
+    isolatedCodexHome,
+    isolatedParent,
+  );
   await assert.rejects(readFile(isolatedCodexHome), { code: "ENOENT" });
   assert.equal(
     await readFile(path.join(sourceCodexHome, "auth.json"), "utf8"),
