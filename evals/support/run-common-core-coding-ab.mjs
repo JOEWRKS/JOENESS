@@ -869,7 +869,9 @@ export function parseCodexJsonl(value) {
   };
 }
 
-export function buildCodexArgs(workspace, finalOutputPath) {
+export function buildCodexArgs(workspace, finalOutputPath, mode = null) {
+  const useUnelevatedSandbox =
+    V9_RUN_MODES.includes(mode) || V10_RUN_MODES.includes(mode);
   return [
     "exec",
     "--ignore-user-config",
@@ -881,8 +883,9 @@ export function buildCodexArgs(workspace, finalOutputPath) {
     "gpt-5.6-sol",
     "--sandbox",
     "workspace-write",
-    "-c",
-    'windows.sandbox="unelevated"',
+    ...(useUnelevatedSandbox
+      ? ["-c", 'windows.sandbox="unelevated"']
+      : []),
     "-c",
     'approval_policy="never"',
     "-c",
@@ -1340,6 +1343,7 @@ async function readBoundedFile(file, limit) {
 }
 
 async function runLiveCase({
+  mode,
   item,
   caseIndex,
   candidate,
@@ -1395,7 +1399,7 @@ async function runLiveCase({
     const finalOutputPath = path.join(ownedRoot, "final-message.txt");
     const codexProcess = await runBoundedProcess(
       executable,
-      buildCodexArgs(materialized.workspace, finalOutputPath),
+      buildCodexArgs(materialized.workspace, finalOutputPath, mode),
       {
         cwd: materialized.workspace,
         env: buildChildEnvironment(
@@ -1648,6 +1652,7 @@ async function runLive(mode) {
   for (const [caseIndex, item] of catalog.cases.entries()) {
     cases.push(
       await runLiveCase({
+        mode,
         item,
         caseIndex,
         candidate,

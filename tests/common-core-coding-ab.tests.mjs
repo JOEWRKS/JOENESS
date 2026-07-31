@@ -8,6 +8,7 @@ import test from "node:test";
 import {
   RUN_MODES,
   V9_RUN_MODES,
+  V10_RUN_MODES,
   assertNoCredentialLeak,
   assertNoSymlinks,
   assertSafeImplementationFiles,
@@ -48,13 +49,38 @@ const EXPECTED_V10_MODES = [
   "run-v1-coding-ab-v10-r2",
 ];
 
-test("v9 coding modes use the unelevated Windows sandbox override", () => {
+test("only repaired coding modes use the unelevated Windows sandbox override", () => {
   assert.deepEqual(RUN_MODES, EXPECTED_MODES);
   assert.deepEqual(V9_RUN_MODES, EXPECTED_V9_MODES);
+  assert.deepEqual(V10_RUN_MODES, EXPECTED_V10_MODES);
+  for (const mode of EXPECTED_MODES) {
+    assert.ok(
+      !buildCodexArgs(
+        "C:\\fixture",
+        "C:\\evidence\\final.txt",
+        mode,
+      ).includes('windows.sandbox="unelevated"'),
+    );
+  }
   for (const mode of EXPECTED_V9_MODES) {
     assert.deepEqual(parseCli([mode]), { mode });
+    assert.ok(
+      buildCodexArgs(
+        "C:\\fixture",
+        "C:\\evidence\\final.txt",
+        mode,
+      ).includes('windows.sandbox="unelevated"'),
+    );
   }
-  assert.ok(buildCodexArgs("C:\\fixture", "C:\\evidence\\final.txt").includes('windows.sandbox="unelevated"'));
+  for (const mode of EXPECTED_V10_MODES) {
+    assert.ok(
+      buildCodexArgs(
+        "C:\\fixture",
+        "C:\\evidence\\final.txt",
+        mode,
+      ).includes('windows.sandbox="unelevated"'),
+    );
+  }
 });
 
 test("CLI exposes exactly two repetitions per candidate", () => {

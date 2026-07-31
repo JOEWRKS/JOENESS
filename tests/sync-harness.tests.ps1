@@ -665,7 +665,7 @@ function Test-RemoveRollback {
         $callback = {
             param($operation)
             $capture.Path = [string] $operation.TargetPath
-            Write-Bytes $capture.Path $changedBytes
+            [IO.File]::WriteAllBytes($capture.Path, $changedBytes)
             throw 'concurrent remove edit'
         }.GetNewClosure()
         $result = Invoke-JoewrksHarnessSync -Remove -CodexHome $f.CodexHome -AgentsHome $f.AgentsHome -BackupRoot $f.BackupRoot -AfterReplace $callback
@@ -1447,7 +1447,8 @@ function Test-UncommittedIdenticalCreation {
         $externalBytes = [IO.File]::ReadAllBytes((Join-Path $f.SourceRoot 'skills\joewrks-design-frontend\SKILL.md'))
         $callback = {
             param($replacement)
-            Write-Bytes $externalTarget $externalBytes
+            [IO.Directory]::CreateDirectory([IO.Path]::GetDirectoryName($externalTarget)) | Out-Null
+            [IO.File]::WriteAllBytes($externalTarget, $externalBytes)
         }.GetNewClosure()
         $result = Invoke-JoewrksHarnessSync -Apply -IncludeDesignFrontend -CodexHome $f.CodexHome -AgentsHome $f.AgentsHome -BackupRoot $f.BackupRoot -AfterReplace $callback
         Assert-Equal $result.status 'unknown' 'identical concurrent creation reports unknown'
