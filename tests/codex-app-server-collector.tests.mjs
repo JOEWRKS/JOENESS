@@ -6479,6 +6479,14 @@ test("Core candidate validation stays mechanical and non-personal", async () => 
   assert.equal(typeof validateCoreCandidate, "function");
   const valid = validCoreCandidateText();
   assert.doesNotThrow(() => validateCoreCandidate(Buffer.from(valid)));
+  const activeCandidate = readFileSync(
+    new URL("../evals/candidates/common-core-v1.md", import.meta.url),
+  );
+  const slimCandidate = readFileSync(
+    new URL("../evals/candidates/common-core-v2.md", import.meta.url),
+  );
+  assert.doesNotThrow(() => validateCoreCandidate(slimCandidate));
+  assert.ok(slimCandidate.length < activeCandidate.length);
   assert.throws(
     () =>
       validateCoreCandidate(

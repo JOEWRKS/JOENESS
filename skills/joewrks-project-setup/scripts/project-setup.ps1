@@ -74,7 +74,12 @@ function Assert-ProjectNoReparsePoint {
     foreach ($segment in @($relative -split '[\\/]')) {
         if ([string]::IsNullOrEmpty($segment)) { continue }
         $current = Join-Path $current $segment
-        $item = Get-Item -LiteralPath $current -Force -ErrorAction SilentlyContinue
+        $item = $null
+        try {
+            $item = Get-Item -LiteralPath $current -Force -ErrorAction Stop
+        } catch [Management.Automation.ItemNotFoundException] {
+            $item = $null
+        }
         if ($null -ne $item -and ($item.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0) {
             throw "$Label contains a reparse point: $current"
         }
@@ -93,7 +98,7 @@ function Resolve-ProjectGitRoot {
     $root = [IO.Path]::GetFullPath($lines[0])
     Assert-ProjectNoReparsePoint $root 'Git root'
     $rootBoundary = $root.TrimEnd('\', '/') + [IO.Path]::DirectorySeparatorChar
-    if ($fullPath -cne $root -and -not $fullPath.StartsWith($rootBoundary, [StringComparison]::OrdinalIgnoreCase)) {
+    if (-not [string]::Equals($fullPath, $root, [StringComparison]::OrdinalIgnoreCase) -and -not $fullPath.StartsWith($rootBoundary, [StringComparison]::OrdinalIgnoreCase)) {
         throw 'ProjectPath is outside the resolved Git root'
     }
     $root
@@ -197,7 +202,7 @@ function Invoke-JoewrksProjectSetup {
 
     try {
         $normalizedExpectedRoot = [IO.Path]::GetFullPath($ExpectedRoot)
-        if ($root -cne $normalizedExpectedRoot) { throw 'Git root changed after check' }
+        if (-not [string]::Equals($root, $normalizedExpectedRoot, [StringComparison]::OrdinalIgnoreCase)) { throw 'Git root changed after check' }
         if ($ExpectedTargetHash -cne 'absent' -and $ExpectedTargetHash -cnotmatch '\A[0-9a-f]{64}\z') {
             throw 'ExpectedTargetHash is not absent or a lowercase SHA-256'
         }

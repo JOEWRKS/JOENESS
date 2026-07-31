@@ -1,6 +1,11 @@
 # Personal Script-First Harness V2 Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **역사적 완료 계획 — 실행하지 마십시오.** 구현과 검토는 revision
+> `6bb7163`까지 완료됐습니다. 아래의 미체크 항목은 당시 실행 순서를 보존한
+> 기록이지 남은 작업이 아닙니다. 현재 기준은
+> `../specs/2026-07-30-personal-script-first-harness-design.md`이며, 후속 감사
+> 보강은 `2026-07-31-common-core-slim-candidate-and-audit-fixes.md`에서
+> 추적합니다.
 
 **Goal:** Windows Codex 사용자가 기존 `harness.ps1` 한 진입점으로 Common Core, 개인 파일럿 스킬과 runtime을 안전하게 설치·업데이트·제거하고, 프로젝트별 규칙은 명시 호출한 결정론적 helper로만 적용하게 한다.
 

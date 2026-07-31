@@ -105,8 +105,8 @@ const EXPECTED_PROJECT_SETUP_SKILL = {
     },
     {
       localPath: 'skills/joewrks-project-setup/scripts/project-setup.ps1',
-      bytes: 17251,
-      sha256: 'd02a731ef8dd8855af083204b29d6ac8b19c45c76fab45b604eecb91ea564946',
+      bytes: 17495,
+      sha256: '4ffc548078a5c87357fd0e4e63538567ea2666f118243a0558bff29278d13105',
       exactUpstreamCopy: false,
     },
   ],

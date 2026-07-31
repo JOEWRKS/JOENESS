@@ -273,6 +273,44 @@ function Test-RootAndReparseBlockers {
         if (Test-Path -LiteralPath $overrideJunction) { [IO.Directory]::Delete($overrideJunction) }
         Remove-ProjectFixture $f
     }
+
+    $f = New-ProjectFixture
+    try {
+        . $Implementation
+        $before = Get-TreeHashes $f.Project
+        function Get-Item {
+            [CmdletBinding()]
+            param([string] $LiteralPath, [switch] $Force)
+            Write-Error 'injected reparse inspection failure'
+        }
+        $result = Invoke-JoewrksProjectSetup -Check -ProjectPath $f.Project
+        Assert-Equal $result.status 'blocked' 'reparse inspection failure is blocked'
+        Assert-True $result.blockers[0].message.Contains('injected reparse inspection failure') 'inspection failure is reported'
+        Assert-TreeEqual (Get-TreeHashes $f.Project) $before 'reparse inspection failure is read-only'
+    } finally { Remove-ProjectFixture $f }
+}
+
+function Test-WindowsPathCasing {
+    $f = New-ProjectFixture
+    try {
+        $alternateProjectPath = $f.Project.ToUpperInvariant()
+        Assert-True ($alternateProjectPath -cne $f.Project -and $alternateProjectPath -ieq $f.Project) 'fixture has a casing-only project path'
+        $before = Get-TreeHashes $f.Project
+        $check = Invoke-RawProjectHelper @('-Check', '-ProjectPath', $alternateProjectPath)
+        Assert-Equal $check.ExitCode 0 'casing-only ProjectPath succeeds'
+        Assert-Equal $check.Result.status 'ready' 'casing-only ProjectPath is the same Git root'
+        Assert-TreeEqual (Get-TreeHashes $f.Project) $before 'casing-only check is read-only'
+    } finally { Remove-ProjectFixture $f }
+
+    $f = New-ProjectFixture
+    try {
+        $check = Invoke-ProjectHelper $f Check
+        $alternateExpectedRoot = $check.Result.projectRoot.ToUpperInvariant()
+        Assert-True ($alternateExpectedRoot -cne $check.Result.projectRoot -and $alternateExpectedRoot -ieq $check.Result.projectRoot) 'fixture has a casing-only expected root'
+        $apply = Invoke-ProjectHelper $f Apply $alternateExpectedRoot $check.Result.targetHash (ConvertTo-BodyBase64 'body')
+        Assert-Equal $apply.ExitCode 0 'casing-only ExpectedRoot succeeds'
+        Assert-Equal $apply.Result.status 'current' 'casing-only ExpectedRoot is the checked Git root'
+    } finally { Remove-ProjectFixture $f }
 }
 
 function Test-RawCliValidation {
@@ -386,6 +424,7 @@ Test-PreservesBomCrLfAndOutsideBytes
 Test-InputAndPreflightBlockers
 Test-StaleSnapshotsAndWrongRoot
 Test-RootAndReparseBlockers
+Test-WindowsPathCasing
 Test-RawCliValidation
 Test-ConditionalRollback
 
