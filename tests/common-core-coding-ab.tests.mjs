@@ -6,6 +6,7 @@ import path from "node:path";
 import test from "node:test";
 
 import {
+  LITE_RUN_MODES,
   RUN_MODES,
   V9_RUN_MODES,
   V10_RUN_MODES,
@@ -16,6 +17,7 @@ import {
   buildGraderNodeArgs,
   buildChildEnvironment,
   buildCodexArgs,
+  buildLiteCaseCatalog,
   buildSubjectPrompt,
   claimsAutonomousTestExecution,
   copyIsolatedCodexHome,
@@ -47,6 +49,13 @@ const EXPECTED_V10_MODES = [
   "run-v2-coding-ab-v10-r1",
   "run-v2-coding-ab-v10-r2",
   "run-v1-coding-ab-v10-r2",
+];
+
+const EXPECTED_LITE_MODES = [
+  "run-lite-control-r1",
+  "run-lite-candidate-r1",
+  "run-lite-candidate-r2",
+  "run-lite-control-r2",
 ];
 
 test("only repaired coding modes use the unelevated Windows sandbox override", () => {
@@ -93,6 +102,33 @@ test("CLI exposes exactly two repetitions per candidate", () => {
     assert.deepEqual(parseCli([mode]), { mode });
   }
   assert.throws(() => parseCli(["run-v1-coding-ab-r3"]), /usage:/);
+});
+
+test("Lite modes use ABBA order and a rough two-case profile", async () => {
+  assert.deepEqual(LITE_RUN_MODES, EXPECTED_LITE_MODES);
+  for (const mode of EXPECTED_LITE_MODES) {
+    assert.deepEqual(parseCli([mode]), { mode });
+    assert.ok(
+      buildCodexArgs("C:\\fixture", "C:\\final.txt", mode).includes(
+        'windows.sandbox="unelevated"',
+      ),
+    );
+  }
+  const full = await loadCaseCatalog();
+  const lite = buildLiteCaseCatalog(full);
+  assert.deepEqual(
+    lite.cases.map(({ id }) => id),
+    ["maintenance-shared-parser", "frontend-responsive-accessible"],
+  );
+  assert.equal(full.cases.length, 3);
+  assert.equal(
+    lite.cases[0].prompt,
+    "limit 파싱 버그를 고쳐줘. 기존 호출부 API와 의존성은 그대로 유지해.",
+  );
+  assert.equal(
+    lite.cases[1].prompt,
+    "이 프로젝트 브라우저를 모바일과 데스크톱에서 실제로 쓸 수 있게 완성해줘. 기존 제목과 의존성 없는 구성을 유지해.",
+  );
 });
 
 test("Codex invocation exposes only the internal patch surface", () => {

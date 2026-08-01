@@ -98,6 +98,14 @@ const SAFE_ENVIRONMENT_KEYS = Object.freeze([
   "windir",
 ]);
 const CANDIDATES = Object.freeze({
+  control: Object.freeze({
+    path: "evals/candidates/no-common-core.md",
+    sha256: "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+  }),
+  lite: Object.freeze({
+    path: "evals/candidates/common-core-lite-v1.md",
+    sha256: "a510cc8c03d51ea37813324ffac0ca38c5a3b6adc032f35c8af4bd6628a70e2b",
+  }),
   v1: Object.freeze({
     path: "evals/candidates/common-core-v1.md",
     sha256: "5aebc74bc795891c43bf785d9b34ae4d35d4a40bf46eddef3f6246d75919a495",
@@ -126,11 +134,18 @@ export const V10_RUN_MODES = Object.freeze([
   "run-v2-coding-ab-v10-r2",
   "run-v1-coding-ab-v10-r2",
 ]);
+export const LITE_RUN_MODES = Object.freeze([
+  "run-lite-control-r1",
+  "run-lite-candidate-r1",
+  "run-lite-candidate-r2",
+  "run-lite-control-r2",
+]);
 export const DIAGNOSTIC_MODE = "diagnose-v1-coding-patch-evidence-r1";
 const CLI_MODES = Object.freeze([
   ...RUN_MODES,
   ...V9_RUN_MODES,
   ...V10_RUN_MODES,
+  ...LITE_RUN_MODES,
   DIAGNOSTIC_MODE,
 ]);
 
@@ -144,6 +159,22 @@ const RUN_CONFIGS = Object.freeze({
           id: mode,
           candidateId: match[1],
           repetition: Number(match[2]),
+          resultRelativePath: `evals/coding/results/${mode}.json`,
+        }),
+      ];
+    }),
+  ),
+  ...Object.fromEntries(
+    LITE_RUN_MODES.map((mode) => {
+      const match = /^run-lite-(control|candidate)-r([12])$/u.exec(mode);
+      const [, arm, repetition] = match;
+      return [
+        mode,
+        Object.freeze({
+          id: mode,
+          candidateId: arm === "candidate" ? "lite" : "control",
+          repetition: Number(repetition),
+          caseProfile: "lite-rough-v1",
           resultRelativePath: `evals/coding/results/${mode}.json`,
         }),
       ];
@@ -340,6 +371,21 @@ function validateCaseCatalog(catalog) {
 
 export async function loadCaseCatalog(file = CASES_PATH) {
   return validateCaseCatalog(JSON.parse(await readFile(file, "utf8")));
+}
+
+const LITE_PROMPTS = Object.freeze({
+  "maintenance-shared-parser":
+    "limit 파싱 버그를 고쳐줘. 기존 호출부 API와 의존성은 그대로 유지해.",
+  "frontend-responsive-accessible":
+    "이 프로젝트 브라우저를 모바일과 데스크톱에서 실제로 쓸 수 있게 완성해줘. 기존 제목과 의존성 없는 구성을 유지해.",
+});
+
+export function buildLiteCaseCatalog(catalog) {
+  const cases = catalog.cases
+    .filter(({ id }) => Object.hasOwn(LITE_PROMPTS, id))
+    .map((item) => ({ ...item, prompt: LITE_PROMPTS[item.id] }));
+  if (cases.length !== 2) throw new Error("Lite case profile is incomplete");
+  return { ...catalog, cases };
 }
 
 export function buildSubjectPrompt(item) {
@@ -871,7 +917,9 @@ export function parseCodexJsonl(value) {
 
 export function buildCodexArgs(workspace, finalOutputPath, mode = null) {
   const useUnelevatedSandbox =
-    V9_RUN_MODES.includes(mode) || V10_RUN_MODES.includes(mode);
+    V9_RUN_MODES.includes(mode) ||
+    V10_RUN_MODES.includes(mode) ||
+    LITE_RUN_MODES.includes(mode);
   return [
     "exec",
     "--ignore-user-config",
@@ -1639,11 +1687,15 @@ async function runLive(mode) {
       `failure receipt already exists: ${config.failureReceiptRelativePath}`,
     );
   }
-  const [catalog, source, candidate] = await Promise.all([
+  const [fullCatalog, source, candidate] = await Promise.all([
     loadCaseCatalog(),
     captureSource(),
     loadCandidate(config.candidateId),
   ]);
+  const catalog =
+    config.caseProfile === "lite-rough-v1"
+      ? buildLiteCaseCatalog(fullCatalog)
+      : fullCatalog;
   const sourceCodexHome =
     process.env.CODEX_HOME || path.join(homedir(), ".codex");
   const { executable, version } = await resolveCodexExecutable(sourceCodexHome);
@@ -1721,6 +1773,7 @@ async function runLive(mode) {
       actualSha256: candidate.actualSha256,
       bytes: candidate.bytes,
     },
+    caseProfile: config.caseProfile ?? "default",
     repetition: config.repetition,
     cases,
     totals: sumMetrics(cases),
