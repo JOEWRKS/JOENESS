@@ -476,7 +476,8 @@ function Invoke-JoewrksHarnessSync {
             $skillName = [string] $skillProperty.Name
             $manifestSkillRelativePaths[$skillName] = Get-HarnessSafeRelativePath "skills/$skillName/SKILL.md" 'Manifest skill path'
         }
-        $coreEntry = $manifest.evaluation.current.commonCore
+        $coreEntry = $manifest.activeCommonCore
+        $historicalCoreEntry = $manifest.evaluation.current.commonCore
         $corePath = Resolve-HarnessSourceFile $sourceRoot ([string] $coreEntry.path)
         if (-not (Test-Path -LiteralPath $corePath -PathType Leaf)) { throw "Missing Common Core source: $($coreEntry.path)" }
         $sourceCoreRead = Read-HarnessUtf8 $corePath
@@ -596,7 +597,7 @@ function Invoke-JoewrksHarnessSync {
             Assert-HarnessObjectShape $state.sourceIdentities.commonCore @('path', 'sha256') 'State commonCore source identity'
             if ([string] $state.sourceIdentities.commonCore.path -cne 'AGENTS.md') { throw 'State commonCore source path is invalid' }
             $stateCommonCoreSourceHash = Get-HarnessValidSha256 $state.sourceIdentities.commonCore.sha256 'State commonCore source hash'
-            if ($state.schemaVersion -eq 1 -and ($null -eq $coreEntry -or $stateCommonCoreSourceHash -cne ([string] $coreEntry.sha256).ToLowerInvariant())) {
+            if ($state.schemaVersion -eq 1 -and ($null -eq $historicalCoreEntry -or $stateCommonCoreSourceHash -cne ([string] $historicalCoreEntry.sha256).ToLowerInvariant())) {
                 throw 'V1 State commonCore source identity is not historical'
             }
 
@@ -623,7 +624,12 @@ function Invoke-JoewrksHarnessSync {
                     throw 'Installed source manifest drifted from state'
                 }
                 $installedManifest = $installedManifestRead.Text | ConvertFrom-Json
-                $installedCore = $installedManifest.evaluation.current.commonCore
+                $installedActiveCore = $installedManifest.PSObject.Properties['activeCommonCore']
+                $installedCore = if ($null -eq $installedActiveCore) {
+                    $installedManifest.evaluation.current.commonCore
+                } else {
+                    $installedActiveCore.Value
+                }
                 if ([string] $installedCore.path -cne 'AGENTS.md') { throw 'Installed manifest Common Core path is invalid' }
                 $installedCoreHash = Get-HarnessValidSha256 $installedCore.sha256 'Installed manifest Common Core hash'
                 if ($stateCommonCoreSourceHash -cne $installedCoreHash) {
@@ -638,7 +644,7 @@ function Invoke-JoewrksHarnessSync {
                     if ($installedDesignSkill.PSObject.Properties.Name -contains 'activationPolicy') {
                         throw 'V1 installed manifest design skill has a non-historical activationPolicy'
                     }
-                    if ($null -eq $coreEntry -or $installedCoreHash -cne ([string] $coreEntry.sha256).ToLowerInvariant()) {
+                    if ($null -eq $historicalCoreEntry -or $installedCoreHash -cne ([string] $historicalCoreEntry.sha256).ToLowerInvariant()) {
                         throw 'V1 installed manifest Common Core identity is not historical'
                     }
                 }

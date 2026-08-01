@@ -90,7 +90,7 @@ function New-Fixture {
     $root = Join-Path ([IO.Path]::GetTempPath()) ("joewrks-sync-" + [guid]::NewGuid().ToString('N'))
     $source = Join-Path $root 'source'
     [IO.Directory]::CreateDirectory($source) | Out-Null
-    foreach ($path in @('AGENTS.md', 'scripts\sync-harness.ps1', 'vendor\source-manifest.json') + (Get-OptionalFiles $RepositoryRoot)) { Copy-RelativeFile $RepositoryRoot $source $path }
+    foreach ($path in @('AGENTS.md', 'evals\candidates\common-core-v1.md', 'scripts\sync-harness.ps1', 'vendor\source-manifest.json') + (Get-OptionalFiles $RepositoryRoot)) { Copy-RelativeFile $RepositoryRoot $source $path }
     [pscustomobject]@{
         Root = $root; SourceRoot = $source; Script = Join-Path $source 'scripts\sync-harness.ps1'
         CodexHome = Join-Path $root 'codex'; AgentsHome = Join-Path $root 'agents'; BackupRoot = Join-Path $root 'backups'
@@ -134,10 +134,12 @@ function Write-V1FixtureState {
     param($Fixture, [switch] $WithBundle)
     $manifestPath = Join-Path $Fixture.SourceRoot 'vendor\source-manifest.json'
     $legacyManifest = [IO.File]::ReadAllText($manifestPath) | ConvertFrom-Json
+    $legacyManifest.PSObject.Properties.Remove('activeCommonCore')
+    $legacyManifest.evaluation.current.commonCore.path = 'AGENTS.md'
     $legacyManifest.activeSkills.PSObject.Properties.Remove('joewrks-project-setup')
     $legacyManifest.activeSkills.'joewrks-design-frontend'.PSObject.Properties.Remove('activationPolicy')
     $legacyManifestText = $legacyManifest | ConvertTo-Json -Depth 100
-    $corePath = Join-Path $Fixture.SourceRoot 'AGENTS.md'
+    $corePath = Join-Path $Fixture.SourceRoot 'evals\candidates\common-core-v1.md'
     $core = [IO.File]::ReadAllText($corePath).TrimEnd("`r", "`n")
     $block = "$BeginMarker`n$core`n$EndMarker"
     $agentsPath = Join-Path $Fixture.CodexHome 'AGENTS.md'
@@ -243,7 +245,7 @@ function Set-SourceCore {
     $core = Join-Path $Fixture.SourceRoot 'AGENTS.md'; Write-Utf8 $core $Text
     $manifestPath = Join-Path $Fixture.SourceRoot 'vendor\source-manifest.json'
     $manifest = Get-Content -Raw -LiteralPath $manifestPath | ConvertFrom-Json
-    $manifest.evaluation.current.commonCore.sha256 = Get-Hash $core
+    $manifest.activeCommonCore.sha256 = Get-Hash $core
     Write-Utf8 $manifestPath ($manifest | ConvertTo-Json -Depth 32)
 }
 
@@ -1140,6 +1142,42 @@ function Test-V1HistoricalTrust {
     } finally { Remove-Fixture $f }
 }
 
+function Test-LegacyV2ActiveCoreMigration {
+    $f = New-Fixture
+    try {
+        Assert-Equal (Invoke-Harness $f Apply).ExitCode 0 'legacy V2 baseline apply succeeds'
+
+        $historicalCorePath = Join-Path $f.SourceRoot 'evals\candidates\common-core-v1.md'
+        $historicalCore = [IO.File]::ReadAllText($historicalCorePath).TrimEnd("`r", "`n")
+        $agentsPath = Join-Path $f.CodexHome 'AGENTS.md'
+        Write-Utf8 $agentsPath "$BeginMarker`n$historicalCore`n$EndMarker"
+
+        $installedManifestPath = Join-Path $f.AgentsHome 'vendor\source-manifest.json'
+        $installedManifest = Get-Content -Raw -LiteralPath $installedManifestPath | ConvertFrom-Json
+        $installedManifest.PSObject.Properties.Remove('activeCommonCore')
+        $installedManifest.evaluation.current.commonCore.path = 'AGENTS.md'
+        Write-Utf8 $installedManifestPath (($installedManifest | ConvertTo-Json -Depth 100) + "`n")
+
+        $state = Get-Content -Raw -LiteralPath $f.State | ConvertFrom-Json
+        $state.sourceIdentities.commonCore.sha256 = Get-Hash $historicalCorePath
+        $state.managedBlocks.'AGENTS.md' = Get-Hash $agentsPath
+        $state.wholeFileTargets.'vendor/source-manifest.json' = Get-Hash $installedManifestPath
+        $state.sourceIdentities.bundleManifest.sha256 = Get-Hash $installedManifestPath
+        Write-Utf8 $f.State (($state | ConvertTo-Json -Depth 16) + "`n")
+
+        $check = Read-Result (Invoke-Harness $f Check) 'legacy V2 active-core migration check'
+        Assert-Equal $check.status 'ready' 'legacy V2 active-core migration is ready'
+        $apply = Read-Result (Invoke-Harness $f Apply) 'legacy V2 active-core migration apply'
+        Assert-Equal $apply.status 'current' 'legacy V2 active-core migration succeeds'
+
+        $migratedState = Get-Content -Raw -LiteralPath $f.State | ConvertFrom-Json
+        $sourceManifest = Get-Content -Raw -LiteralPath (Join-Path $f.SourceRoot 'vendor\source-manifest.json') | ConvertFrom-Json
+        Assert-Equal $migratedState.sourceIdentities.commonCore.sha256 $sourceManifest.activeCommonCore.sha256 'legacy V2 migration records the active core identity'
+        $migratedManifest = Get-Content -Raw -LiteralPath $installedManifestPath | ConvertFrom-Json
+        Assert-Equal $migratedManifest.activeCommonCore.sha256 $sourceManifest.activeCommonCore.sha256 'legacy V2 migration installs the active core pointer'
+    } finally { Remove-Fixture $f }
+}
+
 function Test-V1StateMigration {
     foreach ($case in @(
         @{ Name = 'core-only'; WithBundle = $false },
@@ -1184,7 +1222,9 @@ function Test-V1StateMigration {
         . $f.Script
         $result = Invoke-JoewrksHarnessSync -Apply -CodexHome $f.CodexHome -AgentsHome $f.AgentsHome -BackupRoot $f.BackupRoot -AfterReplace {
             param($replacement)
-            if ($replacement.TargetPath -ine $f.State) { throw 'failure during V1 target migration' }
+            if ($replacement.TargetPath.StartsWith((Join-Path $f.AgentsHome 'skills'), [StringComparison]::OrdinalIgnoreCase)) {
+                throw 'failure during V1 target migration'
+            }
         }
         Assert-Equal $result.status 'unknown' 'V1 target migration incomplete rollback is unknown'
         Assert-Equal $result.rollback.status 'incomplete' 'V1 target migration preserves created directories for inspection'
@@ -1544,6 +1584,7 @@ Test-PreflightBlockers
 Test-ManifestSkillCollisions
 Test-StateTrust
 Test-V1HistoricalTrust
+Test-LegacyV2ActiveCoreMigration
 Test-V1StateMigration
 Test-CreatedDirectoryRollbackResidue
 Test-HomeResolutionAndIdentity

@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "activeCommonCore": {"path":"AGENTS.md","sha256":"893be51a2efbc10fb5e0ab13d766eb13f383da6f22590fd54f5d3a09ca7deb7d"},
   "evaluation": {
     "state": "candidate",
     "tests": ["tests/design-vendor-integrity.tests.mjs", "vendor/ui-ux-pro-max/scripts/validate_data.py", "vendor/ui-ux-pro-max/scripts/tests/test_core.py"],
@@ -16,7 +17,7 @@
       },
       "cases": {"path":"evals/design-frontend/cases.json","sha256":"8a940cd84b4f2cbf265154c060941734ad6e983d0f49cb7dd5d06fc3df5ee1f7"},
       "router": {"path":"skills/joewrks-design-frontend/SKILL.md","sha256":"0694f0d0880c079ab50b2af2621ef37f9745eae356f0c9ebc5a1351cd0d8a67d"},
-      "commonCore": {"path":"AGENTS.md","sha256":"5aebc74bc795891c43bf785d9b34ae4d35d4a40bf46eddef3f6246d75919a495"},
+      "commonCore": {"path":"evals/candidates/common-core-v1.md","sha256":"5aebc74bc795891c43bf785d9b34ae4d35d4a40bf46eddef3f6246d75919a495"},
       "classification": "implicit-unverified",
       "hardGate": "pass",
       "outcomeReview": "human-review-required",

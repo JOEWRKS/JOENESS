@@ -841,8 +841,8 @@ test("smoke proves every fixture fails before and passes after its reference edi
   assert.equal(report.parserValidated, true);
 });
 
-test("Lite is bounded while the active V1 stays byte-identical", async () => {
-  const [control, lite, active, v1] = await Promise.all([
+test("Lite candidate stays bounded independently from the active core", async () => {
+  const [control, lite] = await Promise.all([
     readFile(
       new URL("../evals/candidates/no-common-core.md", import.meta.url),
       "utf8",
@@ -850,10 +850,6 @@ test("Lite is bounded while the active V1 stays byte-identical", async () => {
     readFile(
       new URL("../evals/candidates/common-core-lite-v1.md", import.meta.url),
       "utf8",
-    ),
-    readFile(new URL("../AGENTS.md", import.meta.url)),
-    readFile(
-      new URL("../evals/candidates/common-core-v1.md", import.meta.url),
     ),
   ]);
   assert.equal(control, "\n");
@@ -868,5 +864,4 @@ test("Lite is bounded while the active V1 stays byte-identical", async () => {
     assert.match(lite, pattern);
   }
   assert.doesNotMatch(lite, /Figma|Apple Design|UI UX Pro Max/iu);
-  assert.deepEqual(active, v1);
 });

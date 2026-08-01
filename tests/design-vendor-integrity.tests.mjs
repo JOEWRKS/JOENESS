@@ -9,6 +9,7 @@ const ROOT = path.resolve(import.meta.dirname, '..');
 const VENDOR = path.join(ROOT, 'vendor');
 const MANIFEST = path.join(VENDOR, 'source-manifest.json');
 const AGENTS = path.join(ROOT, 'AGENTS.md');
+const HISTORICAL_COMMON_CORE = path.join(ROOT, 'evals', 'candidates', 'common-core-v1.md');
 const GITATTRIBUTES = path.join(ROOT, '.gitattributes');
 const UI_FILES = [
   'SKILL.md',
@@ -140,7 +141,7 @@ const EXPECTED_HYBRID_EVALUATION = {
     sha256: '0694f0d0880c079ab50b2af2621ef37f9745eae356f0c9ebc5a1351cd0d8a67d',
   },
   commonCore: {
-    path: 'AGENTS.md',
+    path: 'evals/candidates/common-core-v1.md',
     sha256: '5aebc74bc795891c43bf785d9b34ae4d35d4a40bf46eddef3f6246d75919a495',
   },
   classification: 'implicit-unverified',
@@ -332,9 +333,20 @@ test('vendor bundle is exactly the pinned non-discoverable source set', () => {
   }
 });
 
-test('Common Core remains byte-identical', () => {
-  assert.equal(lstatSync(AGENTS).size, 7933);
-  assert.equal(sha256(AGENTS), '5aebc74bc795891c43bf785d9b34ae4d35d4a40bf46eddef3f6246d75919a495');
+test('active Common Core is pinned independently from immutable evaluation evidence', () => {
+  const manifest = JSON.parse(readFileSync(MANIFEST, 'utf8'));
+
+  assert.equal(lstatSync(HISTORICAL_COMMON_CORE).size, 7933);
+  assert.equal(
+    sha256(HISTORICAL_COMMON_CORE),
+    '5aebc74bc795891c43bf785d9b34ae4d35d4a40bf46eddef3f6246d75919a495',
+  );
+  assert.deepEqual(manifest.activeCommonCore, {
+    path: 'AGENTS.md',
+    sha256: sha256(AGENTS),
+  });
+  assert.notEqual(sha256(AGENTS), sha256(HISTORICAL_COMMON_CORE));
+  assert.ok(lstatSync(AGENTS).size < lstatSync(HISTORICAL_COMMON_CORE).size / 2);
 });
 
 test('candidate ledger binds the reviewed hybrid artifact without promoting implicit routing', async () => {
