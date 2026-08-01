@@ -20,4 +20,5 @@
 /tests/design-frontend-routing.tests.mjs text eol=lf
 /skills/joewrks-design-frontend/** text eol=lf
 /skills/joewrks-project-setup/** text eol=lf
+/skills/handoff/** text eol=lf
 vendor/** -text

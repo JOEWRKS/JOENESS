@@ -88,20 +88,20 @@ const EXPECTED_PROJECT_SETUP_SKILL = {
   activationPolicy: 'explicit-only',
   sourceDependencies: [],
   intentionalDifferences: [
-    'Explicit-only project inspection and deterministic managed-block writer.',
+    'Explicit-only durable project-contract setup with deterministic writes.',
   ],
   validatorSha256: '5347a0a09cfb546bba1c0d1a30dae0a233d9a05f57bd4e7877155c588bcdabf7',
   files: [
     {
       localPath: 'skills/joewrks-project-setup/SKILL.md',
-      bytes: 1738,
-      sha256: 'bc3633b4292d78be8ad4ff11dff15118ca1794f500079f3775593f630d961d8f',
+      bytes: 2502,
+      sha256: '770909bb17b62bc0fa606d678f0247ca82dc1c0ed247771768a32a6d1d6cfac2',
       exactUpstreamCopy: false,
     },
     {
       localPath: 'skills/joewrks-project-setup/agents/openai.yaml',
-      bytes: 259,
-      sha256: '66255619bf9e17fcc30734229be7930d2e1e3da6c6d8062cabcb32db15e3c18e',
+      bytes: 315,
+      sha256: 'cbc5d8da93e27ed5f30e36e8736acb26cde4bd20bd82d6432fc3a18b36d32fee',
       exactUpstreamCopy: false,
     },
     {
@@ -109,6 +109,49 @@ const EXPECTED_PROJECT_SETUP_SKILL = {
       bytes: 17495,
       sha256: '4ffc548078a5c87357fd0e4e63538567ea2666f118243a0558bff29278d13105',
       exactUpstreamCopy: false,
+    },
+  ],
+};
+const EXPECTED_HANDOFF_SKILL = {
+  authorship: 'upstream-adapted',
+  evaluationState: 'candidate',
+  activationPolicy: 'explicit-only',
+  sourceDependencies: [],
+  upstream: {
+    repository: 'mattpocock/skills',
+    url: 'https://github.com/mattpocock/skills',
+    commit: '2ab958093e83e0ec752e6c1c5932da465bf23e0c',
+    upstreamPath: 'skills/productivity/handoff',
+    license: {
+      name: 'MIT',
+      upstreamPath: 'LICENSE',
+      localPath: 'skills/handoff/LICENSE',
+      sha256: '0e7ac423bf2c6e223b7c5b156f8cf72da49d748e56a1641402c31f22ad07dbb5',
+    },
+  },
+  intentionalDifferences: [
+    'Removed unsupported argument-hint and disable-model-invocation frontmatter; agents/openai.yaml preserves explicit-only activation.',
+    'Relocated the skill and included the exact repository license beside it.',
+  ],
+  validatorSha256: '5347a0a09cfb546bba1c0d1a30dae0a233d9a05f57bd4e7877155c588bcdabf7',
+  files: [
+    {
+      localPath: 'skills/handoff/SKILL.md',
+      bytes: 791,
+      sha256: 'aa365c9c3fb57b52e282d901dc2ed8153707b9f54d3fa2a5d15499c2768aaead',
+      exactUpstreamCopy: false,
+    },
+    {
+      localPath: 'skills/handoff/agents/openai.yaml',
+      bytes: 141,
+      sha256: '5c479fd562c691851690e8b18c8501045bef0943c10743d636b2fae26add1d28',
+      exactUpstreamCopy: true,
+    },
+    {
+      localPath: 'skills/handoff/LICENSE',
+      bytes: 1068,
+      sha256: '0e7ac423bf2c6e223b7c5b156f8cf72da49d748e56a1641402c31f22ad07dbb5',
+      exactUpstreamCopy: true,
     },
   ],
 };
@@ -252,10 +295,15 @@ test('vendor bundle is exactly the pinned non-discoverable source set', () => {
   ]);
   assert.deepEqual(Object.keys(manifest.sources).sort(), Object.keys(EXPECTED_SOURCES).sort());
   assert.deepEqual(Object.keys(manifest.activeSkills).sort(), [
+    'handoff',
     'joewrks-design-frontend',
     'joewrks-project-setup',
   ]);
+  const handoff = manifest.activeSkills.handoff;
   const projectSetup = manifest.activeSkills['joewrks-project-setup'];
+  assert.equal(handoff.activationPolicy, 'explicit-only');
+  assert.equal(handoff.evaluationState, 'candidate');
+  assert.deepEqual(handoff.sourceDependencies, []);
   assert.ok(projectSetup, 'missing joewrks-project-setup active skill');
   assert.equal(
     manifest.activeSkills['joewrks-design-frontend'].activationPolicy,
@@ -269,7 +317,7 @@ test('vendor bundle is exactly the pinned non-discoverable source set', () => {
     EXPECTED_PROJECT_SETUP_SKILL.files.map(({ localPath }) => localPath),
   );
 
-  for (const skillName of ['joewrks-design-frontend', 'joewrks-project-setup']) {
+  for (const skillName of ['handoff', 'joewrks-design-frontend', 'joewrks-project-setup']) {
     for (const entry of manifest.activeSkills[skillName].files) {
       const text = readFileSync(path.join(ROOT, entry.localPath), 'utf8');
       assert.doesNotMatch(
@@ -281,6 +329,7 @@ test('vendor bundle is exactly the pinned non-discoverable source set', () => {
   }
   assert.deepEqual(manifest.activeSkills['joewrks-design-frontend'], EXPECTED_ACTIVE_SKILL);
   assert.deepEqual(projectSetup, EXPECTED_PROJECT_SETUP_SKILL);
+  assert.deepEqual(handoff, EXPECTED_HANDOFF_SKILL);
   assert.deepEqual(manifest.sources['ui-ux-pro-max'].upstreamAuditNotes, [
     'SKILL.md reports 98 UX and 104 icon rows; the pinned data contains 99 and 105.',
     'styles.csv omits No=54; search behavior is unaffected.',
@@ -324,7 +373,7 @@ test('vendor bundle is exactly the pinned non-discoverable source set', () => {
       assert.equal(sha256(localFile), file.sha256, `wrong hash: ${file.localPath}`);
     }
   }
-  for (const skill of [EXPECTED_ACTIVE_SKILL, EXPECTED_PROJECT_SETUP_SKILL]) {
+  for (const skill of [EXPECTED_ACTIVE_SKILL, EXPECTED_PROJECT_SETUP_SKILL, EXPECTED_HANDOFF_SKILL]) {
     for (const file of skill.files) {
       const localFile = path.join(ROOT, ...file.localPath.split('/'));
       assert.equal(lstatSync(localFile).size, file.bytes, `wrong active byte length: ${file.localPath}`);
@@ -393,5 +442,6 @@ test('candidate ledger binds the reviewed hybrid artifact without promoting impl
 
 test('Git preserves exact vendor and active skill bytes on checkout', () => {
   assert.match(readFileSync(GITATTRIBUTES, 'utf8'), /^\/skills\/joewrks-design-frontend\/\*\* text eol=lf$/m);
+  assert.match(readFileSync(GITATTRIBUTES, 'utf8'), /^\/skills\/handoff\/\*\* text eol=lf$/m);
   assert.match(readFileSync(GITATTRIBUTES, 'utf8'), /^vendor\/\*\* -text$/m);
 });

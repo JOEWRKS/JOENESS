@@ -1,7 +1,7 @@
 interface:
   display_name: "JOEWRKS Project Setup"
-  short_description: "Check or apply an explicit project contract"
-  default_prompt: "Use $joewrks-project-setup only for this explicitly requested project setup."
+  short_description: "Apply a durable project contract"
+  default_prompt: "Use $joewrks-project-setup to set up a durable contract for this project from current evidence, then apply it with the helper's snapshot guard."
 
 policy:
   allow_implicit_invocation: false

@@ -4,9 +4,9 @@
 
 ## 한국어
 
-Windows Codex 사용자의 공통 작업 규칙과 현재 JOEWRKS 개인 스킬 묶음을 한 PowerShell 진입점으로 점검·설치·업데이트·제거합니다.
+Windows Codex에 이미 내장된 계획·도구·권한·검증 체계를 대체하지 않고, 반복적으로 확인된 JOEWRKS 작업 이탈만 교정하는 얇은 공통 규칙과 개인 스킬 묶음을 한 PowerShell 진입점으로 점검·설치·업데이트·제거합니다. 에이전트 팀이나 프로젝트별 스킬을 자동 생성하는 메타 하네스가 아닙니다.
 
-> **기본 `-Apply`는 `personal-pilot` 전체를 설치합니다.** Common Work Core, candidate 상태인 `joewrks-design-frontend`와 `joewrks-project-setup`, manifest가 선택한 UI UX Pro Max runtime·Apple Design reference·고지가 함께 설치됩니다. 디자인 파일럿은 승격되거나 품질이 인증된 기능이 아닙니다. Python, Figma, browser capability 또는 외부 플러그인은 포함하거나 자동 설치·설정하지 않습니다.
+> **기본 `-Apply`는 `personal-pilot` 전체를 설치합니다.** Common Work Core, 명시 호출 전용 `handoff`, candidate 상태인 `joewrks-design-frontend`와 `joewrks-project-setup`, manifest가 선택한 UI UX Pro Max runtime·Apple Design reference가 함께 설치됩니다. 디자인 파일럿은 승격되거나 품질이 인증된 기능이 아닙니다. Python, Figma, browser capability 또는 외부 플러그인은 포함하거나 자동 설치·설정하지 않습니다.
 
 ### 빠른 시작
 
@@ -42,11 +42,21 @@ DEPRECATED: -IncludeDesignFrontend no longer changes selection; personal-pilot a
 |---|---|
 | Common Work Core 관리 블록 | `<resolvedCodexHome>\AGENTS.md` |
 | 설치 state | `<resolvedCodexHome>\joewrks-harness-state.json` |
-| JOEWRKS 스킬 | `%USERPROFILE%\.agents\skills\joewrks-*` |
+| 관리 스킬 | `%USERPROFILE%\.agents\skills\<skill-name>` |
 | vendored runtime·reference | `%USERPROFILE%\.agents\vendor\...` |
 | 실행별 backup | `%LOCALAPPDATA%\JOEWRKS\work-harness\backups\<run-id>` |
 
 `-AgentsHome`과 `-BackupRoot`로 후자의 root를 명시할 수 있습니다. 신규 스킬은 `.agents`에 설치되며 legacy `<resolvedCodexHome>\skills`는 충돌 검사에만 사용됩니다.
+
+### 파일별 역할
+
+- 사용자 범위 `<resolvedCodexHome>\AGENTS.md`: 모든 작업에 자동 적용되는 짧은 Common Work Core만 둡니다.
+- 각 프로젝트 루트 `AGENTS.md`: 그 프로젝트의 장기 목표, 비목표, 권한 경계, 표준 명령, 품질·출시 기준과 상세 문서 경로만 둡니다. Common Core를 복사하지 않습니다.
+- 더 가까운 하위 `AGENTS.md`: 특정 하위 디렉터리에 실제로 다른 규칙이 있을 때만 둡니다.
+- `README.md`: 사람이 설치·공유·복구 방식을 이해하기 위한 설명서입니다. 에이전트의 상시 실행 규칙으로 취급하지 않습니다.
+- `SKILL.md`와 reference: 특정 작업에서만 필요한 절차와 전문 지식을 필요할 때 로드합니다.
+
+별도 `HARNESS.md`는 만들지 않습니다. 공통 실행 규칙을 두 군데에 복제하면 어느 파일이 최신인지 불명확해지고 토큰도 중복됩니다. 프로젝트의 긴 명세·아키텍처·도메인 문서는 기존 위치에 유지하고, 프로젝트 `AGENTS.md`에서는 필요한 경로와 사용 조건만 가리킵니다.
 
 state schema v2는 `personal-pilot`, Common Core와 bundle manifest의 source identity, 관리 대상 hash, 정규화한 AgentsHome의 SHA-256 identity를 기록합니다. 개인 절대경로는 state에 저장하지 않습니다. 같은 state를 다른 AgentsHome과 함께 사용하면 적용·제거 전에 차단됩니다.
 
@@ -71,7 +81,7 @@ stdout은 한 JSON 결과입니다.
 
 no-state `removed`는 유효한 state나 알려진 차단 증거를 찾지 못했고 관리 파일을 변경하지 않았다는 뜻일 뿐, 인식하지 못한 vendor residue까지 모두 없다는 증명은 아닙니다.
 
-성공한 제거 뒤 남는 정확한 빈 `.agents\skills\joewrks-*` 디렉터리 skeleton은 다음 `-Apply`가 재사용할 수 있습니다. 무관한 `.agents` 파일과 디렉터리는 제거하지 않습니다.
+성공한 제거 뒤 남는 정확한 빈 관리 스킬 디렉터리 skeleton은 다음 `-Apply`가 재사용할 수 있습니다. 무관한 `.agents` 파일과 디렉터리는 제거하지 않습니다.
 
 업데이트는 새 repository revision 또는 ZIP에서 `-Check` → `-Apply` → `-Check`를 다시 실행합니다. 같은 상태면 새 파일이나 backup 없이 `current`입니다. manifest에서 사라진 state-owned 파일도 현재 hash가 기록과 일치할 때만 제거합니다.
 
@@ -79,7 +89,9 @@ no-state `removed`는 유효한 state나 알려진 차단 증거를 찾지 못�
 
 ### 프로젝트별 설정
 
-프로젝트 파일은 설치 과정에서 자동으로 바뀌지 않습니다. 해당 프로젝트에서 `$joewrks-project-setup`을 명시적으로 호출하고 helper의 `check`를 먼저 실행합니다. `check`는 Git root와 `AGENTS.md` snapshot을 읽기 전용으로 확인합니다. 그 프로젝트에 대한 명시적 `apply` 요청이 있을 때만 snapshot을 다시 검증하고 루트 `AGENTS.md`의 JOEWRKS project marker 블록 하나를 씁니다.
+Common Core는 새 프로젝트 선언과 `해줘`·`계속해줘`를 현재 저장소 증거에 맞는 다음 실행 계약으로 자동 해석합니다. 프로젝트 설정 계약을 자동 생성하지는 않지만, 요청된 결과에 필요한 권한 범위 안의 로컬 작업은 계속 수행합니다.
+
+장기간 재사용할 제품 목표, 권한, 명령, 아키텍처·도메인 참고자료, 품질 기준, 협업 및 출시 기준이 필요해 사용자가 `$joewrks-project-setup` 또는 내구성 JOEWRKS 프로젝트 계약의 `setup`·`configure`·`persist`·`apply`를 명시적으로 요청하면, 스킬이 프로젝트를 읽고 최소 계약을 적용합니다. helper의 `check`는 Git root와 `AGENTS.md` snapshot을 읽기 전용으로 확인하고, 쓰기 직전에 snapshot을 다시 검증한 뒤 루트 `AGENTS.md`의 JOEWRKS project marker 블록 하나만 변경합니다.
 
 이 스킬은 Common Core를 복제하거나 의존성·코드·디자인을 변경하지 않으며, 다른 프로젝트나 과거 대화의 승인을 가져오지 않습니다.
 
@@ -122,9 +134,9 @@ node --test .\tests\design-vendor-integrity.tests.mjs
 
 ## English
 
-This project checks, installs, updates, and removes shared working rules and the current JOEWRKS personal skill bundle for Windows Codex through one PowerShell entry point.
+This project does not replace the planning, tools, permissions, or verification already built into Windows Codex. One PowerShell entry point checks, installs, updates, and removes a thin corrective overlay for recurring JOEWRKS workflow failures plus the personal skill bundle. It is not a meta-harness that automatically generates agent teams or per-project skills.
 
-> **The default `-Apply` installs the full `personal-pilot`.** It includes the Common Work Core, the candidate `joewrks-design-frontend` and `joewrks-project-setup` skills, and the manifest-selected UI UX Pro Max runtime, Apple Design reference, and notices. The design pilot is not promoted or quality-certified. Python, Figma, browser capabilities, and external plugins are neither bundled nor installed or configured automatically.
+> **The default `-Apply` installs the full `personal-pilot`.** It includes the Common Work Core, the explicit-only `handoff` skill, the candidate `joewrks-design-frontend` and `joewrks-project-setup` skills, and the manifest-selected UI UX Pro Max runtime and Apple Design reference. The design pilot is not promoted or quality-certified. Python, Figma, browser capabilities, and external plugins are neither bundled nor installed or configured automatically.
 
 ### Quick start
 
@@ -160,11 +172,21 @@ DEPRECATED: -IncludeDesignFrontend no longer changes selection; personal-pilot a
 |---|---|
 | Common Work Core managed block | `<resolvedCodexHome>\AGENTS.md` |
 | Installation state | `<resolvedCodexHome>\joewrks-harness-state.json` |
-| JOEWRKS skills | `%USERPROFILE%\.agents\skills\joewrks-*` |
+| Managed skills | `%USERPROFILE%\.agents\skills\<skill-name>` |
 | Vendored runtime and references | `%USERPROFILE%\.agents\vendor\...` |
 | Per-run backups | `%LOCALAPPDATA%\JOEWRKS\work-harness\backups\<run-id>` |
 
 `-AgentsHome` and `-BackupRoot` can override the latter roots. New skills go under `.agents`; legacy `<resolvedCodexHome>\skills` is inspected only for collisions.
+
+### File responsibilities
+
+- User-level `<resolvedCodexHome>\AGENTS.md`: contains only the short Common Work Core automatically applied to every task.
+- Project-root `AGENTS.md`: contains that project's durable outcome, non-goals, authority boundaries, standard commands, quality and release criteria, and paths to detailed documents. It does not copy the Common Core.
+- A closer nested `AGENTS.md`: exists only when a subdirectory genuinely needs different scoped rules.
+- `README.md`: explains installation, sharing, and recovery to people. It is not an always-on agent instruction source.
+- `SKILL.md` and references: load task-specific procedures and specialist knowledge only when relevant.
+
+Do not add a separate `HARNESS.md`. Duplicating common runtime rules creates two sources of truth and spends context twice. Keep long product specifications, architecture, and domain documents in their existing project locations; the project `AGENTS.md` should point to the relevant path and state when it matters.
 
 State schema v2 records `personal-pilot`, the Common Core and bundle-manifest source identities, owned hashes, and a SHA-256 identity of the normalized AgentsHome. It does not store personal absolute paths. Pairing the same state with another AgentsHome is blocked before apply or remove.
 
@@ -189,7 +211,7 @@ For `unknown`, do not assume recovery or blindly rerun. Inspect `backupPath`, `r
 
 A no-state `removed` result means no valid state or recognized blocking evidence was found and no managed files were changed; it does not prove that every unrecognized or vendor residue is absent.
 
-An exact empty `.agents\skills\joewrks-*` directory skeleton left after successful removal can be reused by a later `-Apply`. Unrelated `.agents` files and directories are preserved.
+An exact empty managed-skill directory skeleton left after successful removal can be reused by a later `-Apply`. Unrelated `.agents` files and directories are preserved.
 
 To update, use a new repository revision or ZIP and run `-Check` → `-Apply` → `-Check`. An already-current bundle creates no new files or backup. A state-owned file removed from the new manifest is deleted only if its current hash still matches recorded ownership.
 
@@ -197,7 +219,9 @@ If the source folder is gone, keep the exact revision archive used for installat
 
 ### Per-project setup
 
-Installation never mutates project files automatically. Explicitly invoke `$joewrks-project-setup` for the target project and run its helper `check` first. The check resolves the Git root and `AGENTS.md` snapshot without writing. Only an explicit `apply` request for that project allows the helper to revalidate the snapshot and write the single JOEWRKS project marker block in the root `AGENTS.md`.
+The Common Core automatically interprets a new project declaration and broad `do it` or `continue` request as the next execution contract supported by current repository evidence. It does not auto-create a project setup contract, but it continues authorized local work needed for the requested outcome.
+
+When the user explicitly requests `$joewrks-project-setup` or `setup`, `configure`, `persist`, or `apply` of a durable JOEWRKS project contract, the skill reads the project and applies a minimal durable contract for product goals, authority, commands, architecture and domain references, quality criteria, collaboration, and release criteria. Its helper `check` resolves the Git root and `AGENTS.md` snapshot without writing, revalidates that snapshot before the write, and changes only the single JOEWRKS project marker block in the root `AGENTS.md`.
 
 The skill does not copy the Common Core, install dependencies, change code or design, or reuse authorization from another project or conversation.
 

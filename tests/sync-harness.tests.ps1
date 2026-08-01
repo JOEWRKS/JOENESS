@@ -25,7 +25,9 @@ function Test-ReadmeContract {
         'powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\harness.ps1 -Check',
         $koreanRemovedAnchor,
         'A no-state `removed` result means no valid state or recognized blocking evidence was found and no managed files were changed; it does not prove that every unrecognized or vendor residue is absent.',
-        'Explicitly invoke `$joewrks-project-setup` for the target project and run its helper `check` first.',
+        'Do not add a separate `HARNESS.md`.',
+        'the explicit-only `handoff` skill',
+        'When the user explicitly requests `$joewrks-project-setup` or `setup`, `configure`, `persist`, or `apply` of a durable JOEWRKS project contract',
         'An unresolved target or incomplete rollback prevents a final-state claim.',
         'Backups may contain prior state and the user''s `AGENTS.md`; treat them as private.',
         'Before sharing, run and record an exact-HEAD archive review and deliver the archive SHA-256 out of band.'
@@ -136,6 +138,7 @@ function Write-V1FixtureState {
     $legacyManifest = [IO.File]::ReadAllText($manifestPath) | ConvertFrom-Json
     $legacyManifest.PSObject.Properties.Remove('activeCommonCore')
     $legacyManifest.evaluation.current.commonCore.path = 'AGENTS.md'
+    $legacyManifest.activeSkills.PSObject.Properties.Remove('handoff')
     $legacyManifest.activeSkills.PSObject.Properties.Remove('joewrks-project-setup')
     $legacyManifest.activeSkills.'joewrks-design-frontend'.PSObject.Properties.Remove('activationPolicy')
     $legacyManifestText = $legacyManifest | ConvertTo-Json -Depth 100
@@ -1045,6 +1048,9 @@ function Test-OptionalBundleStateAndDrift {
         $installedRoot = Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $installedDesign))
         Assert-True (Test-Path (Join-Path $installedRoot 'vendor\ui-ux-pro-max\scripts\search.py')) 'installed UIUX runtime resolves'
         Assert-True (Test-Path (Join-Path $installedRoot 'vendor\apple-design\SKILL.md')) 'installed Apple reference resolves'
+        Assert-True (Test-Path (Join-Path $f.AgentsHome 'skills\handoff\SKILL.md')) 'explicit handoff skill installs'
+        Assert-True (([IO.File]::ReadAllText((Join-Path $f.AgentsHome 'skills\handoff\agents\openai.yaml'))) -match 'allow_implicit_invocation:\s*false') 'handoff remains explicit-only'
+        Assert-True (Test-Path (Join-Path $f.AgentsHome 'skills\handoff\LICENSE')) 'handoff license installs'
         Assert-True (Test-Path (Join-Path $f.AgentsHome 'skills\joewrks-project-setup\scripts\project-setup.ps1')) 'project helper installs'
         $before = Get-TreeHashes $f.AgentsHome
         $beforeState = [IO.File]::ReadAllBytes($f.State)
@@ -1215,14 +1221,12 @@ function Test-V1StateMigration {
         [IO.Directory]::CreateDirectory((Join-Path $f.AgentsHome 'preexisting\child')) | Out-Null
         $beforeTree = @{ codex = Get-TreeHashes $f.CodexHome; agents = Get-TreeHashes $f.AgentsHome }
         $beforeState = [IO.File]::ReadAllBytes($f.State)
-        $createdDirectories = @(
-            (Join-Path $f.AgentsHome 'skills'),
-            (Join-Path $f.AgentsHome 'skills\joewrks-design-frontend')
-        )
+        $failedTargets = [Collections.Generic.List[string]]::new()
         . $f.Script
         $result = Invoke-JoewrksHarnessSync -Apply -CodexHome $f.CodexHome -AgentsHome $f.AgentsHome -BackupRoot $f.BackupRoot -AfterReplace {
             param($replacement)
             if ($replacement.TargetPath.StartsWith((Join-Path $f.AgentsHome 'skills'), [StringComparison]::OrdinalIgnoreCase)) {
+                $failedTargets.Add([string] $replacement.TargetPath)
                 throw 'failure during V1 target migration'
             }
         }
@@ -1233,6 +1237,12 @@ function Test-V1StateMigration {
         Assert-TreeEqual (Get-TreeHashes $f.AgentsHome) $beforeTree.agents 'target failure restores the V1 Agents tree'
         Assert-True (Test-Path -LiteralPath (Join-Path $f.AgentsHome 'keep-empty') -PathType Container) 'target failure preserves pre-existing empty directory'
         Assert-True (Test-Path -LiteralPath (Join-Path $f.AgentsHome 'preexisting\child') -PathType Container) 'target failure preserves pre-existing nested directory'
+        Assert-Equal $failedTargets.Count 1 'V1 migration fails on the first managed skill target'
+        $failedTargetParent = [IO.Path]::GetDirectoryName($failedTargets[0])
+        $createdDirectories = @(
+            [IO.Path]::GetDirectoryName($failedTargetParent),
+            $failedTargetParent
+        )
         foreach ($directory in $createdDirectories) {
             Assert-True (Test-Path -LiteralPath $directory -PathType Container) "target failure preserves created directory: $directory"
             Assert-Equal (@($result.unresolvedTargets | Where-Object { $_ -ieq $directory }).Count) 1 "target failure reports created directory once: $directory"
@@ -1505,11 +1515,6 @@ function Test-MultiTargetRollback {
         $externalPath = Join-Path $f.AgentsHome 'external.txt'
         Write-Utf8 $externalPath 'external'
         $beforeAgents = Get-TreeHashes $f.AgentsHome
-        $createdDirectories = @(
-            $f.CodexHome,
-            (Join-Path $f.AgentsHome 'skills'),
-            (Join-Path $f.AgentsHome 'skills\joewrks-design-frontend')
-        )
         . $f.Script
         $replacements = [Collections.Generic.List[string]]::new()
         $callback = {
@@ -1522,6 +1527,12 @@ function Test-MultiTargetRollback {
         Assert-PilotDisclosure $result.designFrontendPilot 'default-personal-pilot' 'failed personal-pilot apply'
         Assert-Equal $replacements.Count 2 'failure occurs after two replacements'
         Assert-Equal $result.rollback.status 'incomplete' 'multi-target rollback preserves created directories for inspection'
+        $failedTargetParent = [IO.Path]::GetDirectoryName($replacements[1])
+        $createdDirectories = @(
+            $f.CodexHome,
+            [IO.Path]::GetDirectoryName($failedTargetParent),
+            $failedTargetParent
+        )
         foreach ($directory in $createdDirectories) {
             Assert-True (Test-Path -LiteralPath $directory -PathType Container) "multi-target rollback preserves created directory: $directory"
             Assert-Equal (@($result.unresolvedTargets | Where-Object { $_ -ieq $directory }).Count) 1 "multi-target rollback reports created directory once: $directory"

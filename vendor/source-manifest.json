@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "activeCommonCore": {"path":"AGENTS.md","sha256":"893be51a2efbc10fb5e0ab13d766eb13f383da6f22590fd54f5d3a09ca7deb7d"},
+  "activeCommonCore": {"path":"AGENTS.md","sha256":"be9327f3ea68f523cb741219dc5a2c41dd36b3b7fda85904723b6fdd60763779"},
   "evaluation": {
     "state": "candidate",
     "tests": ["tests/design-vendor-integrity.tests.mjs", "vendor/ui-ux-pro-max/scripts/validate_data.py", "vendor/ui-ux-pro-max/scripts/tests/test_core.py"],
@@ -26,6 +26,26 @@
     }
   },
   "activeSkills": {
+    "handoff": {
+      "authorship": "upstream-adapted",
+      "evaluationState": "candidate",
+      "activationPolicy": "explicit-only",
+      "sourceDependencies": [],
+      "upstream": {
+        "repository": "mattpocock/skills",
+        "url": "https://github.com/mattpocock/skills",
+        "commit": "2ab958093e83e0ec752e6c1c5932da465bf23e0c",
+        "upstreamPath": "skills/productivity/handoff",
+        "license": {"name":"MIT","upstreamPath":"LICENSE","localPath":"skills/handoff/LICENSE","sha256":"0e7ac423bf2c6e223b7c5b156f8cf72da49d748e56a1641402c31f22ad07dbb5"}
+      },
+      "intentionalDifferences": ["Removed unsupported argument-hint and disable-model-invocation frontmatter; agents/openai.yaml preserves explicit-only activation.", "Relocated the skill and included the exact repository license beside it."],
+      "validatorSha256": "5347a0a09cfb546bba1c0d1a30dae0a233d9a05f57bd4e7877155c588bcdabf7",
+      "files": [
+        {"localPath":"skills/handoff/SKILL.md","bytes":791,"sha256":"aa365c9c3fb57b52e282d901dc2ed8153707b9f54d3fa2a5d15499c2768aaead","exactUpstreamCopy":false},
+        {"localPath":"skills/handoff/agents/openai.yaml","bytes":141,"sha256":"5c479fd562c691851690e8b18c8501045bef0943c10743d636b2fae26add1d28","exactUpstreamCopy":true},
+        {"localPath":"skills/handoff/LICENSE","bytes":1068,"sha256":"0e7ac423bf2c6e223b7c5b156f8cf72da49d748e56a1641402c31f22ad07dbb5","exactUpstreamCopy":true}
+      ]
+    },
     "joewrks-design-frontend": {
       "authorship": "joewrks-canonical",
       "evaluationState": "candidate",
@@ -43,11 +63,11 @@
       "evaluationState": "candidate",
       "activationPolicy": "explicit-only",
       "sourceDependencies": [],
-      "intentionalDifferences": ["Explicit-only project inspection and deterministic managed-block writer."],
+      "intentionalDifferences": ["Explicit-only durable project-contract setup with deterministic writes."],
       "validatorSha256": "5347a0a09cfb546bba1c0d1a30dae0a233d9a05f57bd4e7877155c588bcdabf7",
       "files": [
-        {"localPath":"skills/joewrks-project-setup/SKILL.md","bytes":1738,"sha256":"bc3633b4292d78be8ad4ff11dff15118ca1794f500079f3775593f630d961d8f","exactUpstreamCopy":false},
-        {"localPath":"skills/joewrks-project-setup/agents/openai.yaml","bytes":259,"sha256":"66255619bf9e17fcc30734229be7930d2e1e3da6c6d8062cabcb32db15e3c18e","exactUpstreamCopy":false},
+        {"localPath":"skills/joewrks-project-setup/SKILL.md","bytes":2502,"sha256":"770909bb17b62bc0fa606d678f0247ca82dc1c0ed247771768a32a6d1d6cfac2","exactUpstreamCopy":false},
+        {"localPath":"skills/joewrks-project-setup/agents/openai.yaml","bytes":315,"sha256":"cbc5d8da93e27ed5f30e36e8736acb26cde4bd20bd82d6432fc3a18b36d32fee","exactUpstreamCopy":false},
         {"localPath":"skills/joewrks-project-setup/scripts/project-setup.ps1","bytes":17495,"sha256":"4ffc548078a5c87357fd0e4e63538567ea2666f118243a0558bff29278d13105","exactUpstreamCopy":false}
       ]
     }
