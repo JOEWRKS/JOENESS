@@ -244,6 +244,51 @@ test("Lite outcome grader replays recorded rough frontend diffs without exact ID
   }
 });
 
+test("Lite regrade report refuses promotion without an observed Control risk fix", async () => {
+  const repositoryRoot = path.resolve(
+    path.dirname(fileURLToPath(import.meta.url)),
+    "..",
+  );
+  const report = JSON.parse(
+    await readFile(
+      path.join(
+        repositoryRoot,
+        "evals",
+        "experiments",
+        "common-core-lite-coding-ab-v2.json",
+      ),
+      "utf8",
+    ),
+  );
+  assert.equal(report.status, "complete");
+  assert.equal(report.decision, "no-observed-benefit-do-not-promote");
+  assert.equal(report.activationChanged, false);
+  assert.equal(report.additionalModelCalls, 0);
+  assert.equal(report.additionalModelTokens, 0);
+  assert.deepEqual(report.regrade.outcomePasses, {
+    control: { maintenance: 2, frontend: 2, possible: 4 },
+    lite: { maintenance: 2, frontend: 2, possible: 4 },
+  });
+  assert.equal(report.regrade.controlRiskFailuresFixedByLite, 0);
+  const predecessor = await readFile(
+    path.join(repositoryRoot, ...report.predecessor.path.split("/")),
+  );
+  assert.equal(
+    createHash("sha256").update(predecessor).digest("hex"),
+    report.predecessor.sha256,
+  );
+  for (const evidence of report.evidence) {
+    const bytes = await readFile(
+      path.join(repositoryRoot, ...evidence.path.split("/")),
+    );
+    assert.equal(
+      createHash("sha256").update(bytes).digest("hex"),
+      evidence.sha256,
+      evidence.path,
+    );
+  }
+});
+
 test("Codex invocation exposes only the internal patch surface", () => {
   const args = buildCodexArgs("C:\\fixture", "C:\\evidence\\final.txt");
   assert.deepEqual(args.slice(0, 5), [
