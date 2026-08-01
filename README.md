@@ -58,6 +58,8 @@ DEPRECATED: -IncludeDesignFrontend no longer changes selection; personal-pilot a
 
 별도 `HARNESS.md`는 만들지 않습니다. 공통 실행 규칙을 두 군데에 복제하면 어느 파일이 최신인지 불명확해지고 토큰도 중복됩니다. 프로젝트의 긴 명세·아키텍처·도메인 문서는 기존 위치에 유지하고, 프로젝트 `AGENTS.md`에서는 필요한 경로와 사용 조건만 가리킵니다.
 
+큰 작업 단계가 바뀌고 현재 파일과 짧게 검증된 인수인계만으로 다음 단계를 독립 재개할 수 있으면, 다음 단계는 새 작업 또는 새 위임 문맥에서 이어갑니다. 목표·채택한 결정·실행한 검사·미확인 사항만 넘기고 이전 도구 로그와 폐기한 탐색 과정은 넘기지 않습니다. 아직 파일에 반영되지 않은 상태나 미해결 의존성이 있으면 같은 작업에서 계속합니다.
+
 state schema v2는 `personal-pilot`, Common Core와 bundle manifest의 source identity, 관리 대상 hash, 정규화한 AgentsHome의 SHA-256 identity를 기록합니다. 개인 절대경로는 state에 저장하지 않습니다. 같은 state를 다른 AgentsHome과 함께 사용하면 적용·제거 전에 차단됩니다.
 
 ### 결과와 exit code
@@ -187,6 +189,8 @@ DEPRECATED: -IncludeDesignFrontend no longer changes selection; personal-pilot a
 - `SKILL.md` and references: load task-specific procedures and specialist knowledge only when relevant.
 
 Do not add a separate `HARNESS.md`. Duplicating common runtime rules creates two sources of truth and spends context twice. Keep long product specifications, architecture, and domain documents in their existing project locations; the project `AGENTS.md` should point to the relevant path and state when it matters.
+
+At a major phase boundary, use a fresh task or delegated context when current files plus a compact verified handoff are enough to resume independently. Carry only the target, selected decisions, checks run, and unknowns—not prior tool logs or rejected exploration. Continue in the same task when unresolved dependencies or unmaterialized state would otherwise be lost.
 
 State schema v2 records `personal-pilot`, the Common Core and bundle-manifest source identities, owned hashes, and a SHA-256 identity of the normalized AgentsHome. It does not store personal absolute paths. Pairing the same state with another AgentsHome is blocked before apply or remove.
 

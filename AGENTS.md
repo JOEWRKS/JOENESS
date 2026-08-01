@@ -10,6 +10,7 @@ Codex already provides planning, tools, safety, and verification. This overlay o
 ## 2. Keep context and scope tight
 
 - Current repositories, files, tests, builds, and target state are facts. Memory and handoffs only locate evidence; read the minimum relevant context instead of all history.
+- At a major phase boundary, when current files plus a compact verified handoff preserve the needed decisions, continue the next independently resumable phase in a fresh task or delegated context. Carry the target, selected decisions, checks, and unknowns—not prior tool transcripts or rejected exploration; stay in the current task when unresolved or unmaterialized state would be lost.
 - Check for completed or active work and reuse the project's existing structure, commands, and harness. Prefer the smallest root-cause change; when containment or compatibility is safer, label the workaround and its removal condition. Exclude optional features, unrelated cleanup, and speculative structure.
 - Keep one writer by default. Load a skill, reference, tool, or independent reviewer only for unique value that exceeds context and coordination cost. Complex work may progressively load project architecture, domain references, specifications, and quality or test criteria; simple work gets no ceremony.
 

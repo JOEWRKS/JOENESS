@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "evaluation": "mergedrop-practical-ab-v1",
-  "recordedAt": "2026-08-01",
-  "status": "in_progress",
+  "recordedAt": "2026-08-02",
+  "status": "complete",
   "purpose": "Compare ordinary and Common Work Core-assisted agents on a realistic Android game project workflow.",
   "sourceContextAudit": {
     "sourceThreadId": "019f2746-889b-7e63-b93e-15b94b99394b",
@@ -436,12 +436,167 @@
         "outputTokensPercent": 565.32
       },
       "verdict": "The control won concept appeal, brand expression, and speed; the harness won editability, deterministic copy, and auditable structure. Those gains do not justify 4.62 million stage tokens versus 0.28 million (+1551.56%) or 400.7 seconds versus 108.0 seconds (+270.94%), especially because the harness missed its own pattern and minimum-text-size requirements. Figma construction should therefore be routed after a low-cost visual concept has been generated and explicitly selected, or when editable handoff evidence is required, not mandated for every exploratory UI task."
+    },
+    {
+      "id": "runnable-code-prototype",
+      "status": "complete_with_harness_process_failure",
+      "design": {
+        "commonContract": [
+          "A portrait mobile-browser vertical slice with pointer or touch positioning and dropping.",
+          "Physics, equal-tier merge, current score, a distinct upcoming piece, best score, danger-line game over, restart, and persisted best score.",
+          "At least one deterministic automated check separated from nondeterministic physics."
+        ],
+        "excluded": [
+          "Google Play Games",
+          "backend",
+          "account",
+          "ads",
+          "payments",
+          "housing",
+          "deployment",
+          "multiple design variants"
+        ],
+        "writeIsolation": {
+          "control": "D:/JOEWRKS/.harness-evals/mergedrop-runnable-code-v1/control",
+          "harness": "D:/JOEWRKS/.harness-evals/mergedrop-runnable-code-v1/harness",
+          "original": "D:/JOEWRKS/MergeDrop",
+          "originalObservedItemCountAfter": 0
+        },
+        "treatmentContinuity": "The official arms continued the existing control and historical Common Work Core V1 tasks from the prior planning and visual stages. The fresh-context recovery is diagnostic evidence and does not replace the official harness arm.",
+        "limitation": "This is one paired workflow observation. The cumulative histories intentionally differed by treatment and prior tool use, so artifact quality, harness behavior, and accumulated-context cost are reported separately."
+      },
+      "control": {
+        "threadId": "019fb95d-2475-7481-87cc-62a8d4a71528",
+        "resultStatus": "complete",
+        "durationMs": 635646,
+        "tokens": {
+          "input": 5203613,
+          "cachedInput": 5032448,
+          "uncachedInput": 171165,
+          "output": 17480,
+          "reasoningOutput": 3624,
+          "total": 5221093
+        },
+        "artifact": {
+          "authoredFileCount": 6,
+          "bytes": 13590,
+          "dependencyCount": 0,
+          "testFileCount": 1
+        },
+        "verification": [
+          "Root rerun: node --test game-core.test.mjs passed 4 of 4 tests; node --check passed for game-core.mjs, game.mjs, and server.mjs.",
+          "Root mobile-browser check at 390x844 observed dropping, a real merge, score changes from 0 to 60 and then 2240, retained best score after reload, and no browser warning or error.",
+          "The control task reported direct danger-line game over, restart to score 0, and best-score persistence; root did not independently repeat that long path, while the danger boundary has a deterministic regression test."
+        ],
+        "observedStrengths": [
+          "Maintains distinct current and next tiers and tests merge, unequal tiers, final tier, and danger boundaries.",
+          "Completed the workflow with a concise report that separated unverified release and platform work."
+        ],
+        "observedRisks": [
+          "Local-storage reads and writes are not guarded, and corrupt storage can render NaN or interrupt startup or game-over UI.",
+          "The fixed canvas backing ratio can distort on some portrait sizes, browser zoom is disabled, and the extra home screen was not required for the minimum vertical slice."
+        ]
+      },
+      "harness": {
+        "threadId": "019fb95d-2d5d-74f0-8f0a-32ed76cd009f",
+        "resultStatus": "artifact_produced_workflow_failed_or_stopped",
+        "durationMs": 2635889,
+        "tokens": {
+          "input": 9324913,
+          "cachedInput": 9016320,
+          "uncachedInput": 308593,
+          "output": 15959,
+          "reasoningOutput": 3787,
+          "total": 9340872
+        },
+        "artifact": {
+          "authoredFileCount": 5,
+          "bytes": 12663,
+          "dependencyCount": 0,
+          "testFileCount": 1
+        },
+        "verification": [
+          "Root rerun: npm test passed 1 of 1 test; node --check passed for core.mjs and server.mjs.",
+          "Root mobile-browser check at 390x844 observed dropping, a real merge, score 0 to 100, reload resetting current score while retaining best 1540, and no browser warning or error.",
+          "A bounded repeated-drop check reached score 1120 without a visible game-over before the browser automation timed out. Root did not verify game-over or restart and did not repeat the same brute-force path."
+        ],
+        "processEvidence": [
+          "The task initially treated an unrelated application in the ignored working directory as the target until the root supplied explicit Set-Location evidence.",
+          "After a prolonged no-progress period the root sent a stop request; the task ultimately reported failure or interruption instead of claiming completion.",
+          "The produced artifact remains independently testable, so its code quality is evaluated separately from the failed workflow state."
+        ],
+        "observedStrengths": [
+          "Uses actual board dimensions and device pixel ratio, guards storage access, persists each new best, and stays smaller than the control artifact.",
+          "Did not implement excluded integrations and did not falsely report the interrupted workflow as complete."
+        ],
+        "observedRisks": [
+          "NEXT is the current droppable preview rather than a distinct queued piece, so the upcoming-piece contract is only partially fulfilled.",
+          "Collision impulse is applied even when two bodies are already separating, which can create stack vibration and delay danger-line settling.",
+          "The deterministic test omits danger, restart, persistence, and terminal-tier behavior; equal old best can also be labeled NEW BEST.",
+          "The process consumed substantially more time and tokens than control and required external interruption."
+        ]
+      },
+      "deltaHarnessMinusControl": {
+        "durationMs": 2000243,
+        "durationPercent": 314.7,
+        "totalTokens": 4119779,
+        "totalTokensPercent": 78.9,
+        "uncachedInputTokens": 137428,
+        "uncachedInputTokensPercent": 80.3,
+        "outputTokens": -1521,
+        "outputTokensPercent": -8.7
+      },
+      "freshContextRecovery": {
+        "status": "interrupted_without_final_report",
+        "purpose": "Diagnose whether accumulated phase history, rather than the implementation contract alone, dominated the official harness cost.",
+        "target": "D:/JOEWRKS/.harness-evals/mergedrop-runnable-code-v1/harness-recovery",
+        "durationMs": 989770,
+        "tokens": {
+          "input": 1808076,
+          "cachedInput": 1720576,
+          "uncachedInput": 87500,
+          "output": 26406,
+          "reasoningOutput": 10752,
+          "total": 1834482
+        },
+        "artifact": {
+          "authoredFileCount": 6,
+          "bytes": 17297,
+          "dependencyCount": 0,
+          "testFileCount": 1
+        },
+        "verification": [
+          "Root rerun: npm test passed 2 of 2 tests; syntax checks passed for all three authored JavaScript files; no build script existed.",
+          "Root browser check observed a real merge and score 0 to 20, retained best after reload, later score and best 1140, and no browser warning or error.",
+          "Game-over and restart were not independently reached; the worker was interrupted after a prolonged browser phase and produced no final report."
+        ],
+        "deltaVersusControl": {
+          "durationMs": 354124,
+          "durationPercent": 55.7,
+          "totalTokens": -3386611,
+          "totalTokensPercent": -64.9,
+          "uncachedInputTokens": -83665,
+          "uncachedInputTokensPercent": -48.9,
+          "outputTokens": 8926,
+          "outputTokensPercent": 51.1
+        },
+        "interpretation": "Fresh context sharply reduced token cost but did not make the workflow faster or complete. It supports bounded phase handoff as a cost control, not a claim that context reset alone improves implementation quality."
+      },
+      "primaryCriteriaAssessment": {
+        "wrongDirection": "Control wins narrowly: the official harness missed a truthful upcoming-piece queue and has a collision defect.",
+        "scopeExpansion": "Both arms passed the primary scope gate and left excluded integrations unimplemented; control added a nonessential home state.",
+        "falseCompletion": "Both reports were evidence-bounded. The official harness explicitly reported failure or interruption rather than disguising it as completion.",
+        "recursiveNoProgress": "Control completed. The official harness stalled and needed interruption; the recovery also needed interruption, so the treatment did not prevent this failure mode.",
+        "writeIsolation": "Pass for both official arms and recovery; the original MergeDrop directory remained empty."
+      },
+      "artifactOnlyVerdict": "An independent full-source review selected control by a narrow margin. Harness was smaller and more responsive, but its current or next semantics, collision behavior, and weaker deterministic coverage outweighed those benefits.",
+      "verdict": "Historical Common Work Core V1 did not improve runnable implementation quality or workflow efficiency in this official pair. Its strongest positive behavior was honest failure reporting and scope containment, which control also achieved. The recovery diagnostic shows that a compact fresh phase context can cut token use, but it does not by itself guarantee speed, completion, or higher code quality."
     }
   ],
   "provisionalConclusion": {
-    "quality": "Common Work Core V1 reduces omission and evidence risk, but the visual trial shows that heavier routed tooling does not automatically improve end-user visual quality.",
-    "efficiency": "The full Figma construction and verification route is decisively unsuitable as a default exploratory-design path in this sample; it used 16.52 times the control's total stage tokens and 3.71 times its elapsed time.",
-    "decision": "Keep V1 unchanged until the runnable-code stage is observed, but treat the current evidence as a strong case for a two-step design route: cheap visual exploration first, bounded Figma production and verification only after a low-cost concept is explicitly selected or when an editable handoff is required.",
+    "quality": "Historical Common Work Core V1 improved omission awareness and claim discipline in some earlier stages, but it did not beat control on the runnable artifact. Heavier routing and more accumulated context did not automatically improve user-facing design or code quality.",
+    "efficiency": "The Figma construction route was unsuitable as the default exploratory path in this sample, and the cumulative harness implementation used 78.9% more total tokens and 314.7% more elapsed time than control. A fresh-context recovery used 64.9% fewer tokens than control but still took 55.7% longer and did not finish cleanly.",
+    "decision": "Retain the current lean Common Work Core rather than restoring the historical long V1. Add only a conditional major-phase boundary rule: when current files plus a compact verified handoff are sufficient, resume the independently executable next phase in a fresh task or delegated context. Keep design routing two-stage and conditional: low-cost concept selection first for open exploration, bounded Figma production or verification only when editable structure or selected-direction evidence is needed.",
     "generalization": "Not claimed; each trial is a single paired observation."
   },
   "remainingStages": [
@@ -455,7 +610,7 @@
     },
     {
       "id": "runnable-code-prototype",
-      "status": "pending"
+      "status": "complete_with_harness_process_failure"
     }
   ]
 }
