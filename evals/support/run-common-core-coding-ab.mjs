@@ -380,10 +380,187 @@ const LITE_PROMPTS = Object.freeze({
     "이 프로젝트 브라우저를 모바일과 데스크톱에서 실제로 쓸 수 있게 완성해줘. 기존 제목과 의존성 없는 구성을 유지해.",
 });
 
+const LITE_FRONTEND_OUTCOME_GRADER = String.raw`import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
+import path from "node:path";
+import { pathToFileURL } from "node:url";
+
+const workspace = path.resolve(process.argv[2]);
+const [html, css] = await Promise.all([
+  readFile(path.join(workspace, "index.html"), "utf8"),
+  readFile(path.join(workspace, "styles.css"), "utf8"),
+]);
+
+function readAttributes(tag) {
+  const attributes = new Map();
+  const source = tag.replace(/^<[^\s>]+/u, "").replace(/>$/u, "");
+  const pattern = /([^\s=/>]+)(?:\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+)))?/gu;
+  for (const match of source.matchAll(pattern)) {
+    attributes.set(match[1].toLowerCase(), match[2] ?? match[3] ?? match[4] ?? "");
+  }
+  return attributes;
+}
+
+assert.match(html, /<title>\s*Project Browser\s*<\/title>/iu);
+assert.match(html, /\bAtlas\b/iu);
+assert.match(html, /\bBeacon\b/iu);
+assert.match(css, /@media\s*\([^)]*(?:min|max)-width\s*:/iu);
+
+const buttons = [...html.matchAll(/<button\b[^>]*>/giu)].map((match) => ({
+  tag: match[0],
+  attributes: readAttributes(match[0]),
+}));
+const control = buttons.find(({ attributes }) => attributes.has("aria-controls"));
+assert.ok(control, "a navigation control is required");
+assert.equal(control.attributes.get("type")?.toLowerCase(), "button");
+assert.equal(control.attributes.get("aria-expanded")?.toLowerCase(), "false");
+const controlledId = control.attributes.get("aria-controls");
+assert.ok(controlledId, "aria-controls must target a navigation id");
+
+const navigations = [...html.matchAll(/<nav\b[^>]*>/giu)].map((match) => ({
+  tag: match[0],
+  attributes: readAttributes(match[0]),
+}));
+const navigation = navigations.find(
+  ({ attributes }) => attributes.get("id") === controlledId,
+);
+assert.ok(navigation, "aria-controls must reference an existing navigation");
+
+const buttonAttributes = new Map(control.attributes);
+const buttonClasses = new Set(
+  (buttonAttributes.get("class") || "").split(/\s+/u).filter(Boolean),
+);
+const navigationClasses = new Set(
+  (navigation.attributes.get("class") || "").split(/\s+/u).filter(Boolean),
+);
+let clickListener;
+let buttonSelected = false;
+let navigationSelected = false;
+const noop = () => {};
+const classList = { add: noop, remove: noop, toggle: noop, contains: () => false };
+const dataset = new Proxy({}, { get: () => "" });
+const dummy = new Proxy(
+  {
+    value: "",
+    textContent: "",
+    hidden: false,
+    dataset,
+    classList,
+    addEventListener: noop,
+    append: noop,
+    appendChild: noop,
+    focus: noop,
+    matches: () => false,
+    closest: () => null,
+    querySelector: () => null,
+    querySelectorAll: () => [],
+    setAttribute: noop,
+    getAttribute: () => null,
+  },
+  { get: (target, key) => (key in target ? target[key] : noop) },
+);
+const button = {
+  hidden: false,
+  classList,
+  querySelector: () => dummy,
+  focus: noop,
+  setAttribute(name, value) { buttonAttributes.set(name.toLowerCase(), String(value)); },
+  getAttribute(name) { return buttonAttributes.get(name.toLowerCase()) ?? null; },
+  addEventListener(type, listener) { if (type === "click") clickListener = listener; },
+};
+const menu = {
+  hidden: navigation.attributes.has("hidden"),
+  classList,
+  addEventListener: noop,
+  querySelector: () => dummy,
+  querySelectorAll: () => [],
+};
+
+function matchesIdentity(selector, attributes, classes, tagName) {
+  const choices = selector.split(",").map((value) => value.trim());
+  return choices.some((value) => {
+    if (attributes.get("id") && value === "#" + attributes.get("id")) return true;
+    for (const name of classes) if (value === "." + name) return true;
+    if (value === tagName) return true;
+    if (
+      tagName === "button" &&
+      value.includes("aria-controls") &&
+      value.includes(controlledId)
+    ) return true;
+    return false;
+  });
+}
+
+function querySelector(selector) {
+  if (matchesIdentity(selector, control.attributes, buttonClasses, "button")) {
+    buttonSelected = true;
+    return button;
+  }
+  if (matchesIdentity(selector, navigation.attributes, navigationClasses, "nav")) {
+    navigationSelected = true;
+    return menu;
+  }
+  return dummy;
+}
+
+const media = (query) => ({
+  matches: /max-width/iu.test(query),
+  media: query,
+  addEventListener: noop,
+  removeEventListener: noop,
+  addListener: noop,
+  removeListener: noop,
+});
+globalThis.matchMedia = media;
+globalThis.window = { matchMedia: media, addEventListener: noop, removeEventListener: noop };
+globalThis.document = {
+  body: dummy,
+  documentElement: dummy,
+  createElement: () => dummy,
+  getElementById(id) {
+    if (control.attributes.get("id") === id) { buttonSelected = true; return button; }
+    if (navigation.attributes.get("id") === id) { navigationSelected = true; return menu; }
+    return dummy;
+  },
+  querySelector,
+  querySelectorAll: () => [],
+  addEventListener(type, listener) { if (type === "DOMContentLoaded") listener(); },
+};
+
+try {
+  const module = await import(pathToFileURL(path.join(workspace, "app.mjs")).href + "?lite-outcome=1");
+  assert.equal(typeof module.setMenuOpen, "function");
+  assert.equal(buttonSelected, true, "the application must bind the navigation control");
+  assert.equal(navigationSelected, true, "the application must bind the controlled navigation");
+  assert.equal(typeof clickListener, "function");
+  assert.equal(menu.hidden, true, "mobile navigation must start collapsed");
+  assert.equal(button.getAttribute("aria-expanded"), "false");
+  clickListener();
+  assert.equal(menu.hidden, false);
+  assert.equal(button.getAttribute("aria-expanded"), "true");
+  clickListener();
+  assert.equal(menu.hidden, true);
+  assert.equal(button.getAttribute("aria-expanded"), "false");
+} finally {
+  delete globalThis.document;
+  delete globalThis.window;
+  delete globalThis.matchMedia;
+}
+
+console.log("hidden responsive outcome: pass");
+`;
+
 export function buildLiteCaseCatalog(catalog) {
   const cases = catalog.cases
     .filter(({ id }) => Object.hasOwn(LITE_PROMPTS, id))
-    .map((item) => ({ ...item, prompt: LITE_PROMPTS[item.id] }));
+    .map((item) => ({
+      ...item,
+      prompt: LITE_PROMPTS[item.id],
+      hiddenFiles:
+        item.id === "frontend-responsive-accessible"
+          ? { "hidden-grade.mjs": LITE_FRONTEND_OUTCOME_GRADER }
+          : item.hiddenFiles,
+    }));
   if (cases.length !== 2) throw new Error("Lite case profile is incomplete");
   return { ...catalog, cases };
 }

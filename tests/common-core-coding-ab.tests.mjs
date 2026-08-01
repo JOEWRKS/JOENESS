@@ -1,9 +1,18 @@
 import assert from "node:assert/strict";
+import { spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
-import { mkdtemp, mkdir, readFile, symlink, writeFile } from "node:fs/promises";
+import {
+  mkdtemp,
+  mkdir,
+  readFile,
+  rm,
+  symlink,
+  writeFile,
+} from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import test from "node:test";
+import { fileURLToPath } from "node:url";
 
 import {
   LITE_RUN_MODES,
@@ -129,6 +138,110 @@ test("Lite modes use ABBA order and a rough two-case profile", async () => {
     lite.cases[1].prompt,
     "이 프로젝트 브라우저를 모바일과 데스크톱에서 실제로 쓸 수 있게 완성해줘. 기존 제목과 의존성 없는 구성을 유지해.",
   );
+});
+
+test("Lite outcome grader replays recorded rough frontend diffs without exact IDs", async () => {
+  const repositoryRoot = path.resolve(
+    path.dirname(fileURLToPath(import.meta.url)),
+    "..",
+  );
+  const catalog = buildLiteCaseCatalog(await loadCaseCatalog());
+  const item = catalog.cases.find(
+    ({ id }) => id === "frontend-responsive-accessible",
+  );
+  const grader = item.hiddenFiles["hidden-grade.mjs"];
+  assert.doesNotMatch(grader, /menu-toggle|site-nav/u);
+
+  for (const resultName of [
+    "run-lite-control-r1.json",
+    "run-lite-candidate-r1.json",
+    "run-lite-candidate-r2.json",
+    "run-lite-control-r2.json",
+  ]) {
+    const result = JSON.parse(
+      await readFile(
+        path.join(repositoryRoot, "evals", "coding", "results", resultName),
+        "utf8",
+      ),
+    );
+    const evidence = result.cases.find(({ caseId }) => caseId === item.id);
+    assert.equal(evidence.diff.truncated, false);
+    assert.equal(Buffer.byteLength(evidence.diff.text), evidence.diff.bytes);
+    assert.equal(
+      createHash("sha256").update(evidence.diff.text).digest("hex"),
+      evidence.diff.sha256,
+    );
+    const subject = buildSubjectPrompt(item);
+    assert.equal(subject.visibleFilesSha256, evidence.visibleFilesSha256);
+    assert.equal(
+      createHash("sha256").update(subject.text).digest("hex"),
+      evidence.promptSha256,
+    );
+
+    const ownedRoot = await mkdtemp(path.join(tmpdir(), "lite-regrade-"));
+    try {
+      const materialized = await materializeCase(item, ownedRoot);
+      const candidate = await readFile(
+        path.join(repositoryRoot, ...result.candidate.path.split("/")),
+      );
+      assert.equal(
+        createHash("sha256").update(candidate).digest("hex"),
+        result.candidate.actualSha256,
+      );
+      await writeFile(path.join(materialized.workspace, "AGENTS.md"), candidate);
+      const patchPath = path.join(ownedRoot, "recorded.patch");
+      await writeFile(patchPath, evidence.diff.text);
+      const check = spawnSync(
+        "git",
+        ["-c", "core.autocrlf=false", "apply", "--check", patchPath],
+        {
+        cwd: materialized.workspace,
+        encoding: "utf8",
+        },
+      );
+      assert.equal(check.status, 0, check.stderr);
+      const apply = spawnSync(
+        "git",
+        ["-c", "core.autocrlf=false", "apply", patchPath],
+        {
+          cwd: materialized.workspace,
+          encoding: "utf8",
+        },
+      );
+      assert.equal(apply.status, 0, apply.stderr);
+
+      for (const [relative, expected] of Object.entries(evidence.fileTree.files)) {
+        const bytes = await readFile(
+          path.join(materialized.workspace, ...relative.split("/")),
+        );
+        assert.equal(bytes.length, expected.bytes, `${resultName}: ${relative}`);
+        assert.equal(
+          createHash("sha256").update(bytes).digest("hex"),
+          expected.sha256,
+          `${resultName}: ${relative}`,
+        );
+      }
+
+      await mkdir(materialized.hiddenDirectory);
+      await writeFile(materialized.hiddenGrader, grader);
+      const grade = spawnSync(
+        process.execPath,
+        buildGraderNodeArgs(
+          ["hidden-grade.mjs", materialized.workspace],
+          [materialized.hiddenDirectory, materialized.workspace],
+        ),
+        {
+          cwd: materialized.hiddenDirectory,
+          encoding: "utf8",
+          env: { ...process.env, NO_COLOR: "1" },
+        },
+      );
+      assert.equal(grade.status, 0, `${resultName}: ${grade.stderr}`);
+      assert.match(grade.stdout, /hidden responsive outcome: pass/u);
+    } finally {
+      await rm(ownedRoot, { recursive: true, force: true });
+    }
+  }
 });
 
 test("Codex invocation exposes only the internal patch surface", () => {
