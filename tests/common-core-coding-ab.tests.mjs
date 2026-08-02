@@ -634,6 +634,45 @@ test("Codex JSONL parser rejects external tools, failures, and invalid lifecycle
   }
 });
 
+test("Codex JSONL parser records built-in shell evidence only when explicitly allowed", () => {
+  const parsed = parseCodexJsonl(
+    [
+      JSON.stringify({ type: "thread.started", thread_id: "thread-shell" }),
+      JSON.stringify({ type: "turn.started" }),
+      JSON.stringify({
+        type: "item.completed",
+        item: {
+          id: "command-1",
+          type: "command_execution",
+          command: "node --test",
+          status: "completed",
+          exit_code: 0,
+          aggregated_output: "2 tests passed",
+        },
+      }),
+      JSON.stringify({
+        type: "item.completed",
+        item: { id: "message-1", type: "agent_message", text: "Verified." },
+      }),
+      JSON.stringify({
+        type: "turn.completed",
+        usage: { input_tokens: 12, cached_input_tokens: 4, output_tokens: 3 },
+      }),
+    ].join("\n"),
+    { allowCommandExecution: true },
+  );
+
+  assert.equal(parsed.patchOnly, false);
+  assert.deepEqual(parsed.commandExecutions, [
+    {
+      command: "node --test",
+      status: "completed",
+      exitCode: 0,
+      output: "2 tests passed",
+    },
+  ]);
+});
+
 test("patch evidence requires the exact allowed workspace paths", () => {
   const workspace = path.resolve("C:\\fixture");
   assert.deepEqual(

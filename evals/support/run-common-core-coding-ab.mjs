@@ -947,7 +947,7 @@ async function applySmokeSolution(item, workspace) {
   await writeFileMap(workspace, item.smokeSolution, false);
 }
 
-export function parseCodexJsonl(value) {
+export function parseCodexJsonl(value, { allowCommandExecution = false } = {}) {
   if (typeof value !== "string" || Buffer.byteLength(value) > PROCESS_OUTPUT_LIMIT) {
     throw new Error("Codex JSONL exceeds input limit");
   }
@@ -961,6 +961,10 @@ export function parseCodexJsonl(value) {
   let lifecycle = "thread";
   const itemTypes = [];
   const fileChangePaths = [];
+  const commandExecutions = [];
+  const allowedItemTypes = allowCommandExecution
+    ? new Set([...ALLOWED_ITEM_TYPES, "command_execution"])
+    : ALLOWED_ITEM_TYPES;
   for (const line of lines) {
     if (Buffer.byteLength(line) > 256 * 1024) {
       throw new Error("Codex JSONL line exceeds limit");
@@ -1010,7 +1014,7 @@ export function parseCodexJsonl(value) {
       ) {
         throw new Error("Codex item identity is invalid");
       }
-      if (!ALLOWED_ITEM_TYPES.has(item.type)) {
+      if (!allowedItemTypes.has(item.type)) {
         throw new Error(`forbidden Codex item type: ${item.type}`);
       }
       if (!itemTypes.includes(item.type)) itemTypes.push(item.type);
@@ -1052,6 +1056,24 @@ export function parseCodexJsonl(value) {
           }
         }
       }
+      if (item.type === "command_execution" && event.type === "item.completed") {
+        if (
+          typeof item.command !== "string" ||
+          Buffer.byteLength(item.command) > 16 * 1024 ||
+          !["completed", "failed"].includes(item.status) ||
+          !Number.isSafeInteger(item.exit_code) ||
+          typeof item.aggregated_output !== "string" ||
+          Buffer.byteLength(item.aggregated_output) > FINAL_MESSAGE_LIMIT
+        ) {
+          throw new Error("command execution evidence is invalid");
+        }
+        commandExecutions.push({
+          command: item.command,
+          status: item.status,
+          exitCode: item.exit_code,
+          output: item.aggregated_output,
+        });
+      }
     } else if (event.type === "turn.completed") {
       if (lifecycle !== "items" || !isPlainObject(event.usage)) {
         throw new Error("Codex lifecycle terminal event is invalid");
@@ -1083,7 +1105,8 @@ export function parseCodexJsonl(value) {
     eventCount: lines.length,
     itemTypes,
     fileChangePaths: [...new Set(fileChangePaths)],
-    patchOnly: true,
+    patchOnly: commandExecutions.length === 0,
+    ...(allowCommandExecution ? { commandExecutions } : {}),
     inputTokens,
     cachedInputTokens,
     outputTokens,

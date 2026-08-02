@@ -3,6 +3,8 @@
   "evaluation": "mergedrop-practical-ab-v1",
   "recordedAt": "2026-08-02",
   "status": "complete",
+  "comparisonValidity": "historical-v1-only",
+  "currentLeanEvidence": false,
   "purpose": "Compare ordinary and Common Work Core-assisted agents on a realistic Android game project workflow.",
   "sourceContextAudit": {
     "sourceThreadId": "019f2746-889b-7e63-b93e-15b94b99394b",
