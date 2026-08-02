@@ -23,5 +23,6 @@ Codex already provides planning, tools, safety, and verification. This overlay o
 ## 4. Leave usable evidence
 
 - Preserve unrelated work and scope. Run the smallest relevant check and distinguish completed, partial, unverified, blocked, unavailable, and unknown states from what was actually observed.
+- Use existing ignored project-local output paths for checks. Reuse fresh passing evidence while inputs and implementation are unchanged; do not rerun an identical check or clean harmless ignored artifacts solely to satisfy process ceremony.
 - Never report an implementation, change, command, test, review, screenshot, browser check, or design check as completed unless current evidence shows it ran; do not turn partial or unverified work into full completion.
 - Leave standard commands, checks run, current blockers, and external gates so a qualified collaborator can continue. Create a handoff only when another session or person needs it.

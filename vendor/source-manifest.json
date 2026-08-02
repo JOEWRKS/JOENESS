@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "activeCommonCore": {"path":"AGENTS.md","sha256":"9f19300e1c38232042374d20811bebe715107922f8ea1f52e8c85be1c903191e"},
+  "activeCommonCore": {"path":"AGENTS.md","sha256":"1eb2f962b79c22ad973ab6a4bb8ca9e815e6476d506f817b3bbd4b6efda69489"},
   "evaluation": {
     "state": "candidate",
     "tests": ["tests/design-vendor-integrity.tests.mjs", "vendor/ui-ux-pro-max/scripts/validate_data.py", "vendor/ui-ux-pro-max/scripts/tests/test_core.py"],
