@@ -10,8 +10,10 @@
   },
   "canary": {
     "status": "complete",
-    "runId": "canary-2026-08-02T06-28-57-020Z-01b59a46",
-    "evidence": "D:/JOEWRKS/.harness-evals/project-aware-lean-ab-v1/canary-2026-08-02T06-28-57-020Z-01b59a46/result.json",
+    "initialRunId": "canary-2026-08-02T06-28-57-020Z-01b59a46",
+    "initialEvidence": "D:/JOEWRKS/.harness-evals/project-aware-lean-ab-v1/canary-2026-08-02T06-28-57-020Z-01b59a46/result.json",
+    "postFixRunId": "canary-2026-08-02T06-38-24-932Z-7456e625",
+    "evidence": "D:/JOEWRKS/.harness-evals/project-aware-lean-ab-v1/canary-2026-08-02T06-38-24-932Z-7456e625/result.json",
     "sourceUnchanged": true,
     "controlSawCandidateToken": false,
     "candidateFollowedProjectInstruction": true,

@@ -344,7 +344,11 @@ async function sourceState() {
   return { head, statusSha256: sha256(statusText), statusText };
 }
 
-async function snapshotWorkspace(workspace, contract, excludeTreatmentAgents) {
+export async function snapshotWorkspace(
+  workspace,
+  contract,
+  excludeTreatmentAgents,
+) {
   const files = {};
   let totalBytes = 0;
   const queue = [workspace];
@@ -356,6 +360,9 @@ async function snapshotWorkspace(workspace, contract, excludeTreatmentAgents) {
       const absolute = path.join(current, entry.name);
       const relative = path.relative(workspace, absolute).split(path.sep).join("/");
       if (relative === ".git" || relative.startsWith(".git/")) continue;
+      if (relative === "node_modules" || relative.startsWith("node_modules/")) {
+        continue;
+      }
       if (excludeTreatmentAgents && relative === "AGENTS.md") continue;
       const metadata = await lstat(absolute);
       if (metadata.isSymbolicLink()) {

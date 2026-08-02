@@ -1,6 +1,8 @@
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
 import { readFileSync } from "node:fs";
+import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
 import path from "node:path";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
@@ -145,4 +147,27 @@ test("result validation requires six fresh threads and stable arm workspaces", (
     () => lifecycleRunner.validateRunEvidence(duplicateThread, contract),
     /fresh thread/,
   );
+});
+
+test("artifact snapshots exclude installed dependencies from authored-file limits", async () => {
+  assert.equal(typeof lifecycleRunner.snapshotWorkspace, "function");
+  const root = await mkdtemp(path.join(tmpdir(), "lean-snapshot-"));
+  try {
+    await mkdir(path.join(root, "src"));
+    await mkdir(path.join(root, "node_modules", "dependency"), { recursive: true });
+    await writeFile(path.join(root, "src", "app.js"), "export const app = true;\n");
+    await writeFile(
+      path.join(root, "node_modules", "dependency", "index.js"),
+      "module.exports = {};\n",
+    );
+    const contract = structuredClone(readJson(contractPath));
+    contract.workspace.fileLimit = 1;
+
+    const snapshot = await lifecycleRunner.snapshotWorkspace(root, contract, false);
+
+    assert.equal(snapshot.fileCount, 1);
+    assert.deepEqual(Object.keys(snapshot.files), ["src/app.js"]);
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
 });
