@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "evaluation": "project-aware-lean-ab-v1",
-  "status": "planned",
+  "status": "invalid-infrastructure",
   "contract": "evals/project-aware-lean/contract-v1.json",
   "candidate": {
     "path": "evals/candidates/project-aware-lean-v1.md",
@@ -19,6 +19,47 @@
     "candidateFollowedProjectInstruction": true,
     "scored": false
   },
-  "run": null,
-  "decision": null
+  "run": {
+    "status": "invalid-infrastructure",
+    "scored": false,
+    "completedScoredSessions": 0,
+    "attempts": [
+      {
+        "runId": "paired-r1-2026-08-02T06-31-18-363Z-d1073277",
+        "mode": "nested-codex-workspace-write",
+        "reason": "Generated node_modules content was incorrectly counted against the authored-file limit.",
+        "evidence": "D:/JOEWRKS/.harness-evals/project-aware-lean-ab-v1/paired-r1-2026-08-02T06-31-18-363Z-d1073277/invalid-infrastructure.json"
+      },
+      {
+        "runId": "paired-r1-2026-08-02T06-39-47-367Z-4d6f832b",
+        "mode": "nested-codex-workspace-write",
+        "reason": "Windows shell commands ignored the requested evaluation workspace and ran in D:/JOEWRKS/JOEWRKS-TestProject-01.",
+        "evidence": "D:/JOEWRKS/.harness-evals/project-aware-lean-ab-v1/paired-r1-2026-08-02T06-39-47-367Z-4d6f832b/invalid-infrastructure.json"
+      },
+      {
+        "runId": "desktop-worktree-probe-2026-08-02",
+        "mode": "codex-desktop-worktree",
+        "reason": "The task metadata and worktree pointed to an empty control checkout, but its shell output came from the unrelated backpack-dungeon repository.",
+        "controlThreadId": "019fc142-6aec-7d83-a646-855395aeb288",
+        "controlHead": "b56ce6a1fc9a73e3a7c4cceaa8986d9bdb47ce6d",
+        "controlWorktree": "C:/Users/tjdwo/.codex/worktrees/6b7a/작업하네스",
+        "controlWorktreeEntries": [
+          ".git"
+        ],
+        "observedWrongRepository": {
+          "packageName": "backpack-dungeon",
+          "head": "ea130d7"
+        },
+        "totalTokens": 80802,
+        "candidateClientThreadId": "client-new-thread:0eedce46-308d-4bb6-b00e-44c320745ec3",
+        "candidateThreadAvailableAtProbeEnd": false
+      }
+    ],
+    "officialRelatedIssue": "https://github.com/openai/codex/issues/21606"
+  },
+  "decision": {
+    "status": "invalid-infrastructure",
+    "candidateEffectAssessed": false,
+    "reason": "No comparable Control/Candidate scored sessions were produced; the current Windows runtime did not honor isolated task working directories."
+  }
 }
