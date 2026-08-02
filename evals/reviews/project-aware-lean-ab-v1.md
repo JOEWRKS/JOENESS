@@ -12,7 +12,8 @@
 - The first scored attempt exposed and fixed an evaluator snapshot error: generated `node_modules` files were counted as authored artifacts.
 - The one allowed rerun failed because Windows shell commands ignored the requested `--cd` workspace and ran in `D:/JOEWRKS/JOEWRKS-TestProject-01`.
 - A Codex Desktop worktree probe reproduced the same class of failure. Its task metadata pointed to `C:/Users/tjdwo/.codex/worktrees/6b7a/작업하네스`, whose checkout contained only `.git` at control commit `b56ce6a`, while the task's shell output reported package `backpack-dungeon` at commit `ea130d7`.
-- That invalid Desktop probe consumed 80,802 total tokens. It is infrastructure overhead, not A/B evidence.
+- The two canaries consumed 116,106 tokens, the completed invalid CLI attempt consumed 721,852, and the invalid Desktop probe consumed 80,802. The directly recorded minimum is therefore 918,760 tokens. The first interrupted CLI attempt and extra read-only CWD probes have no complete usage record, so the actual total is higher but unknown.
+- All of that usage is infrastructure overhead, not A/B evidence.
 - The original harness repository and the unrelated game repository remained unchanged during the failed scored run.
 
 ## Consequence / 후속 처리

@@ -55,6 +55,13 @@
         "candidateThreadAvailableAtProbeEnd": false
       }
     ],
+    "tokenCost": {
+      "canaries": 116106,
+      "completedInvalidCliAttempt": 721852,
+      "desktopWorktreeProbe": 80802,
+      "knownRecordedMinimum": 918760,
+      "unknownAdditionalCost": "The first interrupted CLI attempt and extra read-only CWD probes did not expose complete usage records."
+    },
     "officialRelatedIssue": "https://github.com/openai/codex/issues/21606"
   },
   "decision": {
