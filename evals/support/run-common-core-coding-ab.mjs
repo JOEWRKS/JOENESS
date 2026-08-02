@@ -1060,7 +1060,7 @@ export function parseCodexJsonl(value, { allowCommandExecution = false } = {}) {
         if (
           typeof item.command !== "string" ||
           Buffer.byteLength(item.command) > 16 * 1024 ||
-          !["completed", "failed"].includes(item.status) ||
+          !["completed", "failed", "declined"].includes(item.status) ||
           !Number.isSafeInteger(item.exit_code) ||
           typeof item.aggregated_output !== "string" ||
           Buffer.byteLength(item.aggregated_output) > FINAL_MESSAGE_LIMIT

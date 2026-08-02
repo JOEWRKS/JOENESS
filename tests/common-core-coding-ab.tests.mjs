@@ -652,6 +652,17 @@ test("Codex JSONL parser records built-in shell evidence only when explicitly al
       }),
       JSON.stringify({
         type: "item.completed",
+        item: {
+          id: "command-2",
+          type: "command_execution",
+          command: "Remove-Item cache -Recurse",
+          status: "declined",
+          exit_code: -1,
+          aggregated_output: "blocked by policy",
+        },
+      }),
+      JSON.stringify({
+        type: "item.completed",
         item: { id: "message-1", type: "agent_message", text: "Verified." },
       }),
       JSON.stringify({
@@ -669,6 +680,12 @@ test("Codex JSONL parser records built-in shell evidence only when explicitly al
       status: "completed",
       exitCode: 0,
       output: "2 tests passed",
+    },
+    {
+      command: "Remove-Item cache -Recurse",
+      status: "declined",
+      exitCode: -1,
+      output: "blocked by policy",
     },
   ]);
 });
