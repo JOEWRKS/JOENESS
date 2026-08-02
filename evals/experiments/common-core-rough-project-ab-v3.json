@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "evaluation": "common-core-rough-project-ab-v3",
   "recordedAt": "2026-08-02",
-  "status": "complete-partial-pass",
+  "status": "complete-primary-pass",
   "purposeKo": "거친 프로젝트 선언과 '다음 작업을 해줘'를 현재 저장소 근거에 맞는 실제 다음 산출물로 변환하는지, 동시에 사실성·종료성·범위·토큰 효율을 비교한다.",
   "design": {
     "arms": ["isolated no-Common-Core control", "isolated active-Common-Core candidate"],
@@ -101,7 +101,7 @@
     "A PowerShell ModuleAnalysisCache remained untracked and was not mentioned in the final report; it is evaluation residue rather than product code."
   ],
   "decision": {
-    "verdict": "partial-pass",
+    "verdict": "primary-objective-pass",
     "retain": [
       "rough request to next-deliverable compilation",
       "byte-level confirmation before source-corruption claims",

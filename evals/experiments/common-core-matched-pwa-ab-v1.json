@@ -1,0 +1,123 @@
+{
+  "schemaVersion": 1,
+  "evaluation": "common-core-matched-pwa-ab-v1",
+  "recordedAt": "2026-08-02",
+  "status": "complete-control-limited-win",
+  "purposeKo": "일반 Codex와 최종 Common Core에 동일한 PWA 산출물과 합격 조건을 주고 구현 품질, 유지보수성, 검증, 사실성, 종료성 및 비용 대비 효용을 비교한다.",
+  "design": {
+    "arms": ["isolated no-Common-Core control", "isolated active-Common-Core candidate"],
+    "baselineCommit": "f680f2e80495dffbc4cbf5d94de4ac21939e6c4e",
+    "treatment": {
+      "path": "AGENTS.md",
+      "bytes": 3933,
+      "sha256": "3e1cc9cc93a6ed07c276b6d41f8acd1928918b41d2394ab67795b3fc492f6635"
+    },
+    "matchedOutcome": "Installable and offline PWA shell, valid manifest and icons, correct MIME types, install entry point, safe background pause and resume, preserved game and score storage, bounded UI changes, relevant tests, truthful report.",
+    "samePromptAndRuntime": true,
+    "parallelStart": true,
+    "timeoutMsPerArm": 300000,
+    "model": "gpt-5.6-sol",
+    "reasoningEffort": "low",
+    "network": false,
+    "externalEffects": "none",
+    "limitation": "One stochastic pair cannot establish a general causal quality effect. Candidate token usage is unavailable because the turn never emitted turn.completed."
+  },
+  "rawEvidence": {
+    "root": "D:/JOEWRKS/.harness-evals/common-core-matched-pwa-ab-v1-20260802",
+    "runner": {"bytes": 5921, "sha256": "50f23995d171e302983bffa91439013fae872f336c58db420b0a21f10f7375ce"},
+    "controlEvents": {"bytes": 97191, "sha256": "85a774f7de69f1bd4dd5afd7b5aba94c142a366c20129ffe45fd1dea10632182"},
+    "controlSummary": {"bytes": 83853, "sha256": "e5813f5ba993002e17c825ce2f6282c137aa4ee589fa5ff8ca9b49aa35096e7c"},
+    "candidateEvents": {"bytes": 75158, "sha256": "4fdf49f80a23b4f3d7ad7830080b9c9bd229a038a5f73dfc4ee8f2db3b8f9377"},
+    "candidateSummary": {"bytes": 304, "sha256": "abed4595f721a75fe1dfbb89dac320db1428544dfd53d45158c448ca2df0bcc5"}
+  },
+  "metrics": {
+    "control": {
+      "wallMs": 272027,
+      "inputTokens": 354028,
+      "cachedInputTokens": 275712,
+      "uncachedInputTokens": 78316,
+      "outputTokens": 12595,
+      "reasoningOutputTokens": 1467,
+      "totalTokens": 366623,
+      "commands": {"total": 10, "completed": 8, "failed": 1, "declined": 1},
+      "productPaths": 8,
+      "completed": true
+    },
+    "candidate": {
+      "wallMs": 300053,
+      "inputTokens": null,
+      "cachedInputTokens": null,
+      "uncachedInputTokens": null,
+      "outputTokens": null,
+      "reasoningOutputTokens": null,
+      "totalTokens": null,
+      "commands": {"total": 11, "completed": 10, "failed": 1, "declined": 0},
+      "productPaths": 11,
+      "completed": false,
+      "termination": "SIGTERM after the 300 second cap"
+    }
+  },
+  "acceptanceEvidence": {
+    "control": {
+      "gameAndScorePreserved": true,
+      "manifestAndOfflineShell": true,
+      "installEntryAndBackgroundHandling": true,
+      "independentTests": "10/10 pass",
+      "runtimeHttpMime": "verified on an ephemeral local port by pwa.test.mjs",
+      "finalReport": true
+    },
+    "candidate": {
+      "gameAndScorePreserved": true,
+      "manifestAndOfflineShell": true,
+      "installEntryAndBackgroundHandling": true,
+      "independentTests": "8/8 pass",
+      "runtimeHttpMime": "not tested; MIME mapping was checked as a pure function",
+      "finalReport": false
+    },
+    "notVerifiedByEither": [
+      "physical Android or iOS installation",
+      "browser-driven install prompt and background-resume interaction",
+      "complete offline restart through browser DevTools or a physical device"
+    ]
+  },
+  "qualityComparison": {
+    "controlStrengths": [
+      "Completed with a coherent eight-path artifact and final handoff.",
+      "Added four PWA tests, including real HTTP MIME responses on an ephemeral port and service-worker navigation fallback coverage.",
+      "Recovered from the sandbox test-runner limitation and stopped after one declined optional fixed-port check."
+    ],
+    "candidateStrengths": [
+      "Used relative PWA paths and implemented an explicit pause overlay, resume focus, install status, and stronger canvas accessibility.",
+      "Produced valid 192 and 512 PNG files without external packages."
+    ],
+    "controlDefects": [
+      "Uses one SVG icon for the manifest and Apple touch icon, limiting real-device compatibility.",
+      "Falsely reported repairing broken Korean source even though HEAD:index.html is strict valid UTF-8 with intact Korean and closing tags.",
+      "Browser install, actual offline restart, and lifecycle behavior remain unverified."
+    ],
+    "candidateDefects": [
+      "Timed out after acceptance checks had passed because it expanded into optional PNG compatibility work.",
+      "The generated PNG files are unreferenced: manifest, HTML, service worker, and tests still point to SVG files.",
+      "Has only two PWA tests and no runtime HTTP, install-prompt, pause-resume, or offline-browser verification.",
+      "Repeated the terminal-rendering source-corruption misdiagnosis in intermediate reasoning despite the active Common Core rule.",
+      "Emitted no final report and left an internally inconsistent partial compatibility change."
+    ]
+  },
+  "costInterpretation": {
+    "principle": "Higher cost is acceptable when it produces proportionally better verified output; raw token count is not a failure criterion.",
+    "observed": "The control's high cost produced a completed, more strongly tested artifact. The candidate's additional wall time produced some better interaction design but ended before integrating its final compatibility work, so the extra effort did not yield a net quality advantage.",
+    "candidateTokenComparison": "unavailable, not estimated"
+  },
+  "decision": {
+    "verdict": "control-limited-win",
+    "harnessQualityAdvantage": "not-demonstrated",
+    "reason": "Both produced useful PWA implementations, but only the control completed, provided a final handoff, and verified runtime HTTP behavior. Candidate interaction details were better, but its post-pass expansion caused timeout and left unused PNG artifacts.",
+    "harnessImplication": [
+      "Retain Common Core's demonstrated rough-request compilation role.",
+      "Do not claim that Common Core improves an already explicit implementation task.",
+      "Do not add more general rules from this single sample; the existing stop and source-evidence rules were present but not reliably followed.",
+      "Treat design skills as shared model capability in this test because both arms loaded the same installed design skill and vendor references."
+    ],
+    "next": "Use the thin core in real projects and record material failures. Do not repeat this synthetic pair without a distinct hypothesis."
+  }
+}
