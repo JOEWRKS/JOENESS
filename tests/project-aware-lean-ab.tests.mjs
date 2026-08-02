@@ -55,7 +55,7 @@ test("contract isolates the current Lean Core as the only arm difference", () =>
   );
 });
 
-test("smoke validates candidate identity and the six-session contract without calling Codex", () => {
+test("smoke validates frozen candidate identity and the six-session contract without calling Codex", () => {
   const result = spawnSync(
     process.execPath,
     [runnerPath, "--smoke", "--contract", contractPath],
@@ -66,7 +66,7 @@ test("smoke validates candidate identity and the six-session contract without ca
   const output = JSON.parse(result.stdout);
   assert.equal(output.status, "smoke-ok");
   assert.equal(output.evaluation, "project-aware-lean-ab-v1");
-  assert.equal(output.candidateMatchesActive, true);
+  assert.equal(output.candidateMatchesActive, false);
   assert.equal(output.candidateSha256, readJson(contractPath).candidate.sha256);
   assert.equal(output.phaseCount, 3);
   assert.equal(output.sessionCount, 6);

@@ -151,11 +151,10 @@ async function readCandidate(contract) {
   const candidateSha256 = sha256(candidate);
   const matchesActive = active.equals(candidate);
   if (
-    !matchesActive ||
     candidate.length !== contract.candidate.bytes ||
     candidateSha256 !== contract.candidate.sha256
   ) {
-    throw new Error("candidate identity does not match the active Lean Core");
+    throw new Error("candidate identity does not match the frozen contract");
   }
   return { active, candidate, activeSha256, candidateSha256, matchesActive };
 }

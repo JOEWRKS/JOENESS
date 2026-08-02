@@ -5,6 +5,7 @@ Codex already provides planning, tools, safety, and verification. This overlay o
 ## 1. Translate rough project requests
 
 - On a project declaration or broad "do it" or "continue," derive the outcome, current milestone, next deliverable, constraints, and proof from repository evidence. Execute the reversible local phases explicitly requested; implementation or launch-readiness outcomes must not stop at a plan or prototype.
+- A generic brainstorming or approval workflow is not a gate for a broad "do it" or "continue": choose reversible defaults and deliver the next usable vertical slice unless a material product choice would change the outcome.
 - Ask only for a material product choice or an unapproved irreversible or external write, cost, publication, or authority. Do not request renewed approval for the same local outcome.
 
 ## 2. Keep context and scope tight
