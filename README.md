@@ -22,8 +22,6 @@ JOENESS는 Windows용 Codex에 프로젝트 맥락 관리와 선별된 작업 �
 - 자동 업데이트, Windows 앱 등록, 백업 자동 복원
 - 모든 작업에 강제로 적용되는 긴 전역 프롬프트
 
-
-
 ### 준비물
 
 - Windows와 Codex
@@ -55,25 +53,23 @@ git clone https://github.com/JOEWRKS/joewrks-work-harness.git
 4. Enter 키를 누릅니다.
 5. 파란색 또는 검은색 PowerShell 창이 열리면 준비가 끝난 것입니다.
 
-이 설명서에서 **“JOENESS 폴더에서 실행하세요”**라는 말은 바로 이 상태를 뜻합니다. PowerShell 경로를 직접 입력할 필요가 없습니다.
-
-아래 명령의 `.`은 **현재 폴더**, `\`는 **그 안의 파일**이라는 뜻입니다. 따라서 `.\JOENESS-0.1.ps1`은 “지금 연 폴더 안의 `JOENESS-0.1.ps1` 파일”을 가리킵니다.
-
 #### 3단계: 아래 명령을 한 줄씩 복사합니다
 
-먼저 설치 가능한 상태인지 확인합니다. 이 명령은 파일을 바꾸지 않습니다.
+먼저 설치 가능한 상태인지 확인합니다. **이 단계에서는 아직 설치하지 않습니다.**
 
 ```powershell
 powershell.exe -NoProfile -File .\JOENESS-0.1.ps1 -Check
 ```
 
-출력에서 `"status":"ready"` 또는 `"status":"current"`가 보이면 다음으로 진행합니다. `blocked` 또는 `unknown`이 보이면 설치하지 말고 그 출력 내용을 도움을 줄 사람에게 전달합니다.
+출력에서 `"status":"ready"`가 보이면 아래 설치 명령으로 진행합니다. `"status":"current"`가 보이면 이미 설치된 상태이므로 설치 명령을 건너뛰고 4단계로 이동합니다. `blocked` 또는 `unknown`이 보이면 설치하지 말고 출력 전체를 Codex에 붙여 넣어 해결 방법을 물어봅니다.
 
 설치 명령을 복사하고 Enter 키를 누릅니다.
 
 ```powershell
 powershell.exe -NoProfile -File .\JOENESS-0.1.ps1 -Apply
 ```
+
+`-Apply` 결과가 `"status":"current"`이면 다음 확인 단계로 진행합니다. `blocked`, `failed`, `unknown` 중 하나가 보이면 더 실행하지 말고 출력 전체를 Codex에 붙여 넣습니다.
 
 마지막으로 설치가 끝났는지 확인합니다.
 
@@ -91,7 +87,7 @@ powershell.exe -NoProfile -File .\JOENESS-0.1.ps1 -Check
 
 새 작업을 여는 이유는 방금 설치한 스킬 목록을 Codex가 다시 읽게 하기 위해서입니다.
 
-#### 5단계: 프로젝트마다 처음 한 번만 설정합니다
+#### 5단계: 프로젝트를 처음 사용할 때 설정합니다
 
 새 작업의 채팅창에 다음 문장을 그대로 붙여 넣습니다.
 
@@ -107,44 +103,64 @@ $joewrks-project-setup 이 프로젝트의 목표, 현재 구조, 실행·테스
 오류 원인을 찾아서 수정해줘.
 ```
 
-필요할 때만 다음 스킬을 직접 부릅니다.
+아래 스킬을 매번 직접 부를 필요는 없습니다. 해당 절차를 **이번 작업에서 꼭 적용하라고 명시하고 싶을 때만** 사용합니다.
 
 - UI/UX 작업에 디자인 절차를 확실히 적용: `$joewrks-design-frontend`
 - 새 작업이나 다른 사람에게 현재 상태 전달: `$handoff`
 - 프로젝트의 지속 규칙을 다시 설정: `$joewrks-project-setup`
 
-`joewrks-project-setup`은 프로젝트의 JOEWRKS 관리 블록만 만들며 코드·디자인·의존성을 바꾸지 않습니다. Figma와 브라우저 검증은 해당 플러그인과 권한이 따로 있을 때만 사용할 수 있습니다.
+`joewrks-project-setup`은 프로젝트의 JOEWRKS 관리 블록만 만들거나 갱신하며 코드·디자인·의존성을 바꾸지 않습니다. Figma와 브라우저 검증은 해당 플러그인과 권한이 따로 있을 때만 사용할 수 있습니다.
 
-### 설치되는 항목
+### 설치하면 무엇이 생기나요?
 
+설치만으로 현재 프로젝트의 코드나 디자인이 바뀌지는 않습니다. JOENESS는 사용자용 Codex 설정 폴더에 다음 도우미를 준비합니다.
 
-| 항목                         | 기본 위치                                             | 상태                   |
-| -------------------------- | ------------------------------------------------- | -------------------- |
-| 설치 상태 파일                   | `%USERPROFILE%\.codex\joewrks-harness-state.json` | 설치·업데이트·제거의 소유권 증거   |
-| 빈 JOEWRKS 관리 블록            | `%USERPROFILE%\.codex\AGENTS.md`                  | 전역 규칙 없음             |
-| `handoff`                  | `%USERPROFILE%\.agents\skills`                    | 명시 호출 전용             |
-| `joewrks-project-setup`    | `%USERPROFILE%\.agents\skills`                    | 명시 호출 전용 candidate   |
-| `joewrks-design-frontend`  | `%USERPROFILE%\.agents\skills`                    | 조건부 선택 가능한 candidate |
-| UI UX Pro Max·Apple Design | `%USERPROFILE%\.agents\vendor`                    | 디자인 스킬용 고정 참고자료      |
-| 실행별 백업                     | `%LOCALAPPDATA%\JOEWRKS\work-harness\backups`     | 자동 삭제되지 않음           |
+- **프로젝트 설정 도우미 — `joewrks-project-setup`:** 프로젝트의 목표, 중요한 문서, 실행·테스트 방법을 짧은 지속 규칙으로 정리합니다. 처음 사용할 때 직접 요청하고, 목표나 규칙을 바꾸고 싶을 때 다시 요청할 수 있습니다.
+- **디자인·프론트엔드 도우미 — `joewrks-design-frontend`:** 의미 있는 UI/UX 작업에서 디자인 기준, 접근성, 반응형 화면과 검증 방법을 선택해서 사용합니다. 관련 작업이면 자동으로 선택될 수 있습니다.
+- **인수인계 도우미 — `handoff`:** 새 작업이나 다른 사람이 이어갈 때 현재 파일·Git·검사 결과를 짧게 정리합니다. 사용자가 직접 요청할 때만 문서를 만듭니다.
+- **UI UX Pro Max·Apple Design 참고자료:** 디자인 도우미가 필요할 때 찾아보는 내부 참고자료입니다. 사용자가 별도로 실행할 프로그램은 아닙니다.
+- **설치 기록과 백업:** JOENESS가 설치한 파일만 나중에 안전하게 업데이트하거나 제거하기 위한 기록입니다. 기존 파일을 강제로 덮어쓰지 않도록 돕습니다.
 
+Figma·브라우저·외부 플러그인은 설치되지 않습니다. 필요하면 각각 별도로 설치하고 연결해야 합니다.
 
-사용자 지정 위치가 필요하면 `-CodexHome`, `-AgentsHome`, `-BackupRoot`를 지정할 수 있습니다. 업데이트와 제거에도 처음 사용한 것과 같은 경로 인수를 사용해야 합니다.
+<details>
+<summary>정확한 설치 위치가 궁금한 경우에만 펼쳐보기</summary>
 
-### 결과 읽기
+아래는 별도 경로 옵션이나 `CODEX_HOME`을 설정하지 않았을 때의 위치입니다.
 
+| 항목 | 기본 위치 |
+|---|---|
+| 설치 상태 파일 | `%USERPROFILE%\.codex\joewrks-harness-state.json` |
+| 전역 규칙이 없는 빈 관리 구역 | `%USERPROFILE%\.codex\AGENTS.md` |
+| 세 가지 스킬 | `%USERPROFILE%\.agents\skills` |
+| 디자인 참고자료 | `%USERPROFILE%\.agents\vendor` |
+| 실행별 백업 | `%LOCALAPPDATA%\JOEWRKS\work-harness\backups` |
 
-| `status`  | exit | 의미                                  |
-| --------- | ---- | ----------------------------------- |
-| `current` | 0    | 설치 상태가 현재 소스와 일치                    |
-| `ready`   | 0    | 안전하게 적용하거나 제거할 변경이 있음               |
-| `removed` | 0    | 소유권이 확인된 항목 제거 완료 또는 no-state no-op |
-| `failed`  | 1    | 실행 실패, 확인 가능한 rollback 완료           |
-| `blocked` | 2    | 충돌·drift·경로·소유권 문제로 쓰기 전 중단         |
-| `unknown` | 3    | rollback 또는 대상 상태를 확정할 수 없음         |
+사용자 지정 위치가 필요하면 `-CodexHome`, `-AgentsHome`, `-BackupRoot`를 지정할 수 있습니다. 업데이트와 제거에도 처음 사용한 것과 같은 경로를 사용해야 합니다.
 
+</details>
 
-`blocked`이면 `blockers`를 먼저 확인하고 기존 파일을 직접 덮어쓰지 마십시오. `unknown`이면 같은 명령을 반복하지 말고 `backupPath`, `rollback`, `unresolvedTargets`와 실제 파일을 확인하십시오.
+### 명령 실행 후 이것만 확인하세요
+
+PowerShell 출력에서 `"status":"단어"` 부분만 찾으면 됩니다.
+
+| 보이는 단어 | 쉬운 뜻 | 내가 할 일 |
+|---|---|---|
+| `ready` | 설치하거나 업데이트할 준비가 됨 | `-Apply` 명령을 실행합니다. |
+| `current` | 설치가 정상적으로 끝났고 최신 상태임 | PowerShell을 닫고 Codex를 사용합니다. |
+| `blocked` | 기존 파일 충돌 등을 발견해 아무것도 덮어쓰지 않고 멈춤 | 강제로 설치하지 말고 출력 전체를 Codex에 붙여 넣습니다. |
+| `unknown` | 설치 또는 복구 결과를 확실히 판단할 수 없음 | 같은 명령을 반복하지 말고 출력 전체를 Codex에 붙여 넣습니다. |
+| `failed` | 설치에 실패했지만 변경 내용은 되돌린 상태 | 출력 전체를 Codex에 붙여 넣어 원인을 확인합니다. |
+| `removed` | 제거가 끝났거나 제거할 JOENESS 설치 기록이 없었음 | 제거가 목적이었다면 작업을 끝냅니다. |
+
+정상적인 첫 설치에서는 보통 `-Check` 후 `ready` → `-Apply` 후 `current` → 마지막 `-Check` 후 `current` 순서로 보입니다.
+
+<details>
+<summary>개발자용 exit code 보기</summary>
+
+`current`, `ready`, `removed`는 exit `0`, `failed`는 `1`, `blocked`는 `2`, `unknown`은 `3`입니다.
+
+</details>
 
 ### 업데이트와 제거
 
@@ -171,10 +187,7 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\JOENESS-0.1.ps1 -Check
 - 비어 있지 않은 `.codex\AGENTS.override.md`, 같은 이름의 기존 unmanaged 스킬, 설치 뒤 수정된 관리 파일, 잘못된 marker, junction·symlink 경로는 안전을 위해 `blocked`가 될 수 있습니다. `--force` 옵션은 없습니다.
 - `-Apply`는 실제 쓰기 직전에 전체 검사를 다시 수행하고, 대상 변경 전 실행별 백업을 만듭니다.
 
-
-
 ### 저장소 안내
-
 
 | 경로                         | 역할                           |
 | -------------------------- | ---------------------------- |
@@ -185,7 +198,6 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\JOENESS-0.1.ps1 -Check
 | `tests/`                   | 설치기·스킬·vendor 무결성 회귀 검사      |
 | `evals/`                   | 후보와 과거 실험을 수정하지 않고 보존하는 증거   |
 | `docs/superpowers/`        | 설계 명세와 구현 계획 기록              |
-
 
 루트 `common-core.md`는 비교에 사용한 평가 증거이며 현재 설치되지 않습니다. 별도 `HARNESS.md`를 만들지 않고, 사람용 설명은 README, 저장소·프로젝트 규칙은 해당 `AGENTS.md`, 조건부 절차는 `SKILL.md`에 둡니다.
 
@@ -199,15 +211,11 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\tests\project-setup.te
 node --test .\tests\design-vendor-integrity.tests.mjs
 ```
 
-
-
 ## English Guide
 
 JOENESS is a personal Beta work environment that adds project-context management and selected task skills to Codex on Windows. It is not a guaranteed performance booster. Its purpose is to reduce scope drift, false completion claims, and avoidable rework in long projects while loading specialist guidance only when useful.
 
 > **Current status:** `personal-pilot Beta candidate`. It is ready for personal pilots, but it is not certified as stable or share-ready. Validation disabled the global Common Core rule layer.
-
-
 
 ### What it does
 
@@ -228,51 +236,98 @@ You need Windows, Codex, and Windows PowerShell 5.1 or later. The installer itse
 4. Replace the address with `powershell` and press Enter.
 5. In the PowerShell window, paste each command below one at a time.
 
-In `.\JOENESS-0.1.ps1`, `.\` means “the file inside the folder from which you just opened PowerShell.”
+First, inspect whether installation can proceed. This does not install anything.
 
 ```powershell
-# Read-only preview
-powershell.exe -NoProfile -File .\JOENESS-0.1.ps1 -Check
-
-# Install
-powershell.exe -NoProfile -File .\JOENESS-0.1.ps1 -Apply
-
-# Confirm installation
 powershell.exe -NoProfile -File .\JOENESS-0.1.ps1 -Check
 ```
 
-The final output must contain `"status":"current"`. Stop and ask for help if it contains `blocked` or `unknown`. `harness.ps1` remains a compatibility alias; new users should use `JOENESS-0.1.ps1`.
+If the result is `ready`, continue to Apply. If it is `current`, JOENESS is already installed, so skip Apply and continue to “Start using it.” If it is `blocked` or `unknown`, do not install—paste the complete output into Codex and ask how to resolve it.
+
+When the result is `ready`, run the installation command:
+
+```powershell
+powershell.exe -NoProfile -File .\JOENESS-0.1.ps1 -Apply
+```
+
+Continue only if Apply reports `"status":"current"`. If it reports `blocked`, `failed`, or `unknown`, run nothing else and paste the complete output into Codex.
+
+Finally, confirm the installed state:
+
+```powershell
+powershell.exe -NoProfile -File .\JOENESS-0.1.ps1 -Check
+```
+
+The final Check must report `"status":"current"`. `harness.ps1` remains a compatibility alias; new users should use `JOENESS-0.1.ps1`.
 
 ### Start using it
 
 1. Open Codex and create a new task so it refreshes the installed skill list.
 2. Open the project folder you want to work on.
-3. Paste this once for that project:
+3. Paste this when first setting up the project. Repeat it later only when its durable goals or rules need to change:
 
 ```text
 $joewrks-project-setup read this project's goal, structure, run commands, and tests, then persist the smallest durable work contract.
 ```
 
-After setup, ask for work normally. Use `$joewrks-design-frontend` when you need the design workflow explicitly, and `$handoff` when another task or person must resume the verified state.
+After setup, ask for work normally. You do not need to name a skill every time. Use `$joewrks-design-frontend` only when you want to require the design workflow explicitly, and `$handoff` when another task or person must resume the verified state.
 
 The package includes the explicit-only `handoff` skill. When the user explicitly requests `$joewrks-project-setup` or `setup`, `configure`, `persist`, or `apply` of a durable JOEWRKS project contract, that skill may update only its managed block in the project-root `AGENTS.md`; it does not change code, design, or dependencies.
 
 Figma and browser verification require separately available plugins and permissions. JOENESS neither installs those capabilities nor certifies their output.
 
-### Results
+### What gets installed?
 
+Installation alone does not change the code or design in your current project. JOENESS prepares these helpers in your user-level Codex configuration:
 
-| `status`  | exit | Meaning                                                       |
-| --------- | ---- | ------------------------------------------------------------- |
-| `current` | 0    | Installed state matches this source                           |
-| `ready`   | 0    | Safe apply or remove changes are available                    |
-| `removed` | 0    | State-owned removal completed, or the no-state no-op below    |
-| `failed`  | 1    | The operation failed and rollback was verified complete       |
-| `blocked` | 2    | A collision, drift, path, or ownership problem stopped writes |
-| `unknown` | 3    | Final state cannot be established                             |
+- **Project setup helper — `joewrks-project-setup`:** Turns the project's goals, important documents, run commands, and tests into a small durable contract. Request it explicitly the first time, and request it again whenever you want to change the durable goals or rules.
+- **Design and frontend helper — `joewrks-design-frontend`:** Selects relevant design guidance, accessibility checks, responsive behavior, and verification for meaningful UI/UX work. Codex may select it automatically when relevant.
+- **Handoff helper — `handoff`:** Records a compact summary linked to current files, Git, and observed checks when another task or person must continue. It writes a handoff only when explicitly requested.
+- **UI UX Pro Max and Apple Design references:** Internal reference material consulted by the design helper when useful. They are not separate programs for the user to run.
+- **Installation state and backups:** Let JOENESS update or remove only files it can prove it installed, instead of force-overwriting existing content.
 
+Figma, browser capabilities, and external plugins are not installed. Install and connect them separately when needed.
+
+<details>
+<summary>Show exact default locations</summary>
+
+These locations apply when no custom path arguments or `CODEX_HOME` are set.
+
+| Item | Default location |
+|---|---|
+| Installation state | `%USERPROFILE%\.codex\joewrks-harness-state.json` |
+| Empty managed area with no global rules | `%USERPROFILE%\.codex\AGENTS.md` |
+| Three skills | `%USERPROFILE%\.agents\skills` |
+| Design references | `%USERPROFILE%\.agents\vendor` |
+| Per-run backups | `%LOCALAPPDATA%\JOEWRKS\work-harness\backups` |
+
+Use `-CodexHome`, `-AgentsHome`, and `-BackupRoot` only when custom locations are required. Reuse the same locations for updates and removal.
+
+</details>
+
+### After a command, check only this
+
+Find the `"status":"word"` part of the PowerShell output.
+
+| Word shown | Plain meaning | What to do |
+|---|---|---|
+| `ready` | Installation or update can proceed | Run the `-Apply` command. |
+| `current` | Installation is complete and matches this version | Close PowerShell and use Codex. |
+| `blocked` | JOENESS found a conflict and stopped without force-overwriting it | Do not force installation; paste the complete output into Codex. |
+| `unknown` | The final install or recovery state cannot be determined | Do not rerun the same command; paste the complete output into Codex. |
+| `failed` | Installation failed, but its changes were rolled back | Paste the complete output into Codex to diagnose the cause. |
+| `removed` | Removal completed, or no owned JOENESS installation state was found | If removal was your goal, stop here. |
+
+A normal first installation usually reads `ready` after the first Check → `current` after Apply → `current` after the final Check.
 
 An unresolved target or incomplete rollback prevents a final-state claim. For `unknown`, do not blindly rerun: inspect `backupPath`, `rollback`, `unresolvedTargets`, and the actual files first.
+
+<details>
+<summary>Show developer exit codes</summary>
+
+`current`, `ready`, and `removed` use exit `0`; `failed` uses `1`; `blocked` uses `2`; `unknown` uses `3`.
+
+</details>
 
 ### Update and remove
 
@@ -291,8 +346,6 @@ If the default command is blocked by ExecutionPolicy, verify the source commit o
 ```powershell
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\JOENESS-0.1.ps1 -Check
 ```
-
-
 
 ### Repository and evidence
 
