@@ -36,11 +36,12 @@ test("the interaction safety core adds conditional decisions and failure receipt
   assert.match(core, /recommended default.*what waits/is);
   assert.match(core, /material reversible assumption.*continue.*do not re-ask/is);
   assert.match(core, /future external action.*(?:stated|state).*(?:boundary|not a question).*until.*current/is);
-  assert.match(core, /material failure.*observed evidence.*cause.*confirmed.*suspected.*unknown/is);
-  assert.match(core, /material failure.*carried-forward workaround/is);
-  assert.match(core, /response.*fixed.*mitigated.*worked around.*unresolved/is);
+  assert.match(core, /material failure.*carried-forward workaround.*Evidence:.*observed.*Cause:.*confirmed.*suspected.*unknown/is);
+  assert.match(core, /Evidence:.*Cause:.*Handling:.*Verification:.*Remaining risk:/is);
+  assert.match(core, /Handling:\s*choose one:/i);
+  assert.match(core, /Handling:.*fixed.*mitigated.*worked around.*unresolved/is);
   assert.match(core, /remaining risk.*raw logs.*routine transient.*TDD.*syntax/is);
-  assert.match(core, /never call a workaround a fix/is);
+  assert.match(core, /never call (?:a )?workaround a fix/is);
   assert.doesNotMatch(core, /every external GUI launch must record/i);
   assert.doesNotMatch(core, /mandatory WER.*(?:launch|attempt)/i);
   assert.equal(disabledCore, "\n");
@@ -60,8 +61,11 @@ test("the interaction safety core adds conditional decisions and failure receipt
   assert.equal(interactionDecision.candidateV1.sampleCount, 5);
   assert.equal(interactionDecision.candidateV1.scores.onlyCurrentChoices, "1/5");
   assert.equal(interactionDecision.candidateV1.scores.workaroundExplicitlyClassified, "0/5");
-  assert.equal(interactionDecision.revision.sampleCount, 0);
-  assert.equal(interactionDecision.limitations.revisionFreshContextSamples, "unavailable");
+  assert.equal(interactionDecision.revisionV1.sampleCount, 5);
+  assert.equal(interactionDecision.revisionV1.scores.futureExternalActionIsBoundary, "5/5");
+  assert.equal(interactionDecision.revisionV1.scores.workaroundExplicitlyClassified, "0/5");
+  assert.equal(interactionDecision.revisionV2.sampleCount, 0);
+  assert.equal(interactionDecision.limitations.revisionV2FreshContextSamples, "unavailable");
 });
 
 test("design references are selected independently and cannot expand scope", async () => {
