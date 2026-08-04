@@ -85,6 +85,39 @@ test("the interaction safety core adds conditional decisions and failure receipt
   assert.equal(interactionDecision.revisionV3.result, "pass");
   assert.equal(interactionDecision.excludedAttempts.leakedTargetTerms, 1);
   assert.equal(interactionDecision.excludedAttempts.interruptedSiblings, 2);
+  const historicalBindings = {
+    candidateV1: {
+      path: "evals/candidates/interaction-safety-core-v1.md",
+      gitCommit: "4ae9d29243ce49ffa8b62534adf879fd4d4ebd67",
+      sha256: "95566ab5c40164cdcecbe42d5fa00ac67b52da5711c250d2f31e54126920ec1e",
+    },
+    revisionV1: {
+      path: "evals/candidates/interaction-safety-core-v1.md",
+      gitCommit: "a77565d88b8afd3dee2247601a7ab0027971d82e",
+      sha256: "6e83d9142b9118d5cabcff8dd1ff65defcc23f5226347779453b180fafe81c67",
+    },
+    revisionV2: {
+      path: "evals/candidates/interaction-safety-core-v1.md",
+      gitCommit: "637aa8db2afe5153928856aa2940a429d7e66a32",
+      sha256: "9979420a69eef8635c12b5550f76c9f40a5a21095986eaad2f04e9ea451c7b6a",
+    },
+    revisionV3: {
+      path: "evals/candidates/interaction-safety-core-v1.md",
+      gitCommit: "06157c81c0ea978845a811d6c9c374835101dd36",
+      sha256: "bcc4b92533f5e6ac6f06891293eadfec1d692db66019c2245795e47001a70bba",
+    },
+  };
+  for (const [name, expected] of Object.entries(historicalBindings)) {
+    const { path: candidatePath, gitCommit, sha256 } = interactionDecision[name];
+    assert.deepEqual({ path: candidatePath, gitCommit, sha256 }, expected);
+  }
+
+  const betaLedger = await readFile(path.join(root, "evals", "JOENESS-0.1-BETA-VALIDATION.md"), "utf8");
+  assert.match(betaLedger, /Revision v1 question evidence:.*separated.*current-choice.*future-boundary.*recommended-default.*waiting-state.*5\/5/is);
+  assert.match(betaLedger, /Revision v3 exact error receipt evidence:.*5\/5/is);
+  assert.match(betaLedger, /token measurement.*unavailable/is);
+  assert.match(betaLedger, /no general quality or token-improvement claim/is);
+  assert.doesNotMatch(betaLedger, /Fresh-context candidate sampling.*unavailable/is);
 });
 
 test("design references are selected independently and cannot expand scope", async () => {

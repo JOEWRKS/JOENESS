@@ -298,7 +298,7 @@ V1의 설치 구현 결함은 발견되지 않았지만 증거 계약은 실패�
 
 `interaction-safety-core-v1.md` replaces only the installed pointer. It retains the retry branches and adds conditional decision presentation plus a compact material-failure receipt. The explicit-only Handoff receipt records the same classification and any workaround removal condition.
 
-Control evidence is preserved in `evals/experiments/joeness-0.1-interaction-safety-core-v1.json`. Fresh-context candidate sampling and token measurement were unavailable in this task, so no candidate outputs, general-quality result, or token-improvement claim is recorded.
+Control and candidate evidence is preserved in `evals/experiments/joeness-0.1-interaction-safety-core-v1.json`. Revision v1 question evidence: separated final block, current-choice questions, future-boundary handling, and recommended-default plus waiting-state behavior passed 5/5. Revision v3 exact error receipt evidence: all five samples emitted every required field with `Handling: worked around`, preserved the unverified store build, and avoided a false fixed claim, passing 5/5. Token measurement is unavailable; this is no general quality or token-improvement claim.
 
 ## 변경 기록
 

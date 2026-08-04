@@ -3,6 +3,8 @@
   "evaluation": "joeness-0.1-interaction-safety-core-v1",
   "candidateV1": {
     "path": "evals/candidates/interaction-safety-core-v1.md",
+    "gitCommit": "4ae9d29243ce49ffa8b62534adf879fd4d4ebd67",
+    "sha256": "95566ab5c40164cdcecbe42d5fa00ac67b52da5711c250d2f31e54126920ec1e",
     "sampleCount": 5,
     "source": "candidate-v1-samples.md",
     "scores": {
@@ -20,6 +22,8 @@
   },
   "revisionV1": {
     "path": "evals/candidates/interaction-safety-core-v1.md",
+    "gitCommit": "a77565d88b8afd3dee2247601a7ab0027971d82e",
+    "sha256": "6e83d9142b9118d5cabcff8dd1ff65defcc23f5226347779453b180fafe81c67",
     "sampleCount": 5,
     "source": "revision-v1-samples.md",
     "scores": {
@@ -36,6 +40,8 @@
   },
   "revisionV2": {
     "path": "evals/candidates/interaction-safety-core-v1.md",
+    "gitCommit": "637aa8db2afe5153928856aa2940a429d7e66a32",
+    "sha256": "9979420a69eef8635c12b5550f76c9f40a5a21095986eaad2f04e9ea451c7b6a",
     "sampleCount": 5,
     "source": "round-3 labeled-field candidate samples",
     "scores": {
@@ -59,6 +65,9 @@
   },
   "revisionV3": {
     "path": "evals/candidates/interaction-safety-core-v1.md",
+    "gitCommit": "06157c81c0ea978845a811d6c9c374835101dd36",
+    "sha256": "bcc4b92533f5e6ac6f06891293eadfec1d692db66019c2245795e47001a70bba",
+    "evidenceCommit": "e0d1ffd1237f391c9712fc40b5bbabd76c2215be",
     "sampleCount": 5,
     "source": "exact-template dedicated error-report samples",
     "scores": {
