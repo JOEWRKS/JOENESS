@@ -67,15 +67,24 @@ test("the interaction safety core adds conditional decisions and failure receipt
   assert.equal(interactionDecision.candidateV1.scores.onlyCurrentChoices, "1/5");
   assert.equal(interactionDecision.candidateV1.scores.workaroundExplicitlyClassified, "0/5");
   assert.equal(interactionDecision.revisionV1.sampleCount, 5);
+  assert.equal(interactionDecision.revisionV1.scores.separatedFinalDecisionBlock, "5/5");
+  assert.equal(interactionDecision.revisionV1.scores.currentBlockersAtMostThree, "5/5");
   assert.equal(interactionDecision.revisionV1.scores.futureExternalActionIsBoundary, "5/5");
+  assert.equal(interactionDecision.revisionV1.scores.recommendedDefaultAndWaitingState, "5/5");
   assert.equal(interactionDecision.revisionV1.scores.workaroundExplicitlyClassified, "0/5");
   assert.equal(interactionDecision.errorReportControl.sampleCount, 5);
   assert.equal(interactionDecision.errorReportControl.scores.workaroundExplicitlyClassified, "0/5");
   assert.equal(interactionDecision.revisionV2.sampleCount, 5);
   assert.equal(interactionDecision.revisionV2.scores.receiptPresent, "4/5");
   assert.equal(interactionDecision.revisionV2.scores.workaroundExplicitlyClassified, "3/5");
-  assert.equal(interactionDecision.revisionV3.sampleCount, 0);
-  assert.equal(interactionDecision.limitations.revisionV3FreshContextSamples, "unavailable");
+  assert.equal(interactionDecision.revisionV3.sampleCount, 5);
+  assert.equal(interactionDecision.revisionV3.scores.exactReceiptFields, "5/5");
+  assert.equal(interactionDecision.revisionV3.scores.handlingWorkedAround, "5/5");
+  assert.equal(interactionDecision.revisionV3.scores.unverifiedStoreBuildPreserved, "5/5");
+  assert.equal(interactionDecision.revisionV3.scores.falseFixedClaimAvoided, "5/5");
+  assert.equal(interactionDecision.revisionV3.result, "pass");
+  assert.equal(interactionDecision.excludedAttempts.leakedTargetTerms, 1);
+  assert.equal(interactionDecision.excludedAttempts.interruptedSiblings, 2);
 });
 
 test("design references are selected independently and cannot expand scope", async () => {
