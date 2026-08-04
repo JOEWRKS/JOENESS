@@ -102,9 +102,19 @@
       "The local mock-signing workaround was not explicitly classified as a workaround."
     ]
   },
+  "installationContract": {
+    "owner": "root",
+    "worktree": "D:/JOEWRKS/작업하네스/.worktrees/intent-error-reporting",
+    "command": "pwsh -NoProfile -File tests/sync-harness.tests.ps1",
+    "runCount": 1,
+    "exitCode": 0,
+    "wallTimeSeconds": 305.7,
+    "output": "PASS sync-harness contract",
+    "result": "pass"
+  },
   "limitations": {
     "scope": "Focused interaction and error-report scenarios only; no general quality claim.",
     "tokenMeasurement": "unavailable"
   },
-  "conclusion": "Revision v1 question behavior passed its four target criteria 5/5, and revision v3 exact-template error reporting passed 5/5. No general quality or token improvement is asserted."
+  "conclusion": "Revision v1 question behavior passed its four target criteria 5/5, revision v3 exact-template error reporting passed 5/5, and the root-owned installation contract passed its single final run. No general quality or token improvement is asserted."
 }

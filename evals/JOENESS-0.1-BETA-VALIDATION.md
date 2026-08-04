@@ -300,6 +300,8 @@ V1의 설치 구현 결함은 발견되지 않았지만 증거 계약은 실패�
 
 Control and candidate evidence is preserved in `evals/experiments/joeness-0.1-interaction-safety-core-v1.json`. Revision v1 question evidence: separated final block, current-choice questions, future-boundary handling, and recommended-default plus waiting-state behavior passed 5/5. Revision v3 exact error receipt evidence: all five samples emitted every required field with `Handling: worked around`, preserved the unverified store build, and avoided a false fixed claim, passing 5/5. Token measurement is unavailable; this is no general quality or token-improvement claim.
 
+The root-owned final installation contract ran exactly once in the intent-error-reporting worktree: `pwsh -NoProfile -File tests/sync-harness.tests.ps1`, exit `0`, 305.7 seconds, output `PASS sync-harness contract`.
+
 ## 변경 기록
 
 - 2026-08-03: 검증 원장 생성. 단계 0 증거를 요약하고 단계 1 계약을 초안 상태로 기록.
