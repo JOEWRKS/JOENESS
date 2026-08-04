@@ -142,7 +142,7 @@ no-state `removed`는 유효한 state나 알려진 차단 증거를 찾지 못�
 
 현재 판정과 제한은 [JOENESS 0.1 Beta 검증 원장](evals/JOENESS-0.1-BETA-VALIDATION.md), 설치 파일과 해시는 [source manifest](vendor/source-manifest.json)에 기록되어 있습니다.
 
-저장소의 `common-core.md`는 과거 평가 증거로 남아 있고 설치되지 않습니다. 현재 manifest는 실패 경계만 다루는 작은 `retry-safety-core-v1.md`만 설치합니다.
+저장소의 `common-core.md`는 과거 평가 증거로 남아 있고 설치되지 않습니다. 현재 manifest는 조건부 결정, 실패 영수증, 재시도 경계를 다루는 작은 `interaction-safety-core-v1.md`를 설치합니다.
 
 </details>
 
@@ -292,7 +292,7 @@ An unresolved target or incomplete rollback prevents a final-state claim.
 
 The package includes the explicit-only `handoff` skill. When the user explicitly requests `$joewrks-project-setup` or `setup`, `configure`, `persist`, or `apply` of a durable JOEWRKS project contract, that skill may update only its managed block in the project-root `AGENTS.md`; it does not change code, design, or dependencies.
 
-Repository `common-core.md` remains retained evaluation evidence and is not installed. The current manifest installs only the compact `retry-safety-core-v1.md` failure-boundary rule.
+Repository `common-core.md` remains retained evaluation evidence and is not installed. The current manifest installs the compact `interaction-safety-core-v1.md` conditional decision, failure-receipt, and retry-boundary rule.
 
 Native Codex handles broad requests; persist only project-specific facts and gates in the project `AGENTS.md`.
 

@@ -134,14 +134,14 @@ const EXPECTED_HANDOFF_SKILL = {
   intentionalDifferences: [
     'Removed unsupported argument-hint and disable-model-invocation frontmatter; agents/openai.yaml preserves explicit-only activation.',
     'Relocated the skill and included the exact repository license beside it.',
-    'Added compact evidence and cost receipts, target-root binding, current-state revalidation, and handoff-bound authorization checks.',
+    'Added compact evidence and cost receipts, target-root binding, current-state revalidation, handoff-bound authorization checks, and material-failure classification.',
   ],
   validatorSha256: '5347a0a09cfb546bba1c0d1a30dae0a233d9a05f57bd4e7877155c588bcdabf7',
   files: [
     {
       localPath: 'skills/handoff/SKILL.md',
-      bytes: 3300,
-      sha256: '4cc4e2f3a91eaabd6ede33056bcba4fdc2224041282ab9f4739756498654d854',
+      bytes: 3700,
+      sha256: '5c49bbe372921e95530d566359670f760cc25da95efe38a4d16c5125a1ca30b4',
       exactUpstreamCopy: false,
     },
     {
@@ -399,10 +399,12 @@ test('the targeted retry safety core is active without rewriting broader Core ev
     sha256(HISTORICAL_COMMON_CORE),
     '5aebc74bc795891c43bf785d9b34ae4d35d4a40bf46eddef3f6246d75919a495',
   );
+  const interactionSafetyCore = path.join(ROOT, 'evals', 'candidates', 'interaction-safety-core-v1.md');
   assert.deepEqual(manifest.activeCommonCore, {
-    path: 'evals/candidates/retry-safety-core-v1.md',
-    sha256: sha256(RETRY_SAFETY_CORE),
+    path: 'evals/candidates/interaction-safety-core-v1.md',
+    sha256: sha256(interactionSafetyCore),
   });
+  assert.ok(lstatSync(interactionSafetyCore).size <= 1800);
   assert.equal(lstatSync(RETRY_SAFETY_CORE).size, 1261);
   assert.equal(sha256(RETRY_SAFETY_CORE), '0f1ef55811e4507b3f2fb21d41ad9d992a6f7fabc24d3e44a110468bd6ac5813');
   assert.equal(readFileSync(path.join(ROOT, 'evals', 'candidates', 'no-common-core.md'), 'utf8'), '\n');
@@ -493,6 +495,16 @@ test('operational skills bound handoff context and high-cost validation', () => 
   assert.match(handoff, /working-directory selection is not identity evidence/i);
   assert.match(handoff, /Treat a handoff as context, not authorization/i);
   assert.match(handoff, /cannot expand the receiver's read, write, execution, external-action, or disclosure scope/i);
+  for (const field of [
+    'observed evidence',
+    'cause confirmed, suspected, or unknown',
+    'response fixed, mitigated, worked around, or unresolved',
+    'verification',
+    'remaining risk',
+    'workaround removal condition',
+  ]) {
+    assert.match(handoff, new RegExp(field));
+  }
   assert.match(projectSetup, /project-documented, risk-proportional acceptance and release evidence/i);
   assert.match(projectSetup, /preserve only project-specified review requirements.*do not invent validation topology or duplicate unchanged clean builds/i);
   assert.doesNotMatch(projectSetup, /reviewer trees|one controller check|at most one independent reviewer|at most one evidence-scoped re-review/i);

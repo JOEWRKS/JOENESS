@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "release": {"name":"JOENESS","version":"0.1","entrypoint":"JOENESS-0.1.ps1"},
-  "activeCommonCore": {"path":"evals/candidates/retry-safety-core-v1.md","sha256":"0f1ef55811e4507b3f2fb21d41ad9d992a6f7fabc24d3e44a110468bd6ac5813"},
+  "activeCommonCore": {"path":"evals/candidates/interaction-safety-core-v1.md","sha256":"95566ab5c40164cdcecbe42d5fa00ac67b52da5711c250d2f31e54126920ec1e"},
   "evaluation": {
     "state": "candidate",
     "tests": ["tests/design-vendor-integrity.tests.mjs", "tests/thin-hybrid-core.tests.mjs", "vendor/ui-ux-pro-max/scripts/validate_data.py", "vendor/ui-ux-pro-max/scripts/tests/test_core.py"],
@@ -39,10 +39,10 @@
         "upstreamPath": "skills/productivity/handoff",
         "license": {"name":"MIT","upstreamPath":"LICENSE","localPath":"skills/handoff/LICENSE","sha256":"0e7ac423bf2c6e223b7c5b156f8cf72da49d748e56a1641402c31f22ad07dbb5"}
       },
-      "intentionalDifferences": ["Removed unsupported argument-hint and disable-model-invocation frontmatter; agents/openai.yaml preserves explicit-only activation.", "Relocated the skill and included the exact repository license beside it.", "Added compact evidence and cost receipts, target-root binding, current-state revalidation, and handoff-bound authorization checks."],
+      "intentionalDifferences": ["Removed unsupported argument-hint and disable-model-invocation frontmatter; agents/openai.yaml preserves explicit-only activation.", "Relocated the skill and included the exact repository license beside it.", "Added compact evidence and cost receipts, target-root binding, current-state revalidation, handoff-bound authorization checks, and material-failure classification."],
       "validatorSha256": "5347a0a09cfb546bba1c0d1a30dae0a233d9a05f57bd4e7877155c588bcdabf7",
       "files": [
-        {"localPath":"skills/handoff/SKILL.md","bytes":3300,"sha256":"4cc4e2f3a91eaabd6ede33056bcba4fdc2224041282ab9f4739756498654d854","exactUpstreamCopy":false},
+        {"localPath":"skills/handoff/SKILL.md","bytes":3700,"sha256":"5c49bbe372921e95530d566359670f760cc25da95efe38a4d16c5125a1ca30b4","exactUpstreamCopy":false},
         {"localPath":"skills/handoff/agents/openai.yaml","bytes":141,"sha256":"5c479fd562c691851690e8b18c8501045bef0943c10743d636b2fae26add1d28","exactUpstreamCopy":true},
         {"localPath":"skills/handoff/LICENSE","bytes":1068,"sha256":"0e7ac423bf2c6e223b7c5b156f8cf72da49d748e56a1641402c31f22ad07dbb5","exactUpstreamCopy":true}
       ]

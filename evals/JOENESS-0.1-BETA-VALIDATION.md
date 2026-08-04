@@ -294,6 +294,12 @@ V1의 설치 구현 결함은 발견되지 않았지만 증거 계약은 실패�
 
 판정: 개인 Pilot의 P0 실패 경계로만 승격한다. Unity 전용 규칙, 상시 프로세스 감시, 별도 재시도 엔진은 추가하지 않는다.
 
+## 6. Interaction and material-failure Core candidate
+
+`interaction-safety-core-v1.md` replaces only the installed pointer. It retains the retry branches and adds conditional decision presentation plus a compact material-failure receipt. The explicit-only Handoff receipt records the same classification and any workaround removal condition.
+
+Control evidence is preserved in `evals/experiments/joeness-0.1-interaction-safety-core-v1.json`. Fresh-context candidate sampling and token measurement were unavailable in this task, so no candidate outputs, general-quality result, or token-improvement claim is recorded.
+
 ## 변경 기록
 
 - 2026-08-03: 검증 원장 생성. 단계 0 증거를 요약하고 단계 1 계약을 초안 상태로 기록.

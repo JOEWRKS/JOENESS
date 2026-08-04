@@ -21,6 +21,7 @@ Include:
 - selected decisions and constraints, referencing their existing artifact paths or URLs;
 - the current changed-file, worktree, design, or external-target state relevant to resuming;
 - an evidence receipt listing changes and commands or checks actually observed, their results, and explicit `completed`, `partial`, `unverified`, `blocked`, `unavailable`, or `unknown` status;
+- for a material failure that changed the path, outcome, safety, verification, or handoff: observed evidence; cause confirmed, suspected, or unknown; response fixed, mitigated, worked around, or unresolved; verification; remaining risk; and any workaround removal condition. Link raw logs rather than copying them, omit routine transient, TDD, and syntax failures, and never call a workaround a fix;
 - blockers, unknowns, and the receiver's first revalidation step;
 - a "suggested skills" section containing only skills with likely unique value for the next step.
 

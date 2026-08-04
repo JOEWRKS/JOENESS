@@ -6,7 +6,7 @@ import { fileURLToPath } from "node:url";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
-test("a targeted retry safety core supersedes the Lean decision without rewriting it", async () => {
+test("the interaction safety core adds conditional decisions and failure receipts without rewriting retry evidence", async () => {
   const manifest = JSON.parse(
     await readFile(path.join(root, "vendor", "source-manifest.json"), "utf8"),
   );
@@ -16,7 +16,10 @@ test("a targeted retry safety core supersedes the Lean decision without rewritin
   const retryDecision = JSON.parse(
     await readFile(path.join(root, "evals", "experiments", "joeness-0.1-retry-safety-core-v1.json"), "utf8"),
   );
-  assert.equal(manifest.activeCommonCore.path, "evals/candidates/retry-safety-core-v1.md");
+  const interactionDecision = JSON.parse(
+    await readFile(path.join(root, "evals", "experiments", "joeness-0.1-interaction-safety-core-v1.json"), "utf8"),
+  );
+  assert.equal(manifest.activeCommonCore.path, "evals/candidates/interaction-safety-core-v1.md");
 
   const core = await readFile(path.join(root, manifest.activeCommonCore.path), "utf8");
   const disabledCore = await readFile(path.join(root, "evals", "candidates", "no-common-core.md"), "utf8");
@@ -29,6 +32,13 @@ test("a targeted retry safety core supersedes the Lean decision without rewritin
   assert.match(core, /primary approach.*one materially different fallback.*whole verification goal/is);
   assert.match(core, /replacement PID.*new attempt/is);
   assert.match(core, /filenames.*narration.*not success/is);
+  assert.match(core, /progress depends on a user decision.*final confirmation-needed block.*(?:at most|max) three/is);
+  assert.match(core, /recommended default.*what waits/is);
+  assert.match(core, /material reversible assumption.*continue.*do not re-ask/is);
+  assert.match(core, /material failure.*observed evidence.*cause.*confirmed.*suspected.*unknown/is);
+  assert.match(core, /response.*fixed.*mitigated.*worked around.*unresolved/is);
+  assert.match(core, /remaining risk.*raw logs.*routine transient.*TDD.*syntax/is);
+  assert.match(core, /never call a workaround a fix/is);
   assert.doesNotMatch(core, /every external GUI launch must record/i);
   assert.doesNotMatch(core, /mandatory WER.*(?:launch|attempt)/i);
   assert.equal(disabledCore, "\n");
@@ -43,6 +53,11 @@ test("a targeted retry safety core supersedes the Lean decision without rewritin
   assert.equal(retryDecision.decision.normalDeterministicEvidenceDrivenRetries, 1);
   assert.equal(retryDecision.decision.transientIdempotentRetries, 1);
   assert.equal(retryDecision.decision.unknownNonIdempotentWriteRetriesBeforeReadback, 0);
+  assert.equal(interactionDecision.schemaVersion, 1);
+  assert.equal(interactionDecision.control.sampleCount, 5);
+  assert.equal(interactionDecision.candidate.sampleCount, 0);
+  assert.equal(interactionDecision.limitations.freshContextSamples, "unavailable");
+  assert.match(interactionDecision.limitations.reason, /fresh-context/i);
 });
 
 test("design references are selected independently and cannot expand scope", async () => {
