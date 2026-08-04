@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
-import { readFileSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
 import {
   mkdir,
   mkdtemp,
@@ -17,6 +17,7 @@ import { fileURLToPath } from "node:url";
 
 import {
   approvalDenialResponse,
+  assertEvaluationSourceConfigSafe,
   boundUtf8,
   buildAppServerEnvironment,
   buildCaseDynamicTools,
@@ -44,6 +45,8 @@ import {
   handleSyntheticDynamicToolCall,
   inspectSyntheticState,
   listMcpServerStatus,
+  liveRunModes,
+  materializeIsolatedCodexHome,
   normalizeEvent,
   parseCli,
   prepareInstructionDiscoveryReceipt,
@@ -51,6 +54,7 @@ import {
   proveNetworkIsolation,
   proveWriteIsolation,
   readWindowsSandboxReadiness,
+  removeIsolatedCodexHome,
   remoteControlSnapshotIsSafe,
   requestSyntheticWriteBroker,
   runBuffered,
@@ -133,7 +137,149 @@ test("App Server environment and named profile exclude ambient secrets", () => {
     'windows.sandbox="elevated"',
     "-c",
     'shell_environment_policy={inherit="core",ignore_default_excludes=false}',
+    "-c",
+    "notify=[]",
   ]);
+  assert.doesNotThrow(() =>
+    assertEvaluationSourceConfigSafe(
+      Buffer.from('model = "fixture"\n'),
+    ),
+  );
+  assert.throws(
+    () =>
+      assertEvaluationSourceConfigSafe(
+        Buffer.from('developer_instructions = "override"\n'),
+      ),
+    /instruction override/,
+  );
+  assert.throws(
+    () =>
+      assertEvaluationSourceConfigSafe(
+        Buffer.from(
+          '[profiles.fixture]\nmodel_instructions_file = "C:\\\\override.md"\n',
+        ),
+      ),
+    /instruction override/,
+  );
+});
+
+test("isolated Codex home copies runtime identity but excludes global instructions", async (t) => {
+  const parent = await createTestRoot(t);
+  const sourceCodexHome = path.join(parent, "source-codex-home");
+  const runRoot = path.join(parent, "run");
+  const isolatedParent = path.join(parent, "isolated-runtime");
+  await mkdir(sourceCodexHome);
+  await mkdir(runRoot);
+  await mkdir(path.join(sourceCodexHome, ".sandbox"));
+  await mkdir(path.join(sourceCodexHome, ".sandbox-secrets"));
+  await writeFile(
+    path.join(sourceCodexHome, "auth.json"),
+    '{"auth":"fixture"}\n',
+    "utf8",
+  );
+  await writeFile(
+    path.join(sourceCodexHome, "config.toml"),
+    'model = "fixture"\n',
+    "utf8",
+  );
+  await writeFile(
+    path.join(sourceCodexHome, "AGENTS.md"),
+    "must-not-copy\n",
+    "utf8",
+  );
+  await writeFile(
+    path.join(sourceCodexHome, ".sandbox", "setup_marker.json"),
+    '{"version":5}\n',
+    "utf8",
+  );
+  await writeFile(
+    path.join(
+      sourceCodexHome,
+      ".sandbox-secrets",
+      "sandbox_users.json",
+    ),
+    '{"users":"fixture"}\n',
+    "utf8",
+  );
+
+  const isolatedCodexHome = await materializeIsolatedCodexHome(
+    runRoot,
+    sourceCodexHome,
+    isolatedParent,
+  );
+  assert.equal(
+    path.dirname(isolatedCodexHome),
+    isolatedParent,
+  );
+  assert.equal(
+    await readFile(path.join(isolatedCodexHome, "auth.json"), "utf8"),
+    '{"auth":"fixture"}\n',
+  );
+  assert.equal(
+    await readFile(path.join(isolatedCodexHome, "config.toml"), "utf8"),
+    'model = "fixture"\n',
+  );
+  assert.equal(
+    await readFile(
+      path.join(isolatedCodexHome, ".sandbox", "setup_marker.json"),
+      "utf8",
+    ),
+    '{"version":5}\n',
+  );
+  assert.equal(
+    await readFile(
+      path.join(
+        isolatedCodexHome,
+        ".sandbox-secrets",
+        "sandbox_users.json",
+      ),
+      "utf8",
+    ),
+    '{"users":"fixture"}\n',
+  );
+  await assert.rejects(
+    readFile(path.join(isolatedCodexHome, "AGENTS.md")),
+    { code: "ENOENT" },
+  );
+
+  await removeIsolatedCodexHome(
+    runRoot,
+    isolatedCodexHome,
+    isolatedParent,
+  );
+  await assert.rejects(readFile(isolatedCodexHome), { code: "ENOENT" });
+  assert.equal(
+    await readFile(path.join(sourceCodexHome, "auth.json"), "utf8"),
+    '{"auth":"fixture"}\n',
+  );
+
+  const failingSource = path.join(parent, "failing-source");
+  const failingRunRoot = path.join(parent, "run-failure");
+  await mkdir(failingSource);
+  await mkdir(failingRunRoot);
+  await writeFile(
+    path.join(failingSource, "auth.json"),
+    '{"auth":"fixture"}\n',
+    "utf8",
+  );
+  await assert.rejects(
+    materializeIsolatedCodexHome(
+      failingRunRoot,
+      failingSource,
+      isolatedParent,
+    ),
+    { code: "ENOENT" },
+  );
+  await assert.rejects(
+    readFile(
+      path.join(
+        isolatedParent,
+        "run-failure-controller-codex-home",
+        "auth.json",
+      ),
+    ),
+    { code: "ENOENT" },
+  );
 });
 
 test("selectCases requires each exact ID once", () => {
@@ -2041,7 +2187,7 @@ test("Core writes one exact AGENTS overlay and records an unchanged snapshot", a
     }),
     instructionOverlay: {
       bytes,
-      sourcePath: "evals/candidates/common-core-v1.md",
+      sourcePath: "evals/candidates/common-core-v2.md",
     },
     expectedBaselineInstructionSources: [
       {
@@ -2055,7 +2201,7 @@ test("Core writes one exact AGENTS overlay and records an unchanged snapshot", a
 
   assert.deepEqual(await readFile(instructionPath), bytes);
   assert.deepEqual(evidence.state.instructionOverlay, {
-    sourcePath: "evals/candidates/common-core-v1.md",
+    sourcePath: "evals/candidates/common-core-v2.md",
     target: "AGENTS.md",
     before: {
       byteLength: bytes.length,
@@ -4594,6 +4740,10 @@ function completeSchema3ExplicitLocalControlPassResult(
   runId,
   candidateBytes = Buffer.from("core"),
 ) {
+  const candidateRelativePath =
+    ["no-harness-control-v6", "no-harness-control-v7"].includes(runId)
+      ? "evals/candidates/common-core-v2.md"
+      : "evals/candidates/common-core-v1.md";
   const result = completeSchema3ControlPassResult();
   const runRoot = path.resolve(
     tmpdir(),
@@ -4614,7 +4764,12 @@ function completeSchema3ExplicitLocalControlPassResult(
           FROZEN_CASE_DEFINITIONS[candidate.id],
           {
             stableKeyRequirement:
-              runId === "no-harness-control-v5"
+              ([
+                "no-harness-control-v5",
+                "no-harness-control-v6",
+                "no-harness-control-v7",
+              ].includes(runId) ||
+                runId.endsWith("-ab-v8"))
                 ? "all"
                 : runId === "no-harness-control-v4"
                   ? "write"
@@ -4635,11 +4790,14 @@ function completeSchema3ExplicitLocalControlPassResult(
       };
       candidate.instructionSourceSnapshot = [];
       if (
-        [
+        ([
           "no-harness-control-v3",
           "no-harness-control-v4",
           "no-harness-control-v5",
-        ].includes(runId) &&
+          "no-harness-control-v6",
+          "no-harness-control-v7",
+        ].includes(runId) ||
+          runId.endsWith("-ab-v8")) &&
         index === 0
       ) {
         const completionIndex = candidate.events.findIndex(
@@ -4672,7 +4830,7 @@ function completeSchema3ExplicitLocalControlPassResult(
     ...result.evidence.evaluation,
     condition: "control",
     candidateReference: {
-      sourcePath: "evals/candidates/common-core-v1.md",
+      sourcePath: candidateRelativePath,
       byteLength: candidateBytes.length,
       sha256: sha256(candidateBytes),
     },
@@ -4753,9 +4911,32 @@ function schema3V5CoreResult(control) {
   });
 }
 
+function schema3V6CoreResult(control) {
+  return schema3ExplicitLocalCoreResult(control, {
+    coreRunId: "common-core-v6",
+    baselinePath: "evals/p0/no-harness-control-v6.json",
+    controlRunId: "no-harness-control-v6",
+    candidateRelativePath: "evals/candidates/common-core-v2.md",
+  });
+}
+
+function schema3V7CoreResult(control) {
+  return schema3ExplicitLocalCoreResult(control, {
+    coreRunId: "common-core-v7",
+    baselinePath: "evals/p0/no-harness-control-v7.json",
+    controlRunId: "no-harness-control-v7",
+    candidateRelativePath: "evals/candidates/common-core-v2.md",
+  });
+}
+
 function schema3ExplicitLocalCoreResult(
   control,
-  { coreRunId, baselinePath, controlRunId },
+  {
+    coreRunId,
+    baselinePath,
+    controlRunId,
+    candidateRelativePath = "evals/candidates/common-core-v1.md",
+  },
 ) {
   const baselineBytes = Buffer.from(
     `${JSON.stringify(control, null, 2)}\n`,
@@ -4770,7 +4951,7 @@ function schema3ExplicitLocalCoreResult(
       control.evidence.evaluation.candidateReference,
     ),
     instructionOverlay: {
-      sourcePath: "evals/candidates/common-core-v1.md",
+      sourcePath: candidateRelativePath,
       byteLength: Buffer.byteLength("core"),
       sha256: sha256("core"),
     },
@@ -5243,7 +5424,7 @@ test("schema 3 Core requires the exact reviewed Control bytes", () => {
   );
 });
 
-test("schema 3 v2-v5 keep local profiles and same-generation pairs exact", () => {
+test("schema 3 v2-v7 keep local profiles and same-generation pairs exact", () => {
   const control = completeSchema3ExplicitLocalControlPassResult(
     "no-harness-control-v2",
   );
@@ -5302,6 +5483,90 @@ test("schema 3 v2-v5 keep local profiles and same-generation pairs exact", () =>
   assert.doesNotThrow(() =>
     validateFixtureResult(v5Core, {
       baselineBytes: v5BaselineBytes,
+    }),
+  );
+  const v6Control =
+    completeSchema3ExplicitLocalControlPassResult(
+      "no-harness-control-v6",
+    );
+  assert.throws(
+    () => validateFixtureResult(v6Control),
+    /complete evidence/,
+  );
+  v6Control.evidence.cases.at(-1).dynamicToolRequests[1]
+    .idempotencyKey = "request-001";
+  v6Control.evidenceSha256 = independentHash(v6Control.evidence);
+  assert.doesNotThrow(() => validateFixtureResult(v6Control));
+  const staleV6Candidate = structuredClone(v6Control);
+  staleV6Candidate.evidence.evaluation.candidateReference.sourcePath =
+    "evals/candidates/common-core-v1.md";
+  staleV6Candidate.evidenceSha256 = independentHash(
+    staleV6Candidate.evidence,
+  );
+  assert.throws(
+    () => validateFixtureResult(staleV6Candidate),
+    /candidate reference/,
+  );
+  const {
+    result: v6Core,
+    baselineBytes: v6BaselineBytes,
+  } = schema3V6CoreResult(v6Control);
+  assert.doesNotThrow(() =>
+    validateFixtureResult(v6Core, {
+      baselineBytes: v6BaselineBytes,
+    }),
+  );
+  const v7Control =
+    completeSchema3ExplicitLocalControlPassResult(
+      "no-harness-control-v7",
+    );
+  v7Control.evidence.cases.at(-1).dynamicToolRequests[1]
+    .idempotencyKey = "request-001";
+  v7Control.evidenceSha256 = independentHash(v7Control.evidence);
+  assert.doesNotThrow(() => validateFixtureResult(v7Control));
+  const contaminatedV7Control = structuredClone(v7Control);
+  const globalInstructionSnapshot = {
+    path: path.resolve(tmpdir(), "global-v7", "AGENTS.md"),
+    byteLength: Buffer.byteLength("global"),
+    sha256: sha256("global"),
+  };
+  for (const candidate of contaminatedV7Control.evidence.cases) {
+    candidate.thread.instructionSources = [
+      globalInstructionSnapshot.path,
+    ];
+    candidate.instructionSourceSnapshot = [
+      structuredClone(globalInstructionSnapshot),
+    ];
+  }
+  const receipt =
+    contaminatedV7Control.evidence.preflight
+      .instructionDiscoveryReceipt;
+  receipt.sourceSnapshots.control = [
+    structuredClone(globalInstructionSnapshot),
+  ];
+  receipt.sourceSnapshots.projectDocsDisabled = [
+    structuredClone(globalInstructionSnapshot),
+  ];
+  receipt.sourceSnapshots.core.unshift(
+    structuredClone(globalInstructionSnapshot),
+  );
+  const receiptBody = structuredClone(receipt);
+  delete receiptBody.receiptSha256;
+  receipt.receiptSha256 = independentHash(receiptBody);
+  contaminatedV7Control.evidenceSha256 = independentHash(
+    contaminatedV7Control.evidence,
+  );
+  assert.throws(
+    () => validateFixtureResult(contaminatedV7Control),
+    /complete evidence/,
+  );
+  const {
+    result: v7Core,
+    baselineBytes: v7BaselineBytes,
+  } = schema3V7CoreResult(v7Control);
+  assert.doesNotThrow(() =>
+    validateFixtureResult(v7Core, {
+      baselineBytes: v7BaselineBytes,
     }),
   );
 
@@ -5562,6 +5827,40 @@ test("schema 3 v2-v5 keep local profiles and same-generation pairs exact", () =>
     () => validateFixtureResult(nestedRunRoot),
     /reviewed pass\/fail case lacks complete evidence|capability pass is not supported/,
   );
+});
+
+test("schema 3 v8 uses one neutral Control for both A/B candidates", () => {
+  const controlRunId = "no-harness-control-ab-v8";
+  const baselinePath = `evals/p0/${controlRunId}.json`;
+  const control =
+    completeSchema3ExplicitLocalControlPassResult(controlRunId);
+  control.evidence.cases.at(-1).dynamicToolRequests[1]
+    .idempotencyKey = "request-001";
+  control.evidenceSha256 = independentHash(control.evidence);
+  assert.doesNotThrow(() => validateFixtureResult(control));
+
+  for (const version of ["v1", "v2"]) {
+    const candidateRelativePath =
+      `evals/candidates/common-core-${version}.md`;
+    for (let repetition = 1; repetition <= 4; repetition += 1) {
+      const { result, baselineBytes } =
+        schema3ExplicitLocalCoreResult(control, {
+          coreRunId:
+            `common-core-${version}-ab-v8-r${repetition}`,
+          baselinePath,
+          controlRunId,
+          candidateRelativePath,
+        });
+      if (version === "v2") {
+        result.evidence.evaluation.candidateReference.sourcePath =
+          candidateRelativePath;
+        result.evidenceSha256 = independentHash(result.evidence);
+      }
+      assert.doesNotThrow(() =>
+        validateFixtureResult(result, { baselineBytes }),
+      );
+    }
+  }
 });
 
 test("schema 3 complete pass rejects duplicate identities and start lifecycle", () => {
@@ -6344,6 +6643,32 @@ test("result writer forwards exact Core baseline validation bytes", async (t) =>
   );
 });
 
+test("immutable P0 JSON bytes stay LF-only on checkout", () => {
+  const attributes = readFileSync(
+    new URL("../.gitattributes", import.meta.url),
+    "utf8",
+  ).split(/\r?\n/u);
+  assert.equal(
+    attributes.includes("/evals/p0/*.json text eol=lf"),
+    true,
+  );
+  const paths = readdirSync(
+    new URL("../evals/p0/", import.meta.url),
+    { withFileTypes: true },
+  )
+    .filter((entry) => entry.isFile() && entry.name.endsWith(".json"))
+    .map((entry) => `evals/p0/${entry.name}`);
+  for (const relativePath of paths) {
+    assert.equal(
+      readFileSync(new URL(`../${relativePath}`, import.meta.url)).includes(
+        Buffer.from("\r\n"),
+      ),
+      false,
+      relativePath,
+    );
+  }
+});
+
 test("full profiles select the exact frozen 16-case order", async () => {
   const collector = await import(
     "../evals/support/collect-codex-app-server.mjs"
@@ -6357,8 +6682,8 @@ test("full profiles select the exact frozen 16-case order", async () => {
     EXPECTED_FULL_CASE_IDS,
   );
 
-  const control = collector.runConfigurationForMode("run-control-v5");
-  const core = collector.runConfigurationForMode("run-core-v5");
+  const control = collector.runConfigurationForMode("run-control-v7");
+  const core = collector.runConfigurationForMode("run-core-v7");
   assert.deepEqual(
     {
       mode: control.mode,
@@ -6367,14 +6692,16 @@ test("full profiles select the exact frozen 16-case order", async () => {
       caseIds: control.caseIds,
       instructionCondition: control.instructionCondition,
       baselineRelativePath: control.baselineRelativePath,
+      candidateRelativePath: control.candidateRelativePath,
     },
     {
-      mode: "run-control-v5",
-      runId: "no-harness-control-v5",
-      resultRelativePath: "evals/p0/no-harness-control-v5.json",
+      mode: "run-control-v7",
+      runId: "no-harness-control-v7",
+      resultRelativePath: "evals/p0/no-harness-control-v7.json",
       caseIds: EXPECTED_FULL_CASE_IDS,
       instructionCondition: "none",
       baselineRelativePath: null,
+      candidateRelativePath: "evals/candidates/common-core-v2.md",
     },
   );
   assert.deepEqual(
@@ -6388,13 +6715,13 @@ test("full profiles select the exact frozen 16-case order", async () => {
       candidateRelativePath: core.candidateRelativePath,
     },
     {
-      mode: "run-core-v5",
-      runId: "common-core-v5",
-      resultRelativePath: "evals/p0/common-core-v5.json",
+      mode: "run-core-v7",
+      runId: "common-core-v7",
+      resultRelativePath: "evals/p0/common-core-v7.json",
       caseIds: EXPECTED_FULL_CASE_IDS,
       instructionCondition: "common-core",
-      baselineRelativePath: "evals/p0/no-harness-control-v5.json",
-      candidateRelativePath: "evals/candidates/common-core-v1.md",
+      baselineRelativePath: "evals/p0/no-harness-control-v7.json",
+      candidateRelativePath: "evals/candidates/common-core-v2.md",
     },
   );
   assert.equal(Object.isFrozen(control), true);
@@ -6413,6 +6740,87 @@ test("full profiles select the exact frozen 16-case order", async () => {
     () => collector.runConfigurationForMode("run-control-v4"),
     /unsupported live run mode/,
   );
+  assert.throws(
+    () => collector.runConfigurationForMode("run-control-v5"),
+    /unsupported live run mode/,
+  );
+  assert.throws(
+    () => collector.runConfigurationForMode("run-control-v6"),
+    /unsupported live run mode/,
+  );
+});
+
+test("v8 A/B modes freeze one neutral Control and four repetitions", async () => {
+  const collector = await import(
+    "../evals/support/collect-codex-app-server.mjs"
+  );
+  const controlRunId = "no-harness-control-ab-v8";
+  const controlResult = `evals/p0/${controlRunId}.json`;
+  const control = collector.runConfigurationForMode(
+    "run-control-ab-v8",
+  );
+  assert.deepEqual(
+    {
+      runId: control.runId,
+      resultRelativePath: control.resultRelativePath,
+      caseIds: control.caseIds,
+      instructionCondition: control.instructionCondition,
+      baselineRelativePath: control.baselineRelativePath,
+      candidateRelativePath: control.candidateRelativePath,
+      expectedCandidateSha256: control.expectedCandidateSha256,
+    },
+    {
+      runId: controlRunId,
+      resultRelativePath: controlResult,
+      caseIds: EXPECTED_FULL_CASE_IDS,
+      instructionCondition: "none",
+      baselineRelativePath: null,
+      candidateRelativePath: "evals/candidates/common-core-v1.md",
+      expectedCandidateSha256:
+        "5aebc74bc795891c43bf785d9b34ae4d35d4a40bf46eddef3f6246d75919a495",
+    },
+  );
+  assert.equal(Object.isFrozen(control), true);
+
+  for (const version of ["v1", "v2"]) {
+    const candidateRelativePath =
+      `evals/candidates/common-core-${version}.md`;
+    const expectedCandidateSha256 =
+      version === "v1"
+        ? "5aebc74bc795891c43bf785d9b34ae4d35d4a40bf46eddef3f6246d75919a495"
+        : "a17e6f056fdf89373c3e726b326922241fc76f196c6f576028ded2b687912d3f";
+
+    for (let repetition = 1; repetition <= 4; repetition += 1) {
+      const coreRunId =
+        `common-core-${version}-ab-v8-r${repetition}`;
+      const core = collector.runConfigurationForMode(
+        `run-core-${version}-ab-v8-r${repetition}`,
+      );
+      assert.deepEqual(
+        {
+          runId: core.runId,
+          resultRelativePath: core.resultRelativePath,
+          caseIds: core.caseIds,
+          instructionCondition: core.instructionCondition,
+          baselineRelativePath: core.baselineRelativePath,
+          baselineRunId: core.baselineRunId,
+          candidateRelativePath: core.candidateRelativePath,
+          expectedCandidateSha256: core.expectedCandidateSha256,
+        },
+        {
+          runId: coreRunId,
+          resultRelativePath: `evals/p0/${coreRunId}.json`,
+          caseIds: EXPECTED_FULL_CASE_IDS,
+          instructionCondition: "common-core",
+          baselineRelativePath: controlResult,
+          baselineRunId: controlRunId,
+          candidateRelativePath,
+          expectedCandidateSha256,
+        },
+      );
+      assert.equal(Object.isFrozen(core), true);
+    }
+  }
 });
 
 test("only p0-02 receives a dynamic tool in the full profile", () => {
@@ -6479,6 +6887,22 @@ test("Core candidate validation stays mechanical and non-personal", async () => 
   assert.equal(typeof validateCoreCandidate, "function");
   const valid = validCoreCandidateText();
   assert.doesNotThrow(() => validateCoreCandidate(Buffer.from(valid)));
+  const activeCandidate = readFileSync(
+    new URL("../evals/candidates/common-core-v1.md", import.meta.url),
+  );
+  const slimCandidate = readFileSync(
+    new URL("../evals/candidates/common-core-v2.md", import.meta.url),
+  );
+  assert.equal(
+    sha256(activeCandidate),
+    "5aebc74bc795891c43bf785d9b34ae4d35d4a40bf46eddef3f6246d75919a495",
+  );
+  assert.equal(
+    sha256(slimCandidate),
+    "a17e6f056fdf89373c3e726b326922241fc76f196c6f576028ded2b687912d3f",
+  );
+  assert.doesNotThrow(() => validateCoreCandidate(slimCandidate));
+  assert.ok(slimCandidate.length < activeCandidate.length);
   assert.throws(
     () =>
       validateCoreCandidate(
@@ -6682,27 +7106,27 @@ test("paired execution gate blocks root activation, dirty inputs and source drif
     await import("../evals/support/collect-codex-app-server.mjs");
   assert.equal(typeof assertEvaluationGateSnapshot, "function");
   const controlConfiguration =
-    runConfigurationForMode("run-control-v5");
-  const coreConfiguration = runConfigurationForMode("run-core-v5");
+    runConfigurationForMode("run-control-v7");
+  const coreConfiguration = runConfigurationForMode("run-core-v7");
   const candidateBytes = Buffer.from(validCoreCandidateText());
-  const reviewedV5Control =
+  const reviewedV7Control =
     completeSchema3ExplicitLocalControlPassResult(
-      "no-harness-control-v5",
+      "no-harness-control-v7",
       candidateBytes,
     );
-  reviewedV5Control.evidence.cases.at(-1).dynamicToolRequests[1]
+  reviewedV7Control.evidence.cases.at(-1).dynamicToolRequests[1]
     .idempotencyKey = "request-001";
-  reviewedV5Control.evidenceSha256 = independentHash(
-    reviewedV5Control.evidence,
+  reviewedV7Control.evidenceSha256 = independentHash(
+    reviewedV7Control.evidence,
   );
   const baselineBytes = Buffer.from(
-    `${JSON.stringify(reviewedV5Control, null, 2)}\n`,
+    `${JSON.stringify(reviewedV7Control, null, 2)}\n`,
   );
   const source = {
     gitBlobs: structuredClone(
-      reviewedV5Control.evidence.source.gitBlobs,
+      reviewedV7Control.evidence.source.gitBlobs,
     ),
-    sha256: structuredClone(reviewedV5Control.evidence.source.sha256),
+    sha256: structuredClone(reviewedV7Control.evidence.source.sha256),
   };
   const cleanControl = {
     result: { exists: false },
@@ -6715,6 +7139,7 @@ test("paired execution gate blocks root activation, dirty inputs and source drif
     },
     baseline: { exists: false },
     source,
+    repository: { status: [] },
   };
   assert.doesNotThrow(() =>
     assertEvaluationGateSnapshot(
@@ -6722,6 +7147,40 @@ test("paired execution gate blocks root activation, dirty inputs and source drif
       cleanControl,
       { sourceResolver: fixtureSourceResolver },
     ),
+  );
+  const abControlConfiguration =
+    runConfigurationForMode("run-control-ab-v8");
+  const frozenV1Candidate = readFileSync(
+    new URL("../evals/candidates/common-core-v1.md", import.meta.url),
+  );
+  const cleanAbControl = {
+    ...cleanControl,
+    candidate: {
+      exists: true,
+      tracked: true,
+      clean: true,
+      bytes: frozenV1Candidate,
+    },
+  };
+  assert.doesNotThrow(() =>
+    assertEvaluationGateSnapshot(
+      abControlConfiguration,
+      cleanAbControl,
+      { sourceResolver: fixtureSourceResolver },
+    ),
+  );
+  const driftedAbControl = structuredClone(cleanAbControl);
+  driftedAbControl.candidate.bytes = Buffer.from(
+    `${frozenV1Candidate.toString("utf8")}\n`,
+  );
+  assert.throws(
+    () =>
+      assertEvaluationGateSnapshot(
+        abControlConfiguration,
+        driftedAbControl,
+        { sourceResolver: fixtureSourceResolver },
+      ),
+    /frozen candidate/i,
   );
 
   const cleanCore = {
@@ -6740,18 +7199,68 @@ test("paired execution gate blocks root activation, dirty inputs and source drif
       bytes: baselineBytes,
     },
     source,
+    repository: { status: [] },
   };
   assert.doesNotThrow(() =>
     assertEvaluationGateSnapshot(coreConfiguration, cleanCore, {
       sourceResolver: fixtureSourceResolver,
     }),
   );
+  const reviewedAbControl =
+    completeSchema3ExplicitLocalControlPassResult(
+      "no-harness-control-ab-v8",
+      frozenV1Candidate,
+    );
+  reviewedAbControl.evidence.cases.at(-1).dynamicToolRequests[1]
+    .idempotencyKey = "request-001";
+  reviewedAbControl.evidenceSha256 = independentHash(
+    reviewedAbControl.evidence,
+  );
+  const frozenV2Candidate = readFileSync(
+    new URL("../evals/candidates/common-core-v2.md", import.meta.url),
+  );
+  const abV2CoreConfiguration =
+    runConfigurationForMode("run-core-v2-ab-v8-r1");
+  const cleanAbV2Core = {
+    result: { exists: false },
+    rootInstruction: { exists: false },
+    candidate: {
+      exists: true,
+      tracked: true,
+      clean: true,
+      bytes: frozenV2Candidate,
+    },
+    baseline: {
+      exists: true,
+      tracked: true,
+      clean: true,
+      bytes: Buffer.from(
+        `${JSON.stringify(reviewedAbControl, null, 2)}\n`,
+      ),
+    },
+    source: {
+      gitBlobs: structuredClone(
+        reviewedAbControl.evidence.source.gitBlobs,
+      ),
+      sha256: structuredClone(
+        reviewedAbControl.evidence.source.sha256,
+      ),
+    },
+    repository: { status: [] },
+  };
+  assert.doesNotThrow(() =>
+    assertEvaluationGateSnapshot(
+      abV2CoreConfiguration,
+      cleanAbV2Core,
+      { sourceResolver: fixtureSourceResolver },
+    ),
+  );
 
-  const pendingControl = structuredClone(reviewedV5Control);
+  const pendingControl = structuredClone(reviewedV7Control);
   pendingControl.review.status = "pending";
   pendingControl.review.capabilityVerdict = "blocked";
   pendingControl.review.reasons = ["review-pending"];
-  const blockedControl = structuredClone(reviewedV5Control);
+  const blockedControl = structuredClone(reviewedV7Control);
   blockedControl.review.capabilityVerdict = "blocked";
   blockedControl.review.reasons = ["reviewed-block"];
   const previousGenerationControl =
@@ -6819,6 +7328,9 @@ test("paired execution gate blocks root activation, dirty inputs and source drif
         "evals/support/collect-codex-app-server.mjs"
       ] = "0".repeat(64);
     },
+    (snapshot) => {
+      snapshot.repository.status = ["?? unrelated.json"];
+    },
   ]) {
     const blocked = structuredClone(cleanCore);
     mutate(blocked);
@@ -6859,12 +7371,36 @@ test("paired execution gate blocks root activation, dirty inputs and source drif
 });
 
 test("CLI accepts only smoke and the fresh paired live modes", () => {
+  const expectedModes = [
+    "run-control-v7",
+    "run-core-v7",
+    "run-control-ab-v8",
+    "run-core-v1-ab-v8-r1",
+    "run-core-v1-ab-v8-r2",
+    "run-core-v1-ab-v8-r3",
+    "run-core-v1-ab-v8-r4",
+    "run-core-v2-ab-v8-r1",
+    "run-core-v2-ab-v8-r2",
+    "run-core-v2-ab-v8-r3",
+    "run-core-v2-ab-v8-r4",
+  ];
+  assert.deepEqual(liveRunModes(), expectedModes);
   assert.deepEqual(parseCli(["smoke"]), { mode: "smoke" });
   assert.deepEqual(
-    parseCli(["run-control-v5"]),
-    { mode: "run-control-v5" },
+    parseCli(["run-control-v7"]),
+    { mode: "run-control-v7" },
   );
-  assert.deepEqual(parseCli(["run-core-v5"]), { mode: "run-core-v5" });
+  assert.deepEqual(parseCli(["run-core-v7"]), { mode: "run-core-v7" });
+  assert.deepEqual(
+    parseCli(["run-control-ab-v8"]),
+    { mode: "run-control-ab-v8" },
+  );
+  for (const version of ["v1", "v2"]) {
+    for (let repetition = 1; repetition <= 4; repetition += 1) {
+      const mode = `run-core-${version}-ab-v8-r${repetition}`;
+      assert.deepEqual(parseCli([mode]), { mode });
+    }
+  }
   for (const argv of [
     [],
     ["run-control-v1"],
@@ -6875,17 +7411,21 @@ test("CLI accepts only smoke and the fresh paired live modes", () => {
     ["run-core-v3"],
     ["run-control-v4"],
     ["run-core-v4"],
+    ["run-control-v5"],
+    ["run-core-v5"],
+    ["run-control-v6"],
+    ["run-core-v6"],
     ["run-v2"],
     ["run-v3"],
     ["resume"],
     ["--force"],
     ["smoke", "--force"],
-    ["run-control-v5", "extra"],
-    ["run-core-v5", "--force"],
+    ["run-control-v7", "extra"],
+    ["run-core-v7", "--force"],
   ]) {
     assert.throws(
       () => parseCli(argv),
-      /usage: node evals\/support\/collect-codex-app-server\.mjs <smoke\|run-control-v5\|run-core-v5>/,
+      /usage: node evals\/support\/collect-codex-app-server\.mjs </,
     );
   }
 });

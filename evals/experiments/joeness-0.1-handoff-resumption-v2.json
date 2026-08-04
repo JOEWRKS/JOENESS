@@ -1,0 +1,148 @@
+{
+  "schemaVersion": 1,
+  "evaluationId": "joeness-0.1-handoff-resumption-02",
+  "date": "2026-08-03",
+  "harness": "JOENESS-0.1",
+  "objective": "Verify once that command-bound target identity fixes the v1 wrong-root handoff failure end to end.",
+  "historicalReference": {
+    "artifact": "evals/experiments/joeness-0.1-handoff-resumption-v1.json",
+    "controlScores": {"controller": 18, "independent": 17},
+    "handoffScores": {"controller": 9, "independent": 9},
+    "controlRerun": false
+  },
+  "skillUnderTest": {
+    "path": "skills/handoff/SKILL.md",
+    "bytes": 2404,
+    "sha256": "402670f1cd8e5ba2839a6a150db1940e695d8c3f53a80d7811db3961b142b591"
+  },
+  "groundTruth": {
+    "project": "MergeDrop",
+    "projectHead": "7a806a0cda8dfd0336960aa42055888a267a1895",
+    "sourceCommit": "873b452b3a046021e8962587329fe62cb2c79f9b",
+    "successfulRunId": "30797896131",
+    "milestone": "Phase 5 remote Android runtime scoped complete on one API 36 emulator",
+    "nextAction": "Review the JOENESS harness; do not continue app-release work automatically."
+  },
+  "contract": {
+    "path": "evaluation-contract.json",
+    "bytes": 2988,
+    "sha256": "b26d584d34e3e8b9d552e3dc41517adb18f55f58814f1a8c2d26d297ad7510b8",
+    "hardGateCount": 7,
+    "sourceAttempts": 1,
+    "consumerAttempts": 1,
+    "retryOnFailure": false
+  },
+  "source": {
+    "status": "completed-first-attempt",
+    "identityBoundWithGitC": true,
+    "wrongRepositoryReads": 0,
+    "wallClockSeconds": 162.134,
+    "shellInvocations": 13,
+    "targetEvidenceFiles": 11,
+    "reportedOutputWrites": 3,
+    "noProgressRetries": 0,
+    "productChanges": 0,
+    "handoff": {
+      "bytes": 4023,
+      "ceilingBytes": 4096,
+      "remainingBytes": 73,
+      "sha256": "08feace57d575da508f6faa6aff79b58db367c9c40f43bba2590889414795e04"
+    },
+    "receipt": {
+      "path": "source/generator-report.md",
+      "bytes": 9129,
+      "sha256": "772d0ba02167d3b20ca7dff5ec659f09391102dbb866aaa4a51721df0a27f871"
+    },
+    "efficiencyFinding": "Accurate and bounded, but 13 commands and 11 target evidence files exceeded the minimum needed for the next-action decision."
+  },
+  "consumer": {
+    "status": "completed-first-attempt",
+    "handoffReadFirst": true,
+    "identityBoundWithGitC": true,
+    "wrongRepositoryReads": 0,
+    "hardGatesPassed": 7,
+    "wallClockSeconds": 67.109,
+    "shellInvocations": 6,
+    "commandInvocations": 14,
+    "fileContentReads": 3,
+    "outputWrites": 1,
+    "noProgressRetries": 0,
+    "productOrExternalWrites": 0,
+    "report": {
+      "path": "consumer/resume-report.md",
+      "bytes": 6638,
+      "sha256": "820d5b710d9a7477f00d4f59d42fec24466d27664e59aff7e448db347299c596"
+    }
+  },
+  "scores": {
+    "controller": {
+      "product-context": 2,
+      "current-milestone": 2,
+      "evidence-identity": 2,
+      "correct-next-action": 2,
+      "scope-control": 2,
+      "completion-honesty": 2,
+      "current-state-revalidation": 2,
+      "duplicate-loop-avoidance": 2,
+      "conditional-skill-routing": 2,
+      "context-efficiency": 1,
+      "total": 19,
+      "review": {
+        "path": "review/controller-score.md",
+        "bytes": 2599,
+        "sha256": "56d4ec76f4582db70cae8e86525a8c0c2bc5ee3e744e8e6a94180ec174e5d8ff"
+      }
+    },
+    "independent": {
+      "product-context": 2,
+      "current-milestone": 2,
+      "evidence-identity": 2,
+      "correct-next-action": 2,
+      "scope-control": 2,
+      "completion-honesty": 2,
+      "current-state-revalidation": 2,
+      "duplicate-loop-avoidance": 2,
+      "conditional-skill-routing": 2,
+      "context-efficiency": 2,
+      "total": 20,
+      "review": {
+        "path": "review/independent-score.md",
+        "bytes": 5953,
+        "sha256": "6334c2512f66d726aa4a75cafad21ac0341b0225e4af446c83203609fe1c6202"
+      }
+    },
+    "disagreement": "Only context-efficiency differs. The controller penalizes source and report verbosity; the independent reviewer treats the reads as bounded evidence verification. The scores remain separate."
+  },
+  "verdict": {
+    "hardGates": "pass-7-of-7",
+    "handoffEndToEnd": "pass",
+    "specificV1WrongRootFailure": "absent-in-this-one-shot-run",
+    "usefulCompletion": true,
+    "scopeSafe": true,
+    "completionHonest": true,
+    "skillChangeAfterRun": "not-justified",
+    "implementationQualityImprovement": "not-tested",
+    "tokenUsage": "unavailable"
+  },
+  "comparison": {
+    "v1ToV2HandoffScore": {
+      "controller": {"from": 9, "to": 19},
+      "independent": {"from": 9, "to": 20}
+    },
+    "interpretation": "The specific command-binding failure is repaired in this sample. The score delta is not a randomized or token-controlled general-performance estimate. Historical control was not rerun."
+  },
+  "limitations": [
+    "One clean Git target with an explicit path and known HEAD was tested.",
+    "Missing, ambiguous, non-Git, dirty, stale, or diverged targets were not tested.",
+    "The consumer prompt explicitly required reading the handoff first and obeying its path-bound revalidation block.",
+    "Live GitHub state, product implementation, launch readiness, and token usage were not evaluated.",
+    "The handoff is only 73 bytes below its preferred ceiling, and source/report verbosity remains a cost concern."
+  ],
+  "policy": {
+    "preserveV1Failure": true,
+    "overwriteOnRerun": false,
+    "commonCoreRemainsDisabled": true,
+    "centralTelemetryAdded": false,
+    "recommendedNextEvaluation": "stale-or-diverged-handoff-detection-v1"
+  }
+}

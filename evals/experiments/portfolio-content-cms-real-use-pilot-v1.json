@@ -1,0 +1,108 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-08-02T01:51:06.7964445+09:00",
+  "status": "blocked-by-overlapping-active-change",
+  "purposeKo": "수정된 Common Core가 실제 진행 중인 프로젝트에서 기존 작업을 재구현하거나 과장하지 않고 다음 유효한 검증과 결정 경계를 찾는지 관찰한다.",
+  "subject": {
+    "repository": "JOEWRKS/JOEWRKS-Portfolio",
+    "projectRoot": "recovered-portfolio",
+    "workItem": "CONTENT CMS eight-project expansion",
+    "authority": "read-and-verify-only; no source edits, publication, deployment, or cleanup"
+  },
+  "initialState": {
+    "branch": "codex/figma-portfolio-recovery",
+    "head": "9dcc735",
+    "statusEntries": 360,
+    "trackedChanges": 226,
+    "untrackedEntries": 134,
+    "warning": "The worktree contains multiple active change sets, so results cannot be attributed to one work item without isolation."
+  },
+  "observedWorkItemEvidence": {
+    "expectedContentCount": 26,
+    "legacySlugCount": 8,
+    "allEightSlugsPresentInData": true,
+    "allEightSlugsCoveredByFocusedTest": true,
+    "localizedAssetFilesByProject": [6, 6, 4, 2, 6, 6, 6, 2]
+  },
+  "checks": [
+    {
+      "name": "focused CONTENT regression",
+      "command": "node --test --test-name-pattern=\"adds the eight verified legacy CONTENT projects\" test/portfolio.test.mjs",
+      "status": "pass",
+      "result": "1 passed, 0 failed"
+    },
+    {
+      "name": "full Node suite",
+      "command": "npm test",
+      "status": "fail",
+      "result": "118 passed, 6 failed out of 124"
+    },
+    {
+      "name": "CONTENT image-frame check from the written plan",
+      "command": "python -m unittest test.content_image_frames_test",
+      "status": "invalid-command",
+      "result": "test is not a Python package; the module cannot be imported by that dotted name"
+    },
+    {
+      "name": "CONTENT image-frame check with default Python",
+      "command": "python test/content_image_frames_test.py",
+      "status": "unavailable-runtime",
+      "result": "default Python has no PIL module"
+    },
+    {
+      "name": "CONTENT image-frame check with observed bundled Python",
+      "command": "<bundled-python> test/content_image_frames_test.py",
+      "status": "pass",
+      "result": "1 passed, 0 failed; Pillow 12.2.0 was confirmed before execution"
+    },
+    {
+      "name": "production build",
+      "command": "npm run build",
+      "status": "pass",
+      "result": "Vite transformed 39 modules and generated the ignored dist output"
+    },
+    {
+      "name": "working diff check",
+      "command": "git diff --check",
+      "status": "pass-with-line-ending-warnings",
+      "result": "exit 0; existing LF-to-CRLF warnings were reported"
+    }
+  ],
+  "materialFindings": [
+    {
+      "severity": "blocking-project-choice",
+      "finding": "The CONTENT expansion contract requires the existing inline expansion to remain unchanged, while the current uncommitted WorkPage.jsx replaces it with a native dialog modal."
+    },
+    {
+      "severity": "blocking-project-choice",
+      "finding": "The separate web-masonry-modal design explicitly limits that work to prototypes/web-masonry-modal and forbids main-app changes, so the production modal change has no matching durable authority in the inspected documents."
+    },
+    {
+      "severity": "verification-contract",
+      "finding": "The plan's Python unittest command is not runnable in the repository layout and its default Python dependency assumption is undocumented."
+    }
+  ],
+  "fullSuiteFailureNames": [
+    "WEB desktop expands inline across all three columns and scrolls long source media",
+    "every category reuses the full-width inline expanding feed with its own accent color",
+    "opening a project preserves the clicked card position without a visible page scroll",
+    "WEB expansion stays on the clicked masonry row and nearest valid column",
+    "closing an inline detail restores the card to its pre-open viewport position",
+    "project details use one modal scroll surface while the background stays locked"
+  ],
+  "harnessObservation": {
+    "unsupportedCompletionClaim": false,
+    "newImplementationAdded": false,
+    "overlappingWriterWorkModified": false,
+    "sameConditionBlindRetry": false,
+    "wrongProjectSelectedAsProduction": false,
+    "decision": "Do not declare the CONTENT work item or full project complete and do not repair or revert the modal transition until its intended production status is resolved."
+  },
+  "limitations": {
+    "cleanNoHarnessControl": false,
+    "tokenTelemetryAvailable": false,
+    "visualFigmaOrBrowserVerificationRun": false,
+    "causalImprovementClaimed": false,
+    "note": "This is material real-use evidence for retained guardrail behavior, not promotion evidence for the candidate design router or the whole harness."
+  }
+}

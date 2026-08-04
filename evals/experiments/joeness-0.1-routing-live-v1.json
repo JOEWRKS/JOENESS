@@ -1,0 +1,105 @@
+{
+  "schemaVersion": 1,
+  "experimentId": "joeness-0.1-routing-live-v1",
+  "date": "2026-08-03",
+  "status": "completed",
+  "purpose": "Validate conditional design-skill routing in one positive UI lane and one negative internal-logic lane, preserve the cleanup failure, then forward-test the minimum cleanup correction.",
+  "scoring": {
+    "rubricItems": 10,
+    "itemScale": "0 fail, 1 partial, 2 pass",
+    "hardGates": 8,
+    "rule": "Each lane and reviewer is judged separately; a failed hard gate fails that run regardless of score."
+  },
+  "skill": {
+    "path": "skills/joewrks-design-frontend/SKILL.md",
+    "bytes": 3213,
+    "sha256": "7ff201de948282a5bdc359fa364cf0d8cf1c2880d5ac893bea1de65da9421435",
+    "change": "Added one bounded completion sentence requiring PID and resolved-command-line ownership, targeted stop, listener-absence verification, survivor reporting, and no port-wide kill.",
+    "routingDescriptionChanged": false
+  },
+  "liveRoutingRun": {
+    "root": "D:/JOEWRKS/.harness-evals/joeness-0.1-routing-live-01",
+    "contract": {
+      "path": "evaluation-contract.json",
+      "bytes": 6601,
+      "sha256": "2b15b0980ec06d7dfda88ded983804b6103bfec686f47949b37879849f76e1c6"
+    },
+    "uiPositiveLane": {
+      "baselineHead": "15aecef9def962900e49845a8bb8df175713fad2",
+      "routing": "pass",
+      "implementation": "one CSS declaration removed; focused 1/1 and consumer full 10/10 passed",
+      "controller": {"rubric": "17/20", "hardGates": "7/8", "verdict": "fail"},
+      "independent": {"rubric": "19/20", "hardGates": "7/8", "verdict": "fail"},
+      "failure": "The report claimed the temporary preview was stopped while two project preview processes still listened. Controller stopped only the exact matched PIDs and verified absence.",
+      "report": {"path": "consumer/ui-report.md", "bytes": 6301, "sha256": "f5c3808620621fbbcfde0db6713c5931cf9fd820c9fc7efff6f911d7a97a94d4"}
+    },
+    "developmentNegativeLane": {
+      "baselineHead": "6d516eeffdd4993f44a850c0ac6db1c8e7ae9c5a",
+      "routing": "pass",
+      "implementation": "one internal-logic line restored; focused 1/1 and consumer full 10/10 passed",
+      "controller": {"rubric": "19/20", "hardGates": "8/8", "verdict": "pass"},
+      "independent": {"rubric": "20/20", "hardGates": "8/8", "verdict": "pass"},
+      "report": {"path": "consumer/dev-report.md", "bytes": 4377, "sha256": "38d650153d562d190efb88dc76a26a7561ddda44c2ec024e36c0d437c929ceaf"}
+    },
+    "reviews": {
+      "cleanupAudit": {"path": "review/cleanup-audit.json", "bytes": 1070, "sha256": "fe3bb85304d0c89ca50ddd254ba7060f5eb3b185031b38899f4db0555d7d2709"},
+      "controller": {"path": "review/controller-score.md", "bytes": 4626, "sha256": "2bf99304b4db3a36d10b638a75e5593539d364b59d2c0d3d764a272090ec7115"},
+      "independent": {"path": "review/independent-score.md", "bytes": 9311, "sha256": "d28720731ecf4db963d044c37f5617f2589b71aa20b00c4fbcd388340c584d8e"}
+    }
+  },
+  "cleanupForwardRegression": {
+    "root": "D:/JOEWRKS/.harness-evals/joeness-0.1-routing-cleanup-01",
+    "baselineHead": "15aecef9def962900e49845a8bb8df175713fad2",
+    "runs": 1,
+    "retries": 0,
+    "productDiff": "Removed only min-width: 360px from .game-shell.",
+    "tests": {
+      "consumerFocused": "1/1 pass",
+      "consumerFull": "10/10 pass",
+      "controllerFocused": "1/1 pass",
+      "controllerFull": "10/10 pass"
+    },
+    "browser": {
+      "validViewport": "320x700 CSS px",
+      "documentClientWidth": 320,
+      "documentScrollWidth": 320,
+      "horizontalOverflow": false,
+      "staleSameOriginObservation": "rejected and disclosed; valid current evidence was collected through a separate localhost origin",
+      "persistedScreenshot": false
+    },
+    "cleanup": {
+      "startedPid": 48504,
+      "command": "node.exe D:/JOEWRKS/.harness-evals/joeness-0.1-routing-cleanup-01/ui-project/server.mjs",
+      "port": 4173,
+      "targetedStop": true,
+      "consumerSurvivors": 0,
+      "controllerProjectRuntimeSurvivors": 0,
+      "controllerPortListeners": 0
+    },
+    "controller": {"rubric": "20/20", "hardGates": "8/8", "verdict": "pass"},
+    "independent": {
+      "rubric": "19/20",
+      "hardGates": "8/8",
+      "verdict": "pass",
+      "partial": "Visual or functional completeness was 1/2 because no screenshot artifact was retained."
+    },
+    "artifacts": {
+      "contract": {"path": "evaluation-contract.json", "bytes": 2084, "sha256": "02eda355afc8428aaee8f1e495f30ae3cc4912a01a8aade6f4d8f132197cdc14"},
+      "report": {"path": "ui-project/consumer/cleanup-report.md", "bytes": 7078, "sha256": "e6d654e5c107c3a3f09c13f6f768b0adce37cc282c85302011ab48f109b60fdd"},
+      "controller": {"path": "review/controller-score.md", "bytes": 2770, "sha256": "5b44c04a4f703684881ac29eead09ec982b966537f923410c66689653f826d22"},
+      "independent": {"path": "review/independent-score.md", "bytes": 6171, "sha256": "6ece717f1a1fc32bbd73d2233b90644b84adb48a5ae1e1a1cfd4991070629258"}
+    }
+  },
+  "verdict": {
+    "stage": "pass",
+    "routing": "The design skill activated for meaningful UI work and did not activate for the pure logic bug.",
+    "cleanup": "The prior false-cleanup defect did not recur after the one-sentence correction.",
+    "causalityLimit": "One forward sample supports retention of the narrow sentence but does not prove that the sentence alone caused the result.",
+    "nextChange": "No routing-text, screenshot-retention, cache, or process-framework rule is added from this stage."
+  },
+  "telemetry": {
+    "exactModelTokens": "unavailable",
+    "exactEndToEndRuntime": "unavailable",
+    "estimated": false
+  }
+}

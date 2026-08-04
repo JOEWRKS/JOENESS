@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "kind": "common-core-coding-diagnostic-failure-receipt",
+  "diagnostic": {
+    "mode": "diagnose-v1-coding-patch-evidence-r1",
+    "runId": "1156b369-2c3c-45bf-b6c2-37c298c10143"
+  },
+  "source": {
+    "head": "b8d9eb90ba7b30ea464f39ec7d8b20c9ab018bba"
+  },
+  "candidate": {
+    "id": "v1",
+    "sha256": "5aebc74bc795891c43bf785d9b34ae4d35d4a40bf46eddef3f6246d75919a495"
+  },
+  "case": {
+    "id": "feature-immutable-update",
+    "index": 0
+  },
+  "failureStage": "patch-evidence-validation",
+  "codex": {
+    "exitCode": 0,
+    "signal": null,
+    "wallClockMs": 16805
+  },
+  "evidence": {
+    "jsonl": {
+      "bytes": 1008,
+      "sha256": "aae4d5d5dde79f094c4aac77cd62ac41e423032f59966d1296876818bf352d27"
+    },
+    "diff": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  },
+  "patchEvidence": {
+    "reported": [],
+    "git": [],
+    "snapshot": [],
+    "allowed": [
+      "src/todos.mjs"
+    ],
+    "reportedEmpty": true,
+    "forbiddenPath": false,
+    "gitOutsideAllowed": false,
+    "reportedGitMismatch": false,
+    "snapshotGitMismatch": false
+  }
+}

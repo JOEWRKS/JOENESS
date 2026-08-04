@@ -1,0 +1,1013 @@
+{
+  "schemaVersion": 1,
+  "kind": "common-core-coding-ab",
+  "id": "run-lite-control-r2",
+  "runId": "a35abc07-e540-4cb2-b136-381d30ba39c4",
+  "recordedAt": "2026-08-01T07:35:31.508Z",
+  "source": {
+    "head": "bbb35d1c9edf6bb8368e4fc3f464fdd6dd961639",
+    "clean": true,
+    "objectFormat": "sha1",
+    "runner": {
+      "path": "evals/support/run-common-core-coding-ab.mjs",
+      "sha256": "72897651fa8775c77102414cd1c409bb8765d8a356bb7d3a51d2d176da0bae07"
+    },
+    "cases": {
+      "path": "evals/coding/cases.json",
+      "sha256": "164ffcbec6bc6ca597543500c3295c155154e15f05cbe005323129b05fcafd1c"
+    }
+  },
+  "runtime": {
+    "codexVersion": "codex-cli 0.145.0",
+    "model": "gpt-5.6-sol",
+    "reasoningEffort": "low",
+    "serviceTier": "default",
+    "approvalPolicy": "never",
+    "sandbox": "workspace-write",
+    "network": false,
+    "executionSurface": "patch-only-no-shell",
+    "shellTool": false,
+    "patchToolEvidence": "jsonl-file-change-hard-gate",
+    "ephemeral": true,
+    "ignoreUserConfig": true,
+    "ignoreRules": true,
+    "disabledFeatures": [
+      "apps",
+      "plugins",
+      "multi_agent",
+      "hooks",
+      "skill_search",
+      "skill_mcp_dependency_install",
+      "shell_tool",
+      "unified_exec",
+      "code_mode",
+      "code_mode_host",
+      "browser_use",
+      "browser_use_external",
+      "browser_use_full_cdp_access",
+      "in_app_browser",
+      "computer_use",
+      "standalone_web_search",
+      "image_generation",
+      "workspace_dependencies",
+      "tool_suggest",
+      "enable_mcp_apps",
+      "tool_call_mcp_elicitation"
+    ],
+    "isolationFiles": [
+      "auth.json",
+      "cap_sid",
+      ".sandbox/setup_marker.json",
+      ".sandbox-secrets/sandbox_users.json"
+    ],
+    "shellEnvPolicy": "inherit=\"core\",ignore_default_excludes=false"
+  },
+  "candidate": {
+    "id": "control",
+    "path": "evals/candidates/no-common-core.md",
+    "expectedSha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+    "actualSha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+    "bytes": 1
+  },
+  "caseProfile": "lite-rough-v1",
+  "repetition": 2,
+  "cases": [
+    {
+      "caseId": "maintenance-shared-parser",
+      "promptSha256": "afe633ba19dc7a61a4bc5ba36fca41ede05091f7e02f8d292df8ca110d7a75bb",
+      "promptBytes": 1139,
+      "visibleFilesSha256": "dbf4d9ccdee1e2fdb54618aa95088585f74e5572cf9518523f66ad11297fb631",
+      "visibleFilesBytes": 859,
+      "visibleFilePaths": [
+        "src/api/list.mjs",
+        "src/report/page.mjs",
+        "src/shared/query.mjs",
+        "test.mjs"
+      ],
+      "baseline": {
+        "gitHead": "1fec2171db49a69809c4bce709cc3bbc6f802f06",
+        "gitTree": "17b9a6333fded672967a5924efe8ff9681150d35",
+        "diff": {
+          "text": "",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "truncated": false
+        },
+        "changedPaths": [],
+        "fileTree": {
+          "files": {
+            "AGENTS.md": {
+              "bytes": 1,
+              "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b"
+            },
+            "test.mjs": {
+              "bytes": 319,
+              "sha256": "0599c6c19be7ae93db90e1a974ca0dffdd6301aff37b204f4c59077ec8aea0ee"
+            },
+            "src/shared/query.mjs": {
+              "bytes": 152,
+              "sha256": "821c69c4ecbf508303e81b5ec60dd16a31e33d1c58aaa0a671d9f5ffc440bb6d"
+            },
+            "src/report/page.mjs": {
+              "bytes": 136,
+              "sha256": "8340a30f4f7ec05e7b8bffc39f6ebf5aa2f6dea0e2cf77bcbd03381fd17ae595"
+            },
+            "src/api/list.mjs": {
+              "bytes": 124,
+              "sha256": "fdb9fd69bc2478a5668067c8a7b8668cf71cd6ee30ceebc9ce942314fec3341f"
+            }
+          },
+          "sha256": "3e072547f573378d049b95caa0fb62fb07b1c2ba4c43748f9fe4894075c8cd49",
+          "bytes": 732
+        },
+        "gitMetadataSha256": "dc9509917fd6c2a78055b92d5a791bc8de2106380f929b71610d95a10ac37ed2",
+        "gitMetadata": {
+          "files": {
+            "COMMIT_EDITMSG": {
+              "bytes": 8,
+              "sha256": "e80b71cd14d3cbd65f4173abcbfcf01a545dbca32a72d575108b553a648cc96f"
+            },
+            "config": {
+              "bytes": 190,
+              "sha256": "52d7637257b46877222aaac1fe93288b84cd730fd9b9fe20905dd8570f8180ec"
+            },
+            "description": {
+              "bytes": 73,
+              "sha256": "85ab6c163d43a17ea9cf7788308bca1466f1b0a8d1cc92e26e9bf63da4062aee"
+            },
+            "HEAD": {
+              "bytes": 23,
+              "sha256": "f6f2b945f6c411b02ba3da9c7ace88dcf71b6af65ba2e0d89aa82900042b5a10"
+            },
+            "index": {
+              "bytes": 583,
+              "sha256": "91649ca81754dd701690cdb8bd202cb3ec8857cac6739b75d4ae6ca5cfa97d2e"
+            },
+            "refs/heads/master": {
+              "bytes": 41,
+              "sha256": "59653bae3bca3001d533b01c9c5b0dc95486ff4cb13dd3be508679d2672dfb1e"
+            },
+            "objects/fc/c1f65d85ef1a9c7b3f0e3d6d4b08cd4a711913": {
+              "bytes": 53,
+              "sha256": "625834bacf98ce74f5c5e57e2abbe733357b07bd04761b7302473be6a33f06fa"
+            },
+            "objects/f5/c976c531bb284e4cea4005909f82ae538d4e0b": {
+              "bytes": 126,
+              "sha256": "0ddaa308f09551ea39f93e7d8f74fa70ba237acd23247027ece08c7543621837"
+            },
+            "objects/e8/916ed6746930332a327fcabbc7b71aabc31169": {
+              "bytes": 105,
+              "sha256": "9b7f22bf950e7d7c8fde9e71148a4503f81ab8fc54f0d5b2859a01b9b276aba5"
+            },
+            "objects/cc/eb6064128e9210b1a84a247407d952f28ed61c": {
+              "bytes": 53,
+              "sha256": "09ee95488fa3f58dbcbb2eaf5fa21d15e05afd4e18a9e2f4ec13d2d238027d73"
+            },
+            "objects/9e/9d972650ee3a36f000cbc8ff7372e132e1f8c8": {
+              "bytes": 53,
+              "sha256": "9147ddc666959327f34d1fdd006cfcd84f8c869b9f6595ff9921619eb05d2de5"
+            },
+            "objects/8b/137891791fe96927ad78e64b0aad7bded08bdc": {
+              "bytes": 16,
+              "sha256": "a25e48d49327f35569e5d25fc64cce3822b7d1402ff13fb8a031139543510477"
+            },
+            "objects/1f/ec2171db49a69809c4bce709cc3bbc6f802f06": {
+              "bytes": 143,
+              "sha256": "3a2a641778e4c9a824f8b133984ebacf81509f46ac603354b144181d22b603fd"
+            },
+            "objects/17/b9a6333fded672967a5924efe8ff9681150d35": {
+              "bytes": 116,
+              "sha256": "bcbd37f2d1d2e03dfe17fc3f4f67dd1d7e5fbdc7d4f7b56d11a5571dfcff6ce1"
+            },
+            "objects/16/b78189a6d39f919334bf472a4e9e94807810c0": {
+              "bytes": 115,
+              "sha256": "3ccb45a4cbac0abe0f9578c6e0e2606b2b0d9fafcae937c3f4d347e3fb90168e"
+            },
+            "objects/12/3df20578c5711183e9c11367510db7ed10fea7": {
+              "bytes": 190,
+              "sha256": "3ff370867f9d5376060cb747e8d7e21241ce342eb8764d9558618c0662a3ee7f"
+            },
+            "objects/06/5772206e962d9ec8884ef8372b36d65f5b7e2a": {
+              "bytes": 130,
+              "sha256": "9bf2e95edef4baadb31c92851a968381e307032b6e08b5277381e847e634bbe9"
+            },
+            "logs/HEAD": {
+              "bytes": 181,
+              "sha256": "621972399a1020477c3de68b882228d4ddcd7f4ad24c1a88cf32c8f6030e9226"
+            },
+            "logs/refs/heads/master": {
+              "bytes": 181,
+              "sha256": "621972399a1020477c3de68b882228d4ddcd7f4ad24c1a88cf32c8f6030e9226"
+            },
+            "info/exclude": {
+              "bytes": 240,
+              "sha256": "6671fe83b7a07c8932ee89164d1f2793b2318058eb8b98dc5c06ee0a5a3b0ec1"
+            },
+            "hooks/applypatch-msg.sample": {
+              "bytes": 478,
+              "sha256": "0223497a0b8b033aa58a3a521b8629869386cf7ab0e2f101963d328aa62193f7"
+            },
+            "hooks/commit-msg.sample": {
+              "bytes": 1972,
+              "sha256": "efc1401b0e99d1ff51494d154d98b46c1e99059bcd8bf9f73cecde19fd3eb23b"
+            },
+            "hooks/fsmonitor-watchman.sample": {
+              "bytes": 4611,
+              "sha256": "9159720099ad5595b8e66645cbfd47763c1e920f46e0b50ae75e642bbec57ef0"
+            },
+            "hooks/post-update.sample": {
+              "bytes": 189,
+              "sha256": "81765af2daef323061dcbc5e61fc16481cb74b3bac9ad8a174b186523586f6c5"
+            },
+            "hooks/pre-applypatch.sample": {
+              "bytes": 424,
+              "sha256": "e15c5b469ea3e0a695bea6f2c82bcf8e62821074939ddd85b77e0007ff165475"
+            },
+            "hooks/pre-commit.sample": {
+              "bytes": 1649,
+              "sha256": "57185b7b9f05239d7ab52db045f5b89eb31348d7b2177eab214f5eb872e1971b"
+            },
+            "hooks/pre-merge-commit.sample": {
+              "bytes": 416,
+              "sha256": "d3825a70337940ebbd0a5c072984e13245920cdf8898bd225c8d27a6dfc9cb53"
+            },
+            "hooks/pre-push.sample": {
+              "bytes": 1374,
+              "sha256": "ecce9c7e04d3f5dd9d8ada81753dd1d549a9634b26770042b58dda00217d086a"
+            },
+            "hooks/pre-rebase.sample": {
+              "bytes": 4898,
+              "sha256": "4febce867790052338076f4e66cc47efb14879d18097d1d61c8261859eaaa7b3"
+            },
+            "hooks/pre-receive.sample": {
+              "bytes": 544,
+              "sha256": "a4c3d2b9c7bb3fd8d1441c31bd4ee71a595d66b44fcf49ddb310252320169989"
+            },
+            "hooks/prepare-commit-msg.sample": {
+              "bytes": 1492,
+              "sha256": "e9ddcaa4189fddd25ed97fc8c789eca7b6ca16390b2392ae3276f0c8e1aa4619"
+            },
+            "hooks/push-to-checkout.sample": {
+              "bytes": 2783,
+              "sha256": "a53d0741798b287c6dd7afa64aee473f305e65d3f49463bb9d7408ec3b12bf5f"
+            },
+            "hooks/sendemail-validate.sample": {
+              "bytes": 2308,
+              "sha256": "44ebfc923dc5466bc009602f0ecf067b9c65459abfe8868ddc49b78e6ced7a92"
+            },
+            "hooks/update.sample": {
+              "bytes": 3650,
+              "sha256": "8d5f2fa83e103cf08b57eaa67521df9194f45cbdbcb37da52ad586097a14d106"
+            }
+          },
+          "sha256": "dc9509917fd6c2a78055b92d5a791bc8de2106380f929b71610d95a10ac37ed2",
+          "bytes": 29408
+        },
+        "visible": {
+          "exitCode": 1,
+          "signal": null,
+          "stdout": "",
+          "stderr": "node:internal/modules/run_main:107\r\n    triggerUncaughtException(\r\n    ^\r\n\r\nAssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\r\n\r\n12 !== 20\r\n\r\n    at file:///C:/Users/tjdwo/AppData/Local/Temp/joewrks-coding-ab-JLV8Id/workspace/test.mjs:5:8\r\n    at ModuleJob.run (node:internal/modules/esm/module_job:439:25)\r\n    at async node:internal/modules/esm/loader:646:26\r\n    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5) {\r\n  generatedMessage: true,\r\n  code: 'ERR_ASSERTION',\r\n  actual: 12,\r\n  expected: 20,\r\n  operator: 'strictEqual',\r\n  diff: 'simple'\r\n}\r\n\r\nNode.js v26.3.0\r\n",
+          "wallClockMs": 78,
+          "outputExceeded": false,
+          "timedOut": false
+        },
+        "hidden": {
+          "exitCode": 1,
+          "signal": null,
+          "stdout": "",
+          "stderr": "node:internal/modules/run_main:107\r\n    triggerUncaughtException(\r\n    ^\r\n\r\nAssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\r\n\r\n0 !== 17\r\n\r\n    at file:///C:/Users/tjdwo/AppData/Local/Temp/joewrks-coding-ab-JLV8Id/grader/hidden-grade.mjs:13:10 {\r\n  generatedMessage: true,\r\n  code: 'ERR_ASSERTION',\r\n  actual: 0,\r\n  expected: 17,\r\n  operator: 'strictEqual',\r\n  diff: 'simple'\r\n}\r\n\r\nNode.js v26.3.0\r\n",
+          "wallClockMs": 73,
+          "outputExceeded": false,
+          "timedOut": false
+        }
+      },
+      "metrics": {
+        "inputTokens": 34948,
+        "cachedInputTokens": 29952,
+        "outputTokens": 694,
+        "reasoningOutputTokens": 249,
+        "totalTokens": 35642,
+        "finalOutputBytes": 293,
+        "eventCount": 9,
+        "wallClockMs": 32687
+      },
+      "process": {
+        "exitCode": 0,
+        "signal": null,
+        "stderr": "",
+        "threadId": "019fbc3d-54c5-7453-a3a6-11e185ec0503",
+        "itemTypes": [
+          "agent_message",
+          "file_change"
+        ],
+        "fileChangePaths": [
+          "src/shared/query.mjs"
+        ],
+        "rawFileChangePaths": [
+          "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joewrks-coding-ab-JLV8Id\\workspace\\src\\shared\\query.mjs"
+        ],
+        "jsonlBytes": 1851,
+        "jsonlSha256": "f2ca46f8d944ca544704b81fa0aad28437b72951a0b99d49a7c0e70e5efec119"
+      },
+      "finalMessage": "`src/shared/query.mjs`의 limit 파싱 버그를 수정했습니다.\n\n- `\"12items\"` 같은 부분 숫자 문자열 거부\n- 공백 포함 숫자 허용\n- 1~100 범위의 안전한 정수만 허용\n- 범위 밖이거나 잘못된 값은 기존 `fallback` 반환\n- 함수 API와 의존성 유지",
+      "changedPaths": [
+        "src/shared/query.mjs"
+      ],
+      "diff": {
+        "text": "diff --git a/src/shared/query.mjs b/src/shared/query.mjs\nindex 0657722..52cc7df 100644\n--- a/src/shared/query.mjs\n+++ b/src/shared/query.mjs\n@@ -1,4 +1,13 @@\n export function parseLimit(value, fallback = 20) {\n-  const parsed = Number.parseInt(value, 10);\n-  return Number.isFinite(parsed) ? parsed : fallback;\n+  if (\n+    typeof value !== \"number\" &&\n+    (typeof value !== \"string\" || !/^\\s*\\d+\\s*$/.test(value))\n+  ) {\n+    return fallback;\n+  }\n+\n+  const parsed = Number(value);\n+  return Number.isSafeInteger(parsed) && parsed >= 1 && parsed <= 100\n+    ? parsed\n+    : fallback;\n }\n",
+        "bytes": 590,
+        "sha256": "e578f0c041cae5c208938f221e8a46bbf2dda8bf18eae2453161d078f8b72109",
+        "truncated": false
+      },
+      "fileTree": {
+        "files": {
+          "AGENTS.md": {
+            "bytes": 1,
+            "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b"
+          },
+          "test.mjs": {
+            "bytes": 319,
+            "sha256": "0599c6c19be7ae93db90e1a974ca0dffdd6301aff37b204f4c59077ec8aea0ee"
+          },
+          "src/shared/query.mjs": {
+            "bytes": 318,
+            "sha256": "4d53d529bb2559f7712661c99b90f0089a3951ee57a9359721e274f9a29e84c4"
+          },
+          "src/report/page.mjs": {
+            "bytes": 136,
+            "sha256": "8340a30f4f7ec05e7b8bffc39f6ebf5aa2f6dea0e2cf77bcbd03381fd17ae595"
+          },
+          "src/api/list.mjs": {
+            "bytes": 124,
+            "sha256": "fdb9fd69bc2478a5668067c8a7b8668cf71cd6ee30ceebc9ce942314fec3341f"
+          }
+        },
+        "sha256": "4bfa89b4b2662190767d144e8d3a19781eecd47c31ef6c230c7ca910d1ff729e",
+        "bytes": 898
+      },
+      "git": {
+        "head": "1fec2171db49a69809c4bce709cc3bbc6f802f06",
+        "tree": "17b9a6333fded672967a5924efe8ff9681150d35",
+        "metadataSha256": "dc9509917fd6c2a78055b92d5a791bc8de2106380f929b71610d95a10ac37ed2",
+        "metadata": {
+          "files": {
+            "COMMIT_EDITMSG": {
+              "bytes": 8,
+              "sha256": "e80b71cd14d3cbd65f4173abcbfcf01a545dbca32a72d575108b553a648cc96f"
+            },
+            "config": {
+              "bytes": 190,
+              "sha256": "52d7637257b46877222aaac1fe93288b84cd730fd9b9fe20905dd8570f8180ec"
+            },
+            "description": {
+              "bytes": 73,
+              "sha256": "85ab6c163d43a17ea9cf7788308bca1466f1b0a8d1cc92e26e9bf63da4062aee"
+            },
+            "HEAD": {
+              "bytes": 23,
+              "sha256": "f6f2b945f6c411b02ba3da9c7ace88dcf71b6af65ba2e0d89aa82900042b5a10"
+            },
+            "index": {
+              "bytes": 583,
+              "sha256": "91649ca81754dd701690cdb8bd202cb3ec8857cac6739b75d4ae6ca5cfa97d2e"
+            },
+            "refs/heads/master": {
+              "bytes": 41,
+              "sha256": "59653bae3bca3001d533b01c9c5b0dc95486ff4cb13dd3be508679d2672dfb1e"
+            },
+            "objects/fc/c1f65d85ef1a9c7b3f0e3d6d4b08cd4a711913": {
+              "bytes": 53,
+              "sha256": "625834bacf98ce74f5c5e57e2abbe733357b07bd04761b7302473be6a33f06fa"
+            },
+            "objects/f5/c976c531bb284e4cea4005909f82ae538d4e0b": {
+              "bytes": 126,
+              "sha256": "0ddaa308f09551ea39f93e7d8f74fa70ba237acd23247027ece08c7543621837"
+            },
+            "objects/e8/916ed6746930332a327fcabbc7b71aabc31169": {
+              "bytes": 105,
+              "sha256": "9b7f22bf950e7d7c8fde9e71148a4503f81ab8fc54f0d5b2859a01b9b276aba5"
+            },
+            "objects/cc/eb6064128e9210b1a84a247407d952f28ed61c": {
+              "bytes": 53,
+              "sha256": "09ee95488fa3f58dbcbb2eaf5fa21d15e05afd4e18a9e2f4ec13d2d238027d73"
+            },
+            "objects/9e/9d972650ee3a36f000cbc8ff7372e132e1f8c8": {
+              "bytes": 53,
+              "sha256": "9147ddc666959327f34d1fdd006cfcd84f8c869b9f6595ff9921619eb05d2de5"
+            },
+            "objects/8b/137891791fe96927ad78e64b0aad7bded08bdc": {
+              "bytes": 16,
+              "sha256": "a25e48d49327f35569e5d25fc64cce3822b7d1402ff13fb8a031139543510477"
+            },
+            "objects/1f/ec2171db49a69809c4bce709cc3bbc6f802f06": {
+              "bytes": 143,
+              "sha256": "3a2a641778e4c9a824f8b133984ebacf81509f46ac603354b144181d22b603fd"
+            },
+            "objects/17/b9a6333fded672967a5924efe8ff9681150d35": {
+              "bytes": 116,
+              "sha256": "bcbd37f2d1d2e03dfe17fc3f4f67dd1d7e5fbdc7d4f7b56d11a5571dfcff6ce1"
+            },
+            "objects/16/b78189a6d39f919334bf472a4e9e94807810c0": {
+              "bytes": 115,
+              "sha256": "3ccb45a4cbac0abe0f9578c6e0e2606b2b0d9fafcae937c3f4d347e3fb90168e"
+            },
+            "objects/12/3df20578c5711183e9c11367510db7ed10fea7": {
+              "bytes": 190,
+              "sha256": "3ff370867f9d5376060cb747e8d7e21241ce342eb8764d9558618c0662a3ee7f"
+            },
+            "objects/06/5772206e962d9ec8884ef8372b36d65f5b7e2a": {
+              "bytes": 130,
+              "sha256": "9bf2e95edef4baadb31c92851a968381e307032b6e08b5277381e847e634bbe9"
+            },
+            "logs/HEAD": {
+              "bytes": 181,
+              "sha256": "621972399a1020477c3de68b882228d4ddcd7f4ad24c1a88cf32c8f6030e9226"
+            },
+            "logs/refs/heads/master": {
+              "bytes": 181,
+              "sha256": "621972399a1020477c3de68b882228d4ddcd7f4ad24c1a88cf32c8f6030e9226"
+            },
+            "info/exclude": {
+              "bytes": 240,
+              "sha256": "6671fe83b7a07c8932ee89164d1f2793b2318058eb8b98dc5c06ee0a5a3b0ec1"
+            },
+            "hooks/applypatch-msg.sample": {
+              "bytes": 478,
+              "sha256": "0223497a0b8b033aa58a3a521b8629869386cf7ab0e2f101963d328aa62193f7"
+            },
+            "hooks/commit-msg.sample": {
+              "bytes": 1972,
+              "sha256": "efc1401b0e99d1ff51494d154d98b46c1e99059bcd8bf9f73cecde19fd3eb23b"
+            },
+            "hooks/fsmonitor-watchman.sample": {
+              "bytes": 4611,
+              "sha256": "9159720099ad5595b8e66645cbfd47763c1e920f46e0b50ae75e642bbec57ef0"
+            },
+            "hooks/post-update.sample": {
+              "bytes": 189,
+              "sha256": "81765af2daef323061dcbc5e61fc16481cb74b3bac9ad8a174b186523586f6c5"
+            },
+            "hooks/pre-applypatch.sample": {
+              "bytes": 424,
+              "sha256": "e15c5b469ea3e0a695bea6f2c82bcf8e62821074939ddd85b77e0007ff165475"
+            },
+            "hooks/pre-commit.sample": {
+              "bytes": 1649,
+              "sha256": "57185b7b9f05239d7ab52db045f5b89eb31348d7b2177eab214f5eb872e1971b"
+            },
+            "hooks/pre-merge-commit.sample": {
+              "bytes": 416,
+              "sha256": "d3825a70337940ebbd0a5c072984e13245920cdf8898bd225c8d27a6dfc9cb53"
+            },
+            "hooks/pre-push.sample": {
+              "bytes": 1374,
+              "sha256": "ecce9c7e04d3f5dd9d8ada81753dd1d549a9634b26770042b58dda00217d086a"
+            },
+            "hooks/pre-rebase.sample": {
+              "bytes": 4898,
+              "sha256": "4febce867790052338076f4e66cc47efb14879d18097d1d61c8261859eaaa7b3"
+            },
+            "hooks/pre-receive.sample": {
+              "bytes": 544,
+              "sha256": "a4c3d2b9c7bb3fd8d1441c31bd4ee71a595d66b44fcf49ddb310252320169989"
+            },
+            "hooks/prepare-commit-msg.sample": {
+              "bytes": 1492,
+              "sha256": "e9ddcaa4189fddd25ed97fc8c789eca7b6ca16390b2392ae3276f0c8e1aa4619"
+            },
+            "hooks/push-to-checkout.sample": {
+              "bytes": 2783,
+              "sha256": "a53d0741798b287c6dd7afa64aee473f305e65d3f49463bb9d7408ec3b12bf5f"
+            },
+            "hooks/sendemail-validate.sample": {
+              "bytes": 2308,
+              "sha256": "44ebfc923dc5466bc009602f0ecf067b9c65459abfe8868ddc49b78e6ced7a92"
+            },
+            "hooks/update.sample": {
+              "bytes": 3650,
+              "sha256": "8d5f2fa83e103cf08b57eaa67521df9194f45cbdbcb37da52ad586097a14d106"
+            }
+          },
+          "sha256": "dc9509917fd6c2a78055b92d5a791bc8de2106380f929b71610d95a10ac37ed2",
+          "bytes": 29408
+        }
+      },
+      "tests": {
+        "visible": {
+          "exitCode": 0,
+          "signal": null,
+          "stdout": "visible shared parser: pass\n",
+          "stderr": "",
+          "wallClockMs": 67,
+          "outputExceeded": false,
+          "timedOut": false
+        },
+        "hidden": {
+          "exitCode": 0,
+          "signal": null,
+          "stdout": "hidden shared parser: pass\n",
+          "stderr": "",
+          "wallClockMs": 71,
+          "outputExceeded": false,
+          "timedOut": false
+        }
+      },
+      "workspaceSize": {
+        "files": 5,
+        "bytes": 898
+      },
+      "integrity": {
+        "instructionUnchanged": true,
+        "changedPathsAllowed": true,
+        "protectedPathsUnchanged": true,
+        "noSymlinks": true,
+        "workspaceContained": true,
+        "safeImplementationFiles": true,
+        "patchOnlyToolSurface": true,
+        "claimIntegrity": true,
+        "gitMetadataUnchanged": true,
+        "fixtureHeadUnchanged": true,
+        "fullTreeDiffMatchesGit": true,
+        "noUserConfigPluginsOrSkills": true,
+        "credentialPathOutsideWorkspace": true,
+        "identityHomeEmpty": true,
+        "shellEnvPolicy": "inherit=\"core\",ignore_default_excludes=false"
+      },
+      "runtime": {
+        "codexVersion": "codex-cli 0.145.0"
+      }
+    },
+    {
+      "caseId": "frontend-responsive-accessible",
+      "promptSha256": "ce14fceab6dc76a879cccab30d2d1f115b2b8532e868013a664ab23809ee928d",
+      "promptBytes": 1730,
+      "visibleFilesSha256": "bcee76262b20f203ebc7114ff092413bfe09e463c762ab4431fba3c005b6a680",
+      "visibleFilesBytes": 1360,
+      "visibleFilePaths": [
+        "app.mjs",
+        "index.html",
+        "styles.css",
+        "test.mjs"
+      ],
+      "baseline": {
+        "gitHead": "ac18f2683e4a2b436fb4c2bcade58317186cb5f3",
+        "gitTree": "dd01963ca50d9f6bf92bc7d75680a627608782be",
+        "diff": {
+          "text": "",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "truncated": false
+        },
+        "changedPaths": [],
+        "fileTree": {
+          "files": {
+            "AGENTS.md": {
+              "bytes": 1,
+              "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b"
+            },
+            "app.mjs": {
+              "bytes": 31,
+              "sha256": "37b67c988beca2ee4d5737e8610c816d8ab6259b4ac6f803feacf63bfbf71770"
+            },
+            "index.html": {
+              "bytes": 567,
+              "sha256": "370dfba081eb7c81b673f8bd9baf1b13331762f30be825fa22ce74643378f258"
+            },
+            "styles.css": {
+              "bytes": 118,
+              "sha256": "8147fc900369404cd9f45a3a2ca3fdb76eb7d3a40a6d78f9332713d144932ca7"
+            },
+            "test.mjs": {
+              "bytes": 512,
+              "sha256": "ae18f286a4bb5d8692531663d2b756433e5eed38a9a34c366f7b13c82a56b09e"
+            }
+          },
+          "sha256": "3f7dbbc3464049cc1869453ef37e56af833503153c64c4167404e2ed242500f0",
+          "bytes": 1229
+        },
+        "gitMetadataSha256": "aec0aa511fee533b52c6cf5a47a5ebe27ebbed37d7251586a5d548fe14e688b2",
+        "gitMetadata": {
+          "files": {
+            "COMMIT_EDITMSG": {
+              "bytes": 8,
+              "sha256": "e80b71cd14d3cbd65f4173abcbfcf01a545dbca32a72d575108b553a648cc96f"
+            },
+            "config": {
+              "bytes": 190,
+              "sha256": "52d7637257b46877222aaac1fe93288b84cd730fd9b9fe20905dd8570f8180ec"
+            },
+            "description": {
+              "bytes": 73,
+              "sha256": "85ab6c163d43a17ea9cf7788308bca1466f1b0a8d1cc92e26e9bf63da4062aee"
+            },
+            "HEAD": {
+              "bytes": 23,
+              "sha256": "f6f2b945f6c411b02ba3da9c7ace88dcf71b6af65ba2e0d89aa82900042b5a10"
+            },
+            "index": {
+              "bytes": 441,
+              "sha256": "e70c948100a6dd9b101934c6bdfaf1378972142ce9fe970b16284eef5c43539e"
+            },
+            "refs/heads/master": {
+              "bytes": 41,
+              "sha256": "667ebe398a8c20aa262bbfb7788cfb1429840fbf61360c1e4492fc88e9a64ab1"
+            },
+            "objects/f2/9022d7fe1c009d37dc83ac7646e5410e343aed": {
+              "bytes": 261,
+              "sha256": "4b5fb81537d449eeb2e3fc8aa5549e8c8f227d727b8dfb2ea0cb0d755b8dbe81"
+            },
+            "objects/dd/01963ca50d9f6bf92bc7d75680a627608782be": {
+              "bytes": 184,
+              "sha256": "b31016c3954beb9b7e9c7d055e5beed4e506946be11432e1beff292a6396484f"
+            },
+            "objects/d1/5554988ba53dd4ee05d9d85be8a33871effac4": {
+              "bytes": 327,
+              "sha256": "a3a4adb1b16a364ce4d7e2c8efac87e5d41e1cf3c857f615e58b88c213bbba49"
+            },
+            "objects/ac/18f2683e4a2b436fb4c2bcade58317186cb5f3": {
+              "bytes": 141,
+              "sha256": "f3f5816f3dec25a8d4b90975fb51453942c8db187d6f0724c818c704712b9613"
+            },
+            "objects/8b/137891791fe96927ad78e64b0aad7bded08bdc": {
+              "bytes": 16,
+              "sha256": "a25e48d49327f35569e5d25fc64cce3822b7d1402ff13fb8a031139543510477"
+            },
+            "objects/6d/bc6af53bcf0337389f629566469478c39a73f2": {
+              "bytes": 115,
+              "sha256": "112d8222d25c9e286bfbfd5c540c88a1aba842e8cfa714275b1f6dff4edf4474"
+            },
+            "objects/4b/1664437a0ee80c96738789aaa9d2fbd0009da8": {
+              "bytes": 47,
+              "sha256": "afecef5d55bf34e4269129e289c96a6100a3ba0ae9cc76ea725ba02649aecfd3"
+            },
+            "logs/HEAD": {
+              "bytes": 181,
+              "sha256": "3c6fe49195f4ca25d2ff4b6d8d7ac0de3ab7868d044c7fa19cbf0975d573f2f1"
+            },
+            "logs/refs/heads/master": {
+              "bytes": 181,
+              "sha256": "3c6fe49195f4ca25d2ff4b6d8d7ac0de3ab7868d044c7fa19cbf0975d573f2f1"
+            },
+            "info/exclude": {
+              "bytes": 240,
+              "sha256": "6671fe83b7a07c8932ee89164d1f2793b2318058eb8b98dc5c06ee0a5a3b0ec1"
+            },
+            "hooks/applypatch-msg.sample": {
+              "bytes": 478,
+              "sha256": "0223497a0b8b033aa58a3a521b8629869386cf7ab0e2f101963d328aa62193f7"
+            },
+            "hooks/commit-msg.sample": {
+              "bytes": 1972,
+              "sha256": "efc1401b0e99d1ff51494d154d98b46c1e99059bcd8bf9f73cecde19fd3eb23b"
+            },
+            "hooks/fsmonitor-watchman.sample": {
+              "bytes": 4611,
+              "sha256": "9159720099ad5595b8e66645cbfd47763c1e920f46e0b50ae75e642bbec57ef0"
+            },
+            "hooks/post-update.sample": {
+              "bytes": 189,
+              "sha256": "81765af2daef323061dcbc5e61fc16481cb74b3bac9ad8a174b186523586f6c5"
+            },
+            "hooks/pre-applypatch.sample": {
+              "bytes": 424,
+              "sha256": "e15c5b469ea3e0a695bea6f2c82bcf8e62821074939ddd85b77e0007ff165475"
+            },
+            "hooks/pre-commit.sample": {
+              "bytes": 1649,
+              "sha256": "57185b7b9f05239d7ab52db045f5b89eb31348d7b2177eab214f5eb872e1971b"
+            },
+            "hooks/pre-merge-commit.sample": {
+              "bytes": 416,
+              "sha256": "d3825a70337940ebbd0a5c072984e13245920cdf8898bd225c8d27a6dfc9cb53"
+            },
+            "hooks/pre-push.sample": {
+              "bytes": 1374,
+              "sha256": "ecce9c7e04d3f5dd9d8ada81753dd1d549a9634b26770042b58dda00217d086a"
+            },
+            "hooks/pre-rebase.sample": {
+              "bytes": 4898,
+              "sha256": "4febce867790052338076f4e66cc47efb14879d18097d1d61c8261859eaaa7b3"
+            },
+            "hooks/pre-receive.sample": {
+              "bytes": 544,
+              "sha256": "a4c3d2b9c7bb3fd8d1441c31bd4ee71a595d66b44fcf49ddb310252320169989"
+            },
+            "hooks/prepare-commit-msg.sample": {
+              "bytes": 1492,
+              "sha256": "e9ddcaa4189fddd25ed97fc8c789eca7b6ca16390b2392ae3276f0c8e1aa4619"
+            },
+            "hooks/push-to-checkout.sample": {
+              "bytes": 2783,
+              "sha256": "a53d0741798b287c6dd7afa64aee473f305e65d3f49463bb9d7408ec3b12bf5f"
+            },
+            "hooks/sendemail-validate.sample": {
+              "bytes": 2308,
+              "sha256": "44ebfc923dc5466bc009602f0ecf067b9c65459abfe8868ddc49b78e6ced7a92"
+            },
+            "hooks/update.sample": {
+              "bytes": 3650,
+              "sha256": "8d5f2fa83e103cf08b57eaa67521df9194f45cbdbcb37da52ad586097a14d106"
+            }
+          },
+          "sha256": "aec0aa511fee533b52c6cf5a47a5ebe27ebbed37d7251586a5d548fe14e688b2",
+          "bytes": 29257
+        },
+        "visible": {
+          "exitCode": 1,
+          "signal": null,
+          "stdout": "",
+          "stderr": "file:///C:/Users/tjdwo/AppData/Local/Temp/joewrks-coding-ab-wlcgvj/workspace/test.mjs:2\r\nimport { setMenuOpen } from \"./app.mjs\";\r\n         ^^^^^^^^^^^\r\nSyntaxError: The requested module './app.mjs' does not provide an export named 'setMenuOpen'\r\n    at #asyncInstantiate (node:internal/modules/esm/module_job:327:21)\r\n    at async ModuleJob.run (node:internal/modules/esm/module_job:431:5)\r\n    at async node:internal/modules/esm/loader:646:26\r\n    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5)\r\n\r\nNode.js v26.3.0\r\n",
+          "wallClockMs": 66,
+          "outputExceeded": false,
+          "timedOut": false
+        },
+        "hidden": {
+          "exitCode": 1,
+          "signal": null,
+          "stdout": "",
+          "stderr": "node:internal/modules/run_main:107\r\n    triggerUncaughtException(\r\n    ^\r\n\r\nAssertionError [ERR_ASSERTION]: The input did not match the regular expression /<button(?=[^>]*\\bid=[\"']menu-toggle[\"'])(?=[^>]*\\btype=[\"']button[\"'])(?=[^>]*\\baria-controls=[\"']site-nav[\"'])(?=[^>]*\\baria-expanded=[\"']false[\"'])[^>]*>/i. Input:\r\n\r\n'<!doctype html>\\n' +\r\n  '<html lang=\"en\">\\n' +\r\n  '<head>\\n' +\r\n  '  <meta charset=\"utf-8\">\\n' +\r\n  '  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\\n' +\r\n  '  <title>Project Browser</title>\\n' +\r\n  '  <link rel=\"stylesheet\" href=\"styles.css\">\\n' +\r\n  '</head>\\n' +\r\n  '<body>\\n' +\r\n  '  <header><h1>Project Browser</h1></header>\\n' +\r\n  '  <main>\\n' +\r\n  '    <section aria-labelledby=\"projects-heading\">\\n' +\r\n  '      <h2 id=\"projects-heading\">Projects</h2>\\n' +\r\n  '      <div class=\"projects\"><article><h3>Atlas</h3></article><article><h3>Beacon</h3></article></div>\\n' +\r\n  '    </section>\\n' +\r\n  '  </main>\\n' +\r\n  '  <script type=\"module\" src=\"app.mjs\"></script>\\n' +\r\n  '</body>\\n' +\r\n  '</html>\\n'\r\n\r\n    at file:///C:/Users/tjdwo/AppData/Local/Temp/joewrks-coding-ab-wlcgvj/grader/hidden-grade.mjs:12:8 {\r\n  generatedMessage: true,\r\n  code: 'ERR_ASSERTION',\r\n  actual: '<!doctype html>\\n' +\r\n    '<html lang=\"en\">\\n' +\r\n    '<head>\\n' +\r\n    '  <meta charset=\"utf-8\">\\n' +\r\n    '  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\\n' +\r\n    '  <title>Project Browser</title>\\n' +\r\n    '  <link rel=\"stylesheet\" href=\"styles.css\">\\n' +\r\n    '</head>\\n' +\r\n    '<body>\\n' +\r\n    '  <header><h1>Project Browser</h1></header>\\n' +\r\n    '  <main>\\n' +\r\n    '    <section aria-labelledby=\"projects-heading\">\\n' +\r\n    '      <h2 id=\"projects-heading\">Projects</h2>\\n' +\r\n    '      <div class=\"projects\"><article><h3>Atlas</h3></article><article><h3>Beacon</h3></article></div>\\n' +\r\n    '    </section>\\n' +\r\n    '  </main>\\n' +\r\n    '  <script type=\"module\" src=\"app.mjs\"></script>\\n' +\r\n    '</body>\\n' +\r\n    '</html>\\n',\r\n  expected: /<button(?=[^>]*\\bid=[\"']menu-toggle[\"'])(?=[^>]*\\btype=[\"']button[\"'])(?=[^>]*\\baria-controls=[\"']site-nav[\"'])(?=[^>]*\\baria-expanded=[\"']false[\"'])[^>]*>/i,\r\n  operator: 'match',\r\n  diff: 'simple'\r\n}\r\n\r\nNode.js v26.3.0\r\n",
+          "wallClockMs": 73,
+          "outputExceeded": false,
+          "timedOut": false
+        }
+      },
+      "metrics": {
+        "inputTokens": 29344,
+        "cachedInputTokens": 18944,
+        "outputTokens": 6605,
+        "reasoningOutputTokens": 186,
+        "totalTokens": 35949,
+        "finalOutputBytes": 827,
+        "eventCount": 7,
+        "wallClockMs": 133319
+      },
+      "process": {
+        "exitCode": 0,
+        "signal": null,
+        "stderr": "",
+        "threadId": "019fbc3d-e03d-7580-a190-2fb9de23dd5b",
+        "itemTypes": [
+          "agent_message",
+          "file_change"
+        ],
+        "fileChangePaths": [
+          "app.mjs",
+          "index.html",
+          "styles.css"
+        ],
+        "rawFileChangePaths": [
+          "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joewrks-coding-ab-wlcgvj\\workspace\\app.mjs",
+          "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joewrks-coding-ab-wlcgvj\\workspace\\index.html",
+          "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joewrks-coding-ab-wlcgvj\\workspace\\styles.css"
+        ],
+        "jsonlBytes": 2497,
+        "jsonlSha256": "ad8e292706783ee36438efeaebd7b92be3e3bb13336630e9bd8ec74af8f20b12"
+      },
+      "finalMessage": "프로젝트 브라우저를 완성했습니다.\n\n- 모바일/데스크톱 반응형 레이아웃\n- 접근성 있는 모바일 메뉴와 키보드 포커스\n- 프로젝트 검색 및 상태 필터\n- 6개 프로젝트 카드, 진행률, 담당자, 마감일\n- 요약 지표, 최근 활동, 빈 검색 결과 화면\n- 다크 그린 기반의 독립적인 디자인 시스템\n- 외부 라이브러리·폰트·이미지 의존성 없음\n- 기존 `Project Browser` 제목 유지\n- `setMenuOpen()` export 및 테스트 요구사항 충족\n\n변경 파일: [index.html](C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joewrks-coding-ab-wlcgvj\\workspace\\index.html), [styles.css](C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joewrks-coding-ab-wlcgvj\\workspace\\styles.css), [app.mjs](C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joewrks-coding-ab-wlcgvj\\workspace\\app.mjs)",
+      "changedPaths": [
+        "app.mjs",
+        "index.html",
+        "styles.css"
+      ],
+      "diff": {
+        "text": "diff --git a/app.mjs b/app.mjs\nindex 4b16644..e37418c 100644\n--- a/app.mjs\n+++ b/app.mjs\n@@ -1 +1,50 @@\n export const pageReady = true;\n+\n+export function setMenuOpen(button, menu, open) {\n+  menu.hidden = !open;\n+  button.setAttribute(\"aria-expanded\", String(open));\n+}\n+\n+if (typeof document !== \"undefined\") {\n+  const menuButton = document.querySelector(\".menu-button\");\n+  const menu = document.querySelector(\"#primary-nav\");\n+  const search = document.querySelector(\"#project-search\");\n+  const filters = [...document.querySelectorAll(\".filter\")];\n+  const cards = [...document.querySelectorAll(\".project-card\")];\n+  const count = document.querySelector(\"#result-count\");\n+  const empty = document.querySelector(\".empty-state\");\n+  let currentFilter = \"all\";\n+\n+  const desktop = window.matchMedia(\"(min-width: 48rem)\");\n+  const syncMenu = () => setMenuOpen(menuButton, menu, desktop.matches);\n+  syncMenu();\n+  desktop.addEventListener?.(\"change\", syncMenu);\n+  menuButton.addEventListener(\"click\", () => setMenuOpen(menuButton, menu, menu.hidden));\n+  menu.addEventListener(\"click\", (event) => {\n+    if (!desktop.matches && event.target.closest(\"a\")) setMenuOpen(menuButton, menu, false);\n+  });\n+\n+  const updateProjects = () => {\n+    const query = search.value.trim().toLowerCase();\n+    let visible = 0;\n+    cards.forEach((card) => {\n+      const matchesFilter = currentFilter === \"all\" || card.dataset.status === currentFilter;\n+      const matchesSearch = !query || card.dataset.search.includes(query);\n+      card.hidden = !(matchesFilter && matchesSearch);\n+      if (!card.hidden) visible += 1;\n+    });\n+    count.textContent = `${visible} ${visible === 1 ? \"project\" : \"projects\"}`;\n+    empty.hidden = visible !== 0;\n+  };\n+\n+  search.addEventListener(\"input\", updateProjects);\n+  filters.forEach((button) => button.addEventListener(\"click\", () => {\n+    currentFilter = button.dataset.filter;\n+    filters.forEach((item) => {\n+      const selected = item === button;\n+      item.classList.toggle(\"active\", selected);\n+      item.setAttribute(\"aria-pressed\", String(selected));\n+    });\n+    updateProjects();\n+  }));\n+}\ndiff --git a/index.html b/index.html\nindex d155549..ef78be1 100644\n--- a/index.html\n+++ b/index.html\n@@ -3,17 +3,107 @@\n <head>\n   <meta charset=\"utf-8\">\n   <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n+  <meta name=\"description\" content=\"Browse active projects, owners, and recent progress.\">\n   <title>Project Browser</title>\n   <link rel=\"stylesheet\" href=\"styles.css\">\n </head>\n <body>\n-  <header><h1>Project Browser</h1></header>\n-  <main>\n-    <section aria-labelledby=\"projects-heading\">\n-      <h2 id=\"projects-heading\">Projects</h2>\n-      <div class=\"projects\"><article><h3>Atlas</h3></article><article><h3>Beacon</h3></article></div>\n+  <a class=\"skip-link\" href=\"#main-content\">Skip to content</a>\n+  <header class=\"site-header\">\n+    <div class=\"header-inner\">\n+      <a class=\"brand\" href=\"#\" aria-label=\"Project Browser home\">\n+        <span class=\"brand-mark\" aria-hidden=\"true\">PB</span>\n+        <span>Project Browser</span>\n+      </a>\n+      <button class=\"menu-button\" type=\"button\" aria-expanded=\"false\" aria-controls=\"primary-nav\">\n+        <span class=\"sr-only\">Toggle navigation</span>\n+        <span aria-hidden=\"true\"></span><span aria-hidden=\"true\"></span><span aria-hidden=\"true\"></span>\n+      </button>\n+      <nav id=\"primary-nav\" class=\"primary-nav\" aria-label=\"Primary\" hidden>\n+        <a class=\"active\" href=\"#projects-heading\" aria-current=\"page\">Projects</a>\n+        <a href=\"#activity\">Activity</a>\n+        <button class=\"new-project\" type=\"button\">+ New project</button>\n+      </nav>\n+    </div>\n+  </header>\n+\n+  <main id=\"main-content\">\n+    <section class=\"hero\" aria-labelledby=\"projects-heading\">\n+      <div>\n+        <p class=\"eyebrow\">Workspace overview</p>\n+        <h1 id=\"projects-heading\">Projects</h1>\n+        <p class=\"intro\">Keep track of what’s moving, what needs attention, and who’s making it happen.</p>\n+      </div>\n+      <div class=\"summary\" aria-label=\"Project summary\">\n+        <div><strong>6</strong><span>Total</span></div>\n+        <div><strong>4</strong><span>Active</span></div>\n+        <div><strong>2</strong><span>At risk</span></div>\n+      </div>\n+    </section>\n+\n+    <section class=\"browser\" aria-label=\"Project browser\">\n+      <div class=\"toolbar\">\n+        <label class=\"search\">\n+          <span class=\"sr-only\">Search projects</span>\n+          <svg aria-hidden=\"true\" viewBox=\"0 0 24 24\"><path d=\"m21 21-4.35-4.35m2.35-5.15a7.5 7.5 0 1 1-15 0 7.5 7.5 0 0 1 15 0Z\"/></svg>\n+          <input id=\"project-search\" type=\"search\" placeholder=\"Search projects or owners…\" autocomplete=\"off\">\n+        </label>\n+        <div class=\"filters\" role=\"group\" aria-label=\"Filter projects\">\n+          <button class=\"filter active\" type=\"button\" data-filter=\"all\" aria-pressed=\"true\">All</button>\n+          <button class=\"filter\" type=\"button\" data-filter=\"active\" aria-pressed=\"false\">Active</button>\n+          <button class=\"filter\" type=\"button\" data-filter=\"at-risk\" aria-pressed=\"false\">At risk</button>\n+          <button class=\"filter\" type=\"button\" data-filter=\"complete\" aria-pressed=\"false\">Complete</button>\n+        </div>\n+      </div>\n+\n+      <p id=\"result-count\" class=\"result-count\" aria-live=\"polite\">6 projects</p>\n+      <div class=\"projects\">\n+        <article class=\"project-card\" data-status=\"active\" data-search=\"atlas maya chen product design\">\n+          <div class=\"card-top\"><span class=\"project-icon coral\" aria-hidden=\"true\">A</span><span class=\"status active-status\">Active</span></div>\n+          <div><p class=\"category\">Product design</p><h2>Atlas</h2><p>Reimagining the analytics workspace for faster, clearer decisions.</p></div>\n+          <div class=\"progress-row\"><span>Progress</span><strong>72%</strong></div><div class=\"progress\"><span style=\"width:72%\"></span></div>\n+          <footer><span class=\"avatar coral\">MC</span><span>Maya Chen</span><time datetime=\"2026-08-12\">Aug 12</time></footer>\n+        </article>\n+        <article class=\"project-card\" data-status=\"active\" data-search=\"beacon noah williams engineering\">\n+          <div class=\"card-top\"><span class=\"project-icon blue\" aria-hidden=\"true\">B</span><span class=\"status active-status\">Active</span></div>\n+          <div><p class=\"category\">Engineering</p><h2>Beacon</h2><p>A smarter notification system that keeps teams focused.</p></div>\n+          <div class=\"progress-row\"><span>Progress</span><strong>48%</strong></div><div class=\"progress\"><span style=\"width:48%\"></span></div>\n+          <footer><span class=\"avatar blue\">NW</span><span>Noah Williams</span><time datetime=\"2026-08-18\">Aug 18</time></footer>\n+        </article>\n+        <article class=\"project-card\" data-status=\"at-risk\" data-search=\"canopy sofia rossi research\">\n+          <div class=\"card-top\"><span class=\"project-icon gold\" aria-hidden=\"true\">C</span><span class=\"status risk-status\">At risk</span></div>\n+          <div><p class=\"category\">Research</p><h2>Canopy</h2><p>Understanding how growing teams share knowledge at scale.</p></div>\n+          <div class=\"progress-row\"><span>Progress</span><strong>31%</strong></div><div class=\"progress warning\"><span style=\"width:31%\"></span></div>\n+          <footer><span class=\"avatar gold\">SR</span><span>Sofia Rossi</span><time datetime=\"2026-08-22\">Aug 22</time></footer>\n+        </article>\n+        <article class=\"project-card\" data-status=\"complete\" data-search=\"drift liam parker marketing\">\n+          <div class=\"card-top\"><span class=\"project-icon green\" aria-hidden=\"true\">D</span><span class=\"status complete-status\">Complete</span></div>\n+          <div><p class=\"category\">Marketing</p><h2>Drift</h2><p>A focused campaign for the next chapter of our platform.</p></div>\n+          <div class=\"progress-row\"><span>Progress</span><strong>100%</strong></div><div class=\"progress complete\"><span style=\"width:100%\"></span></div>\n+          <footer><span class=\"avatar green\">LP</span><span>Liam Parker</span><time datetime=\"2026-07-30\">Jul 30</time></footer>\n+        </article>\n+        <article class=\"project-card\" data-status=\"active\" data-search=\"ember priya shah operations\">\n+          <div class=\"card-top\"><span class=\"project-icon violet\" aria-hidden=\"true\">E</span><span class=\"status active-status\">Active</span></div>\n+          <div><p class=\"category\">Operations</p><h2>Ember</h2><p>Simplifying the way customer requests move through the team.</p></div>\n+          <div class=\"progress-row\"><span>Progress</span><strong>64%</strong></div><div class=\"progress\"><span style=\"width:64%\"></span></div>\n+          <footer><span class=\"avatar violet\">PS</span><span>Priya Shah</span><time datetime=\"2026-08-15\">Aug 15</time></footer>\n+        </article>\n+        <article class=\"project-card\" data-status=\"at-risk\" data-search=\"forge theo martin infrastructure\">\n+          <div class=\"card-top\"><span class=\"project-icon red\" aria-hidden=\"true\">F</span><span class=\"status risk-status\">At risk</span></div>\n+          <div><p class=\"category\">Infrastructure</p><h2>Forge</h2><p>Building a resilient foundation for the services ahead.</p></div>\n+          <div class=\"progress-row\"><span>Progress</span><strong>22%</strong></div><div class=\"progress warning\"><span style=\"width:22%\"></span></div>\n+          <footer><span class=\"avatar red\">TM</span><span>Theo Martin</span><time datetime=\"2026-08-28\">Aug 28</time></footer>\n+        </article>\n+      </div>\n+      <div class=\"empty-state\" hidden><strong>No projects found</strong><span>Try another search or filter.</span></div>\n+    </section>\n+\n+    <section id=\"activity\" class=\"activity\" aria-labelledby=\"activity-heading\">\n+      <div><p class=\"eyebrow\">Latest updates</p><h2 id=\"activity-heading\">Recent activity</h2></div>\n+      <ul><li><span class=\"activity-dot blue\"></span><p><strong>Beacon</strong> moved to 48% complete<br><small>2 hours ago · Noah Williams</small></p></li><li><span class=\"activity-dot green\"></span><p><strong>Drift</strong> was marked complete<br><small>Yesterday · Liam Parker</small></p></li></ul>\n     </section>\n   </main>\n+  <footer class=\"site-footer\"><span>Project Browser</span><span>Built for focused teams.</span></footer>\n   <script type=\"module\" src=\"app.mjs\"></script>\n </body>\n </html>\ndiff --git a/styles.css b/styles.css\nindex 6dbc6af..693b670 100644\n--- a/styles.css\n+++ b/styles.css\n@@ -1,3 +1,77 @@\n-body { margin: 0; font-family: system-ui, sans-serif; }\n-main, header { padding: 1rem; }\n-.projects { display: block; }\n+:root { --ink: #18221d; --muted: #66716b; --line: #dde3df; --paper: #f7f8f5; --white: #fff; --green: #215f45; --lime: #dcef7b; }\n+* { box-sizing: border-box; }\n+html { scroll-behavior: smooth; }\n+body { margin: 0; color: var(--ink); background: var(--paper); font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif; line-height: 1.5; }\n+button, input { font: inherit; }\n+button, a { -webkit-tap-highlight-color: transparent; }\n+a { color: inherit; }\n+.skip-link { position: fixed; z-index: 100; top: .5rem; left: .5rem; padding: .75rem 1rem; background: var(--ink); color: white; transform: translateY(-150%); }\n+.skip-link:focus { transform: none; }\n+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }\n+.site-header { position: sticky; z-index: 20; top: 0; border-bottom: 1px solid rgba(24,34,29,.1); background: rgba(247,248,245,.94); backdrop-filter: blur(14px); }\n+.header-inner, main, .site-footer { width: min(1180px, calc(100% - 2rem)); margin-inline: auto; }\n+.header-inner { min-height: 4.5rem; display: flex; align-items: center; justify-content: space-between; position: relative; }\n+.brand { display: inline-flex; align-items: center; gap: .7rem; font-weight: 750; text-decoration: none; letter-spacing: -.02em; }\n+.brand-mark { display: grid; place-items: center; width: 2.25rem; aspect-ratio: 1; border-radius: .7rem; background: var(--ink); color: var(--lime); font-size: .72rem; letter-spacing: .06em; }\n+.menu-button { width: 2.75rem; height: 2.75rem; display: grid; place-content: center; gap: 4px; background: white; border: 1px solid var(--line); border-radius: .7rem; cursor: pointer; }\n+.menu-button span[aria-hidden] { width: 18px; height: 2px; border-radius: 2px; background: var(--ink); }\n+.primary-nav { position: absolute; top: calc(100% + .5rem); left: 0; right: 0; padding: .7rem; border: 1px solid var(--line); border-radius: 1rem; background: white; box-shadow: 0 18px 40px rgba(24,34,29,.12); }\n+.primary-nav a, .primary-nav button { display: block; width: 100%; padding: .75rem 1rem; border: 0; border-radius: .65rem; text-decoration: none; text-align: left; background: transparent; cursor: pointer; }\n+.primary-nav a.active { color: var(--green); font-weight: 700; }\n+.primary-nav .new-project { margin-top: .4rem; background: var(--ink); color: white; text-align: center; font-weight: 700; }\n+main { padding-block: 3.5rem 5rem; }\n+.hero { display: grid; gap: 2rem; padding-bottom: 3rem; }\n+.eyebrow { margin: 0 0 .65rem; color: var(--green); text-transform: uppercase; font-size: .72rem; font-weight: 800; letter-spacing: .13em; }\n+h1 { margin: 0; font-family: Georgia, \"Times New Roman\", serif; font-size: clamp(3rem, 11vw, 6.5rem); line-height: .95; letter-spacing: -.06em; font-weight: 500; }\n+.intro { max-width: 34rem; margin: 1.25rem 0 0; color: var(--muted); font-size: clamp(1rem, 2vw, 1.2rem); }\n+.summary { display: grid; grid-template-columns: repeat(3, 1fr); align-self: end; border: 1px solid var(--line); border-radius: 1.25rem; background: white; overflow: hidden; }\n+.summary div { padding: 1rem; text-align: center; }\n+.summary div + div { border-left: 1px solid var(--line); }\n+.summary strong, .summary span { display: block; }\n+.summary strong { font-family: Georgia, serif; font-size: 1.75rem; font-weight: 500; }\n+.summary span { color: var(--muted); font-size: .72rem; text-transform: uppercase; letter-spacing: .08em; }\n+.browser { border-top: 1px solid var(--line); padding-top: 1.5rem; }\n+.toolbar { display: grid; gap: 1rem; }\n+.search { height: 3rem; display: flex; align-items: center; gap: .65rem; padding-inline: .9rem; border: 1px solid var(--line); border-radius: .8rem; background: white; }\n+.search:focus-within { border-color: var(--green); box-shadow: 0 0 0 3px rgba(33,95,69,.12); }\n+.search svg { width: 1.2rem; fill: none; stroke: var(--muted); stroke-width: 1.8; }\n+.search input { min-width: 0; width: 100%; border: 0; outline: 0; background: transparent; color: var(--ink); }\n+.filters { display: flex; gap: .4rem; overflow-x: auto; padding-bottom: .15rem; scrollbar-width: none; }\n+.filter { flex: 0 0 auto; padding: .62rem .9rem; border: 1px solid var(--line); border-radius: 99px; color: var(--muted); background: transparent; cursor: pointer; }\n+.filter.active { border-color: var(--ink); color: white; background: var(--ink); }\n+.result-count { margin: 1.6rem 0 .8rem; color: var(--muted); font-size: .85rem; }\n+.projects { display: grid; gap: 1rem; }\n+.project-card { min-width: 0; display: flex; flex-direction: column; gap: 1.35rem; padding: 1.35rem; border: 1px solid var(--line); border-radius: 1.2rem; background: white; transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease; }\n+.project-card[hidden] { display: none; }\n+.project-card:hover { transform: translateY(-3px); border-color: #c4cec8; box-shadow: 0 16px 35px rgba(24,34,29,.07); }\n+.card-top, .progress-row, .project-card footer { display: flex; align-items: center; }\n+.card-top { justify-content: space-between; }\n+.project-icon { display: grid; place-items: center; width: 2.8rem; aspect-ratio: 1; border-radius: .85rem; font: 600 1.35rem Georgia, serif; }\n+.coral { background: #f6c2ac; color: #6e2d1c; } .blue { background: #bdd8ec; color: #204c6b; } .gold { background: #f2d995; color: #654d0e; } .green { background: #c3dfc4; color: #285b32; } .violet { background: #d6cae8; color: #513c72; } .red { background: #efc1bd; color: #762f29; }\n+.status { padding: .28rem .6rem; border-radius: 99px; font-size: .7rem; font-weight: 750; }\n+.active-status { color: #276044; background: #e2f2e8; } .risk-status { color: #87541b; background: #fff0d4; } .complete-status { color: #4c5963; background: #e8ecea; }\n+.category { margin: 0 0 .35rem; color: var(--muted); font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; }\n+.project-card h2 { margin: 0; font-family: Georgia, serif; font-size: 1.75rem; font-weight: 500; letter-spacing: -.02em; }\n+.project-card h2 + p { min-height: 3rem; margin: .45rem 0 0; color: var(--muted); font-size: .9rem; }\n+.progress-row { justify-content: space-between; color: var(--muted); font-size: .75rem; }\n+.progress-row strong { color: var(--ink); }\n+.progress { height: 5px; margin-top: -1rem; border-radius: 99px; overflow: hidden; background: #edf0ee; }\n+.progress span { display: block; height: 100%; border-radius: inherit; background: var(--green); }\n+.progress.warning span { background: #d58a28; } .progress.complete span { background: #78937d; }\n+.project-card footer { gap: .55rem; padding-top: 1rem; border-top: 1px solid #edf0ee; color: var(--muted); font-size: .78rem; }\n+.avatar { display: grid; place-items: center; width: 1.75rem; aspect-ratio: 1; border-radius: 50%; font-size: .58rem; font-weight: 800; }\n+.project-card time { margin-left: auto; }\n+.empty-state { padding: 4rem 1rem; text-align: center; border: 1px dashed #bcc6c0; border-radius: 1rem; color: var(--muted); }\n+.empty-state strong, .empty-state span { display: block; } .empty-state strong { color: var(--ink); font-family: Georgia, serif; font-size: 1.4rem; }\n+.activity { display: grid; gap: 1.5rem; margin-top: 5rem; padding: 2rem; border-radius: 1.4rem; color: white; background: var(--ink); }\n+.activity h2 { margin: 0; font: 500 clamp(2rem, 5vw, 3rem) Georgia, serif; }.activity .eyebrow { color: var(--lime); }\n+.activity ul { list-style: none; margin: 0; padding: 0; }.activity li { display: flex; gap: .9rem; padding: 1rem 0; border-bottom: 1px solid rgba(255,255,255,.13); }.activity li:last-child { border-bottom: 0; }\n+.activity p { margin: 0; }.activity small { color: #aeb8b2; }.activity-dot { flex: 0 0 auto; width: .75rem; height: .75rem; margin-top: .4rem; border-radius: 50%; }\n+.site-footer { display: flex; justify-content: space-between; gap: 1rem; padding-block: 1.5rem; border-top: 1px solid var(--line); color: var(--muted); font-size: .8rem; }\n+button:focus-visible, a:focus-visible, input:focus-visible { outline: 3px solid #8daf45; outline-offset: 3px; }\n+@media (min-width: 48rem) {\n+  .header-inner { min-height: 5rem; }.menu-button { display: none; }.primary-nav { position: static; display: flex !important; align-items: center; gap: .4rem; padding: 0; border: 0; box-shadow: none; background: transparent; }.primary-nav a, .primary-nav button { width: auto; }.primary-nav .new-project { margin: 0 0 0 .7rem; padding-inline: 1.1rem; }\n+  main { padding-top: 5rem; }.hero { grid-template-columns: minmax(0,1.5fr) minmax(21rem,.7fr); align-items: end; padding-bottom: 4rem; }.toolbar { grid-template-columns: minmax(18rem, 1fr) auto; align-items: center; }.projects { grid-template-columns: repeat(2, minmax(0,1fr)); }.activity { grid-template-columns: .8fr 1.2fr; align-items: start; padding: 3rem; }\n+}\n+@media (min-width: 68rem) { .projects { grid-template-columns: repeat(3, minmax(0,1fr)); }.project-card { padding: 1.5rem; } }\n+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } *, *::before, *::after { transition-duration: .01ms !important; } }\n",
+        "bytes": 19806,
+        "sha256": "3d203a8b8374262c1a3b2558c90baef2a9388808c786a6265f51a1acc019a325",
+        "truncated": false
+      },
+      "fileTree": {
+        "files": {
+          "AGENTS.md": {
+            "bytes": 1,
+            "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b"
+          },
+          "app.mjs": {
+            "bytes": 1990,
+            "sha256": "22e6cd06f895489892c502894e4497f268774c6959d91423de089ebbe2ce13e1"
+          },
+          "index.html": {
+            "bytes": 7797,
+            "sha256": "cfe5ebcd8ee1016558afd8d02d1b3a58057358acd59e4cb5c5eb8411350be516"
+          },
+          "styles.css": {
+            "bytes": 9100,
+            "sha256": "ef6b1a9924e22c4728c7818d3607e74868716b5392d8225a7b742dd8920b2314"
+          },
+          "test.mjs": {
+            "bytes": 512,
+            "sha256": "ae18f286a4bb5d8692531663d2b756433e5eed38a9a34c366f7b13c82a56b09e"
+          }
+        },
+        "sha256": "a6b6d9fc09920e76e91b847c028955402dde97c36a30619124c8db569cbc5bd9",
+        "bytes": 19400
+      },
+      "git": {
+        "head": "ac18f2683e4a2b436fb4c2bcade58317186cb5f3",
+        "tree": "dd01963ca50d9f6bf92bc7d75680a627608782be",
+        "metadataSha256": "aec0aa511fee533b52c6cf5a47a5ebe27ebbed37d7251586a5d548fe14e688b2",
+        "metadata": {
+          "files": {
+            "COMMIT_EDITMSG": {
+              "bytes": 8,
+              "sha256": "e80b71cd14d3cbd65f4173abcbfcf01a545dbca32a72d575108b553a648cc96f"
+            },
+            "config": {
+              "bytes": 190,
+              "sha256": "52d7637257b46877222aaac1fe93288b84cd730fd9b9fe20905dd8570f8180ec"
+            },
+            "description": {
+              "bytes": 73,
+              "sha256": "85ab6c163d43a17ea9cf7788308bca1466f1b0a8d1cc92e26e9bf63da4062aee"
+            },
+            "HEAD": {
+              "bytes": 23,
+              "sha256": "f6f2b945f6c411b02ba3da9c7ace88dcf71b6af65ba2e0d89aa82900042b5a10"
+            },
+            "index": {
+              "bytes": 441,
+              "sha256": "e70c948100a6dd9b101934c6bdfaf1378972142ce9fe970b16284eef5c43539e"
+            },
+            "refs/heads/master": {
+              "bytes": 41,
+              "sha256": "667ebe398a8c20aa262bbfb7788cfb1429840fbf61360c1e4492fc88e9a64ab1"
+            },
+            "objects/f2/9022d7fe1c009d37dc83ac7646e5410e343aed": {
+              "bytes": 261,
+              "sha256": "4b5fb81537d449eeb2e3fc8aa5549e8c8f227d727b8dfb2ea0cb0d755b8dbe81"
+            },
+            "objects/dd/01963ca50d9f6bf92bc7d75680a627608782be": {
+              "bytes": 184,
+              "sha256": "b31016c3954beb9b7e9c7d055e5beed4e506946be11432e1beff292a6396484f"
+            },
+            "objects/d1/5554988ba53dd4ee05d9d85be8a33871effac4": {
+              "bytes": 327,
+              "sha256": "a3a4adb1b16a364ce4d7e2c8efac87e5d41e1cf3c857f615e58b88c213bbba49"
+            },
+            "objects/ac/18f2683e4a2b436fb4c2bcade58317186cb5f3": {
+              "bytes": 141,
+              "sha256": "f3f5816f3dec25a8d4b90975fb51453942c8db187d6f0724c818c704712b9613"
+            },
+            "objects/8b/137891791fe96927ad78e64b0aad7bded08bdc": {
+              "bytes": 16,
+              "sha256": "a25e48d49327f35569e5d25fc64cce3822b7d1402ff13fb8a031139543510477"
+            },
+            "objects/6d/bc6af53bcf0337389f629566469478c39a73f2": {
+              "bytes": 115,
+              "sha256": "112d8222d25c9e286bfbfd5c540c88a1aba842e8cfa714275b1f6dff4edf4474"
+            },
+            "objects/4b/1664437a0ee80c96738789aaa9d2fbd0009da8": {
+              "bytes": 47,
+              "sha256": "afecef5d55bf34e4269129e289c96a6100a3ba0ae9cc76ea725ba02649aecfd3"
+            },
+            "logs/HEAD": {
+              "bytes": 181,
+              "sha256": "3c6fe49195f4ca25d2ff4b6d8d7ac0de3ab7868d044c7fa19cbf0975d573f2f1"
+            },
+            "logs/refs/heads/master": {
+              "bytes": 181,
+              "sha256": "3c6fe49195f4ca25d2ff4b6d8d7ac0de3ab7868d044c7fa19cbf0975d573f2f1"
+            },
+            "info/exclude": {
+              "bytes": 240,
+              "sha256": "6671fe83b7a07c8932ee89164d1f2793b2318058eb8b98dc5c06ee0a5a3b0ec1"
+            },
+            "hooks/applypatch-msg.sample": {
+              "bytes": 478,
+              "sha256": "0223497a0b8b033aa58a3a521b8629869386cf7ab0e2f101963d328aa62193f7"
+            },
+            "hooks/commit-msg.sample": {
+              "bytes": 1972,
+              "sha256": "efc1401b0e99d1ff51494d154d98b46c1e99059bcd8bf9f73cecde19fd3eb23b"
+            },
+            "hooks/fsmonitor-watchman.sample": {
+              "bytes": 4611,
+              "sha256": "9159720099ad5595b8e66645cbfd47763c1e920f46e0b50ae75e642bbec57ef0"
+            },
+            "hooks/post-update.sample": {
+              "bytes": 189,
+              "sha256": "81765af2daef323061dcbc5e61fc16481cb74b3bac9ad8a174b186523586f6c5"
+            },
+            "hooks/pre-applypatch.sample": {
+              "bytes": 424,
+              "sha256": "e15c5b469ea3e0a695bea6f2c82bcf8e62821074939ddd85b77e0007ff165475"
+            },
+            "hooks/pre-commit.sample": {
+              "bytes": 1649,
+              "sha256": "57185b7b9f05239d7ab52db045f5b89eb31348d7b2177eab214f5eb872e1971b"
+            },
+            "hooks/pre-merge-commit.sample": {
+              "bytes": 416,
+              "sha256": "d3825a70337940ebbd0a5c072984e13245920cdf8898bd225c8d27a6dfc9cb53"
+            },
+            "hooks/pre-push.sample": {
+              "bytes": 1374,
+              "sha256": "ecce9c7e04d3f5dd9d8ada81753dd1d549a9634b26770042b58dda00217d086a"
+            },
+            "hooks/pre-rebase.sample": {
+              "bytes": 4898,
+              "sha256": "4febce867790052338076f4e66cc47efb14879d18097d1d61c8261859eaaa7b3"
+            },
+            "hooks/pre-receive.sample": {
+              "bytes": 544,
+              "sha256": "a4c3d2b9c7bb3fd8d1441c31bd4ee71a595d66b44fcf49ddb310252320169989"
+            },
+            "hooks/prepare-commit-msg.sample": {
+              "bytes": 1492,
+              "sha256": "e9ddcaa4189fddd25ed97fc8c789eca7b6ca16390b2392ae3276f0c8e1aa4619"
+            },
+            "hooks/push-to-checkout.sample": {
+              "bytes": 2783,
+              "sha256": "a53d0741798b287c6dd7afa64aee473f305e65d3f49463bb9d7408ec3b12bf5f"
+            },
+            "hooks/sendemail-validate.sample": {
+              "bytes": 2308,
+              "sha256": "44ebfc923dc5466bc009602f0ecf067b9c65459abfe8868ddc49b78e6ced7a92"
+            },
+            "hooks/update.sample": {
+              "bytes": 3650,
+              "sha256": "8d5f2fa83e103cf08b57eaa67521df9194f45cbdbcb37da52ad586097a14d106"
+            }
+          },
+          "sha256": "aec0aa511fee533b52c6cf5a47a5ebe27ebbed37d7251586a5d548fe14e688b2",
+          "bytes": 29257
+        }
+      },
+      "tests": {
+        "visible": {
+          "exitCode": 0,
+          "signal": null,
+          "stdout": "visible responsive UI: pass\n",
+          "stderr": "",
+          "wallClockMs": 62,
+          "outputExceeded": false,
+          "timedOut": false
+        },
+        "hidden": {
+          "exitCode": 1,
+          "signal": null,
+          "stdout": "",
+          "stderr": "node:internal/modules/run_main:107\r\n    triggerUncaughtException(\r\n    ^\r\n\r\nAssertionError [ERR_ASSERTION]: The input did not match the regular expression /<button(?=[^>]*\\bid=[\"']menu-toggle[\"'])(?=[^>]*\\btype=[\"']button[\"'])(?=[^>]*\\baria-controls=[\"']site-nav[\"'])(?=[^>]*\\baria-expanded=[\"']false[\"'])[^>]*>/i. Input:\r\n\r\n'<!doctype html>\\n' +\r\n  '<html lang=\"en\">\\n' +\r\n  '<head>\\n' +\r\n  '  <meta charset=\"utf-8\">\\n' +\r\n  '  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\\n' +\r\n  '  <meta name=\"description\" content=\"Browse active projects, owners, and recent progress.\">\\n' +\r\n  '  <title>Project Browser</title>\\n' +\r\n  '  <link rel=\"stylesheet\" href=\"styles.css\">\\n' +\r\n  '</head>\\n' +\r\n  '<body>\\n' +\r\n  '  <a class=\"skip-link\" href=\"#main-content\">Skip to content</a>\\n' +\r\n  '  <header class=\"site-header\">\\n' +\r\n  '    <div class=\"header-inner\">\\n' +\r\n  '      <a class=\"brand\" href=\"#\" aria-label=\"Project Browser home\">\\n' +\r\n  '        <span class=\"brand-mark\" aria-hidden=\"true\">PB</span>\\n' +\r\n  '        <span>Project Browser</span>\\n' +\r\n  '      </a>\\n' +\r\n  '      <button class=\"menu-button\" type=\"button\" aria-expanded=\"false\" aria-controls=\"primary-nav\">\\n' +\r\n  '        <span class=\"sr-only\">Toggle navigation</span>\\n' +\r\n  '        <span aria-hidden=\"true\"></span><span aria-hidden=\"true\"></span><span aria-hidden=\"true\"></span>\\n' +\r\n  '      </button>\\n' +\r\n  '      <nav id=\"primary-nav\" class=\"primary-nav\" aria-label=\"Primary\" hidden>\\n' +\r\n  '        <a class=\"active\" href=\"#projects-heading\" aria-current=\"page\">Projects</a>\\n' +\r\n  '        <a href=\"#activity\">Activity</a>\\n' +\r\n  '        <button class=\"new-project\" type=\"button\">+ New project</button>\\n' +\r\n  '      </nav>\\n' +\r\n  '    </div>\\n' +\r\n  '  </header>\\n' +\r\n  '\\n' +\r\n  '  <main id=\"main-content\">\\n' +\r\n  '    <section class=\"hero\" aria-labelledby=\"projects-heading\">\\n' +\r\n  '      <div>\\n' +\r\n  '        <p class=\"eyebrow\">Workspace overview</p>\\n' +\r\n  '        <h1 id=\"projects-heading\">Projects</h1>\\n' +\r\n  '        <p class=\"intro\">Keep track of what’s moving, what needs attention, and who’s making it happen.</p>\\n' +\r\n  '      </div>\\n' +\r\n  '      <div class=\"summary\" aria-label=\"Project summary\">\\n' +\r\n  '        <div><strong>6</strong><span>Total</span></div>\\n' +\r\n  '        <div><strong>4</strong><span>Active</span></div>\\n' +\r\n  '        <div><strong>2</strong><span>At risk</span></div>\\n' +\r\n  '      </div>\\n' +\r\n  '    </section>\\n' +\r\n  '\\n' +\r\n  '    <section class=\"browser\" aria-label=\"Project browser\">\\n' +\r\n  '      <div class=\"toolbar\">\\n' +\r\n  '        <label class=\"search\">\\n' +\r\n  '          <span class=\"sr-only\">Search projects</span>\\n' +\r\n  '          <svg aria-hidden=\"true\" viewBox=\"0 0 24 24\"><path d=\"m21 21-4.35-4.35m2.35-5.15a7.5 7.5 0 1 1-15 0 7.5 7.5 0 0 1 15 0Z\"/></svg>\\n' +\r\n  '          <input id=\"project-search\" type=\"search\" placeholder=\"Search projects or owners…\" autocomplete=\"off\">\\n' +\r\n  '        </label>\\n' +\r\n  '        <div class=\"filters\" role=\"group\" aria-label=\"Filter projects\">\\n' +\r\n  '          <button class=\"filter active\" type=\"button\" data-filter=\"all\" aria-pressed=\"true\">All</button>\\n' +\r\n  '          <button class=\"filter\" type=\"button\" data-filter=\"active\" aria-pressed=\"false\">Active</button>\\n' +\r\n  '          <button class=\"filter\" type=\"button\" data-filter=\"at-risk\" aria-pressed=\"false\">At risk</button>\\n' +\r\n  '          <button class=\"filter\" type=\"button\" data-filter=\"complete\" aria-pressed=\"false\">Complete</button>\\n' +\r\n  '        </div>\\n' +\r\n  '      </div>\\n' +\r\n  '\\n' +\r\n  '      <p id=\"result-count\" class=\"result-count\" aria-live=\"polite\">6 projects</p>\\n' +\r\n  '      <div class=\"projects\">\\n' +\r\n  '        <article class=\"project-card\" data-status=\"active\" data-search=\"atlas maya chen product design\">\\n' +\r\n  '          <div class=\"card-top\"><span class=\"project-icon coral\" aria-hidden=\"true\">A</span><span class=\"status active-status\">Active</span></div>\\n' +\r\n  '          <div><p class=\"category\">Product design</p><h2>Atlas</h2><p>Reimagining the analytics workspace for faster, clearer decisions.</p></div>\\n' +\r\n  '          <div class=\"progress-row\"><span>Progress</span><strong>72%</strong></div><div class=\"progress\"><span style=\"width:72%\"></span></div>\\n' +\r\n  '          <footer><span class=\"avatar coral\">MC</span><span>Maya Chen</span><time datetime=\"2026-08-12\">Aug 12</time></footer>\\n' +\r\n  '        </article>\\n' +\r\n  '        <article class=\"project-card\" data-status=\"active\" data-search=\"beacon noah williams engineering\">\\n' +\r\n  '          <div class=\"card-top\"><span class=\"project-icon blue\" aria-hidden=\"true\">B</span><span class=\"status active-status\">Active</span></div>\\n' +\r\n  '          <div><p class=\"category\">Engineering</p><h2>Beacon</h2><p>A smarter notification system that keeps teams focused.</p></div>\\n' +\r\n  '          <div class=\"progress-row\"><span>Progress</span><strong>48%</strong></div><div class=\"progress\"><span style=\"width:48%\"></span></div>\\n' +\r\n  '          <footer><span class=\"avatar blue\">NW</span><span>Noah Williams</span><time datetime=\"2026-08-18\">Aug 18</time></footer>\\n' +\r\n  '        </article>\\n' +\r\n  '        <article class=\"project-card\" data-status=\"at-risk\" data-search=\"canopy sofia rossi research\">\\n' +\r\n  '          <div class=\"card-top\"><span class=\"project-icon gold\" aria-hidden=\"true\">C</span><span class=\"status risk-status\">At risk</span></div>\\n' +\r\n  '          <div><p class=\"category\">Research</p><h2>Canopy</h2><p>Understanding how growing teams share knowledge at scale.</p></div>\\n' +\r\n  '          <div class=\"progress-row\"><span>Progress</span><strong>31%</strong></div><div class=\"progress warning\"><span style=\"width:31%\"></span></div>\\n' +\r\n  '          <footer><span class=\"avatar gold\">SR</span><span>Sofia Rossi</span><time datetime=\"2026-08-22\">Aug 22</time></footer>\\n' +\r\n  '        </article>\\n' +\r\n  '        <article class=\"project-card\" data-status=\"complete\" data-search=\"drift liam parker marketing\">\\n' +\r\n  '          <div class=\"card-top\"><span class=\"project-icon green\" aria-hidden=\"true\">D</span><span class=\"status complete-status\">Complete</span></div>\\n' +\r\n  '          <div><p class=\"category\">Marketing</p><h2>Drift</h2><p>A focused campaign for the next chapter of our platform.</p></div>\\n' +\r\n  '          <div class=\"progress-row\"><span>Progress</span><strong>100%</strong></div><div class=\"progress complete\"><span style=\"width:100%\"></span></div>\\n' +\r\n  '          <footer><span class=\"avatar green\">LP</span><span>Liam Parker</span><time datetime=\"2026-07-30\">Jul 30</time></footer>\\n' +\r\n  '        </article>\\n' +\r\n  '        <article class=\"project-card\" data-status=\"active\" data-search=\"ember priya shah operations\">\\n' +\r\n  '          <div class=\"card-top\"><span class=\"project-icon violet\" aria-hidden=\"true\">E</span><span class=\"status active-status\">Active</span></div>\\n' +\r\n  '          <div><p class=\"category\">Operations</p><h2>Ember</h2><p>Simplifying the way customer requests move through the team.</p></div>\\n' +\r\n  '          <div class=\"progress-row\"><span>Progress</span><strong>64%</strong></div><div class=\"progress\"><span style=\"width:64%\"></span></div>\\n' +\r\n  '          <footer><span class=\"avatar violet\">PS</span><span>Priya Shah</span><time datetime=\"2026-08-15\">Aug 15</time></footer>\\n' +\r\n  '        </article>\\n' +\r\n  '        <article class=\"project-card\" data-status=\"at-risk\" data-search=\"forge theo martin infrastructure\">\\n' +\r\n  '          <div class=\"card-top\"><span class=\"project-icon red\" aria-hidden=\"true\">F</span><span class=\"status risk-status\">At risk</span></div>\\n' +\r\n  '          <div><p class=\"category\">Infrastructure</p><h2>Forge</h2><p>Building a resilient foundation for the services ahead.</p></div>\\n' +\r\n  '          <div class=\"progress-row\"><span>Progress</span><strong>22%</strong></div><div class=\"progress warning\"><span style=\"width:22%\"></span></div>\\n' +\r\n  '          <footer><span class=\"avatar red\">TM</span><span>Theo Martin</span><time datetime=\"2026-08-28\">Aug 28</time></footer>\\n' +\r\n  '        </article>\\n' +\r\n  '      </div>\\n' +\r\n  '      <div class=\"empty-state\" hidden><strong>No projects found</strong><span>Try another search or filter.</span></div>\\n' +\r\n  '    </section>\\n' +\r\n  '\\n' +\r\n  '    <section id=\"activity\" class=\"activity\" aria-labelledby=\"activity-heading\">\\n' +\r\n  '      <div><p class=\"eyebrow\">Latest updates</p><h2 id=\"activity-heading\">Recent activity</h2></div>\\n' +\r\n  '      <ul><li><span class=\"activity-dot blue\"></span><p><strong>Beacon</strong> moved to 48% complete<br><small>2 hours ago · Noah Williams</small></p></li><li><span class=\"activity-dot green\"></span><p><strong>Drift</strong> was marked complete<br><small>Yesterday · Liam Parker</small></p></li></ul>\\n' +\r\n  '    </section>\\n' +\r\n  '  </main>\\n' +\r\n  '  <footer class=\"site-footer\"><span>Project Browser</span><span>Built for focused teams.</span></footer>\\n' +\r\n  '  <script type=\"module\" src=\"app.mjs\"></script>\\n' +\r\n  '</body>\\n' +\r\n  '</html>\\n'\r\n\r\n    at file:///C:/Users/tjdwo/AppData/Local/Temp/joewrks-coding-ab-wlcgvj/grader/hidden-grade.mjs:12:8 {\r\n  generatedMessage: true,\r\n  code: 'ERR_ASSERTION',\r\n  actual: '<!doctype html>\\n' +\r\n    '<html lang=\"en\">\\n' +\r\n    '<head>\\n' +\r\n    '  <meta charset=\"utf-8\">\\n' +\r\n    '  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\\n' +\r\n    '  <meta name=\"description\" content=\"Browse active projects, owners, and recent progress.\">\\n' +\r\n    '  <title>Project Browser</title>\\n' +\r\n    '  <link rel=\"stylesheet\" href=\"styles.css\">\\n' +\r\n    '</head>\\n' +\r\n    '<body>\\n' +\r\n    '  <a class=\"skip-link\" href=\"#main-content\">Skip to content</a>\\n' +\r\n    '  <header class=\"site-header\">\\n' +\r\n    '    <div class=\"header-inner\">\\n' +\r\n    '      <a class=\"brand\" href=\"#\" aria-label=\"Project Browser home\">\\n' +\r\n    '        <span class=\"brand-mark\" aria-hidden=\"true\">PB</span>\\n' +\r\n    '        <span>Project Browser</span>\\n' +\r\n    '      </a>\\n' +\r\n    '      <button class=\"menu-button\" type=\"button\" aria-expanded=\"false\" aria-controls=\"primary-nav\">\\n' +\r\n    '        <span class=\"sr-only\">Toggle navigation</span>\\n' +\r\n    '        <span aria-hidden=\"true\"></span><span aria-hidden=\"true\"></span><span aria-hidden=\"true\"></span>\\n' +\r\n    '      </button>\\n' +\r\n    '      <nav id=\"primary-nav\" class=\"primary-nav\" aria-label=\"Primary\" hidden>\\n' +\r\n    '        <a class=\"active\" href=\"#projects-heading\" aria-current=\"page\">Projects</a>\\n' +\r\n    '        <a href=\"#activity\">Activity</a>\\n' +\r\n    '        <button class=\"new-project\" type=\"button\">+ New project</button>\\n' +\r\n    '      </nav>\\n' +\r\n    '    </div>\\n' +\r\n    '  </header>\\n' +\r\n    '\\n' +\r\n    '  <main id=\"main-content\">\\n' +\r\n    '    <section class=\"hero\" aria-labelledby=\"projects-heading\">\\n' +\r\n    '      <div>\\n' +\r\n    '        <p class=\"eyebrow\">Workspace overview</p>\\n' +\r\n    '        <h1 id=\"projects-heading\">Projects</h1>\\n' +\r\n    '        <p class=\"intro\">Keep track of what’s moving, what needs attention, and who’s making it happen.</p>\\n' +\r\n    '      </div>\\n' +\r\n    '      <div class=\"summary\" aria-label=\"Project summary\">\\n' +\r\n    '        <div><strong>6</strong><span>Total</span></div>\\n' +\r\n    '        <div><strong>4</strong><span>Active</span></div>\\n' +\r\n    '        <div><strong>2</strong><span>At risk</span></div>\\n' +\r\n    '      </div>\\n' +\r\n    '    </section>\\n' +\r\n    '\\n' +\r\n    '    <section class=\"browser\" aria-label=\"Project browser\">\\n' +\r\n    '      <div class=\"toolbar\">\\n' +\r\n    '        <label class=\"search\">\\n' +\r\n    '          <span class=\"sr-only\">Search projects</span>\\n' +\r\n    '          <svg aria-hidden=\"true\" viewBox=\"0 0 24 24\"><path d=\"m21 21-4.35-4.35m2.35-5.15a7.5 7.5 0 1 1-15 0 7.5 7.5 0 0 1 15 0Z\"/></svg>\\n' +\r\n    '          <input id=\"project-search\" type=\"search\" placeholder=\"Search projects or owners…\" autocomplete=\"off\">\\n' +\r\n    '        </label>\\n' +\r\n    '        <div class=\"filters\" role=\"group\" aria-label=\"Filter projects\">\\n' +\r\n    '          <button class=\"filter active\" type=\"button\" data-filter=\"all\" aria-pressed=\"true\">All</button>\\n' +\r\n    '          <button class=\"filter\" type=\"button\" data-filter=\"active\" aria-pressed=\"false\">Active</button>\\n' +\r\n    '          <button class=\"filter\" type=\"button\" data-filter=\"at-risk\" aria-pressed=\"false\">At risk</button>\\n' +\r\n    '          <button class=\"filter\" type=\"button\" data-filter=\"complete\" aria-pressed=\"false\">Complete</button>\\n' +\r\n    '        </div>\\n' +\r\n    '      </div>\\n' +\r\n    '\\n' +\r\n    '      <p id=\"result-count\" class=\"result-count\" aria-live=\"polite\">6 projects</p>\\n' +\r\n    '      <div class=\"projects\">\\n' +\r\n    '        <article class=\"project-card\" data-status=\"active\" data-search=\"atlas maya chen product design\">\\n' +\r\n    '          <div class=\"card-top\"><span class=\"project-icon coral\" aria-hidden=\"true\">A</span><span class=\"status active-status\">Active</span></div>\\n' +\r\n    '          <div><p class=\"category\">Product design</p><h2>Atlas</h2><p>Reimagining the analytics workspace for faster, clearer decisions.</p></div>\\n' +\r\n    '          <div class=\"progress-row\"><span>Progress</span><strong>72%</strong></div><div class=\"progress\"><span style=\"width:72%\"></span></div>\\n' +\r\n    '          <footer><span class=\"avatar coral\">MC</span><span>Maya Chen</span><time datetime=\"2026-08-12\">Aug 12</time></footer>\\n' +\r\n    '        </article>\\n' +\r\n    '        <article class=\"project-card\" data-status=\"active\" data-search=\"beacon noah williams engineering\">\\n' +\r\n    '          <div class=\"card-top\"><span class=\"project-icon blue\" aria-hidden=\"true\">B</span><span class=\"status active-status\">Active</span></div>\\n' +\r\n    '          <div><p class=\"category\">Engineering</p><h2>Beacon</h2><p>A smarter notification system that keeps teams focused.</p></div>\\n' +\r\n    '          <div class=\"progress-row\"><span>Progress</span><strong>48%</strong></div><div class=\"progress\"><span style=\"width:48%\"></span></div>\\n' +\r\n    '          <footer><span class=\"avatar blue\">NW</span><span>Noah Williams</span><time datetime=\"2026-08-18\">Aug 18</time></footer>\\n' +\r\n    '        </article>\\n' +\r\n    '        <article class=\"project-card\" data-status=\"at-risk\" data-search=\"canopy sofia rossi research\">\\n' +\r\n    '          <div class=\"card-top\"><span class=\"project-icon gold\" aria-hidden=\"true\">C</span><span class=\"status risk-status\">At risk</span></div>\\n' +\r\n    '          <div><p class=\"category\">Research</p><h2>Canopy</h2><p>Understanding how growing teams share knowledge at scale.</p></div>\\n' +\r\n    '          <div class=\"progress-row\"><span>Progress</span><strong>31%</strong></div><div class=\"progress warning\"><span style=\"width:31%\"></span></div>\\n' +\r\n    '          <footer><span class=\"avatar gold\">SR</span><span>Sofia Rossi</span><time datetime=\"2026-08-22\">Aug 22</time></footer>\\n' +\r\n    '        </article>\\n' +\r\n    '        <article class=\"project-card\" data-status=\"complete\" data-search=\"drift liam parker marketing\">\\n' +\r\n    '          <div class=\"card-top\"><span class=\"project-icon green\" aria-hidden=\"true\">D</span><span class=\"status complete-status\">Complete</span></div>\\n' +\r\n    '          <div><p class=\"category\">Marketing</p><h2>Drift</h2><p>A focused campaign for the next chapter of our platform.</p></div>\\n' +\r\n    '          <div class=\"progress-row\"><span>Progress</span><strong>100%</strong></div><div class=\"progress complete\"><span style=\"width:100%\"></span></div>\\n' +\r\n    '          <footer><span class=\"avatar green\">LP</span><span>Liam Parker</span><time datetime=\"2026-07-30\">Jul 30</time></footer>\\n' +\r\n    '        </article>\\n' +\r\n    '        <article class=\"project-card\" data-status=\"active\" data-search=\"ember priya shah operations\">\\n' +\r\n    '          <div class=\"card-top\"><span class=\"project-icon violet\" aria-hidden=\"true\">E</span><span class=\"status active-status\">Active</span></div>\\n' +\r\n    '          <div><p class=\"category\">Operations</p><h2>Ember</h2><p>Simplifying the way customer requests move through the team.</p></div>\\n' +\r\n    '          <div class=\"progress-row\"><span>Progress</span><strong>64%</strong></div><div class=\"progress\"><span style=\"width:64%\"></span></div>\\n' +\r\n    '          <footer><span class=\"avatar violet\">PS</span><span>Priya Shah</span><time datetime=\"2026-08-15\">Aug 15</time></footer>\\n' +\r\n    '        </article>\\n' +\r\n    '        <article class=\"project-card\" data-status=\"at-risk\" data-search=\"forge theo martin infrastructure\">\\n' +\r\n    '          <div class=\"card-top\"><span class=\"project-icon red\" aria-hidden=\"true\">F</span><span class=\"status risk-status\">At risk</span></div>\\n' +\r\n    '          <div><p class=\"category\">Infrastructure</p><h2>Forge</h2><p>Building a resilient foundation for the services ahead.</p></div>\\n' +\r\n    '          <div class=\"progress-row\"><span>Progress</span><strong>22%</strong></div><div class=\"progress warning\"><span style=\"width:22%\"></span></div>\\n' +\r\n    '          <footer><span class=\"avatar red\">TM</span><span>Theo Martin</span><time datetime=\"2026-08-28\">Aug 28</time></footer>\\n' +\r\n    '        </article>\\n' +\r\n    '      </div>\\n' +\r\n    '      <div class=\"empty-state\" hidden><strong>No projects found</strong><span>Try another search or filter.</span></div>\\n' +\r\n    '    </section>\\n' +\r\n    '\\n' +\r\n    '    <section id=\"activity\" class=\"activity\" aria-labelledby=\"activity-heading\">\\n' +\r\n    '      <div><p class=\"eyebrow\">Latest updates</p><h2 id=\"activity-heading\">Recent activity</h2></div>\\n' +\r\n    '      <ul><li><span class=\"activity-dot blue\"></span><p><strong>Beacon</strong> moved to 48% complete<br><small>2 hours ago · Noah Williams</small></p></li><li><span class=\"activity-dot green\"></span><p><strong>Drift</strong> was marked complete<br><small>Yesterday · Liam Parker</small></p></li></ul>\\n' +\r\n    '    </section>\\n' +\r\n    '  </main>\\n' +\r\n    '  <footer class=\"site-footer\"><span>Project Browser</span><span>Built for focused teams.</span></footer>\\n' +\r\n    '  <script type=\"module\" src=\"app.mjs\"></script>\\n' +\r\n    '</body>\\n' +\r\n    '</html>\\n',\r\n  expected: /<button(?=[^>]*\\bid=[\"']menu-toggle[\"'])(?=[^>]*\\btype=[\"']button[\"'])(?=[^>]*\\baria-controls=[\"']site-nav[\"'])(?=[^>]*\\baria-expanded=[\"']false[\"'])[^>]*>/i,\r\n  operator: 'match',\r\n  diff: 'simple'\r\n}\r\n\r\nNode.js v26.3.0\r\n",
+          "wallClockMs": 63,
+          "outputExceeded": false,
+          "timedOut": false
+        }
+      },
+      "workspaceSize": {
+        "files": 5,
+        "bytes": 19400
+      },
+      "integrity": {
+        "instructionUnchanged": true,
+        "changedPathsAllowed": true,
+        "protectedPathsUnchanged": true,
+        "noSymlinks": true,
+        "workspaceContained": true,
+        "safeImplementationFiles": true,
+        "patchOnlyToolSurface": true,
+        "claimIntegrity": true,
+        "gitMetadataUnchanged": true,
+        "fixtureHeadUnchanged": true,
+        "fullTreeDiffMatchesGit": true,
+        "noUserConfigPluginsOrSkills": true,
+        "credentialPathOutsideWorkspace": true,
+        "identityHomeEmpty": true,
+        "shellEnvPolicy": "inherit=\"core\",ignore_default_excludes=false"
+      },
+      "runtime": {
+        "codexVersion": "codex-cli 0.145.0"
+      }
+    }
+  ],
+  "totals": {
+    "inputTokens": 64292,
+    "cachedInputTokens": 48896,
+    "outputTokens": 7299,
+    "reasoningOutputTokens": 435,
+    "totalTokens": 71591,
+    "finalOutputBytes": 1120,
+    "eventCount": 16,
+    "wallClockMs": 166006
+  },
+  "checks": {
+    "sourceClean": true,
+    "sourceBound": true,
+    "candidateHashMatch": true,
+    "allCasesCompleted": true,
+    "allBaselineTestsFail": true,
+    "allVisibleTestsPass": true,
+    "allHiddenTestsPass": false,
+    "noSymlinks": true,
+    "safeImplementationFiles": true,
+    "patchOnlyToolSurface": true,
+    "claimIntegrity": true,
+    "gitMetadataUnchanged": true,
+    "fixtureHeadUnchanged": true,
+    "fullTreeDiffMatchesGit": true,
+    "outputWithinLimits": true,
+    "noUserConfigPluginsOrSkills": true,
+    "credentialPathOutsideWorkspace": true,
+    "identityHomeEmpty": true,
+    "shellEnvPolicy": true
+  }
+}

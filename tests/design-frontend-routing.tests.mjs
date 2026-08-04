@@ -59,6 +59,10 @@ const V3_ROUTER_BINDING = Object.freeze({
   path: 'skills/joewrks-design-frontend/SKILL.md',
   sha256: 'd641c0210e02ca10cc70f1f3219eafbff99c480fb4e0f7ccca5348e6d2e14dfa',
 });
+const V3_ROUTER_SNAPSHOT = Object.freeze({
+  path: 'evals/candidates/design-frontend-router-pair-v3.md',
+  sha256: V3_ROUTER_BINDING.sha256,
+});
 
 function repositoryBindings() {
   return {
@@ -337,6 +341,7 @@ test('routing and evaluator inputs retain LF bytes on checkout', () => {
   const attributes = readFileSync(GITATTRIBUTES_PATH, 'utf8');
   assert.match(attributes, /^\/evals\/design-frontend\/\*\.json text eol=lf$/m);
   assert.match(attributes, /^\/evals\/design-frontend\/\*\.mjs text eol=lf$/m);
+  assert.match(attributes, /^\/evals\/candidates\/design-frontend-router-pair-v3\.md text eol=lf$/m);
   assert.match(attributes, /^\/tests\/design-frontend-routing\.tests\.mjs text eol=lf$/m);
 });
 
@@ -346,7 +351,11 @@ test('v3 evidence binds the retired skill separately from the active contract', 
     ({ pairVersion }) => pairVersion === 3,
   );
 
-  assert.deepEqual(manifest.behaviorEvidence.router, V3_ROUTER_BINDING);
+  assert.deepEqual(manifest.behaviorEvidence.router, V3_ROUTER_SNAPSHOT);
+  assert.equal(
+    sha256(path.join(ROOT, ...V3_ROUTER_SNAPSHOT.path.split('/'))),
+    V3_ROUTER_SNAPSHOT.sha256,
+  );
   assert.deepEqual(v3Evidence, {
     pairVersion: 3,
     mode: 'run-pair-v3',
@@ -735,7 +744,10 @@ test('reviewed P0 baseline and atomic pair configuration are bound', async () =>
     sha256(PAIR_V2_PATH),
     v2Evidence.sha256,
   );
-  assert.equal(evaluator.validateBehaviorEvidence(manifest, repositoryBindings()), true);
+  assert.equal(evaluator.validateBehaviorEvidence(manifest, {
+    ...repositoryBindings(),
+    router: V3_ROUTER_SNAPSHOT,
+  }), true);
   for (const pairVersion of [1, 2]) {
     const staleHistory = structuredClone(manifest);
     staleHistory.behaviorEvidenceHistory.find(

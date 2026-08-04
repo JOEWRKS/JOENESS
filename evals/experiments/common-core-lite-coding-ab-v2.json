@@ -1,0 +1,129 @@
+{
+  "schemaVersion": 1,
+  "id": "common-core-lite-coding-ab-v2",
+  "recordedAt": "2026-08-01T08:18:38.4935863Z",
+  "status": "complete",
+  "decision": "no-observed-benefit-do-not-promote",
+  "activationChanged": false,
+  "additionalModelCalls": 0,
+  "additionalModelTokens": 0,
+  "purpose": "Resolve the invalid frontend grader in v1 by replaying the exact four recorded patches against an outcome-based Lite contract without another model run.",
+  "predecessor": {
+    "path": "evals/experiments/common-core-lite-coding-ab-v1.json",
+    "sha256": "d94f83a4594b75c7735f941d864750aa951456bb3f33c2a864afd4a232c56f8f",
+    "decision": "blocked"
+  },
+  "evaluator": {
+    "sourceCommit": "faee63589af37d9ca4bc0d93a1fd0a7f3f19430e",
+    "runner": {
+      "path": "evals/support/run-common-core-coding-ab.mjs",
+      "sha256": "ed57948d687379ea1819a055417b9592cf187e444581e11f9e53c15c8bd2902e"
+    },
+    "replayTest": {
+      "path": "tests/common-core-coding-ab.tests.mjs",
+      "sha256AtSourceCommit": "6b7210f8415276c80df42b6fab0ea5973447af7c61346c134b295aeaccebdec1"
+    },
+    "outcomeGrader": {
+      "bytes": 5822,
+      "sha256": "73e2714dff88b2123db4ecb5091366589725050d05bf147ac46fffb18add48e0",
+      "forbiddenExactIdentifiers": [
+        "menu-toggle",
+        "site-nav"
+      ],
+      "checkedOutcomes": [
+        "Project Browser title and existing project content remain",
+        "CSS contains a responsive width branch",
+        "a button controls the navigation identified by aria-controls",
+        "the application binds both elements and toggles collapsed and expanded states"
+      ]
+    }
+  },
+  "evidence": [
+    {
+      "id": "run-lite-control-r1",
+      "path": "evals/coding/results/run-lite-control-r1.json",
+      "sha256": "99f415795fb3c7d705c1574a4455b4bcee047a2e751194acbd1bbbb0caac411e",
+      "candidate": "control",
+      "repetition": 1
+    },
+    {
+      "id": "run-lite-candidate-r1",
+      "path": "evals/coding/results/run-lite-candidate-r1.json",
+      "sha256": "8e0505e7f2bc5a431f00bc4b217a8756cc1be16cb857ddfdd04d11739ed0e079",
+      "candidate": "lite",
+      "repetition": 1
+    },
+    {
+      "id": "run-lite-candidate-r2",
+      "path": "evals/coding/results/run-lite-candidate-r2.json",
+      "sha256": "80626d2c71cf16dbc2b251729d85b49cbb0903eb422e0a7ac0c421951db0d563",
+      "candidate": "lite",
+      "repetition": 2
+    },
+    {
+      "id": "run-lite-control-r2",
+      "path": "evals/coding/results/run-lite-control-r2.json",
+      "sha256": "869c34118d781a0afe5e7e952e3ca0f46301ac587b60ad7aa54eb5a0d69c1da7",
+      "candidate": "control",
+      "repetition": 2
+    }
+  ],
+  "regrade": {
+    "method": [
+      "verify each recorded diff byte count and SHA-256",
+      "rebuild the original visible fixture and candidate AGENTS.md",
+      "apply each complete patch with LF-preserving Git settings",
+      "verify every reconstructed file byte count and SHA-256 against the recorded file tree",
+      "run the outcome grader under the existing Node filesystem permission boundary"
+    ],
+    "integrity": {
+      "recordedDiffsComplete": 4,
+      "recordedDiffHashesMatched": 4,
+      "promptHashesMatched": 4,
+      "candidateHashesMatched": 4,
+      "reconstructedFileTreesMatched": 4,
+      "possible": 4
+    },
+    "legacyFrontendHiddenPasses": {
+      "control": 0,
+      "lite": 0,
+      "possiblePerArm": 2
+    },
+    "outcomePasses": {
+      "control": {
+        "maintenance": 2,
+        "frontend": 2,
+        "possible": 4
+      },
+      "lite": {
+        "maintenance": 2,
+        "frontend": 2,
+        "possible": 4
+      }
+    },
+    "qualityComparison": "equal on all retained maintenance, frontend, scope, protected-path, safe-file, and claim-integrity checks",
+    "controlRiskFailuresFixedByLite": 0
+  },
+  "cost": {
+    "controlMeanTotalTokens": 65092,
+    "liteMeanTotalTokens": 59263,
+    "liteTotalTokenDeltaPercent": -8.96,
+    "controlMeanUncachedInputTokens": 14757,
+    "liteMeanUncachedInputTokens": 18875.5,
+    "liteUncachedInputTokenDeltaPercent": 27.91,
+    "liteOutputTokenDeltaPercent": -6.85,
+    "liteWallClockDeltaPercent": -10.21,
+    "repetitionDirection": {
+      "r1TotalTokenDeltaPercent": 1.61,
+      "r2TotalTokenDeltaPercent": -17.6,
+      "stable": false
+    }
+  },
+  "decisionReason": "After replacing the invalid exact-identifier check, Control and Lite both pass all four retained case outcomes. Lite fixes no observed Control risk. Its lower mean total tokens and time are not stable across two repetitions, while mean uncached input rises 27.91 percent. The predeclared rule therefore requires no promotion.",
+  "limitations": [
+    "Two repetitions per arm cannot establish general token savings.",
+    "Offline replay can verify source outcomes and recorded file identity, not historical browser rendering or screenshots.",
+    "This comparison does not authorize replacing or editing the active V1 Common Core."
+  ],
+  "nextAction": "Keep Lite inactive. Do not add its rules on the strength of this experiment; any active V1 reduction must be a separate, explicitly reviewed change."
+}

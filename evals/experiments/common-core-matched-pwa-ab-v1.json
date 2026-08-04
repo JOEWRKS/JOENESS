@@ -1,0 +1,126 @@
+{
+  "schemaVersion": 1,
+  "evaluation": "common-core-matched-pwa-ab-v1",
+  "recordedAt": "2026-08-02",
+  "status": "recorded-control-pass-candidate-timeout-fail",
+  "purposeKo": "일반 Codex와 최종 Common Core에 동일한 PWA 산출물과 합격 조건을 주고 구현 품질, 유지보수성, 검증, 사실성, 종료성 및 비용 대비 효용을 비교한다.",
+  "design": {
+    "arms": ["isolated no-Common-Core control", "isolated active-Common-Core candidate"],
+    "baselineCommit": "f680f2e80495dffbc4cbf5d94de4ac21939e6c4e",
+    "treatment": {
+      "path": "AGENTS.md",
+      "bytes": 3933,
+      "sha256": "3e1cc9cc93a6ed07c276b6d41f8acd1928918b41d2394ab67795b3fc492f6635"
+    },
+    "matchedOutcome": "Installable and offline PWA shell, valid manifest and icons, correct MIME types, install entry point, safe background pause and resume, preserved game and score storage, bounded UI changes, relevant tests, truthful report.",
+    "samePromptAndRuntime": true,
+    "parallelStart": true,
+    "timeoutMsPerArm": 300000,
+    "model": "gpt-5.6-sol",
+    "reasoningEffort": "low",
+    "network": false,
+    "externalEffects": "none",
+    "limitation": "The control completed within the common cap. The candidate was forcibly terminated before final integration, re-verification, and reporting, so only task completion within 300 seconds is directly comparable; candidate final quality, tokens, and cost efficiency are right-censored. One stochastic pair cannot establish a general causal effect."
+  },
+  "rawEvidence": {
+    "root": "D:/JOEWRKS/.harness-evals/common-core-matched-pwa-ab-v1-20260802",
+    "runner": {"bytes": 5921, "sha256": "50f23995d171e302983bffa91439013fae872f336c58db420b0a21f10f7375ce"},
+    "controlEvents": {"bytes": 97191, "sha256": "85a774f7de69f1bd4dd5afd7b5aba94c142a366c20129ffe45fd1dea10632182"},
+    "controlSummary": {"bytes": 83853, "sha256": "e5813f5ba993002e17c825ce2f6282c137aa4ee589fa5ff8ca9b49aa35096e7c"},
+    "candidateEvents": {"bytes": 75158, "sha256": "4fdf49f80a23b4f3d7ad7830080b9c9bd229a038a5f73dfc4ee8f2db3b8f9377"},
+    "candidateSummary": {"bytes": 304, "sha256": "abed4595f721a75fe1dfbb89dac320db1428544dfd53d45158c448ca2df0bcc5"}
+  },
+  "metrics": {
+    "control": {
+      "wallMs": 272027,
+      "inputTokens": 354028,
+      "cachedInputTokens": 275712,
+      "uncachedInputTokens": 78316,
+      "outputTokens": 12595,
+      "reasoningOutputTokens": 1467,
+      "totalTokens": 366623,
+      "commands": {"total": 10, "completed": 8, "failed": 1, "declined": 1},
+      "productPaths": 8,
+      "completed": true
+    },
+    "candidate": {
+      "wallMs": 300053,
+      "inputTokens": null,
+      "cachedInputTokens": null,
+      "uncachedInputTokens": null,
+      "outputTokens": null,
+      "reasoningOutputTokens": null,
+      "totalTokens": null,
+      "commands": {"total": 12, "completed": 10, "failed": 1, "declined": 0, "incomplete": 1},
+      "productPaths": 11,
+      "completed": false,
+      "status": "failed-timeout",
+      "termination": "SIGTERM after the 300 second cap"
+    }
+  },
+  "acceptanceEvidence": {
+    "control": {
+      "gameAndScorePreserved": true,
+      "manifestAndOfflineShell": true,
+      "installEntryAndBackgroundHandling": true,
+      "tests": "10/10 passed in the artifact and were independently rerun by the evaluator",
+      "runtimeHttpMime": "verified on an ephemeral local port by pwa.test.mjs",
+      "finalReport": true
+    },
+    "candidate": {
+      "gameAndScorePreserved": "baseline core tests last observed passing before timeout",
+      "manifestAndOfflineShell": "static source checks last observed passing before unfinished PNG changes",
+      "installEntryAndBackgroundHandling": "implemented in the partial worktree; not browser-verified and not finalized",
+      "tests": "8/8 last observed pass: six baseline tests plus two candidate-authored static PWA tests",
+      "runtimeHttpMime": "not tested; MIME mapping was checked as a pure function",
+      "finalReport": false
+    },
+    "notVerifiedByEither": [
+      "physical Android or iOS installation",
+      "browser-driven install prompt and background-resume interaction",
+      "service-worker install, activate, fetch, and offline navigation in a real browser"
+    ]
+  },
+  "partialWorktreeObservations": {
+    "comparableFinalOutput": false,
+    "controlStrengths": [
+      "Completed with a coherent eight-path artifact and final handoff.",
+      "Added four PWA tests, including real HTTP MIME responses on an ephemeral port and a static source check for the service-worker navigation fallback.",
+      "Recovered from the sandbox test-runner limitation and stopped after one declined optional fixed-port check."
+    ],
+    "candidatePartialFeatures": [
+      "The incomplete worktree contains relative PWA paths, an explicit pause overlay, install status, and additional canvas accessibility code.",
+      "The incomplete worktree contains valid 192 and 512 PNG files, but no active reference uses them."
+    ],
+    "controlDefects": [
+      "Uses one SVG icon for the manifest and Apple touch icon, limiting real-device compatibility.",
+      "Falsely reported repairing broken Korean source even though HEAD:index.html is strict valid UTF-8 with intact Korean and closing tags.",
+      "Browser install, actual offline restart, and lifecycle behavior remain unverified."
+    ],
+    "candidateDefects": [
+      "After some static checks passed, it continued into optional PNG compatibility work and was forcibly terminated before final integration or reporting.",
+      "The generated PNG files are unreferenced: manifest, HTML, service worker, and tests still point to SVG files.",
+      "Has only two PWA tests and no runtime HTTP, install-prompt, pause-resume, or offline-browser verification.",
+      "Repeated the terminal-rendering source-corruption misdiagnosis in intermediate reasoning despite the active Common Core rule.",
+      "Emitted no final report and left an internally inconsistent partial compatibility change."
+    ]
+  },
+  "costInterpretation": {
+    "principle": "Higher cost is acceptable when it produces proportionally better verified output; raw token count is not a failure criterion.",
+    "observed": "The control completed in 272027 ms. The candidate was forcibly terminated at 300053 ms without a final artifact or token event. Candidate final quality and cost efficiency therefore cannot be ranked from this attempt.",
+    "candidateTokenComparison": "unavailable, not estimated"
+  },
+  "decision": {
+    "verdict": "control-pass-candidate-timeout-fail",
+    "harnessObservedEffect": "completion-disadvantage-in-this-pair",
+    "generalCausalEffect": "inconclusive-single-pair",
+    "reason": "The control completed within the shared cap and emitted a final report. The candidate ended with SIGTERM, no turn.completed event, no final report, and unreferenced PNG files after optional post-check work. Candidate partial features do not offset task failure.",
+    "harnessImplication": [
+      "This pair provides no evidence that Common Core improves an already explicit implementation task.",
+      "The active stop and source-evidence rules were present but not reliably followed.",
+      "Do not add another general rule from this single failure; first test whether the failure reproduces.",
+      "Treat design skills as shared model capability in this test because both arms loaded the same installed design skill and vendor references."
+    ],
+    "next": "Keep this failed attempt immutable and record any clean candidate rerun as a separate recovery result. Never overwrite the timeout with a later success."
+  }
+}

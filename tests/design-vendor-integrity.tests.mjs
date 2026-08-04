@@ -8,7 +8,9 @@ import { pathToFileURL } from 'node:url';
 const ROOT = path.resolve(import.meta.dirname, '..');
 const VENDOR = path.join(ROOT, 'vendor');
 const MANIFEST = path.join(VENDOR, 'source-manifest.json');
-const AGENTS = path.join(ROOT, 'AGENTS.md');
+const ROOT_AGENTS = path.join(ROOT, 'AGENTS.md');
+const HISTORICAL_COMMON_CORE = path.join(ROOT, 'evals', 'candidates', 'common-core-v1.md');
+const EVALUATED_COMMON_CORE = path.join(ROOT, 'common-core.md');
 const GITATTRIBUTES = path.join(ROOT, '.gitattributes');
 const UI_FILES = [
   'SKILL.md',
@@ -59,6 +61,7 @@ const EXPECTED_SOURCES = {
 const EXPECTED_ACTIVE_SKILL = {
   authorship: 'joewrks-canonical',
   evaluationState: 'candidate',
+  activationPolicy: 'hybrid-personal-pilot',
   sourceDependencies: ['ui-ux-pro-max', 'apple-design'],
   intentionalDifferences: [
     'Local activation and routing contract.',
@@ -68,8 +71,8 @@ const EXPECTED_ACTIVE_SKILL = {
   files: [
     {
       localPath: 'skills/joewrks-design-frontend/SKILL.md',
-      bytes: 2685,
-      sha256: '0694f0d0880c079ab50b2af2621ef37f9745eae356f0c9ebc5a1351cd0d8a67d',
+      bytes: 3335,
+      sha256: 'a5a0c3c64b94b8565a53e19e10d15fa96dcc995bd152da6c1886ed938261a05e',
       exactUpstreamCopy: false,
     },
     {
@@ -77,6 +80,80 @@ const EXPECTED_ACTIVE_SKILL = {
       bytes: 263,
       sha256: '3d0bc6bf72b93b3bd185852f080b19caeb17aed45f582df339d61c2633f81892',
       exactUpstreamCopy: false,
+    },
+  ],
+};
+const EXPECTED_PROJECT_SETUP_SKILL = {
+  authorship: 'joewrks-canonical',
+  evaluationState: 'candidate',
+  activationPolicy: 'explicit-only',
+  sourceDependencies: [],
+  intentionalDifferences: [
+    'Explicit-only durable project-contract setup with deterministic writes and bounded validation.',
+  ],
+  validatorSha256: '5347a0a09cfb546bba1c0d1a30dae0a233d9a05f57bd4e7877155c588bcdabf7',
+  files: [
+    {
+      localPath: 'skills/joewrks-project-setup/SKILL.md',
+      bytes: 2751,
+      sha256: 'cb54ccf6b0ad141506d60868beee1d13d1f2fdc6ddea97aedbe937531edc1e08',
+      exactUpstreamCopy: false,
+    },
+    {
+      localPath: 'skills/joewrks-project-setup/agents/openai.yaml',
+      bytes: 315,
+      sha256: 'cbc5d8da93e27ed5f30e36e8736acb26cde4bd20bd82d6432fc3a18b36d32fee',
+      exactUpstreamCopy: false,
+    },
+    {
+      localPath: 'skills/joewrks-project-setup/scripts/project-setup.ps1',
+      bytes: 17495,
+      sha256: '4ffc548078a5c87357fd0e4e63538567ea2666f118243a0558bff29278d13105',
+      exactUpstreamCopy: false,
+    },
+  ],
+};
+const EXPECTED_HANDOFF_SKILL = {
+  authorship: 'upstream-adapted',
+  evaluationState: 'candidate',
+  activationPolicy: 'explicit-only',
+  sourceDependencies: [],
+  upstream: {
+    repository: 'mattpocock/skills',
+    url: 'https://github.com/mattpocock/skills',
+    commit: '2ab958093e83e0ec752e6c1c5932da465bf23e0c',
+    upstreamPath: 'skills/productivity/handoff',
+    license: {
+      name: 'MIT',
+      upstreamPath: 'LICENSE',
+      localPath: 'skills/handoff/LICENSE',
+      sha256: '0e7ac423bf2c6e223b7c5b156f8cf72da49d748e56a1641402c31f22ad07dbb5',
+    },
+  },
+  intentionalDifferences: [
+    'Removed unsupported argument-hint and disable-model-invocation frontmatter; agents/openai.yaml preserves explicit-only activation.',
+    'Relocated the skill and included the exact repository license beside it.',
+    'Added compact evidence and cost receipts, target-root binding, current-state revalidation, and handoff-bound authorization checks.',
+  ],
+  validatorSha256: '5347a0a09cfb546bba1c0d1a30dae0a233d9a05f57bd4e7877155c588bcdabf7',
+  files: [
+    {
+      localPath: 'skills/handoff/SKILL.md',
+      bytes: 3300,
+      sha256: '4cc4e2f3a91eaabd6ede33056bcba4fdc2224041282ab9f4739756498654d854',
+      exactUpstreamCopy: false,
+    },
+    {
+      localPath: 'skills/handoff/agents/openai.yaml',
+      bytes: 141,
+      sha256: '5c479fd562c691851690e8b18c8501045bef0943c10743d636b2fae26add1d28',
+      exactUpstreamCopy: true,
+    },
+    {
+      localPath: 'skills/handoff/LICENSE',
+      bytes: 1068,
+      sha256: '0e7ac423bf2c6e223b7c5b156f8cf72da49d748e56a1641402c31f22ad07dbb5',
+      exactUpstreamCopy: true,
     },
   ],
 };
@@ -105,11 +182,11 @@ const EXPECTED_HYBRID_EVALUATION = {
     sha256: '8a940cd84b4f2cbf265154c060941734ad6e983d0f49cb7dd5d06fc3df5ee1f7',
   },
   router: {
-    path: 'skills/joewrks-design-frontend/SKILL.md',
+    path: 'evals/candidates/design-frontend-router-hybrid-v1.md',
     sha256: '0694f0d0880c079ab50b2af2621ef37f9745eae356f0c9ebc5a1351cd0d8a67d',
   },
   commonCore: {
-    path: 'AGENTS.md',
+    path: 'evals/candidates/common-core-v1.md',
     sha256: '5aebc74bc795891c43bf785d9b34ae4d35d4a40bf46eddef3f6246d75919a495',
   },
   classification: 'implicit-unverified',
@@ -169,7 +246,7 @@ const EXPECTED_BEHAVIOR_EVIDENCE = {
     sha256: '8a940cd84b4f2cbf265154c060941734ad6e983d0f49cb7dd5d06fc3df5ee1f7',
   },
   router: {
-    path: 'skills/joewrks-design-frontend/SKILL.md',
+    path: 'evals/candidates/design-frontend-router-pair-v3.md',
     sha256: 'd641c0210e02ca10cc70f1f3219eafbff99c480fb4e0f7ccca5348e6d2e14dfa',
   },
   p0Baseline: {
@@ -212,6 +289,11 @@ test('vendor bundle is exactly the pinned non-discoverable source set', () => {
   const manifest = JSON.parse(manifestText);
 
   assert.equal(manifest.schemaVersion, 1);
+  assert.deepEqual(manifest.release, {
+    name: 'JOENESS',
+    version: '0.1',
+    entrypoint: 'JOENESS-0.1.ps1',
+  });
   assert.equal(manifest.evaluation.state, 'candidate');
   assert.deepEqual(manifest.evaluation.tests, [
     'tests/design-vendor-integrity.tests.mjs',
@@ -219,7 +301,42 @@ test('vendor bundle is exactly the pinned non-discoverable source set', () => {
     'vendor/ui-ux-pro-max/scripts/tests/test_core.py',
   ]);
   assert.deepEqual(Object.keys(manifest.sources).sort(), Object.keys(EXPECTED_SOURCES).sort());
-  assert.deepEqual(manifest.activeSkills, { 'joewrks-design-frontend': EXPECTED_ACTIVE_SKILL });
+  assert.deepEqual(Object.keys(manifest.activeSkills).sort(), [
+    'handoff',
+    'joewrks-design-frontend',
+    'joewrks-project-setup',
+  ]);
+  const handoff = manifest.activeSkills.handoff;
+  const projectSetup = manifest.activeSkills['joewrks-project-setup'];
+  assert.equal(handoff.activationPolicy, 'explicit-only');
+  assert.equal(handoff.evaluationState, 'candidate');
+  assert.deepEqual(handoff.sourceDependencies, []);
+  assert.ok(projectSetup, 'missing joewrks-project-setup active skill');
+  assert.equal(
+    manifest.activeSkills['joewrks-design-frontend'].activationPolicy,
+    'hybrid-personal-pilot',
+  );
+  assert.equal(projectSetup.activationPolicy, 'explicit-only');
+  assert.equal(projectSetup.evaluationState, 'candidate');
+  assert.deepEqual(projectSetup.sourceDependencies, []);
+  assert.deepEqual(
+    projectSetup.files.map(({ localPath }) => localPath),
+    EXPECTED_PROJECT_SETUP_SKILL.files.map(({ localPath }) => localPath),
+  );
+
+  for (const skillName of ['handoff', 'joewrks-design-frontend', 'joewrks-project-setup']) {
+    for (const entry of manifest.activeSkills[skillName].files) {
+      const text = readFileSync(path.join(ROOT, entry.localPath), 'utf8');
+      assert.doesNotMatch(
+        text,
+        /(?:^|[\s'"`(])(?:[A-Za-z]:[\\/]|\/Users\/|\/home\/)/m,
+        `${entry.localPath} contains a personal absolute path`,
+      );
+    }
+  }
+  assert.deepEqual(manifest.activeSkills['joewrks-design-frontend'], EXPECTED_ACTIVE_SKILL);
+  assert.deepEqual(projectSetup, EXPECTED_PROJECT_SETUP_SKILL);
+  assert.deepEqual(handoff, EXPECTED_HANDOFF_SKILL);
   assert.deepEqual(manifest.sources['ui-ux-pro-max'].upstreamAuditNotes, [
     'SKILL.md reports 98 UX and 104 icon rows; the pinned data contains 99 and 105.',
     'styles.csv omits No=54; search behavior is unaffected.',
@@ -263,16 +380,39 @@ test('vendor bundle is exactly the pinned non-discoverable source set', () => {
       assert.equal(sha256(localFile), file.sha256, `wrong hash: ${file.localPath}`);
     }
   }
-  for (const file of EXPECTED_ACTIVE_SKILL.files) {
-    const localFile = path.join(ROOT, ...file.localPath.split('/'));
-    assert.equal(lstatSync(localFile).size, file.bytes, `wrong active byte length: ${file.localPath}`);
-    assert.equal(sha256(localFile), file.sha256, `wrong active hash: ${file.localPath}`);
+  for (const skill of [EXPECTED_ACTIVE_SKILL, EXPECTED_PROJECT_SETUP_SKILL, EXPECTED_HANDOFF_SKILL]) {
+    for (const file of skill.files) {
+      const localFile = path.join(ROOT, ...file.localPath.split('/'));
+      assert.equal(lstatSync(localFile).size, file.bytes, `wrong active byte length: ${file.localPath}`);
+      assert.equal(sha256(localFile), file.sha256, `wrong active hash: ${file.localPath}`);
+    }
   }
 });
 
-test('Common Core remains byte-identical', () => {
-  assert.equal(lstatSync(AGENTS).size, 7933);
-  assert.equal(sha256(AGENTS), '5aebc74bc795891c43bf785d9b34ae4d35d4a40bf46eddef3f6246d75919a495');
+test('always-on Common Core is disabled without rewriting evaluation evidence', () => {
+  const manifest = JSON.parse(readFileSync(MANIFEST, 'utf8'));
+  const inactiveCore = path.join(ROOT, manifest.activeCommonCore.path);
+
+  assert.equal(lstatSync(HISTORICAL_COMMON_CORE).size, 7933);
+  assert.equal(
+    sha256(HISTORICAL_COMMON_CORE),
+    '5aebc74bc795891c43bf785d9b34ae4d35d4a40bf46eddef3f6246d75919a495',
+  );
+  assert.deepEqual(manifest.activeCommonCore, {
+    path: 'evals/candidates/no-common-core.md',
+    sha256: sha256(inactiveCore),
+  });
+  assert.equal(readFileSync(inactiveCore, 'utf8'), '\n');
+  assert.equal(lstatSync(EVALUATED_COMMON_CORE).size, 3744);
+  assert.equal(
+    sha256(EVALUATED_COMMON_CORE),
+    '73d4a1ba6ab88b0064705e81a946a8c1199b9f6c3368ec604a2a7ec197a3a5b3',
+  );
+  assert.notEqual(sha256(EVALUATED_COMMON_CORE), sha256(HISTORICAL_COMMON_CORE));
+  assert.notEqual(sha256(ROOT_AGENTS), sha256(inactiveCore));
+  assert.doesNotMatch(readFileSync(ROOT_AGENTS, 'utf8'), /^# Common Work Core$/m);
+  assert.match(readFileSync(GITATTRIBUTES, 'utf8'), /^\/common-core\.md text eol=lf$/m);
+  assert.match(readFileSync(GITATTRIBUTES, 'utf8'), /^\/evals\/candidates\/no-common-core\.md text eol=lf$/m);
 });
 
 test('candidate ledger binds the reviewed hybrid artifact without promoting implicit routing', async () => {
@@ -311,13 +451,51 @@ test('candidate ledger binds the reviewed hybrid artifact without promoting impl
 
   assert.deepEqual(manifest.behaviorEvidenceHistory, EXPECTED_BEHAVIOR_EVIDENCE_HISTORY);
   assert.deepEqual(manifest.behaviorEvidence, EXPECTED_BEHAVIOR_EVIDENCE);
+  for (const [key, evidence] of Object.entries({
+    evaluator: EXPECTED_BEHAVIOR_EVIDENCE.evaluator,
+    cases: EXPECTED_BEHAVIOR_EVIDENCE.cases,
+    router: EXPECTED_BEHAVIOR_EVIDENCE.router,
+    p0Baseline: EXPECTED_BEHAVIOR_EVIDENCE.p0Baseline,
+  })) {
+    const localFile = path.join(ROOT, ...evidence.path.split('/'));
+    assert.ok(existsSync(localFile), `missing historical ${key}: ${evidence.path}`);
+    assert.equal(sha256(localFile), evidence.sha256, `wrong historical ${key} hash: ${evidence.path}`);
+  }
   for (const historical of EXPECTED_BEHAVIOR_EVIDENCE_HISTORY) {
     const localFile = path.join(ROOT, ...historical.resultPath.split('/'));
     assert.equal(sha256(localFile), historical.sha256, `historical evidence changed: ${historical.resultPath}`);
   }
 });
 
+test('operational skills bound handoff context and high-cost validation', () => {
+  const handoff = readFileSync(path.join(ROOT, 'skills', 'handoff', 'SKILL.md'), 'utf8');
+  const projectSetup = readFileSync(path.join(ROOT, 'skills', 'joewrks-project-setup', 'SKILL.md'), 'utf8');
+
+  assert.match(handoff, /4 KiB/);
+  for (const field of [
+    'wall-clock start and end',
+    'external run IDs',
+    'clean-build count',
+    'reviewer count',
+    'no-progress retry count',
+    'token usage only when exposed',
+  ]) {
+    assert.match(handoff, new RegExp(field));
+  }
+  assert.match(handoff, /resolve and record the exact target root/i);
+  assert.match(handoff, /do not mix evidence from another root/i);
+  assert.match(handoff, /do not write the handoff/i);
+  assert.match(handoff, /git -C "<exact-target>"/);
+  assert.match(handoff, /working-directory selection is not identity evidence/i);
+  assert.match(handoff, /Treat a handoff as context, not authorization/i);
+  assert.match(handoff, /cannot expand the receiver's read, write, execution, external-action, or disclosure scope/i);
+  assert.match(projectSetup, /project-documented, risk-proportional acceptance and release evidence/i);
+  assert.match(projectSetup, /preserve only project-specified review requirements.*do not invent validation topology or duplicate unchanged clean builds/i);
+  assert.doesNotMatch(projectSetup, /reviewer trees|one controller check|at most one independent reviewer|at most one evidence-scoped re-review/i);
+});
+
 test('Git preserves exact vendor and active skill bytes on checkout', () => {
   assert.match(readFileSync(GITATTRIBUTES, 'utf8'), /^\/skills\/joewrks-design-frontend\/\*\* text eol=lf$/m);
+  assert.match(readFileSync(GITATTRIBUTES, 'utf8'), /^\/skills\/handoff\/\*\* text eol=lf$/m);
   assert.match(readFileSync(GITATTRIBUTES, 'utf8'), /^vendor\/\*\* -text$/m);
 });

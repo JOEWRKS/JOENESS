@@ -1,0 +1,161 @@
+{
+  "schemaVersion": 1,
+  "evaluation": "joeness-0.1-beta-mergedrop-android-phase-5",
+  "recordedAt": "2026-08-03T17:44:10.7987650+09:00",
+  "status": "scoped-complete",
+  "kind": "single-arm-real-project-runtime-and-harness-review",
+  "continues": "evals/experiments/joeness-0.1-beta-mergedrop-android-phase-4.json",
+  "source": {
+    "repository": "JOEWRKS/JOEWRKS-TestProject-01",
+    "branch": "codex/mergedrop-android-runtime",
+    "commit": "873b452b3a046021e8962587329fe62cb2c79f9b",
+    "evidenceCommit": "7a806a0cda8dfd0336960aa42055888a267a1895",
+    "originalProject": "D:/JOEWRKS/MergeDrop",
+    "originalItemCountAfter": 0
+  },
+  "workflowRuns": [
+    {
+      "runId": 30796186384,
+      "commit": "2f6d1aeb922be23af1ea7d35b65820945c1087d1",
+      "conclusion": "failure",
+      "jobSeconds": 389,
+      "classification": "verifier-failure",
+      "observed": ["clean build", "streamed install", "cold launch"],
+      "rejectedClaim": "interaction",
+      "reason": "The verifier searched for a WebView accessibility node while a system dialog, not the app UI, owned the tree."
+    },
+    {
+      "runId": 30796918922,
+      "commit": "14969e2c920e6abd7c4f698fe6b82021b303a9b8",
+      "conclusion": "success",
+      "jobSeconds": 455,
+      "classification": "verifier-false-positive",
+      "artifact": {
+        "id": 8849405029,
+        "bytes": 3216526,
+        "sha256": "2c04739d65ea7e1f9aaf900d64a5b0def99fee190cf8c1b9102c47d8ef5d6286"
+      },
+      "rejectedClaims": ["normal initial render", "merge", "normal relaunch render", "persistence"],
+      "reason": "The initial screenshot contained a System UI ANR dialog, merge_status_observed was false, and the relaunch screenshot was white. runtime-check-passed did not match the evidence."
+    },
+    {
+      "runId": 30797896131,
+      "commit": "873b452b3a046021e8962587329fe62cb2c79f9b",
+      "conclusion": "success",
+      "jobSeconds": 412,
+      "classification": "accepted-runtime-evidence",
+      "url": "https://github.com/JOEWRKS/JOEWRKS-TestProject-01/actions/runs/30797896131",
+      "artifact": {
+        "id": 8849770485,
+        "bytes": 1850922,
+        "sha256": "679f308ca5168db40694fd32690e8697eb41107950ef3637925a4d04d91c46e6",
+        "expiresAt": "2026-08-10T08:41:11Z",
+        "localEvidence": ".runtime-evidence/run-30797896131/expanded"
+      }
+    }
+  ],
+  "finalRuntimeEvidence": {
+    "environment": {
+      "model": "sdk_gphone64_x86_64",
+      "android": 16,
+      "sdk": 36,
+      "overrideDisplay": "390x844",
+      "overrideDensity": 160
+    },
+    "apk": {
+      "bytes": 1338293,
+      "sha256": "d33799bab3a56fceb9f1d85f08f61bb0da8c334c60cc3d6e6e306ac146de30b9",
+      "applicationId": "com.joewrks.mergedrop.beta",
+      "versionCode": 1,
+      "versionName": "0.1.0-beta",
+      "minSdk": 24,
+      "targetSdk": 36,
+      "debuggable": true,
+      "permissions": []
+    },
+    "checks": [
+      {"id": "install", "status": "completed", "evidence": "Performing Streamed Install; Success"},
+      {"id": "cold-launch", "status": "completed", "evidence": "MainActivity COLD launch, 8636 ms"},
+      {"id": "initial-render", "status": "completed", "evidence": "before.png and before.xml show the unobstructed MergeDrop UI"},
+      {"id": "automated-input", "status": "completed", "evidence": "three tier-routed coordinate taps"},
+      {"id": "merge", "status": "completed", "evidence": "score 0 to 4, best 0 to 4, status 4점 병합!"},
+      {"id": "relaunch", "status": "completed", "evidence": "force-stop then MainActivity COLD launch, 5779 ms"},
+      {"id": "persistence", "status": "completed", "evidence": "relaunch score 0 and best 4 in summary, XML, and screenshot"},
+      {"id": "app-fatal-log", "status": "completed", "evidence": "zero FATAL EXCEPTION or AndroidRuntime matches in both app-PID logs"}
+    ],
+    "nonfatalEnvironmentWarnings": [
+      "ashmem pinning deprecation",
+      "MESA software emulator render-node lookup",
+      "Chromium variations seed/index warnings"
+    ],
+    "unverified": [
+      "human touch feel and ergonomics",
+      "physical-device and device-matrix behavior",
+      "Android assistive technology behavior",
+      "final branded icon",
+      "release signing and production package identity",
+      "current Play policy and console state",
+      "store submission and production readiness"
+    ]
+  },
+  "harnessVerification": {
+    "installedCheck": "current; personal-pilot; zero blockers",
+    "projectSetupContract": "PASS",
+    "vendorIntegrity": "4/4 PASS",
+    "syncHarnessFullSuite": "unverified-current-run",
+    "syncHarnessDetail": "The command transport detached after about 260 seconds with exit -1 and no final output. Its child process later ended, but no current PASS was observed; one exact current-run temp fixture remained. Prior documented PASS evidence was not rewritten.",
+    "repositoryWorkingTreeAtReview": {
+      "branch": "codex/personal-script-first-harness-design",
+      "head": "0aa1afdc40e003a2acb506b5fef38729b6537aaf",
+      "changedEntriesBeforeThisRecord": 34,
+      "shareReady": false
+    }
+  },
+  "independentHarnessReview": {
+    "scale": "0..4",
+    "total": {"score": 24, "maximum": 40},
+    "items": [
+      {"id": "scope-control", "score": 3, "evidence": "global Core disabled; bounded project contract and Android scope", "finding": "coordination and Phase 4 evidence expanded beyond the smallest useful receipt"},
+      {"id": "completion-honesty", "score": 3, "evidence": "build/runtime separation, stale hash correction, and rejected green run", "finding": "the false-positive marker existed before artifact inspection corrected it"},
+      {"id": "context-continuity", "score": 3, "evidence": "project AGENTS and phase handoffs enabled resumption", "finding": "Phase 4 handoff is 12019 bytes and not compact"},
+      {"id": "root-cause-resolution", "score": 3, "evidence": "commit 873b452 aligns UI readiness, merge, relaunch, persistence, and PID logs", "finding": "the first verifier parser was added and then deleted"},
+      {"id": "duplicate-loop-avoidance", "score": 2, "evidence": "zero unchanged remote retries", "finding": "duplicate clean builds, nested review attempts, and verifier churn occurred"},
+      {"id": "tool-skill-routing", "score": 2, "evidence": "setup and handoff are explicit; design references are conditional", "finding": "implicit design routing and semantic improvement remain unproven"},
+      {"id": "verification-proportionality", "score": 2, "evidence": "final gate matches render, merge, persistence, and log claims", "finding": "one false green and three remote clean builds were required"},
+      {"id": "token-time-efficiency", "score": 1, "evidence": "final Lean comparisons increased tokens; Phase 5 used 1256 remote job-seconds", "finding": "token usage and complete controller telemetry were unavailable"},
+      {"id": "collaboration-maintainability", "score": 2, "evidence": "hash, drift, rollback, and byte-preserving installer defenses", "finding": "large installer/test/document surface and dirty release worktree"},
+      {"id": "outcome-quality", "score": 3, "evidence": "verified API 36 install, render, deterministic merge, relaunch, persistence, and app logs", "finding": "single emulator and no native control comparison"}
+    ],
+    "causalEffectEstablished": false,
+    "verdictKo": "JOENESS는 범위·연속성·허위 완료 교정에는 실효성이 있으나, 일반 Codex 대비 구현력 또는 토큰 효율 향상은 입증되지 않았다."
+  },
+  "metrics": {
+    "remoteRunCount": 3,
+    "remoteCleanBuildCount": 3,
+    "remoteJobSeconds": 1256,
+    "stateChangingVerifierFixes": 2,
+    "unchangedNoProgressRetries": 0,
+    "independentReviewers": 1,
+    "scopedRereviews": 1,
+    "tokenUsage": "not-available"
+  },
+  "minimalRecommendations": [
+    "Keep the global Common Core disabled.",
+    "Add a compact default budget to the handoff skill and link detailed evidence instead of repeating it.",
+    "At important gates use one controller check, one independent reviewer, and at most one evidence-scoped rereview; do not create reviewer trees or duplicate unchanged builds.",
+    "Record only wall start/end, external run IDs, clean-build count, reviewer count, no-progress retry count, and token usage when available; do not build a central telemetry subsystem.",
+    "Do not promote automatic design routing or implementation-quality claims until a real controlled comparison proves them."
+  ],
+  "doNotChange": [
+    "Do not reactivate or rewrite a global Common Core from this single-arm result.",
+    "Do not add a central router, always-on memory, evidence-recorder service, or new runtime dependency.",
+    "Do not restore the deleted Python XML parser or overwrite rejected run evidence.",
+    "Do not weaken installer hash, drift, rollback, reparse-point, or byte-preservation defenses merely to reduce line count."
+  ],
+  "decision": {
+    "phaseVerdict": "SCOPED COMPLETE",
+    "meaningKo": "API 36 원격 에뮬레이터에서 정확한 debug APK의 설치·초기 렌더·자동 입력·병합·강제 종료 후 재실행·최고점 지속성·앱 치명 로그 부재를 검증했다.",
+    "releaseVerdict": "NOT READY",
+    "nextUsefulActionKo": "앱 출시 작업을 자동으로 이어가지 말고, 이 리뷰에서 제안한 최소 하네스 보강의 채택 여부를 먼저 결정한다."
+  }
+}

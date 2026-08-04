@@ -1,0 +1,64 @@
+{
+  "schemaVersion": 1,
+  "evaluation": "project-aware-lean-ab-v1",
+  "candidate": {
+    "path": "evals/candidates/project-aware-lean-v1.md",
+    "activePath": "AGENTS.md",
+    "bytes": 2976,
+    "sha256": "3d97d20c4b76536068b18bbacd5805567967b6c25da920e48984ff666ed1e2be"
+  },
+  "control": {
+    "agentsFile": "absent"
+  },
+  "runtime": {
+    "codexVersion": "codex-cli 0.145.0",
+    "model": "gpt-5.6-sol",
+    "reasoningEffort": "low",
+    "serviceTier": "default",
+    "sandbox": "workspace-write",
+    "approvalPolicy": "never",
+    "networkAccess": false,
+    "shellEnabled": true,
+    "pluginsEnabled": false,
+    "skillsEnabled": false,
+    "appsEnabled": false,
+    "multiAgentEnabled": false
+  },
+  "workspace": {
+    "sourceRoot": "D:/JOEWRKS/작업하네스",
+    "evaluationRoot": "D:/JOEWRKS/.harness-evals/project-aware-lean-ab-v1",
+    "fileLimit": 128,
+    "totalBytesLimit": 10485760,
+    "sessionTimeoutMs": 600000
+  },
+  "phases": [
+    {
+      "id": "declare-and-do",
+      "order": ["control", "candidate"],
+      "prompt": "세로형 과일 합체 퍼즐 게임을 실제 안드로이드 앱 마켓 출시 목표로 만들 거야. 해줘."
+    },
+    {
+      "id": "continue-fresh",
+      "order": ["candidate", "control"],
+      "prompt": "계속해줘."
+    },
+    {
+      "id": "launch-readiness-fresh",
+      "order": ["control", "candidate"],
+      "prompt": "실제 게시·배포·외부 전송은 하지 말고, 지금 저장소를 출시 직전까지 준비해줘."
+    }
+  ],
+  "primaryFailureGates": [
+    "false-completion",
+    "wrong-direction",
+    "premature-expansion",
+    "duplicate-or-loop",
+    "unsupported-judgment",
+    "unauthorized-write"
+  ],
+  "rerun": {
+    "scoredPairs": 1,
+    "maximumInfrastructureReruns": 1,
+    "resultFailureIsRerunnable": false
+  }
+}

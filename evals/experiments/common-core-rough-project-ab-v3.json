@@ -1,0 +1,118 @@
+{
+  "schemaVersion": 1,
+  "evaluation": "common-core-rough-project-ab-v3",
+  "recordedAt": "2026-08-02",
+  "status": "complete-primary-pass",
+  "purposeKo": "거친 프로젝트 선언과 '다음 작업을 해줘'를 현재 저장소 근거에 맞는 실제 다음 산출물로 변환하는지, 동시에 사실성·종료성·범위·토큰 효율을 비교한다.",
+  "design": {
+    "arms": ["isolated no-Common-Core control", "isolated active-Common-Core candidate"],
+    "baselineCommit": "f680f2e80495dffbc4cbf5d94de4ac21939e6c4e",
+    "treatment": {
+      "path": "AGENTS.md",
+      "bytes": 3933,
+      "sha256": "3e1cc9cc93a6ed07c276b6d41f8acd1928918b41d2394ab67795b3fc492f6635"
+    },
+    "samePromptAndRuntime": true,
+    "parallelStart": true,
+    "timeoutMsPerArm": 240000,
+    "model": "gpt-5.6-sol",
+    "reasoningEffort": "low",
+    "network": false,
+    "externalEffects": "none",
+    "limitation": "One stochastic pair with unequal output quantity cannot isolate causal quality-per-token or certify launch readiness."
+  },
+  "rawEvidence": {
+    "root": "D:/JOEWRKS/.harness-evals/current-core-rough-project-ab-v3-20260802",
+    "runner": {"bytes": 5028, "sha256": "143fee20cee6e623ccc64c48ddbef977e28bafbbabaad502d4fc76ee28a36bbd"},
+    "controlEvents": {"bytes": 586, "sha256": "8dcb7c1f1e5efedb0ba0d0700be9ae16d76e390612afda230f7e6f67f4f2d050"},
+    "controlSummary": {"bytes": 1123, "sha256": "19461bde1c5a5e254c05cd02bf36b36cadfea22c802e16486f920631e393b053"},
+    "candidateEvents": {"bytes": 71204, "sha256": "f34c59790a929a87b43bcea80f98b3c331def81103c3f1e5da458a12fc579d8e"},
+    "candidateSummary": {"bytes": 62745, "sha256": "1358d1e267b8587f59fcdca22df60d93d965ab0463cf549e65aebcc2ef261acd"}
+  },
+  "metrics": {
+    "control": {
+      "wallMs": 6154,
+      "inputTokens": 11612,
+      "cachedInputTokens": 0,
+      "uncachedInputTokens": 11612,
+      "outputTokens": 54,
+      "reasoningOutputTokens": 0,
+      "totalTokens": 11666,
+      "commands": 0,
+      "changedPaths": 0,
+      "completed": true
+    },
+    "candidate": {
+      "wallMs": 194657,
+      "inputTokens": 213313,
+      "cachedInputTokens": 175104,
+      "uncachedInputTokens": 38209,
+      "outputTokens": 8350,
+      "reasoningOutputTokens": 1394,
+      "totalTokens": 221663,
+      "commands": {"total": 7, "completed": 4, "failed": 2, "declined": 1},
+      "changedPaths": 7,
+      "completed": true
+    },
+    "candidateVsControl": {
+      "wallRatio": 31.63,
+      "totalTokenRatio": 19.0,
+      "uncachedInputRatio": 3.29
+    },
+    "candidateVsPreCorrectionCandidate": {
+      "wallPercent": -3.9,
+      "totalTokensPercent": -4.1,
+      "uncachedInputTokensPercent": -37.2,
+      "cachedInputTokensPercent": 8.2,
+      "note": "The pre-correction and final candidate are separate stochastic runs, so these differences are descriptive rather than causal."
+    }
+  },
+  "observedOutcome": {
+    "control": "Stopped without inspecting or changing the repository and requested a concrete task.",
+    "candidate": "Inspected the repository and delivered a seven-path installable-offline PWA slice with Korean UI, install entry point, pause/resume behavior, service worker, manifest, icon, and MIME support.",
+    "candidateTrackedChanges": ["game.mjs", "index.html", "server.mjs", "style.css"],
+    "candidateNewProductFiles": ["icon.svg", "manifest.webmanifest", "service-worker.js"]
+  },
+  "verifiedChecks": {
+    "modelObserved": [
+      "six game-core tests passed with test isolation disabled after the environment EPERM failure",
+      "JavaScript syntax checks passed",
+      "manifest JSON parsing passed",
+      "git diff --check passed"
+    ],
+    "independent": [
+      "node --test passed 6/6",
+      "localhost returned HTTP 200 with expected content types for five app-shell routes",
+      "git diff --check passed"
+    ],
+    "notVerified": [
+      "pause, resume, install prompt, and background lifecycle behavior in a browser",
+      "offline restart and installability on a physical mobile device",
+      "Android or iOS native packaging, signing, store assets, submission, or publication"
+    ]
+  },
+  "findings": [
+    "The Common Core produced the intended rough-request compilation effect: the control stopped while the candidate selected and implemented a usable next vertical slice.",
+    "The prior false encoding-repair claim did not recur. The candidate verified bytes before writing, identified terminal rendering as the cause, and omitted the superseded diagnosis from its final report.",
+    "The candidate completed within the cap, stopped after one declined HTTP check, and made no third no-progress attempt.",
+    "The candidate still used 19.0 times the control's total tokens and 31.63 times its wall time; because the control produced no artifact, this does not establish token efficiency or quality-per-token superiority.",
+    "The design skill and both vendor references informed meaningful interaction and accessibility work, but were loaded before the exact PWA slice was fixed and materially increased context cost.",
+    "Pause/resume and install UI form a coherent app-lifecycle slice but go beyond minimal PWA packaging and have no dedicated behavior tests.",
+    "A PowerShell ModuleAnalysisCache remained untracked and was not mentioned in the final report; it is evaluation residue rather than product code."
+  ],
+  "decision": {
+    "verdict": "primary-objective-pass",
+    "retain": [
+      "rough request to next-deliverable compilation",
+      "byte-level confirmation before source-corruption claims",
+      "stop after blocked optional verification",
+      "truthful separation of verified and unverified outcomes"
+    ],
+    "notProven": [
+      "overall token efficiency",
+      "minimal implementation scope",
+      "browser behavior or store launch readiness"
+    ],
+    "next": "Use the corrected core in real project work. Do not run another synthetic pair unless a new material failure provides a distinct hypothesis."
+  }
+}
