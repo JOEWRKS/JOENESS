@@ -35,7 +35,9 @@ test("the interaction safety core adds conditional decisions and failure receipt
   assert.match(core, /progress depends on a user decision.*final confirmation-needed block.*(?:at most|max) three/is);
   assert.match(core, /recommended default.*what waits/is);
   assert.match(core, /material reversible assumption.*continue.*do not re-ask/is);
+  assert.match(core, /future external action.*(?:stated|state).*(?:boundary|not a question).*until.*current/is);
   assert.match(core, /material failure.*observed evidence.*cause.*confirmed.*suspected.*unknown/is);
+  assert.match(core, /material failure.*carried-forward workaround/is);
   assert.match(core, /response.*fixed.*mitigated.*worked around.*unresolved/is);
   assert.match(core, /remaining risk.*raw logs.*routine transient.*TDD.*syntax/is);
   assert.match(core, /never call a workaround a fix/is);
@@ -55,9 +57,11 @@ test("the interaction safety core adds conditional decisions and failure receipt
   assert.equal(retryDecision.decision.unknownNonIdempotentWriteRetriesBeforeReadback, 0);
   assert.equal(interactionDecision.schemaVersion, 1);
   assert.equal(interactionDecision.control.sampleCount, 5);
-  assert.equal(interactionDecision.candidate.sampleCount, 0);
-  assert.equal(interactionDecision.limitations.freshContextSamples, "unavailable");
-  assert.match(interactionDecision.limitations.reason, /fresh-context/i);
+  assert.equal(interactionDecision.candidateV1.sampleCount, 5);
+  assert.equal(interactionDecision.candidateV1.scores.onlyCurrentChoices, "1/5");
+  assert.equal(interactionDecision.candidateV1.scores.workaroundExplicitlyClassified, "0/5");
+  assert.equal(interactionDecision.revision.sampleCount, 0);
+  assert.equal(interactionDecision.limitations.revisionFreshContextSamples, "unavailable");
 });
 
 test("design references are selected independently and cannot expand scope", async () => {
