@@ -391,7 +391,7 @@ test('vendor bundle is exactly the pinned non-discoverable source set', () => {
   }
 });
 
-test('the targeted retry safety core is active without rewriting broader Core evidence', () => {
+test('the interaction safety core is active without rewriting broader Core evidence', () => {
   const manifest = JSON.parse(readFileSync(MANIFEST, 'utf8'));
 
   assert.equal(lstatSync(HISTORICAL_COMMON_CORE).size, 7933);

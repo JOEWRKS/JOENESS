@@ -6,7 +6,7 @@
     "gitCommit": "4ae9d29243ce49ffa8b62534adf879fd4d4ebd67",
     "sha256": "95566ab5c40164cdcecbe42d5fa00ac67b52da5711c250d2f31e54126920ec1e",
     "sampleCount": 5,
-    "source": "candidate-v1-samples.md",
+    "sourceDescription": "Controller-observed candidate v1 sample summary",
     "scores": {
       "separatedFinalDecisionBlock": "5/5",
       "currentBlockersAtMostThree": "5/5",
@@ -25,7 +25,7 @@
     "gitCommit": "a77565d88b8afd3dee2247601a7ab0027971d82e",
     "sha256": "6e83d9142b9118d5cabcff8dd1ff65defcc23f5226347779453b180fafe81c67",
     "sampleCount": 5,
-    "source": "revision-v1-samples.md",
+    "sourceDescription": "Controller-observed clean revision v1 sample summary",
     "scores": {
       "separatedFinalDecisionBlock": "5/5",
       "currentBlockersAtMostThree": "5/5",
@@ -43,7 +43,7 @@
     "gitCommit": "637aa8db2afe5153928856aa2940a429d7e66a32",
     "sha256": "9979420a69eef8635c12b5550f76c9f40a5a21095986eaad2f04e9ea451c7b6a",
     "sampleCount": 5,
-    "source": "round-3 labeled-field candidate samples",
+    "sourceDescription": "Controller-observed labeled-field candidate sample summary",
     "scores": {
       "receiptPresent": "4/5",
       "workaroundExplicitlyClassified": "3/5",
@@ -57,7 +57,7 @@
   },
   "errorReportControl": {
     "sampleCount": 5,
-    "source": "round-3 dedicated fresh control",
+    "sourceDescription": "Controller-observed dedicated error-report control summary",
     "scores": {
       "workaroundExplicitlyClassified": "0/5"
     },
@@ -69,7 +69,7 @@
     "sha256": "bcc4b92533f5e6ac6f06891293eadfec1d692db66019c2245795e47001a70bba",
     "evidenceCommit": "e0d1ffd1237f391c9712fc40b5bbabd76c2215be",
     "sampleCount": 5,
-    "source": "exact-template dedicated error-report samples",
+    "sourceDescription": "Controller-observed exact-template error-report sample summary",
     "scores": {
       "exactReceiptFields": "5/5",
       "handlingWorkedAround": "5/5",
@@ -86,7 +86,7 @@
   },
   "control": {
     "sampleCount": 5,
-    "source": "control-samples.md",
+    "sourceDescription": "Controller-observed no-guidance control summary",
     "scores": {
       "separatedFinalDecisionBlock": "0/5",
       "currentBlockersAtMostThree": "5/5",
@@ -114,6 +114,7 @@
   },
   "limitations": {
     "scope": "Focused interaction and error-report scenarios only; no general quality claim.",
+    "behaviorEvidenceRetention": "Only controller-observed scores, representative failures, and candidate Git commits plus SHA-256 identities are retained; raw model outputs and run IDs were not retained. Behavioral scores are summary-only and not independently replayable from this repository.",
     "tokenMeasurement": "unavailable"
   },
   "conclusion": "Revision v1 question behavior passed its four target criteria 5/5, revision v3 exact-template error reporting passed 5/5, and the root-owned installation contract passed its single final run. No general quality or token improvement is asserted."

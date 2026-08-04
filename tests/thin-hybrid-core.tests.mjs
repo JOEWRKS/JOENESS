@@ -24,6 +24,7 @@ test("the interaction safety core adds conditional decisions and failure receipt
   const core = await readFile(path.join(root, manifest.activeCommonCore.path), "utf8");
   const disabledCore = await readFile(path.join(root, "evals", "candidates", "no-common-core.md"), "utf8");
   const projectAgents = await readFile(path.join(root, "AGENTS.md"), "utf8");
+  const readme = await readFile(path.join(root, "README.md"), "utf8");
   assert.ok(Buffer.byteLength(core, "utf8") <= 1800, "safety core must stay smaller than 1.8 KiB");
   assert.match(core, /native crash.*same (?:command|mechanism).*automatic retr(?:y|ies).*0/is);
   assert.match(core, /deterministic.*(?:cause|error).*(?:one|1).*evidence-driven/is);
@@ -52,6 +53,14 @@ test("the interaction safety core adds conditional decisions and failure receipt
   assert.equal(disabledCore, "\n");
   assert.notEqual(projectAgents, core);
   assert.doesNotMatch(projectAgents, /Treat an explicit request.*closed contract/is);
+  assert.match(projectAgents, /rejected broad.*always-on Core.*disabled.*preserved.*evidence/is);
+  assert.match(projectAgents, /thin Interaction Safety Core.*activeCommonCore.*manifest/is);
+  assert.doesNotMatch(projectAgents, /^# JOENESS Interaction Safety Core$/m);
+  assert.match(readme, /진행에 사용자 결정이 필요할 때.*현재 차단 선택.*최종 확인 블록.*권장 기본값.*대기 작업/s);
+  assert.match(readme, /중대한 실패.*이어받은 우회책.*증거.*원인.*처리.*검증.*남은 위험/s);
+  assert.match(readme, /progress needs a user decision.*current blocking choices.*final confirmation block.*recommended default.*waiting state/is);
+  assert.match(readme, /material failures.*carried-forward workarounds.*Evidence.*Cause.*Handling.*Verification.*Remaining risk/is);
+  assert.doesNotMatch(readme, /activates only after failure/i);
   assert.equal(priorDecision.decision.activeCommonCore, "none");
   assert.equal(priorDecision.decision.promoteLeanCandidate, false);
   assert.equal(priorDecision.decision.allowOneRevision, false);
@@ -85,6 +94,14 @@ test("the interaction safety core adds conditional decisions and failure receipt
   assert.equal(interactionDecision.revisionV3.result, "pass");
   assert.equal(interactionDecision.excludedAttempts.leakedTargetTerms, 1);
   assert.equal(interactionDecision.excludedAttempts.interruptedSiblings, 2);
+  for (const name of ["candidateV1", "revisionV1", "revisionV2", "errorReportControl", "revisionV3", "control"]) {
+    assert.equal("source" in interactionDecision[name], false, `${name} must not imply a retained raw source file`);
+    assert.equal(typeof interactionDecision[name].sourceDescription, "string");
+  }
+  assert.match(
+    interactionDecision.limitations.behaviorEvidenceRetention,
+    /controller-observed scores.*representative failures.*Git.*SHA-256.*raw model outputs.*run IDs.*not retained.*summary-only.*not independently replayable/is,
+  );
   const historicalBindings = {
     candidateV1: {
       path: "evals/candidates/interaction-safety-core-v1.md",
@@ -117,6 +134,7 @@ test("the interaction safety core adds conditional decisions and failure receipt
   assert.match(betaLedger, /Revision v3 exact error receipt evidence:.*5\/5/is);
   assert.match(betaLedger, /token measurement.*unavailable/is);
   assert.match(betaLedger, /no general quality or token-improvement claim/is);
+  assert.match(betaLedger, /Summary evidence is retained.*raw model outputs.*run IDs.*not retained.*summary-only.*not independently replayable/is);
   assert.doesNotMatch(betaLedger, /Fresh-context candidate sampling.*unavailable/is);
 });
 
