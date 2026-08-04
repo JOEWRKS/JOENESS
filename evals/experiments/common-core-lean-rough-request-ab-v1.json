@@ -1,0 +1,68 @@
+{
+  "schemaVersion": 1,
+  "evaluation": "common-core-lean-rough-request-ab-v1",
+  "recordedAt": "2026-08-03",
+  "status": "complete-valid-mixed-product-control-wins-promotion-rejected",
+  "purpose": "Test whether the frozen Lean Common Core uniquely turns a rough project request into a usable local deliverable without over-expansion, false completion, or unjustified token cost.",
+  "design": {
+    "prompt": "팀에서 쓸 간단한 릴리스 체크리스트를 만들어줘. 추가 설치 없이 index.html을 열면 바로 써야 해. 나머지는 알아서 해.\n",
+    "promptSha256": "a16dbd2321fc2abe058466e0c5c8d3af910aa0f94443f6fa449278e1a4cec987",
+    "control": "One-byte project instruction; user-installed skills disabled.",
+    "candidate": "The same empty Git fixture plus common-core-lean-v1.md as project AGENTS.md; user-installed skills disabled.",
+    "candidateBytes": 1054,
+    "candidateSha256": "b7108b59a03395f69316eeaae3ad3a66ec32918bfecc7feb28df16911779a8f3",
+    "model": "gpt-5.6-sol",
+    "reasoningEffort": "low",
+    "launchMode": "parallel",
+    "armShellAndBrowser": false,
+    "repetitionsPerArm": 1
+  },
+  "rawEvidence": {
+    "root": "D:/JOEWRKS/.harness-evals/lean-rough-release-checklist-ab-v1-r1-20260803",
+    "resultSha256": "549e15b3356d4cd52421ea227e958be682e58cd14dfeda210bf1fb5800ba2ea0",
+    "files": [
+      {"path":"run-contract.json","bytes":1654,"sha256":"9775790934eb3e2f6970c81748feda11667d42db392c0c1ef9e3c74153707fe8"},
+      {"path":"control/evidence.json","bytes":1928,"sha256":"58ac935f2e63cfc558c49c3299952bb96c47c2d7783bc4722cc9b6798aff49d1"},
+      {"path":"control/diff.patch","bytes":12971,"sha256":"396c7aec2a141e4b0393a6a46fe696524b1d5ee2db193bc1387433f73ff26fc1"},
+      {"path":"control/render.png","bytes":151173,"sha256":"e63ac89cb4367106989c4e62c6f7b58ba22d15e9c99d5eeb707d543bb6a5dc4a"},
+      {"path":"harness/evidence.json","bytes":1956,"sha256":"a2bb089b79a592fc94b4650bc04a734978e9a84570308e79b43f8aa3c09abc6d"},
+      {"path":"harness/diff.patch","bytes":12628,"sha256":"f838d4cdf4a7ca46c6eef2e8ad81c48b7bd8aa898b83211a0a1f8087605201b8"},
+      {"path":"harness/render.png","bytes":66373,"sha256":"e580ede8c2041add0492a444b1421c6f1e5d9b5f4b4e55cc6a46faf6f7a3168b"}
+    ]
+  },
+  "metrics": {
+    "control": {"wallMs":105839,"totalTokens":41244,"cachedInputTokens":14848,"uncachedInputTokens":21772,"outputTokens":4624,"reasoningOutputTokens":139,"events":8,"webSearches":1,"changedFiles":1,"indexBytes":12641,"diffBytes":12971},
+    "candidate": {"wallMs":105626,"totalTokens":59212,"cachedInputTokens":38912,"uncachedInputTokens":15895,"outputTokens":4405,"reasoningOutputTokens":201,"events":8,"webSearches":0,"changedFiles":1,"indexBytes":12435,"diffBytes":12628},
+    "candidateDelta": {"wallMs":-213,"wallPercent":-0.20,"totalTokens":17968,"totalTokensPercent":43.56,"uncachedInputTokens":-5877,"outputTokens":-219,"webSearches":-1,"indexBytes":-206,"diffBytes":-343},
+    "interpretation": "The candidate avoided one empty web-search event and emitted a slightly smaller file, but used 43.56% more total tokens at effectively identical latency."
+  },
+  "externalVerification": {
+    "bothInlineJavaScriptSyntax": "PASS",
+    "bothRemoteReferences": 0,
+    "bothEdgeHeadlessRender": "PASS; screenshots retained",
+    "interaction": "UNVERIFIED for both arms. The generic Playwright check selected the hidden input under Control's custom label and was intercepted by that associated label, so the comparison was stopped instead of tailoring retries per arm.",
+    "temporaryEdgeProfiles": "Retained because recursive cleanup was rejected by command policy; not product evidence."
+  },
+  "rubric": [
+    {"area":"rough request to implemented artifact","control":"PASS","candidate":"PASS","decision":"tie-no-unique-candidate-gain","reason":"Both immediately created one browser-openable index.html instead of stopping at questions or a plan."},
+    {"area":"core checklist usefulness","control":"PASS","candidate":"PASS","decision":"mixed","reason":"Control has 16 fixed checks, filters, notes, and post-release coverage; candidate has 12 checks plus item add/delete and JSON backup."},
+    {"area":"scope and over-expansion","control":"PASS","candidate":"PARTIAL","decision":"control","reason":"Candidate added CRUD, backup, and toast behavior beyond the simple request; useful, but broader than Control's fixed checklist workflow."},
+    {"area":"accessibility basics","control":"PASS","candidate":"PARTIAL","decision":"control","reason":"Control provides associated labels, progress semantics, and explicit checkbox focus-visible styling. Candidate's appearance-none checkbox and hover-hidden delete control lack equivalent focus-visible treatment."},
+    {"area":"responsive visual hierarchy","control":"PASS","candidate":"PASS","decision":"candidate-subjective-win","reason":"Both render cleanly and adapt to mobile; candidate has a clearer two-column dashboard hierarchy in the retained 1280px screenshot."},
+    {"area":"workflow adaptability","control":"PARTIAL","candidate":"PASS","decision":"candidate","reason":"Candidate permits item add/delete and JSON backup without editing source."},
+    {"area":"code maintainability and collaboration","control":"PASS","candidate":"PARTIAL","decision":"control","reason":"Both are dependency-free single files, but candidate compresses most CSS and JavaScript into very long lines, making review and maintenance harder."},
+    {"area":"completion-report truth","control":"PARTIAL","candidate":"PARTIAL","decision":"tie-defect","reason":"Both accurately list static features but state that the app is immediately usable although neither arm executed interaction checks."},
+    {"area":"unnecessary tool use","control":"PARTIAL","candidate":"PASS","decision":"candidate","reason":"Control emitted one empty web-search event; candidate used none."},
+    {"area":"retry and recursive-loop control","control":"PASS","candidate":"PASS","decision":"tie","reason":"Both wrote once and stopped without a no-progress loop."},
+    {"area":"cost for observed quality","control":"PASS","candidate":"FAIL","decision":"control","reason":"Candidate's mixed UI/process improvements do not justify 17,968 extra total tokens, especially alongside material scope, accessibility, maintainability, and reporting regressions."},
+    {"area":"hard failure","control":"NONE","candidate":"NONE","decision":"tie"}
+  ],
+  "decision": {
+    "candidateUniqueRoughTranslationGain": false,
+    "candidateHasMaterialQualityRegressions": true,
+    "promotion": false,
+    "revision": false,
+    "reason": "A subjective visual win, workflow configurability, and one avoided empty search cannot offset the candidate's scope, accessibility, maintainability, and cost regressions or the reporting defect shared by both arms. The baseline already performed the intended rough-request compilation, so another wording revision would be speculative.",
+    "next": "Apply the predeclared promotion rule across all four cases and deactivate the separate Common Core if the final evidence audit agrees."
+  }
+}

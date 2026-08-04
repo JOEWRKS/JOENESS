@@ -1,6 +1,7 @@
 {
   "schemaVersion": 1,
-  "activeCommonCore": {"path":"AGENTS.md","sha256":"3e1cc9cc93a6ed07c276b6d41f8acd1928918b41d2394ab67795b3fc492f6635"},
+  "release": {"name":"JOENESS","version":"0.1","entrypoint":"JOENESS-0.1.ps1"},
+  "activeCommonCore": {"path":"evals/candidates/no-common-core.md","sha256":"01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b"},
   "evaluation": {
     "state": "candidate",
     "tests": ["tests/design-vendor-integrity.tests.mjs", "vendor/ui-ux-pro-max/scripts/validate_data.py", "vendor/ui-ux-pro-max/scripts/tests/test_core.py"],
@@ -16,7 +17,7 @@
         "limitation": "V1 retains no normalized command, file, or tool events; event-only failures are rejected as unsubstantiated, so this is not event-level certification."
       },
       "cases": {"path":"evals/design-frontend/cases.json","sha256":"8a940cd84b4f2cbf265154c060941734ad6e983d0f49cb7dd5d06fc3df5ee1f7"},
-      "router": {"path":"skills/joewrks-design-frontend/SKILL.md","sha256":"0694f0d0880c079ab50b2af2621ef37f9745eae356f0c9ebc5a1351cd0d8a67d"},
+      "router": {"path":"evals/candidates/design-frontend-router-hybrid-v1.md","sha256":"0694f0d0880c079ab50b2af2621ef37f9745eae356f0c9ebc5a1351cd0d8a67d"},
       "commonCore": {"path":"evals/candidates/common-core-v1.md","sha256":"5aebc74bc795891c43bf785d9b34ae4d35d4a40bf46eddef3f6246d75919a495"},
       "classification": "implicit-unverified",
       "hardGate": "pass",
@@ -38,10 +39,10 @@
         "upstreamPath": "skills/productivity/handoff",
         "license": {"name":"MIT","upstreamPath":"LICENSE","localPath":"skills/handoff/LICENSE","sha256":"0e7ac423bf2c6e223b7c5b156f8cf72da49d748e56a1641402c31f22ad07dbb5"}
       },
-      "intentionalDifferences": ["Removed unsupported argument-hint and disable-model-invocation frontmatter; agents/openai.yaml preserves explicit-only activation.", "Relocated the skill and included the exact repository license beside it."],
+      "intentionalDifferences": ["Removed unsupported argument-hint and disable-model-invocation frontmatter; agents/openai.yaml preserves explicit-only activation.", "Relocated the skill and included the exact repository license beside it.", "Added compact evidence and cost receipts, target-root binding, current-state revalidation, and handoff-bound authorization checks."],
       "validatorSha256": "5347a0a09cfb546bba1c0d1a30dae0a233d9a05f57bd4e7877155c588bcdabf7",
       "files": [
-        {"localPath":"skills/handoff/SKILL.md","bytes":791,"sha256":"aa365c9c3fb57b52e282d901dc2ed8153707b9f54d3fa2a5d15499c2768aaead","exactUpstreamCopy":false},
+        {"localPath":"skills/handoff/SKILL.md","bytes":3300,"sha256":"4cc4e2f3a91eaabd6ede33056bcba4fdc2224041282ab9f4739756498654d854","exactUpstreamCopy":false},
         {"localPath":"skills/handoff/agents/openai.yaml","bytes":141,"sha256":"5c479fd562c691851690e8b18c8501045bef0943c10743d636b2fae26add1d28","exactUpstreamCopy":true},
         {"localPath":"skills/handoff/LICENSE","bytes":1068,"sha256":"0e7ac423bf2c6e223b7c5b156f8cf72da49d748e56a1641402c31f22ad07dbb5","exactUpstreamCopy":true}
       ]
@@ -54,7 +55,7 @@
       "intentionalDifferences": ["Local activation and routing contract.", "Local OpenAI product metadata."],
       "validatorSha256": "5347a0a09cfb546bba1c0d1a30dae0a233d9a05f57bd4e7877155c588bcdabf7",
       "files": [
-        {"localPath":"skills/joewrks-design-frontend/SKILL.md","bytes":2685,"sha256":"0694f0d0880c079ab50b2af2621ef37f9745eae356f0c9ebc5a1351cd0d8a67d","exactUpstreamCopy":false},
+        {"localPath":"skills/joewrks-design-frontend/SKILL.md","bytes":3335,"sha256":"a5a0c3c64b94b8565a53e19e10d15fa96dcc995bd152da6c1886ed938261a05e","exactUpstreamCopy":false},
         {"localPath":"skills/joewrks-design-frontend/agents/openai.yaml","bytes":263,"sha256":"3d0bc6bf72b93b3bd185852f080b19caeb17aed45f582df339d61c2633f81892","exactUpstreamCopy":false}
       ]
     },
@@ -63,10 +64,10 @@
       "evaluationState": "candidate",
       "activationPolicy": "explicit-only",
       "sourceDependencies": [],
-      "intentionalDifferences": ["Explicit-only durable project-contract setup with deterministic writes."],
+      "intentionalDifferences": ["Explicit-only durable project-contract setup with deterministic writes and bounded validation."],
       "validatorSha256": "5347a0a09cfb546bba1c0d1a30dae0a233d9a05f57bd4e7877155c588bcdabf7",
       "files": [
-        {"localPath":"skills/joewrks-project-setup/SKILL.md","bytes":2502,"sha256":"770909bb17b62bc0fa606d678f0247ca82dc1c0ed247771768a32a6d1d6cfac2","exactUpstreamCopy":false},
+        {"localPath":"skills/joewrks-project-setup/SKILL.md","bytes":2751,"sha256":"cb54ccf6b0ad141506d60868beee1d13d1f2fdc6ddea97aedbe937531edc1e08","exactUpstreamCopy":false},
         {"localPath":"skills/joewrks-project-setup/agents/openai.yaml","bytes":315,"sha256":"cbc5d8da93e27ed5f30e36e8736acb26cde4bd20bd82d6432fc3a18b36d32fee","exactUpstreamCopy":false},
         {"localPath":"skills/joewrks-project-setup/scripts/project-setup.ps1","bytes":17495,"sha256":"4ffc548078a5c87357fd0e4e63538567ea2666f118243a0558bff29278d13105","exactUpstreamCopy":false}
       ]
@@ -102,7 +103,7 @@
     "runIds": {"control":"design-router-control-v3","candidate":"design-router-candidate-v3"},
     "evaluator": {"path":"evals/design-frontend/collect-router-evaluation.mjs","sha256":"f2f13c00e22ac12dac83c91a116ee9d5de4a3530be54142b1eccf312585690b6"},
     "cases": {"path":"evals/design-frontend/cases.json","sha256":"8a940cd84b4f2cbf265154c060941734ad6e983d0f49cb7dd5d06fc3df5ee1f7"},
-    "router": {"path":"skills/joewrks-design-frontend/SKILL.md","sha256":"d641c0210e02ca10cc70f1f3219eafbff99c480fb4e0f7ccca5348e6d2e14dfa"},
+    "router": {"path":"evals/candidates/design-frontend-router-pair-v3.md","sha256":"d641c0210e02ca10cc70f1f3219eafbff99c480fb4e0f7ccca5348e6d2e14dfa"},
     "p0Baseline": {"path":"evals/p0/common-core-v5.json","sha256":"05631b136be55626987f7deed16ec8bf4c34b38880e4764b2375051f42249316"},
     "syntheticLimitation": "Selection evidence only; no live Figma connection or browser result is proven."
   },

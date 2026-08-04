@@ -595,7 +595,10 @@ function Invoke-JoewrksHarnessSync {
             }
             Assert-HarnessObjectShape $state.sourceIdentities $identityNames 'State sourceIdentities'
             Assert-HarnessObjectShape $state.sourceIdentities.commonCore @('path', 'sha256') 'State commonCore source identity'
-            if ([string] $state.sourceIdentities.commonCore.path -cne 'AGENTS.md') { throw 'State commonCore source path is invalid' }
+            $stateCommonCoreSourcePath = Get-HarnessSafeRelativePath ([string] $state.sourceIdentities.commonCore.path) 'State commonCore source path'
+            if ($state.schemaVersion -eq 1 -and $stateCommonCoreSourcePath -cne 'AGENTS.md') {
+                throw 'V1 State commonCore source path is not historical'
+            }
             $stateCommonCoreSourceHash = Get-HarnessValidSha256 $state.sourceIdentities.commonCore.sha256 'State commonCore source hash'
             if ($state.schemaVersion -eq 1 -and ($null -eq $historicalCoreEntry -or $stateCommonCoreSourceHash -cne ([string] $historicalCoreEntry.sha256).ToLowerInvariant())) {
                 throw 'V1 State commonCore source identity is not historical'
@@ -630,7 +633,10 @@ function Invoke-JoewrksHarnessSync {
                 } else {
                     $installedActiveCore.Value
                 }
-                if ([string] $installedCore.path -cne 'AGENTS.md') { throw 'Installed manifest Common Core path is invalid' }
+                $installedCorePath = Get-HarnessSafeRelativePath ([string] $installedCore.path) 'Installed manifest Common Core path'
+                if ($installedCorePath -cne $stateCommonCoreSourcePath) {
+                    throw 'State commonCore source path does not match its installed manifest'
+                }
                 $installedCoreHash = Get-HarnessValidSha256 $installedCore.sha256 'Installed manifest Common Core hash'
                 if ($stateCommonCoreSourceHash -cne $installedCoreHash) {
                     throw 'State commonCore source identity does not match its installed manifest'

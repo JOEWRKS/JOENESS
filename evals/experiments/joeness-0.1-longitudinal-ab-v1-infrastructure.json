@@ -1,0 +1,102 @@
+{
+  "schemaVersion": 1,
+  "evaluation": "joeness-0.1-longitudinal-ab-v1",
+  "recordedAt": "2026-08-03",
+  "status": "invalid-infrastructure",
+  "purposeKo": "동일한 멜론머지 프로젝트에서 기본 Codex와 JOENESS-0.1의 장기 작업 성능을 비교하기 전, 각 격리 작업의 실제 셸 CWD가 요청한 작업공간과 일치하는지 검증한다.",
+  "plannedPhases": [
+    "거친 프로젝트 요청을 실행 가능한 계획과 산출물로 변환",
+    "동일 작업공간에서 실제 구현을 계속",
+    "새 세션에서 인수인계·유지보수·출시 준비"
+  ],
+  "gate": {
+    "requirement": "모든 에이전트가 요청한 격리 작업공간에서 명령을 실행해야 한다.",
+    "observed": "모델이 실행한 PowerShell 명령이 요청한 probe workspace가 아니라 D:/JOEWRKS/JOEWRKS-TestProject-01에서 실행됐다.",
+    "result": "fail",
+    "scoredRunStarted": false,
+    "harnessOutcome": "not-evaluated"
+  },
+  "probes": [
+    {
+      "id": "cwd-probe-20260803-01",
+      "cliVersion": "0.145.0",
+      "result": "invocation-error",
+      "modelTokens": 0,
+      "note": "codex exec에 유효하지 않은 -a 옵션을 전달해 모델 실행 전 종료됐다."
+    },
+    {
+      "id": "cwd-probe-20260803-02",
+      "cliVersion": "0.145.0",
+      "variant": "standard isolated environment",
+      "result": "wrong-cwd",
+      "inputTokens": 22821,
+      "outputTokens": 181,
+      "totalTokens": 23002
+    },
+    {
+      "id": "cwd-probe-20260803-03",
+      "cliVersion": "0.145.0",
+      "variant": "code_mode_host disabled",
+      "result": "wrong-cwd",
+      "inputTokens": 22820,
+      "outputTokens": 167,
+      "totalTokens": 22987
+    },
+    {
+      "id": "cwd-probe-20260803-04",
+      "cliVersion": "0.145.0",
+      "variant": "clean environment and code_mode_host disabled",
+      "result": "wrong-cwd",
+      "inputTokens": 22822,
+      "outputTokens": 187,
+      "totalTokens": 23009
+    },
+    {
+      "id": "cwd-probe-20260803-05",
+      "cliVersion": "0.146.0",
+      "variant": "after CLI update, before desktop restart",
+      "result": "wrong-cwd",
+      "inputTokens": 22814,
+      "outputTokens": 180,
+      "totalTokens": 22994
+    },
+    {
+      "id": "cwd-probe-20260803-06",
+      "cliVersion": "0.146.0",
+      "variant": "after CLI update and desktop restart",
+      "result": "wrong-cwd",
+      "inputTokens": 22818,
+      "outputTokens": 186,
+      "reasoningOutputTokens": 43,
+      "totalTokens": 23004
+    }
+  ],
+  "usage": {
+    "modelProbes": 5,
+    "totalTokens": 114996,
+    "classification": "evaluation infrastructure overhead; not A/B evidence"
+  },
+  "safetyAndCleanup": {
+    "dangerousSandboxBypassUsed": false,
+    "probeAuthCopiesRemoved": true,
+    "unrelatedTestProjectClean": true,
+    "probeScaffoldingRetainedAt": "D:/JOEWRKS/.harness-evals/joeness-0.1-longitudinal"
+  },
+  "upstream": [
+    {
+      "url": "https://github.com/openai/codex/issues/21606",
+      "statusAtReview": "open",
+      "relevance": "Windows sandbox can ignore the requested workdir and execute commands in another directory."
+    },
+    {
+      "url": "https://github.com/openai/codex/issues/24214",
+      "statusAtReview": "open",
+      "relevance": "On Windows, --add-dir is not a reliable write fence for apply_patch; --cd must be the narrow boundary."
+    }
+  ],
+  "decision": {
+    "action": "stop",
+    "reason": "The isolation gate failed consistently before either arm began. Repeating the scored A/B or disabling the sandbox would risk unrelated files and waste more tokens.",
+    "resumeWhen": "A single read-only preflight proves observed shell CWD equals the requested isolated workspace in the runtime that will execute both arms."
+  }
+}

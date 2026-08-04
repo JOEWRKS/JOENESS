@@ -2,6 +2,7 @@ $ErrorActionPreference = 'Stop'
 
 $RepositoryRoot = Split-Path -Parent $PSScriptRoot
 $Implementation = Join-Path $RepositoryRoot 'scripts\sync-harness.ps1'
+$ReleaseEntry = Join-Path $RepositoryRoot 'JOENESS-0.1.ps1'
 $BeginMarker = '<!-- JOEWRKS-HARNESS:BEGIN -->'
 $EndMarker = '<!-- JOEWRKS-HARNESS:END -->'
 
@@ -15,17 +16,20 @@ function Test-ReadmeContract {
     $readme = [IO.File]::ReadAllText((Join-Path $RepositoryRoot 'README.md'))
     $koreanRemovedAnchor = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('bm8tc3RhdGUgYHJlbW92ZWRg64qUIOycoO2aqO2VnCBzdGF0ZeuCmCDslYzroKTsp4Qg7LCo64uoIOymneqxsOulvCDssL7sp4Ag66q77ZaI6rOgIOq0gOumrCDtjIzsnbzsnYQg67OA6rK97ZWY7KeAIOyViuyVmOuLpOuKlCDrnLvsnbwg67+QLCDsnbjsi53tlZjsp4Ag66q77ZWcIHZlbmRvciByZXNpZHVl6rmM7KeAIOuqqOuRkCDsl4bri6TripQg7Kad66qF7J2AIOyVhOuLmeuLiOuLpC4='))
     foreach ($command in @(
-        'powershell.exe -NoProfile -File .\harness.ps1 -Check',
-        'powershell.exe -NoProfile -File .\harness.ps1 -Apply',
-        'powershell.exe -NoProfile -File .\harness.ps1 -Remove'
+        'powershell.exe -NoProfile -File .\JOENESS-0.1.ps1 -Check',
+        'powershell.exe -NoProfile -File .\JOENESS-0.1.ps1 -Apply',
+        'powershell.exe -NoProfile -File .\JOENESS-0.1.ps1 -Remove'
     )) {
         Assert-True $readme.Contains($command) "README quick start contains $command"
     }
     foreach ($anchor in @(
-        'powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\harness.ps1 -Check',
+        'powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\JOENESS-0.1.ps1 -Check',
+        '`harness.ps1` remains a compatibility alias',
         $koreanRemovedAnchor,
         'A no-state `removed` result means no valid state or recognized blocking evidence was found and no managed files were changed; it does not prove that every unrecognized or vendor residue is absent.',
         'Do not add a separate `HARNESS.md`.',
+        'Repository `common-core.md`: retained evaluation evidence and not installed by the current manifest.',
+        'Native Codex handles broad requests; persist only project-specific facts and gates in the project `AGENTS.md`.',
         'the explicit-only `handoff` skill',
         'When the user explicitly requests `$joewrks-project-setup` or `setup`, `configure`, `persist`, or `apply` of a durable JOEWRKS project contract',
         'An unresolved target or incomplete rollback prevents a final-state claim.',
@@ -60,6 +64,12 @@ function Get-OptionalFiles {
     @($paths | Sort-Object -Unique)
 }
 
+function Get-ActiveCoreRelativePath {
+    param([string] $SourceRoot)
+    $manifest = Get-Content -Raw -LiteralPath (Join-Path $SourceRoot 'vendor\source-manifest.json') | ConvertFrom-Json
+    ([string] $manifest.activeCommonCore.path).Replace('/', '\')
+}
+
 function Get-V1SelectedFiles {
     param($Manifest)
     $paths = @()
@@ -92,7 +102,8 @@ function New-Fixture {
     $root = Join-Path ([IO.Path]::GetTempPath()) ("joewrks-sync-" + [guid]::NewGuid().ToString('N'))
     $source = Join-Path $root 'source'
     [IO.Directory]::CreateDirectory($source) | Out-Null
-    foreach ($path in @('AGENTS.md', 'evals\candidates\common-core-v1.md', 'scripts\sync-harness.ps1', 'vendor\source-manifest.json') + (Get-OptionalFiles $RepositoryRoot)) { Copy-RelativeFile $RepositoryRoot $source $path }
+    $activeCore = Get-ActiveCoreRelativePath $RepositoryRoot
+    foreach ($path in @($activeCore, 'evals\candidates\common-core-v1.md', 'scripts\sync-harness.ps1', 'vendor\source-manifest.json') + (Get-OptionalFiles $RepositoryRoot)) { Copy-RelativeFile $RepositoryRoot $source $path }
     [pscustomobject]@{
         Root = $root; SourceRoot = $source; Script = Join-Path $source 'scripts\sync-harness.ps1'
         CodexHome = Join-Path $root 'codex'; AgentsHome = Join-Path $root 'agents'; BackupRoot = Join-Path $root 'backups'
@@ -103,18 +114,18 @@ function New-Fixture {
 function Remove-Fixture { param($Fixture) if (Test-Path -LiteralPath $Fixture.Root) { [IO.Directory]::Delete($Fixture.Root, $true) } }
 
 function Invoke-Harness {
-    param($Fixture, [ValidateSet('Check', 'Apply', 'Remove')] [string] $Mode, [switch] $IncludeDesignFrontend, [switch] $PublicEntry, [switch] $UseEnvironmentCodexHome, [string[]] $ExtraArguments = @())
+    param($Fixture, [ValidateSet('Check', 'Apply', 'Remove')] [string] $Mode, [switch] $IncludeDesignFrontend, [switch] $PublicEntry, [switch] $ReleasePublicEntry, [switch] $UseEnvironmentCodexHome, [string[]] $ExtraArguments = @())
     $arguments = @("-$Mode")
     if (-not $UseEnvironmentCodexHome) { $arguments += @('-CodexHome', $Fixture.CodexHome) }
     $arguments += @('-AgentsHome', $Fixture.AgentsHome, '-BackupRoot', $Fixture.BackupRoot)
     if ($IncludeDesignFrontend) { $arguments += '-IncludeDesignFrontend' }
-    Invoke-HarnessRaw $Fixture $arguments -PublicEntry:$PublicEntry -UseEnvironmentCodexHome:$UseEnvironmentCodexHome -ExtraArguments $ExtraArguments
+    Invoke-HarnessRaw $Fixture $arguments -PublicEntry:$PublicEntry -ReleasePublicEntry:$ReleasePublicEntry -UseEnvironmentCodexHome:$UseEnvironmentCodexHome -ExtraArguments $ExtraArguments
 }
 
 function Invoke-HarnessRaw {
-    param($Fixture, [string[]] $Arguments, [switch] $PublicEntry, [switch] $UseEnvironmentCodexHome, [string[]] $ExtraArguments = @())
+    param($Fixture, [string[]] $Arguments, [switch] $PublicEntry, [switch] $ReleasePublicEntry, [switch] $UseEnvironmentCodexHome, [string[]] $ExtraArguments = @())
     $out = Join-Path $Fixture.Root 'stdout.txt'; $err = Join-Path $Fixture.Root 'stderr.txt'
-    $scriptPath = if ($PublicEntry) { Join-Path $RepositoryRoot 'harness.ps1' } else { $Fixture.Script }
+    $scriptPath = if ($ReleasePublicEntry) { $ReleaseEntry } elseif ($PublicEntry) { Join-Path $RepositoryRoot 'harness.ps1' } else { $Fixture.Script }
     $commandArgs = @('-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', $scriptPath) + $Arguments
     $oldPreference = $ErrorActionPreference
     $oldCodexHome = $env:CODEX_HOME
@@ -181,6 +192,11 @@ function Write-V1FixtureState {
 function Test-PublicHarnessEntry {
     $f = New-Fixture
     try {
+        $releaseCheck = Invoke-Harness $f Check -ReleasePublicEntry
+        Assert-Equal $releaseCheck.ExitCode 0 'JOENESS-0.1 entry check succeeds'
+        Assert-Equal (Read-Result $releaseCheck 'JOENESS-0.1 entry check').status 'ready' 'JOENESS-0.1 entry forwards check'
+        Assert-True (-not (Test-Path -LiteralPath $f.CodexHome)) 'JOENESS-0.1 check remains read-only'
+
         $emptyRemove = Invoke-Harness $f Remove -PublicEntry
         Assert-Equal $emptyRemove.ExitCode 0 'public entry empty remove succeeds'
         Assert-Equal (Read-Result $emptyRemove 'public entry empty remove').status 'removed' 'public entry forwards empty remove'
@@ -189,6 +205,7 @@ function Test-PublicHarnessEntry {
         $check = Invoke-Harness $f Check -PublicEntry
         Assert-Equal $check.ExitCode 0 'public entry check succeeds'
         Assert-Equal (Read-Result $check 'public entry check').status 'ready' 'public entry forwards check'
+        Assert-Equal $check.StdOut $releaseCheck.StdOut 'legacy and JOENESS-0.1 entries return the same check result'
         Assert-True (-not (Test-Path -LiteralPath $f.CodexHome)) 'public entry check remains read-only'
 
         $apply = Invoke-Harness $f Apply -PublicEntry
@@ -245,7 +262,7 @@ function Assert-TreeEqual {
 
 function Set-SourceCore {
     param($Fixture, [string] $Text)
-    $core = Join-Path $Fixture.SourceRoot 'AGENTS.md'; Write-Utf8 $core $Text
+    $core = Join-Path $Fixture.SourceRoot (Get-ActiveCoreRelativePath $Fixture.SourceRoot); Write-Utf8 $core $Text
     $manifestPath = Join-Path $Fixture.SourceRoot 'vendor\source-manifest.json'
     $manifest = Get-Content -Raw -LiteralPath $manifestPath | ConvertFrom-Json
     $manifest.activeCommonCore.sha256 = Get-Hash $core
@@ -455,7 +472,7 @@ function Test-RemovePreflightBlockers {
 
     foreach ($case in @(
         @{ Name = 'drifted owned target'; Prepare = { param($f) Add-Content -LiteralPath (Join-Path $f.AgentsHome 'skills\joewrks-design-frontend\SKILL.md') -Value 'drift' } },
-        @{ Name = 'drifted owned Common Core'; Prepare = { param($f) $path = Join-Path $f.CodexHome 'AGENTS.md'; Write-Utf8 $path ([IO.File]::ReadAllText($path).Replace('# Common Work Core', '# Drifted Common Work Core')) } },
+        @{ Name = 'drifted owned Common Core'; Prepare = { param($f) $path = Join-Path $f.CodexHome 'AGENTS.md'; Write-Utf8 $path ([IO.File]::ReadAllText($path).Replace($EndMarker, "# Drifted managed slot`n$EndMarker")) } },
         @{ Name = 'missing owned target'; Prepare = { param($f) [IO.File]::Delete((Join-Path $f.AgentsHome 'skills\joewrks-design-frontend\SKILL.md')) } },
         @{ Name = 'missing owned AGENTS'; Prepare = { param($f) [IO.File]::Delete((Join-Path $f.CodexHome 'AGENTS.md')) } }
     )) {
@@ -721,7 +738,7 @@ function Test-AgentEncodingAndCoreUpdate {
         Write-Bytes $path ([Text.Encoding]::UTF8.GetPreamble() + (New-Object Text.UTF8Encoding($false)).GetBytes($agentText.Replace($end, $edit)))
         $external = Get-ExternalAgentBytes $path
         Assert-Equal (Invoke-Harness $f Check).ExitCode 0 'external edit is checkable'; Assert-Equal (Invoke-Harness $f Apply).ExitCode 0 'no-op apply preserves external edit'
-        Set-SourceCore $f ((Get-Content -Raw -LiteralPath (Join-Path $f.SourceRoot 'AGENTS.md')) + "`n# update")
+        Set-SourceCore $f ((Get-Content -Raw -LiteralPath (Join-Path $f.SourceRoot (Get-ActiveCoreRelativePath $f.SourceRoot))) + "`n# update")
         Assert-Equal (Invoke-Harness $f Apply).ExitCode 0 'source core update succeeds'
         $after = Get-ExternalAgentBytes $path; Assert-BytesEqual $after.Prefix $external.Prefix 'external prefix is byte-exact'; Assert-BytesEqual $after.Suffix $external.Suffix 'external suffix is byte-exact'
     } finally { Remove-Fixture $f }
@@ -1077,7 +1094,7 @@ function Test-PreservedOptionalAfterCoreUpdate {
         Assert-Equal (Invoke-Harness $f Apply -IncludeDesignFrontend).ExitCode 0 'preserved optional baseline apply succeeds'
         $designSkill = Join-Path $f.AgentsHome 'skills\joewrks-design-frontend\SKILL.md'
         $beforeDesignSkill = Get-Hash $designSkill
-        Set-SourceCore $f ((Get-Content -Raw -LiteralPath (Join-Path $f.SourceRoot 'AGENTS.md')) + "`n# core-only update")
+        Set-SourceCore $f ((Get-Content -Raw -LiteralPath (Join-Path $f.SourceRoot (Get-ActiveCoreRelativePath $f.SourceRoot))) + "`n# core-only update")
 
         Assert-Equal (Invoke-Harness $f Apply).ExitCode 0 'core-only update after opt-in succeeds'
         Assert-Equal (Get-Hash $designSkill) $beforeDesignSkill 'core update preserves unchanged design skill bytes'
@@ -1165,6 +1182,7 @@ function Test-LegacyV2ActiveCoreMigration {
         Write-Utf8 $installedManifestPath (($installedManifest | ConvertTo-Json -Depth 100) + "`n")
 
         $state = Get-Content -Raw -LiteralPath $f.State | ConvertFrom-Json
+        $state.sourceIdentities.commonCore.path = 'AGENTS.md'
         $state.sourceIdentities.commonCore.sha256 = Get-Hash $historicalCorePath
         $state.managedBlocks.'AGENTS.md' = Get-Hash $agentsPath
         $state.wholeFileTargets.'vendor/source-manifest.json' = Get-Hash $installedManifestPath
@@ -1178,8 +1196,10 @@ function Test-LegacyV2ActiveCoreMigration {
 
         $migratedState = Get-Content -Raw -LiteralPath $f.State | ConvertFrom-Json
         $sourceManifest = Get-Content -Raw -LiteralPath (Join-Path $f.SourceRoot 'vendor\source-manifest.json') | ConvertFrom-Json
+        Assert-Equal $migratedState.sourceIdentities.commonCore.path $sourceManifest.activeCommonCore.path 'legacy V2 migration records the active core path'
         Assert-Equal $migratedState.sourceIdentities.commonCore.sha256 $sourceManifest.activeCommonCore.sha256 'legacy V2 migration records the active core identity'
         $migratedManifest = Get-Content -Raw -LiteralPath $installedManifestPath | ConvertFrom-Json
+        Assert-Equal $migratedManifest.activeCommonCore.path $sourceManifest.activeCommonCore.path 'legacy V2 migration installs the active core path'
         Assert-Equal $migratedManifest.activeCommonCore.sha256 $sourceManifest.activeCommonCore.sha256 'legacy V2 migration installs the active core pointer'
     } finally { Remove-Fixture $f }
 }
@@ -1460,7 +1480,7 @@ function Test-ExistingTargetRollback {
         $agentsPath = Join-Path $f.CodexHome 'AGENTS.md'
         $beforeAgents = [IO.File]::ReadAllBytes($agentsPath)
         $beforeState = [IO.File]::ReadAllBytes($f.State)
-        Set-SourceCore $f ((Get-Content -Raw -LiteralPath (Join-Path $f.SourceRoot 'AGENTS.md')) + "`n# rollback probe")
+        Set-SourceCore $f ((Get-Content -Raw -LiteralPath (Join-Path $f.SourceRoot (Get-ActiveCoreRelativePath $f.SourceRoot))) + "`n# rollback probe")
         . $f.Script
         $result = Invoke-JoewrksHarnessSync -Apply -CodexHome $f.CodexHome -AgentsHome $f.AgentsHome -BackupRoot $f.BackupRoot -AfterReplace { param($replacement) throw 'test existing-target failure' }
         Assert-Equal $result.status 'failed' 'existing-target callback failure reports failed'

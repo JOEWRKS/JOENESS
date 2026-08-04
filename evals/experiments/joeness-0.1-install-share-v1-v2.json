@@ -1,0 +1,76 @@
+{
+  "schemaVersion": 1,
+  "experimentId": "joeness-0.1-install-share-v1-v2",
+  "date": "2026-08-03",
+  "status": "completed",
+  "purpose": "Validate the PowerShell share/install lifecycle in custom roots and preserve the evidence-gap correction as a separate run.",
+  "v1": {
+    "root": "D:/JOEWRKS/.harness-evals/joeness-0.1-install-share-01",
+    "verdict": "fail-evidence-contract",
+    "implementationDefectFound": false,
+    "controller": {"hardGates": "10/10", "rubric": "20/20"},
+    "independent": {"hardGates": "9/10", "rubric": "17/20"},
+    "failure": "The retained controller summary did not preserve the initial Check's exact targets fields or raw stdout.",
+    "lifecycle": {
+      "sequence": ["Check", "Apply", "Check", "Apply", "Remove", "Check", "Apply", "Check", "Remove"],
+      "customRootsOnly": true,
+      "ownedWholeFiles": 55,
+      "sourceHashMismatches": 0,
+      "emptyCommonCoreMarker": true,
+      "idempotentApplyTreeChanges": 0,
+      "idempotentApplyBackups": 0,
+      "finalRemainingFiles": ["codex-home/AGENTS.md", "agents-home/notes/keep.txt"],
+      "finalTreeDigestsEqualInitial": true,
+      "personalSentinelsChanged": 0,
+      "defaultBackupTreeChanged": false,
+      "pluginsInstalled": 0
+    },
+    "blockedProbe": {
+      "check": {"exit": 2, "status": "blocked", "blocker": "optionalCollision"},
+      "apply": {"exit": 2, "status": "blocked", "blocker": "optionalCollision"},
+      "stateCreated": false,
+      "backupCreated": false,
+      "observedTargetTreeChange": false
+    },
+    "partialScoresPreserved": {
+      "failureAtomicity": "1/2 because no independently retained pre-probe file digest or raw stdout was available",
+      "skillDiscoveryLayout": "1/2 because standard layout was verified but native discovery in a fresh Codex task was not",
+      "installationCost": "1/2 because file and backup cost was measured but exact runtime and model tokens were unavailable"
+    },
+    "artifacts": {
+      "contract": {"bytes": 2566, "sha256": "7648f0bcb3d6e7a62bc354684febe7698086c2af4d902f26fd076227f2e8bea7"},
+      "result": {"bytes": 4000, "sha256": "c2752cb99e01c6c2ebe0d225bb27c3a8fbe2115f9cf1970d9e34012543887871"},
+      "controller": {"bytes": 3024, "sha256": "b01417228210bea45bd55b0b2b1914136ef631208c8d177ea7e655abfb0d308b"},
+      "independent": {"bytes": 5749, "sha256": "39b3c99b4c58bd6e169f4e2a1883920effabf934fa17ca6439cbac1b398c5ac6"}
+    }
+  },
+  "v2PathReceipt": {
+    "root": "D:/JOEWRKS/.harness-evals/joeness-0.1-install-path-receipt-01",
+    "scope": "Close only V1 hard gate 1; no Apply, lifecycle rerun, or score rewrite.",
+    "runs": 1,
+    "retries": 0,
+    "exit": 0,
+    "status": "ready",
+    "hardGates": "3/3 pass by controller and independent reviewer",
+    "rawTargetsRetained": true,
+    "codexTreeUnchanged": true,
+    "agentsTreeUnchanged": true,
+    "backupCreated": false,
+    "artifacts": {
+      "contract": {"bytes": 960, "sha256": "05ad1db697909b6d930265e13a1b2c6826c613f6196f23c36a7f8b0fdaa5ec91"},
+      "rawCheckStdout": {"bytes": 7490, "sha256": "03251255e2edbc08341480be8abaa9b5aee456a51fd7c9e66a06283dd13e4cf7"},
+      "result": {"bytes": 984, "sha256": "497b17cea9e2552f95538687c632e218dd2385982082bbc4b8c4e1aa76fe5cfe"},
+      "controller": {"bytes": 604, "sha256": "bb65462a2709c7732468db6a50eb32ef59573532c532fe2aafe467c47c888da7"},
+      "independent": {"bytes": 1423, "sha256": "881eebc37913f59de93a2071243dc09d2fd304311612df3e1132f64f54cd61f0"}
+    }
+  },
+  "stageVerdict": {
+    "hardGates": "10/10 supported across preserved V1 and narrow V2",
+    "verdict": "pass-with-explicit-limitations",
+    "nativeCodexDiscovery": "unverified",
+    "exactRuntime": "unavailable",
+    "exactModelTokens": "unavailable",
+    "efficiencyAdvantageAsserted": false,
+    "ruleOrInstallerChange": "none; V2 corrected evidence retention only"
+  }
+}

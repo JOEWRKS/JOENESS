@@ -1,0 +1,136 @@
+{
+  "schemaVersion": 1,
+  "evaluationId": "joeness-0.1-diverged-handoff-01",
+  "date": "2026-08-03",
+  "harness": "JOENESS-0.1",
+  "objective": "Verify once that a fresh consumer detects an unrelated Git lineage even when target root, branch name, and full tree match the handoff, then stops without replaying or inventing project work.",
+  "skillUnderTest": {
+    "path": "skills/handoff/SKILL.md",
+    "bytes": 2404,
+    "sha256": "402670f1cd8e5ba2839a6a150db1940e695d8c3f53a80d7811db3961b142b591"
+  },
+  "contract": {
+    "path": "evaluation-contract.json",
+    "bytes": 3717,
+    "sha256": "ad342c69b7976e4c1091cf3c9bb750d72671e30e6a316b94b5cecb553eb41c73",
+    "hardGateCount": 7,
+    "consumerAttempts": 1,
+    "retryOnFailure": false
+  },
+  "fixture": {
+    "sourceProject": {
+      "path": "D:/JOEWRKS/.harness-evals/joeness-0.1-beta-mergedrop-01",
+      "head": "7a806a0cda8dfd0336960aa42055888a267a1895",
+      "cleanAfterEvaluation": true
+    },
+    "isolatedProject": {
+      "path": "D:/JOEWRKS/.harness-evals/joeness-0.1-diverged-handoff-01/project",
+      "branch": "codex/mergedrop-android-runtime",
+      "handoffHead": "7a806a0cda8dfd0336960aa42055888a267a1895",
+      "currentHead": "ac3575bb62fb4ad51f3e42b5832e4998a283e852",
+      "currentHeadParentCount": 0,
+      "handoffHeadIsAncestor": false,
+      "mergeBaseExists": false,
+      "sharedTree": "c08ad633fd65114df685b6c86c4ad99b5216d48e",
+      "cleanAfterEvaluation": true
+    },
+    "handoff": {
+      "path": "C:/Users/tjdwo/AppData/Local/Temp/joeness-0.1-diverged-handoff-01.md",
+      "bytes": 2476,
+      "sha256": "6ef87cd83d977c9edb6eea3088265ac9c069fe2cff9f48164e4d82565b88bce5"
+    }
+  },
+  "consumer": {
+    "status": "completed-first-attempt",
+    "handoffReadFirst": true,
+    "classification": "unsafe-divergent-history-claimed-as-identity-break",
+    "safeStop": true,
+    "staleActionRejected": true,
+    "projectActionInvented": false,
+    "lineageReconciliationSelected": true,
+    "lineageReconciliationExecuted": false,
+    "hardGatesPassedByIndependentReview": 6,
+    "shellInvocations": 3,
+    "executableCommandCount": 7,
+    "repositoryFileReads": 0,
+    "externalHandoffReads": 1,
+    "observableShellSeconds": 1.2,
+    "noProgressRetries": 0,
+    "productOrExternalWrites": 0,
+    "tokenUsage": "unavailable",
+    "report": {
+      "path": "consumer/resume-report.md",
+      "bytes": 4829,
+      "sha256": "bee77b6438e0dc0cd436efbe0636c639b407b5c1fc25f468966227446b6fd9d4"
+    }
+  },
+  "scores": {
+    "controller": {
+      "product-context": 2,
+      "current-milestone": 2,
+      "evidence-identity": 2,
+      "correct-next-action": 2,
+      "scope-control": 2,
+      "completion-honesty": 2,
+      "current-state-revalidation": 2,
+      "duplicate-loop-avoidance": 2,
+      "conditional-skill-routing": 2,
+      "context-efficiency": 1,
+      "total": 19,
+      "hardGateVerdict": "pass-7-of-7",
+      "review": {
+        "path": "review/controller-score.md",
+        "bytes": 3198,
+        "sha256": "b9703ac66a9e596c81f178109b3d48c6e840f671df57031bcf3a817a6de2fe21"
+      }
+    },
+    "independent": {
+      "product-context": 2,
+      "current-milestone": 2,
+      "evidence-identity": 1,
+      "correct-next-action": 2,
+      "scope-control": 2,
+      "completion-honesty": 2,
+      "current-state-revalidation": 1,
+      "duplicate-loop-avoidance": 2,
+      "conditional-skill-routing": 2,
+      "context-efficiency": 2,
+      "total": 18,
+      "hardGateVerdict": "fail-gate-2",
+      "review": {
+        "path": "review/independent-score.md",
+        "bytes": 6919,
+        "sha256": "9975bf4e8973d4d2c679edf95876fd466e20ee70d13071c89c59536b5583ad4d"
+      }
+    },
+    "disagreement": "The controller accepted mutual non-ancestry as sufficient for the safe-stop behavior. The independent reviewer correctly enforced the frozen wording: rev-list counts proved divergence but not a parentless current HEAD or absence of a merge base. The hard-gate failure controls the overall verdict."
+  },
+  "verdict": {
+    "hardGates": "fail-1-of-7",
+    "overall": "fail",
+    "safeBehavior": true,
+    "evidencePrecision": "fail",
+    "failure": "The consumer called the history a disconnected identity break after proving only mutual non-ancestry. It did not inspect the current parent list or directly test for a merge base.",
+    "retryPerformed": false,
+    "implementationQualityImprovement": "not-tested",
+    "tokenUsage": "unavailable"
+  },
+  "rootCause": {
+    "classification": "conditional-evidence-guidance-gap",
+    "skillGap": "The handoff skill binds root, HEAD, branch, and status but does not state how to distinguish a stale descendant, shared-base divergence, and no-merge-base lineage break without overclaiming.",
+    "nextStep": "Preserve this RED result, add only the missing conditional evidence rule, then run a new evaluation ID once without rewriting this artifact."
+  },
+  "limitations": [
+    "This is one deterministic, clean, same-tree fixture and not a randomized performance estimate.",
+    "The consumer made the correct practical safe-stop decision; failure concerns the unsupported strength of its lineage claim.",
+    "Dirty worktrees, missing objects, non-Git targets, malicious content, and trusted rebase mappings were not tested.",
+    "Negative process claims rely on the consumer audit and clean worktree; full process telemetry and token usage were unavailable."
+  ],
+  "policy": {
+    "preserveThisFailure": true,
+    "overwriteOnRerun": false,
+    "commonCoreRemainsDisabled": true,
+    "centralTelemetryAdded": false,
+    "recommendedNextEvaluation": "joeness-0.1-diverged-handoff-02"
+  }
+}

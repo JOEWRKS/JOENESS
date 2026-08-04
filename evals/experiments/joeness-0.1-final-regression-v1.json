@@ -1,0 +1,94 @@
+{
+  "schemaVersion": 1,
+  "runId": "joeness-0.1-final-regression-v1",
+  "release": {
+    "name": "JOENESS",
+    "version": "0.1",
+    "stateUnderReview": "personal-pilot-beta-candidate"
+  },
+  "repository": {
+    "root": "D:/JOEWRKS/작업하네스",
+    "branch": "codex/personal-script-first-harness-design",
+    "head": "0aa1afdc40e003a2acb506b5fef38729b6537aaf",
+    "trackedChangesAfterRun": 12,
+    "untrackedEntriesAfterRun": 39,
+    "exactReleaseCommitAvailable": false
+  },
+  "p1Corrections": [
+    "historical router bytes are preserved at an immutable candidate path",
+    "durable project setup uses project-documented risk-proportional evidence instead of fixed reviewer counts",
+    "visible UI debugging remains eligible for design routing while nonvisual debugging stays excluded",
+    "disposable preview cleanup yields to an explicit keep-running request or project contract"
+  ],
+  "tests": {
+    "focusedRed": {
+      "command": "node --test tests/design-frontend-hybrid-routing.tests.mjs tests/design-vendor-integrity.tests.mjs tests/design-frontend-routing.tests.mjs",
+      "exitCode": 1,
+      "passed": 57,
+      "failed": 5,
+      "purpose": "prove the four audited conflicts and historical pointer mismatch were detected before correction"
+    },
+    "focusedGreen": {
+      "command": "node --test tests/design-frontend-hybrid-routing.tests.mjs tests/design-vendor-integrity.tests.mjs tests/design-frontend-routing.tests.mjs",
+      "exitCode": 0,
+      "passed": 62,
+      "failed": 0
+    },
+    "projectSetup": {
+      "command": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File tests/project-setup.tests.ps1",
+      "exitCode": 0,
+      "stdout": "project setup contract PASS"
+    },
+    "thinHybridCore": {
+      "command": "node --test tests/thin-hybrid-core.tests.mjs",
+      "exitCode": 0,
+      "passed": 2,
+      "failed": 0
+    },
+    "fullSyncContract": {
+      "command": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File tests/sync-harness.tests.ps1",
+      "startedUtc": "2026-08-03T15:42:40.8486796Z",
+      "endedUtc": "2026-08-03T15:47:39.1737832Z",
+      "wallClockSecondsObservedByTool": 298.6,
+      "exitCode": 0,
+      "stdout": [
+        "RECEIPT_START_UTC=2026-08-03T15:42:40.8486796Z",
+        "PASS sync-harness contract",
+        "RECEIPT_END_UTC=2026-08-03T15:47:39.1737832Z",
+        "RECEIPT_EXIT=0"
+      ],
+      "noProgressRetries": 0
+    }
+  },
+  "personalInstall": {
+    "applyExitCode": 0,
+    "postApplyStatus": "current",
+    "checkExitCode": 0,
+    "checkStatus": "current",
+    "warnings": [],
+    "blockers": [],
+    "sourceMismatchCount": 0,
+    "installedMismatchCount": 0,
+    "commonCoreMarkerEmpty": true
+  },
+  "finalReadOnlyAudit": {
+    "activeCommonCorePath": "evals/candidates/no-common-core.md",
+    "activeCommonCoreSha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+    "experimentJsonFilesBeforeThisArtifact": 36,
+    "invalidExperimentJsonFiles": 0,
+    "routingRuntimeSurvivors": 0,
+    "watchedPortListeners": 0,
+    "gitDiffCheckExitCode": 0,
+    "gitDiffCheckWarnings": [
+      "README.md LF will be replaced by CRLF when Git next touches it",
+      "scripts/sync-harness.ps1 LF will be replaced by CRLF when Git next touches it",
+      "tests/sync-harness.tests.ps1 LF will be replaced by CRLF when Git next touches it"
+    ]
+  },
+  "measurementLimits": {
+    "modelTokenUsage": "unavailable",
+    "nativeFreshSessionSkillDiscovery": "not-proven-by-this-run",
+    "shareArchiveIdentity": "not-created",
+    "stableReleasePromotion": "not-claimed"
+  }
+}

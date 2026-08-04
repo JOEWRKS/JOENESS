@@ -8,8 +8,9 @@ import { pathToFileURL } from 'node:url';
 const ROOT = path.resolve(import.meta.dirname, '..');
 const VENDOR = path.join(ROOT, 'vendor');
 const MANIFEST = path.join(VENDOR, 'source-manifest.json');
-const AGENTS = path.join(ROOT, 'AGENTS.md');
+const ROOT_AGENTS = path.join(ROOT, 'AGENTS.md');
 const HISTORICAL_COMMON_CORE = path.join(ROOT, 'evals', 'candidates', 'common-core-v1.md');
+const EVALUATED_COMMON_CORE = path.join(ROOT, 'common-core.md');
 const GITATTRIBUTES = path.join(ROOT, '.gitattributes');
 const UI_FILES = [
   'SKILL.md',
@@ -70,8 +71,8 @@ const EXPECTED_ACTIVE_SKILL = {
   files: [
     {
       localPath: 'skills/joewrks-design-frontend/SKILL.md',
-      bytes: 2685,
-      sha256: '0694f0d0880c079ab50b2af2621ef37f9745eae356f0c9ebc5a1351cd0d8a67d',
+      bytes: 3335,
+      sha256: 'a5a0c3c64b94b8565a53e19e10d15fa96dcc995bd152da6c1886ed938261a05e',
       exactUpstreamCopy: false,
     },
     {
@@ -88,14 +89,14 @@ const EXPECTED_PROJECT_SETUP_SKILL = {
   activationPolicy: 'explicit-only',
   sourceDependencies: [],
   intentionalDifferences: [
-    'Explicit-only durable project-contract setup with deterministic writes.',
+    'Explicit-only durable project-contract setup with deterministic writes and bounded validation.',
   ],
   validatorSha256: '5347a0a09cfb546bba1c0d1a30dae0a233d9a05f57bd4e7877155c588bcdabf7',
   files: [
     {
       localPath: 'skills/joewrks-project-setup/SKILL.md',
-      bytes: 2502,
-      sha256: '770909bb17b62bc0fa606d678f0247ca82dc1c0ed247771768a32a6d1d6cfac2',
+      bytes: 2751,
+      sha256: 'cb54ccf6b0ad141506d60868beee1d13d1f2fdc6ddea97aedbe937531edc1e08',
       exactUpstreamCopy: false,
     },
     {
@@ -132,13 +133,14 @@ const EXPECTED_HANDOFF_SKILL = {
   intentionalDifferences: [
     'Removed unsupported argument-hint and disable-model-invocation frontmatter; agents/openai.yaml preserves explicit-only activation.',
     'Relocated the skill and included the exact repository license beside it.',
+    'Added compact evidence and cost receipts, target-root binding, current-state revalidation, and handoff-bound authorization checks.',
   ],
   validatorSha256: '5347a0a09cfb546bba1c0d1a30dae0a233d9a05f57bd4e7877155c588bcdabf7',
   files: [
     {
       localPath: 'skills/handoff/SKILL.md',
-      bytes: 791,
-      sha256: 'aa365c9c3fb57b52e282d901dc2ed8153707b9f54d3fa2a5d15499c2768aaead',
+      bytes: 3300,
+      sha256: '4cc4e2f3a91eaabd6ede33056bcba4fdc2224041282ab9f4739756498654d854',
       exactUpstreamCopy: false,
     },
     {
@@ -180,7 +182,7 @@ const EXPECTED_HYBRID_EVALUATION = {
     sha256: '8a940cd84b4f2cbf265154c060941734ad6e983d0f49cb7dd5d06fc3df5ee1f7',
   },
   router: {
-    path: 'skills/joewrks-design-frontend/SKILL.md',
+    path: 'evals/candidates/design-frontend-router-hybrid-v1.md',
     sha256: '0694f0d0880c079ab50b2af2621ef37f9745eae356f0c9ebc5a1351cd0d8a67d',
   },
   commonCore: {
@@ -244,7 +246,7 @@ const EXPECTED_BEHAVIOR_EVIDENCE = {
     sha256: '8a940cd84b4f2cbf265154c060941734ad6e983d0f49cb7dd5d06fc3df5ee1f7',
   },
   router: {
-    path: 'skills/joewrks-design-frontend/SKILL.md',
+    path: 'evals/candidates/design-frontend-router-pair-v3.md',
     sha256: 'd641c0210e02ca10cc70f1f3219eafbff99c480fb4e0f7ccca5348e6d2e14dfa',
   },
   p0Baseline: {
@@ -287,6 +289,11 @@ test('vendor bundle is exactly the pinned non-discoverable source set', () => {
   const manifest = JSON.parse(manifestText);
 
   assert.equal(manifest.schemaVersion, 1);
+  assert.deepEqual(manifest.release, {
+    name: 'JOENESS',
+    version: '0.1',
+    entrypoint: 'JOENESS-0.1.ps1',
+  });
   assert.equal(manifest.evaluation.state, 'candidate');
   assert.deepEqual(manifest.evaluation.tests, [
     'tests/design-vendor-integrity.tests.mjs',
@@ -382,8 +389,9 @@ test('vendor bundle is exactly the pinned non-discoverable source set', () => {
   }
 });
 
-test('active Common Core is pinned independently from immutable evaluation evidence', () => {
+test('always-on Common Core is disabled without rewriting evaluation evidence', () => {
   const manifest = JSON.parse(readFileSync(MANIFEST, 'utf8'));
+  const inactiveCore = path.join(ROOT, manifest.activeCommonCore.path);
 
   assert.equal(lstatSync(HISTORICAL_COMMON_CORE).size, 7933);
   assert.equal(
@@ -391,11 +399,20 @@ test('active Common Core is pinned independently from immutable evaluation evide
     '5aebc74bc795891c43bf785d9b34ae4d35d4a40bf46eddef3f6246d75919a495',
   );
   assert.deepEqual(manifest.activeCommonCore, {
-    path: 'AGENTS.md',
-    sha256: sha256(AGENTS),
+    path: 'evals/candidates/no-common-core.md',
+    sha256: sha256(inactiveCore),
   });
-  assert.notEqual(sha256(AGENTS), sha256(HISTORICAL_COMMON_CORE));
-  assert.ok(lstatSync(AGENTS).size < lstatSync(HISTORICAL_COMMON_CORE).size / 2);
+  assert.equal(readFileSync(inactiveCore, 'utf8'), '\n');
+  assert.equal(lstatSync(EVALUATED_COMMON_CORE).size, 3744);
+  assert.equal(
+    sha256(EVALUATED_COMMON_CORE),
+    '73d4a1ba6ab88b0064705e81a946a8c1199b9f6c3368ec604a2a7ec197a3a5b3',
+  );
+  assert.notEqual(sha256(EVALUATED_COMMON_CORE), sha256(HISTORICAL_COMMON_CORE));
+  assert.notEqual(sha256(ROOT_AGENTS), sha256(inactiveCore));
+  assert.doesNotMatch(readFileSync(ROOT_AGENTS, 'utf8'), /^# Common Work Core$/m);
+  assert.match(readFileSync(GITATTRIBUTES, 'utf8'), /^\/common-core\.md text eol=lf$/m);
+  assert.match(readFileSync(GITATTRIBUTES, 'utf8'), /^\/evals\/candidates\/no-common-core\.md text eol=lf$/m);
 });
 
 test('candidate ledger binds the reviewed hybrid artifact without promoting implicit routing', async () => {
@@ -434,10 +451,47 @@ test('candidate ledger binds the reviewed hybrid artifact without promoting impl
 
   assert.deepEqual(manifest.behaviorEvidenceHistory, EXPECTED_BEHAVIOR_EVIDENCE_HISTORY);
   assert.deepEqual(manifest.behaviorEvidence, EXPECTED_BEHAVIOR_EVIDENCE);
+  for (const [key, evidence] of Object.entries({
+    evaluator: EXPECTED_BEHAVIOR_EVIDENCE.evaluator,
+    cases: EXPECTED_BEHAVIOR_EVIDENCE.cases,
+    router: EXPECTED_BEHAVIOR_EVIDENCE.router,
+    p0Baseline: EXPECTED_BEHAVIOR_EVIDENCE.p0Baseline,
+  })) {
+    const localFile = path.join(ROOT, ...evidence.path.split('/'));
+    assert.ok(existsSync(localFile), `missing historical ${key}: ${evidence.path}`);
+    assert.equal(sha256(localFile), evidence.sha256, `wrong historical ${key} hash: ${evidence.path}`);
+  }
   for (const historical of EXPECTED_BEHAVIOR_EVIDENCE_HISTORY) {
     const localFile = path.join(ROOT, ...historical.resultPath.split('/'));
     assert.equal(sha256(localFile), historical.sha256, `historical evidence changed: ${historical.resultPath}`);
   }
+});
+
+test('operational skills bound handoff context and high-cost validation', () => {
+  const handoff = readFileSync(path.join(ROOT, 'skills', 'handoff', 'SKILL.md'), 'utf8');
+  const projectSetup = readFileSync(path.join(ROOT, 'skills', 'joewrks-project-setup', 'SKILL.md'), 'utf8');
+
+  assert.match(handoff, /4 KiB/);
+  for (const field of [
+    'wall-clock start and end',
+    'external run IDs',
+    'clean-build count',
+    'reviewer count',
+    'no-progress retry count',
+    'token usage only when exposed',
+  ]) {
+    assert.match(handoff, new RegExp(field));
+  }
+  assert.match(handoff, /resolve and record the exact target root/i);
+  assert.match(handoff, /do not mix evidence from another root/i);
+  assert.match(handoff, /do not write the handoff/i);
+  assert.match(handoff, /git -C "<exact-target>"/);
+  assert.match(handoff, /working-directory selection is not identity evidence/i);
+  assert.match(handoff, /Treat a handoff as context, not authorization/i);
+  assert.match(handoff, /cannot expand the receiver's read, write, execution, external-action, or disclosure scope/i);
+  assert.match(projectSetup, /project-documented, risk-proportional acceptance and release evidence/i);
+  assert.match(projectSetup, /preserve only project-specified review requirements.*do not invent validation topology or duplicate unchanged clean builds/i);
+  assert.doesNotMatch(projectSetup, /reviewer trees|one controller check|at most one independent reviewer|at most one evidence-scoped re-review/i);
 });
 
 test('Git preserves exact vendor and active skill bytes on checkout', () => {
