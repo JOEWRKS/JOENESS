@@ -57,6 +57,8 @@ git clone https://github.com/JOEWRKS/joewrks-work-harness.git
 
 이 설명서에서 **“JOENESS 폴더에서 실행하세요”**라는 말은 바로 이 상태를 뜻합니다. PowerShell 경로를 직접 입력할 필요가 없습니다.
 
+아래 명령의 `.`은 **현재 폴더**, `\`는 **그 안의 파일**이라는 뜻입니다. 따라서 `.\JOENESS-0.1.ps1`은 “지금 연 폴더 안의 `JOENESS-0.1.ps1` 파일”을 가리킵니다.
+
 #### 3단계: 아래 명령을 한 줄씩 복사합니다
 
 먼저 설치 가능한 상태인지 확인합니다. 이 명령은 파일을 바꾸지 않습니다.
@@ -225,6 +227,8 @@ You need Windows, Codex, and Windows PowerShell 5.1 or later. The installer itse
 3. Click the File Explorer address bar.
 4. Replace the address with `powershell` and press Enter.
 5. In the PowerShell window, paste each command below one at a time.
+
+In `.\JOENESS-0.1.ps1`, `.\` means “the file inside the folder from which you just opened PowerShell.”
 
 ```powershell
 # Read-only preview
