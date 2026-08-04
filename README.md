@@ -140,9 +140,9 @@ Figma·브라우저·외부 플러그인은 설치되지 않습니다. 필요하
 
 </details>
 
-### 명령 실행 후 이것만 확인하세요
+### PowerShell 창에 나온 설치 결과·오류 확인하기
 
-PowerShell 출력에서 `"status":"단어"` 부분만 찾으면 됩니다.
+이 부분은 **Codex 채팅에 프롬프트를 입력한 뒤 보는 내용이 아닙니다.** 앞에서 연 PowerShell 창에 JOENESS 설치 명령을 입력하면 긴 글이 나오는데, 그중 `"status":"단어"` 부분만 찾으면 됩니다.
 
 | 보이는 단어 | 쉬운 뜻 | 내가 할 일 |
 |---|---|---|
@@ -187,29 +187,38 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\JOENESS-0.1.ps1 -Check
 - 비어 있지 않은 `.codex\AGENTS.override.md`, 같은 이름의 기존 unmanaged 스킬, 설치 뒤 수정된 관리 파일, 잘못된 marker, junction·symlink 경로는 안전을 위해 `blocked`가 될 수 있습니다. `--force` 옵션은 없습니다.
 - `-Apply`는 실제 쓰기 직전에 전체 검사를 다시 수행하고, 대상 변경 전 실행별 백업을 만듭니다.
 
-### 저장소 안내
+### 압축을 푼 JOENESS 폴더 안의 파일·폴더 설명
 
-| 경로                         | 역할                           |
-| -------------------------- | ---------------------------- |
-| `JOENESS-0.1.ps1`          | 사용자용 설치 진입점                  |
-| `scripts/sync-harness.ps1` | 설치·점검·제거 구현                  |
-| `skills/`                  | 설치되는 JOEWRKS 스킬              |
-| `vendor/`                  | 고정된 외부 자료, manifest, 라이선스 고지 |
-| `tests/`                   | 설치기·스킬·vendor 무결성 회귀 검사      |
-| `evals/`                   | 후보와 과거 실험을 수정하지 않고 보존하는 증거   |
-| `docs/superpowers/`        | 설계 명세와 구현 계획 기록              |
+여기서 말하는 이름은 인터넷 주소나 설치된 위치가 아닙니다. **ZIP 압축을 풀었을 때 파일 탐색기에 보이는 파일과 노란색 폴더의 이름**입니다. 이름 끝에 `/`가 있으면 폴더입니다.
 
-루트 `common-core.md`는 비교에 사용한 평가 증거이며 현재 설치되지 않습니다. 별도 `HARNESS.md`를 만들지 않고, 사람용 설명은 README, 저장소·프로젝트 규칙은 해당 `AGENTS.md`, 조건부 절차는 `SKILL.md`에 둡니다.
+일반 사용자는 `README.md`와 `JOENESS-0.1.ps1` 두 파일만 알면 됩니다. 나머지는 설치기가 내부에서 사용하므로 이름을 바꾸거나 삭제하지 않습니다.
+
+| 탐색기에 보이는 이름 | 쉽게 말하면 | 일반 사용자가 할 일 |
+|---|---|---|
+| `README.md` | 지금 읽고 있는 설치·사용 설명서 | 사용법이 궁금할 때 엽니다. |
+| `JOENESS-0.1.ps1` | JOENESS 설치·확인·제거를 시작하는 파일 | 앞의 PowerShell 명령에서 사용합니다. |
+| `harness.ps1` | 예전 파일명을 위한 호환용 설치 파일 | 새 사용자는 사용하지 않습니다. |
+| `scripts/` | 실제 설치 작업을 처리하는 내부 폴더 | 열거나 수정할 필요가 없습니다. |
+| `skills/` | 설치할 프로젝트 설정·디자인·인수인계 도우미 원본 | 직접 실행하지 않습니다. |
+| `vendor/` | 디자인 참고자료와 설치 목록·라이선스가 든 폴더 | 삭제하거나 이름을 바꾸지 않습니다. |
+| `tests/` | 설치기가 제대로 작동하는지 개발자가 검사하는 폴더 | 일반 사용자는 사용하지 않습니다. |
+| `evals/` | 어떤 하네스 구성이 나았는지 비교한 실험 기록 | 일반 사용자는 읽지 않아도 됩니다. |
+| `docs/` | JOENESS를 설계하고 만든 과정의 문서 | 일반 사용자는 읽지 않아도 됩니다. |
+| `AGENTS.md` | 이 JOENESS 저장소를 개발할 때만 쓰는 작업 규칙 | 설치된 전역 규칙이 아니므로 건드리지 않습니다. |
+| `common-core.md` | 사용하지 않기로 결정한 과거 규칙의 평가 기록 | 현재 설치되지 않으므로 사용하지 않습니다. |
+
+<details>
+<summary>개발자용 검증 기록과 테스트 명령 보기</summary>
 
 현재 판정과 검증 범위는 [JOENESS 0.1 Beta 검증 원장](evals/JOENESS-0.1-BETA-VALIDATION.md), 설치 대상과 고정 hash는 [source manifest](vendor/source-manifest.json)에서 확인할 수 있습니다. 과거 A/B 결과는 현재 JOENESS의 성능 보증이 아닙니다.
-
-개발자용 최소 회귀 명령:
 
 ```powershell
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\tests\sync-harness.tests.ps1
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\tests\project-setup.tests.ps1
 node --test .\tests\design-vendor-integrity.tests.mjs
 ```
+
+</details>
 
 ## English Guide
 
@@ -305,9 +314,9 @@ Use `-CodexHome`, `-AgentsHome`, and `-BackupRoot` only when custom locations ar
 
 </details>
 
-### After a command, check only this
+### Read the JOENESS installer result in PowerShell — not a Codex prompt
 
-Find the `"status":"word"` part of the PowerShell output.
+This section is **not about the response after entering a prompt in Codex chat**. When you run a JOENESS installation command in the PowerShell window opened earlier, it prints a long result. Find only the `"status":"word"` part.
 
 | Word shown | Plain meaning | What to do |
 |---|---|---|
@@ -347,13 +356,32 @@ If the default command is blocked by ExecutionPolicy, verify the source commit o
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\JOENESS-0.1.ps1 -Check
 ```
 
-### Repository and evidence
+### Files and folders inside the extracted JOENESS folder
+
+These names are not web addresses or installed locations. They are the files and yellow folders shown in File Explorer after extracting the ZIP. A name ending in `/` is a folder.
+
+Most users need only `README.md` and `JOENESS-0.1.ps1`. The installer uses everything else internally, so do not rename or delete those items.
+
+| Name shown in File Explorer | Plain meaning | What a regular user should do |
+|---|---|---|
+| `README.md` | The installation and usage guide you are reading | Open it when you need instructions. |
+| `JOENESS-0.1.ps1` | Starts JOENESS installation, checking, and removal | Use it through the PowerShell commands above. |
+| `harness.ps1` | Compatibility file for the older installer name | New users should ignore it. |
+| `scripts/` | Internal folder that performs the actual installation | Do not edit it. |
+| `skills/` | Source copies of the project setup, design, and handoff helpers | Do not run them directly. |
+| `vendor/` | Design references, the install inventory, and license notices | Do not delete or rename it. |
+| `tests/` | Developer checks for the installer and bundled files | Regular users do not use it. |
+| `evals/` | Historical experiments comparing harness candidates | Regular users do not need to read it. |
+| `docs/` | Documents recording how JOENESS was designed and built | Regular users do not need to read it. |
+| `AGENTS.md` | Work rules used only while developing this JOENESS repository | It is not an installed global rule; leave it unchanged. |
+| `common-core.md` | Evaluation record for a retired rule set | It is not currently installed or used. |
+
+<details>
+<summary>Show developer evidence, sharing, and test commands</summary>
 
 - Repository `common-core.md`: retained evaluation evidence and not installed by the current manifest.
 - Native Codex handles broad requests; persist only project-specific facts and gates in the project `AGENTS.md`.
 - Do not add a separate `HARNESS.md`.
-- `skills/` contains the installed skills; `vendor/` contains pinned references, the manifest, and third-party license notices.
-- `evals/` preserves candidates and experiment results. Historical A/B results are not a performance guarantee for the current Beta.
 
 See the [Beta validation ledger](evals/JOENESS-0.1-BETA-VALIDATION.md) for the current verdict and limitations, and the [source manifest](vendor/source-manifest.json) for the installed inventory and hashes.
 
@@ -367,3 +395,5 @@ Get-FileHash $archive -Algorithm SHA256
 ```
 
 Before sharing, run and record an exact-HEAD archive review and deliver the archive SHA-256 out of band. The manifest proves internal source consistency; it does not authenticate who supplied the archive.
+
+</details>
