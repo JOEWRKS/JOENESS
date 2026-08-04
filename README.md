@@ -121,7 +121,7 @@ $joewrks-project-setup 이 프로젝트의 목표, 현재 구조, 실행·테스
 - **UI UX Pro Max·Apple Design 참고자료:** 디자인 도우미가 필요할 때 찾아보는 내부 참고자료입니다. 사용자가 별도로 실행할 프로그램은 아닙니다.
 - **설치 기록과 백업:** JOENESS가 설치한 파일만 나중에 안전하게 업데이트하거나 제거하기 위한 기록입니다. 기존 파일을 강제로 덮어쓰지 않도록 돕습니다.
 
-Figma·브라우저·외부 플러그인은 설치되지 않습니다. 필요하면 각각 별도로 설치하고 연결해야 합니다.
+Figma·Superpowers·Ponytail과 브라우저 기능은 이 스크립트로 설치되지 않습니다. **전체 JOENESS 작업환경을 준비하려면 아래 세 플러그인을 모두 별도로 설치하고, 브라우저 기능도 사용할 수 있는지 확인해야 합니다.**
 
 <details>
 <summary>정확한 설치 위치가 궁금한 경우에만 펼쳐보기</summary>
@@ -140,19 +140,21 @@ Figma·브라우저·외부 플러그인은 설치되지 않습니다. 필요하
 
 </details>
 
-### 함께 쓰면 좋은 외부 플러그인 — 전부 설치할 필요는 없습니다
+### 필수 외부 플러그인 — 세 가지 모두 설치하세요
 
-JOENESS는 아래 플러그인 없이도 작동하며, 설치 스크립트도 플러그인을 설치하지 않습니다. 플러그인은 하네스의 필수 규칙이 아니라 **특정 작업에서만 추가 기능을 빌려 쓰는 선택 도구**입니다.
+JOENESS 설치 스크립트는 자체 스킬과 참고자료만 설치합니다. **완전한 작업환경에는 아래 세 플러그인이 모두 필요하지만 JOENESS가 대신 설치하거나 기능을 대체하지는 않습니다.**
 
-설치하려면 Codex의 플러그인 목록에서 아래 검색 이름을 찾아 설치한 뒤 새 작업을 여세요. 이미 설치되어 있다면 다시 설치할 필요가 없습니다.
+1. Codex의 플러그인 목록을 엽니다.
+2. 아래 검색 이름 세 가지를 하나씩 찾아 모두 설치합니다.
+3. 설치가 끝나면 새 Codex 작업을 엽니다. 이미 설치된 플러그인은 다시 설치하지 않아도 됩니다.
 
-| 검색 이름 | 쉽게 말하면 | 추천하는 때 | 없어도 가능한가요? |
+| 검색 이름 | 담당 역할 | 왜 필요한가요? | JOENESS로 대체 가능한가요? |
 |---|---|---|---|
-| **Figma**<br>`figma@openai-curated-remote` | Codex가 실제 Figma 파일을 읽고 만들고 수정하며, 디자인 구조를 확인하게 합니다. | Figma 파일 제작·수정이 요청됐거나, 승인된 Figma가 기준이거나, Figma 검증이 완료 조건일 때 사용합니다. | 코드·브라우저·스크린샷으로 실제 화면은 만들고 확인할 수 있습니다. 다만 편집 가능한 Figma 파일을 대신 만들거나 Figma 검증을 했다고 말할 수는 없습니다. JOENESS의 디자인 도우미는 디자인 기준을 제공하지만 실제 Figma 연결을 대신하지 않습니다. |
-| **Superpowers**<br>`superpowers@openai-curated-remote` | 복잡한 아이디어 정리, 계획, 체계적인 디버깅, 테스트 우선 개발, 코드 검토를 더 세밀한 절차로 돕습니다. | 선택지가 많은 큰 기능, 반복되는 오류, 실패 비용이 큰 변경처럼 기본 작업 방식만으로 부족할 때 관련 기능 하나만 골라 사용합니다. | Codex의 기본 계획·디버깅·테스트 기능과 프로젝트 규칙으로 대부분 대체할 수 있습니다. 단순 작업에는 보통 필요 없고, 여러 하위 기능을 한꺼번에 불러오지 않습니다. |
-| **Ponytail**<br>`ponytail@ponytail` | 불필요한 추상화·의존성·코드가 늘어났는지 찾아 가장 작은 해결책을 제안합니다. | 유지보수·리팩터링·코드 검토 중 과설계가 의심되거나, 저장소 전체를 독립적으로 점검하고 싶을 때 사용합니다. | “기존 코드를 재사용하고 새 의존성 없이 근본 원인만 최소 수정해 줘”라고 요청해 대체할 수 있습니다. 다만 필요한 디자인 품질·접근성·보안·오류 처리를 줄이는 도구로 사용하면 안 됩니다. |
+| **Figma**<br>`figma@openai-curated-remote` | 실제 Figma 파일 읽기·생성·수정·구조 검증 | JOENESS의 디자인 참고자료는 디자인 판단만 돕고 실제 Figma 파일에는 연결할 수 없습니다. | **불가.** 코드·브라우저·스크린샷은 편집 가능한 Figma 파일이나 Figma 검증을 대신하지 못합니다. |
+| **Superpowers**<br>`superpowers@openai-curated-remote` | 복잡한 아이디어 정리, 계획, 체계적인 디버깅, 테스트 우선 개발, 코드 검토 | JOENESS는 프로젝트 맥락과 인수인계를 관리하지만 이런 범용 개발 절차를 내장하지 않았습니다. | **불가.** 기본 Codex로 비슷한 작업을 수행할 수는 있어도 Superpowers의 전문 절차가 JOENESS에 포함된 것은 아닙니다. |
+| **Ponytail**<br>`ponytail@ponytail` | 최소 구현 원칙, 과설계 검토, 불필요한 추상화·의존성·코드 감사 | 현재 활성 JOENESS에는 범용 최소 구현 규칙이나 저장소 과설계 감사 기능이 없습니다. | **불가.** 최소 수정을 직접 요청해 일부 흉내 낼 수는 있지만 Ponytail의 지속 규칙과 감사 기능을 대체하지 못합니다. |
 
-빠르게 고르면 됩니다: **일반 작업은 추가 플러그인 없음**, **실제 Figma 작업은 Figma**, **복잡한 계획·디버깅은 필요할 때만 Superpowers**, **과설계 점검은 Ponytail**입니다. 같은 역할의 플러그인을 겹쳐 쓰지 않습니다.
+**세 플러그인은 모두 설치하되, 매 작업에서 전부 실행하지는 않습니다.** 실제 Figma 작업에는 Figma, 복잡한 계획·디버깅에는 관련 Superpowers 기능, 과설계 점검에는 Ponytail만 호출합니다. 설치는 필수이고 호출은 작업에 따라 달라집니다.
 
 ### PowerShell 창에 나온 설치 결과·오류 확인하기
 
@@ -309,7 +311,7 @@ Installation alone does not change the code or design in your current project. J
 - **UI UX Pro Max and Apple Design references:** Internal reference material consulted by the design helper when useful. They are not separate programs for the user to run.
 - **Installation state and backups:** Let JOENESS update or remove only files it can prove it installed, instead of force-overwriting existing content.
 
-Figma, browser capabilities, and external plugins are not installed. Install and connect them separately when needed.
+Figma, Superpowers, Ponytail, and browser capabilities are not installed by this script. **To prepare the complete JOENESS working environment, install all three plugins below separately and confirm that browser capabilities are available.**
 
 <details>
 <summary>Show exact default locations</summary>
@@ -328,19 +330,21 @@ Use `-CodexHome`, `-AgentsHome`, and `-BackupRoot` only when custom locations ar
 
 </details>
 
-### Recommended external plugins — you do not need all of them
+### Required external plugins — install all three
 
-JOENESS works without these plugins, and its installer does not install them. They are optional tools that add a unique capability for a particular task, not mandatory harness rules.
+The JOENESS installer installs only its own skills and reference material. **The complete working environment requires all three plugins below; JOENESS neither installs them nor replaces their capabilities.**
 
-To install one, find the search name below in Codex's plugin list, install it, and open a new task. If it is already installed, do not reinstall it.
+1. Open the plugin list in Codex.
+2. Find and install each of the three search names below.
+3. Open a new Codex task after installation. Do not reinstall a plugin that is already installed.
 
-| Search name | In plain language | Use it when | Can you work without it? |
+| Search name | Responsibility | Why is it required? | Can JOENESS replace it? |
 |---|---|---|---|
-| **Figma**<br>`figma@openai-curated-remote` | Lets Codex inspect, create, edit, and verify the structure of a real Figma file. | Use it when Figma work is requested, an approved Figma file is the design reference, or Figma verification is an explicit completion condition. | Code, browser checks, and screenshots can build and verify the running interface. They cannot produce the requested editable Figma file or justify a claim of Figma verification. JOENESS design guidance does not replace a live Figma connection. |
-| **Superpowers**<br>`superpowers@openai-curated-remote` | Adds detailed workflows for complex brainstorming, planning, systematic debugging, test-driven development, and review. | Use only the one relevant capability when a large feature has consequential choices, a bug keeps recurring, or a high-risk change needs more structure than the native workflow provides. | Native Codex planning, debugging, testing, project rules, and existing tests cover most work. Simple tasks normally need no Superpowers skill, and multiple subskills should not be preloaded together. |
-| **Ponytail**<br>`ponytail@ponytail` | Reviews unnecessary abstractions, dependencies, and code, then favors the smallest root-cause solution. | Use it for maintenance, refactoring, or review when over-engineering is suspected or an independent repository audit would help. | Ask for the smallest root-cause change that reuses existing code and adds no dependency. Ponytail must not remove required design fidelity, accessibility, security, or error handling. |
+| **Figma**<br>`figma@openai-curated-remote` | Read, create, edit, and structurally verify real Figma files | JOENESS design references guide decisions but cannot connect to a real Figma file. | **No.** Code, browser checks, and screenshots cannot replace an editable Figma deliverable or Figma verification. |
+| **Superpowers**<br>`superpowers@openai-curated-remote` | Complex ideation, planning, systematic debugging, test-driven development, and code review | JOENESS manages project context and handoffs but does not contain these general development workflows. | **No.** Native Codex can perform similar tasks, but the Superpowers procedures are not built into JOENESS. |
+| **Ponytail**<br>`ponytail@ponytail` | Minimal implementation rules, over-engineering review, and audits of unnecessary abstractions, dependencies, and code | The active JOENESS package has no general minimal-implementation policy or repository-wide over-engineering audit. | **No.** A direct minimal-change prompt can imitate part of the behavior but not Ponytail's persistent rules and audit capabilities. |
 
-Quick choice: use **no extra plugin for ordinary work**, **Figma for real Figma work**, **Superpowers only for unusually complex planning or debugging**, and **Ponytail for an over-engineering review**. Do not stack plugins that serve the same role.
+**Install all three, but do not run all three on every task.** Use Figma for real Figma work, the relevant Superpowers capability for complex planning or debugging, and Ponytail for over-engineering checks. Installation is required; invocation remains task-specific.
 
 ### Read the JOENESS installer result in PowerShell — not a Codex prompt
 
