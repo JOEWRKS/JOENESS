@@ -84,6 +84,8 @@ JOENESS가 추가하는 도우미는 세 가지입니다.
 - `joewrks-design-frontend`: 의미 있는 UI/UX 작업에서 UI UX Pro Max와 Apple Design 참고자료를 필요한 만큼 사용합니다.
 - `handoff`: 다른 작업이나 사람이 이어갈 때 현재 파일·Git·검사 결과를 짧게 정리합니다.
 
+또한 실패할 때만 적용되는 짧은 재시도 안전 규칙이 설치됩니다. 네이티브 크래시는 같은 방식으로 자동 재시도하지 않고, 명확한 컴파일·테스트 오류와 멱등인 일시 오류만 원인을 확인한 뒤 한 번 다시 시도합니다. 선택적인 외부 GUI 검증은 최초 방식과 서로 다른 대안 한 번까지만 허용합니다.
+
 설치만으로 프로젝트 코드나 디자인은 바뀌지 않습니다.
 
 Git 프로젝트에 지속 규칙을 남기고 싶을 때만 프로젝트 폴더를 열고 다음 문장을 입력합니다.
@@ -139,6 +141,8 @@ powershell.exe -NoProfile -File .\JOENESS-0.1.ps1 -Remove
 no-state `removed`는 유효한 state나 알려진 차단 증거를 찾지 못했고 관리 파일을 변경하지 않았다는 뜻일 뿐, 인식하지 못한 vendor residue까지 모두 없다는 증명은 아닙니다.
 
 현재 판정과 제한은 [JOENESS 0.1 Beta 검증 원장](evals/JOENESS-0.1-BETA-VALIDATION.md), 설치 파일과 해시는 [source manifest](vendor/source-manifest.json)에 기록되어 있습니다.
+
+저장소의 `common-core.md`는 과거 평가 증거로 남아 있고 설치되지 않습니다. 현재 manifest는 실패 경계만 다루는 작은 `retry-safety-core-v1.md`만 설치합니다.
 
 </details>
 
@@ -224,6 +228,8 @@ JOENESS adds three helpers:
 - `joewrks-design-frontend`: Uses the relevant UI UX Pro Max and Apple Design material for meaningful UI/UX work.
 - `handoff`: Creates a compact continuation note tied to current files, Git, and observed checks.
 
+Installation also adds a compact retry safety rule that activates only after failure. It performs no automatic same-mechanism retry after a native crash; a diagnosed compile or test error and a known transient idempotent failure get one retry. Optional external GUI verification gets the primary approach plus one materially different fallback.
+
 Installation alone does not change project code or design.
 
 Open the Git project folder. Use this only when you want to persist durable project rules:
@@ -286,7 +292,7 @@ An unresolved target or incomplete rollback prevents a final-state claim.
 
 The package includes the explicit-only `handoff` skill. When the user explicitly requests `$joewrks-project-setup` or `setup`, `configure`, `persist`, or `apply` of a durable JOEWRKS project contract, that skill may update only its managed block in the project-root `AGENTS.md`; it does not change code, design, or dependencies.
 
-Repository `common-core.md`: retained evaluation evidence and not installed by the current manifest.
+Repository `common-core.md` remains retained evaluation evidence and is not installed. The current manifest installs only the compact `retry-safety-core-v1.md` failure-boundary rule.
 
 Native Codex handles broad requests; persist only project-specific facts and gates in the project `AGENTS.md`.
 

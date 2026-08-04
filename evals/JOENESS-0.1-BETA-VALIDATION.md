@@ -270,6 +270,30 @@ V1의 설치 구현 결함은 발견되지 않았지만 증거 계약은 실패�
 - `D:/JOEWRKS/.harness-evals/joeness-0.1-final-audit-02/review/independent-structure-delta-v2.md`
 - `D:/JOEWRKS/.harness-evals/joeness-0.1-final-audit-02/review/independent-evidence-final-v2.md`
 
+## 5. 실사용 사고 후 재시도 안전 Core — 개인 Pilot 보강
+
+2026-08-04 MergeDrop Unity 캡처 사고는 활성 Common Core가 없는 상태에서 네이티브 크래시 1회 뒤 비배치 실패 실행이 7회 이어지고 사용자가 중단한 실제 RED 증거다. 이후 복구에서는 batch Editor와 Standalone Player라는 서로 다른 데스크톱 캡처 경로를 각각 한 번 실행했지만 두 결과 모두 시각 검증에 실패했다. 세 번째 데스크톱 우회는 실행하지 않았다.
+
+기존 `common-core-final-decision-v1`의 광범위 상시 Core 기각은 수정하지 않는다. 새 `retry-safety-core-v1.md`는 실패·재시도 경계만 다루는 198단어, 1,261바이트 예외다.
+
+| 실패 유형 | 자동 재시도 예산 |
+|---|---:|
+| 네이티브 크래시·Bug Reporter·사용자의 현재 반복 크래시 보고 | 동일 방식 `0` |
+| 원인이 확인된 컴파일·테스트·managed 오류 | 원인 수정 후 최소 검증 `1` |
+| 멱등성이 확인된 일시 오류 | `1`, 재실패 시 중단 |
+| 결과 불명확한 외부 쓰기 | read-back 또는 같은 안정 idempotency key 전까지 쓰기 `0` |
+| 선택적 외부 GUI 검증 | 최초 방식 뒤 서로 다른 fallback `1`; 목표 전체에서 공유 |
+
+새 PID, helper 이름, 서브에이전트 변경은 목표 예산을 초기화하지 않는다. 모든 GUI 실행에 WER 감시·command hash·장문 ledger를 강제하지 않으며 crash 신호가 있을 때만 관련 증거를 확인한다.
+
+네이티브 크래시, 결정론적 오류, 멱등 일시 오류, 불명확한 외부 쓰기, GUI 목표 예산을 다룬 fresh-context 해석 표본 5개가 의도한 분류를 모두 따랐다. 이는 live process enforcement나 일반적 품질 향상을 증명하지 않는다. 정확한 토큰 증가는 측정 불가이며, 비활성 1바이트 Core보다 설치 문구 1,261바이트가 늘어난다.
+
+개인 설치본은 `Check ready → Apply current → Check current` 한 번으로 갱신됐다. warning·blocker·unresolved target은 0이고 source·설치 manifest·state의 Core SHA-256이 모두 `0f1ef558…5813`으로 일치했다.
+
+근거: `evals/experiments/joeness-0.1-retry-safety-core-v1.json`.
+
+판정: 개인 Pilot의 P0 실패 경계로만 승격한다. Unity 전용 규칙, 상시 프로세스 감시, 별도 재시도 엔진은 추가하지 않는다.
+
 ## 변경 기록
 
 - 2026-08-03: 검증 원장 생성. 단계 0 증거를 요약하고 단계 1 계약을 초안 상태로 기록.
@@ -281,3 +305,4 @@ V1의 설치 구현 결함은 발견되지 않았지만 증거 계약은 실패�
 - 2026-08-04: 최종 구조 감사 P1 네 건을 RED 57/62 → GREEN 62/62로 교정. 전체 설치 계약은 단일 298.6초 실행으로 통과하고 원문 시각·exit 영수증을 별도 보존.
 - 2026-08-04: 독립 재감사에서 잔여 reviewer-topology P1을 발견. 이전 `REVISE`를 보존하고 RED 4/5 → GREEN 5/5, project-setup PASS, Apply→Check `current`로 교정.
 - 2026-08-04: 최종 독립 감사에서 개인 Beta 유지, stable·share-ready 승격 실패로 확정. 토큰·효율·fresh native discovery·exact release identity는 미검증으로 유지.
+- 2026-08-04: MergeDrop Unity 재실행 사고와 두 번의 bounded recovery를 새 RED 증거로 분리. 기존 광범위 Core 기각을 보존하고 198단어 retry safety Core만 개인 Pilot P0 경계로 승격.

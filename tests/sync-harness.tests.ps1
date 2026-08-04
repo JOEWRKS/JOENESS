@@ -28,7 +28,7 @@ function Test-ReadmeContract {
         $koreanRemovedAnchor,
         'A no-state `removed` result means no valid state or recognized blocking evidence was found and no managed files were changed; it does not prove that every unrecognized or vendor residue is absent.',
         'Do not add a separate `HARNESS.md`.',
-        'Repository `common-core.md`: retained evaluation evidence and not installed by the current manifest.',
+        'Repository `common-core.md` remains retained evaluation evidence and is not installed. The current manifest installs only the compact `retry-safety-core-v1.md` failure-boundary rule.',
         'Native Codex handles broad requests; persist only project-specific facts and gates in the project `AGENTS.md`.',
         'the explicit-only `handoff` skill',
         'When the user explicitly requests `$joewrks-project-setup` or `setup`, `configure`, `persist`, or `apply` of a durable JOEWRKS project contract',

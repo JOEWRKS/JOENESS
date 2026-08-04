@@ -11,6 +11,7 @@ const MANIFEST = path.join(VENDOR, 'source-manifest.json');
 const ROOT_AGENTS = path.join(ROOT, 'AGENTS.md');
 const HISTORICAL_COMMON_CORE = path.join(ROOT, 'evals', 'candidates', 'common-core-v1.md');
 const EVALUATED_COMMON_CORE = path.join(ROOT, 'common-core.md');
+const RETRY_SAFETY_CORE = path.join(ROOT, 'evals', 'candidates', 'retry-safety-core-v1.md');
 const GITATTRIBUTES = path.join(ROOT, '.gitattributes');
 const UI_FILES = [
   'SKILL.md',
@@ -297,6 +298,7 @@ test('vendor bundle is exactly the pinned non-discoverable source set', () => {
   assert.equal(manifest.evaluation.state, 'candidate');
   assert.deepEqual(manifest.evaluation.tests, [
     'tests/design-vendor-integrity.tests.mjs',
+    'tests/thin-hybrid-core.tests.mjs',
     'vendor/ui-ux-pro-max/scripts/validate_data.py',
     'vendor/ui-ux-pro-max/scripts/tests/test_core.py',
   ]);
@@ -389,9 +391,8 @@ test('vendor bundle is exactly the pinned non-discoverable source set', () => {
   }
 });
 
-test('always-on Common Core is disabled without rewriting evaluation evidence', () => {
+test('the targeted retry safety core is active without rewriting broader Core evidence', () => {
   const manifest = JSON.parse(readFileSync(MANIFEST, 'utf8'));
-  const inactiveCore = path.join(ROOT, manifest.activeCommonCore.path);
 
   assert.equal(lstatSync(HISTORICAL_COMMON_CORE).size, 7933);
   assert.equal(
@@ -399,20 +400,23 @@ test('always-on Common Core is disabled without rewriting evaluation evidence', 
     '5aebc74bc795891c43bf785d9b34ae4d35d4a40bf46eddef3f6246d75919a495',
   );
   assert.deepEqual(manifest.activeCommonCore, {
-    path: 'evals/candidates/no-common-core.md',
-    sha256: sha256(inactiveCore),
+    path: 'evals/candidates/retry-safety-core-v1.md',
+    sha256: sha256(RETRY_SAFETY_CORE),
   });
-  assert.equal(readFileSync(inactiveCore, 'utf8'), '\n');
+  assert.equal(lstatSync(RETRY_SAFETY_CORE).size, 1261);
+  assert.equal(sha256(RETRY_SAFETY_CORE), '0f1ef55811e4507b3f2fb21d41ad9d992a6f7fabc24d3e44a110468bd6ac5813');
+  assert.equal(readFileSync(path.join(ROOT, 'evals', 'candidates', 'no-common-core.md'), 'utf8'), '\n');
   assert.equal(lstatSync(EVALUATED_COMMON_CORE).size, 3744);
   assert.equal(
     sha256(EVALUATED_COMMON_CORE),
     '73d4a1ba6ab88b0064705e81a946a8c1199b9f6c3368ec604a2a7ec197a3a5b3',
   );
   assert.notEqual(sha256(EVALUATED_COMMON_CORE), sha256(HISTORICAL_COMMON_CORE));
-  assert.notEqual(sha256(ROOT_AGENTS), sha256(inactiveCore));
+  assert.notEqual(sha256(ROOT_AGENTS), sha256(RETRY_SAFETY_CORE));
   assert.doesNotMatch(readFileSync(ROOT_AGENTS, 'utf8'), /^# Common Work Core$/m);
   assert.match(readFileSync(GITATTRIBUTES, 'utf8'), /^\/common-core\.md text eol=lf$/m);
   assert.match(readFileSync(GITATTRIBUTES, 'utf8'), /^\/evals\/candidates\/no-common-core\.md text eol=lf$/m);
+  assert.match(readFileSync(GITATTRIBUTES, 'utf8'), /^\/evals\/candidates\/retry-safety-core-v1\.md text eol=lf$/m);
 });
 
 test('candidate ledger binds the reviewed hybrid artifact without promoting implicit routing', async () => {
