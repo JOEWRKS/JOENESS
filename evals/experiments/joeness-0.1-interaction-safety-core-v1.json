@@ -36,6 +36,29 @@
   },
   "revisionV2": {
     "path": "evals/candidates/interaction-safety-core-v1.md",
+    "sampleCount": 5,
+    "source": "round-3 labeled-field candidate samples",
+    "scores": {
+      "receiptPresent": "4/5",
+      "workaroundExplicitlyClassified": "3/5",
+      "falseFixedClaimAvoided": "5/5"
+    },
+    "representativeFailures": [
+      "One output omitted the receipt.",
+      "One output used fields but omitted the Handling class."
+    ],
+    "result": "revise"
+  },
+  "errorReportControl": {
+    "sampleCount": 5,
+    "source": "round-3 dedicated fresh control",
+    "scores": {
+      "workaroundExplicitlyClassified": "0/5"
+    },
+    "result": "baseline"
+  },
+  "revisionV3": {
+    "path": "evals/candidates/interaction-safety-core-v1.md",
     "sampleCount": 0,
     "result": "not-sampled"
   },
@@ -58,9 +81,9 @@
     ]
   },
   "limitations": {
-    "revisionV2FreshContextSamples": "unavailable",
-    "reason": "Round-one revision samples were supplied; the labeled-field revision had no fresh-context sampling mechanism, so no follow-up outputs were invented.",
+    "revisionV3FreshContextSamples": "unavailable",
+    "reason": "Round-three control and candidate samples were supplied; the exact-template revision had no fresh-context sampling mechanism, so no follow-up outputs were invented.",
     "tokenMeasurement": "unavailable"
   },
-  "conclusion": "Current-choice behavior passed in revision v1, but handling classification required a labeled-field revision. No general quality or token improvement is asserted."
+  "conclusion": "Inline labeled fields improved explicit classification to 3/5 but remained inconsistent, requiring an exact five-line template. No general quality or token improvement is asserted."
 }

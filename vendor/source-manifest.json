@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "release": {"name":"JOENESS","version":"0.1","entrypoint":"JOENESS-0.1.ps1"},
-  "activeCommonCore": {"path":"evals/candidates/interaction-safety-core-v1.md","sha256":"9979420a69eef8635c12b5550f76c9f40a5a21095986eaad2f04e9ea451c7b6a"},
+  "activeCommonCore": {"path":"evals/candidates/interaction-safety-core-v1.md","sha256":"bcc4b92533f5e6ac6f06891293eadfec1d692db66019c2245795e47001a70bba"},
   "evaluation": {
     "state": "candidate",
     "tests": ["tests/design-vendor-integrity.tests.mjs", "tests/thin-hybrid-core.tests.mjs", "vendor/ui-ux-pro-max/scripts/validate_data.py", "vendor/ui-ux-pro-max/scripts/tests/test_core.py"],
