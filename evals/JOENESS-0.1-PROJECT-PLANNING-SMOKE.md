@@ -1,7 +1,7 @@
 # JOENESS 0.1 Project Planning Smoke Review
 
-**Date:** 2026-08-05  
-**Candidate:** `skills/joewrks-project-setup/SKILL.md`  
+**Date:** 2026-08-05
+**Candidate:** `skills/joewrks-project-setup/SKILL.md`
 **Scope:** instruction-level behavior; no shared-file writes
 
 ## RED / GREEN wording check
