@@ -41,15 +41,15 @@
 - Consumes: existing `scripts/project-setup.ps1 -Check/-Apply` snapshot contract.
 - Produces: activation policy `hybrid-offer-explicit-write`; read-only offer mode; explicit write mode for `TASKS.md` and the managed `AGENTS.md` block.
 
-- [ ] **Step 1: Run the no-guidance behavior baseline**
+- [x] **Step 1: Run the no-guidance behavior baseline**
 
 Give five fresh agents the same realistic request without this skill: a clean Git repository, three collaborators, a three-month release, no plan, and “start now.” Ask for the first response and exact immediate actions without permitting shared-file writes.
 
-- [ ] **Step 2: Verify RED and retain the observed gap**
+- [x] **Step 2: Verify RED and retain the observed gap**
 
 Read every output. The baseline is RED only if the agents repeatedly omit a durable single plan source, start broad implementation without resolving the working contract, or create excessive up-front plans. Record exact observed behavior rather than a guessed rationale. If the control already produces the target behavior consistently, stop and do not modify the skill.
 
-- [ ] **Step 3: Write the minimum skill contract**
+- [x] **Step 3: Write the minimum skill contract**
 
 Change the skill description so it is selected for either an explicit durable-contract request or an unplanned long-lived project start/major release expansion. Its workflow must say:
 
@@ -78,11 +78,11 @@ policy:
   allow_implicit_invocation: true
 ```
 
-- [ ] **Step 4: Run the same five fresh-context samples with the candidate skill**
+- [x] **Step 4: Run the same five fresh-context samples with the candidate skill**
 
 Invoke the candidate by its worktree path and use the same request and constraints as Step 1. Read every output. GREEN requires one bounded persistence offer, no file-write claim, no broad implementation, and no detailed A-Z plan in all five samples.
 
-- [ ] **Step 5: Commit the behavior-tested contract**
+- [x] **Step 5: Commit the behavior-tested contract**
 
 ```powershell
 git add -- skills/joewrks-project-setup/SKILL.md skills/joewrks-project-setup/agents/openai.yaml
@@ -101,7 +101,7 @@ git commit -m "feat: offer durable project planning"
 - Consumes: the final bytes from Task 1.
 - Produces: deterministic install metadata and matching Korean/English user instructions.
 
-- [ ] **Step 1: Add failing README/install assertions**
+- [x] **Step 1: Add failing README/install assertions**
 
 Require the bilingual README to explain these exact outcomes:
 
@@ -114,7 +114,7 @@ An existing tracker remains the single source of truth.
 
 Require installed `agents/openai.yaml` to contain `allow_implicit_invocation: true`. Run the smallest relevant PowerShell test selection or the full file if it has no selector.
 
-- [ ] **Step 2: Observe RED**
+- [x] **Step 2: Observe RED**
 
 Run:
 
@@ -125,11 +125,11 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\tests\sync-harness.tes
 
 Expected: at least the README/manifest assertions fail before documentation and hashes are updated.
 
-- [ ] **Step 3: Update README in both languages**
+- [x] **Step 3: Update README in both languages**
 
 Replace the explicit-only explanation with a short flow: broad long-lived request, one offer, named file targets, accept/decline effects, existing-ledger reuse, and optional explicit `$joewrks-project-setup` invocation. Do not add a second usage guide or a `HARNESS.md`.
 
-- [ ] **Step 4: Record exact bytes and hashes**
+- [x] **Step 4: Record exact bytes and hashes**
 
 Compute the two changed skill files:
 
@@ -154,11 +154,11 @@ Update both `vendor/source-manifest.json` and `EXPECTED_PROJECT_SETUP_SKILL` wit
 "intentionalDifferences": ["Conditional long-project planning offer with explicit writes, bounded discovery, single-ledger reuse, and snapshot-guarded AGENTS.md updates."]
 ```
 
-- [ ] **Step 5: Run integrity and installer tests**
+- [x] **Step 5: Run integrity and installer tests**
 
 Run the two Step 2 commands again. Expected: PASS with no manifest hash drift, README contract failure, or helper regression.
 
-- [ ] **Step 6: Commit docs and integrity metadata**
+- [x] **Step 6: Commit docs and integrity metadata**
 
 ```powershell
 git add -- README.md tests/sync-harness.tests.ps1 tests/design-vendor-integrity.tests.mjs vendor/source-manifest.json
@@ -174,7 +174,7 @@ git commit -m "docs: explain conditional project roadmaps"
 - Consumes: Task 1 candidate skill text and metadata.
 - Produces: bounded evidence for the six design scenarios without claiming runtime routing certification.
 
-- [ ] **Step 1: Review the remaining five isolated variations**
+- [x] **Step 1: Review the remaining five isolated variations**
 
 Use fresh agents with no project history. Invoke the candidate skill by path, give each one prompt and a synthetic repository inventory, and do not reveal the expected answer. Task 1 already covers case 1 with five repetitions; cover the remaining cases once each:
 
@@ -186,11 +186,11 @@ Use fresh agents with no project history. Invoke the candidate skill by path, gi
 6. Ledger says done but no current evidence -> keep unverified/partial, not complete.
 ```
 
-- [ ] **Step 2: Record evidence without inflation**
+- [x] **Step 2: Record evidence without inflation**
 
 Create one compact table with columns `Case`, `Expected`, `Observed`, `Pass`, and `Residual limitation`. Include the five control and five candidate observations from Task 1. State that this is instruction-level evidence; explicit path invocation verifies application behavior but does not prove Codex runtime implicit selection frequency.
 
-- [ ] **Step 3: Commit the smoke record**
+- [x] **Step 3: Commit the smoke record**
 
 ```powershell
 git add -- evals/JOENESS-0.1-PROJECT-PLANNING-SMOKE.md
