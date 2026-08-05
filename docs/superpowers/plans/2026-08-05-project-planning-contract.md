@@ -206,7 +206,7 @@ git commit -m "test: record project planning smoke cases"
 - Consumes: Tasks 1-3.
 - Produces: reviewed main-branch release and matching personal installation.
 
-- [ ] **Step 1: Run the documented regression suite**
+- [x] **Step 1: Run the documented regression suite**
 
 ```powershell
 node --test .\tests\thin-hybrid-core.tests.mjs .\tests\design-vendor-integrity.tests.mjs
@@ -218,7 +218,7 @@ git status --short
 
 Expected: all tests PASS, diff check is empty, and only intentional committed files exist.
 
-- [ ] **Step 2: Request an independent diff review**
+- [x] **Step 2: Request an independent diff review**
 
 Ask one reviewer to score spec compliance and one reviewer to look only for over-expansion, duplicate authority, misleading completion claims, and installer regressions. Fix only evidenced issues and rerun the smallest affected test.
 
