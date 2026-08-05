@@ -1,33 +1,59 @@
 ---
 name: joewrks-project-setup
-description: Use only when the user explicitly asks to set up, configure, persist, or apply a durable JOEWRKS contract for a development or design project. Native Codex handles ordinary project declarations and broad do it or continue requests; this skill only persists verified project-specific context.
+description: Use when the user explicitly asks to persist a project contract, or starts or materially expands a long-lived development or design project with multiple sessions, milestones, collaborators, or release work and no concrete plan.
 ---
 
 # JOEWRKS Project Setup
 
-Create or update a durable project contract only for an explicit setup, configure, persist, or apply request for the current project. Start with a read-only check; no other project, conversation, global instruction layer, or prior permission transfers write authority.
+Keep one verified durable project contract and at most one planning ledger. Persistence is context, not proof or additional authority.
 
-## Workflow
+## Route
 
-1. Run `scripts/project-setup.ps1 -Check -ProjectPath <path>`. Treat its exact `projectRoot` and `targetHash` as the apply snapshot.
-2. Read only the minimum relevant project rules, product and status documents, package manifests, framework or design-system evidence, standard commands, and tests.
-3. Propose a UTF-8 managed body of preferably 2 KiB and at most 8 KiB. Include only durable, verified facts needed by a fresh qualified collaborator:
-   - product outcome, target users and platforms, and actual release target;
-   - explicit non-goals, constraints, and local or external authority boundaries;
-   - authoritative specification, design, status, stack, and standard run, build, and test paths;
-   - project-documented, risk-proportional acceptance and release evidence for planning, design, implementation, verification, and launch readiness; preserve only project-specified review requirements and do not invent validation topology or duplicate unchanged clean builds solely for confirmation;
-   - maintenance, collaboration, release acceptance, and unresolved external decisions.
-4. Do not freeze volatile progress as memory. Recompute the current phase from Git, files, tests, and builds; reference an existing status source when continuity must persist. Ask one question only when ambiguity would change product direction.
-5. Do not include either JOEWRKS project marker; the helper owns markers and byte conversion.
-6. Only after the user explicitly requests setup, configure, persist, or apply of a durable JOEWRKS contract for this project, encode the approved body as UTF-8 Base64 and run:
+| Observed state | Action |
+|---|---|
+| Small fix, edit, research, explanation, or brainstorming | Stop this skill; continue normally. |
+| No verifiable Git project root | Use a compact chat plan; create nothing. |
+| Usable authoritative tracker exists | Use it as the single source; do not offer or copy another ledger. |
+| Long-lived project, no concrete plan or ledger | Make the read-only offer below once in the current task. |
+| Explicit persist/setup/apply request | Disclose exact targets, then write only the approved targets. |
 
-   ```powershell
-   scripts/project-setup.ps1 -Apply -ProjectPath <path> `
-     -ExpectedRoot <check-projectRoot> `
-     -ExpectedTargetHash <check-targetHash> `
-     -ManagedBodyBase64 <base64>
-   ```
+1. Run `scripts/project-setup.ps1 -Check -ProjectPath <path>`. Bind all later work to its exact `projectRoot` and `targetHash`.
+2. Read only the minimum project rules and evidence. Ledger discovery is limited to a user-named tracker, documents linked by project rules, root `TASKS.md`, `ROADMAP.md`, `TODO.md`, and a directly relevant approved plan.
+3. Reconcile documents with current Git, files, commands, tests, builds, and observed external state. Do not infer current progress from filenames or narration.
 
-7. Report the helper JSON and observed project diff as completion evidence.
+For implicit use with no ledger, the pre-consent response contains only one sentence naming the long-horizon trigger and current reversible assumption, up to three read-only checks, and this body-separated offer. Plan detail belongs in the approved ledger:
 
-The helper may change only the single managed marker block in the Git-root `AGENTS.md`. Do not create a global rule layer, install dependencies, change code or design, make external writes, or expand authority.
+```text
+Project roadmap
+Decision: Create TASKS.md and add its location and update rule to the project AGENTS.md?
+Recommended: Yes, because this work spans multiple milestones or sessions.
+Waiting: Permanent planning files and plan-based broad implementation. Read-only checks and a compact current-step plan can continue.
+```
+
+Name both targets. Do not write before an explicit yes. A refusal applies only to the current task: create no files, do not ask again in that task, and continue within scope using a compact chat plan.
+
+## Persist
+
+Use an existing tracker instead of `TASKS.md`. Otherwise create a UTF-8 root `TASKS.md`, preferably no more than 4 KiB, with only:
+
+- product goal and authoritative release-condition link or one-line summary;
+- shallow future milestones, current milestone, and next one to three priorities;
+- each current item's outcome, acceptance condition, status, and owner only when shared;
+- current blockers, decisions, and authoritative links;
+- compact evidence references for completed work; and
+- last review date and evidence types checked.
+
+Mark inferred milestones `provisional`; they are not new requirements, completion gates, or external-action authority. The ledger is not proof. Before starting or completing work, recheck current evidence and keep unsupported states partial or unverified. Update only at milestone, scope, release-condition, decision, blocker, or planned-handoff boundaries, never per edit, command, response, or commit.
+
+Create and verify `TASKS.md` first. Then prepare the existing managed `AGENTS.md` body, preferably 2 KiB and at most 8 KiB. Preserve only verified durable facts: product outcome, users/platforms, release target, non-goals, constraints and authority boundaries, authoritative documents, standard run/build/test paths, project-defined risk-proportional acceptance evidence, maintenance or collaboration rules, unresolved external decisions, and the single ledger path with the update rule above. Do not freeze volatile progress in `AGENTS.md` or invent review topology.
+
+Exclude both JOEWRKS markers; the helper owns them. Encode the approved body as UTF-8 Base64 and run:
+
+```powershell
+scripts/project-setup.ps1 -Apply -ProjectPath <path> `
+  -ExpectedRoot <check-projectRoot> `
+  -ExpectedTargetHash <check-targetHash> `
+  -ManagedBodyBase64 <base64>
+```
+
+Report helper JSON and the observed diff. If `TASKS.md` succeeded but the managed block failed, report partial completion and leave the verified ledger intact. Never call a partial write complete. The helper may change only its project-root `AGENTS.md` block; do not install dependencies, change product code/design, make external writes, create global rules, or expand authority.

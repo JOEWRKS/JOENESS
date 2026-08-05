@@ -34,7 +34,6 @@
 ### Task 1: Hybrid project-planning contract
 
 **Files:**
-- Modify: `tests/design-vendor-integrity.tests.mjs`
 - Modify: `skills/joewrks-project-setup/SKILL.md`
 - Modify: `skills/joewrks-project-setup/agents/openai.yaml`
 
@@ -42,33 +41,13 @@
 - Consumes: existing `scripts/project-setup.ps1 -Check/-Apply` snapshot contract.
 - Produces: activation policy `hybrid-offer-explicit-write`; read-only offer mode; explicit write mode for `TASKS.md` and the managed `AGENTS.md` block.
 
-- [ ] **Step 1: Add a failing contract test**
+- [ ] **Step 1: Run the no-guidance behavior baseline**
 
-Add a named `node:test` case that requires all of the following:
+Give five fresh agents the same realistic request without this skill: a clean Git repository, three collaborators, a three-month release, no plan, and “start now.” Ask for the first response and exact immediate actions without permitting shared-file writes.
 
-```js
-assert.match(projectSetup, /long-lived development or design project/i);
-assert.match(projectSetup, /TASKS\.md.*AGENTS\.md/i);
-assert.match(projectSetup, /current task/i);
-assert.match(projectSetup, /4 KiB/);
-assert.match(projectSetup, /single source/i);
-assert.match(projectSetup, /not proof/i);
-assert.match(projectSetup, /milestone.*scope.*release.*decision.*blocker.*handoff/i);
-assert.match(projectSetupMetadata, /allow_implicit_invocation:\s*true/);
-assert.doesNotMatch(projectSetup, /modify the Interaction Safety Core/i);
-```
+- [ ] **Step 2: Verify RED and retain the observed gap**
 
-Also change the expected manifest activation policy to `hybrid-offer-explicit-write`; leave file sizes and hashes unchanged until Task 2 so the focused contract test can run independently.
-
-- [ ] **Step 2: Run the focused test and observe RED**
-
-Run:
-
-```powershell
-node --test --test-name-pattern "project planning contract" .\tests\design-vendor-integrity.tests.mjs
-```
-
-Expected: FAIL because the current skill is explicit-only and lacks the planning contract.
+Read every output. The baseline is RED only if the agents repeatedly omit a durable single plan source, start broad implementation without resolving the working contract, or create excessive up-front plans. Record exact observed behavior rather than a guessed rationale. If the control already produces the target behavior consistently, stop and do not modify the skill.
 
 - [ ] **Step 3: Write the minimum skill contract**
 
@@ -99,14 +78,14 @@ policy:
   allow_implicit_invocation: true
 ```
 
-- [ ] **Step 4: Run the focused test and observe GREEN**
+- [ ] **Step 4: Run the same five fresh-context samples with the candidate skill**
 
-Run the Step 2 command again. Expected: PASS.
+Invoke the candidate by its worktree path and use the same request and constraints as Step 1. Read every output. GREEN requires one bounded persistence offer, no file-write claim, no broad implementation, and no detailed A-Z plan in all five samples.
 
-- [ ] **Step 5: Commit the contract**
+- [ ] **Step 5: Commit the behavior-tested contract**
 
 ```powershell
-git add -- tests/design-vendor-integrity.tests.mjs skills/joewrks-project-setup/SKILL.md skills/joewrks-project-setup/agents/openai.yaml
+git add -- skills/joewrks-project-setup/SKILL.md skills/joewrks-project-setup/agents/openai.yaml
 git commit -m "feat: offer durable project planning"
 ```
 
@@ -195,12 +174,11 @@ git commit -m "docs: explain conditional project roadmaps"
 - Consumes: Task 1 candidate skill text and metadata.
 - Produces: bounded evidence for the six design scenarios without claiming runtime routing certification.
 
-- [ ] **Step 1: Review six isolated prompts**
+- [ ] **Step 1: Review the remaining five isolated variations**
 
-Use fresh reviewers with no project history. Give each the candidate `SKILL.md`, one prompt, and a synthetic repository inventory. Cover:
+Use fresh agents with no project history. Invoke the candidate skill by path, give each one prompt and a synthetic repository inventory, and do not reveal the expected answer. Task 1 already covers case 1 with five repetitions; cover the remaining cases once each:
 
 ```text
-1. Long-lived app project, no ledger -> offer once; no write.
 2. Long-lived app project, existing ROADMAP.md -> reuse; no new ledger.
 3. One bug fix, no ledger -> no planning offer.
 4. Long-lived project, user declines -> no files; no repeat in this task.
@@ -210,7 +188,7 @@ Use fresh reviewers with no project history. Give each the candidate `SKILL.md`,
 
 - [ ] **Step 2: Record evidence without inflation**
 
-Create one compact table with columns `Case`, `Expected`, `Observed`, `Pass`, and `Residual limitation`. State that this is instruction-level evidence; it does not prove Codex runtime implicit selection frequency.
+Create one compact table with columns `Case`, `Expected`, `Observed`, `Pass`, and `Residual limitation`. Include the five control and five candidate observations from Task 1. State that this is instruction-level evidence; explicit path invocation verifies application behavior but does not prove Codex runtime implicit selection frequency.
 
 - [ ] **Step 3: Commit the smoke record**
 

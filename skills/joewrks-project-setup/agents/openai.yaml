@@ -1,7 +1,7 @@
 interface:
   display_name: "JOEWRKS Project Setup"
-  short_description: "Apply a durable project contract"
-  default_prompt: "Use $joewrks-project-setup to set up a durable contract for this project from current evidence, then apply it with the helper's snapshot guard."
+  short_description: "Offer or apply a durable project roadmap"
+  default_prompt: "Use $joewrks-project-setup to find the current project ledger, offer a durable roadmap for unplanned long-lived work, and write only the targets the user explicitly approves."
 
 policy:
-  allow_implicit_invocation: false
+  allow_implicit_invocation: true
