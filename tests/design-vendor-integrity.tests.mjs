@@ -96,8 +96,8 @@ const EXPECTED_PROJECT_SETUP_SKILL = {
   files: [
     {
       localPath: 'skills/joewrks-project-setup/SKILL.md',
-      bytes: 4619,
-      sha256: 'b429b5ec61498155b853682ac3034b4a9558f911c30bee10a87d04111353fc59',
+      bytes: 5010,
+      sha256: '3945bed47ea7ce82aede38f25d652ee0f59c102d6088213aa5e0a802c126b097',
       exactUpstreamCopy: false,
     },
     {

@@ -34,18 +34,23 @@ Name both targets. Do not write before an explicit yes. A refusal applies only t
 
 ## Persist
 
-Use an existing tracker instead of `TASKS.md`. Otherwise create a UTF-8 root `TASKS.md`, preferably no more than 4 KiB, with only:
+Use an existing tracker instead of `TASKS.md`. Otherwise create a UTF-8 root `TASKS.md`, preferably no more than 4 KiB, as this compact locator rather than a narrative:
 
-- product goal and authoritative release-condition link or one-line summary;
-- shallow future milestones, current milestone, and next one to three priorities;
-- each current item's outcome, acceptance condition, status, and owner only when shared;
-- current blockers, decisions, and authoritative links;
-- compact evidence references for completed work; and
-- last review date and evidence types checked.
+```markdown
+# Plan
+- Goal / release: authoritative link or one-line summary
+- Milestones: current plus shallow future milestones
+- Now: one to three rows with outcome, acceptance, status, and owner only when shared
+- Blockers / decisions / links: one compact list
+- Evidence / reviewed: references only, review date, and evidence types checked
+```
+
+Keep each fact in one place. Group unknown product facts into one blocker instead of repeating `unverified` fields, and link rather than copy project rules, logs, or Handoff content.
+All five locator lines are required; when evidence is missing, use `pending - see blocker` once instead of omitting or repeating the field.
 
 Mark inferred milestones `provisional`; they are not new requirements, completion gates, or external-action authority. The ledger is not proof. Before starting or completing work, recheck current evidence and keep unsupported states partial or unverified. Update only at milestone, scope, release-condition, decision, blocker, or planned-handoff boundaries, never per edit, command, response, or commit.
 
-Create and verify `TASKS.md` first. Then prepare the existing managed `AGENTS.md` body, preferably 2 KiB and at most 8 KiB. Preserve only verified durable facts: product outcome, users/platforms, release target, non-goals, constraints and authority boundaries, authoritative documents, standard run/build/test paths, project-documented, risk-proportional acceptance and release evidence, maintenance or collaboration rules, unresolved external decisions, and the single ledger path with the update rule above. Preserve only project-specified review requirements; do not invent validation topology or duplicate unchanged clean builds solely for confirmation. Do not freeze volatile progress in `AGENTS.md`.
+Create and verify `TASKS.md` first. Then prepare the existing managed `AGENTS.md` body, preferably 2 KiB and at most 8 KiB. Include a durable fact only when verified; omit unverified fields instead of listing them. Eligible facts are product outcome, users/platforms, release target, non-goals, constraints and authority boundaries, authoritative documents, standard run/build/test paths, project-documented, risk-proportional acceptance and release evidence, maintenance or collaboration rules, unresolved external decisions, and the single ledger path with the update rule above. Preserve only project-specified review requirements; do not invent validation topology or duplicate unchanged clean builds solely for confirmation. Do not copy milestones or volatile progress into `AGENTS.md`.
 
 Exclude both JOEWRKS markers; the helper owns them. Encode the approved body as UTF-8 Base64 and run:
 
