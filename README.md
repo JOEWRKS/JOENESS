@@ -80,7 +80,7 @@ JOENESS와 세 플러그인을 모두 설치한 다음 새 Codex 작업을 **한
 
 JOENESS가 추가하는 도우미는 세 가지입니다.
 
-- `joewrks-project-setup`: 프로젝트의 목표·중요 문서·실행·테스트 방법을 지속 규칙으로 정리합니다.
+- `joewrks-project-setup`: 장기 프로젝트에 계획 원장이 없으면 한 번 제안하고, 승인 시 검증된 프로젝트 규칙과 단계별 로드맵을 연결합니다.
 - `joewrks-design-frontend`: 의미 있는 UI/UX 작업에서 UI UX Pro Max와 Apple Design 참고자료를 필요한 만큼 사용합니다.
 - `handoff`: 다른 작업이나 사람이 이어갈 때 현재 파일·Git·검사 결과를 짧게 정리합니다.
 
@@ -88,13 +88,15 @@ JOENESS가 추가하는 도우미는 세 가지입니다.
 
 설치만으로 프로젝트 코드나 디자인은 바뀌지 않습니다.
 
-Git 프로젝트에 지속 규칙을 남기고 싶을 때만 프로젝트 폴더를 열고 다음 문장을 입력합니다.
+앱·게임·웹·디자인처럼 여러 세션이나 마일스톤이 필요한 작업인데 쓸 수 있는 계획이 없으면, JOENESS가 영구 로드맵을 한 번 제안할 수 있습니다. 동의하면 루트 `TASKS.md`를 만들고 프로젝트 `AGENTS.md`에는 그 위치와 갱신 규칙만 추가합니다. 거절하면 어떤 파일도 만들지 않고 짧은 채팅 계획으로 평소 작업을 계속합니다. 이미 쓰는 이슈 트래커나 로드맵이 있으면 그것을 단일 원장으로 유지하며 중복 파일을 만들지 않습니다. 작은 수정·조사·설명에는 이 제안을 하지 않습니다.
+
+자동 제안을 기다리지 않고 지금 설정하고 싶을 때는 Git 프로젝트 폴더를 열고 다음 문장을 입력합니다.
 
 ```text
 $joewrks-project-setup 이 프로젝트의 목표, 현재 구조, 실행·테스트 방법을 읽고 지속 작업 규칙으로 최소 설정해줘.
 ```
 
-그 뒤에는 평소처럼 `로그인 화면을 만들어줘`처럼 요청하면 됩니다. 디자인 도우미는 관련 작업에서 자동으로 선택될 수 있으며, 반드시 적용하고 싶을 때만 `$joewrks-design-frontend`를 지정합니다. `$handoff`와 `$joewrks-project-setup`은 필요할 때 직접 요청합니다.
+그 뒤에는 평소처럼 `로그인 화면을 만들어줘`처럼 요청하면 됩니다. 디자인 도우미는 관련 작업에서 자동으로 선택될 수 있으며, 반드시 적용하고 싶을 때만 `$joewrks-design-frontend`를 지정합니다. `$joewrks-project-setup`은 장기 프로젝트에서 조건부로 제안될 수 있고 직접 지정할 수도 있습니다. `$handoff`는 필요할 때 직접 요청합니다.
 
 ### 5. 설치 결과와 문제 해결
 
@@ -224,7 +226,7 @@ After JOENESS and all three plugins are installed, open **one new Codex task** s
 
 JOENESS adds three helpers:
 
-- `joewrks-project-setup`: Records project goals, important documents, run commands, and tests as a durable project contract.
+- `joewrks-project-setup`: Offers a roadmap when a long-lived project has no usable ledger, then connects verified project rules and milestones after approval.
 - `joewrks-design-frontend`: Uses the relevant UI UX Pro Max and Apple Design material for meaningful UI/UX work.
 - `handoff`: Creates a compact continuation note tied to current files, Git, and observed checks.
 
@@ -232,13 +234,15 @@ Installation also adds a compact interaction safety rule. When progress needs a 
 
 Installation alone does not change project code or design.
 
-Open the Git project folder. Use this only when you want to persist durable project rules:
+For app, game, web, or design work likely to span sessions or milestones, JOENESS may offer one durable roadmap when no usable plan exists. Accepting may create a root `TASKS.md` and add only its location and update rule to the project `AGENTS.md`. Declining creates no files; normal work continues with a compact chat plan. An existing issue tracker or roadmap remains the single source of truth, so JOENESS does not create a duplicate. Small fixes, research, and explanations do not trigger this offer.
+
+Open the Git project folder and use this when you want to configure it immediately instead of waiting for an offer:
 
 ```text
 $joewrks-project-setup read this project's goal, structure, run commands, and tests, then persist the smallest durable work contract.
 ```
 
-Then request work normally. The design helper may be selected automatically for relevant work; name `$joewrks-design-frontend` only when you want to require it. Request `$handoff` and `$joewrks-project-setup` explicitly when needed.
+Then request work normally. The design helper may be selected automatically for relevant work; name `$joewrks-design-frontend` only when you want to require it. Project setup may make the conditional offer above or be named explicitly. Request `$handoff` explicitly when needed.
 
 ### 5. Read results and solve problems
 
@@ -290,11 +294,11 @@ A no-state `removed` result means no valid state or recognized blocking evidence
 
 An unresolved target or incomplete rollback prevents a final-state claim.
 
-The package includes the explicit-only `handoff` skill. When the user explicitly requests `$joewrks-project-setup` or `setup`, `configure`, `persist`, or `apply` of a durable JOEWRKS project contract, that skill may update only its managed block in the project-root `AGENTS.md`; it does not change code, design, or dependencies.
+The package includes the explicit-only `handoff` skill. JOENESS may offer a durable roadmap once for a long-lived project with no usable plan. Accepting may create `TASKS.md` and add only its location and update rule to the project `AGENTS.md`. Declining creates no files and normal work continues with a compact chat plan. An existing tracker remains the single source of truth. Project setup does not change product code, design, or dependencies.
 
 Repository `common-core.md` remains retained evaluation evidence and is not installed. The current manifest installs the compact `interaction-safety-core-v1.md` conditional decision, failure-receipt, and retry-boundary rule.
 
-Native Codex handles broad requests; persist only project-specific facts and gates in the project `AGENTS.md`.
+Native Codex handles ordinary small requests; persist only verified project-specific facts and the chosen ledger location in the project `AGENTS.md`.
 
 Do not add a separate `HARNESS.md`.
 

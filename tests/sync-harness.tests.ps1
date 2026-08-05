@@ -29,9 +29,11 @@ function Test-ReadmeContract {
         'A no-state `removed` result means no valid state or recognized blocking evidence was found and no managed files were changed; it does not prove that every unrecognized or vendor residue is absent.',
         'Do not add a separate `HARNESS.md`.',
         'Repository `common-core.md` remains retained evaluation evidence and is not installed. The current manifest installs the compact `interaction-safety-core-v1.md` conditional decision, failure-receipt, and retry-boundary rule.',
-        'Native Codex handles broad requests; persist only project-specific facts and gates in the project `AGENTS.md`.',
+        'JOENESS may offer a durable roadmap once for a long-lived project with no usable plan.',
+        'Accepting may create `TASKS.md` and add only its location and update rule to the project `AGENTS.md`.',
+        'Declining creates no files and normal work continues with a compact chat plan.',
+        'An existing tracker remains the single source of truth.',
         'the explicit-only `handoff` skill',
-        'When the user explicitly requests `$joewrks-project-setup` or `setup`, `configure`, `persist`, or `apply` of a durable JOEWRKS project contract',
         'An unresolved target or incomplete rollback prevents a final-state claim.',
         'Backups may contain prior state and the user''s `AGENTS.md`; treat them as private.',
         'Before sharing, run and record an exact-HEAD archive review and deliver the archive SHA-256 out of band.'
@@ -1069,6 +1071,7 @@ function Test-OptionalBundleStateAndDrift {
         Assert-True (([IO.File]::ReadAllText((Join-Path $f.AgentsHome 'skills\handoff\agents\openai.yaml'))) -match 'allow_implicit_invocation:\s*false') 'handoff remains explicit-only'
         Assert-True (Test-Path (Join-Path $f.AgentsHome 'skills\handoff\LICENSE')) 'handoff license installs'
         Assert-True (Test-Path (Join-Path $f.AgentsHome 'skills\joewrks-project-setup\scripts\project-setup.ps1')) 'project helper installs'
+        Assert-True (([IO.File]::ReadAllText((Join-Path $f.AgentsHome 'skills\joewrks-project-setup\agents\openai.yaml'))) -match 'allow_implicit_invocation:\s*true') 'project setup allows conditional implicit selection'
         $before = Get-TreeHashes $f.AgentsHome
         $beforeState = [IO.File]::ReadAllBytes($f.State)
         $compatApply = Read-Result (Invoke-Harness $f Apply -IncludeDesignFrontend) 'compatibility no-op apply'

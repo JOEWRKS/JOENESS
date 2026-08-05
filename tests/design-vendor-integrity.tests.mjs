@@ -87,23 +87,23 @@ const EXPECTED_ACTIVE_SKILL = {
 const EXPECTED_PROJECT_SETUP_SKILL = {
   authorship: 'joewrks-canonical',
   evaluationState: 'candidate',
-  activationPolicy: 'explicit-only',
+  activationPolicy: 'hybrid-offer-explicit-write',
   sourceDependencies: [],
   intentionalDifferences: [
-    'Explicit-only durable project-contract setup with deterministic writes and bounded validation.',
+    'Conditional long-project planning offer with explicit writes, bounded discovery, single-ledger reuse, and snapshot-guarded AGENTS.md updates.',
   ],
   validatorSha256: '5347a0a09cfb546bba1c0d1a30dae0a233d9a05f57bd4e7877155c588bcdabf7',
   files: [
     {
       localPath: 'skills/joewrks-project-setup/SKILL.md',
-      bytes: 2751,
-      sha256: 'cb54ccf6b0ad141506d60868beee1d13d1f2fdc6ddea97aedbe937531edc1e08',
+      bytes: 4619,
+      sha256: 'b429b5ec61498155b853682ac3034b4a9558f911c30bee10a87d04111353fc59',
       exactUpstreamCopy: false,
     },
     {
       localPath: 'skills/joewrks-project-setup/agents/openai.yaml',
-      bytes: 315,
-      sha256: 'cbc5d8da93e27ed5f30e36e8736acb26cde4bd20bd82d6432fc3a18b36d32fee',
+      bytes: 353,
+      sha256: '1581633a8cea5dce3dd33a49bc8fb593169deddc01e496347190928a23cfeffc',
       exactUpstreamCopy: false,
     },
     {
@@ -318,7 +318,7 @@ test('vendor bundle is exactly the pinned non-discoverable source set', () => {
     manifest.activeSkills['joewrks-design-frontend'].activationPolicy,
     'hybrid-personal-pilot',
   );
-  assert.equal(projectSetup.activationPolicy, 'explicit-only');
+  assert.equal(projectSetup.activationPolicy, 'hybrid-offer-explicit-write');
   assert.equal(projectSetup.evaluationState, 'candidate');
   assert.deepEqual(projectSetup.sourceDependencies, []);
   assert.deepEqual(
