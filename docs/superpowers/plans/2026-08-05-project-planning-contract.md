@@ -222,7 +222,7 @@ Expected: all tests PASS, diff check is empty, and only intentional committed fi
 
 Ask one reviewer to score spec compliance and one reviewer to look only for over-expansion, duplicate authority, misleading completion claims, and installer regressions. Fix only evidenced issues and rerun the smallest affected test.
 
-- [ ] **Step 3: Merge the verified branch into main**
+- [x] **Step 3: Merge the verified branch into main**
 
 From the main worktree, confirm it is clean and still at the branch base or a reviewed descendant, then run:
 
@@ -230,7 +230,7 @@ From the main worktree, confirm it is clean and still at the branch base or a re
 git merge --no-ff codex/project-planning -m "merge: add conditional project planning"
 ```
 
-- [ ] **Step 4: Apply and verify the personal installation**
+- [x] **Step 4: Apply and verify the personal installation**
 
 ```powershell
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\JOENESS-0.1.ps1 -Check
@@ -240,7 +240,7 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\JOENESS-0.1.ps1 -Check
 
 Expected: the final status is `current`; the installed project-setup skill and metadata hashes match the manifest.
 
-- [ ] **Step 5: Push main**
+- [x] **Step 5: Push main**
 
 ```powershell
 git push origin main
