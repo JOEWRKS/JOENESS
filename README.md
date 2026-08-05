@@ -88,7 +88,7 @@ JOENESS가 추가하는 도우미는 세 가지입니다.
 
 설치만으로 프로젝트 코드나 디자인은 바뀌지 않습니다.
 
-앱·게임·웹·디자인처럼 여러 세션이나 마일스톤이 필요한 작업인데 쓸 수 있는 계획이 없으면, JOENESS가 영구 로드맵을 한 번 제안할 수 있습니다. 동의하면 루트 `TASKS.md`를 만들고 프로젝트 `AGENTS.md`에는 그 위치와 갱신 규칙만 추가합니다. 거절하면 어떤 파일도 만들지 않고 짧은 채팅 계획으로 평소 작업을 계속합니다. 이미 쓰는 이슈 트래커나 로드맵이 있으면 그것을 단일 원장으로 유지하며 중복 파일을 만들지 않습니다. 작은 수정·조사·설명에는 이 제안을 하지 않습니다.
+앱·게임·웹·디자인 프로젝트를 새로 시작하거나 출시 범위를 크게 넓힐 때, 여러 세션이나 마일스톤이 필요하지만 쓸 수 있는 계획이 없으면 JOENESS가 영구 로드맵을 한 번 제안할 수 있습니다. 동의하면 루트 `TASKS.md`를 만들고 프로젝트 `AGENTS.md`에는 그 위치와 갱신 규칙만 추가합니다. 거절하면 어떤 파일도 만들지 않고 짧은 채팅 계획으로 평소 작업을 계속합니다. 이미 쓰는 이슈 트래커나 로드맵이 있으면 그것을 단일 원장으로 유지하며 중복 파일을 만들지 않습니다. 작은 수정·조사·설명에는 이 제안을 하지 않습니다.
 
 자동 제안을 기다리지 않고 지금 설정하고 싶을 때는 Git 프로젝트 폴더를 열고 다음 문장을 입력합니다.
 
@@ -234,7 +234,7 @@ Installation also adds a compact interaction safety rule. When progress needs a 
 
 Installation alone does not change project code or design.
 
-For app, game, web, or design work likely to span sessions or milestones, JOENESS may offer one durable roadmap when no usable plan exists. Accepting may create a root `TASKS.md` and add only its location and update rule to the project `AGENTS.md`. Declining creates no files; normal work continues with a compact chat plan. An existing issue tracker or roadmap remains the single source of truth, so JOENESS does not create a duplicate. Small fixes, research, and explanations do not trigger this offer.
+When an app, game, web, or design project starts at project level or receives a major release-scope expansion, JOENESS may offer one durable roadmap if the work will span sessions or milestones and no usable plan exists. Accepting may create a root `TASKS.md` and add only its location and update rule to the project `AGENTS.md`. Declining creates no files; normal work continues with a compact chat plan. An existing issue tracker or roadmap remains the single source of truth, so JOENESS does not create a duplicate. Small fixes, research, and explanations do not trigger this offer.
 
 Open the Git project folder and use this when you want to configure it immediately instead of waiting for an offer:
 
@@ -294,7 +294,7 @@ A no-state `removed` result means no valid state or recognized blocking evidence
 
 An unresolved target or incomplete rollback prevents a final-state claim.
 
-The package includes the explicit-only `handoff` skill. JOENESS may offer a durable roadmap once for a long-lived project with no usable plan. Accepting may create `TASKS.md` and add only its location and update rule to the project `AGENTS.md`. Declining creates no files and normal work continues with a compact chat plan. An existing tracker remains the single source of truth. Project setup does not change product code, design, or dependencies.
+The package includes the explicit-only `handoff` skill. JOENESS may offer a durable roadmap once when a project-level effort starts or a major release scope expands with no usable plan. Accepting may create `TASKS.md` and add only its location and update rule to the project `AGENTS.md`. Declining creates no files and normal work continues with a compact chat plan. An existing tracker remains the single source of truth. Project setup does not change product code, design, or dependencies.
 
 Repository `common-core.md` remains retained evaluation evidence and is not installed. The current manifest installs the compact `interaction-safety-core-v1.md` conditional decision, failure-receipt, and retry-boundary rule.
 

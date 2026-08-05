@@ -15,6 +15,9 @@ function Assert-Equal { param($Actual, $Expected, [string] $Message) if ($Actual
 function Test-ReadmeContract {
     $readme = [IO.File]::ReadAllText((Join-Path $RepositoryRoot 'README.md'))
     $koreanRemovedAnchor = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('bm8tc3RhdGUgYHJlbW92ZWRg64qUIOycoO2aqO2VnCBzdGF0ZeuCmCDslYzroKTsp4Qg7LCo64uoIOymneqxsOulvCDssL7sp4Ag66q77ZaI6rOgIOq0gOumrCDtjIzsnbzsnYQg67OA6rK97ZWY7KeAIOyViuyVmOuLpOuKlCDrnLvsnbwg67+QLCDsnbjsi53tlZjsp4Ag66q77ZWcIHZlbmRvciByZXNpZHVl6rmM7KeAIOuqqOuRkCDsl4bri6TripQg7Kad66qF7J2AIOyVhOuLmeuLiOuLpC4='))
+    $koreanPlanningAcceptAnchor = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('64+Z7J2Y7ZWY66m0IOujqO2KuCBgVEFTS1MubWRg66W8IOunjOuTpOqzoCDtlITroZzsoJ3tirggYEFHRU5UUy5tZGDsl5DripQg6re4IOychOy5mOyZgCDqsLHsi6Ag6rec7LmZ66eMIOy2lOqwgO2VqeuLiOuLpC4='))
+    $koreanPlanningDeclineAnchor = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('6rGw7KCI7ZWY66m0IOyWtOuWpCDtjIzsnbzrj4Qg66eM65Ok7KeAIOyViuqzoCDsp6fsnYAg7LGE7YyFIOqzhO2ajeycvOuhnCDtj4nshowg7J6R7JeF7J2EIOqzhOyGje2VqeuLiOuLpC4='))
+    $koreanPlanningExistingAnchor = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('7J2066+4IOyTsOuKlCDsnbTsiogg7Yq4656Y7Luk64KYIOuhnOuTnOunteydtCDsnojsnLzrqbQg6re46rKD7J2EIOuLqOydvCDsm5DsnqXsnLzroZwg7Jyg7KeA7ZWY66mwIOykkeuztSDtjIzsnbzsnYQg66eM65Ok7KeAIOyViuyKteuLiOuLpC4='))
     foreach ($command in @(
         'powershell.exe -NoProfile -File .\JOENESS-0.1.ps1 -Check',
         'powershell.exe -NoProfile -File .\JOENESS-0.1.ps1 -Apply',
@@ -29,10 +32,13 @@ function Test-ReadmeContract {
         'A no-state `removed` result means no valid state or recognized blocking evidence was found and no managed files were changed; it does not prove that every unrecognized or vendor residue is absent.',
         'Do not add a separate `HARNESS.md`.',
         'Repository `common-core.md` remains retained evaluation evidence and is not installed. The current manifest installs the compact `interaction-safety-core-v1.md` conditional decision, failure-receipt, and retry-boundary rule.',
-        'JOENESS may offer a durable roadmap once for a long-lived project with no usable plan.',
+        'JOENESS may offer a durable roadmap once when a project-level effort starts or a major release scope expands with no usable plan.',
         'Accepting may create `TASKS.md` and add only its location and update rule to the project `AGENTS.md`.',
         'Declining creates no files and normal work continues with a compact chat plan.',
         'An existing tracker remains the single source of truth.',
+        $koreanPlanningAcceptAnchor,
+        $koreanPlanningDeclineAnchor,
+        $koreanPlanningExistingAnchor,
         'the explicit-only `handoff` skill',
         'An unresolved target or incomplete rollback prevents a final-state claim.',
         'Backups may contain prior state and the user''s `AGENTS.md`; treat them as private.',

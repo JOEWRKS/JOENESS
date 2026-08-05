@@ -1,6 +1,6 @@
 ---
 name: joewrks-project-setup
-description: Use when the user explicitly asks to persist a project contract, or starts or materially expands a long-lived development or design project with multiple sessions, milestones, collaborators, or release work and no concrete plan.
+description: Use when the user explicitly asks to persist a project contract, or begins a project-level development or design effort or major release-scope expansion likely to span sessions, milestones, collaborators, or release work and provides no concrete plan.
 ---
 
 # JOEWRKS Project Setup
@@ -14,14 +14,14 @@ Keep one verified durable project contract and at most one planning ledger. Pers
 | Small fix, edit, research, explanation, or brainstorming | Stop this skill; continue normally. |
 | No verifiable Git project root | Use a compact chat plan; create nothing. |
 | Usable authoritative tracker exists | Use it as the single source; do not offer or copy another ledger. |
-| Long-lived project, no concrete plan or ledger | Make the read-only offer below once in the current task. |
+| Project-level start or major release-scope expansion, no concrete plan or ledger | Make the read-only offer below once in the current task. |
 | Explicit persist/setup/apply request | Disclose exact targets, then write only the approved targets. |
 
 1. Run `scripts/project-setup.ps1 -Check -ProjectPath <path>`. Bind all later work to its exact `projectRoot` and `targetHash`.
 2. Read only the minimum project rules and evidence. Ledger discovery is limited to a user-named tracker, documents linked by project rules, root `TASKS.md`, `ROADMAP.md`, `TODO.md`, and a directly relevant approved plan.
-3. Reconcile documents with current Git, files, commands, tests, builds, and observed external state. Do not infer current progress from filenames or narration.
+3. Before consent, reconcile only already-observed evidence, Git status, and bounded read-only file inspection. Do not run tests, builds, or external checks solely to decide whether to offer persistence. The original task may independently authorize them.
 
-For implicit use with no ledger, the pre-consent response contains only one sentence naming the long-horizon trigger and current reversible assumption, up to three read-only checks, and this body-separated offer. Plan detail belongs in the approved ledger:
+For implicit use with no ledger, the pre-consent response contains only one sentence naming the long-horizon trigger and current reversible assumption, up to three read-only checks, and this body-separated offer rendered in the user's language. Plan detail belongs in the approved ledger:
 
 ```text
 Project roadmap
@@ -34,7 +34,7 @@ Name both targets. Do not write before an explicit yes. A refusal applies only t
 
 ## Persist
 
-Use an existing tracker instead of `TASKS.md`. Otherwise create a UTF-8 root `TASKS.md`, preferably no more than 4 KiB, as this compact locator rather than a narrative:
+Immediately before writing, repeat the bounded ledger discovery and reread the current managed `AGENTS.md` body. If a ledger now exists, use it and do not create or overwrite `TASKS.md`. When no ledger still exists, create a UTF-8 root `TASKS.md`, preferably no more than 4 KiB, as this compact locator rather than a narrative:
 
 ```markdown
 # Plan
@@ -50,7 +50,9 @@ All five locator lines are required; when evidence is missing, use `pending - se
 
 Mark inferred milestones `provisional`; they are not new requirements, completion gates, or external-action authority. The ledger is not proof. Before starting or completing work, recheck current evidence and keep unsupported states partial or unverified. Update only at milestone, scope, release-condition, decision, blocker, or planned-handoff boundaries, never per edit, command, response, or commit.
 
-Create and verify `TASKS.md` first. Then prepare the existing managed `AGENTS.md` body, preferably 2 KiB and at most 8 KiB. Include a durable fact only when verified; omit unverified fields instead of listing them. Eligible facts are product outcome, users/platforms, release target, non-goals, constraints and authority boundaries, authoritative documents, standard run/build/test paths, project-documented, risk-proportional acceptance and release evidence, maintenance or collaboration rules, unresolved external decisions, and the single ledger path with the update rule above. Preserve only project-specified review requirements; do not invent validation topology or duplicate unchanged clean builds solely for confirmation. Do not copy milestones or volatile progress into `AGENTS.md`.
+For approval of the implicit roadmap offer, preserve the current managed body and add or update only these two facts: the selected ledger path, and the evidence-reconciliation plus event-based update rule above. The proposed managed-body diff may contain no other change. If that narrow edit cannot be isolated, stop without applying it and request explicit full-setup scope.
+
+For an explicit full-contract setup/apply request that disclosed the broader scope, prepare the managed `AGENTS.md` body, preferably 2 KiB and at most 8 KiB. Include a durable fact only when verified; omit unverified fields instead of listing them. Eligible facts are product outcome, users/platforms, release target, non-goals, constraints and authority boundaries, authoritative documents, standard run/build/test paths, project-documented, risk-proportional acceptance and release evidence, maintenance or collaboration rules, unresolved external decisions, and the single ledger path with the update rule above. Preserve only project-specified review requirements; do not invent validation topology or duplicate unchanged clean builds solely for confirmation. Do not copy milestones or volatile progress into `AGENTS.md`.
 
 Exclude both JOEWRKS markers; the helper owns them. Encode the approved body as UTF-8 Base64 and run:
 
