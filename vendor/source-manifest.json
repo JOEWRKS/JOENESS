@@ -62,13 +62,13 @@
     "joewrks-project-setup": {
       "authorship": "joewrks-canonical",
       "evaluationState": "candidate",
-      "activationPolicy": "explicit-only",
+      "activationPolicy": "hybrid-offer-explicit-write",
       "sourceDependencies": [],
-      "intentionalDifferences": ["Explicit-only durable project-contract setup with deterministic writes and bounded validation."],
+      "intentionalDifferences": ["Conditional long-project planning offer with explicit writes, bounded discovery, single-ledger reuse, and snapshot-guarded AGENTS.md updates."],
       "validatorSha256": "5347a0a09cfb546bba1c0d1a30dae0a233d9a05f57bd4e7877155c588bcdabf7",
       "files": [
-        {"localPath":"skills/joewrks-project-setup/SKILL.md","bytes":2751,"sha256":"cb54ccf6b0ad141506d60868beee1d13d1f2fdc6ddea97aedbe937531edc1e08","exactUpstreamCopy":false},
-        {"localPath":"skills/joewrks-project-setup/agents/openai.yaml","bytes":315,"sha256":"cbc5d8da93e27ed5f30e36e8736acb26cde4bd20bd82d6432fc3a18b36d32fee","exactUpstreamCopy":false},
+        {"localPath":"skills/joewrks-project-setup/SKILL.md","bytes":5764,"sha256":"777eecb563479f813015548284b43a2a94b2fa0fd10b2ee0f55198396fe9173c","exactUpstreamCopy":false},
+        {"localPath":"skills/joewrks-project-setup/agents/openai.yaml","bytes":353,"sha256":"1581633a8cea5dce3dd33a49bc8fb593169deddc01e496347190928a23cfeffc","exactUpstreamCopy":false},
         {"localPath":"skills/joewrks-project-setup/scripts/project-setup.ps1","bytes":17495,"sha256":"4ffc548078a5c87357fd0e4e63538567ea2666f118243a0558bff29278d13105","exactUpstreamCopy":false}
       ]
     }
