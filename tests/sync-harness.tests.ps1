@@ -31,7 +31,7 @@ function Test-ReadmeContract {
         $koreanRemovedAnchor,
         'A no-state `removed` result means no valid state or recognized blocking evidence was found and no managed files were changed; it does not prove that every unrecognized or vendor residue is absent.',
         'Do not add a separate `HARNESS.md`.',
-        'Repository `common-core.md` remains retained evaluation evidence and is not installed. The current manifest installs the compact `interaction-safety-core-v1.md` conditional decision, failure-receipt, and retry-boundary rule.',
+        'Repository `common-core.md` remains retained evaluation evidence and is not installed. The current manifest installs the compact `interaction-safety-core-v1.md` conditional-decision, failure-receipt, retry-boundary, and claim-evidence-binding rule.',
         'JOENESS may offer a durable roadmap once when a project-level effort starts or a major release scope expands with no usable plan.',
         'Accepting may create `TASKS.md` and add only its location and update rule to the project `AGENTS.md`.',
         'Declining creates no files and normal work continues with a compact chat plan.',

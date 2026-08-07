@@ -404,7 +404,7 @@ test('the interaction safety core is active without rewriting broader Core evide
     path: 'evals/candidates/interaction-safety-core-v1.md',
     sha256: sha256(interactionSafetyCore),
   });
-  assert.ok(lstatSync(interactionSafetyCore).size <= 1800);
+  assert.ok(lstatSync(interactionSafetyCore).size <= 2048);
   assert.equal(lstatSync(RETRY_SAFETY_CORE).size, 1261);
   assert.equal(sha256(RETRY_SAFETY_CORE), '0f1ef55811e4507b3f2fb21d41ad9d992a6f7fabc24d3e44a110468bd6ac5813');
   assert.equal(readFileSync(path.join(ROOT, 'evals', 'candidates', 'no-common-core.md'), 'utf8'), '\n');
