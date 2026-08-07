@@ -144,7 +144,7 @@ no-state `removed`는 유효한 state나 알려진 차단 증거를 찾지 못�
 
 현재 판정과 제한은 [JOENESS 0.1 Beta 검증 원장](evals/JOENESS-0.1-BETA-VALIDATION.md), 설치 파일과 해시는 [source manifest](vendor/source-manifest.json)에 기록되어 있습니다.
 
-저장소의 `common-core.md`는 과거 평가 증거로 남아 있고 설치되지 않습니다. 현재 manifest는 조건부 결정, 실패 영수증, 재시도 경계를 다루는 작은 `interaction-safety-core-v1.md`를 설치합니다.
+저장소의 `common-core.md`는 과거 평가 증거로 남아 있고 설치되지 않습니다. 현재 manifest는 조건부 결정, 실패 영수증, 재시도 경계, 주장과 증거의 일치를 다루는 작은 `interaction-safety-core-v1.md`를 설치합니다.
 
 </details>
 
@@ -296,7 +296,7 @@ An unresolved target or incomplete rollback prevents a final-state claim.
 
 The package includes the explicit-only `handoff` skill. JOENESS may offer a durable roadmap once when a project-level effort starts or a major release scope expands with no usable plan. Accepting may create `TASKS.md` and add only its location and update rule to the project `AGENTS.md`. Declining creates no files and normal work continues with a compact chat plan. An existing tracker remains the single source of truth. Project setup does not change product code, design, or dependencies.
 
-Repository `common-core.md` remains retained evaluation evidence and is not installed. The current manifest installs the compact `interaction-safety-core-v1.md` conditional decision, failure-receipt, and retry-boundary rule.
+Repository `common-core.md` remains retained evaluation evidence and is not installed. The current manifest installs the compact `interaction-safety-core-v1.md` conditional-decision, failure-receipt, retry-boundary, and claim-evidence-binding rule.
 
 Native Codex handles ordinary small requests; persist only verified project-specific facts and the chosen ledger location in the project `AGENTS.md`.
 

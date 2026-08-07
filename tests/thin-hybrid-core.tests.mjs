@@ -25,7 +25,7 @@ test("the interaction safety core adds conditional decisions and failure receipt
   const disabledCore = await readFile(path.join(root, "evals", "candidates", "no-common-core.md"), "utf8");
   const projectAgents = await readFile(path.join(root, "AGENTS.md"), "utf8");
   const readme = await readFile(path.join(root, "README.md"), "utf8");
-  assert.ok(Buffer.byteLength(core, "utf8") <= 1800, "safety core must stay smaller than 1.8 KiB");
+  assert.ok(Buffer.byteLength(core, "utf8") <= 2048, "safety core must stay at or below 2 KiB");
   assert.match(core, /native crash.*same (?:command|mechanism).*automatic retr(?:y|ies).*0/is);
   assert.match(core, /deterministic.*(?:cause|error).*(?:one|1).*evidence-driven/is);
   assert.match(core, /transient.*idempotent.*(?:one|1)/is);
@@ -33,6 +33,8 @@ test("the interaction safety core adds conditional decisions and failure receipt
   assert.match(core, /primary approach.*one materially different fallback.*whole verification goal/is);
   assert.match(core, /replacement PID.*new attempt/is);
   assert.match(core, /filenames.*narration.*not success/is);
+  assert.match(core, /evidence supports only.*exact artifact\/version.*named target\/state.*property.*observed/is);
+  assert.match(core, /original failure mode.*directly rechecked.*verified layer.*missing check/is);
   assert.match(core, /progress depends on a user decision.*final confirmation-needed block.*(?:at most|max) three/is);
   assert.match(core, /recommended default.*what waits/is);
   assert.match(core, /material reversible assumption.*continue.*do not re-ask/is);
