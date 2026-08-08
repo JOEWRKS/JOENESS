@@ -35,9 +35,11 @@ test("the interaction safety core adds conditional decisions and failure receipt
   assert.match(core, /filenames.*narration.*not success/is);
   assert.match(core, /evidence supports only.*exact artifact\/version.*named target\/state.*property.*observed/is);
   assert.match(core, /original failure mode.*directly rechecked.*verified layer.*missing check/is);
-  assert.match(core, /progress depends on a user decision.*final confirmation-needed block.*(?:at most|max) three/is);
+  assert.match(core, /progress needs a user decision.*valid unresolved choices.*separate confirmation-needed block.*user's language.*max 3/is);
+  assert.match(core, /don't copy external menus verbatim/is);
   assert.match(core, /recommended default.*what waits/is);
-  assert.match(core, /material reversible assumption.*continue.*do not re-ask/is);
+  assert.match(core, /omit if none.*continue.*material reversible assumption.*don't re-ask resolved choices absent new evidence/is);
+  assert.match(core, /task end.*no blocker.*one realistic next step/is);
   assert.match(core, /future external action.*(?:stated|state).*(?:boundary|not a question).*until.*current/is);
   const receiptTemplate = [
     "  Evidence: <observed>",
@@ -60,7 +62,7 @@ test("the interaction safety core adds conditional decisions and failure receipt
   assert.doesNotMatch(projectAgents, /^# JOENESS Interaction Safety Core$/m);
   assert.match(readme, /진행에 사용자 결정이 필요할 때.*현재 차단 선택.*최종 확인 블록.*권장 기본값.*대기 작업/s);
   assert.match(readme, /중대한 실패.*이어받은 우회책.*증거.*원인.*처리.*검증.*남은 위험/s);
-  assert.match(readme, /progress needs a user decision.*current blocking choices.*final confirmation block.*recommended default.*waiting state/is);
+  assert.match(readme, /user decision.*valid unresolved choices.*user's language.*recommended default.*what waits.*external skill menus.*not copied verbatim.*no blocking choice.*one realistic recommended next step/is);
   assert.match(readme, /material failures.*carried-forward workarounds.*Evidence.*Cause.*Handling.*Verification.*Remaining risk/is);
   assert.doesNotMatch(readme, /activates only after failure/i);
   assert.equal(priorDecision.decision.activeCommonCore, "none");
