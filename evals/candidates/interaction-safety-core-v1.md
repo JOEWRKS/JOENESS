@@ -8,9 +8,4 @@ No approval/logging workflow.
 - External/shared write may have applied: inspect state or recover with same stable idempotency key; else report unknown and stop writes.
 - Optional external GUI verification: primary approach plus one materially different fallback for whole verification goal. Helper/PID/delegation changes don't reset it. Both fail: report unverified/blocked; another approach needs new evidence/user decision.
 - Filenames, narration, liveness: not success. Evidence supports only the exact artifact/version, named target/state, and property observed. Call fixed only after the original failure mode is directly rechecked; otherwise name the verified layer and missing check. WER/dumps only after a crash signal.
-- When reporting a material failure or carried-forward workaround, omit routine errors/log dumps, link raw logs, never call a workaround a fix, and output exactly:
-  Evidence: <observed>
-  Cause: confirmed|suspected|unknown
-  Handling: fixed|mitigated|worked around|unresolved
-  Verification: <observed check>
-  Remaining risk: <residual>
+- Material failure/carried-forward workaround receipt: omit routine errors/log dumps; link raw logs; never call workaround a fix. Exactly 5 labeled lines in user's language: evidence; cause=confirmed/suspected/unknown; handling=fixed/mitigated/worked around/unresolved; verification; remaining risk. Labels/statuses use user language.

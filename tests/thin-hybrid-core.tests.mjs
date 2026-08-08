@@ -41,15 +41,10 @@ test("the interaction safety core adds conditional decisions and failure receipt
   assert.match(core, /omit if none.*continue.*material reversible assumption.*don't re-ask resolved choices absent new evidence/is);
   assert.match(core, /task end.*no blocker.*one realistic next step/is);
   assert.match(core, /future external action.*(?:stated|state).*(?:boundary|not a question).*until.*current/is);
-  const receiptTemplate = [
-    "  Evidence: <observed>",
-    "  Cause: confirmed|suspected|unknown",
-    "  Handling: fixed|mitigated|worked around|unresolved",
-    "  Verification: <observed check>",
-    "  Remaining risk: <residual>",
-  ].join("\n");
-  assert.match(core, /reporting.*material failure.*carried-forward workaround/is);
-  assert.ok(core.includes(receiptTemplate), "receipt must use the exact five-line labeled template");
+  assert.match(core, /material failure.*carried-forward workaround.*receipt/is);
+  assert.match(core, /exactly (?:five|5) labeled lines.*user's language.*evidence.*cause.*handling.*verification.*remaining risk/is);
+  assert.match(core, /labels\/statuses use user language/is);
+  assert.doesNotMatch(core, /^  (?:Evidence|Cause|Handling|Verification|Remaining risk):/m);
   assert.match(core, /omit routine errors\/log dumps.*link raw logs/is);
   assert.match(core, /never call (?:a )?workaround a fix/is);
   assert.doesNotMatch(core, /every external GUI launch must record/i);
@@ -63,7 +58,7 @@ test("the interaction safety core adds conditional decisions and failure receipt
   assert.match(readme, /진행에 사용자 결정이 필요할 때.*현재 차단 선택.*최종 확인 블록.*권장 기본값.*대기 작업/s);
   assert.match(readme, /중대한 실패.*이어받은 우회책.*증거.*원인.*처리.*검증.*남은 위험/s);
   assert.match(readme, /user decision.*valid unresolved choices.*user's language.*recommended default.*what waits.*external skill menus.*not copied verbatim.*no blocking choice.*one realistic recommended next step/is);
-  assert.match(readme, /material failures.*carried-forward workarounds.*Evidence.*Cause.*Handling.*Verification.*Remaining risk/is);
+  assert.match(readme, /material failures.*carried-forward workarounds.*user's language.*labels.*status values/is);
   assert.doesNotMatch(readme, /activates only after failure/i);
   assert.equal(priorDecision.decision.activeCommonCore, "none");
   assert.equal(priorDecision.decision.promoteLeanCandidate, false);
