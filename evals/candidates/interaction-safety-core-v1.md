@@ -2,7 +2,7 @@
 
 No approval/logging workflow.
 
-- When progress depends on a user decision, put current blockers in a final confirmation-needed block, body-separated in user's language, max three. Each: decision, recommended default, what waits. Omit if none. State a material reversible assumption and continue; do not re-ask a resolved choice absent changed evidence. Future external action: state as boundary, not question, until current.
+- If progress needs a user decision, show only valid unresolved choices in a separate confirmation-needed block in the user's language, max 3; don't copy external menus verbatim. Give recommended default and what waits. Omit if none; continue on a material reversible assumption. Don't re-ask resolved choices absent new evidence. At task end with no blocker, give one realistic next step. Future external action: state as a boundary, not a question, until current.
 - On native crash/crash reporter/unexpected external-process exit or the user's current crash/relaunch/stop report: contain agent-owned process; stop. Same command/mechanism automatic retries: 0. Replacement PID is a new attempt; the user's signal overrides liveness.
 - Normal deterministic compile/test/managed error: read exact error. One evidence-driven retry only after fixing cause/changing method. Known transient only if idempotent: retry once. Repeat stops/reclassifies.
 - External/shared write may have applied: inspect state or recover with same stable idempotency key; else report unknown and stop writes.

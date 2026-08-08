@@ -84,7 +84,7 @@ JOENESS가 추가하는 도우미는 세 가지입니다.
 - `joewrks-design-frontend`: 의미 있는 UI/UX 작업에서 UI UX Pro Max와 Apple Design 참고자료를 필요한 만큼 사용합니다.
 - `handoff`: 다른 작업이나 사람이 이어갈 때 현재 파일·Git·검사 결과를 짧게 정리합니다.
 
-또한 진행에 사용자 결정이 필요할 때 현재 차단 선택만 최종 확인 블록으로 분리하고 권장 기본값과 대기 작업을 표시하는 상호작용 안전 규칙이 설치됩니다. 실패 후에는 네이티브 크래시를 같은 방식으로 자동 재시도하지 않고, 원인을 확인한 오류와 멱등인 일시 오류만 한 번 다시 시도합니다. 중대한 실패나 이어받은 우회책은 증거·원인·처리·검증·남은 위험 영수증으로 보고하며, 선택적 외부 GUI 검증은 최초 방식과 서로 다른 대안 한 번까지만 허용합니다.
+또한 진행에 사용자 결정이 필요할 때 현재 차단 선택 중 유효한 미결 선택만 사용자 언어의 최종 확인 블록으로 분리하고 권장 기본값과 대기 작업을 표시하는 상호작용 안전 규칙이 설치됩니다. 외부 스킬의 고정 메뉴는 문구 그대로 복사하지 않습니다. 차단 선택이 없으면 작업 종료 시 메뉴 대신 현실적인 다음 단계 하나를 추천합니다. 실패 후에는 네이티브 크래시를 같은 방식으로 자동 재시도하지 않고, 원인을 확인한 오류와 멱등인 일시 오류만 한 번 다시 시도합니다. 중대한 실패나 이어받은 우회책은 증거·원인·처리·검증·남은 위험 영수증으로 보고하며, 선택적 외부 GUI 검증은 최초 방식과 서로 다른 대안 한 번까지만 허용합니다.
 
 설치만으로 프로젝트 코드나 디자인은 바뀌지 않습니다.
 
@@ -230,7 +230,7 @@ JOENESS adds three helpers:
 - `joewrks-design-frontend`: Uses the relevant UI UX Pro Max and Apple Design material for meaningful UI/UX work.
 - `handoff`: Creates a compact continuation note tied to current files, Git, and observed checks.
 
-Installation also adds a compact interaction safety rule. When progress needs a user decision, it puts only current blocking choices in a final confirmation block with a recommended default and waiting state. After failure, it allows no automatic same-mechanism retry after a native crash and one bounded retry for a diagnosed error or known transient idempotent failure. Material failures or carried-forward workarounds use labeled Evidence, Cause, Handling, Verification, and Remaining risk fields; optional external GUI verification gets one materially different fallback.
+Installation also adds a compact interaction safety rule. When progress needs a user decision, it shows only valid unresolved choices in the user's language, with a recommended default and what waits. External skill menus are not copied verbatim. With no blocking choice, task completion gives one realistic recommended next step instead of a menu. After failure, it allows no automatic same-mechanism retry after a native crash and one bounded retry for a diagnosed error or known transient idempotent failure. Material failures or carried-forward workarounds use labeled Evidence, Cause, Handling, Verification, and Remaining risk fields; optional external GUI verification gets one materially different fallback.
 
 Installation alone does not change project code or design.
 
