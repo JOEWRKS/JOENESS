@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import test from "node:test";
@@ -19,7 +20,7 @@ test("the interaction safety core adds conditional decisions and failure receipt
   const interactionDecision = JSON.parse(
     await readFile(path.join(root, "evals", "experiments", "joeness-0.1-interaction-safety-core-v1.json"), "utf8"),
   );
-  assert.equal(manifest.activeCommonCore.path, "evals/candidates/interaction-safety-core-v1.md");
+  assert.equal(manifest.activeCommonCore.path, "evals/candidates/interaction-safety-core-v2.md");
 
   const core = await readFile(path.join(root, manifest.activeCommonCore.path), "utf8");
   const disabledCore = await readFile(path.join(root, "evals", "candidates", "no-common-core.md"), "utf8");
@@ -29,21 +30,22 @@ test("the interaction safety core adds conditional decisions and failure receipt
   assert.match(core, /native crash.*same (?:command|mechanism).*automatic retr(?:y|ies).*0/is);
   assert.match(core, /deterministic.*(?:cause|error).*(?:one|1).*evidence-driven/is);
   assert.match(core, /transient.*idempotent.*(?:one|1)/is);
-  assert.match(core, /external.*write.*inspect.*state.*stable idempotency key/is);
+  assert.match(core, /build\/test.*deploy folder.*shared target.*external runtime.*external\/shared write/is);
+  assert.match(core, /may have applied.*inspect state.*stable idempotency key.*unknown.*stop writes/is);
   assert.match(core, /primary approach.*one materially different fallback.*whole verification goal/is);
   assert.match(core, /replacement PID.*new attempt/is);
-  assert.match(core, /filenames.*narration.*not success/is);
-  assert.match(core, /evidence supports only.*exact artifact\/version.*named target\/state.*property.*observed/is);
-  assert.match(core, /original failure mode.*directly rechecked.*verified layer.*missing check/is);
-  assert.match(core, /progress needs a user decision.*valid unresolved choices.*separate confirmation-needed block.*user's language.*max 3/is);
+  assert.match(core, /filenames.*narration.*aren't success/is);
+  assert.match(core, /evidence supports only.*exact artifact\/version.*named target\/state.*observed property/is);
+  assert.match(core, /directly rechecking the original failure mode.*verified layer.*missing check/is);
+  assert.match(core, /progress needs a user decision.*valid unresolved choices.*separate confirmation block.*user's language.*max 3/is);
   assert.match(core, /don't copy external menus verbatim/is);
   assert.match(core, /recommended default.*what waits/is);
   assert.match(core, /omit if none.*continue.*material reversible assumption.*don't re-ask resolved choices absent new evidence/is);
   assert.match(core, /task end.*no blocker.*one realistic next step/is);
   assert.match(core, /future external action.*(?:stated|state).*(?:boundary|not a question).*until.*current/is);
   assert.match(core, /material failure.*carried-forward workaround.*receipt/is);
-  assert.match(core, /exactly (?:five|5) labeled lines.*user's language.*evidence.*cause.*handling.*verification.*remaining risk/is);
-  assert.match(core, /labels\/statuses use user language/is);
+  assert.match(core, /exactly (?:five|5) lines.*labels\/statuses.*user language.*evidence.*cause.*handling.*verification.*remaining risk/is);
+  assert.match(core, /labels\/statuses in user language/is);
   assert.doesNotMatch(core, /^  (?:Evidence|Cause|Handling|Verification|Remaining risk):/m);
   assert.match(core, /omit routine errors\/log dumps.*link raw logs/is);
   assert.match(core, /never call (?:a )?workaround a fix/is);
@@ -60,6 +62,14 @@ test("the interaction safety core adds conditional decisions and failure receipt
   assert.match(readme, /user decision.*valid unresolved choices.*user's language.*recommended default.*what waits.*external skill menus.*not copied verbatim.*no blocking choice.*one realistic recommended next step/is);
   assert.match(readme, /material failures.*carried-forward workarounds.*user's language.*labels.*status values/is);
   assert.doesNotMatch(readme, /activates only after failure/i);
+  const coreV1 = await readFile(
+    path.join(root, "evals", "candidates", "interaction-safety-core-v1.md"),
+    "utf8",
+  );
+  assert.equal(
+    createHash("sha256").update(coreV1).digest("hex"),
+    "e7a3c02d4c147eaadde2c00a0452c7de21b3e0f51fa02cf7bd7085c43d97ac4d",
+  );
   assert.equal(priorDecision.decision.activeCommonCore, "none");
   assert.equal(priorDecision.decision.promoteLeanCandidate, false);
   assert.equal(priorDecision.decision.allowOneRevision, false);

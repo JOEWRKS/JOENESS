@@ -12,6 +12,8 @@ const ROOT_AGENTS = path.join(ROOT, 'AGENTS.md');
 const HISTORICAL_COMMON_CORE = path.join(ROOT, 'evals', 'candidates', 'common-core-v1.md');
 const EVALUATED_COMMON_CORE = path.join(ROOT, 'common-core.md');
 const RETRY_SAFETY_CORE = path.join(ROOT, 'evals', 'candidates', 'retry-safety-core-v1.md');
+const INTERACTION_SAFETY_CORE_V1 = path.join(ROOT, 'evals', 'candidates', 'interaction-safety-core-v1.md');
+const INTERACTION_SAFETY_CORE_V2 = path.join(ROOT, 'evals', 'candidates', 'interaction-safety-core-v2.md');
 const GITATTRIBUTES = path.join(ROOT, '.gitattributes');
 const UI_FILES = [
   'SKILL.md',
@@ -399,12 +401,16 @@ test('the interaction safety core is active without rewriting broader Core evide
     sha256(HISTORICAL_COMMON_CORE),
     '5aebc74bc795891c43bf785d9b34ae4d35d4a40bf46eddef3f6246d75919a495',
   );
-  const interactionSafetyCore = path.join(ROOT, 'evals', 'candidates', 'interaction-safety-core-v1.md');
+  assert.equal(
+    sha256(INTERACTION_SAFETY_CORE_V1),
+    'e7a3c02d4c147eaadde2c00a0452c7de21b3e0f51fa02cf7bd7085c43d97ac4d',
+  );
   assert.deepEqual(manifest.activeCommonCore, {
-    path: 'evals/candidates/interaction-safety-core-v1.md',
-    sha256: sha256(interactionSafetyCore),
+    path: 'evals/candidates/interaction-safety-core-v2.md',
+    sha256: '3f10f1ba56864b4ba3bf1dd2b9f3200281749280a09375b2d843d1d0838049a5',
   });
-  assert.ok(lstatSync(interactionSafetyCore).size <= 2048);
+  assert.equal(lstatSync(INTERACTION_SAFETY_CORE_V2).size, 2048);
+  assert.equal(sha256(INTERACTION_SAFETY_CORE_V2), manifest.activeCommonCore.sha256);
   assert.equal(lstatSync(RETRY_SAFETY_CORE).size, 1261);
   assert.equal(sha256(RETRY_SAFETY_CORE), '0f1ef55811e4507b3f2fb21d41ad9d992a6f7fabc24d3e44a110468bd6ac5813');
   assert.equal(readFileSync(path.join(ROOT, 'evals', 'candidates', 'no-common-core.md'), 'utf8'), '\n');
@@ -419,6 +425,7 @@ test('the interaction safety core is active without rewriting broader Core evide
   assert.match(readFileSync(GITATTRIBUTES, 'utf8'), /^\/common-core\.md text eol=lf$/m);
   assert.match(readFileSync(GITATTRIBUTES, 'utf8'), /^\/evals\/candidates\/no-common-core\.md text eol=lf$/m);
   assert.match(readFileSync(GITATTRIBUTES, 'utf8'), /^\/evals\/candidates\/retry-safety-core-v1\.md text eol=lf$/m);
+  assert.match(readFileSync(GITATTRIBUTES, 'utf8'), /^\/evals\/candidates\/interaction-safety-core-v2\.md text eol=lf$/m);
 });
 
 test('candidate ledger binds the reviewed hybrid artifact without promoting implicit routing', async () => {
