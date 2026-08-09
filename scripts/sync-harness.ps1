@@ -1218,6 +1218,12 @@ function Invoke-JoewrksHarnessSync {
         }
         foreach ($relative in @($stateWholeFiles.Keys | Sort-Object)) {
             if (-not $currentOptionalPaths.ContainsKey($relative)) {
+                $cleanupDirectory = [IO.Path]::GetDirectoryName((Resolve-HarnessSourceFile $resolvedAgentsHome $relative))
+                while ($cleanupDirectory) {
+                    $null = $removeCleanupDirectories.Add($cleanupDirectory)
+                    if ($cleanupDirectory -ieq $resolvedAgentsHome) { break }
+                    $cleanupDirectory = [IO.Path]::GetDirectoryName($cleanupDirectory)
+                }
                 $null = $operations.Add([pscustomobject] @{
                     TargetPath = Resolve-HarnessSourceFile $resolvedAgentsHome $relative
                     DesiredExists = $false
@@ -1294,7 +1300,7 @@ function Invoke-JoewrksHarnessSync {
                 throw
             }
         }
-        if ($Remove) {
+        if ($removeCleanupDirectories.Count -gt 0) {
             $null = Remove-HarnessEmptyDirectories $resolvedAgentsHome $removeCleanupDirectories
         }
         return New-HarnessPublicResult -Status $(if ($Remove) { 'removed' } else { 'current' }) -Mode $mode -AgentsRoot $resolvedAgentsHome -SkillsRoot (Join-Path $resolvedAgentsHome 'skills') -ActiveSkills @($manifestSkillRelativePaths.Keys) -Warnings @($warnings) -ChangesRequired $false -Changes @($changes) -Blockers @() -BackupPath $backupPath -Rollback $null -UnresolvedTargets @()

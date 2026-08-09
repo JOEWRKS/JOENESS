@@ -149,7 +149,7 @@ test("the interaction safety core adds conditional decisions and failure receipt
 
 test("design references are selected independently and cannot expand scope", async () => {
   const skill = await readFile(
-    path.join(root, "skills", "joewrks-design-frontend", "SKILL.md"),
+    path.join(root, "skills", "design", "SKILL.md"),
     "utf8",
   );
 

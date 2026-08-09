@@ -16,7 +16,15 @@ import test from 'node:test';
 import { pathToFileURL } from 'node:url';
 
 const ROOT = path.resolve(import.meta.dirname, '..');
-const SKILL = path.join(ROOT, 'skills', 'joewrks-design-frontend', 'SKILL.md');
+const SKILL = path.join(
+  ROOT,
+  'vendor',
+  'compatibility',
+  'joeness-0.1',
+  'skills',
+  'joewrks-design-frontend',
+  'SKILL.md',
+);
 const CASES_PATH = path.join(ROOT, 'evals', 'design-frontend', 'cases.json');
 const COLLECTOR = path.join(
   ROOT,

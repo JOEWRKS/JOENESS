@@ -1,11 +1,22 @@
 {
   "schemaVersion": 1,
-  "release": {"name":"JOENESS","version":"0.1","entrypoint":"JOENESS-0.1.ps1"},
+  "release": {"name":"JOENESS","version":"0.1","entrypoint":"JOENESS.ps1"},
   "activeCommonCore": {"path":"evals/candidates/interaction-safety-core-v2.md","sha256":"3f10f1ba56864b4ba3bf1dd2b9f3200281749280a09375b2d843d1d0838049a5"},
   "evaluation": {
     "state": "candidate",
-    "tests": ["tests/design-vendor-integrity.tests.mjs", "tests/thin-hybrid-core.tests.mjs", "vendor/ui-ux-pro-max/scripts/validate_data.py", "vendor/ui-ux-pro-max/scripts/tests/test_core.py"],
+    "tests": ["tests/design-vendor-integrity.tests.mjs", "tests/thin-hybrid-core.tests.mjs", "tests/skill-contracts.tests.mjs", "vendor/ui-ux-pro-max/scripts/validate_data.py", "vendor/ui-ux-pro-max/scripts/tests/test_core.py"],
     "current": {
+      "mode": "active-skill-contract-v1",
+      "version": 1,
+      "state": "unvalidated",
+      "cases": {"path":"evals/skill-contracts/cases.json","sha256":"56de838e2cd019be801f9367566e49319f7713e69fef458eb2400214374ac90c"},
+      "hardGate": "unverified",
+      "classification": "candidate",
+      "outcomeReview": "pending",
+      "semanticImprovement": "not-asserted",
+      "promotionPass": false
+    },
+    "history": [{
       "mode": "run-hybrid-v1",
       "version": 1,
       "artifact": {"path":"evals/design-frontend/router-hybrid-v1.json","sha256":"10ddbd6d14bf3153e53561314245607d36c7d950af231585a8b5ae78fc590554"},
@@ -24,7 +35,7 @@
       "outcomeReview": "human-review-required",
       "semanticImprovement": "not-asserted",
       "promotionPass": false
-    }
+    }]
   },
   "compatibility": {
     "legacyInstallSources": {
@@ -62,6 +73,18 @@
     }
   },
   "activeSkills": {
+    "design": {
+      "authorship": "joewrks-canonical",
+      "evaluationState": "candidate",
+      "activationPolicy": "hybrid",
+      "sourceDependencies": ["ui-ux-pro-max", "apple-design"],
+      "intentionalDifferences": ["Local activation and routing contract.", "Local OpenAI product metadata."],
+      "validatorSha256": "5347a0a09cfb546bba1c0d1a30dae0a233d9a05f57bd4e7877155c588bcdabf7",
+      "files": [
+        {"localPath":"skills/design/SKILL.md","bytes":3608,"sha256":"0045f2ddd979ca3741d62c6aa140b0991f51521493aeca5b24f62c7eef01f41d","exactUpstreamCopy":false},
+        {"localPath":"skills/design/agents/openai.yaml","bytes":233,"sha256":"0819087aca545cd84638680c79e5a5d390d9a8792ed0c1df2d298b714bddfd7b","exactUpstreamCopy":false}
+      ]
+    },
     "handoff": {
       "authorship": "upstream-adapted",
       "evaluationState": "candidate",
@@ -82,19 +105,7 @@
         {"localPath":"skills/handoff/LICENSE","bytes":1068,"sha256":"0e7ac423bf2c6e223b7c5b156f8cf72da49d748e56a1641402c31f22ad07dbb5","exactUpstreamCopy":true}
       ]
     },
-    "joewrks-design-frontend": {
-      "authorship": "joewrks-canonical",
-      "evaluationState": "candidate",
-      "activationPolicy": "hybrid-personal-pilot",
-      "sourceDependencies": ["ui-ux-pro-max", "apple-design"],
-      "intentionalDifferences": ["Local activation and routing contract.", "Local OpenAI product metadata."],
-      "validatorSha256": "5347a0a09cfb546bba1c0d1a30dae0a233d9a05f57bd4e7877155c588bcdabf7",
-      "files": [
-        {"localPath":"skills/joewrks-design-frontend/SKILL.md","bytes":3335,"sha256":"a5a0c3c64b94b8565a53e19e10d15fa96dcc995bd152da6c1886ed938261a05e","exactUpstreamCopy":false},
-        {"localPath":"skills/joewrks-design-frontend/agents/openai.yaml","bytes":263,"sha256":"3d0bc6bf72b93b3bd185852f080b19caeb17aed45f582df339d61c2633f81892","exactUpstreamCopy":false}
-      ]
-    },
-    "joewrks-project-setup": {
+    "project": {
       "authorship": "joewrks-canonical",
       "evaluationState": "candidate",
       "activationPolicy": "hybrid-offer-explicit-write",
@@ -102,9 +113,21 @@
       "intentionalDifferences": ["Conditional long-project planning offer with explicit writes, bounded discovery, single-ledger reuse, and snapshot-guarded AGENTS.md updates."],
       "validatorSha256": "5347a0a09cfb546bba1c0d1a30dae0a233d9a05f57bd4e7877155c588bcdabf7",
       "files": [
-        {"localPath":"skills/joewrks-project-setup/SKILL.md","bytes":5764,"sha256":"777eecb563479f813015548284b43a2a94b2fa0fd10b2ee0f55198396fe9173c","exactUpstreamCopy":false},
-        {"localPath":"skills/joewrks-project-setup/agents/openai.yaml","bytes":353,"sha256":"1581633a8cea5dce3dd33a49bc8fb593169deddc01e496347190928a23cfeffc","exactUpstreamCopy":false},
-        {"localPath":"skills/joewrks-project-setup/scripts/project-setup.ps1","bytes":17495,"sha256":"4ffc548078a5c87357fd0e4e63538567ea2666f118243a0558bff29278d13105","exactUpstreamCopy":false}
+        {"localPath":"skills/project/SKILL.md","bytes":6592,"sha256":"9c930573910f526b6354096b59d29474432eed8b436685438e00152f15d62884","exactUpstreamCopy":false},
+        {"localPath":"skills/project/agents/openai.yaml","bytes":318,"sha256":"d5757afbeb0e378b6356c118804cdf7989d4394ecd5218bee5365a246efba720","exactUpstreamCopy":false},
+        {"localPath":"skills/project/scripts/project-setup.ps1","bytes":17495,"sha256":"4ffc548078a5c87357fd0e4e63538567ea2666f118243a0558bff29278d13105","exactUpstreamCopy":false}
+      ]
+    },
+    "visual-check": {
+      "authorship": "joewrks-canonical",
+      "evaluationState": "candidate",
+      "activationPolicy": "hybrid-visual-regression",
+      "sourceDependencies": [],
+      "intentionalDifferences": ["Concrete visual-regression verification contract.", "Local OpenAI product metadata."],
+      "validatorSha256": "5347a0a09cfb546bba1c0d1a30dae0a233d9a05f57bd4e7877155c588bcdabf7",
+      "files": [
+        {"localPath":"skills/visual-check/SKILL.md","bytes":1415,"sha256":"126e4eabc4a37666207d2122b7aea0a0277d2c0e2523753637114b88e1252f14","exactUpstreamCopy":false},
+        {"localPath":"skills/visual-check/agents/openai.yaml","bytes":285,"sha256":"a02ab7d4a60728f303e6eb6206c18d4a30cbfd7a3d4db5c6f0ab388c23bc7fff","exactUpstreamCopy":false}
       ]
     }
   },

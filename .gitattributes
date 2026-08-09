@@ -1,6 +1,7 @@
 /.gitattributes text eol=lf
 /AGENTS.md text eol=lf
 /README.md text eol=lf
+/JOENESS.ps1 text eol=lf
 /JOENESS-0.1.ps1 text eol=lf
 /harness.ps1 text eol=lf
 /common-core.md text eol=lf
@@ -33,8 +34,6 @@
 /evals/design-frontend/*.json text eol=lf
 /evals/design-frontend/*.mjs text eol=lf
 /tests/design-frontend-routing.tests.mjs text eol=lf
-/skills/joewrks-design-frontend/** text eol=lf
-/skills/joewrks-project-setup/** text eol=lf
 /skills/handoff/** text eol=lf
 /skills/project/** text eol=lf
 /skills/design/** text eol=lf

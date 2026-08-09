@@ -91,11 +91,12 @@ test('handoff expands only repeated visual or deployment incidents', () => {
   assert.match(handoff, /last accepted.*build.*deploy.*hash.*next single hypothesis/is);
 });
 
-test('new public roles are sources but are not active manifest skills yet', () => {
+test('the four public roles are the exact active manifest skills', () => {
   const manifest = JSON.parse(readFileSync(path.join(ROOT, 'vendor', 'source-manifest.json'), 'utf8'));
   assert.deepEqual(Object.keys(manifest.activeSkills).sort(), [
+    'design',
     'handoff',
-    'joewrks-design-frontend',
-    'joewrks-project-setup',
+    'project',
+    'visual-check',
   ]);
 });
