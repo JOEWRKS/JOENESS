@@ -1,6 +1,6 @@
 ---
 name: design
-description: Use when work creates or changes UI/UX intent, implementation, interaction, responsive layout, accessibility, motion, typography, or a design system, including subjective first-draft feedback. Do not use for a concrete mismatch or visual regression against an accepted implemented state unless the task also changes design intent.
+description: Use when work creates or changes UI/UX intent, implementation, interaction, responsive layout, accessibility, motion, typography, or a design system, including subjective first-draft feedback. Do not use for layout-unaffected one-line copy or literal-value changes, or for a concrete mismatch or visual regression against an accepted implemented state unless the task also changes design intent.
 ---
 
 # Design

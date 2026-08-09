@@ -73,6 +73,11 @@ test('design owns intent while visual-check owns concrete regressions', () => {
   assert.match(design, /visual-check.*concrete visual defect|visual regression.*visual-check/is);
 });
 
+test('design excludes layout-unaffected copy and literal-value fixes', () => {
+  const design = readRoleFile('design', 'SKILL.md');
+  assert.match(design, /do not use.*layout-unaffected one-line copy or literal-value changes/is);
+});
+
 test('visual-check binds one hypothesis to the exact observed state', () => {
   const visualCheck = readRoleFile('visual-check', 'SKILL.md');
   assert.match(visualCheck, /original failure.*target.*state/is);
