@@ -102,6 +102,43 @@ function parseCli(argv) {
   return { mode, runName, contractPath };
 }
 
+async function absoluteGitCommonDirectory(root) {
+  try {
+    const output = await runSuccessful(
+      "git",
+      [
+        "-C",
+        root,
+        "rev-parse",
+        "--is-inside-work-tree",
+        "--path-format=absolute",
+        "--git-common-dir",
+      ],
+      {},
+      "repository identity",
+    );
+    const [insideWorkTree, commonDirectory] = output.split(/\r?\n/u);
+    if (insideWorkTree !== "true" || !commonDirectory) return null;
+    return path.resolve(commonDirectory);
+  } catch {
+    return null;
+  }
+}
+
+export async function repositoryRootsMatch(contractRoot, runtimeRoot) {
+  const expected = path.resolve(contractRoot);
+  const actual = path.resolve(runtimeRoot);
+  if (expected === actual) return true;
+  const [expectedCommonDirectory, actualCommonDirectory] = await Promise.all([
+    absoluteGitCommonDirectory(expected),
+    absoluteGitCommonDirectory(actual),
+  ]);
+  return (
+    expectedCommonDirectory !== null &&
+    expectedCommonDirectory === actualCommonDirectory
+  );
+}
+
 async function loadContract(contractPath) {
   const contract = JSON.parse(await readFile(contractPath, "utf8"));
   if (
@@ -129,7 +166,7 @@ async function loadContract(contractPath) {
   ) {
     throw new Error("phase order or prompt contract is invalid");
   }
-  if (path.resolve(contract.workspace.sourceRoot) !== repositoryRoot) {
+  if (!(await repositoryRootsMatch(contract.workspace.sourceRoot, repositoryRoot))) {
     throw new Error("contract source root does not match this repository");
   }
   const evaluationRoot = path.resolve(contract.workspace.evaluationRoot);

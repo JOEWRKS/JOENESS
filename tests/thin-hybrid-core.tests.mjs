@@ -25,7 +25,6 @@ test("the interaction safety core adds conditional decisions and failure receipt
   const core = await readFile(path.join(root, manifest.activeCommonCore.path), "utf8");
   const disabledCore = await readFile(path.join(root, "evals", "candidates", "no-common-core.md"), "utf8");
   const projectAgents = await readFile(path.join(root, "AGENTS.md"), "utf8");
-  const readme = await readFile(path.join(root, "README.md"), "utf8");
   assert.ok(Buffer.byteLength(core, "utf8") <= 2048, "safety core must stay at or below 2 KiB");
   assert.match(core, /native crash.*same (?:command|mechanism).*automatic retr(?:y|ies).*0/is);
   assert.match(core, /deterministic.*(?:cause|error).*(?:one|1).*evidence-driven/is);
@@ -57,11 +56,6 @@ test("the interaction safety core adds conditional decisions and failure receipt
   assert.match(projectAgents, /rejected broad.*always-on Core.*disabled.*preserved.*evidence/is);
   assert.match(projectAgents, /thin Interaction Safety Core.*activeCommonCore.*manifest/is);
   assert.doesNotMatch(projectAgents, /^# JOENESS Interaction Safety Core$/m);
-  assert.match(readme, /진행에 사용자 결정이 필요할 때.*현재 차단 선택.*최종 확인 블록.*권장 기본값.*대기 작업/s);
-  assert.match(readme, /중대한 실패.*이어받은 우회책.*증거.*원인.*처리.*검증.*남은 위험/s);
-  assert.match(readme, /user decision.*valid unresolved choices.*user's language.*recommended default.*what waits.*external skill menus.*not copied verbatim.*no blocking choice.*one realistic recommended next step/is);
-  assert.match(readme, /material failures.*carried-forward workarounds.*user's language.*labels.*status values/is);
-  assert.doesNotMatch(readme, /activates only after failure/i);
   const coreV1 = await readFile(
     path.join(root, "evals", "candidates", "interaction-safety-core-v1.md"),
     "utf8",

@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { spawnSync } from "node:child_process";
+import { execFileSync, spawnSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
@@ -28,6 +28,81 @@ const runnerPath = path.join(
 function readJson(file) {
   return JSON.parse(readFileSync(file, "utf8"));
 }
+
+function runGit(args) {
+  return execFileSync("git", args, { encoding: "utf8", stdio: "pipe" }).trim();
+}
+
+async function initializeRepository(root) {
+  await mkdir(root);
+  runGit(["init", "-b", "main", root]);
+  await writeFile(path.join(root, "README.md"), "repository identity fixture\n");
+  runGit(["-C", root, "add", "README.md"]);
+  runGit([
+    "-C",
+    root,
+    "-c",
+    "user.name=JOEWRKS Harness",
+    "-c",
+    "user.email=harness@example.invalid",
+    "commit",
+    "-m",
+    "fixture",
+  ]);
+}
+
+async function removeVerifiedTempRoot(root) {
+  const absoluteRoot = path.resolve(root);
+  const absoluteTemp = path.resolve(tmpdir());
+  const relation = path.relative(absoluteTemp, absoluteRoot);
+  assert.ok(
+    relation !== "" &&
+      relation !== ".." &&
+      !relation.startsWith(`..${path.sep}`) &&
+      !path.isAbsolute(relation),
+    "cleanup target must stay inside the OS temp root",
+  );
+  assert.match(path.basename(absoluteRoot), /^lean-repository-identity-/u);
+  await rm(absoluteRoot, { recursive: true, force: true });
+}
+
+test("repository identity accepts linked worktrees from the same repository", async () => {
+  const tempRoot = await mkdtemp(
+    path.join(tmpdir(), "lean-repository-identity-"),
+  );
+  try {
+    const main = path.join(tempRoot, "main");
+    const linked = path.join(tempRoot, "linked");
+    await initializeRepository(main);
+    runGit(["-C", main, "worktree", "add", "-b", "linked", linked]);
+
+    assert.equal(
+      await lifecycleRunner.repositoryRootsMatch(main, linked),
+      true,
+    );
+  } finally {
+    await removeVerifiedTempRoot(tempRoot);
+  }
+});
+
+test("repository identity rejects a foreign repository", async () => {
+  const tempRoot = await mkdtemp(
+    path.join(tmpdir(), "lean-repository-identity-"),
+  );
+  try {
+    const first = path.join(tempRoot, "first");
+    const foreign = path.join(tempRoot, "foreign");
+    await initializeRepository(first);
+    await initializeRepository(foreign);
+
+    assert.equal(
+      await lifecycleRunner.repositoryRootsMatch(first, foreign),
+      false,
+    );
+  } finally {
+    await removeVerifiedTempRoot(tempRoot);
+  }
+});
 
 test("contract isolates the current Lean Core as the only arm difference", () => {
   const contract = readJson(contractPath);
