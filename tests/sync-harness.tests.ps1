@@ -973,9 +973,13 @@ function Test-ManifestSkillCollisions {
             Remove-Item -LiteralPath $caseRoot -Recurse -Force
         }
 
-        $unreadableSkill = Join-Path $skillRoot 'unreadable\SKILL.md'
-        Write-Bytes $unreadableSkill ([byte[]] @(0xff, 0xfe, 0x2d, 0x00))
-        Assert-True (@(Get-HarnessFrontmatterCollisions @($skillRoot) $managedSkillFiles | Where-Object { $_ -like '*Cannot inspect skill frontmatter as UTF-8*' }).Count -eq 1) 'unreadable SKILL.md blocks inspection'
+        $unreadableUnreserved = Join-Path $skillRoot 'unreadable\SKILL.md'
+        Write-Bytes $unreadableUnreserved ([byte[]] @(0xff, 0xfe, 0x2d, 0x00))
+        Assert-Equal @(Get-HarnessFrontmatterCollisions @($skillRoot) $managedSkillFiles).Count 0 'unreadable non-reserved SKILL.md does not block inspection'
+
+        $unreadableReserved = Join-Path $skillRoot 'project\SKILL.md'
+        Write-Bytes $unreadableReserved ([byte[]] @(0xff, 0xfe, 0x2d, 0x00))
+        Assert-True (@(Get-HarnessFrontmatterCollisions @($skillRoot) $managedSkillFiles | Where-Object { $_ -like "*Cannot inspect skill frontmatter as UTF-8: $unreadableReserved" }).Count -eq 1) 'unreadable reserved SKILL.md blocks inspection'
     } finally { Remove-Fixture $f }
 
     $f = New-Fixture

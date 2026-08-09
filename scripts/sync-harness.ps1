@@ -430,7 +430,10 @@ function Get-HarnessFrontmatterCollisions {
                     }
                 }
             } catch {
-                $null = $collisions.Add("Cannot inspect skill frontmatter as UTF-8: $($skillFile.FullName)")
+                $isReservedParent = @($reservedNames | Where-Object { $skillFile.Directory.Name -ieq $_ }).Count -gt 0
+                if ($isReservedParent) {
+                    $null = $collisions.Add("Cannot inspect skill frontmatter as UTF-8: $($skillFile.FullName)")
+                }
             }
         }
     }
