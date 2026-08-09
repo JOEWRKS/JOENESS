@@ -1,0 +1,7 @@
+interface:
+  display_name: "JOEWRKS Design Frontend"
+  short_description: "Route bounded frontend design and verification"
+  default_prompt: "Use $joewrks-design-frontend to route and verify this visible frontend task."
+
+policy:
+  allow_implicit_invocation: true

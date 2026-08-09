@@ -1,0 +1,6 @@
+interface:
+  display_name: "Project"
+  short_description: "Keep one durable project roadmap and deployment boundary"
+  default_prompt: "Use $project to find the current project ledger, offer a durable roadmap for unplanned long-lived work, and persist only approved targets."
+policy:
+  allow_implicit_invocation: true

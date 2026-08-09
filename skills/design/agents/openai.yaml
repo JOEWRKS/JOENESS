@@ -1,0 +1,6 @@
+interface:
+  display_name: "Design"
+  short_description: "Route bounded UI and UX design work"
+  default_prompt: "Use $design to route and verify this UI or UX task without expanding scope."
+policy:
+  allow_implicit_invocation: true

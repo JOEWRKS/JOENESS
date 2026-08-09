@@ -25,8 +25,6 @@ Include:
 - blockers, unknowns, and the receiver's first revalidation step;
 - a "suggested skills" section containing only skills with likely unique value for the next step.
 
-For a repeated visual or deployment incident only, also record the exact failing target/state; the last accepted evidence pointer or applicable source, build, and deployed hashes; the user's current verdict; rejected hypotheses or methods; and the next single hypothesis. Keep ordinary handoffs compact.
-
 Keep the handoff preferably at or below 4 KiB. Exceed that only when links cannot preserve evidence needed to resume safely.
 
 When observed, the evidence receipt also records wall-clock start and end, external run IDs, clean-build count, reviewer count, no-progress retry count, and token usage only when exposed. Mark unavailable fields unavailable; do not reconstruct them.

@@ -1,0 +1,6 @@
+interface:
+  display_name: "Visual Check"
+  short_description: "Verify a concrete visual regression and its exact state"
+  default_prompt: "Use $visual-check to bind a reported visual failure to the exact built, deployed, and observed state."
+policy:
+  allow_implicit_invocation: true

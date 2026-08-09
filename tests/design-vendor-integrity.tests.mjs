@@ -7,6 +7,7 @@ import { pathToFileURL } from 'node:url';
 
 const ROOT = path.resolve(import.meta.dirname, '..');
 const VENDOR = path.join(ROOT, 'vendor');
+const COMPATIBILITY = path.join(VENDOR, 'compatibility');
 const MANIFEST = path.join(VENDOR, 'source-manifest.json');
 const ROOT_AGENTS = path.join(ROOT, 'AGENTS.md');
 const HISTORICAL_COMMON_CORE = path.join(ROOT, 'evals', 'candidates', 'common-core-v1.md');
@@ -43,6 +44,16 @@ const EXPECTED_FILES = [
   'vendor/notices/apple-design-LICENSE',
   'vendor/notices/ui-ux-pro-max-LICENSE',
 ].sort();
+const EXPECTED_COMPATIBILITY_FILES = [
+  { sourcePath: 'skills/joewrks-design-frontend/SKILL.md', archivePath: 'vendor/compatibility/joeness-0.1/skills/joewrks-design-frontend/SKILL.md', bytes: 3335, sha256: 'a5a0c3c64b94b8565a53e19e10d15fa96dcc995bd152da6c1886ed938261a05e' },
+  { sourcePath: 'skills/joewrks-design-frontend/agents/openai.yaml', archivePath: 'vendor/compatibility/joeness-0.1/skills/joewrks-design-frontend/agents/openai.yaml', bytes: 263, sha256: '3d0bc6bf72b93b3bd185852f080b19caeb17aed45f582df339d61c2633f81892' },
+  { sourcePath: 'skills/joewrks-project-setup/SKILL.md', archivePath: 'vendor/compatibility/joeness-0.1/skills/joewrks-project-setup/SKILL.md', bytes: 5764, sha256: '777eecb563479f813015548284b43a2a94b2fa0fd10b2ee0f55198396fe9173c' },
+  { sourcePath: 'skills/joewrks-project-setup/agents/openai.yaml', archivePath: 'vendor/compatibility/joeness-0.1/skills/joewrks-project-setup/agents/openai.yaml', bytes: 353, sha256: '1581633a8cea5dce3dd33a49bc8fb593169deddc01e496347190928a23cfeffc' },
+  { sourcePath: 'skills/joewrks-project-setup/scripts/project-setup.ps1', archivePath: 'vendor/compatibility/joeness-0.1/skills/joewrks-project-setup/scripts/project-setup.ps1', bytes: 17495, sha256: '4ffc548078a5c87357fd0e4e63538567ea2666f118243a0558bff29278d13105' },
+  { sourcePath: 'skills/handoff/SKILL.md', archivePath: 'vendor/compatibility/joeness-0.1/skills/handoff/SKILL.md', bytes: 3700, sha256: '5c49bbe372921e95530d566359670f760cc25da95efe38a4d16c5125a1ca30b4' },
+  { sourcePath: 'skills/handoff/agents/openai.yaml', archivePath: 'vendor/compatibility/joeness-0.1/skills/handoff/agents/openai.yaml', bytes: 141, sha256: '5c479fd562c691851690e8b18c8501045bef0943c10743d636b2fae26add1d28' },
+  { sourcePath: 'skills/handoff/LICENSE', archivePath: 'vendor/compatibility/joeness-0.1/skills/handoff/LICENSE', bytes: 1068, sha256: '0e7ac423bf2c6e223b7c5b156f8cf72da49d748e56a1641402c31f22ad07dbb5' },
+];
 const EXPECTED_SOURCES = {
   'ui-ux-pro-max': {
     repository: 'nextlevelbuilder/ui-ux-pro-max-skill',
@@ -142,8 +153,8 @@ const EXPECTED_HANDOFF_SKILL = {
   files: [
     {
       localPath: 'skills/handoff/SKILL.md',
-      bytes: 3700,
-      sha256: '5c49bbe372921e95530d566359670f760cc25da95efe38a4d16c5125a1ca30b4',
+      bytes: 4005,
+      sha256: '096abd4d56fdcbf48c077f52ba9bfbfd38168401d0fbe3404f8bfac5dd5a6d99',
       exactUpstreamCopy: false,
     },
     {
@@ -372,7 +383,9 @@ test('vendor bundle is exactly the pinned non-discoverable source set', () => {
   }
 
   assert.deepEqual(registered.sort(), EXPECTED_FILES);
-  const actual = vendorFiles(VENDOR).filter((file) => file !== 'vendor/source-manifest.json').sort();
+  const actual = vendorFiles(VENDOR)
+    .filter((file) => file !== 'vendor/source-manifest.json' && !file.startsWith('vendor/compatibility/'))
+    .sort();
   assert.deepEqual(actual, EXPECTED_FILES);
 
   for (const [name, source] of Object.entries(manifest.sources)) {
@@ -390,6 +403,20 @@ test('vendor bundle is exactly the pinned non-discoverable source set', () => {
       assert.equal(lstatSync(localFile).size, file.bytes, `wrong active byte length: ${file.localPath}`);
       assert.equal(sha256(localFile), file.sha256, `wrong active hash: ${file.localPath}`);
     }
+  }
+});
+
+test('the JOENESS 0.1 compatibility archive is an exact separate source set', () => {
+  const expectedPaths = EXPECTED_COMPATIBILITY_FILES.map(({ archivePath }) => archivePath).sort();
+  const actualPaths = vendorFiles(COMPATIBILITY, 'vendor/compatibility').sort();
+  assert.deepEqual(actualPaths, expectedPaths);
+
+  for (const entry of EXPECTED_COMPATIBILITY_FILES) {
+    const archiveFile = path.join(ROOT, ...entry.archivePath.split('/'));
+    assert.ok(existsSync(archiveFile), `missing compatibility source: ${entry.sourcePath}`);
+    assert.equal(lstatSync(archiveFile).isSymbolicLink(), false, `compatibility source is a symlink: ${entry.sourcePath}`);
+    assert.equal(lstatSync(archiveFile).size, entry.bytes, `wrong original byte length: ${entry.sourcePath}`);
+    assert.equal(sha256(archiveFile), entry.sha256, `wrong original hash: ${entry.sourcePath}`);
   }
 });
 
@@ -520,5 +547,9 @@ test('operational skills bound handoff context and high-cost validation', () => 
 test('Git preserves exact vendor and active skill bytes on checkout', () => {
   assert.match(readFileSync(GITATTRIBUTES, 'utf8'), /^\/skills\/joewrks-design-frontend\/\*\* text eol=lf$/m);
   assert.match(readFileSync(GITATTRIBUTES, 'utf8'), /^\/skills\/handoff\/\*\* text eol=lf$/m);
+  assert.match(readFileSync(GITATTRIBUTES, 'utf8'), /^\/skills\/project\/\*\* text eol=lf$/m);
+  assert.match(readFileSync(GITATTRIBUTES, 'utf8'), /^\/skills\/design\/\*\* text eol=lf$/m);
+  assert.match(readFileSync(GITATTRIBUTES, 'utf8'), /^\/skills\/visual-check\/\*\* text eol=lf$/m);
+  assert.match(readFileSync(GITATTRIBUTES, 'utf8'), /^\/evals\/skill-contracts\/\*\.json text eol=lf$/m);
   assert.match(readFileSync(GITATTRIBUTES, 'utf8'), /^vendor\/\*\* -text$/m);
 });

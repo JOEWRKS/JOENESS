@@ -36,4 +36,8 @@
 /skills/joewrks-design-frontend/** text eol=lf
 /skills/joewrks-project-setup/** text eol=lf
 /skills/handoff/** text eol=lf
+/skills/project/** text eol=lf
+/skills/design/** text eol=lf
+/skills/visual-check/** text eol=lf
+/evals/skill-contracts/*.json text eol=lf
 vendor/** -text
