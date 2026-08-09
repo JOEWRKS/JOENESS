@@ -939,36 +939,54 @@ function Test-PreflightBlockers {
 }
 
 function Test-ManifestSkillCollisions {
-    $cases = @(
-        @{
-            Name = 'current design frontmatter collision'
-            Action = { param($f) Write-Utf8 (Join-Path $f.AgentsHome 'skills\other\SKILL.md') "---`nname: joewrks-design-frontend`n---" }
-        },
-        @{
-            Name = 'legacy project directory collision'
-            Action = { param($f) Write-Utf8 (Join-Path $f.CodexHome 'skills\joewrks-project-setup\SKILL.md') 'unmanaged' }
-        },
-        @{
-            Name = 'exact project directory without managed skill file'
-            Action = { param($f) Write-Utf8 (Join-Path $f.AgentsHome 'skills\joewrks-project-setup\unrelated.txt') 'unmanaged' }
+    . $Implementation
+    $f = New-Fixture
+    try {
+        $skillRoot = Join-Path $f.AgentsHome 'skills'
+        $managedSkillFiles = @{
+            design = $null
+            project = $null
         }
-    )
-    foreach ($case in $cases) {
-        $f = New-Fixture
-        try {
-            & $case.Action $f
-            $codex = Get-TreeHashes $f.CodexHome
-            $agents = Get-TreeHashes $f.AgentsHome
-            $run = Invoke-Harness $f Check -IncludeDesignFrontend
-            $result = Read-Result $run $case.Name
-            Assert-True ($run.ExitCode -ne 0) "$($case.Name) exits nonzero"
-            Assert-Equal $result.status 'blocked' "$($case.Name) reports blocked"
-            Assert-True (@($result.blockers).kind -contains 'duplicateSkill') "$($case.Name) reports duplicateSkill"
-            Assert-TreeEqual (Get-TreeHashes $f.CodexHome) $codex "$($case.Name) check creates no Codex writes"
-            Assert-TreeEqual (Get-TreeHashes $f.AgentsHome) $agents "$($case.Name) check creates no agents writes"
-            Assert-True (-not (Test-Path -LiteralPath $f.BackupRoot)) "$($case.Name) creates no backup"
-        } finally { Remove-Fixture $f }
-    }
+        $cases = @(
+            @{ Name = 'actual design frontmatter'; Skill = 'design'; ExpectBlocked = $true },
+            @{ Name = 'actual project frontmatter'; Skill = 'project'; ExpectBlocked = $true },
+            @{ Name = 'plain project directory'; Skill = $null; ExpectBlocked = $false },
+            @{ Name = 'unowned legacy design skill'; Skill = 'joewrks-design-frontend'; ExpectBlocked = $true },
+            @{ Name = 'unowned legacy project skill'; Skill = 'joewrks-project-setup'; ExpectBlocked = $true },
+            @{ Name = 'state-owned legacy skill'; Skill = 'state-owned'; ExpectBlocked = $false }
+        )
+        foreach ($case in $cases) {
+            $caseDirectory = if ($null -eq $case.Skill) { 'project' } else { $case.Name }
+            $caseRoot = Join-Path $skillRoot $caseDirectory
+            $skillFile = Join-Path $caseRoot 'SKILL.md'
+            if ($null -eq $case.Skill) {
+                Write-Utf8 (Join-Path $caseRoot 'unrelated.txt') 'plain directory'
+                $collisions = @(Get-HarnessFrontmatterCollisions @($skillRoot) $managedSkillFiles)
+            } elseif ($case.Skill -eq 'state-owned') {
+                Write-Utf8 $skillFile "---`nname: design`n---"
+                $collisions = @(Get-HarnessFrontmatterCollisions @($skillRoot) $managedSkillFiles @($skillFile))
+            } else {
+                Write-Utf8 $skillFile "---`nname: $($case.Skill)`n---"
+                $collisions = @(Get-HarnessFrontmatterCollisions @($skillRoot) $managedSkillFiles)
+            }
+            Assert-Equal ([bool] $collisions.Count) $case.ExpectBlocked "$($case.Name) matches the skill namespace"
+            Remove-Item -LiteralPath $caseRoot -Recurse -Force
+        }
+
+        $unreadableSkill = Join-Path $skillRoot 'unreadable\SKILL.md'
+        Write-Bytes $unreadableSkill ([byte[]] @(0xff, 0xfe, 0x2d, 0x00))
+        Assert-True (@(Get-HarnessFrontmatterCollisions @($skillRoot) $managedSkillFiles | Where-Object { $_ -like '*Cannot inspect skill frontmatter as UTF-8*' }).Count -eq 1) 'unreadable SKILL.md blocks inspection'
+    } finally { Remove-Fixture $f }
+
+    $f = New-Fixture
+    try {
+        Write-Utf8 (Join-Path $f.AgentsHome 'skills\joewrks-project-setup\unrelated.txt') 'unmanaged'
+        $run = Invoke-Harness $f Check -IncludeDesignFrontend
+        $result = Read-Result $run 'exact project target directory without managed skill file'
+        Assert-True ($run.ExitCode -ne 0) 'exact project target directory without managed skill file exits nonzero'
+        Assert-Equal $result.status 'blocked' 'exact project target directory without managed skill file reports blocked'
+        Assert-True (@($result.blockers).kind -contains 'duplicateSkill') 'exact project target directory without managed skill file stays blocked by skeleton preflight'
+    } finally { Remove-Fixture $f }
 
     $f = New-Fixture
     try {
