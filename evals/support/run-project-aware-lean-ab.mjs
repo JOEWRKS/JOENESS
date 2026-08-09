@@ -125,17 +125,24 @@ async function absoluteGitCommonDirectory(root) {
   }
 }
 
+function absolutePathsEqual(left, right) {
+  return process.platform === "win32"
+    ? left.toLowerCase() === right.toLowerCase()
+    : left === right;
+}
+
 export async function repositoryRootsMatch(contractRoot, runtimeRoot) {
   const expected = path.resolve(contractRoot);
   const actual = path.resolve(runtimeRoot);
-  if (expected === actual) return true;
+  if (absolutePathsEqual(expected, actual)) return true;
   const [expectedCommonDirectory, actualCommonDirectory] = await Promise.all([
     absoluteGitCommonDirectory(expected),
     absoluteGitCommonDirectory(actual),
   ]);
   return (
     expectedCommonDirectory !== null &&
-    expectedCommonDirectory === actualCommonDirectory
+    actualCommonDirectory !== null &&
+    absolutePathsEqual(expectedCommonDirectory, actualCommonDirectory)
   );
 }
 

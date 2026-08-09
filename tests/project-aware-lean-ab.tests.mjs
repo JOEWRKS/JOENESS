@@ -66,6 +66,35 @@ async function removeVerifiedTempRoot(root) {
   await rm(absoluteRoot, { recursive: true, force: true });
 }
 
+function invertAsciiCase(value) {
+  return value.replace(/[A-Za-z]/gu, (character) =>
+    character === character.toLowerCase()
+      ? character.toUpperCase()
+      : character.toLowerCase(),
+  );
+}
+
+test(
+  "repository identity accepts a Windows case-only root variant",
+  { skip: process.platform !== "win32" },
+  async () => {
+    const tempRoot = await mkdtemp(
+      path.join(tmpdir(), "lean-repository-identity-"),
+    );
+    try {
+      const caseOnlyVariant = invertAsciiCase(tempRoot);
+      assert.notEqual(path.resolve(tempRoot), path.resolve(caseOnlyVariant));
+
+      assert.equal(
+        await lifecycleRunner.repositoryRootsMatch(tempRoot, caseOnlyVariant),
+        true,
+      );
+    } finally {
+      await removeVerifiedTempRoot(tempRoot);
+    }
+  },
+);
+
 test("repository identity accepts linked worktrees from the same repository", async () => {
   const tempRoot = await mkdtemp(
     path.join(tmpdir(), "lean-repository-identity-"),
