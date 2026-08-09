@@ -302,6 +302,33 @@ function Write-LegacyNamedV2FixtureState {
     Write-Utf8 $Fixture.State (($state | ConvertTo-Json -Depth 16) + "`n")
 }
 
+function Write-SelfConsistentForgedLegacyNamedV2FixtureState {
+    param($Fixture)
+    Write-LegacyNamedV2FixtureState $Fixture
+
+    $relative = 'skills/joewrks-design-frontend/agents/openai.yaml'
+    $targetPath = Join-Path $Fixture.AgentsHome ($relative.Replace('/', '\'))
+    Write-Utf8 $targetPath "forged legacy descriptor`n"
+    $targetHash = Get-Hash $targetPath
+    $targetBytes = (Get-Item -LiteralPath $targetPath).Length
+
+    $installedManifestPath = Join-Path $Fixture.AgentsHome 'vendor\source-manifest.json'
+    $installedManifest = Get-Content -Raw -LiteralPath $installedManifestPath | ConvertFrom-Json
+    $descriptor = @($installedManifest.activeSkills.'joewrks-design-frontend'.files | Where-Object {
+        [string] $_.localPath -ceq $relative
+    })[0]
+    $descriptor.bytes = $targetBytes
+    $descriptor.sha256 = $targetHash
+    Write-Utf8 $installedManifestPath (($installedManifest | ConvertTo-Json -Depth 100) + "`n")
+
+    $state = Get-Content -Raw -LiteralPath $Fixture.State | ConvertFrom-Json
+    $state.wholeFileTargets.PSObject.Properties[$relative].Value = $targetHash
+    $manifestHash = Get-Hash $installedManifestPath
+    $state.wholeFileTargets.PSObject.Properties['vendor/source-manifest.json'].Value = $manifestHash
+    $state.sourceIdentities.bundleManifest.sha256 = $manifestHash
+    Write-Utf8 $Fixture.State (($state | ConvertTo-Json -Depth 16) + "`n")
+}
+
 function Test-EmptyDirectoryCleanupDeleteRace {
     $f = New-Fixture
     try {
@@ -1564,6 +1591,87 @@ function Test-LegacyNamedV2Migration {
     } finally { Remove-Fixture $f }
 }
 
+function Test-LegacyNamedV2PinnedIdentity {
+    $f = New-Fixture
+    try {
+        Write-SelfConsistentForgedLegacyNamedV2FixtureState $f
+        Assert-BlockedBeforeWrites $f {} 'self-consistent forged legacy named V2 install' 'invalidState'
+    } finally { Remove-Fixture $f }
+}
+
+function Test-LegacyNamedV2CleanupFailure {
+    $f = New-Fixture
+    try {
+        Write-LegacyNamedV2FixtureState $f
+        $oldDesignRoot = Join-Path $f.AgentsHome 'skills\joewrks-design-frontend'
+        $oldDesignAgentsRoot = Join-Path $oldDesignRoot 'agents'
+        $oldProjectRoot = Join-Path $f.AgentsHome 'skills\joewrks-project-setup'
+        $beforeState = [IO.File]::ReadAllBytes($f.State)
+        $beforeCodex = Get-TreeHashes $f.CodexHome
+        $beforeAgents = Get-TreeHashes $f.AgentsHome
+        $cleanupInjection = @{ Triggered = $false }
+        . $f.Script
+        $realCleanup = ${function:Remove-HarnessEmptyDirectories}
+        $result = & {
+            function Remove-HarnessEmptyDirectories {
+                param([string] $BoundaryRoot, [string[]] $Directories)
+                if (-not $cleanupInjection.Triggered -and @($Directories | Where-Object { $_ -ieq $oldDesignRoot }).Count -gt 0) {
+                    $cleanupInjection.Triggered = $true
+                    [IO.Directory]::Delete($oldDesignAgentsRoot, $false)
+                    return [pscustomobject] @{ removed = @($oldDesignAgentsRoot); nonEmpty = @(); failed = @($oldProjectRoot) }
+                }
+                & $realCleanup $BoundaryRoot $Directories
+            }
+            Invoke-JoewrksHarnessSync -Apply -CodexHome $f.CodexHome -AgentsHome $f.AgentsHome -BackupRoot $f.BackupRoot
+        }
+
+        Assert-True $cleanupInjection.Triggered 'legacy named V2 migration injects obsolete-directory cleanup failure'
+        Assert-Equal $result.status 'failed' 'obsolete-directory cleanup failure does not report current'
+        Assert-Equal $result.rollback.status 'complete' 'obsolete-directory cleanup failure rolls back completely'
+        Assert-Equal @($result.unresolvedTargets).Count 0 'complete cleanup rollback has no unresolved targets'
+        Assert-True (@($result.blockers).kind -contains 'applyFailure') 'obsolete-directory cleanup failure reports applyFailure'
+        Assert-True ([string] @($result.blockers)[0].message -like '*directory cleanup failed*') 'obsolete-directory cleanup failure names the next action'
+        Assert-True (Test-Path -LiteralPath $oldDesignRoot -PathType Container) 'failed cleanup leaves the old design directory'
+        Assert-True (Test-Path -LiteralPath $oldProjectRoot -PathType Container) 'failed cleanup leaves the old project directory'
+        Assert-BytesEqual ([IO.File]::ReadAllBytes($f.State)) $beforeState 'cleanup failure restores exact legacy V2 state bytes'
+        Assert-TreeEqual (Get-TreeHashes $f.CodexHome) $beforeCodex 'cleanup failure restores the legacy V2 Codex tree'
+        Assert-TreeEqual (Get-TreeHashes $f.AgentsHome) $beforeAgents 'cleanup failure restores the legacy V2 Agents tree'
+        $retry = Read-Result (Invoke-Harness $f Check) 'legacy named V2 cleanup retry check'
+        Assert-Equal $retry.status 'ready' 'cleanup failure leaves migration ready for retry'
+        Assert-True $retry.changesRequired 'cleanup retry exposes the pending migration'
+    } finally { Remove-Fixture $f }
+}
+
+function Test-LegacyNamedV2CommentCollision {
+    $f = New-Fixture
+    try {
+        Write-LegacyNamedV2FixtureState $f
+        Assert-BlockedBeforeWrites $f {
+            param($fixture)
+            Write-Utf8 (Join-Path $fixture.CodexHome 'skills\second-old-design\SKILL.md') "---`nname: joewrks-design-frontend # compatibility copy`n---"
+        } 'commented unowned second legacy named V2 skill' 'duplicateSkill'
+    } finally { Remove-Fixture $f }
+
+    . $Implementation
+    $root = Join-Path ([IO.Path]::GetTempPath()) ('joewrks-frontmatter-scalar-' + [guid]::NewGuid().ToString('N'))
+    try {
+        $managed = @{ design = 'skills/design/SKILL.md' }
+        foreach ($case in @(
+            @{ Directory = 'double-quoted'; Text = "---`nname: `"joewrks-design-frontend`" # compatibility copy`n---"; Collision = $true },
+            @{ Directory = 'single-quoted'; Text = "---`nname: 'joewrks-design-frontend' # compatibility copy`n---"; Collision = $true },
+            @{ Directory = 'quoted-comment'; Text = "---`nname: `"joewrks-design-frontend # compatibility copy`"`n---"; Collision = $false }
+        )) {
+            $path = Join-Path $root (Join-Path $case.Directory 'SKILL.md')
+            Write-Utf8 $path $case.Text
+            $collisions = @(Get-HarnessFrontmatterCollisions @($root) $managed)
+            Assert-Equal ($collisions.Count -gt 0) $case.Collision "frontmatter scalar distinguishes $($case.Directory)"
+            [IO.Directory]::Delete((Split-Path -Parent $path), $true)
+        }
+    } finally {
+        if (Test-Path -LiteralPath $root) { [IO.Directory]::Delete($root, $true) }
+    }
+}
+
 function Test-V1StateMigration {
     foreach ($case in @(
         @{ Name = 'core-only'; WithBundle = $false },
@@ -1981,6 +2089,9 @@ Test-StateTrust
 Test-V1HistoricalTrust
 Test-LegacyV2ActiveCoreMigration
 Test-LegacyNamedV2Migration
+Test-LegacyNamedV2PinnedIdentity
+Test-LegacyNamedV2CleanupFailure
+Test-LegacyNamedV2CommentCollision
 Test-V1StateMigration
 Test-CreatedDirectoryRollbackResidue
 Test-HomeResolutionAndIdentity

@@ -514,9 +514,16 @@ function Get-HarnessFrontmatterCollisions {
             if ($isOwned) { continue }
             try {
                 $text = (Read-HarnessUtf8 $skillFile.FullName).Text
+                $frontmatter = [regex]::Match(
+                    $text,
+                    '\A---[ \t]*\r?\n(?<body>.*?)(?:\r?\n)---[ \t]*(?:\r?\n|\z)',
+                    [Text.RegularExpressions.RegexOptions]::Singleline
+                )
+                if (-not $frontmatter.Success) { continue }
                 foreach ($skillName in $reservedNames) {
-                    $pattern = '(?ms)\A---\s*\r?\n.*?^\s*name\s*:\s*[''"]?' + [regex]::Escape([string] $skillName) + '[''"]?\s*$.*?^---\s*$'
-                    if ($text -match $pattern) {
+                    $escapedName = [regex]::Escape([string] $skillName)
+                    $pattern = '(?m)^[ \t]*name[ \t]*:[ \t]*(?:' + $escapedName + '|''' + $escapedName + '''|"' + $escapedName + '")(?:[ \t]+#.*)?[ \t]*$'
+                    if ($frontmatter.Groups['body'].Value -match $pattern) {
                         $null = $collisions.Add("Duplicate skill frontmatter name: $($skillFile.FullName)")
                         break
                     }
@@ -570,6 +577,12 @@ function Invoke-JoewrksHarnessSync {
     $manifestHash = $null
     $historicalV1WholeFiles = @{}
     $historicalV1SkillName = $null
+    $release01WholeFiles = @{}
+    $release01SkillFiles = @{}
+    $release01SkillNames = @()
+    $release01LegacySkillNames = @()
+    $release01LegacyPrefixes = @()
+    $release01Dependencies = @()
     $sourceCore = $null
     $blockHash = $null
     $agentSnapshot = $null
@@ -655,7 +668,31 @@ function Invoke-JoewrksHarnessSync {
 
         $release01 = $legacyInstallSources.PSObject.Properties['release0.1'].Value
         if ($null -eq $release01) { throw 'Missing release 0.1 compatibility source' }
-        $null = @(Get-HarnessLegacyInstallSelections $release01 $manifest $sourceRoot)
+        $release01Dependencies = @($legacyV1Entry.sourceDependencies | ForEach-Object { [string] $_ })
+        $releaseSelectionEntry = [pscustomobject] @{
+            files = @($release01.files)
+            sourceDependencies = @($release01Dependencies)
+        }
+        foreach ($selection in @(Get-HarnessLegacyInstallSelections $releaseSelectionEntry $manifest $sourceRoot)) {
+            $release01WholeFiles[$selection.RelativePath] = $selection.Hash
+        }
+        foreach ($file in @($release01.files)) {
+            $relative = Get-HarnessSafeRelativePath ([string] $file.localPath) 'Release 0.1 skill path'
+            $segments = @($relative -split '/')
+            if ($segments.Count -lt 3 -or $segments[0] -cne 'skills') {
+                throw "Release 0.1 skill path is outside a skill root: $relative"
+            }
+            $skillName = $segments[1]
+            if (-not $release01SkillFiles.ContainsKey($skillName)) {
+                $release01SkillFiles[$skillName] = [Collections.Generic.List[object]]::new()
+            }
+            $null = $release01SkillFiles[$skillName].Add($file)
+        }
+        $release01SkillNames = @($release01SkillFiles.Keys | Sort-Object -CaseSensitive)
+        $currentSkillNames = @($manifest.activeSkills.PSObject.Properties.Name | Sort-Object -CaseSensitive)
+        $release01LegacySkillNames = @($release01SkillNames | Where-Object { $currentSkillNames -cnotcontains $_ })
+        if ($release01LegacySkillNames.Count -eq 0) { throw 'Release 0.1 has no legacy skill names' }
+        $release01LegacyPrefixes = @($release01LegacySkillNames | ForEach-Object { "skills/$_/" })
         $releaseCore = $release01.activeCommonCore
         $releaseCoreSource = Get-HarnessSafeRelativePath ([string] $releaseCore.sourcePath) 'Release 0.1 Common Core source path'
         $null = Get-HarnessSafeRelativePath ([string] $releaseCore.localPath) 'Release 0.1 Common Core target path'
@@ -795,8 +832,8 @@ function Invoke-JoewrksHarnessSync {
                 if ($stateCommonCoreSourceHash -cne $installedCoreHash) {
                     throw 'State commonCore source identity does not match its installed manifest'
                 }
+                $installedSkillNames = @($installedManifest.activeSkills.PSObject.Properties.Name | Sort-Object -CaseSensitive)
                 if ($state.schemaVersion -eq 1) {
-                    $installedSkillNames = @($installedManifest.activeSkills.PSObject.Properties.Name | Sort-Object -CaseSensitive)
                     if (($installedSkillNames -join "`n") -cne $historicalV1SkillName) {
                         throw 'V1 installed manifest active skill set is not historical'
                     }
@@ -813,6 +850,60 @@ function Invoke-JoewrksHarnessSync {
                 foreach ($selection in @(Get-HarnessManifestSelections $installedManifest $resolvedAgentsHome)) {
                     $installedWholeFiles[$selection.RelativePath] = $selection.Hash
                 }
+                $isRelease01V2 = $false
+                if ($state.schemaVersion -eq 2) {
+                    $isRelease01V2 = @($installedSkillNames | Where-Object { $release01LegacySkillNames -ccontains $_ }).Count -gt 0
+                    if (-not $isRelease01V2) {
+                        foreach ($relative in @($installedWholeFiles.Keys)) {
+                            if (@($release01LegacyPrefixes | Where-Object { $relative.StartsWith($_, [StringComparison]::OrdinalIgnoreCase) }).Count -gt 0) {
+                                $isRelease01V2 = $true
+                                break
+                            }
+                        }
+                    }
+                    if ($isRelease01V2) {
+                        if (($installedSkillNames -join "`n") -cne ($release01SkillNames -join "`n")) {
+                            throw 'Release 0.1 installed manifest active skill set is not pinned'
+                        }
+                        if ($installedCorePath -cne $releaseCoreSource -or $installedCoreHash -cne $releaseCoreHash) {
+                            throw 'Release 0.1 installed manifest Common Core identity is not pinned'
+                        }
+                        foreach ($skillName in $release01SkillNames) {
+                            $installedSkill = $installedManifest.activeSkills.PSObject.Properties[$skillName].Value
+                            $expectedDependencies = if ($skillName -ceq $historicalV1SkillName) { @($release01Dependencies) } else { @() }
+                            $installedDependencies = @($installedSkill.sourceDependencies | ForEach-Object { [string] $_ })
+                            if (($installedDependencies -join "`n") -cne ($expectedDependencies -join "`n")) {
+                                throw "Release 0.1 installed manifest dependencies are not pinned: $skillName"
+                            }
+                            $expectedFiles = @($release01SkillFiles[$skillName])
+                            $installedFiles = @($installedSkill.files)
+                            if ($installedFiles.Count -ne $expectedFiles.Count) {
+                                throw "Release 0.1 installed manifest file descriptor count is not pinned: $skillName"
+                            }
+                            for ($fileIndex = 0; $fileIndex -lt $expectedFiles.Count; $fileIndex++) {
+                                $expectedFile = $expectedFiles[$fileIndex]
+                                $installedFile = $installedFiles[$fileIndex]
+                                $installedFilePath = Get-HarnessSafeRelativePath ([string] $installedFile.localPath) "Release 0.1 installed file path for $skillName"
+                                $installedFileHash = Get-HarnessValidSha256 $installedFile.sha256 "Release 0.1 installed file hash for $skillName"
+                                if ($installedFilePath -cne ([string] $expectedFile.localPath) -or
+                                    [long] $installedFile.bytes -ne [long] $expectedFile.bytes -or
+                                    $installedFileHash -cne ([string] $expectedFile.sha256).ToLowerInvariant()) {
+                                    throw "Release 0.1 installed manifest file descriptor is not pinned: $installedFilePath"
+                                }
+                            }
+                        }
+                        $installedNames = @($installedWholeFiles.Keys | Sort-Object -CaseSensitive)
+                        $releaseNames = @($release01WholeFiles.Keys | Sort-Object -CaseSensitive)
+                        if (($installedNames -join "`n") -cne ($releaseNames -join "`n")) {
+                            throw 'Release 0.1 installed manifest selection is not pinned'
+                        }
+                        foreach ($relative in $releaseNames) {
+                            if ($installedWholeFiles[$relative] -cne $release01WholeFiles[$relative]) {
+                                throw "Release 0.1 installed manifest target hash is not pinned: $relative"
+                            }
+                        }
+                    }
+                }
                 if ($state.schemaVersion -eq 1) {
                     $installedNames = @($installedWholeFiles.Keys | Sort-Object -CaseSensitive)
                     $historicalNames = @($historicalV1WholeFiles.Keys | Sort-Object -CaseSensitive)
@@ -825,7 +916,13 @@ function Invoke-JoewrksHarnessSync {
                         }
                     }
                 }
-                $expectedWholeFiles = if ($state.schemaVersion -eq 1) { $historicalV1WholeFiles.Clone() } else { $installedWholeFiles }
+                $expectedWholeFiles = if ($state.schemaVersion -eq 1) {
+                    $historicalV1WholeFiles.Clone()
+                } elseif ($isRelease01V2) {
+                    $release01WholeFiles.Clone()
+                } else {
+                    $installedWholeFiles
+                }
                 $expectedWholeFiles[$installedManifestRelative] = $stateManifestSourceHash
                 $actualNames = @($stateWholeFiles.Keys | Sort-Object -CaseSensitive)
                 $expectedNames = @($expectedWholeFiles.Keys | Sort-Object -CaseSensitive)
@@ -1301,7 +1398,11 @@ function Invoke-JoewrksHarnessSync {
             }
         }
         if ($removeCleanupDirectories.Count -gt 0) {
-            $null = Remove-HarnessEmptyDirectories $resolvedAgentsHome $removeCleanupDirectories
+            $cleanupResult = Remove-HarnessEmptyDirectories $resolvedAgentsHome $removeCleanupDirectories
+            if (@($cleanupResult.failed).Count -gt 0) {
+                $failedCleanupTargets = @($cleanupResult.failed | Sort-Object -Unique)
+                throw "Obsolete directory cleanup failed: $($failedCleanupTargets -join ', ')"
+            }
         }
         return New-HarnessPublicResult -Status $(if ($Remove) { 'removed' } else { 'current' }) -Mode $mode -AgentsRoot $resolvedAgentsHome -SkillsRoot (Join-Path $resolvedAgentsHome 'skills') -ActiveSkills @($manifestSkillRelativePaths.Keys) -Warnings @($warnings) -ChangesRequired $false -Changes @($changes) -Blockers @() -BackupPath $backupPath -Rollback $null -UnresolvedTargets @()
     } catch {
@@ -1334,7 +1435,7 @@ function Invoke-JoewrksHarnessSync {
                         AppliedHash = $operation.Snapshot.Hash
                         Snapshot = $current
                         Committed = $false
-                    }) $createdDirectories
+                    }) $null
                     $null = $restored.Add($operation.TargetPath)
                 } else {
                     Set-HarnessFile ([pscustomobject] @{
@@ -1345,7 +1446,7 @@ function Invoke-JoewrksHarnessSync {
                         Snapshot = $current
                         Committed = $false
                         Unresolved = $false
-                    }) $createdDirectories
+                    }) $null
                     $null = $removed.Add($operation.TargetPath)
                 }
             } catch {
