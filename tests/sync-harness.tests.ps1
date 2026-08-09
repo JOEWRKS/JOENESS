@@ -371,6 +371,8 @@ function Test-PublicHarnessEntry {
         $invalidResult = Read-Result $invalid 'public entry invalid invocation'
         Assert-Equal $invalidResult.status 'blocked' 'public entry preserves blocked result'
         Assert-PublicResultContract $invalidResult 'check' 'public entry invalid invocation'
+        $manifest = Get-Content -Raw -LiteralPath (Join-Path $f.SourceRoot 'vendor\source-manifest.json') | ConvertFrom-Json
+        Assert-Equal (@($invalidResult.activeSkills) -join ',') (@($manifest.activeSkills.PSObject.Properties.Name | Sort-Object -CaseSensitive) -join ',') 'public entry invalid invocation returns sorted manifest skill keys'
 
         $remove = Invoke-Harness $f Remove -PublicEntry
         Assert-Equal $remove.ExitCode 0 'public entry owned remove succeeds'
@@ -1169,6 +1171,20 @@ function Test-StateTrust {
             $state.schemaVersion = 3
             Write-Utf8 $fixture.State ($state | ConvertTo-Json -Depth 16)
         } 'wrong state schema' 'invalidState'
+    } finally { Remove-Fixture $f }
+
+    $f = New-Fixture
+    try {
+        Assert-Equal (Invoke-Harness $f Apply).ExitCode 0 'bundle selection tamper baseline apply succeeds'
+        $state = Get-Content -Raw -LiteralPath $f.State | ConvertFrom-Json
+        $state.bundleSelection = 'tampered'
+        Write-Utf8 $f.State ($state | ConvertTo-Json -Depth 16)
+        $run = Invoke-Harness $f Check -PublicEntry
+        $result = Read-Result $run 'bundle selection tamper public check'
+        Assert-Equal $run.ExitCode 2 'bundle selection tamper public check exits blocked'
+        Assert-Equal $result.status 'blocked' 'bundle selection tamper public check reports blocked'
+        Assert-PublicResultContract $result 'check' 'bundle selection tamper public check'
+        Assert-Equal ([string](@($result.blockers | Where-Object { $_.kind -eq 'invalidState' }).message)) 'State bundle selection is invalid' 'bundle selection tamper reports a neutral invalid-state message'
     } finally { Remove-Fixture $f }
 
     $f = New-Fixture

@@ -60,6 +60,19 @@ function New-HarnessPublicResult {
     }
 }
 
+function Get-HarnessPublicActiveSkills {
+    param([string] $SourceRoot)
+    try {
+        $manifestPath = Join-Path $SourceRoot 'vendor\source-manifest.json'
+        $manifestRead = Read-HarnessUtf8 $manifestPath
+        $manifest = $manifestRead.Text | ConvertFrom-Json
+        if ($null -eq $manifest.activeSkills) { throw 'Missing active skills' }
+        [pscustomobject]@{ ActiveSkills = @($manifest.activeSkills.PSObject.Properties.Name); Warning = $null }
+    } catch {
+        [pscustomobject]@{ ActiveSkills = @(); Warning = 'Unable to determine active skills because the source manifest could not be read.' }
+    }
+}
+
 function Read-HarnessUtf8 {
     param([string] $Path)
     $bytes = [IO.File]::ReadAllBytes($Path)
@@ -705,7 +718,7 @@ function Invoke-JoewrksHarnessSync {
                 Assert-HarnessObjectShape $state @('schemaVersion', 'sourceIdentities', 'managedBlocks', 'wholeFileTargets') 'State'
             } else {
                 Assert-HarnessObjectShape $state @('schemaVersion', 'bundleSelection', 'agentsHomeIdentitySha256', 'sourceIdentities', 'managedBlocks', 'wholeFileTargets') 'State'
-                if ([string] $state.bundleSelection -cne $bundleSelection) { throw 'State bundleSelection is invalid' }
+                if ([string] $state.bundleSelection -cne $bundleSelection) { throw 'State bundle selection is invalid' }
                 $stateAgentsHomeIdentity = Get-HarnessValidSha256 $state.agentsHomeIdentitySha256 'State AgentsHome identity'
                 if ($stateAgentsHomeIdentity -cne (Get-HarnessPathIdentity $resolvedAgentsHome)) {
                     $stateRootIdentityMismatch = $true
@@ -1389,7 +1402,9 @@ if ($MyInvocation.InvocationName -ne '.') {
             $invocationWarnings += 'DEPRECATED: -IncludeDesignFrontend is ignored; the current JOENESS bundle already installs all active skills.'
         }
         $invocationMode = if ($Check) { 'check' } elseif ($Apply) { 'apply' } else { 'remove' }
-        $result = New-HarnessPublicResult -Status 'blocked' -Mode $invocationMode -AgentsRoot $null -SkillsRoot $null -ActiveSkills @() -Warnings @($invocationWarnings) -ChangesRequired $false -Changes @() -Blockers @([pscustomobject] @{ kind = 'invocation'; message = $_.Exception.Message }) -BackupPath $null -Rollback $null -UnresolvedTargets @()
+        $publicActiveSkills = Get-HarnessPublicActiveSkills (Split-Path -Parent $PSScriptRoot)
+        if ($publicActiveSkills.Warning) { $invocationWarnings += $publicActiveSkills.Warning }
+        $result = New-HarnessPublicResult -Status 'blocked' -Mode $invocationMode -AgentsRoot $null -SkillsRoot $null -ActiveSkills @($publicActiveSkills.ActiveSkills) -Warnings @($invocationWarnings) -ChangesRequired $false -Changes @() -Blockers @([pscustomobject] @{ kind = 'invocation'; message = $_.Exception.Message }) -BackupPath $null -Rollback $null -UnresolvedTargets @()
     }
     $result | ConvertTo-Json -Compress -Depth 16
     exit (Get-HarnessExitCode $result.status)
