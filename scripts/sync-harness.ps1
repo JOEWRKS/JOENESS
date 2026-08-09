@@ -312,6 +312,54 @@ function New-HarnessTargetDirectory {
     }
 }
 
+function Remove-HarnessEmptyDirectories {
+    param([string] $BoundaryRoot, [string[]] $Directories)
+    $removed = [Collections.Generic.List[string]]::new()
+    $nonEmpty = [Collections.Generic.List[string]]::new()
+    $failed = [Collections.Generic.List[string]]::new()
+    $seen = [Collections.Generic.HashSet[string]]::new([StringComparer]::OrdinalIgnoreCase)
+    $unique = [Collections.Generic.List[string]]::new()
+    $boundary = [IO.Path]::GetFullPath($BoundaryRoot)
+    $boundaryPathRoot = [IO.Path]::GetPathRoot($boundary)
+    if ($boundary.Length -gt $boundaryPathRoot.Length) { $boundary = $boundary.TrimEnd('\', '/') }
+    $boundaryPrefix = if ($boundary.EndsWith([string] [IO.Path]::DirectorySeparatorChar)) { $boundary } else { $boundary + [IO.Path]::DirectorySeparatorChar }
+    foreach ($candidate in @($Directories)) {
+        if ([string]::IsNullOrWhiteSpace($candidate)) { continue }
+        try {
+            $full = [IO.Path]::GetFullPath($candidate)
+            $pathRoot = [IO.Path]::GetPathRoot($full)
+            if ($full.Length -gt $pathRoot.Length) { $full = $full.TrimEnd('\', '/') }
+            if ($full -ine $boundary -and -not $full.StartsWith($boundaryPrefix, [StringComparison]::OrdinalIgnoreCase)) {
+                throw "Directory cleanup target escapes its boundary: $full"
+            }
+            if ($seen.Add($full)) { $null = $unique.Add($full) }
+        } catch {
+            $null = $failed.Add([string] $candidate)
+        }
+    }
+    $ordered = @($unique | Sort-Object @{ Expression = { $_.Length }; Descending = $true }, @{ Expression = { $_ }; Descending = $true })
+    foreach ($directory in $ordered) {
+        try {
+            Assert-HarnessNoReparsePoint $boundary $directory 'Directory cleanup target'
+            $item = Get-Item -LiteralPath $directory -Force -ErrorAction Stop
+            if (-not $item.PSIsContainer -or ($item.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0) {
+                throw "Directory cleanup target is unsafe: $directory"
+            }
+            if (@(Get-ChildItem -LiteralPath $directory -Force -ErrorAction Stop).Count -ne 0) {
+                $null = $nonEmpty.Add($directory)
+                continue
+            }
+            Remove-Item -LiteralPath $directory -Force -ErrorAction Stop
+            $null = $removed.Add($directory)
+        } catch [Management.Automation.ItemNotFoundException] {
+            continue
+        } catch {
+            $null = $failed.Add($directory)
+        }
+    }
+    [pscustomobject] @{ removed = @($removed); nonEmpty = @($nonEmpty); failed = @($failed) }
+}
+
 function Set-HarnessFile {
     param($Operation, [Collections.Generic.List[string]] $CreatedDirectories)
     $temporaryPath = $null
@@ -1042,8 +1090,15 @@ function Invoke-JoewrksHarnessSync {
     }
 
     $operations = [Collections.Generic.List[object]]::new()
+    $removeCleanupDirectories = [Collections.Generic.List[string]]::new()
     if ($Remove) {
         foreach ($relative in @($stateWholeFiles.Keys | Sort-Object)) {
+            $cleanupDirectory = [IO.Path]::GetDirectoryName((Resolve-HarnessSourceFile $resolvedAgentsHome $relative))
+            while ($cleanupDirectory) {
+                $null = $removeCleanupDirectories.Add($cleanupDirectory)
+                if ($cleanupDirectory -ieq $resolvedAgentsHome) { break }
+                $cleanupDirectory = [IO.Path]::GetDirectoryName($cleanupDirectory)
+            }
             $null = $operations.Add([pscustomobject] @{
                 TargetPath = Resolve-HarnessSourceFile $resolvedAgentsHome $relative
                 DesiredExists = $false
@@ -1207,6 +1262,9 @@ function Invoke-JoewrksHarnessSync {
                 throw
             }
         }
+        if ($Remove) {
+            $null = Remove-HarnessEmptyDirectories $resolvedAgentsHome $removeCleanupDirectories
+        }
         return [pscustomobject] @{
             status = if ($Remove) { 'removed' } else { 'current' }
             bundleSelection = $bundleSelection
@@ -1272,15 +1330,33 @@ function Invoke-JoewrksHarnessSync {
                 }
             }
         }
-        for ($i = $createdDirectories.Count - 1; $i -ge 0; $i--) {
-            $directory = $createdDirectories[$i]
-            try {
-                Get-Item -LiteralPath $directory -Force -ErrorAction Stop | Out-Null
-            } catch [Management.Automation.ItemNotFoundException] {
-                continue
-            } catch {
-                # Inspection failure is handled by the unresolved path below.
+        $agentsBoundary = [IO.Path]::GetFullPath($resolvedAgentsHome)
+        $agentsPathRoot = [IO.Path]::GetPathRoot($agentsBoundary)
+        if ($agentsBoundary.Length -gt $agentsPathRoot.Length) { $agentsBoundary = $agentsBoundary.TrimEnd('\', '/') }
+        $codexBoundary = [IO.Path]::GetFullPath($resolvedCodexHome)
+        $codexPathRoot = [IO.Path]::GetPathRoot($codexBoundary)
+        if ($codexBoundary.Length -gt $codexPathRoot.Length) { $codexBoundary = $codexBoundary.TrimEnd('\', '/') }
+        $agentsPrefix = if ($agentsBoundary.EndsWith([string] [IO.Path]::DirectorySeparatorChar)) { $agentsBoundary } else { $agentsBoundary + [IO.Path]::DirectorySeparatorChar }
+        $codexPrefix = if ($codexBoundary.EndsWith([string] [IO.Path]::DirectorySeparatorChar)) { $codexBoundary } else { $codexBoundary + [IO.Path]::DirectorySeparatorChar }
+        $agentsCreated = [Collections.Generic.List[string]]::new()
+        $codexCreated = [Collections.Generic.List[string]]::new()
+        $unclassifiedCreated = [Collections.Generic.List[string]]::new()
+        foreach ($directory in $createdDirectories) {
+            $full = [IO.Path]::GetFullPath($directory)
+            $fullPathRoot = [IO.Path]::GetPathRoot($full)
+            if ($full.Length -gt $fullPathRoot.Length) { $full = $full.TrimEnd('\', '/') }
+            if ($full -ieq $agentsBoundary -or $full.StartsWith($agentsPrefix, [StringComparison]::OrdinalIgnoreCase)) {
+                $null = $agentsCreated.Add($full)
+            } elseif ($full -ieq $codexBoundary -or $full.StartsWith($codexPrefix, [StringComparison]::OrdinalIgnoreCase)) {
+                $null = $codexCreated.Add($full)
+            } else {
+                $null = $unclassifiedCreated.Add($full)
             }
+        }
+        $cleanupResults = [Collections.Generic.List[object]]::new()
+        if ($agentsCreated.Count -gt 0) { $null = $cleanupResults.Add((Remove-HarnessEmptyDirectories $agentsBoundary $agentsCreated)) }
+        if ($codexCreated.Count -gt 0) { $null = $cleanupResults.Add((Remove-HarnessEmptyDirectories $codexBoundary $codexCreated)) }
+        foreach ($directory in @($unclassifiedCreated) + @($cleanupResults | ForEach-Object { @($_.nonEmpty) + @($_.failed) })) {
             if (-not $unresolvedSeen.ContainsKey($directory)) {
                 $unresolvedSeen[$directory] = $true
                 $null = $unresolved.Add($directory)

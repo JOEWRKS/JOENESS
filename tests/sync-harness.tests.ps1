@@ -434,6 +434,9 @@ function Test-RemoveContract {
             Assert-True (-not (Test-Path -LiteralPath (Join-Path $f.AgentsHome $relative))) "owned remove deletes state-owned file: $relative"
             Assert-BytesEqual ([IO.File]::ReadAllBytes((Join-Path $removed.backupPath (Join-Path 'agents' $relative)))) $ownedBytes[$relative] "owned remove backs up exact owned bytes: $relative"
         }
+        Assert-True (-not (Test-Path -LiteralPath (Join-Path $f.AgentsHome 'skills\joewrks-design-frontend'))) 'owned remove deletes the empty design skill directory'
+        Assert-True (-not (Test-Path -LiteralPath (Join-Path $f.AgentsHome 'skills\joewrks-project-setup'))) 'owned remove deletes the empty project skill directory'
+        Assert-True (-not (Test-Path -LiteralPath (Join-Path $f.AgentsHome 'vendor'))) 'owned remove deletes the empty managed vendor directory'
         Assert-BytesEqual ([IO.File]::ReadAllBytes((Join-Path $removed.backupPath 'codex\AGENTS.md'))) $installedAgentsBytes 'owned remove backs up exact AGENTS bytes'
         Assert-BytesEqual ([IO.File]::ReadAllBytes((Join-Path $removed.backupPath 'codex\joewrks-harness-state.json'))) $stateBytes 'owned remove backs up exact state bytes'
         Assert-Equal $orderedTargets[$orderedTargets.Count - 1] $f.State 'remove deletes state last'
@@ -448,6 +451,20 @@ function Test-RemoveContract {
         $reapply = Invoke-Harness $f Apply
         Assert-Equal $reapply.ExitCode 0 'apply reuses the clean managed directory skeleton'
         Assert-Equal (Read-Result $reapply 'apply after remove').status 'current' 'apply after remove restores the bundle'
+    } finally { Remove-Fixture $f }
+
+    $f = New-Fixture
+    try {
+        Assert-Equal (Invoke-Harness $f Apply).ExitCode 0 'non-owned residue remove baseline apply succeeds'
+        $externalPath = Join-Path $f.AgentsHome 'skills\joewrks-design-frontend\external.txt'
+        Write-Utf8 $externalPath 'external'
+        $removed = Invoke-Harness $f Remove
+        Assert-Equal $removed.ExitCode 0 'non-owned residue remove succeeds'
+        Assert-Equal (Read-Result $removed 'non-owned residue remove').status 'removed' 'non-owned residue remove reports removed'
+        Assert-True (Test-Path -LiteralPath $externalPath -PathType Leaf) 'remove preserves a non-owned file in a managed directory'
+        Assert-Equal ([IO.File]::ReadAllText($externalPath)) 'external' 'remove preserves non-owned file bytes'
+        Assert-True (Test-Path -LiteralPath (Split-Path -Parent $externalPath) -PathType Container) 'remove preserves a managed directory containing a non-owned file'
+        Assert-True (-not (Test-Path -LiteralPath (Join-Path $f.AgentsHome 'skills\joewrks-project-setup'))) 'remove still deletes other proven-empty managed directories'
     } finally { Remove-Fixture $f }
 
     $f = New-Fixture
@@ -614,7 +631,8 @@ function Test-CleanSkeletonAdversaries {
             Prepare = {
                 param($f)
                 $path = Join-Path $f.AgentsHome 'skills\joewrks-project-setup'
-                [IO.Directory]::Delete($path, $true)
+                if (Test-Path -LiteralPath $path) { [IO.Directory]::Delete($path, $true) }
+                [IO.Directory]::CreateDirectory((Split-Path -Parent $path)) | Out-Null
                 $target = Join-Path $f.Root 'root-reparse-target'
                 [IO.Directory]::CreateDirectory($target) | Out-Null
                 New-Item -ItemType Junction -Path $path -Target $target | Out-Null
@@ -626,7 +644,8 @@ function Test-CleanSkeletonAdversaries {
             Prepare = {
                 param($f)
                 $path = Join-Path $f.AgentsHome 'skills\joewrks-project-setup\agents'
-                [IO.Directory]::Delete($path)
+                if (Test-Path -LiteralPath $path) { [IO.Directory]::Delete($path) }
+                [IO.Directory]::CreateDirectory((Split-Path -Parent $path)) | Out-Null
                 $target = Join-Path $f.Root 'descendant-reparse-target'
                 [IO.Directory]::CreateDirectory($target) | Out-Null
                 New-Item -ItemType Junction -Path $path -Target $target | Out-Null
@@ -667,6 +686,7 @@ function Test-CleanSkeletonAdversaries {
         Assert-Equal (Invoke-Harness $f Apply).ExitCode 0 'skeleton inspection-error baseline apply succeeds'
         Assert-Equal (Invoke-Harness $f Remove).ExitCode 0 'skeleton inspection-error baseline remove succeeds'
         $skillRoot = Join-Path $f.AgentsHome 'skills\joewrks-project-setup'
+        [IO.Directory]::CreateDirectory($skillRoot) | Out-Null
         $before = Get-TreeEntries $f.Root
         . $f.Script
         $results = & {
@@ -1313,8 +1333,8 @@ function Test-V1StateMigration {
                 throw 'failure during V1 target migration'
             }
         }
-        Assert-Equal $result.status 'unknown' 'V1 target migration incomplete rollback is unknown'
-        Assert-Equal $result.rollback.status 'incomplete' 'V1 target migration preserves created directories for inspection'
+        Assert-Equal $result.status 'failed' 'V1 target migration clean rollback reports failed'
+        Assert-Equal $result.rollback.status 'complete' 'V1 target migration clean rollback completes'
         Assert-BytesEqual ([IO.File]::ReadAllBytes($f.State)) $beforeState 'target failure leaves exact V1 state bytes'
         Assert-TreeEqual (Get-TreeHashes $f.CodexHome) $beforeTree.codex 'target failure restores the V1 Codex tree'
         Assert-TreeEqual (Get-TreeHashes $f.AgentsHome) $beforeTree.agents 'target failure restores the V1 Agents tree'
@@ -1327,8 +1347,8 @@ function Test-V1StateMigration {
             $failedTargetParent
         )
         foreach ($directory in $createdDirectories) {
-            Assert-True (Test-Path -LiteralPath $directory -PathType Container) "target failure preserves created directory: $directory"
-            Assert-Equal (@($result.unresolvedTargets | Where-Object { $_ -ieq $directory }).Count) 1 "target failure reports created directory once: $directory"
+            Assert-True (-not (Test-Path -LiteralPath $directory)) "target failure deletes created empty directory: $directory"
+            Assert-Equal (@($result.unresolvedTargets | Where-Object { $_ -ieq $directory }).Count) 0 "target failure does not report deleted empty directory: $directory"
         }
     } finally { Remove-Fixture $f }
 
@@ -1347,14 +1367,14 @@ function Test-V1StateMigration {
             param($replacement)
             if ($replacement.TargetPath -ieq $f.State) { throw 'failure after V2 state replacement' }
         }
-        Assert-Equal $failedAfterState.status 'unknown' 'state-write incomplete rollback is unknown'
-        Assert-Equal $failedAfterState.rollback.status 'incomplete' 'state-write rollback preserves created directories for inspection'
+        Assert-Equal $failedAfterState.status 'failed' 'state-write clean rollback reports failed'
+        Assert-Equal $failedAfterState.rollback.status 'complete' 'state-write clean rollback completes'
         Assert-BytesEqual ([IO.File]::ReadAllBytes($f.State)) $beforeState 'exact V1 state bytes return'
         Assert-TreeEqual (Get-TreeHashes $f.CodexHome) $beforeTree.codex 'Codex tree returns to V1'
         Assert-TreeEqual (Get-TreeHashes $f.AgentsHome) $beforeTree.agents 'Agents tree returns to V1'
         foreach ($directory in $createdDirectories) {
-            Assert-True (Test-Path -LiteralPath $directory -PathType Container) "state-write rollback preserves created directory: $directory"
-            Assert-Equal (@($failedAfterState.unresolvedTargets | Where-Object { $_ -ieq $directory }).Count) 1 "state-write rollback reports created directory once: $directory"
+            Assert-True (-not (Test-Path -LiteralPath $directory)) "state-write rollback deletes created empty directory: $directory"
+            Assert-Equal (@($failedAfterState.unresolvedTargets | Where-Object { $_ -ieq $directory }).Count) 0 "state-write rollback does not report deleted empty directory: $directory"
         }
     } finally { Remove-Fixture $f }
 }
@@ -1560,7 +1580,7 @@ function Test-DeterministicRollback {
     try {
         . $f.Script; Assert-True ((Get-Command Invoke-JoewrksHarnessSync).Parameters.ContainsKey('AfterReplace')) 'dot-sourced function exposes internal callback'
         $result = Invoke-JoewrksHarnessSync -Apply -CodexHome $f.CodexHome -AgentsHome $f.AgentsHome -BackupRoot $f.BackupRoot -AfterReplace { param($replacement) throw 'test failure' }
-        Assert-Equal $result.status 'unknown' 'callback failure with created-directory residue reports unknown'; Assert-True (-not (Test-Path -LiteralPath $f.State)) 'rollback removes unwritten state'; Assert-True (-not (Test-Path -LiteralPath (Join-Path $f.CodexHome 'AGENTS.md'))) 'rollback restores absent target'
+        Assert-Equal $result.status 'failed' 'clean callback rollback reports failed'; Assert-Equal $result.rollback.status 'complete' 'clean callback rollback completes'; Assert-True (-not (Test-Path -LiteralPath $f.State)) 'rollback removes unwritten state'; Assert-True (-not (Test-Path -LiteralPath (Join-Path $f.CodexHome 'AGENTS.md'))) 'rollback restores absent target'; Assert-True (-not (Test-Path -LiteralPath $f.CodexHome)) 'clean rollback deletes the run-created Codex directory'; Assert-True (-not (Test-Path -LiteralPath $f.AgentsHome)) 'clean rollback deletes the run-created Agents directory'
         Assert-True ((Invoke-Harness $f Check -ExtraArguments @('-AfterReplace', 'nope')).ExitCode -ne 0) 'CLI exposes no callback switch'
     } finally { Remove-Fixture $f }
     $f = New-Fixture
@@ -1606,10 +1626,10 @@ function Test-MultiTargetRollback {
             if ($replacements.Count -eq 2) { throw 'test multi-target failure' }
         }.GetNewClosure()
         $result = Invoke-JoewrksHarnessSync -Apply -IncludeDesignFrontend -CodexHome $f.CodexHome -AgentsHome $f.AgentsHome -BackupRoot $f.BackupRoot -AfterReplace $callback
-        Assert-Equal $result.status 'unknown' 'multi-target callback failure reports unknown'
+        Assert-Equal $result.status 'failed' 'clean multi-target callback rollback reports failed'
         Assert-PilotDisclosure $result.designFrontendPilot 'default-personal-pilot' 'failed personal-pilot apply'
         Assert-Equal $replacements.Count 2 'failure occurs after two replacements'
-        Assert-Equal $result.rollback.status 'incomplete' 'multi-target rollback preserves created directories for inspection'
+        Assert-Equal $result.rollback.status 'complete' 'clean multi-target rollback completes'
         $failedTargetParent = [IO.Path]::GetDirectoryName($replacements[1])
         $createdDirectories = @(
             $f.CodexHome,
@@ -1617,8 +1637,8 @@ function Test-MultiTargetRollback {
             $failedTargetParent
         )
         foreach ($directory in $createdDirectories) {
-            Assert-True (Test-Path -LiteralPath $directory -PathType Container) "multi-target rollback preserves created directory: $directory"
-            Assert-Equal (@($result.unresolvedTargets | Where-Object { $_ -ieq $directory }).Count) 1 "multi-target rollback reports created directory once: $directory"
+            Assert-True (-not (Test-Path -LiteralPath $directory)) "multi-target rollback deletes created empty directory: $directory"
+            Assert-Equal (@($result.unresolvedTargets | Where-Object { $_ -ieq $directory }).Count) 0 "multi-target rollback does not report deleted empty directory: $directory"
         }
         Assert-Equal (Get-TreeHashes $f.CodexHome).Count 0 'multi-target rollback removes created Codex files'
         Assert-TreeEqual (Get-TreeHashes $f.AgentsHome) $beforeAgents 'multi-target rollback removes created optional files and preserves external content'
