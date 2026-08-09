@@ -54,6 +54,43 @@ const EXPECTED_COMPATIBILITY_FILES = [
   { sourcePath: 'skills/handoff/agents/openai.yaml', archivePath: 'vendor/compatibility/joeness-0.1/skills/handoff/agents/openai.yaml', bytes: 141, sha256: '5c479fd562c691851690e8b18c8501045bef0943c10743d636b2fae26add1d28' },
   { sourcePath: 'skills/handoff/LICENSE', archivePath: 'vendor/compatibility/joeness-0.1/skills/handoff/LICENSE', bytes: 1068, sha256: '0e7ac423bf2c6e223b7c5b156f8cf72da49d748e56a1641402c31f22ad07dbb5' },
 ];
+const EXPECTED_STATE_SCHEMA_V1 = {
+  commonCore: {
+    sourcePath: 'evals/candidates/common-core-v1.md',
+    localPath: 'AGENTS.md',
+    sha256: '5aebc74bc795891c43bf785d9b34ae4d35d4a40bf46eddef3f6246d75919a495',
+  },
+  skillName: 'joewrks-design-frontend',
+  sourceDependencies: ['ui-ux-pro-max', 'apple-design'],
+  files: [
+    {
+      sourcePath: 'vendor/compatibility/joeness-0.1/skills/joewrks-design-frontend/SKILL.md',
+      localPath: 'skills/joewrks-design-frontend/SKILL.md',
+      bytes: 3335,
+      sha256: 'a5a0c3c64b94b8565a53e19e10d15fa96dcc995bd152da6c1886ed938261a05e',
+    },
+    {
+      sourcePath: 'vendor/compatibility/joeness-0.1/skills/joewrks-design-frontend/agents/openai.yaml',
+      localPath: 'skills/joewrks-design-frontend/agents/openai.yaml',
+      bytes: 263,
+      sha256: '3d0bc6bf72b93b3bd185852f080b19caeb17aed45f582df339d61c2633f81892',
+    },
+  ],
+};
+const EXPECTED_RELEASE_0_1 = {
+  activeCommonCore: {
+    sourcePath: 'evals/candidates/interaction-safety-core-v1.md',
+    localPath: 'AGENTS.md',
+    bytes: 2044,
+    sha256: 'e7a3c02d4c147eaadde2c00a0452c7de21b3e0f51fa02cf7bd7085c43d97ac4d',
+  },
+  files: EXPECTED_COMPATIBILITY_FILES.map(({ archivePath, sourcePath, bytes, sha256 }) => ({
+    sourcePath: archivePath,
+    localPath: sourcePath,
+    bytes,
+    sha256,
+  })),
+};
 const EXPECTED_SOURCES = {
   'ui-ux-pro-max': {
     repository: 'nextlevelbuilder/ui-ux-pro-max-skill',
@@ -407,12 +444,19 @@ test('vendor bundle is exactly the pinned non-discoverable source set', () => {
 });
 
 test('the JOENESS 0.1 compatibility archive is an exact separate source set', () => {
+  const manifest = JSON.parse(readFileSync(MANIFEST, 'utf8'));
+  assert.ok(manifest.compatibility, 'missing compatibility manifest contract');
+  const legacyInstallSources = manifest.compatibility.legacyInstallSources;
+  assert.deepEqual(legacyInstallSources.stateSchemaV1, EXPECTED_STATE_SCHEMA_V1);
+  assert.deepEqual(legacyInstallSources['release0.1'], EXPECTED_RELEASE_0_1);
+
   const expectedPaths = EXPECTED_COMPATIBILITY_FILES.map(({ archivePath }) => archivePath).sort();
   const actualPaths = vendorFiles(COMPATIBILITY, 'vendor/compatibility').sort();
   assert.deepEqual(actualPaths, expectedPaths);
 
-  for (const entry of EXPECTED_COMPATIBILITY_FILES) {
-    const archiveFile = path.join(ROOT, ...entry.archivePath.split('/'));
+  for (const entry of legacyInstallSources['release0.1'].files) {
+    assert.deepEqual(Object.keys(entry).sort(), ['bytes', 'localPath', 'sha256', 'sourcePath']);
+    const archiveFile = path.join(ROOT, ...entry.sourcePath.split('/'));
     assert.ok(existsSync(archiveFile), `missing compatibility source: ${entry.sourcePath}`);
     assert.equal(lstatSync(archiveFile).isSymbolicLink(), false, `compatibility source is a symlink: ${entry.sourcePath}`);
     assert.equal(lstatSync(archiveFile).size, entry.bytes, `wrong original byte length: ${entry.sourcePath}`);

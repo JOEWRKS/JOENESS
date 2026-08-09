@@ -80,15 +80,18 @@ function Get-ActiveCoreRelativePath {
 
 function Get-V1SelectedFiles {
     param($Manifest)
-    $paths = @()
-    foreach ($skill in @($Manifest.activeSkills.PSObject.Properties.Value)) {
-        $paths += @($skill.files | ForEach-Object { ([string] $_.localPath).Replace('/', '\') })
-        foreach ($sourceName in @($skill.sourceDependencies)) {
+    $legacy = $Manifest.compatibility.legacyInstallSources.stateSchemaV1
+    $selected = @($legacy.files | ForEach-Object {
+        [pscustomobject] @{ SourcePath = ([string] $_.sourcePath).Replace('/', '\'); LocalPath = ([string] $_.localPath).Replace('/', '\') }
+    })
+    foreach ($sourceName in @($legacy.sourceDependencies)) {
             $source = $Manifest.sources.PSObject.Properties[[string] $sourceName].Value
-            $paths += @($source.files | ForEach-Object { ([string] $_.localPath).Replace('/', '\') })
-        }
+            $selected += @($source.files | ForEach-Object {
+                $relative = ([string] $_.localPath).Replace('/', '\')
+                [pscustomobject] @{ SourcePath = $relative; LocalPath = $relative }
+            })
     }
-    @($paths | Sort-Object -Unique)
+    @($selected | Sort-Object LocalPath -Unique)
 }
 
 function Copy-RelativeFile {
@@ -111,7 +114,9 @@ function New-Fixture {
     $source = Join-Path $root 'source'
     [IO.Directory]::CreateDirectory($source) | Out-Null
     $activeCore = Get-ActiveCoreRelativePath $RepositoryRoot
-    foreach ($path in @($activeCore, 'evals\candidates\common-core-v1.md', 'scripts\sync-harness.ps1', 'vendor\source-manifest.json') + (Get-OptionalFiles $RepositoryRoot)) { Copy-RelativeFile $RepositoryRoot $source $path }
+    $compatibilityFiles = Get-ChildItem -LiteralPath (Join-Path $RepositoryRoot 'vendor\compatibility') -File -Recurse |
+        ForEach-Object { $_.FullName.Substring($RepositoryRoot.Length).TrimStart('\') }
+    foreach ($path in @($activeCore, 'evals\candidates\common-core-v1.md', 'evals\candidates\interaction-safety-core-v1.md', 'scripts\sync-harness.ps1', 'vendor\source-manifest.json') + (Get-OptionalFiles $RepositoryRoot) + $compatibilityFiles) { Copy-RelativeFile $RepositoryRoot $source $path }
     [pscustomobject]@{
         Root = $root; SourceRoot = $source; Script = Join-Path $source 'scripts\sync-harness.ps1'
         CodexHome = Join-Path $root 'codex'; AgentsHome = Join-Path $root 'agents'; BackupRoot = Join-Path $root 'backups'
@@ -155,13 +160,20 @@ function Write-V1FixtureState {
     param($Fixture, [switch] $WithBundle)
     $manifestPath = Join-Path $Fixture.SourceRoot 'vendor\source-manifest.json'
     $legacyManifest = [IO.File]::ReadAllText($manifestPath) | ConvertFrom-Json
+    $legacyEntry = $legacyManifest.compatibility.legacyInstallSources.stateSchemaV1
     $legacyManifest.PSObject.Properties.Remove('activeCommonCore')
-    $legacyManifest.evaluation.current.commonCore.path = 'AGENTS.md'
-    $legacyManifest.activeSkills.PSObject.Properties.Remove('handoff')
-    $legacyManifest.activeSkills.PSObject.Properties.Remove('joewrks-project-setup')
-    $legacyManifest.activeSkills.'joewrks-design-frontend'.PSObject.Properties.Remove('activationPolicy')
+    $legacyManifest.evaluation.current.commonCore.path = [string] $legacyEntry.commonCore.localPath
+    $legacyManifest.evaluation.current.commonCore.sha256 = [string] $legacyEntry.commonCore.sha256
+    $historicalSkill = [pscustomobject] @{
+        sourceDependencies = @($legacyEntry.sourceDependencies)
+        files = @($legacyEntry.files | ForEach-Object {
+            [pscustomobject] @{ localPath = $_.localPath; bytes = $_.bytes; sha256 = $_.sha256; exactUpstreamCopy = $false }
+        })
+    }
+    $legacyManifest.activeSkills = [pscustomobject] @{ ([string] $legacyEntry.skillName) = $historicalSkill }
+    $legacyManifest.PSObject.Properties.Remove('compatibility')
     $legacyManifestText = $legacyManifest | ConvertTo-Json -Depth 100
-    $corePath = Join-Path $Fixture.SourceRoot 'evals\candidates\common-core-v1.md'
+    $corePath = Join-Path $Fixture.SourceRoot (([string] $legacyEntry.commonCore.sourcePath).Replace('/', '\'))
     $core = [IO.File]::ReadAllText($corePath).TrimEnd("`r", "`n")
     $block = "$BeginMarker`n$core`n$EndMarker"
     $agentsPath = Join-Path $Fixture.CodexHome 'AGENTS.md'
@@ -172,12 +184,18 @@ function Write-V1FixtureState {
     }
     $wholeFileTargets = [ordered] @{}
     if ($WithBundle) {
-        Assert-Equal (($legacyManifest.activeSkills.PSObject.Properties.Name | Sort-Object) -join ',') 'joewrks-design-frontend' 'V1 fixture has only the historical design skill'
-        Assert-True (-not ($legacyManifest.activeSkills.'joewrks-design-frontend'.PSObject.Properties.Name -contains 'activationPolicy')) 'V1 fixture predates activationPolicy'
-        foreach ($relative in Get-V1SelectedFiles $legacyManifest) {
-            Copy-RelativeFile $Fixture.SourceRoot $Fixture.AgentsHome $relative
-            $canonical = $relative.Replace('\', '/')
-            $wholeFileTargets[$canonical] = Get-Hash (Join-Path $Fixture.AgentsHome $relative)
+        Assert-Equal (($legacyManifest.activeSkills.PSObject.Properties.Name | Sort-Object) -join ',') ([string] $legacyEntry.skillName) 'V1 fixture has only the historical design skill'
+        Assert-True (-not ($historicalSkill.PSObject.Properties.Name -contains 'activationPolicy')) 'V1 fixture predates activationPolicy'
+        foreach ($selection in Get-V1SelectedFiles ([IO.File]::ReadAllText($manifestPath) | ConvertFrom-Json)) {
+            Copy-RelativeFile $Fixture.SourceRoot $Fixture.AgentsHome $selection.SourcePath
+            if ($selection.SourcePath -cne $selection.LocalPath) {
+                $source = Join-Path $Fixture.AgentsHome $selection.SourcePath
+                $target = Join-Path $Fixture.AgentsHome $selection.LocalPath
+                [IO.Directory]::CreateDirectory((Split-Path -Parent $target)) | Out-Null
+                [IO.File]::Move($source, $target)
+            }
+            $canonical = $selection.LocalPath.Replace('\', '/')
+            $wholeFileTargets[$canonical] = Get-Hash (Join-Path $Fixture.AgentsHome $selection.LocalPath)
         }
         $installedManifest = Join-Path $Fixture.AgentsHome 'vendor\source-manifest.json'
         Write-Utf8 $installedManifest ($legacyManifestText + "`n")
@@ -1118,6 +1136,20 @@ function Test-PreservedOptionalAfterCoreUpdate {
 }
 
 function Test-V1HistoricalTrust {
+    $f = New-Fixture
+    try {
+        $legacySkill = Join-Path $f.SourceRoot 'vendor\compatibility\joeness-0.1\skills\joewrks-design-frontend\SKILL.md'
+        Add-Content -LiteralPath $legacySkill -Value 'drift'
+        Assert-BlockedBeforeWrites $f {} 'legacy compatibility source hash mismatch' 'sourceIntegrity'
+    } finally { Remove-Fixture $f }
+
+    $f = New-Fixture
+    try {
+        $legacySkill = Join-Path $f.SourceRoot 'vendor\compatibility\joeness-0.1\skills\joewrks-design-frontend\SKILL.md'
+        [IO.File]::Delete($legacySkill)
+        Assert-BlockedBeforeWrites $f {} 'legacy compatibility source missing' 'sourceIntegrity'
+    } finally { Remove-Fixture $f }
+
     $f = New-Fixture
     try {
         Write-V1FixtureState $f

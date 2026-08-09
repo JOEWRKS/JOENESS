@@ -203,6 +203,54 @@ function Get-HarnessManifestSelections {
     }
 }
 
+function Get-HarnessLegacyInstallSelections {
+    param($LegacyEntry, $Manifest, [string] $SourceRoot)
+    $selected = [Collections.Generic.List[object]]::new()
+    foreach ($file in @($LegacyEntry.files)) {
+        $sourceRelative = Get-HarnessSafeRelativePath ([string] $file.sourcePath) 'Legacy source path'
+        $targetRelative = Get-HarnessSafeRelativePath ([string] $file.localPath) 'Legacy target path'
+        $sourcePath = Resolve-HarnessSourceFile $SourceRoot $sourceRelative
+        $hash = Get-HarnessValidSha256 $file.sha256 'Legacy source hash'
+        $bytes = [IO.File]::ReadAllBytes($sourcePath)
+        if ($bytes.Length -ne [long] $file.bytes -or (Get-HarnessSha256 $bytes) -cne $hash) {
+            throw "Legacy compatibility source mismatch: $sourceRelative"
+        }
+        $null = $selected.Add([pscustomobject]@{
+            RelativePath = $targetRelative
+            Path = $sourcePath
+            Hash = $hash
+            Entry = $file
+        })
+    }
+    $dependencyProperty = $LegacyEntry.PSObject.Properties['sourceDependencies']
+    foreach ($sourceName in @($(if ($null -ne $dependencyProperty) { $dependencyProperty.Value }))) {
+        $sourceProperty = $Manifest.sources.PSObject.Properties[[string] $sourceName]
+        if ($null -eq $sourceProperty) { throw "Missing legacy source dependency: $sourceName" }
+        foreach ($file in @($sourceProperty.Value.files)) {
+            $relative = Get-HarnessSafeRelativePath ([string] $file.localPath) 'Legacy dependency path'
+            $path = Resolve-HarnessSourceFile $SourceRoot $relative
+            $hash = Get-HarnessValidSha256 $file.sha256 "Legacy dependency hash for $relative"
+            $bytes = [IO.File]::ReadAllBytes($path)
+            if ($bytes.Length -ne [long] $file.bytes -or (Get-HarnessSha256 $bytes) -cne $hash) {
+                throw "Legacy dependency source mismatch: $relative"
+            }
+            $null = $selected.Add([pscustomobject]@{
+                RelativePath = $relative
+                Path = $path
+                Hash = $hash
+                Entry = $file
+            })
+        }
+    }
+    $destinations = [Collections.Generic.HashSet[string]]::new([StringComparer]::OrdinalIgnoreCase)
+    foreach ($selection in $selected) {
+        if (-not $destinations.Add($selection.RelativePath)) {
+            throw "Duplicate legacy install target: $($selection.RelativePath)"
+        }
+    }
+    $selected.ToArray()
+}
+
 function Get-HarnessFileSnapshot {
     param([string] $Path)
     if (-not (Test-Path -LiteralPath $Path)) {
@@ -438,6 +486,7 @@ function Invoke-JoewrksHarnessSync {
     $manifest = $null
     $manifestHash = $null
     $historicalV1WholeFiles = @{}
+    $historicalV1SkillName = $null
     $sourceCore = $null
     $blockHash = $null
     $agentSnapshot = $null
@@ -477,7 +526,13 @@ function Invoke-JoewrksHarnessSync {
             $manifestSkillRelativePaths[$skillName] = Get-HarnessSafeRelativePath "skills/$skillName/SKILL.md" 'Manifest skill path'
         }
         $coreEntry = $manifest.activeCommonCore
-        $historicalCoreEntry = $manifest.evaluation.current.commonCore
+        $legacyInstallSources = $manifest.compatibility.legacyInstallSources
+        if ($null -eq $legacyInstallSources) { throw 'Missing legacy install compatibility sources' }
+        $legacyV1Entry = $legacyInstallSources.stateSchemaV1
+        if ($null -eq $legacyV1Entry) { throw 'Missing state schema V1 compatibility source' }
+        $historicalCoreEntry = $legacyV1Entry.commonCore
+        $historicalV1SkillName = [string] $legacyV1Entry.skillName
+        if ([string]::IsNullOrWhiteSpace($historicalV1SkillName)) { throw 'Missing historical V1 skill name' }
         $corePath = Resolve-HarnessSourceFile $sourceRoot ([string] $coreEntry.path)
         if (-not (Test-Path -LiteralPath $corePath -PathType Leaf)) { throw "Missing Common Core source: $($coreEntry.path)" }
         $sourceCoreRead = Read-HarnessUtf8 $corePath
@@ -502,14 +557,30 @@ function Invoke-JoewrksHarnessSync {
             Hash = $manifestHash
             Bytes = $manifestRead.Bytes
         })
-        $historicalDesignSkill = $manifest.activeSkills.PSObject.Properties['joewrks-design-frontend']
-        if ($null -eq $historicalDesignSkill) { throw 'Missing historical V1 design skill source' }
-        $historicalV1Manifest = [pscustomobject] @{
-            activeSkills = [pscustomobject] @{ 'joewrks-design-frontend' = $historicalDesignSkill.Value }
-            sources = $manifest.sources
+        $historicalCoreSource = Get-HarnessSafeRelativePath ([string] $historicalCoreEntry.sourcePath) 'Historical V1 Common Core source path'
+        $historicalCoreTarget = Get-HarnessSafeRelativePath ([string] $historicalCoreEntry.localPath) 'Historical V1 Common Core target path'
+        if ($historicalCoreTarget -cne 'AGENTS.md') { throw 'Historical V1 Common Core target is invalid' }
+        $historicalCorePath = Resolve-HarnessSourceFile $sourceRoot $historicalCoreSource
+        $historicalCoreBytes = [IO.File]::ReadAllBytes($historicalCorePath)
+        $historicalCoreHash = Get-HarnessValidSha256 $historicalCoreEntry.sha256 'Historical V1 Common Core hash'
+        if ((Get-HarnessSha256 $historicalCoreBytes) -cne $historicalCoreHash) {
+            throw "Historical V1 Common Core source mismatch: $historicalCoreSource"
         }
-        foreach ($selection in @(Get-HarnessManifestSelections $historicalV1Manifest $sourceRoot)) {
+        foreach ($selection in @(Get-HarnessLegacyInstallSelections $legacyV1Entry $manifest $sourceRoot)) {
             $historicalV1WholeFiles[$selection.RelativePath] = $selection.Hash
+        }
+
+        $release01 = $legacyInstallSources.PSObject.Properties['release0.1'].Value
+        if ($null -eq $release01) { throw 'Missing release 0.1 compatibility source' }
+        $null = @(Get-HarnessLegacyInstallSelections $release01 $manifest $sourceRoot)
+        $releaseCore = $release01.activeCommonCore
+        $releaseCoreSource = Get-HarnessSafeRelativePath ([string] $releaseCore.sourcePath) 'Release 0.1 Common Core source path'
+        $null = Get-HarnessSafeRelativePath ([string] $releaseCore.localPath) 'Release 0.1 Common Core target path'
+        $releaseCorePath = Resolve-HarnessSourceFile $sourceRoot $releaseCoreSource
+        $releaseCoreBytes = [IO.File]::ReadAllBytes($releaseCorePath)
+        $releaseCoreHash = Get-HarnessValidSha256 $releaseCore.sha256 'Release 0.1 Common Core hash'
+        if ($releaseCoreBytes.Length -ne [long] $releaseCore.bytes -or (Get-HarnessSha256 $releaseCoreBytes) -cne $releaseCoreHash) {
+            throw "Release 0.1 Common Core source mismatch: $releaseCoreSource"
         }
     } catch {
         $null = $blockers.Add([pscustomobject] @{ kind = 'sourceIntegrity'; message = $_.Exception.Message })
@@ -643,10 +714,10 @@ function Invoke-JoewrksHarnessSync {
                 }
                 if ($state.schemaVersion -eq 1) {
                     $installedSkillNames = @($installedManifest.activeSkills.PSObject.Properties.Name | Sort-Object -CaseSensitive)
-                    if (($installedSkillNames -join "`n") -cne 'joewrks-design-frontend') {
+                    if (($installedSkillNames -join "`n") -cne $historicalV1SkillName) {
                         throw 'V1 installed manifest active skill set is not historical'
                     }
-                    $installedDesignSkill = $installedManifest.activeSkills.'joewrks-design-frontend'
+                    $installedDesignSkill = $installedManifest.activeSkills.PSObject.Properties[$historicalV1SkillName].Value
                     if ($installedDesignSkill.PSObject.Properties.Name -contains 'activationPolicy') {
                         throw 'V1 installed manifest design skill has a non-historical activationPolicy'
                     }
