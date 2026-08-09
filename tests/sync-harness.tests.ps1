@@ -332,39 +332,51 @@ function Test-PublicHarnessEntry {
     try {
         $releaseCheck = Invoke-Harness $f Check -ReleasePublicEntry
         Assert-Equal $releaseCheck.ExitCode 0 'JOENESS-0.1 entry check succeeds'
-        Assert-Equal (Read-Result $releaseCheck 'JOENESS-0.1 entry check').status 'ready' 'JOENESS-0.1 entry forwards check'
+        $releaseResult = Read-Result $releaseCheck 'JOENESS-0.1 entry check'
+        Assert-Equal $releaseResult.status 'ready' 'JOENESS-0.1 entry forwards check'
+        Assert-PublicResultContract $releaseResult 'check' 'JOENESS-0.1 entry check'
         Assert-True (-not (Test-Path -LiteralPath $f.CodexHome)) 'JOENESS-0.1 check remains read-only'
 
         $emptyRemove = Invoke-Harness $f Remove -PublicEntry
         Assert-Equal $emptyRemove.ExitCode 0 'public entry empty remove succeeds'
-        Assert-Equal (Read-Result $emptyRemove 'public entry empty remove').status 'removed' 'public entry forwards empty remove'
+        $emptyRemoveResult = Read-Result $emptyRemove 'public entry empty remove'
+        Assert-Equal $emptyRemoveResult.status 'removed' 'public entry forwards empty remove'
+        Assert-PublicResultContract $emptyRemoveResult 'remove' 'public entry empty remove'
         Assert-True (-not (Test-Path -LiteralPath $f.BackupRoot)) 'public entry empty remove creates no backup'
 
         $check = Invoke-Harness $f Check -PublicEntry
         Assert-Equal $check.ExitCode 0 'public entry check succeeds'
-        Assert-Equal (Read-Result $check 'public entry check').status 'ready' 'public entry forwards check'
+        $checkResult = Read-Result $check 'public entry check'
+        Assert-Equal $checkResult.status 'ready' 'public entry forwards check'
+        Assert-PublicResultContract $checkResult 'check' 'public entry check'
         Assert-Equal $check.StdOut $releaseCheck.StdOut 'legacy and JOENESS-0.1 entries return the same check result'
         Assert-True (-not (Test-Path -LiteralPath $f.CodexHome)) 'public entry check remains read-only'
 
         $apply = Invoke-Harness $f Apply -PublicEntry
         Assert-Equal $apply.ExitCode 0 'public entry apply succeeds'
-        Assert-Equal (Read-Result $apply 'public entry apply').status 'current' 'public entry forwards apply'
+        $applyResult = Read-Result $apply 'public entry apply'
+        Assert-Equal $applyResult.status 'current' 'public entry forwards apply'
+        Assert-PublicResultContract $applyResult 'apply' 'public entry apply'
         Assert-True (Test-Path -LiteralPath (Join-Path $f.CodexHome 'AGENTS.md') -PathType Leaf) 'public entry apply installs Common Core'
         Assert-StringSetEqual @((Get-TreeHashes $f.AgentsHome).Keys) (Get-OptionalFiles $f.SourceRoot) 'public entry installs the personal pilot bundle'
 
         $pilot = Invoke-Harness $f Check -IncludeDesignFrontend -PublicEntry
         Assert-Equal $pilot.ExitCode 0 'public entry accepts the compatibility flag'
         $pilotResult = Read-Result $pilot 'public entry pilot check'
-        Assert-PilotDisclosure $pilotResult.designFrontendPilot 'default-personal-pilot' 'public entry pilot check'
+        Assert-PublicResultContract $pilotResult 'check' 'public entry compatibility check'
         Assert-Equal @($pilotResult.warnings).Count 1 'public entry exposes one compatibility warning'
 
         $invalid = Invoke-Harness $f Check -PublicEntry -ExtraArguments @('-Apply')
         Assert-Equal $invalid.ExitCode 2 'public entry preserves blocked exit status'
-        Assert-Equal (Read-Result $invalid 'public entry invalid invocation').status 'blocked' 'public entry preserves blocked result'
+        $invalidResult = Read-Result $invalid 'public entry invalid invocation'
+        Assert-Equal $invalidResult.status 'blocked' 'public entry preserves blocked result'
+        Assert-PublicResultContract $invalidResult 'check' 'public entry invalid invocation'
 
         $remove = Invoke-Harness $f Remove -PublicEntry
         Assert-Equal $remove.ExitCode 0 'public entry owned remove succeeds'
-        Assert-Equal (Read-Result $remove 'public entry owned remove').status 'removed' 'public entry forwards owned remove'
+        $removeResult = Read-Result $remove 'public entry owned remove'
+        Assert-Equal $removeResult.status 'removed' 'public entry forwards owned remove'
+        Assert-PublicResultContract $removeResult 'remove' 'public entry owned remove'
         Assert-True (-not (Test-Path -LiteralPath $f.State)) 'public entry owned remove deletes state'
     } finally { Remove-Fixture $f }
 }
@@ -453,18 +465,16 @@ function Get-ExternalAgentBytes {
 
 function Assert-BytesEqual { param([byte[]] $Actual, [byte[]] $Expected, [string] $Message) Assert-Equal ([Convert]::ToBase64String($Actual)) ([Convert]::ToBase64String($Expected)) $Message }
 function Assert-StringSetEqual { param([string[]] $Actual, [string[]] $Expected, [string] $Message) Assert-Equal (($Actual | Sort-Object) -join "`n") (($Expected | Sort-Object) -join "`n") $Message }
-function Assert-PilotDisclosure {
-    param($Pilot, [string] $Selection, [string] $Message)
-    Assert-True ($null -ne $Pilot) "$Message discloses the pilot"
-    Assert-Equal $Pilot.selection $Selection "$Message distinguishes pilot selection"
-    Assert-Equal $Pilot.state 'candidate' "$Message reports candidate state"
-    Assert-Equal $Pilot.hardGate 'pass' "$Message reports the manifest hard gate"
-    Assert-Equal $Pilot.promotionPass $false "$Message does not claim promotion"
-    Assert-Equal $Pilot.classification 'implicit-unverified' "$Message reports unverified classification"
-    Assert-Equal $Pilot.outcomeReview 'human-review-required' "$Message requires human outcome review"
-    Assert-Equal $Pilot.semanticImprovement 'not-asserted' "$Message does not assert semantic improvement"
-    Assert-Equal $Pilot.figma 'task-time-verification-not-certified' "$Message does not certify Figma"
-    Assert-Equal $Pilot.browser 'task-time-verification-not-certified' "$Message does not certify browser behavior"
+function Assert-PublicResultContract {
+    param($Result, [string] $ExpectedMode, [string] $Message)
+    $required = @('activeSkills','agentsRoot','backupPath','blockers','changes','changesRequired','mode','rollback','skillsRoot','status','unresolvedTargets','warnings')
+    Assert-Equal (($Result.PSObject.Properties.Name | Sort-Object) -join ',') (($required | Sort-Object) -join ',') "$Message result keys"
+    Assert-Equal $Result.mode $ExpectedMode "$Message mode"
+    $json = $Result | ConvertTo-Json -Compress -Depth 16
+    foreach ($forbidden in @('designFrontendRoot','designFrontendPilot','bundleSelection','personal-pilot')) {
+        Assert-True (-not $json.Contains($forbidden)) "$Message hides $forbidden"
+    }
+    Assert-True (-not (@($Result.changes).kind -contains 'designFrontend')) "$Message uses neutral change kinds"
 }
 
 function Assert-OneJsonResult {
@@ -863,12 +873,13 @@ function Test-EmptyCheckAndApply {
     try {
         $check = Invoke-Harness $f Check; Assert-Equal $check.ExitCode 0 'empty check succeeds'
         $result = Read-Result $check 'empty check'; Assert-Equal $result.status 'ready' 'empty check is ready'; Assert-True ([bool]$result.changesRequired) 'empty check needs changes'
-        Assert-Equal $result.bundleSelection 'personal-pilot' 'default selects personal pilot'
+        Assert-PublicResultContract $result 'check' 'default check'
+        $manifest = Get-Content -Raw -LiteralPath (Join-Path $f.SourceRoot 'vendor\source-manifest.json') | ConvertFrom-Json
+        Assert-Equal (@($result.activeSkills) -join ',') (@($manifest.activeSkills.PSObject.Properties.Name | Sort-Object -CaseSensitive) -join ',') 'default check returns sorted current manifest skill keys'
         Assert-Equal @($result.warnings).Count 0 'default check has no warnings'
-        Assert-PilotDisclosure $result.designFrontendPilot 'default-personal-pilot' 'default check'
         Assert-True ((@($result.changes) | ConvertTo-Json -Depth 8) -match '(?i)common.?core') 'empty check plans Common Core'
         Assert-True (-not (Test-Path -LiteralPath $f.CodexHome)) 'check creates no target/state'; Assert-True (-not (Test-Path -LiteralPath $f.AgentsHome)) 'check creates no agents directory'; Assert-True (-not (Test-Path -LiteralPath $f.BackupRoot)) 'check creates no backup'
-        $apply = Invoke-Harness $f Apply; Assert-Equal $apply.ExitCode 0 'first apply succeeds'; $applyResult = Read-Result $apply 'first apply'; Assert-Equal $applyResult.status 'current' 'first apply is current'; Assert-Equal $applyResult.bundleSelection 'personal-pilot' 'apply reports personal pilot'
+        $apply = Invoke-Harness $f Apply; Assert-Equal $apply.ExitCode 0 'first apply succeeds'; $applyResult = Read-Result $apply 'first apply'; Assert-Equal $applyResult.status 'current' 'first apply is current'; Assert-PublicResultContract $applyResult 'apply' 'first apply'
         $agents = Join-Path $f.CodexHome 'AGENTS.md'; Assert-True (Test-Path -LiteralPath $agents) 'apply creates Common Core target'; Assert-True (Test-Path -LiteralPath $f.State) 'apply creates state'
         Assert-StringSetEqual @((Get-TreeHashes $f.AgentsHome).Keys) (Get-OptionalFiles $f.SourceRoot) 'default installs full manifest unit'
         $state = Get-Content -Raw -LiteralPath $f.State | ConvertFrom-Json
@@ -1066,7 +1077,7 @@ function Test-PreflightBlockers {
         Add-Content -LiteralPath (Join-Path $f.SourceRoot 'skills\joewrks-design-frontend\SKILL.md') -Value 'bad source'
         $result = Read-Result (Invoke-Harness $f Check -IncludeDesignFrontend) 'pilot source-integrity blocker'
         Assert-Equal $result.status 'blocked' 'pilot source-integrity mismatch blocks'
-        Assert-Equal $result.designFrontendPilot.hardGate 'unverified' 'source-integrity blocker does not report a passing hard gate'
+        Assert-PublicResultContract $result 'check' 'source-integrity blocker'
     } finally { Remove-Fixture $f }
 }
 
@@ -1231,12 +1242,12 @@ function Test-OptionalBundleStateAndDrift {
         $default = Read-Result (Invoke-Harness $f Check) 'default pilot check'
         $explicit = Read-Result (Invoke-Harness $f Check -IncludeDesignFrontend) 'explicit pilot check'
         Assert-Equal $default.status 'ready' 'default pilot check is ready'
-        Assert-PilotDisclosure $default.designFrontendPilot 'default-personal-pilot' 'default pilot check'
+        Assert-PublicResultContract $default 'check' 'default check'
         Assert-Equal @($default.warnings).Count 0 'default pilot check has no warnings'
         Assert-Equal $explicit.status 'ready' 'explicit pilot check is ready'
-        Assert-PilotDisclosure $explicit.designFrontendPilot 'default-personal-pilot' 'explicit pilot check'
+        Assert-PublicResultContract $explicit 'check' 'compatibility check'
         Assert-Equal @($explicit.warnings).Count 1 'compatibility flag emits one warning'
-        Assert-Equal ([string]$explicit.warnings) 'DEPRECATED: -IncludeDesignFrontend no longer changes selection; personal-pilot already includes joewrks-design-frontend.' 'compatibility flag emits the exact warning'
+        Assert-Equal ([string]$explicit.warnings) 'DEPRECATED: -IncludeDesignFrontend is ignored; the current JOENESS bundle already installs all active skills.' 'compatibility flag emits the exact warning'
         Assert-Equal (($default.changes | ConvertTo-Json -Compress -Depth 8)) (($explicit.changes | ConvertTo-Json -Compress -Depth 8)) 'compatibility flag leaves planned targets unchanged'
 
         Assert-Equal (Invoke-Harness $f Apply).ExitCode 0 'default apply succeeds'
@@ -1254,11 +1265,11 @@ function Test-OptionalBundleStateAndDrift {
         $beforeState = [IO.File]::ReadAllBytes($f.State)
         $compatApply = Read-Result (Invoke-Harness $f Apply -IncludeDesignFrontend) 'compatibility no-op apply'
         Assert-Equal $compatApply.status 'current' 'compatibility flag apply is current'
-        Assert-Equal ([string]$compatApply.warnings) 'DEPRECATED: -IncludeDesignFrontend no longer changes selection; personal-pilot already includes joewrks-design-frontend.' 'compatibility apply emits the exact warning'
+        Assert-Equal ([string]$compatApply.warnings) 'DEPRECATED: -IncludeDesignFrontend is ignored; the current JOENESS bundle already installs all active skills.' 'compatibility apply emits the exact warning'
         Assert-TreeEqual (Get-TreeHashes $f.AgentsHome) $before 'compatibility flag changes no target hashes'
         Assert-BytesEqual ([IO.File]::ReadAllBytes($f.State)) $beforeState 'compatibility flag changes no desired state bytes'
         Add-Content -LiteralPath (Join-Path $f.AgentsHome 'skills\joewrks-design-frontend\SKILL.md') -Value 'external drift'; $drift = Get-TreeHashes $f.AgentsHome
-        $check = Invoke-Harness $f Check; $driftResult = Read-Result $check 'optional drift check'; Assert-Equal $driftResult.status 'blocked' 'installed optional drift blocks default check'; Assert-PilotDisclosure $driftResult.designFrontendPilot 'default-personal-pilot' 'optional drift check'; Assert-TreeEqual (Get-TreeHashes $f.AgentsHome) $drift 'optional drift check is read-only'
+        $check = Invoke-Harness $f Check; $driftResult = Read-Result $check 'optional drift check'; Assert-Equal $driftResult.status 'blocked' 'installed optional drift blocks default check'; Assert-PublicResultContract $driftResult 'check' 'optional drift check'; Assert-TreeEqual (Get-TreeHashes $f.AgentsHome) $drift 'optional drift check is read-only'
         $run = Invoke-Harness $f Apply; Assert-True ($run.ExitCode -ne 0) 'installed optional drift blocks apply'; Assert-Equal (Read-Result $run 'optional drift').status 'blocked' 'installed optional drift reports blocked'; Assert-TreeEqual (Get-TreeHashes $f.AgentsHome) $drift 'installed optional drift is not overwritten'
         $stateText = [IO.File]::ReadAllText($f.State); $state = $stateText | ConvertFrom-Json
         Assert-True ($stateText -notmatch '(?i)[a-z]:\\') 'state stores no drive letter'
@@ -1285,7 +1296,7 @@ function Test-PreservedOptionalAfterCoreUpdate {
         Assert-Equal $check.ExitCode 0 'check after preserved optional core update succeeds'
         $result = Read-Result $check 'check after preserved optional core update'
         Assert-Equal $result.status 'current' 'preserved optional state remains valid after a core-only update'
-        Assert-PilotDisclosure $result.designFrontendPilot 'default-personal-pilot' 'check after preserved optional core update'
+        Assert-PublicResultContract $result 'check' 'check after preserved optional core update'
     } finally { Remove-Fixture $f }
 }
 
@@ -1412,7 +1423,7 @@ function Test-V1StateMigration {
             $beforeAgents = Get-TreeHashes $f.AgentsHome
             $check = Read-Result (Invoke-Harness $f Check) "$($case.Name) V1 migration check"
             Assert-Equal $check.status 'ready' "$($case.Name) V1 migration is ready"
-            Assert-Equal $check.bundleSelection 'personal-pilot' "$($case.Name) V1 migration selects the personal pilot"
+            Assert-PublicResultContract $check 'check' "$($case.Name) V1 migration check"
             Assert-BytesEqual ([IO.File]::ReadAllBytes($f.State)) $beforeState "$($case.Name) check leaves exact V1 state bytes"
             Assert-TreeEqual (Get-TreeHashes $f.CodexHome) $beforeCodex "$($case.Name) check leaves the Codex tree"
             Assert-TreeEqual (Get-TreeHashes $f.AgentsHome) $beforeAgents "$($case.Name) check leaves the Agents tree"
@@ -1739,7 +1750,7 @@ function Test-MultiTargetRollback {
         }.GetNewClosure()
         $result = Invoke-JoewrksHarnessSync -Apply -IncludeDesignFrontend -CodexHome $f.CodexHome -AgentsHome $f.AgentsHome -BackupRoot $f.BackupRoot -AfterReplace $callback
         Assert-Equal $result.status 'failed' 'clean multi-target callback rollback reports failed'
-        Assert-PilotDisclosure $result.designFrontendPilot 'default-personal-pilot' 'failed personal-pilot apply'
+        Assert-PublicResultContract $result 'apply' 'failed apply rollback'
         Assert-Equal $replacements.Count 2 'failure occurs after two replacements'
         Assert-Equal $result.rollback.status 'complete' 'clean multi-target rollback completes'
         $failedTargetParent = [IO.Path]::GetDirectoryName($replacements[1])
@@ -1785,8 +1796,8 @@ function Test-Task2CheckRegressions {
         $result = Read-Result $run 'optional directory collision'
         Assert-True ($run.ExitCode -ne 0) 'optional directory collision exits nonzero'
         Assert-Equal $result.status 'blocked' 'optional directory collision blocks'
-        Assert-PilotDisclosure $result.designFrontendPilot 'default-personal-pilot' 'optional directory collision'
-        Assert-True ((@($result.blockers).kind -contains 'optionalCollision')) 'optional directory collision is reported'
+        Assert-PublicResultContract $result 'check' 'optional directory collision'
+        Assert-True ((@($result.blockers).kind -contains 'managedCollision')) 'optional directory collision is reported'
         Assert-TreeEqual (Get-TreeHashes $f.AgentsHome) $before 'optional directory collision check is read-only'
         Assert-True (Test-Path -LiteralPath $collision -PathType Container) 'optional directory collision remains a directory'
         Assert-True (-not (Test-Path -LiteralPath $f.BackupRoot)) 'optional directory collision creates no backup'

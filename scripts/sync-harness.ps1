@@ -37,6 +37,29 @@ function Get-HarnessExitCode {
     }
 }
 
+function New-HarnessPublicResult {
+    param(
+        [string] $Status, [string] $Mode, [string] $AgentsRoot, [string] $SkillsRoot,
+        [string[]] $ActiveSkills, [object[]] $Warnings, [bool] $ChangesRequired,
+        [object[]] $Changes, [object[]] $Blockers, $BackupPath, $Rollback,
+        [string[]] $UnresolvedTargets
+    )
+    [pscustomobject][ordered]@{
+        status = $Status
+        mode = $Mode
+        agentsRoot = $AgentsRoot
+        skillsRoot = $SkillsRoot
+        activeSkills = @($ActiveSkills | Sort-Object -CaseSensitive)
+        warnings = @($Warnings)
+        changesRequired = $ChangesRequired
+        changes = @($Changes)
+        blockers = @($Blockers)
+        backupPath = $BackupPath
+        rollback = $Rollback
+        unresolvedTargets = @($UnresolvedTargets)
+    }
+}
+
 function Read-HarnessUtf8 {
     param([string] $Path)
     $bytes = [IO.File]::ReadAllBytes($Path)
@@ -511,6 +534,7 @@ function Invoke-JoewrksHarnessSync {
 
     $modeCount = ([int] $Check.IsPresent) + ([int] $Apply.IsPresent) + ([int] $Remove.IsPresent)
     if ($modeCount -ne 1) { throw 'Specify exactly one of -Check, -Apply, or -Remove.' }
+    $mode = if ($Check) { 'check' } elseif ($Apply) { 'apply' } else { 'remove' }
 
     $userProfile = if ([string]::IsNullOrWhiteSpace($env:USERPROFILE)) { [Environment]::GetFolderPath('UserProfile') } else { $env:USERPROFILE }
     $localAppData = if ([string]::IsNullOrWhiteSpace($env:LOCALAPPDATA)) { [Environment]::GetFolderPath('LocalApplicationData') } else { $env:LOCALAPPDATA }
@@ -542,7 +566,7 @@ function Invoke-JoewrksHarnessSync {
     $bundleSelection = 'personal-pilot'
     $warnings = @()
     if ($IncludeDesignFrontend) {
-        $warnings += 'DEPRECATED: -IncludeDesignFrontend no longer changes selection; personal-pilot already includes joewrks-design-frontend.'
+        $warnings += 'DEPRECATED: -IncludeDesignFrontend is ignored; the current JOENESS bundle already installs all active skills.'
     }
 
     foreach ($target in @(
@@ -864,9 +888,9 @@ function Invoke-JoewrksHarnessSync {
                     $optionalSnapshots[$relative] = $snapshot
                     if (-not $snapshot.Exists) { throw "Installed optional target is missing: $relative" }
                     if ($snapshot.Hash -cne $stateWholeFiles[$relative]) { throw "Installed optional target drifted: $relative" }
-                    $null = $changes.Add([pscustomobject] @{ kind = 'designFrontend'; action = 'remove'; target = $relative; planned = $true })
+                    $null = $changes.Add([pscustomobject] @{ kind = 'managedFile'; action = 'remove'; target = $relative; planned = $true })
                 } catch {
-                    $null = $blockers.Add([pscustomobject] @{ kind = 'optionalDrift'; message = $_.Exception.Message })
+                    $null = $blockers.Add([pscustomobject] @{ kind = 'managedDrift'; message = $_.Exception.Message })
                 }
             }
             if ($blockers.Count -eq 0) {
@@ -955,7 +979,7 @@ function Invoke-JoewrksHarnessSync {
             if (-not $snapshot.Exists) { throw "Installed optional target is missing: $relative" }
             if ($snapshot.Hash -cne $stateWholeFiles[$relative]) { throw "Installed optional target drifted: $relative" }
         } catch {
-            $null = $blockers.Add([pscustomobject] @{ kind = 'optionalDrift'; message = $_.Exception.Message })
+            $null = $blockers.Add([pscustomobject] @{ kind = 'managedDrift'; message = $_.Exception.Message })
         }
     }
 
@@ -971,11 +995,11 @@ function Invoke-JoewrksHarnessSync {
                 $optionalSnapshots[$entry.RelativePath] = Get-HarnessFileSnapshot $targetPath
             }
             if ($targetExists -and -not $owned) {
-                $null = $blockers.Add([pscustomobject] @{ kind = 'optionalCollision'; message = "Unmanaged optional target exists: $($entry.RelativePath)" })
+                $null = $blockers.Add([pscustomobject] @{ kind = 'managedCollision'; message = "Unmanaged optional target exists: $($entry.RelativePath)" })
             } elseif (-not $targetExists) {
-                $null = $changes.Add([pscustomobject] @{ kind = 'designFrontend'; action = 'install'; target = $entry.RelativePath; planned = $true })
+                $null = $changes.Add([pscustomobject] @{ kind = 'managedFile'; action = 'install'; target = $entry.RelativePath; planned = $true })
             } elseif ($targetIsFile -and $entry.Hash -cne $stateWholeFiles[$entry.RelativePath]) {
-                $null = $changes.Add([pscustomobject] @{ kind = 'designFrontend'; action = 'update'; target = $entry.RelativePath; planned = $true })
+                $null = $changes.Add([pscustomobject] @{ kind = 'managedFile'; action = 'update'; target = $entry.RelativePath; planned = $true })
             }
         } catch {
             $targetPathSafetyBlocked = $true
@@ -984,7 +1008,7 @@ function Invoke-JoewrksHarnessSync {
     }
     foreach ($relative in @($(if ($Remove) { @() } else { $stateWholeFiles.Keys }))) {
         if (-not $currentOptionalPaths.ContainsKey($relative)) {
-            $null = $changes.Add([pscustomobject] @{ kind = 'designFrontend'; action = 'remove'; target = $relative; planned = $true })
+            $null = $changes.Add([pscustomobject] @{ kind = 'managedFile'; action = 'remove'; target = $relative; planned = $true })
         }
     }
 
@@ -1081,20 +1105,7 @@ function Invoke-JoewrksHarnessSync {
     }
 
     if ((-not $Apply -and -not $Remove) -or $status -ne 'ready') {
-        return [pscustomobject] @{
-            status = $status
-            bundleSelection = $bundleSelection
-            warnings = @($warnings)
-            changesRequired = [bool] ($plannedChanges.Count -gt 0)
-            changes = @($changes)
-            blockers = @($blockers)
-            targets = $targets
-            capabilities = $capabilities
-            designFrontendPilot = $designFrontendPilot
-            backupPath = $null
-            rollback = $null
-            unresolvedTargets = @()
-        }
+        return New-HarnessPublicResult -Status $status -Mode $mode -AgentsRoot $resolvedAgentsHome -SkillsRoot (Join-Path $resolvedAgentsHome 'skills') -ActiveSkills @($manifestSkillRelativePaths.Keys) -Warnings @($warnings) -ChangesRequired ([bool] ($plannedChanges.Count -gt 0)) -Changes @($changes) -Blockers @($blockers) -BackupPath $null -Rollback $null -UnresolvedTargets @()
     }
 
     $operations = [Collections.Generic.List[object]]::new()
@@ -1273,20 +1284,7 @@ function Invoke-JoewrksHarnessSync {
         if ($Remove) {
             $null = Remove-HarnessEmptyDirectories $resolvedAgentsHome $removeCleanupDirectories
         }
-        return [pscustomobject] @{
-            status = if ($Remove) { 'removed' } else { 'current' }
-            bundleSelection = $bundleSelection
-            warnings = @($warnings)
-            changesRequired = $false
-            changes = @($changes)
-            blockers = @()
-            targets = $targets
-            capabilities = $capabilities
-            designFrontendPilot = $designFrontendPilot
-            backupPath = $backupPath
-            rollback = $null
-            unresolvedTargets = @()
-        }
+        return New-HarnessPublicResult -Status $(if ($Remove) { 'removed' } else { 'current' }) -Mode $mode -AgentsRoot $resolvedAgentsHome -SkillsRoot (Join-Path $resolvedAgentsHome 'skills') -ActiveSkills @($manifestSkillRelativePaths.Keys) -Warnings @($warnings) -ChangesRequired $false -Changes @($changes) -Blockers @() -BackupPath $backupPath -Rollback $null -UnresolvedTargets @()
     } catch {
         $failureMessage = $_.Exception.Message
         for ($i = $applied.Count - 1; $i -ge 0; $i--) {
@@ -1376,20 +1374,7 @@ function Invoke-JoewrksHarnessSync {
             removedTargets = @($removed)
             unresolvedTargets = @($unresolved)
         }
-        return [pscustomobject] @{
-            status = if ($unresolved.Count -eq 0) { 'failed' } else { 'unknown' }
-            bundleSelection = $bundleSelection
-            warnings = @($warnings)
-            changesRequired = $true
-            changes = @($changes)
-            blockers = @([pscustomobject] @{ kind = if ($Remove) { 'removeFailure' } else { 'applyFailure' }; message = $failureMessage })
-            targets = $targets
-            capabilities = $capabilities
-            designFrontendPilot = $designFrontendPilot
-            backupPath = $backupPath
-            rollback = $rollback
-            unresolvedTargets = @($unresolved)
-        }
+        return New-HarnessPublicResult -Status $(if ($unresolved.Count -eq 0) { 'failed' } else { 'unknown' }) -Mode $mode -AgentsRoot $resolvedAgentsHome -SkillsRoot (Join-Path $resolvedAgentsHome 'skills') -ActiveSkills @($manifestSkillRelativePaths.Keys) -Warnings @($warnings) -ChangesRequired $true -Changes @($changes) -Blockers @([pscustomobject] @{ kind = if ($Remove) { 'removeFailure' } else { 'applyFailure' }; message = $failureMessage }) -BackupPath $backupPath -Rollback $rollback -UnresolvedTargets @($unresolved)
     }
 }
 
@@ -1401,18 +1386,10 @@ if ($MyInvocation.InvocationName -ne '.') {
     } catch {
         $invocationWarnings = @()
         if ($IncludeDesignFrontend) {
-            $invocationWarnings += 'DEPRECATED: -IncludeDesignFrontend no longer changes selection; personal-pilot already includes joewrks-design-frontend.'
+            $invocationWarnings += 'DEPRECATED: -IncludeDesignFrontend is ignored; the current JOENESS bundle already installs all active skills.'
         }
-        $result = [pscustomobject] @{
-            status = 'blocked'
-            bundleSelection = 'personal-pilot'
-            warnings = @($invocationWarnings)
-            changesRequired = $false
-            changes = @()
-            blockers = @([pscustomobject] @{ kind = 'invocation'; message = $_.Exception.Message })
-            targets = $null
-            capabilities = [pscustomobject] @{ python = 'observed-only'; figma = 'checked-at-task-time'; browser = 'checked-at-task-time' }
-        }
+        $invocationMode = if ($Check) { 'check' } elseif ($Apply) { 'apply' } else { 'remove' }
+        $result = New-HarnessPublicResult -Status 'blocked' -Mode $invocationMode -AgentsRoot $null -SkillsRoot $null -ActiveSkills @() -Warnings @($invocationWarnings) -ChangesRequired $false -Changes @() -Blockers @([pscustomobject] @{ kind = 'invocation'; message = $_.Exception.Message }) -BackupPath $null -Rollback $null -UnresolvedTargets @()
     }
     $result | ConvertTo-Json -Compress -Depth 16
     exit (Get-HarnessExitCode $result.status)
