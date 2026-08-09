@@ -307,7 +307,7 @@ function New-HarnessTargetDirectory {
     if (-not (Test-Path -LiteralPath $current -PathType Container)) { throw "Target parent is not a directory: $current" }
     for ($i = $missing.Count - 1; $i -ge 0; $i--) {
         $directory = $missing[$i]
-        [IO.Directory]::CreateDirectory($directory) | Out-Null
+        New-Item -ItemType Directory -Path $directory -ErrorAction Stop | Out-Null
         if ($null -ne $CreatedDirectories) { $CreatedDirectories.Add($directory) }
     }
 }
@@ -329,6 +329,7 @@ function Remove-HarnessEmptyDirectories {
             $full = [IO.Path]::GetFullPath($candidate)
             $pathRoot = [IO.Path]::GetPathRoot($full)
             if ($full.Length -gt $pathRoot.Length) { $full = $full.TrimEnd('\', '/') }
+            if ($full -ieq $pathRoot) { throw "Directory cleanup target is a filesystem root: $full" }
             if ($full -ine $boundary -and -not $full.StartsWith($boundaryPrefix, [StringComparison]::OrdinalIgnoreCase)) {
                 throw "Directory cleanup target escapes its boundary: $full"
             }
@@ -349,7 +350,14 @@ function Remove-HarnessEmptyDirectories {
                 $null = $nonEmpty.Add($directory)
                 continue
             }
-            Remove-Item -LiteralPath $directory -Force -ErrorAction Stop
+            $deletePath = [IO.Path]::GetFullPath($directory)
+            $deletePathRoot = [IO.Path]::GetPathRoot($deletePath)
+            if ($deletePath.Length -gt $deletePathRoot.Length) { $deletePath = $deletePath.TrimEnd('\', '/') }
+            if ($deletePath -ine $boundary -and -not $deletePath.StartsWith($boundaryPrefix, [StringComparison]::OrdinalIgnoreCase)) {
+                throw "Directory cleanup target escapes its boundary before deletion: $deletePath"
+            }
+            Assert-HarnessNoReparsePoint $boundary $deletePath 'Directory cleanup target before deletion'
+            [IO.Directory]::Delete($deletePath, $false)
             $null = $removed.Add($directory)
         } catch [Management.Automation.ItemNotFoundException] {
             continue

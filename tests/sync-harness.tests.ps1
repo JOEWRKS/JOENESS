@@ -215,6 +215,118 @@ function Write-V1FixtureState {
     Write-Utf8 $Fixture.State (($state | ConvertTo-Json -Depth 16) + "`n")
 }
 
+function Test-EmptyDirectoryCleanupDeleteRace {
+    $f = New-Fixture
+    try {
+        . $f.Script
+        $directory = Join-Path $f.AgentsHome 'skills\delete-race'
+        $externalPath = Join-Path $directory 'external.txt'
+        [IO.Directory]::CreateDirectory($directory) | Out-Null
+        $result = & {
+            function Get-ChildItem {
+                [CmdletBinding()]
+                param([string[]] $LiteralPath, [switch] $Force)
+                $entries = @(Microsoft.PowerShell.Management\Get-ChildItem @PSBoundParameters)
+                if (@($LiteralPath).Count -eq 1 -and $LiteralPath[0] -ieq $directory) {
+                    Write-Utf8 $externalPath 'external'
+                }
+                $entries
+            }
+            function Remove-Item {
+                [CmdletBinding()]
+                param([string[]] $LiteralPath, [switch] $Force)
+                Microsoft.PowerShell.Management\Remove-Item @PSBoundParameters -Recurse
+            }
+            Remove-HarnessEmptyDirectories $f.AgentsHome @($directory)
+        }
+        Assert-True (Test-Path -LiteralPath $externalPath -PathType Leaf) 'cleanup preserves a file created after inspection'
+        Assert-Equal ([IO.File]::ReadAllText($externalPath)) 'external' 'cleanup preserves concurrent file bytes'
+        Assert-True (@($result.failed | Where-Object { $_ -ieq $directory }).Count -eq 1) 'cleanup reports the delete-time non-empty directory as failed'
+        Assert-True (@($result.removed | Where-Object { $_ -ieq $directory }).Count -eq 0) 'cleanup does not report the raced directory as removed'
+    } finally { Remove-Fixture $f }
+}
+
+function Test-EmptyDirectoryCleanupReparseRace {
+    $f = New-Fixture
+    $ancestor = Join-Path $f.AgentsHome 'skills\swap-parent'
+    try {
+        . $f.Script
+        $directory = Join-Path $ancestor 'child'
+        $externalRoot = Join-Path $f.Root 'external-target'
+        $externalDirectory = Join-Path $externalRoot 'child'
+        [IO.Directory]::CreateDirectory($directory) | Out-Null
+        [IO.Directory]::CreateDirectory($externalDirectory) | Out-Null
+        $originalAssert = (Get-Command Assert-HarnessNoReparsePoint).ScriptBlock
+        $behavior = @{ Swapped = $false }
+        $result = & {
+            function Assert-HarnessNoReparsePoint {
+                param([string] $Root, [string] $Path, [string] $Label)
+                & $originalAssert $Root $Path $Label
+                if (-not $behavior.Swapped -and $Path -ieq $directory) {
+                    [IO.Directory]::Delete($ancestor, $true)
+                    New-Item -ItemType Junction -Path $ancestor -Target $externalRoot | Out-Null
+                    $behavior.Swapped = $true
+                }
+            }
+            Remove-HarnessEmptyDirectories $f.AgentsHome @($directory)
+        }
+        Assert-True $behavior.Swapped 'reparse race swaps the ancestor after the first safety check'
+        Assert-True (Test-Path -LiteralPath $externalDirectory -PathType Container) 'cleanup preserves an external directory reached through a swapped junction'
+        Assert-True (@($result.failed | Where-Object { $_ -ieq $directory }).Count -eq 1) 'cleanup reports the swapped-ancestor candidate as failed'
+    } finally {
+        $entry = Get-Item -LiteralPath $ancestor -Force -ErrorAction SilentlyContinue
+        if ($null -ne $entry -and ($entry.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0) { [IO.Directory]::Delete($ancestor) }
+        Remove-Fixture $f
+    }
+}
+
+function Test-TargetDirectoryCreationOwnershipRace {
+    $f = New-Fixture
+    try {
+        . $f.Script
+        $directory = Join-Path $f.AgentsHome 'skills\creation-race'
+        $created = [Collections.Generic.List[string]]::new()
+        $behavior = @{ Calls = 0 }
+        & {
+            function Test-Path {
+                [CmdletBinding()]
+                param([string[]] $LiteralPath, [Microsoft.PowerShell.Commands.TestPathType] $PathType)
+                if (@($LiteralPath).Count -eq 1 -and $LiteralPath[0] -ieq $directory) {
+                    $behavior.Calls++
+                    if ($behavior.Calls -eq 1) { return $false }
+                    if ($behavior.Calls -eq 2) {
+                        [IO.Directory]::CreateDirectory($directory) | Out-Null
+                        return $false
+                    }
+                }
+                Microsoft.PowerShell.Management\Test-Path @PSBoundParameters
+            }
+            Assert-ThrowsLike { New-HarnessTargetDirectory $directory $created } '*already exists*' 'concurrent directory creation is distinguished from owned creation'
+        }
+        Assert-Equal $created.Count 0 'concurrently created directory is not recorded as run-owned'
+        Assert-True (Test-Path -LiteralPath $directory -PathType Container) 'concurrently created directory is preserved'
+    } finally { Remove-Fixture $f }
+}
+
+function Test-EmptyDirectoryCleanupPathBoundaries {
+    $f = New-Fixture
+    try {
+        . $f.Script
+        $boundary = Join-Path $f.Root 'agents'
+        $prefixSibling = Join-Path $f.Root 'agents-other'
+        [IO.Directory]::CreateDirectory($boundary) | Out-Null
+        [IO.Directory]::CreateDirectory($prefixSibling) | Out-Null
+        $prefixResult = Remove-HarnessEmptyDirectories $boundary @($prefixSibling)
+        Assert-True (Test-Path -LiteralPath $prefixSibling -PathType Container) 'cleanup preserves a prefix-sibling directory outside its boundary'
+        Assert-True (@($prefixResult.failed | Where-Object { $_ -ieq $prefixSibling }).Count -eq 1) 'cleanup rejects a prefix-sibling candidate'
+
+        $fileSystemRoot = [IO.Path]::GetPathRoot($f.Root)
+        $rootResult = Remove-HarnessEmptyDirectories $fileSystemRoot @($fileSystemRoot)
+        Assert-True (@($rootResult.failed | Where-Object { $_ -ieq $fileSystemRoot }).Count -eq 1) 'cleanup rejects a filesystem-root candidate'
+        Assert-True (@($rootResult.nonEmpty | Where-Object { $_ -ieq $fileSystemRoot }).Count -eq 0) 'filesystem root is rejected before content inspection'
+    } finally { Remove-Fixture $f }
+}
+
 function Test-PublicHarnessEntry {
     $f = New-Fixture
     try {
@@ -1691,6 +1803,10 @@ Test-CleanSkeletonAdversaries
 Test-RemoveRollback
 Test-ManifestPathSafety
 Test-ReparsePlanningBoundaries
+Test-EmptyDirectoryCleanupDeleteRace
+Test-EmptyDirectoryCleanupReparseRace
+Test-TargetDirectoryCreationOwnershipRace
+Test-EmptyDirectoryCleanupPathBoundaries
 Test-Task2CheckRegressions
 Test-EmptyCheckAndApply
 Test-AgentEncodingAndCoreUpdate
