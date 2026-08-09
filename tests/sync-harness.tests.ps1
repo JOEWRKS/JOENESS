@@ -27,6 +27,24 @@ function Test-ReadmeContract {
     $koreanSeparate = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('67OE64+E66GcIOyEpOy5mA=='))
     $koreanRelevant = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('6rSA66CoIOyekeyXhQ=='))
     $koreanRolesHeader = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('fCDtmLjstpzrqoUgfCDtlZjripQg7J28IHwg7J6Q64+ZIOyEoO2DnSDsobDqsbQgfA=='))
+    $koreanFirstUse = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('7LKY7J2MIOyCrOyaqTogNeuLqOqzhA=='))
+    $koreanRoles = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('7Jet7ZWg'))
+    $koreanCompatibility = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('7Zi47ZmYIOydtOumhA=='))
+
+    function Get-ReadmeSubsection {
+        param([string] $Text, [string] $Heading)
+        $match = [regex]::Match($Text, "(?ms)^### $([regex]::Escape($Heading))\r?\n(?<body>.*?)(?=^### |\z)")
+        Assert-True $match.Success "README contains subsection: $Heading"
+        $match.Groups['body'].Value
+    }
+
+    function Get-ReadmeTable {
+        param([string] $Text, [string] $Heading)
+        $body = Get-ReadmeSubsection $Text $Heading
+        $match = [regex]::Match($body, '(?ms)(?<table>^\|.*\|\r?\n^\|[-| ]+\|\r?\n(?:^\|.*\|\r?\n?)+)')
+        Assert-True $match.Success "README subsection has a table: $Heading"
+        $match.Groups['table'].Value.TrimEnd()
+    }
 
     foreach ($language in $sections.Keys) {
         $section = $sections[$language]
@@ -37,18 +55,32 @@ function Test-ReadmeContract {
         )) {
             Assert-True $section.Contains($command) "$language guide contains $command"
         }
-        foreach ($call in @('$project', '$design', '$visual-check', '$handoff')) {
-            Assert-True $section.Contains($call) "$language guide lists active call $call"
-        }
         Assert-True (($section.Contains('PowerShell output') -and $section.Contains('not a Codex chat response')) -or ($section.Contains($koreanPowerShell) -and $section.Contains($koreanChat))) "$language guide distinguishes PowerShell output from chat responses"
         Assert-True ($section.Contains('Restart Codex or open a new task') -or ($section.Contains($koreanRestart) -and $section.Contains($koreanNewTask))) "$language guide starts a fresh task after Apply"
         Assert-True (($section.Contains('installed **separately**') -and $section.Contains('only when relevant')) -or ($section.Contains($koreanSeparate) -and $section.Contains($koreanRelevant))) "$language guide explains external plugin boundaries"
-        Assert-True ($section.Contains('| Call | What it does | Automatic selection condition |') -or $section.Contains($koreanRolesHeader)) "$language guide has the three-column roles table"
         Assert-True ($section -match '(?is)UI UX Pro Max.{0,120}Apple Design.{0,120}\$design') "$language guide describes design references"
-    }
 
-    foreach ($oldName in @('JOENESS-0.1.ps1', 'harness.ps1', 'joewrks-project-setup', 'joewrks-design-frontend')) {
-        Assert-Equal ([regex]::Matches($readme, [regex]::Escape($oldName)).Count) 2 "README keeps $oldName only in the two compatibility tables"
+        $firstUse = Get-ReadmeSubsection $section $(if ($language -eq 'English') { 'First use: five steps' } else { $koreanFirstUse })
+        $steps = @([regex]::Matches($firstUse, '(?m)^([1-9][0-9]*)\. '))
+        Assert-Equal $steps.Count 5 "$language first-use section has exactly five numbered steps"
+        Assert-Equal (@($steps | ForEach-Object { $_.Groups[1].Value }) -join ',') '1,2,3,4,5' "$language first-use steps are numbered 1 through 5"
+        if ($language -eq 'Korean') { Assert-True $firstUse.Contains('Enter') 'Korean PowerShell step tells the user to press Enter' }
+
+        $roles = Get-ReadmeTable $section $(if ($language -eq 'English') { 'Roles' } else { $koreanRoles })
+        $roleLines = @($roles -split '\r?\n')
+        Assert-True (($roleLines[0] -eq '| Call | What it does | Automatic selection condition |') -or ($roleLines[0] -eq $koreanRolesHeader)) "$language roles table has only the public three-column header"
+        $roleRows = @($roleLines | Select-Object -Skip 2)
+        Assert-Equal $roleRows.Count 4 "$language roles table has exactly four calls"
+        Assert-Equal (@($roleRows | ForEach-Object { ($_ -split '\|')[1].Trim().Trim('`') }) -join ',') '$project,$design,$visual-check,$handoff' "$language roles table has only the active calls"
+        Assert-True (@($roleLines | Where-Object { $_ -notmatch '^\|[^|]+\|[^|]+\|[^|]+\|$' }).Count -eq 0) "$language roles table has exactly three columns"
+
+        $compatibility = Get-ReadmeTable $section $(if ($language -eq 'English') { 'Compatibility names' } else { $koreanCompatibility })
+        $withoutCompatibility = $section.Replace($compatibility, '')
+        foreach ($oldName in @('JOENESS-0.1.ps1', 'harness.ps1', 'joewrks-project-setup', 'joewrks-design-frontend')) {
+            Assert-True $compatibility.Contains($oldName) "$language compatibility table maps $oldName"
+            Assert-True (-not $withoutCompatibility.Contains($oldName)) "$language keeps $oldName inside its compatibility table"
+        }
+        Assert-True (-not ($section -match '(?im)^\s*(?:[-*]\s+)?`?\$?(?:figma|superpowers|ponytail)(?::|[-_][a-z])')) "$language guide does not present provider internal skills as commands"
     }
 }
 function Assert-ThrowsLike {

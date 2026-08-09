@@ -11,7 +11,7 @@ JOENESS는 Windows용 Codex 작업환경입니다. 프로젝트 맥락, UI/UX �
 ### 처음 사용: 5단계
 
 1. 받은 ZIP을 **전체 압축 해제**합니다. `JOENESS.ps1`만 따로 옮기지 마세요.
-2. 압축을 푼 폴더를 파일 탐색기로 열고, 위쪽 주소창에 `powershell`을 입력해 PowerShell을 엽니다.
+2. 압축을 푼 폴더를 파일 탐색기로 열고, 위쪽 주소창에 `powershell`을 입력한 뒤 Enter를 눌러 PowerShell을 엽니다.
 3. 설치 전 상태를 확인합니다.
 
    ```powershell
