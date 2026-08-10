@@ -1,6 +1,6 @@
 interface:
   display_name: "Visual Check"
-  short_description: "Translate approved references or verify concrete visual regressions"
-  default_prompt: "Use $visual-check to preserve approved anchors; verify one representative for each materially different output kind or target form in its native target form and minimum actual-use context before fan-out; for objective or subjective unresolved verification, pause fan-out; keep numeric proxies subordinate to the approved reference; identify reusable references by project-owned path and version; and identify retries by causal mechanism plus expected observation."
+  short_description: "Verify produced visuals before completion"
+  default_prompt: "Use $visual-check conditionally: for visual output completion, inspect the exact artifact and version before any acceptance or readiness claim; for approved-reference translation, verify one representative for each materially different output kind or target form in its native target form and minimum actual-use context before fan-out, and when objective or subjective verification remains unresolved pause fan-out; for a concrete defect, identify retries by causal mechanism plus expected observation and change artifacts only with fix authority."
 policy:
   allow_implicit_invocation: true

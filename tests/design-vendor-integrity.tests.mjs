@@ -123,14 +123,14 @@ const EXPECTED_DESIGN_SKILL = {
   files: [
     {
       localPath: 'skills/design/SKILL.md',
-      bytes: 3792,
-      sha256: 'baf7abb9c298c87aaee00bf46296fdff4ef494f8d3dd2e6102b2ee8f35550384',
+      bytes: 4234,
+      sha256: '8c3f872e412eb8d46abe505884dca650471373ce2130d7ff618013e2007394f8',
       exactUpstreamCopy: false,
     },
     {
       localPath: 'skills/design/agents/openai.yaml',
-      bytes: 233,
-      sha256: '0819087aca545cd84638680c79e5a5d390d9a8792ed0c1df2d298b714bddfd7b',
+      bytes: 389,
+      sha256: '84f5e052fcb403f3f2675fc16d25e60197defcc07128c383f8181e34a886a17a',
       exactUpstreamCopy: false,
     },
   ],
@@ -178,14 +178,14 @@ const EXPECTED_VISUAL_CHECK_SKILL = {
   files: [
     {
       localPath: 'skills/visual-check/SKILL.md',
-      bytes: 2626,
-      sha256: '9c846818099f33f2a70878f43ad5c9706cd9e1ddaa0f4b7581b7b767714f6477',
+      bytes: 5036,
+      sha256: '576086766efeba9e3e879bffc89e2fbcbb25c1356d828bbccedb92834e6ae349',
       exactUpstreamCopy: false,
     },
     {
       localPath: 'skills/visual-check/agents/openai.yaml',
-      bytes: 659,
-      sha256: '7382214ea145b1182eb27f264af2f8654a72c07233f762a5d3bf9decf0635918',
+      bytes: 717,
+      sha256: '2de2948af8bb491e049515d90af0e19b5ef2b3e5e6458f7c8a4a277b1058ff9e',
       exactUpstreamCopy: false,
     },
   ],
@@ -273,12 +273,12 @@ const EXPECTED_HYBRID_EVALUATION = {
   promotionPass: false,
 };
 const EXPECTED_CURRENT_EVALUATION = {
-  mode: 'active-skill-contract-v1',
-  version: 1,
+  mode: 'active-skill-contract-v2',
+  version: 2,
   state: 'unvalidated',
   cases: {
-    path: 'evals/skill-contracts/cases.json',
-    sha256: '6f2148c44e5565563a71c850ab66fd78c5261402f375e927e20b9e2509779f81',
+    path: 'evals/skill-contracts/cases-v2.json',
+    sha256: '5f0b06d4041ff276967c49cbf17d110ff0942db900e94eeac9c2dac2421a040b',
   },
   hardGate: 'unverified',
   classification: 'candidate',
@@ -565,7 +565,10 @@ test('candidate ledger separates the unvalidated active contract from retained h
   }
 
   const [historical] = manifest.evaluation.history;
-  assert.equal(lstatSync(path.join(ROOT, ...current.cases.path.split('/'))).size, 1664);
+  const v1Cases = path.join(ROOT, 'evals', 'skill-contracts', 'cases.json');
+  assert.equal(lstatSync(v1Cases).size, 1664);
+  assert.equal(sha256(v1Cases), '6f2148c44e5565563a71c850ab66fd78c5261402f375e927e20b9e2509779f81');
+  assert.equal(lstatSync(path.join(ROOT, ...current.cases.path.split('/'))).size, 4353);
   assert.equal(sha256(path.join(ROOT, ...current.cases.path.split('/'))), current.cases.sha256);
   for (const [key, evidence] of Object.entries({
     artifact: historical.artifact,

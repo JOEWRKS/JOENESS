@@ -32,3 +32,5 @@ Before completion, unless the current request or project contract requires the p
 
 Use this skill for new UI/UX intent, including subjective first-draft feedback. Route a concrete mismatch against an approved state, state-dependent rendering failure, or visual regression to `$visual-check`. When both intent and verification change, settle the intended design first, then verify the implementation as a separate responsibility.
 Route translation of an approved reference across medium, resolution, size, or derived state to `$visual-check`; this preserves accepted intent rather than creating new design intent.
+
+Any output whose acceptance depends on appearance, layout, motion, or target rendering and that this task creates, changes, or implements must be handed to `$visual-check` with its exact produced result before any claim that the affected task or output meets acceptance or is ready for use, delivery, or release. Planning or reference discussion that produces no visual artifact stays in `$design` and does not trigger that completion gate.

@@ -75,9 +75,12 @@ function Test-ReadmeContract {
         Assert-True (@($roleLines | Where-Object { $_ -notmatch '^\|[^|]+\|[^|]+\|[^|]+\|$' }).Count -eq 0) "$language roles table has exactly three columns"
         if ($language -eq 'English') {
             Assert-True $roles.Contains('moving an approved image to another size or format') 'English visual-check row explains approved-image translation'
+            Assert-True $roles.Contains('visual output before completion') 'English visual-check row explains the visual completion gate'
         } else {
             $koreanApprovedImage = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('7Iq57J2465CcIOydtOuvuOyngOulvCDri6Trpbgg7YGs6riwwrftmJXsi53snLzroZwg7Jiu6ri4IOuVjA=='))
+            $koreanVisualCompletion = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('7Iuc6rCBIOqysOqzvOusvOydhCDsmYTro4wg7KCE7JeQIOyngeygkSDtmZXsnbg='))
             Assert-True $roles.Contains($koreanApprovedImage) 'Korean visual-check row explains approved-image translation'
+            Assert-True $roles.Contains($koreanVisualCompletion) 'Korean visual-check row explains the visual completion gate'
         }
 
         $compatibility = Get-ReadmeTable $section $(if ($language -eq 'English') { 'Compatibility names' } else { $koreanCompatibility })

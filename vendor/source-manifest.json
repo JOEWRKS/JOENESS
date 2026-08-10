@@ -6,10 +6,10 @@
     "state": "candidate",
     "tests": ["tests/design-vendor-integrity.tests.mjs", "tests/thin-hybrid-core.tests.mjs", "tests/skill-contracts.tests.mjs", "vendor/ui-ux-pro-max/scripts/validate_data.py", "vendor/ui-ux-pro-max/scripts/tests/test_core.py"],
     "current": {
-      "mode": "active-skill-contract-v1",
-      "version": 1,
+      "mode": "active-skill-contract-v2",
+      "version": 2,
       "state": "unvalidated",
-      "cases": {"path":"evals/skill-contracts/cases.json","sha256":"6f2148c44e5565563a71c850ab66fd78c5261402f375e927e20b9e2509779f81"},
+      "cases": {"path":"evals/skill-contracts/cases-v2.json","sha256":"5f0b06d4041ff276967c49cbf17d110ff0942db900e94eeac9c2dac2421a040b"},
       "hardGate": "unverified",
       "classification": "candidate",
       "outcomeReview": "pending",
@@ -81,8 +81,8 @@
       "intentionalDifferences": ["Local activation and routing contract.", "Local OpenAI product metadata."],
       "validatorSha256": "5347a0a09cfb546bba1c0d1a30dae0a233d9a05f57bd4e7877155c588bcdabf7",
       "files": [
-        {"localPath":"skills/design/SKILL.md","bytes":3792,"sha256":"baf7abb9c298c87aaee00bf46296fdff4ef494f8d3dd2e6102b2ee8f35550384","exactUpstreamCopy":false},
-        {"localPath":"skills/design/agents/openai.yaml","bytes":233,"sha256":"0819087aca545cd84638680c79e5a5d390d9a8792ed0c1df2d298b714bddfd7b","exactUpstreamCopy":false}
+        {"localPath":"skills/design/SKILL.md","bytes":4234,"sha256":"8c3f872e412eb8d46abe505884dca650471373ce2130d7ff618013e2007394f8","exactUpstreamCopy":false},
+        {"localPath":"skills/design/agents/openai.yaml","bytes":389,"sha256":"84f5e052fcb403f3f2675fc16d25e60197defcc07128c383f8181e34a886a17a","exactUpstreamCopy":false}
       ]
     },
     "handoff": {
@@ -126,8 +126,8 @@
       "intentionalDifferences": ["Concrete visual-verification and approved-reference translation contract.", "Local OpenAI product metadata."],
       "validatorSha256": "5347a0a09cfb546bba1c0d1a30dae0a233d9a05f57bd4e7877155c588bcdabf7",
       "files": [
-        {"localPath":"skills/visual-check/SKILL.md","bytes":2626,"sha256":"9c846818099f33f2a70878f43ad5c9706cd9e1ddaa0f4b7581b7b767714f6477","exactUpstreamCopy":false},
-        {"localPath":"skills/visual-check/agents/openai.yaml","bytes":659,"sha256":"7382214ea145b1182eb27f264af2f8654a72c07233f762a5d3bf9decf0635918","exactUpstreamCopy":false}
+        {"localPath":"skills/visual-check/SKILL.md","bytes":5036,"sha256":"576086766efeba9e3e879bffc89e2fbcbb25c1356d828bbccedb92834e6ae349","exactUpstreamCopy":false},
+        {"localPath":"skills/visual-check/agents/openai.yaml","bytes":717,"sha256":"2de2948af8bb491e049515d90af0e19b5ef2b3e5e6458f7c8a4a277b1058ff9e","exactUpstreamCopy":false}
       ]
     }
   },
