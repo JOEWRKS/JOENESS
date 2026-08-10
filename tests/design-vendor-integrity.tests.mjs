@@ -15,6 +15,7 @@ const EVALUATED_COMMON_CORE = path.join(ROOT, 'common-core.md');
 const RETRY_SAFETY_CORE = path.join(ROOT, 'evals', 'candidates', 'retry-safety-core-v1.md');
 const INTERACTION_SAFETY_CORE_V1 = path.join(ROOT, 'evals', 'candidates', 'interaction-safety-core-v1.md');
 const INTERACTION_SAFETY_CORE_V2 = path.join(ROOT, 'evals', 'candidates', 'interaction-safety-core-v2.md');
+const INTERACTION_SAFETY_CORE_V3 = path.join(ROOT, 'evals', 'candidates', 'interaction-safety-core-v3.md');
 const GITATTRIBUTES = path.join(ROOT, '.gitattributes');
 const UI_FILES = [
   'SKILL.md',
@@ -527,11 +528,13 @@ test('the interaction safety core is active without rewriting broader Core evide
     'e7a3c02d4c147eaadde2c00a0452c7de21b3e0f51fa02cf7bd7085c43d97ac4d',
   );
   assert.deepEqual(manifest.activeCommonCore, {
-    path: 'evals/candidates/interaction-safety-core-v2.md',
-    sha256: '3f10f1ba56864b4ba3bf1dd2b9f3200281749280a09375b2d843d1d0838049a5',
+    path: 'evals/candidates/interaction-safety-core-v3.md',
+    sha256: '75a2ecd35404e98ecdbb4a429805b2c59e1f00e445d5daf680cb34b61e785191',
   });
+  assert.equal(lstatSync(INTERACTION_SAFETY_CORE_V3).size, 2048);
+  assert.equal(sha256(INTERACTION_SAFETY_CORE_V3), manifest.activeCommonCore.sha256);
   assert.equal(lstatSync(INTERACTION_SAFETY_CORE_V2).size, 2048);
-  assert.equal(sha256(INTERACTION_SAFETY_CORE_V2), manifest.activeCommonCore.sha256);
+  assert.equal(sha256(INTERACTION_SAFETY_CORE_V2), '3f10f1ba56864b4ba3bf1dd2b9f3200281749280a09375b2d843d1d0838049a5');
   assert.equal(lstatSync(RETRY_SAFETY_CORE).size, 1261);
   assert.equal(sha256(RETRY_SAFETY_CORE), '0f1ef55811e4507b3f2fb21d41ad9d992a6f7fabc24d3e44a110468bd6ac5813');
   assert.equal(readFileSync(path.join(ROOT, 'evals', 'candidates', 'no-common-core.md'), 'utf8'), '\n');
@@ -547,6 +550,7 @@ test('the interaction safety core is active without rewriting broader Core evide
   assert.match(readFileSync(GITATTRIBUTES, 'utf8'), /^\/evals\/candidates\/no-common-core\.md text eol=lf$/m);
   assert.match(readFileSync(GITATTRIBUTES, 'utf8'), /^\/evals\/candidates\/retry-safety-core-v1\.md text eol=lf$/m);
   assert.match(readFileSync(GITATTRIBUTES, 'utf8'), /^\/evals\/candidates\/interaction-safety-core-v2\.md text eol=lf$/m);
+  assert.match(readFileSync(GITATTRIBUTES, 'utf8'), /^\/evals\/candidates\/interaction-safety-core-v3\.md text eol=lf$/m);
 });
 
 test('candidate ledger separates the unvalidated active contract from retained hybrid evidence', async () => {

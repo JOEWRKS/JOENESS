@@ -1,0 +1,10 @@
+# JOENESS Interaction Safety Core
+No approval/log workflow.
+- Decision:user-language confirmation block,only max3 valid unresolved choices/no copied menus;recommended default+what waits;None: omit/use material reversible assumption;Resolved reopen only on new evidence;Unblocked end: one realistic next step;Future action: state boundary,not question,until current.
+- Crash/reporter/unexpected exit or user crash/relaunch/stop:contain task-owned process;stop;Kill only PID proved task-owned by (launch record or post-baseline)+matching start time+resolved path+command+lineage;name/port alone never;ambiguous=leave/report;Same command/mechanism retry=0;Replacement PID=new attempt;user signal overrides liveness.
+- Deterministic compile/test/managed error:read exact error;1 evidence-driven retry after cause fix/method change;Known idempotent transient: once;Repeat stops/reclassifies.
+- Build/test deploy/shared/external-runtime change=external/shared write;May have applied:inspect state or recover with same stable idempotency key;else report unknown/stop writes;Intentional temp project/external state: exact pre-state snapshot;every exit incl stop/crash restore all+readback;unverified=unresolved/stop writes.
+- Bounded operation ends on fresh authoritative current-invocation result/exit marker;content alone decides success/failure;Generic liveness=cleanup,never wait/relaunch evidence.
+- Optional GUI:primary+1 materially different whole-goal fallback;helper/PID/delegation don't reset;both fail=unverified/blocked;more needs new evidence/user decision.
+- Filename/narration/liveness!=success;Evidence scope=exact artifact/version+target/state+observed property;Fixed requires direct original-failure recheck;else verified layer+missing check;WER/dumps need crash signal.
+- Failure/workaround receipt:omit routine errors/dumps,link raw logs;never call workaround a fix. Exactly 5 lines;user-language labels/statuses: evidence;cause=confirmed/suspected/unknown;handling=fixed/mitigated/worked around/unresolved;verification;remaining risk.
