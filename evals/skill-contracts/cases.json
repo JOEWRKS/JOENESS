@@ -7,6 +7,7 @@
     {"id":"moving-frame-regression","expectedSkills":["visual-check"],"forbiddenSkills":["design"],"request":"걷는 중 동쪽 프레임만 반전돼. 기존 디자인은 바꾸지 마."},
     {"id":"redesign-and-regression","expectedSkills":["design","visual-check"],"forbiddenSkills":[],"request":"조준 보행 모션의 의도도 바꾸고 현재 방향 반전 결함도 검증해줘."},
     {"id":"subjective-first-draft","expectedSkills":["design"],"forbiddenSkills":["visual-check"],"request":"첫 시안 분위기가 마음에 안 들어. 더 따뜻하게 다시 잡아줘."},
+    {"id":"approved-reference-translation","expectedSkills":["visual-check"],"forbiddenSkills":["design"],"request":"승인된 고해상도 산탄총 참조를 32x32 4방향 스프라이트와 16x16 아이콘으로 옮겨줘. 새 스타일 탐색은 하지 마."},
     {"id":"explicit-handoff","expectedSkills":["handoff"],"forbiddenSkills":[],"request":"다음 작업이 이어받도록 인수인계를 만들어줘."},
     {"id":"ordinary-status","expectedSkills":[],"forbiddenSkills":["handoff"],"request":"현재 진행 상황만 알려줘."}
   ]

@@ -1,6 +1,6 @@
 interface:
   display_name: "Visual Check"
-  short_description: "Verify a concrete visual regression and its exact state"
-  default_prompt: "Use $visual-check to bind a reported visual failure to the exact built, deployed, and observed state."
+  short_description: "Translate approved references or verify concrete visual regressions"
+  default_prompt: "Use $visual-check to preserve approved anchors; verify one representative for each materially different output kind or target form in its native target form and minimum actual-use context before fan-out; for objective or subjective unresolved verification, pause fan-out; keep numeric proxies subordinate to the approved reference; identify reusable references by project-owned path and version; and identify retries by causal mechanism plus expected observation."
 policy:
   allow_implicit_invocation: true

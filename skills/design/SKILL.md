@@ -31,3 +31,4 @@ Before completion, unless the current request or project contract requires the p
 ## Visual defect boundary
 
 Use this skill for new UI/UX intent, including subjective first-draft feedback. Route a concrete mismatch against an approved state, state-dependent rendering failure, or visual regression to `$visual-check`. When both intent and verification change, settle the intended design first, then verify the implementation as a separate responsibility.
+Route translation of an approved reference across medium, resolution, size, or derived state to `$visual-check`; this preserves accepted intent rather than creating new design intent.

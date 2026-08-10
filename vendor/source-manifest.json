@@ -9,7 +9,7 @@
       "mode": "active-skill-contract-v1",
       "version": 1,
       "state": "unvalidated",
-      "cases": {"path":"evals/skill-contracts/cases.json","sha256":"56de838e2cd019be801f9367566e49319f7713e69fef458eb2400214374ac90c"},
+      "cases": {"path":"evals/skill-contracts/cases.json","sha256":"6f2148c44e5565563a71c850ab66fd78c5261402f375e927e20b9e2509779f81"},
       "hardGate": "unverified",
       "classification": "candidate",
       "outcomeReview": "pending",
@@ -81,7 +81,7 @@
       "intentionalDifferences": ["Local activation and routing contract.", "Local OpenAI product metadata."],
       "validatorSha256": "5347a0a09cfb546bba1c0d1a30dae0a233d9a05f57bd4e7877155c588bcdabf7",
       "files": [
-        {"localPath":"skills/design/SKILL.md","bytes":3608,"sha256":"0045f2ddd979ca3741d62c6aa140b0991f51521493aeca5b24f62c7eef01f41d","exactUpstreamCopy":false},
+        {"localPath":"skills/design/SKILL.md","bytes":3792,"sha256":"baf7abb9c298c87aaee00bf46296fdff4ef494f8d3dd2e6102b2ee8f35550384","exactUpstreamCopy":false},
         {"localPath":"skills/design/agents/openai.yaml","bytes":233,"sha256":"0819087aca545cd84638680c79e5a5d390d9a8792ed0c1df2d298b714bddfd7b","exactUpstreamCopy":false}
       ]
     },
@@ -121,13 +121,13 @@
     "visual-check": {
       "authorship": "joewrks-canonical",
       "evaluationState": "candidate",
-      "activationPolicy": "hybrid-visual-regression",
+      "activationPolicy": "hybrid-visual-verification",
       "sourceDependencies": [],
-      "intentionalDifferences": ["Concrete visual-regression verification contract.", "Local OpenAI product metadata."],
+      "intentionalDifferences": ["Concrete visual-verification and approved-reference translation contract.", "Local OpenAI product metadata."],
       "validatorSha256": "5347a0a09cfb546bba1c0d1a30dae0a233d9a05f57bd4e7877155c588bcdabf7",
       "files": [
-        {"localPath":"skills/visual-check/SKILL.md","bytes":1415,"sha256":"126e4eabc4a37666207d2122b7aea0a0277d2c0e2523753637114b88e1252f14","exactUpstreamCopy":false},
-        {"localPath":"skills/visual-check/agents/openai.yaml","bytes":285,"sha256":"a02ab7d4a60728f303e6eb6206c18d4a30cbfd7a3d4db5c6f0ab388c23bc7fff","exactUpstreamCopy":false}
+        {"localPath":"skills/visual-check/SKILL.md","bytes":2626,"sha256":"9c846818099f33f2a70878f43ad5c9706cd9e1ddaa0f4b7581b7b767714f6477","exactUpstreamCopy":false},
+        {"localPath":"skills/visual-check/agents/openai.yaml","bytes":659,"sha256":"7382214ea145b1182eb27f264af2f8654a72c07233f762a5d3bf9decf0635918","exactUpstreamCopy":false}
       ]
     }
   },

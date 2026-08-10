@@ -23,6 +23,7 @@ const expectedCases = {
     { id: 'moving-frame-regression', expectedSkills: ['visual-check'], forbiddenSkills: ['design'], request: '걷는 중 동쪽 프레임만 반전돼. 기존 디자인은 바꾸지 마.' },
     { id: 'redesign-and-regression', expectedSkills: ['design', 'visual-check'], forbiddenSkills: [], request: '조준 보행 모션의 의도도 바꾸고 현재 방향 반전 결함도 검증해줘.' },
     { id: 'subjective-first-draft', expectedSkills: ['design'], forbiddenSkills: ['visual-check'], request: '첫 시안 분위기가 마음에 안 들어. 더 따뜻하게 다시 잡아줘.' },
+    { id: 'approved-reference-translation', expectedSkills: ['visual-check'], forbiddenSkills: ['design'], request: '승인된 고해상도 산탄총 참조를 32x32 4방향 스프라이트와 16x16 아이콘으로 옮겨줘. 새 스타일 탐색은 하지 마.' },
     { id: 'explicit-handoff', expectedSkills: ['handoff'], forbiddenSkills: [], request: '다음 작업이 이어받도록 인수인계를 만들어줘.' },
     { id: 'ordinary-status', expectedSkills: [], forbiddenSkills: ['handoff'], request: '현재 진행 상황만 알려줘.' },
   ],
@@ -71,6 +72,7 @@ test('design owns intent while visual-check owns concrete regressions', () => {
   const design = readRoleFile('design', 'SKILL.md');
   assert.match(design, /subjective.*first[- ]draft|new UI\/UX intent/is);
   assert.match(design, /visual-check.*concrete visual defect|visual regression.*visual-check/is);
+  assert.match(design, /approved reference.*(?:medium|resolution|size|derived state).*visual-check/is);
 });
 
 test('design excludes layout-unaffected copy and literal-value fixes', () => {
@@ -80,10 +82,26 @@ test('design excludes layout-unaffected copy and literal-value fixes', () => {
 
 test('visual-check binds one hypothesis to the exact observed state', () => {
   const visualCheck = readRoleFile('visual-check', 'SKILL.md');
+  const metadata = readRoleFile('visual-check', 'agents', 'openai.yaml');
+  assert.match(visualCheck, /^description: Use when.*approved visual reference.*(?:medium|resolution|size|derived state)/im);
   assert.match(visualCheck, /original failure.*target.*state/is);
   assert.match(visualCheck, /one causal hypothesis.*minimum coherent change set/is);
   assert.match(visualCheck, /source.*build artifact.*deployed artifact.*visual candidate.*user acceptance/is);
   assert.match(visualCheck, /rejected hypothesis.*new evidence.*not repeat/is);
+  assert.match(visualCheck, /one representative.*native target form.*minimum actual[- ]use context.*before.*fan[- ]out/is);
+  assert.match(visualCheck, /each materially different output kind.*target form.*one representative/is);
+  assert.match(visualCheck, /representative verification.*unresolved.*objective or subjective.*(?:stop|pause).*dependent fan[- ]out/is);
+  assert.match(visualCheck, /ask the user only.*subjective intent.*objective evidence.*without.*approval gate/is);
+  assert.match(visualCheck, /numeric proxy.*not override.*approved reference.*outside.*exact verified target.*state.*hypothesis/is);
+  assert.match(visualCheck, /approved downstream (?:anchor|contract).*not move/is);
+  assert.match(visualCheck, /failed derivative.*unless.*intent change/is);
+  assert.match(visualCheck, /request authorizes.*bounded translation.*not unrelated intent changes.*repeated approval gates/is);
+  assert.match(visualCheck, /retry identity.*causal mechanism.*expected observation.*not.*(?:tool|name)/is);
+  assert.match(visualCheck, /follow-up (?:variant|task).*reuse.*approved reference.*stable project-owned path.*version.*temporary attachment path.*not.*durable evidence/is);
+  assert.match(metadata, /representative.*native target form.*minimum actual[- ]use context.*before.*fan[- ]out/is);
+  assert.match(metadata, /each.*output kind.*target form/is);
+  assert.match(metadata, /objective or subjective.*unresolved.*fan[- ]out/is);
+  assert.match(metadata, /causal mechanism.*expected observation/is);
 });
 
 test('handoff expands only repeated visual or deployment incidents', () => {
