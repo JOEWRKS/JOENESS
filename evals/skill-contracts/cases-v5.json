@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 5,
+  "inherits": {
+    "path": "evals/skill-contracts/cases-v4.json",
+    "sha256": "4bc1005c00129cb478703aaae9edf030dfad211ead7660d220c45f3768c836c3"
+  },
+  "cases": [
+    {"id":"new-persistent-spec","expectedSkills":["spec"],"forbiddenSkills":[],"requiredBehavior":["user-language-decision-digest","exact-current-artifact-link"],"request":"이 설계 명세를 파일로 작성하고, 끝나면 내가 쓰는 언어로 핵심만 알려줘."},
+    {"id":"material-spec-revision-with-project-format","expectedSkills":["spec"],"forbiddenSkills":[],"requiredBehavior":["embed-in-project-report","no-parallel-spec-block"],"request":"기존 API 명세의 범위와 수용 기준을 크게 바꾸고, 프로젝트 보고 양식으로 결과를 알려줘."},
+    {"id":"read-only-spec-review","expectedSkills":[],"forbiddenSkills":["spec"],"request":"이 설계 명세는 수정하지 말고 문제점만 검토해줘."},
+    {"id":"chat-only-design-discussion","expectedSkills":[],"forbiddenSkills":["spec"],"request":"파일은 만들지 말고 채팅으로 아키텍처 아이디어만 얘기해보자."},
+    {"id":"implementation-from-unchanged-spec","expectedSkills":[],"forbiddenSkills":["spec"],"request":"기존 명세는 그대로 두고 구현만 완료해줘."},
+    {"id":"nonmaterial-spec-edit","expectedSkills":[],"forbiddenSkills":["spec"],"request":"명세 내용은 바꾸지 말고 오탈자와 깨진 링크만 고쳐줘."}
+  ]
+}

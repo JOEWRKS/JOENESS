@@ -1,6 +1,8 @@
 /.gitattributes text eol=lf
 /AGENTS.md text eol=lf
 /README.md text eol=lf
+/docs/superpowers/specs/2026-08-11-joeness-silent-core-and-spec-delivery-design.md text eol=lf
+/docs/superpowers/specs/2026-08-11-joeness-silent-core-and-spec-delivery-design.md whitespace=-blank-at-eol
 /JOENESS.ps1 text eol=lf
 /JOENESS-0.1.ps1 text eol=lf
 /harness.ps1 text eol=lf
@@ -14,6 +16,8 @@
 /evals/candidates/interaction-safety-core-v1.md text eol=lf
 /evals/candidates/interaction-safety-core-v2.md text eol=lf
 /evals/candidates/interaction-safety-core-v3.md text eol=lf
+/evals/candidates/interaction-safety-core-v4.md text eol=lf
+/evals/candidates/spec-delivery-skill-v1.md text eol=lf
 /evals/candidates/common-core-lite-v1.md text eol=lf
 /evals/candidates/common-core-lean-v1.md text eol=lf
 /evals/candidates/common-core-pre-thin-hybrid.md text eol=lf
@@ -39,7 +43,10 @@
 /skills/project/** text eol=lf
 /skills/design/** text eol=lf
 /skills/visual-check/** text eol=lf
+/skills/spec/** text eol=lf
 /evals/skill-contracts/*.json text eol=lf
 /evals/skill-contracts/visual-verdict-pressure-v*-raw.md text eol=lf
+/evals/skill-contracts/spec-delivery-pressure-v*-raw.md text eol=lf
+/evals/skill-contracts/spec-delivery-pressure-v*-raw.md whitespace=-blank-at-eol
 /evals/skill-contracts/fixtures/** binary
 vendor/** -text

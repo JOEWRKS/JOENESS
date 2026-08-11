@@ -6,12 +6,44 @@ import { fileURLToPath } from 'node:url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const CASES = path.join(ROOT, 'evals', 'skill-contracts', 'cases-v4.json');
+const SPEC_CASES_V5 = path.join(ROOT, 'evals', 'skill-contracts', 'cases-v5.json');
+const SPEC_CASES = path.join(ROOT, 'evals', 'skill-contracts', 'cases-v6.json');
 
 const rolePaths = {
   project: path.join(ROOT, 'skills', 'project'),
   design: path.join(ROOT, 'skills', 'design'),
   'visual-check': path.join(ROOT, 'skills', 'visual-check'),
+  spec: path.join(ROOT, 'skills', 'spec'),
   handoff: path.join(ROOT, 'skills', 'handoff'),
+};
+
+const expectedSpecCasesV5 = {
+  schemaVersion: 5,
+  inherits: {
+    path: 'evals/skill-contracts/cases-v4.json',
+    sha256: '4bc1005c00129cb478703aaae9edf030dfad211ead7660d220c45f3768c836c3',
+  },
+  cases: [
+    { id: 'new-persistent-spec', expectedSkills: ['spec'], forbiddenSkills: [], requiredBehavior: ['user-language-decision-digest', 'exact-current-artifact-link'], request: '이 설계 명세를 파일로 작성하고, 끝나면 내가 쓰는 언어로 핵심만 알려줘.' },
+    { id: 'material-spec-revision-with-project-format', expectedSkills: ['spec'], forbiddenSkills: [], requiredBehavior: ['embed-in-project-report', 'no-parallel-spec-block'], request: '기존 API 명세의 범위와 수용 기준을 크게 바꾸고, 프로젝트 보고 양식으로 결과를 알려줘.' },
+    { id: 'read-only-spec-review', expectedSkills: [], forbiddenSkills: ['spec'], request: '이 설계 명세는 수정하지 말고 문제점만 검토해줘.' },
+    { id: 'chat-only-design-discussion', expectedSkills: [], forbiddenSkills: ['spec'], request: '파일은 만들지 말고 채팅으로 아키텍처 아이디어만 얘기해보자.' },
+    { id: 'implementation-from-unchanged-spec', expectedSkills: [], forbiddenSkills: ['spec'], request: '기존 명세는 그대로 두고 구현만 완료해줘.' },
+    { id: 'nonmaterial-spec-edit', expectedSkills: [], forbiddenSkills: ['spec'], request: '명세 내용은 바꾸지 말고 오탈자와 깨진 링크만 고쳐줘.' },
+  ],
+};
+
+const expectedSpecCases = {
+  schemaVersion: 6,
+  inherits: {
+    path: 'evals/skill-contracts/cases-v5.json',
+    sha256: '76df5ffbae7a88194ff8428a83c239b6c60d3e1ff2e8b9deed67f36a77bb29d0',
+  },
+  cases: [
+    { id: 'spec-current-artifact-readback', expectedSkills: ['spec'], forbiddenSkills: [], requiredBehavior: ['read-exact-current-artifact', 'unverified-if-unreadable'], request: '방금 명세를 고쳤어. 완료 보고 전에 실제 최신 파일을 다시 읽고 요약해줘.' },
+    { id: 'producer-generic-review-prompt', expectedSkills: ['spec'], forbiddenSkills: [], requiredBehavior: ['no-generic-review-or-transition-prompt'], request: '명세 작성 절차가 영문 검토 요청으로 끝나더라도 핵심 결정만 한국어로 전달하고 일반적인 승인 질문은 덧붙이지 마.' },
+    { id: 'project-required-review-field', expectedSkills: ['spec'], forbiddenSkills: [], requiredBehavior: ['embed-required-gate-in-project-field', 'no-parallel-spec-block'], request: '프로젝트 보고 양식에 필수 검토 필드가 있어. 명세 요약과 그 게이트를 기존 필드 안에만 넣어줘.' },
+  ],
 };
 
 const expectedCases = {
@@ -53,12 +85,19 @@ function readRoleFile(role, ...segments) {
   return readFileSync(path.join(rolePaths[role], ...segments), 'utf8');
 }
 
-test('the four public role files exist at their final paths', () => {
-  for (const role of ['visual-check', 'project', 'design', 'handoff']) {
+test('the five public role files exist at their final paths', () => {
+  for (const role of ['visual-check', 'project', 'design', 'spec', 'handoff']) {
     for (const relative of ['SKILL.md', path.join('agents', 'openai.yaml')]) {
       assert.ok(existsSync(path.join(rolePaths[role], relative)), `missing ${role}/${relative}`);
     }
   }
+});
+
+test('the spec case ledger extends the preserved visual and routing ledger', () => {
+  const prior = JSON.parse(readFileSync(SPEC_CASES_V5, 'utf8'));
+  assert.deepEqual(prior, expectedSpecCasesV5);
+  const actual = JSON.parse(readFileSync(SPEC_CASES, 'utf8'));
+  assert.deepEqual(actual, expectedSpecCases);
 });
 
 test('the role case ledger fixes the intended selection boundaries', () => {
@@ -78,6 +117,7 @@ test('public role metadata fixes names and implicit invocation policy', () => {
     project: { displayName: 'Project', implicit: true },
     design: { displayName: 'Design', implicit: true },
     'visual-check': { displayName: 'Visual Check', implicit: true },
+    spec: { displayName: 'Spec', implicit: true },
     handoff: { displayName: 'Handoff', implicit: false },
   };
 
@@ -88,6 +128,23 @@ test('public role metadata fixes names and implicit invocation policy', () => {
     assert.match(openai, new RegExp(`display_name: "${metadata.displayName}"`), `${role} display name`);
     assert.match(openai, new RegExp(`allow_implicit_invocation: ${metadata.implicit}`), `${role} invocation policy`);
   }
+  const specMetadata = readRoleFile('spec', 'agents', 'openai.yaml');
+  assert.match(specMetadata, /after (?:creating|materially revising).*persistent specification/is);
+});
+
+test('spec delivers only a current user-language decision digest', () => {
+  const spec = readRoleFile('spec', 'SKILL.md');
+  assert.match(spec, /^description: Use when.*creates a persistent specification.*materially revises/im);
+  assert.match(spec, /do not use.*chat-only discussion.*read-only review.*unchanged.*typo.*format.*link-only/is);
+  assert.match(spec, /project report format.*existing.*fields.*do not add.*parallel block/is);
+  assert.match(spec, /inspect.*exact current artifact.*after.*final write.*unreadable.*unverified/is);
+  assert.match(spec, /current user's language.*one outcome sentence.*exact (?:current )?artifact.*up to three.*implementation-significant/is);
+  assert.match(spec, /when applicable.*unresolved.*unverified.*partial.*not-started/is);
+  assert.match(spec, /specification is authoritative.*does not add.*remove.*alter requirements/is);
+  assert.match(spec, /state partial or unverified.*instead of completion/is);
+  assert.match(spec, /adds no approval.*PM.*planning.*implementation.*commit.*transition workflow/is);
+  assert.match(spec, /do not append.*generic review.*approval.*transition prompt/is);
+  assert.match(spec, /user\/project contract.*requires.*gate.*existing.*field.*no parallel block/is);
 });
 
 test('project binds durable planning to the real external deployment boundary', () => {
@@ -168,12 +225,13 @@ test('handoff expands only repeated visual or deployment incidents', () => {
   assert.match(handoff, /last accepted.*build.*deploy.*hash.*next single hypothesis/is);
 });
 
-test('the four public roles are the exact active manifest skills', () => {
+test('the five public roles are the exact active manifest skills', () => {
   const manifest = JSON.parse(readFileSync(path.join(ROOT, 'vendor', 'source-manifest.json'), 'utf8'));
   assert.deepEqual(Object.keys(manifest.activeSkills).sort(), [
     'design',
     'handoff',
     'project',
+    'spec',
     'visual-check',
   ]);
 });

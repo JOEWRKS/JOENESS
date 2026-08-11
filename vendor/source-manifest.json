@@ -1,16 +1,18 @@
 {
   "schemaVersion": 1,
   "release": {"name":"JOENESS","version":"0.1","entrypoint":"JOENESS.ps1"},
-  "activeCommonCore": {"path":"evals/candidates/interaction-safety-core-v3.md","sha256":"75a2ecd35404e98ecdbb4a429805b2c59e1f00e445d5daf680cb34b61e785191"},
+  "activeCommonCore": {"path":"evals/candidates/interaction-safety-core-v4.md","sha256":"5efd93bc041d328b41a9424b9f5593d90da26fe8263cf4a502894d4fdfc2926b"},
   "evaluation": {
     "state": "candidate",
     "tests": ["tests/design-vendor-integrity.tests.mjs", "tests/thin-hybrid-core.tests.mjs", "tests/skill-contracts.tests.mjs", "vendor/ui-ux-pro-max/scripts/validate_data.py", "vendor/ui-ux-pro-max/scripts/tests/test_core.py"],
     "current": {
-      "mode": "active-skill-contract-v5",
-      "version": 5,
+      "mode": "active-skill-contract-v6",
+      "version": 6,
       "state": "unvalidated",
-      "cases": {"path":"evals/skill-contracts/cases-v4.json","sha256":"4bc1005c00129cb478703aaae9edf030dfad211ead7660d220c45f3768c836c3"},
-      "pressureEvidence": {"path":"evals/skill-contracts/visual-verdict-pressure-v5.json","sha256":"e1dec17c021bbb9fb68dd562d67b6c00dce5cb9e6e387918366fe15c8fe347ee"},
+      "cases": {"path":"evals/skill-contracts/cases-v6.json","sha256":"be3c59c6d3f55298af2b75f106e5339e3c2ab6e2476b9b4fd0e01a227aad5b80"},
+      "inheritedPressureEvidence": {"path":"evals/skill-contracts/visual-verdict-pressure-v5.json","sha256":"e1dec17c021bbb9fb68dd562d67b6c00dce5cb9e6e387918366fe15c8fe347ee","scope":"Inherited visual-check cases only."},
+      "specPressureEvidence": {"path":"evals/skill-contracts/spec-delivery-pressure-v2.json","sha256":"46e9eae98f0507d1af3c05d43a4409bcf09d85d12cd1ecb33b48d9bb958103d2"},
+      "specPressureHistory": [{"path":"evals/skill-contracts/spec-delivery-pressure-v1-semantic-review.json","sha256":"ba605b10c5428a0c9074f514dd3e32e9c93435843ef78427188a0561af94594b","disposition":"semantic-review-rejected"}],
       "hardGate": "unverified",
       "classification": "candidate",
       "outcomeReview": "pending",
@@ -68,6 +70,17 @@
       "hardGate": "failed-semantic-review",
       "classification": "semantic-review-rejected",
       "outcomeReview": "failed",
+      "semanticImprovement": "not-asserted",
+      "promotionPass": false
+    }, {
+      "mode": "active-skill-contract-v5",
+      "version": 5,
+      "state": "unvalidated",
+      "cases": {"path":"evals/skill-contracts/cases-v4.json","sha256":"4bc1005c00129cb478703aaae9edf030dfad211ead7660d220c45f3768c836c3"},
+      "pressureEvidence": {"path":"evals/skill-contracts/visual-verdict-pressure-v5.json","sha256":"e1dec17c021bbb9fb68dd562d67b6c00dce5cb9e6e387918366fe15c8fe347ee"},
+      "hardGate": "unverified",
+      "classification": "candidate",
+      "outcomeReview": "pending",
       "semanticImprovement": "not-asserted",
       "promotionPass": false
     }]
@@ -151,6 +164,18 @@
         {"localPath":"skills/project/SKILL.md","bytes":6592,"sha256":"9c930573910f526b6354096b59d29474432eed8b436685438e00152f15d62884","exactUpstreamCopy":false},
         {"localPath":"skills/project/agents/openai.yaml","bytes":318,"sha256":"d5757afbeb0e378b6356c118804cdf7989d4394ecd5218bee5365a246efba720","exactUpstreamCopy":false},
         {"localPath":"skills/project/scripts/project-setup.ps1","bytes":17495,"sha256":"4ffc548078a5c87357fd0e4e63538567ea2666f118243a0558bff29278d13105","exactUpstreamCopy":false}
+      ]
+    },
+    "spec": {
+      "authorship": "joewrks-canonical",
+      "evaluationState": "candidate",
+      "activationPolicy": "implicit-persistent-spec-delivery",
+      "sourceDependencies": [],
+      "intentionalDifferences": ["Conditional user-language decision digest for a created or materially revised persistent specification."],
+      "validatorSha256": "5347a0a09cfb546bba1c0d1a30dae0a233d9a05f57bd4e7877155c588bcdabf7",
+      "files": [
+        {"localPath":"skills/spec/SKILL.md","bytes":1720,"sha256":"2b03833c69b64a8329eb436ddc2d7094277f33007b54d43ccad0a40308709af0","exactUpstreamCopy":false},
+        {"localPath":"skills/spec/agents/openai.yaml","bytes":411,"sha256":"c0236e7b365a2f329f463c43c37033f8d7d8b443090a71b475f88799d3389dc8","exactUpstreamCopy":false}
       ]
     },
     "visual-check": {

@@ -7,7 +7,7 @@ import { fileURLToPath } from "node:url";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
-test("the interaction safety core adds conditional decisions and failure receipts without rewriting retry evidence", async () => {
+test("the interaction safety core stays silent on clean success without rewriting retry evidence", async () => {
   const manifest = JSON.parse(
     await readFile(path.join(root, "vendor", "source-manifest.json"), "utf8"),
   );
@@ -20,37 +20,38 @@ test("the interaction safety core adds conditional decisions and failure receipt
   const interactionDecision = JSON.parse(
     await readFile(path.join(root, "evals", "experiments", "joeness-0.1-interaction-safety-core-v1.json"), "utf8"),
   );
-  assert.equal(manifest.activeCommonCore.path, "evals/candidates/interaction-safety-core-v3.md");
+  assert.equal(manifest.activeCommonCore.path, "evals/candidates/interaction-safety-core-v4.md");
 
   const core = await readFile(path.join(root, manifest.activeCommonCore.path), "utf8");
   const disabledCore = await readFile(path.join(root, "evals", "candidates", "no-common-core.md"), "utf8");
   const projectAgents = await readFile(path.join(root, "AGENTS.md"), "utf8");
-  assert.ok(Buffer.byteLength(core, "utf8") <= 2048, "safety core must stay at or below 2 KiB");
-  assert.match(core, /crash.*same (?:command|mechanism).*retr(?:y|ies).*0/is);
-  assert.match(core, /deterministic.*read exact error.*(?:one|1).*evidence-driven.*cause fix\/method change/is);
+  assert.equal(Buffer.byteLength(core, "utf8"), 2047);
+  assert.equal(createHash("sha256").update(core).digest("hex"), manifest.activeCommonCore.sha256);
+  assert.match(core, /silent on clean success.*no JOENESS block\/receipt\/cause\/menu\/next step/is);
+  assert.match(core, /user\/project owns workflow\/report\/approval\/tool requirements/is);
+  assert.match(core, /material unresolved choice.*user\/project format.*user-language question.*max3.*recommendation.*what waits.*reversible assumption.*within authority/is);
+  assert.match(core, /crash.*contain task-owned PID.*restore temp state.*readback.*stop\/no relaunch/is);
+  assert.match(core, /same command\/mechanism retry=0.*new PID=new attempt.*user signal overrides liveness/is);
+  assert.match(core, /deterministic.*read exact error.*(?:1|one) evidence-driven retry after cause fix\/method change/is);
   assert.match(core, /(?:transient.*idempotent.*(?:one|1)|idempotent transient.*once)/is);
-  assert.match(core, /build\/test.*deploy.*shared.*external.?runtime.*external\/shared write/is);
-  assert.match(core, /may have applied.*inspect state.*same stable idempotency key.*report unknown.*stop writes/is);
-  assert.match(core, /optional GUI.*primary.*(?:one|1) materially different.*whole.?goal fallback.*helper\/PID\/delegation.*don't reset.*both fail.*unverified\/blocked.*new evidence\/user decision/is);
-  assert.match(core, /replacement PID.*new attempt/is);
-  assert.match(core, /filename.*narration.*liveness.*(?:not success|!=success)/is);
-  assert.match(core, /evidence scope.*exact artifact\/version.*target\/state.*observed property/is);
-  assert.match(core, /direct original-failure recheck.*verified layer.*missing check/is);
-  assert.match(core, /decision.*user-language confirmation block.*only max\s?3 valid unresolved choices/is);
-  assert.match(core, /no copied menus/is);
-  assert.match(core, /recommended default.*what waits/is);
-  assert.match(core, /none.*omit.*material reversible assumption.*resolved reopen only on new evidence/is);
-  assert.match(core, /unblocked end.*one realistic next step/is);
-  assert.match(core, /future action.*state boundary.*not question.*until.*current/is);
-  assert.match(core, /failure\/workaround receipt/is);
-  assert.match(core, /exactly (?:five|5) lines.*user-language labels\/statuses.*evidence.*cause.*handling.*verification.*remaining risk/is);
+  assert.match(core, /classify writes by target effect.*local project dependency install.*(?:isn't|not) automatically shared\/external/is);
+  assert.match(core, /shared\/external write uncertain.*inspect state.*recover with same stable idempotency key.*unknown\+stop writes/is);
+  assert.match(core, /(?:intentional|intended) temp project\/shared\/external state.*exact pre-state.*every exit restore\+readback.*unverified=unresolved\+stop writes/is);
+  assert.match(core, /fresh authoritative.*invocation-bound result\/exit.*ends bounded op.*content decides/is);
+  assert.match(core, /generic liveness.*cleanup only.*never wait\/relaunch evidence/is);
+  assert.match(core, /filename\/narration\/liveness!=success/is);
+  assert.match(core, /evidence=exact artifact\/version\+target\/state\+observed property/is);
+  assert.match(core, /fixed needs original-failure recheck.*verified layer\+missing check/is);
+  assert.match(core, /project decides if GUI\/tool is required.*user-visible goal.*primary\+(?:1|one) materially different fallback.*helper\/PID\/delegation.*doesn't reset.*both fail=unverified\/blocked.*new evidence\/user decision/is);
+  assert.match(core, /WER\/dump needs crash signal/is);
+  assert.doesNotMatch(core, /unblocked end.*one realistic next step/is);
+  assert.match(core, /material failure\/workaround changing outcome\/safety\/verification\/continuation.*evidence.*cause confidence.*handling.*verification.*risk.*user\/project report.*no duplicate\/fixed lines/is);
+  assert.match(core, /no format.*concise user-language prose/is);
+  assert.doesNotMatch(core, /exactly (?:five|5) lines/is);
   assert.doesNotMatch(core, /^  (?:Evidence|Cause|Handling|Verification|Remaining risk):/m);
-  assert.match(core, /omit routine errors\/dumps.*link raw logs/is);
-  assert.match(core, /never call (?:a )?workaround a fix/is);
-  assert.match(core, /contain task-owned process.*kill only PID proved task-owned.*launch record or post-baseline.*matching start time.*resolved path.*command\+lineage/is);
-  assert.match(core, /name\/port alone never.*ambiguous.*leave\/report/is);
-  assert.match(core, /bounded operation.*fresh authoritative current-invocation result\/exit marker.*content alone decides success\/failure.*generic liveness.*cleanup.*never wait\/relaunch evidence/is);
-  assert.match(core, /intentional temp.*project\/external state.*exact pre-state snapshot.*every exit.*stop\/crash.*restore all.*readback.*unverified.*unresolved.*stop writes/is);
+  assert.match(core, /omit routine.*never invent cause.*workaround a fix/is);
+  assert.match(core, /kill only with launch\/post-baseline record\+matching start time\+resolved path\+command\+lineage/is);
+  assert.match(core, /name\/port(?: alone)? never.*ambiguous.*leave\/report/is);
   assert.doesNotMatch(core, /every external GUI launch must record/i);
   assert.doesNotMatch(core, /(?:always|every task|all operations).{0,80}(?:process inventory|process logging|launch logging)/is);
   assert.doesNotMatch(core, /mandatory WER.*(?:launch|attempt)/i);

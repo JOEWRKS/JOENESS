@@ -70,17 +70,21 @@ function Test-ReadmeContract {
         $roleLines = @($roles -split '\r?\n')
         Assert-True (($roleLines[0] -eq '| Call | What it does | Automatic selection condition |') -or ($roleLines[0] -eq $koreanRolesHeader)) "$language roles table has only the public three-column header"
         $roleRows = @($roleLines | Select-Object -Skip 2)
-        Assert-Equal $roleRows.Count 4 "$language roles table has exactly four calls"
-        Assert-Equal (@($roleRows | ForEach-Object { ($_ -split '\|')[1].Trim().Trim('`') }) -join ',') '$project,$design,$visual-check,$handoff' "$language roles table has only the active calls"
+        Assert-Equal $roleRows.Count 5 "$language roles table has exactly five calls"
+        Assert-Equal (@($roleRows | ForEach-Object { ($_ -split '\|')[1].Trim().Trim('`') }) -join ',') '$project,$design,$visual-check,$spec,$handoff' "$language roles table has only the active calls"
         Assert-True (@($roleLines | Where-Object { $_ -notmatch '^\|[^|]+\|[^|]+\|[^|]+\|$' }).Count -eq 0) "$language roles table has exactly three columns"
         if ($language -eq 'English') {
             Assert-True $roles.Contains('moving an approved image to another size or format') 'English visual-check row explains approved-image translation'
             Assert-True $roles.Contains('visual output before completion') 'English visual-check row explains the visual completion gate'
+            Assert-True ($roles.Contains('persistent specification') -and $roles.Contains("user's language")) 'English spec row explains conditional user-language delivery'
         } else {
             $koreanApprovedImage = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('7Iq57J2465CcIOydtOuvuOyngOulvCDri6Trpbgg7YGs6riwwrftmJXsi53snLzroZwg7Jiu6ri4IOuVjA=='))
             $koreanVisualCompletion = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('7Iuc6rCBIOqysOqzvOusvOydhCDsmYTro4wg7KCE7JeQIOyngeygkSDtmZXsnbg='))
+            $koreanSpec = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('66qF7IS4'))
+            $koreanUserLanguage = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('7IKs7Jqp7J6QIOyWuOyWtA=='))
             Assert-True $roles.Contains($koreanApprovedImage) 'Korean visual-check row explains approved-image translation'
             Assert-True $roles.Contains($koreanVisualCompletion) 'Korean visual-check row explains the visual completion gate'
+            Assert-True ($roles.Contains($koreanSpec) -and $roles.Contains($koreanUserLanguage)) 'Korean spec row explains conditional user-language delivery'
         }
 
         $compatibility = Get-ReadmeTable $section $(if ($language -eq 'English') { 'Compatibility names' } else { $koreanCompatibility })
@@ -1605,8 +1609,8 @@ function Test-LegacyNamedV2Migration {
         $apply = Read-Result (Invoke-Harness $f Apply) 'legacy named V2 migration apply'
         Assert-Equal $apply.status 'current' 'legacy named V2 migration reaches current'
         $installedManifest = Get-Content -Raw -LiteralPath (Join-Path $f.AgentsHome 'vendor\source-manifest.json') | ConvertFrom-Json
-        Assert-Equal (($installedManifest.activeSkills.PSObject.Properties.Name | Sort-Object) -join ',') 'design,handoff,project,visual-check' 'legacy named V2 migration installs exact clean skill keys'
-        Assert-Equal ((Get-ChildItem -LiteralPath (Join-Path $f.AgentsHome 'skills') -Directory | Select-Object -ExpandProperty Name | Sort-Object) -join ',') 'design,handoff,project,visual-check' 'legacy named V2 migration leaves only clean skill directories'
+        Assert-Equal (($installedManifest.activeSkills.PSObject.Properties.Name | Sort-Object) -join ',') 'design,handoff,project,spec,visual-check' 'legacy named V2 migration installs exact clean skill keys'
+        Assert-Equal ((Get-ChildItem -LiteralPath (Join-Path $f.AgentsHome 'skills') -Directory | Select-Object -ExpandProperty Name | Sort-Object) -join ',') 'design,handoff,project,spec,visual-check' 'legacy named V2 migration leaves only clean skill directories'
         Assert-True (-not (Test-Path -LiteralPath (Join-Path $f.AgentsHome 'skills\joewrks-design-frontend'))) 'legacy named V2 migration removes the empty design directory'
         Assert-True (-not (Test-Path -LiteralPath (Join-Path $f.AgentsHome 'skills\joewrks-project-setup'))) 'legacy named V2 migration removes the empty project directory'
         Assert-StringSetEqual @((Get-TreeHashes $f.AgentsHome).Keys) (Get-OptionalFiles $f.SourceRoot) 'legacy named V2 migration materializes the exact current manifest unit'

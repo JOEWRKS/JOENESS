@@ -16,6 +16,7 @@ const RETRY_SAFETY_CORE = path.join(ROOT, 'evals', 'candidates', 'retry-safety-c
 const INTERACTION_SAFETY_CORE_V1 = path.join(ROOT, 'evals', 'candidates', 'interaction-safety-core-v1.md');
 const INTERACTION_SAFETY_CORE_V2 = path.join(ROOT, 'evals', 'candidates', 'interaction-safety-core-v2.md');
 const INTERACTION_SAFETY_CORE_V3 = path.join(ROOT, 'evals', 'candidates', 'interaction-safety-core-v3.md');
+const INTERACTION_SAFETY_CORE_V4 = path.join(ROOT, 'evals', 'candidates', 'interaction-safety-core-v4.md');
 const GITATTRIBUTES = path.join(ROOT, '.gitattributes');
 const UI_FILES = [
   'SKILL.md',
@@ -234,6 +235,28 @@ const EXPECTED_HANDOFF_SKILL = {
     },
   ],
 };
+const EXPECTED_SPEC_SKILL = {
+  authorship: 'joewrks-canonical',
+  evaluationState: 'candidate',
+  activationPolicy: 'implicit-persistent-spec-delivery',
+  sourceDependencies: [],
+  intentionalDifferences: ['Conditional user-language decision digest for a created or materially revised persistent specification.'],
+  validatorSha256: '5347a0a09cfb546bba1c0d1a30dae0a233d9a05f57bd4e7877155c588bcdabf7',
+  files: [
+    {
+      localPath: 'skills/spec/SKILL.md',
+      bytes: 1720,
+      sha256: '2b03833c69b64a8329eb436ddc2d7094277f33007b54d43ccad0a40308709af0',
+      exactUpstreamCopy: false,
+    },
+    {
+      localPath: 'skills/spec/agents/openai.yaml',
+      bytes: 411,
+      sha256: 'c0236e7b365a2f329f463c43c37033f8d7d8b443090a71b475f88799d3389dc8',
+      exactUpstreamCopy: false,
+    },
+  ],
+};
 const EXPECTED_HYBRID_EVALUATION = {
   mode: 'run-hybrid-v1',
   version: 1,
@@ -330,7 +353,7 @@ const EXPECTED_SKILL_CONTRACT_V4_REJECTED = {
   semanticImprovement: 'not-asserted',
   promotionPass: false,
 };
-const EXPECTED_CURRENT_EVALUATION = {
+const EXPECTED_SKILL_CONTRACT_V5 = {
   mode: 'active-skill-contract-v5',
   version: 5,
   state: 'unvalidated',
@@ -342,6 +365,34 @@ const EXPECTED_CURRENT_EVALUATION = {
     path: 'evals/skill-contracts/visual-verdict-pressure-v5.json',
     sha256: 'e1dec17c021bbb9fb68dd562d67b6c00dce5cb9e6e387918366fe15c8fe347ee',
   },
+  hardGate: 'unverified',
+  classification: 'candidate',
+  outcomeReview: 'pending',
+  semanticImprovement: 'not-asserted',
+  promotionPass: false,
+};
+const EXPECTED_CURRENT_EVALUATION = {
+  mode: 'active-skill-contract-v6',
+  version: 6,
+  state: 'unvalidated',
+  cases: {
+    path: 'evals/skill-contracts/cases-v6.json',
+    sha256: 'be3c59c6d3f55298af2b75f106e5339e3c2ab6e2476b9b4fd0e01a227aad5b80',
+  },
+  inheritedPressureEvidence: {
+    path: 'evals/skill-contracts/visual-verdict-pressure-v5.json',
+    sha256: 'e1dec17c021bbb9fb68dd562d67b6c00dce5cb9e6e387918366fe15c8fe347ee',
+    scope: 'Inherited visual-check cases only.',
+  },
+  specPressureEvidence: {
+    path: 'evals/skill-contracts/spec-delivery-pressure-v2.json',
+    sha256: '46e9eae98f0507d1af3c05d43a4409bcf09d85d12cd1ecb33b48d9bb958103d2',
+  },
+  specPressureHistory: [{
+    path: 'evals/skill-contracts/spec-delivery-pressure-v1-semantic-review.json',
+    sha256: 'ba605b10c5428a0c9074f514dd3e32e9c93435843ef78427188a0561af94594b',
+    disposition: 'semantic-review-rejected',
+  }],
   hardGate: 'unverified',
   classification: 'candidate',
   outcomeReview: 'pending',
@@ -460,21 +511,24 @@ test('vendor bundle is exactly the pinned non-discoverable source set', () => {
     'design',
     'handoff',
     'project',
+    'spec',
     'visual-check',
   ]);
   const design = manifest.activeSkills.design;
   const handoff = manifest.activeSkills.handoff;
   const project = manifest.activeSkills.project;
+  const spec = manifest.activeSkills.spec;
   const visualCheck = manifest.activeSkills['visual-check'];
   assert.equal(handoff.activationPolicy, 'explicit-only');
   assert.equal(design.activationPolicy, 'hybrid');
   assert.equal(project.activationPolicy, 'hybrid-offer-explicit-write');
+  assert.equal(spec.activationPolicy, 'implicit-persistent-spec-delivery');
   assert.equal(visualCheck.activationPolicy, 'hybrid-visual-verification');
   for (const skill of Object.values(manifest.activeSkills)) {
     assert.equal(skill.evaluationState, 'candidate');
   }
   assert.deepEqual(design.sourceDependencies, ['ui-ux-pro-max', 'apple-design']);
-  for (const skill of [handoff, project, visualCheck]) {
+  for (const skill of [handoff, project, spec, visualCheck]) {
     assert.deepEqual(skill.sourceDependencies, []);
   }
   assert.deepEqual(
@@ -482,7 +536,7 @@ test('vendor bundle is exactly the pinned non-discoverable source set', () => {
     EXPECTED_PROJECT_SKILL.files.map(({ localPath }) => localPath),
   );
 
-  for (const skillName of ['design', 'handoff', 'project', 'visual-check']) {
+  for (const skillName of ['design', 'handoff', 'project', 'spec', 'visual-check']) {
     for (const entry of manifest.activeSkills[skillName].files) {
       const text = readFileSync(path.join(ROOT, entry.localPath), 'utf8');
       assert.doesNotMatch(
@@ -494,6 +548,7 @@ test('vendor bundle is exactly the pinned non-discoverable source set', () => {
   }
   assert.deepEqual(design, EXPECTED_DESIGN_SKILL);
   assert.deepEqual(project, EXPECTED_PROJECT_SKILL);
+  assert.deepEqual(spec, EXPECTED_SPEC_SKILL);
   assert.deepEqual(visualCheck, EXPECTED_VISUAL_CHECK_SKILL);
   assert.deepEqual(handoff, EXPECTED_HANDOFF_SKILL);
   assert.deepEqual(manifest.sources['ui-ux-pro-max'].upstreamAuditNotes, [
@@ -541,7 +596,7 @@ test('vendor bundle is exactly the pinned non-discoverable source set', () => {
       assert.equal(sha256(localFile), file.sha256, `wrong hash: ${file.localPath}`);
     }
   }
-  for (const skill of [EXPECTED_DESIGN_SKILL, EXPECTED_PROJECT_SKILL, EXPECTED_VISUAL_CHECK_SKILL, EXPECTED_HANDOFF_SKILL]) {
+  for (const skill of [EXPECTED_DESIGN_SKILL, EXPECTED_PROJECT_SKILL, EXPECTED_VISUAL_CHECK_SKILL, EXPECTED_SPEC_SKILL, EXPECTED_HANDOFF_SKILL]) {
     for (const file of skill.files) {
       const localFile = path.join(ROOT, ...file.localPath.split('/'));
       assert.equal(lstatSync(localFile).size, file.bytes, `wrong active byte length: ${file.localPath}`);
@@ -590,11 +645,13 @@ test('the interaction safety core is active without rewriting broader Core evide
     'e7a3c02d4c147eaadde2c00a0452c7de21b3e0f51fa02cf7bd7085c43d97ac4d',
   );
   assert.deepEqual(manifest.activeCommonCore, {
-    path: 'evals/candidates/interaction-safety-core-v3.md',
-    sha256: '75a2ecd35404e98ecdbb4a429805b2c59e1f00e445d5daf680cb34b61e785191',
+    path: 'evals/candidates/interaction-safety-core-v4.md',
+    sha256: '5efd93bc041d328b41a9424b9f5593d90da26fe8263cf4a502894d4fdfc2926b',
   });
+  assert.equal(lstatSync(INTERACTION_SAFETY_CORE_V4).size, 2047);
+  assert.equal(sha256(INTERACTION_SAFETY_CORE_V4), manifest.activeCommonCore.sha256);
   assert.equal(lstatSync(INTERACTION_SAFETY_CORE_V3).size, 2048);
-  assert.equal(sha256(INTERACTION_SAFETY_CORE_V3), manifest.activeCommonCore.sha256);
+  assert.equal(sha256(INTERACTION_SAFETY_CORE_V3), '75a2ecd35404e98ecdbb4a429805b2c59e1f00e445d5daf680cb34b61e785191');
   assert.equal(lstatSync(INTERACTION_SAFETY_CORE_V2).size, 2048);
   assert.equal(sha256(INTERACTION_SAFETY_CORE_V2), '3f10f1ba56864b4ba3bf1dd2b9f3200281749280a09375b2d843d1d0838049a5');
   assert.equal(lstatSync(RETRY_SAFETY_CORE).size, 1261);
@@ -613,13 +670,16 @@ test('the interaction safety core is active without rewriting broader Core evide
   assert.match(readFileSync(GITATTRIBUTES, 'utf8'), /^\/evals\/candidates\/retry-safety-core-v1\.md text eol=lf$/m);
   assert.match(readFileSync(GITATTRIBUTES, 'utf8'), /^\/evals\/candidates\/interaction-safety-core-v2\.md text eol=lf$/m);
   assert.match(readFileSync(GITATTRIBUTES, 'utf8'), /^\/evals\/candidates\/interaction-safety-core-v3\.md text eol=lf$/m);
+  assert.match(readFileSync(GITATTRIBUTES, 'utf8'), /^\/evals\/candidates\/interaction-safety-core-v4\.md text eol=lf$/m);
+  assert.match(readFileSync(GITATTRIBUTES, 'utf8'), /^\/evals\/candidates\/spec-delivery-skill-v1\.md text eol=lf$/m);
+  assert.match(readFileSync(GITATTRIBUTES, 'utf8'), /^\/docs\/superpowers\/specs\/2026-08-11-joeness-silent-core-and-spec-delivery-design\.md text eol=lf$/m);
 });
 
 test('candidate ledger separates the unvalidated active contract from retained hybrid evidence', async () => {
   const manifest = JSON.parse(readFileSync(MANIFEST, 'utf8'));
   const current = manifest.evaluation.current;
   assert.deepEqual(current, EXPECTED_CURRENT_EVALUATION);
-  assert.deepEqual(manifest.evaluation.history, [EXPECTED_HYBRID_EVALUATION, EXPECTED_SKILL_CONTRACT_V2, EXPECTED_SKILL_CONTRACT_V3_REJECTED, EXPECTED_SKILL_CONTRACT_V4_REJECTED]);
+  assert.deepEqual(manifest.evaluation.history, [EXPECTED_HYBRID_EVALUATION, EXPECTED_SKILL_CONTRACT_V2, EXPECTED_SKILL_CONTRACT_V3_REJECTED, EXPECTED_SKILL_CONTRACT_V4_REJECTED, EXPECTED_SKILL_CONTRACT_V5]);
 
   for (const [name, expected] of Object.entries(EXPECTED_SOURCE_EVALUATION)) {
     assert.equal(manifest.sources[name].evaluationStatus, expected.evaluationStatus);
@@ -648,11 +708,14 @@ test('candidate ledger separates the unvalidated active contract from retained h
   assert.equal(sha256(v4Pressure), EXPECTED_SKILL_CONTRACT_V4_REJECTED.pressureEvidence.sha256);
   assert.equal(lstatSync(v4Raw).size, 14333);
   assert.equal(sha256(v4Raw), EXPECTED_SKILL_CONTRACT_V4_REJECTED.rawEvidence.sha256);
-  assert.equal(lstatSync(path.join(ROOT, ...current.cases.path.split('/'))).size, 8771);
+  assert.equal(lstatSync(path.join(ROOT, ...current.cases.path.split('/'))).size, 1121);
   assert.equal(sha256(path.join(ROOT, ...current.cases.path.split('/'))), current.cases.sha256);
-  const pressurePath = path.join(ROOT, ...current.pressureEvidence.path.split('/'));
+  const visualV5 = manifest.evaluation.history.at(-1);
+  assert.equal(current.inheritedPressureEvidence.path, visualV5.pressureEvidence.path);
+  assert.equal(current.inheritedPressureEvidence.sha256, visualV5.pressureEvidence.sha256);
+  const pressurePath = path.join(ROOT, ...visualV5.pressureEvidence.path.split('/'));
   assert.equal(lstatSync(pressurePath).size, 6107);
-  assert.equal(sha256(pressurePath), current.pressureEvidence.sha256);
+  assert.equal(sha256(pressurePath), visualV5.pressureEvidence.sha256);
   const pressure = JSON.parse(readFileSync(pressurePath, 'utf8'));
   assert.equal(pressure.classification, 'candidate-pressure-sample-pass');
   assert.equal(pressure.promotionPass, false);
@@ -663,7 +726,7 @@ test('candidate ledger separates the unvalidated active contract from retained h
   assert.equal(pressure.supersedes.rawEvidence.sha256, EXPECTED_SKILL_CONTRACT_V4_REJECTED.rawEvidence.sha256);
   assert.equal(pressure.finalCandidate.skillSha256, EXPECTED_VISUAL_CHECK_SKILL.files[0].sha256);
   assert.equal(pressure.finalCandidate.metadataSha256, EXPECTED_VISUAL_CHECK_SKILL.files[1].sha256);
-  assert.equal(pressure.finalCandidate.casesSha256, current.cases.sha256);
+  assert.equal(pressure.finalCandidate.casesSha256, visualV5.cases.sha256);
   const rawPath = path.join(ROOT, ...pressure.rawEvidence.path.split('/'));
   assert.equal(lstatSync(rawPath).size, 19133);
   assert.equal(sha256(rawPath), pressure.rawEvidence.sha256);
@@ -713,6 +776,46 @@ test('candidate ledger separates the unvalidated active contract from retained h
     assert.equal(lstatSync(fixture).size, evidence.bytes);
     assert.equal(sha256(fixture), evidence.sha256);
   }
+  const specPressurePath = path.join(ROOT, ...current.specPressureEvidence.path.split('/'));
+  assert.equal(lstatSync(specPressurePath).size, 2151);
+  assert.equal(sha256(specPressurePath), current.specPressureEvidence.sha256);
+  const specPressure = JSON.parse(readFileSync(specPressurePath, 'utf8'));
+  assert.equal(specPressure.skill.sha256, EXPECTED_SPEC_SKILL.files[0].sha256);
+  assert.equal(specPressure.cases.sha256, current.cases.sha256);
+  assert.equal(specPressure.candidate.sampleCount, 5);
+  assert.equal(specPressure.candidate.scores.exactArtifactMarkdownLink, '5/5');
+  assert.equal(specPressure.candidate.scores.implementationDecisionsAtMostThree, '5/5');
+  assert.equal(specPressure.candidate.scores.notStartedOrUnverifiedBoundary, '5/5');
+  assert.equal(specPressure.candidate.scores.noGenericReviewOrTransitionCeremony, '5/5');
+  assert.equal(specPressure.result, 'candidate-pressure-regression-pass');
+  assert.equal(specPressure.promotionPass, false);
+  const specArtifact = path.join(ROOT, ...specPressure.artifact.path.split('/'));
+  assert.equal(lstatSync(specArtifact).size, specPressure.artifact.bytes);
+  assert.equal(sha256(specArtifact), specPressure.artifact.sha256);
+  const specRaw = path.join(ROOT, ...specPressure.rawEvidence.path.split('/'));
+  assert.equal(lstatSync(specRaw).size, specPressure.rawEvidence.bytes);
+  assert.equal(sha256(specRaw), specPressure.rawEvidence.sha256);
+  assert.match(readFileSync(specRaw, 'utf8'), /## Candidate 1[\s\S]*## Candidate 5/);
+  assert.equal(current.specPressureHistory.length, 1);
+  assert.equal(specPressure.predecessor.sha256, current.specPressureHistory[0].sha256);
+  assert.equal(specPressure.predecessor.disposition, 'semantic-review-rejected');
+  const rejectedSpecPressurePath = path.join(ROOT, ...current.specPressureHistory[0].path.split('/'));
+  assert.equal(sha256(rejectedSpecPressurePath), current.specPressureHistory[0].sha256);
+  const rejectedSpecReview = JSON.parse(readFileSync(rejectedSpecPressurePath, 'utf8'));
+  assert.equal(rejectedSpecReview.disposition, 'semantic-review-rejected');
+  assert.equal(rejectedSpecReview.scores.noApprovalOrTransitionCeremony, '0/5');
+  const rejectedSpecSkillPath = path.join(ROOT, ...rejectedSpecReview.archivedCandidate.path.split('/'));
+  assert.equal(lstatSync(rejectedSpecSkillPath).size, 1326);
+  assert.equal(sha256(rejectedSpecSkillPath), rejectedSpecReview.archivedCandidate.sha256);
+  const originalSpecPressurePath = path.join(ROOT, ...rejectedSpecReview.evaluatedEvidence.path.split('/'));
+  assert.equal(lstatSync(originalSpecPressurePath).size, 1759);
+  assert.equal(sha256(originalSpecPressurePath), rejectedSpecReview.evaluatedEvidence.sha256);
+  const originalSpecPressure = JSON.parse(readFileSync(originalSpecPressurePath, 'utf8'));
+  assert.equal(originalSpecPressure.skill.sha256, rejectedSpecReview.archivedCandidate.sha256);
+  assert.equal(originalSpecPressure.result, 'explicit-output-shape-pass');
+  const originalSpecRawPath = path.join(ROOT, ...rejectedSpecReview.rawEvidence.path.split('/'));
+  assert.equal(lstatSync(originalSpecRawPath).size, 4786);
+  assert.equal(sha256(originalSpecRawPath), rejectedSpecReview.rawEvidence.sha256);
   for (const [key, evidence] of Object.entries({
     artifact: historical.artifact,
     collector: historical.collector,
@@ -799,7 +902,9 @@ test('Git preserves exact vendor and active skill bytes on checkout', () => {
   assert.match(readFileSync(GITATTRIBUTES, 'utf8'), /^\/skills\/project\/\*\* text eol=lf$/m);
   assert.match(readFileSync(GITATTRIBUTES, 'utf8'), /^\/skills\/design\/\*\* text eol=lf$/m);
   assert.match(readFileSync(GITATTRIBUTES, 'utf8'), /^\/skills\/visual-check\/\*\* text eol=lf$/m);
+  assert.match(readFileSync(GITATTRIBUTES, 'utf8'), /^\/skills\/spec\/\*\* text eol=lf$/m);
   assert.match(readFileSync(GITATTRIBUTES, 'utf8'), /^\/evals\/skill-contracts\/visual-verdict-pressure-v\*-raw\.md text eol=lf$/m);
+  assert.match(readFileSync(GITATTRIBUTES, 'utf8'), /^\/evals\/skill-contracts\/spec-delivery-pressure-v\*-raw\.md text eol=lf$/m);
   assert.match(readFileSync(GITATTRIBUTES, 'utf8'), /^\/evals\/skill-contracts\/fixtures\/\*\* binary$/m);
   assert.match(readFileSync(GITATTRIBUTES, 'utf8'), /^\/evals\/skill-contracts\/\*\.json text eol=lf$/m);
   assert.match(readFileSync(GITATTRIBUTES, 'utf8'), /^vendor\/\*\* -text$/m);

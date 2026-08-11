@@ -6,7 +6,7 @@
 
 ## 한국어
 
-JOENESS는 Windows용 Codex 작업환경입니다. 프로젝트 맥락, UI/UX 설계, 시각 결과 확인, 인수인계를 필요한 작업에서만 돕습니다.
+JOENESS는 Windows용 Codex 작업환경입니다. 프로젝트 맥락, UI/UX 설계, 시각 결과 확인, 명세 요약, 인수인계를 필요한 작업에서만 돕습니다.
 
 ### 처음 사용: 5단계
 
@@ -36,7 +36,10 @@ JOENESS는 Windows용 Codex 작업환경입니다. 프로젝트 맥락, UI/UX �
 | `$project` | 오래 이어질 프로젝트의 작업 맥락과 계획을 정리 | 쓸 수 있는 계획이 없는 장기 프로젝트 |
 | `$design` | UI/UX 설계와 구현을 돕기 | UI/UX 설계 또는 구현이 필요한 작업 |
 | `$visual-check` | 새로 만들거나 수정한 시각 결과물을 완료 전에 직접 확인하고, 승인된 이미지를 다른 크기·형식으로 옮기거나 화면·움직임 문제를 검증 | 화면·이미지·움직임 결과가 생겼을 때, 승인된 이미지를 다른 크기·형식으로 옮길 때, 또는 재현 가능한 시각 결함이 있을 때 |
+| `$spec` | 파일로 만든 명세의 핵심 결정을 사용자 언어로 짧게 전달 | 영구 명세를 새로 만들거나 내용상 크게 고쳤을 때 |
 | `$handoff` | 다음 작업을 위한 짧은 인수인계를 만듦 | 자동 선택하지 않음; 요청할 때만 사용 |
+
+`$spec`은 최종 명세 파일을 다시 확인한 뒤 보고합니다. 프로젝트가 요구하지 않는 검토·승인 질문을 새로 만들지 않습니다.
 
 UI UX Pro Max와 Apple Design은 `$design` 내부 참고자료입니다.
 
@@ -68,7 +71,7 @@ powershell.exe -NoProfile -File .\JOENESS.ps1 -Remove
 
 ## English Guide
 
-JOENESS is a Windows Codex work environment. It helps with project context, UI/UX design, visual-result checks, and handoffs only when a task needs them.
+JOENESS is a Windows Codex work environment. It helps with project context, UI/UX design, visual-result checks, specification summaries, and handoffs only when a task needs them.
 
 ### First use: five steps
 
@@ -98,7 +101,10 @@ Statuses such as `ready`, `current`, and `blocked` are **PowerShell output**, no
 | `$project` | Organizes durable project context and planning | A long-running project has no usable plan |
 | `$design` | Helps with UI/UX design and implementation | The task needs UI/UX design or implementation |
 | `$visual-check` | Directly checks a created or changed visual output before completion, and also moves an approved image to another size or format or verifies screen and motion problems | When a screen, image, or motion result is created or changed, when moving an approved image to another size or format, or when a reproducible visual defect needs checking |
+| `$spec` | Briefly delivers the key decisions in a persistent specification in the user's language | After creating or materially revising a persistent specification |
 | `$handoff` | Creates a brief handoff for the next task | Never automatic; use it when requested |
+
+`$spec` rechecks the final specification file before reporting. It does not invent a review or approval prompt that the project does not require.
 
 UI UX Pro Max and Apple Design are reference material inside `$design`.
 
