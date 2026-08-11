@@ -8,6 +8,8 @@
 
 JOENESS는 Windows용 Codex 작업환경입니다. 프로젝트 맥락, UI/UX 설계, 시각 결과 확인, 명세 요약, 인수인계를 필요한 작업에서만 돕습니다.
 
+**JOENESS Core**는 모든 작업에서 보이는 얇은 안전 규칙입니다. 정상 작업에는 별도 보고 양식을 만들지 않고, 시각 결과나 영구 명세가 실제로 생긴 경우에만 알맞은 스킬로 넘깁니다.
+
 ### 처음 사용: 5단계
 
 1. 받은 ZIP을 **전체 압축 해제**합니다. `JOENESS.ps1`만 따로 옮기지 마세요.
@@ -41,17 +43,19 @@ JOENESS는 Windows용 Codex 작업환경입니다. 프로젝트 맥락, UI/UX �
 
 `$spec`은 최종 명세 파일을 다시 확인한 뒤 보고합니다. 프로젝트가 요구하지 않는 검토·승인 질문을 새로 만들지 않습니다.
 
-UI UX Pro Max와 Apple Design은 `$design` 내부 참고자료입니다.
+자동 선택은 강제 후크가 아니라 **모델 라우팅(model routing)** 입니다. JOENESS Core가 시각 결과와 명세 전달 조건을 항상 알려 누락 가능성을 줄이지만, 특정 스킬 사용을 확실히 지정하려면 요청에 `$visual-check` 또는 `$spec`처럼 호출명을 적으세요.
+
+UI UX Pro Max와 Apple Design은 JOENESS 설치 때 함께 복사되는 `$design` 내부 참고자료입니다. 별도 호출 스킬로 노출되지 않습니다.
 
 ### 외부 플러그인
 
-Figma, Superpowers, Ponytail은 JOENESS와 **별도로 설치**하는 외부 플러그인입니다. 관련 작업에서만 선택되며, JOENESS 설치가 이를 대신 설치하거나 모든 작업에서 실행하지 않습니다.
+Figma, Superpowers, Ponytail은 JOENESS와 **별도로 설치**하는 외부 플러그인입니다. JOENESS는 이 플러그인의 설치·활성화 설정을 바꾸지 않습니다.
 
-| 플러그인 | 관련 작업 |
+| 플러그인 | JOENESS 권장 정책 |
 |---|---|
-| Figma | 실제 Figma 파일 작업 |
-| Superpowers | 복잡한 계획·디버깅·검토 |
-| Ponytail | 과설계 점검 |
+| Figma | **conditional**: 실제 Figma 파일·노드·결과가 작업 대상일 때만 사용 |
+| Superpowers | **explicit-only**: 사용자가 요청하거나 프로젝트가 요구한 복잡한 계획·디버깅·TDD에만 사용. 암묵 호출을 막을 수 없다면 기본 비활성화 |
+| Ponytail | **default disabled**: 평소에는 끄고, 과설계 검토를 명시한 `review`·`audit`에만 사용 |
 
 ### 업데이트와 제거
 
@@ -72,6 +76,8 @@ powershell.exe -NoProfile -File .\JOENESS.ps1 -Remove
 ## English Guide
 
 JOENESS is a Windows Codex work environment. It helps with project context, UI/UX design, visual-result checks, specification summaries, and handoffs only when a task needs them.
+
+**JOENESS Core** is the thin safety instruction visible in every task. It adds no special report format to clean work and routes only an actual visual result or persistent-specification delivery to the applicable skill.
 
 ### First use: five steps
 
@@ -106,17 +112,19 @@ Statuses such as `ready`, `current`, and `blocked` are **PowerShell output**, no
 
 `$spec` rechecks the final specification file before reporting. It does not invent a review or approval prompt that the project does not require.
 
-UI UX Pro Max and Apple Design are reference material inside `$design`.
+Automatic selection is **model routing**, not a deterministic hook. JOENESS Core keeps the visual-result and specification-delivery conditions visible to reduce misses. To require a particular skill, include its call such as `$visual-check` or `$spec` in the request.
+
+UI UX Pro Max and Apple Design are bundled with every JOENESS installation as internal `$design` references. They are not exposed as separate callable skills.
 
 ### External plugins
 
-Figma, Superpowers, and Ponytail are external plugins installed **separately** from JOENESS. They are selected only when relevant; JOENESS neither installs them nor runs all of them for every task.
+Figma, Superpowers, and Ponytail are external plugins installed **separately** from JOENESS. JOENESS does not change their installation or enablement settings.
 
-| Plugin | Relevant work |
+| Plugin | JOENESS policy |
 |---|---|
-| Figma | Work on real Figma files |
-| Superpowers | Complex planning, debugging, or review |
-| Ponytail | Over-engineering checks |
+| Figma | **conditional**: only when a real Figma file, node, or result is the task target |
+| Superpowers | **explicit-only**: only when requested or required by the project for complex planning, debugging, or TDD; default disabled if implicit invocation cannot be prevented |
+| Ponytail | **default disabled**: enable only an explicitly requested `review` or `audit` for over-engineering |
 
 ### Update and remove
 

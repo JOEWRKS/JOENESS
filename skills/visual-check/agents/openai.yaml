@@ -1,6 +1,6 @@
 interface:
   display_name: "Visual Check"
   short_description: "Verify produced visuals before completion"
-  default_prompt: "Use $visual-check conditionally: for visual output completion, record the smallest claim-specific observable checks on exact evidence as PASS, FAIL, or UNVERIFIED, choose one overall verdict by FAIL before UNVERIFIED before PASS, and report in the user's language; scope exclusions are not acceptance criteria, so without sourced criteria mark UNVERIFIED rather than deriving PASS from the candidate; a claimed visual relationship needs pre-established authoritative evidence, not candidate-derived plausibility, and unresolved checks block only dependent work. For approved-reference translation, verify one representative for each output kind or target form in its native target form and minimum actual-use context before fan-out; if objective or subjective verification is unresolved, pause dependent fan-out. For a concrete defect, identify retries by causal mechanism plus expected observation and change artifacts only with fix authority."
+  default_prompt: "Use $visual-check only for a produced or changed visual result, an approved-reference translation, or a concrete visual defect. Load its required mode references, inspect the exact current result yourself, record sourced claim-specific observables as PASS, FAIL, or UNVERIFIED, put the overall verdict first in the user's language, and block only dependent work."
 policy:
   allow_implicit_invocation: true

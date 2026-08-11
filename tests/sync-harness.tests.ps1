@@ -25,7 +25,7 @@ function Test-ReadmeContract {
     $koreanNewTask = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('7IOIIOyekeyXhQ=='))
     $koreanRestart = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('7J6s7Iuk7ZaJ'))
     $koreanSeparate = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('67OE64+E66GcIOyEpOy5mA=='))
-    $koreanRelevant = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('6rSA66CoIOyekeyXhQ=='))
+    $koreanModelRouting = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('66qo6424IOudvOyasO2MhQ=='))
     $koreanRolesHeader = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('fCDtmLjstpzrqoUgfCDtlZjripQg7J28IHwg7J6Q64+ZIOyEoO2DnSDsobDqsbQgfA=='))
     $koreanFirstUse = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('7LKY7J2MIOyCrOyaqTogNeuLqOqzhA=='))
     $koreanRoles = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('7Jet7ZWg'))
@@ -57,8 +57,13 @@ function Test-ReadmeContract {
         }
         Assert-True (($section.Contains('PowerShell output') -and $section.Contains('not a Codex chat response')) -or ($section.Contains($koreanPowerShell) -and $section.Contains($koreanChat))) "$language guide distinguishes PowerShell output from chat responses"
         Assert-True ($section.Contains('Restart Codex or open a new task') -or ($section.Contains($koreanRestart) -and $section.Contains($koreanNewTask))) "$language guide starts a fresh task after Apply"
-        Assert-True (($section.Contains('installed **separately**') -and $section.Contains('only when relevant')) -or ($section.Contains($koreanSeparate) -and $section.Contains($koreanRelevant))) "$language guide explains external plugin boundaries"
+        Assert-True ($section.Contains('installed **separately**') -or $section.Contains($koreanSeparate)) "$language guide explains external plugin boundaries"
         Assert-True ($section -match '(?is)UI UX Pro Max.{0,120}Apple Design.{0,120}\$design') "$language guide describes design references"
+        Assert-True ($section.Contains('JOENESS Core')) "$language guide uses the public Core name"
+        Assert-True ($section.Contains('model routing') -or $section.Contains($koreanModelRouting)) "$language guide explains that implicit skill selection is model routing"
+        Assert-True ($section -match '(?is)Figma.{0,160}conditional') "$language guide makes Figma conditional"
+        Assert-True ($section -match '(?is)Superpowers.{0,160}explicit-only') "$language guide makes Superpowers explicit-only"
+        Assert-True ($section -match '(?is)Ponytail.{0,160}default disabled') "$language guide makes Ponytail default disabled"
 
         $firstUse = Get-ReadmeSubsection $section $(if ($language -eq 'English') { 'First use: five steps' } else { $koreanFirstUse })
         $steps = @([regex]::Matches($firstUse, '(?m)^([1-9][0-9]*)\. '))

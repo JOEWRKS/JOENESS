@@ -1,0 +1,15 @@
+# Durable evidence boundaries
+
+Keep source inspection, build artifact, deployed artifact, visual candidate, and user acceptance as separate states. Automated checks or a different state cannot prove the original visual failure fixed. When a deployable result becomes a future baseline, bind the applicable source commit and worktree, build hash, deployed hash, exact target and state, and user verdict in the project's chosen evidence pointer.
+
+Bind evidence to the exact produced artifact and version, named target and state, and acceptance intent. Inspect rendered content or frames in the native target form and minimum actual-use context required by the claim: the Figma artifact for Figma work, a real browser for web UI, the runtime or named device for an app or game, and the exact file at native scale for an image or sprite. For an asset-only claim, inspect the exact file at native scale. For an applied, installed, or in-game claim, inspect the exact current build in the named runtime state; file inspection alone is insufficient. Inspect motion in representative playback, not only a still. For a composite, capture, or mockup, record source, version, crop, scale, and orientation when they affect the claim.
+
+Build, test, tool success, filename, file existence, or a generated capture is not visual verification; open and inspect its content. The completion-reporting agent must inspect the evidence itself; reviewer or tool PASS is not a substitute.
+
+A candidate, capture, or mockup can show output but cannot define its own acceptance authority. For a relationship such as held, attached, aligned, or contained, establish the expected relationship before judging from a user-marked reference, accepted runtime frame, project contract, or target anchor. Candidate content and reviewer plausibility are not authority; without a source, mark UNVERIFIED. Criteria first introduced after viewing may add or strengthen future checks, never weaken or erase existing ones; freeze them and use a new attempt before they support PASS. A self-derived coordinate proves construction consistency, not correctness.
+
+Do not overwrite evidence used for a verdict. Store a correction at a new attempt-specific project path or content-addressed store that preserves the prior bytes. An unexpected overwrite invalidates the prior verdict: report the evidence loss and recheck the replacement as new evidence.
+
+Treat accepted, restorable-copy-present, and restore-tested as separate states. Follow JOENESS Core retry and external-process limits. Use project-owned verification tools; do not create a general deployment or screenshot system.
+
+Track applicable layers separately: implemented, packaged, installed exact artifact, rendered on the named target, interaction rechecked, and user accepted. If exact visual verification is unavailable, preserve the implementation and report the user-language equivalent of `implemented, visually unverified` with the missing target or check; do not claim it meets acceptance or is ready for use, delivery, or release.

@@ -9,6 +9,7 @@ const ROOT = path.resolve(import.meta.dirname, '..');
 const VENDOR = path.join(ROOT, 'vendor');
 const COMPATIBILITY = path.join(VENDOR, 'compatibility');
 const MANIFEST = path.join(VENDOR, 'source-manifest.json');
+const README = path.join(ROOT, 'README.md');
 const ROOT_AGENTS = path.join(ROOT, 'AGENTS.md');
 const HISTORICAL_COMMON_CORE = path.join(ROOT, 'evals', 'candidates', 'common-core-v1.md');
 const EVALUATED_COMMON_CORE = path.join(ROOT, 'common-core.md');
@@ -17,6 +18,7 @@ const INTERACTION_SAFETY_CORE_V1 = path.join(ROOT, 'evals', 'candidates', 'inter
 const INTERACTION_SAFETY_CORE_V2 = path.join(ROOT, 'evals', 'candidates', 'interaction-safety-core-v2.md');
 const INTERACTION_SAFETY_CORE_V3 = path.join(ROOT, 'evals', 'candidates', 'interaction-safety-core-v3.md');
 const INTERACTION_SAFETY_CORE_V4 = path.join(ROOT, 'evals', 'candidates', 'interaction-safety-core-v4.md');
+const INTERACTION_SAFETY_CORE_V5 = path.join(ROOT, 'evals', 'candidates', 'interaction-safety-core-v5.md');
 const GITATTRIBUTES = path.join(ROOT, '.gitattributes');
 const UI_FILES = [
   'SKILL.md',
@@ -172,21 +174,39 @@ const EXPECTED_VISUAL_CHECK_SKILL = {
   activationPolicy: 'hybrid-visual-verification',
   sourceDependencies: [],
   intentionalDifferences: [
-    'Concrete visual-verification and approved-reference translation contract.',
+    'Compact visual-completion router with always-required durable evidence and conditional defect or translation references.',
     'Local OpenAI product metadata.',
   ],
   validatorSha256: '5347a0a09cfb546bba1c0d1a30dae0a233d9a05f57bd4e7877155c588bcdabf7',
   files: [
     {
       localPath: 'skills/visual-check/SKILL.md',
-      bytes: 7290,
-      sha256: 'a90a23f72b48581a65a3ba30e2fa7b3592a64d30506d7c4122754323e568e1bf',
+      bytes: 3115,
+      sha256: 'b0a7d6482d371b7dc066d7fdc2b06f69868fd27054ec01e29c58b1425d2c7998',
       exactUpstreamCopy: false,
     },
     {
       localPath: 'skills/visual-check/agents/openai.yaml',
-      bytes: 1114,
-      sha256: '564320118d97ade92d8645c92bf08026694662c0a47979cb4ea4bce745e67ee8',
+      bytes: 532,
+      sha256: '92428f2972ee74d363af94af40bb8f593126dc99577cdbb15e91850b2b14e32d',
+      exactUpstreamCopy: false,
+    },
+    {
+      localPath: 'skills/visual-check/references/concrete-defect.md',
+      bytes: 646,
+      sha256: '8d16f895a6e40e4325139de00c4d547aca7f9228913495237348ac77df51d2c6',
+      exactUpstreamCopy: false,
+    },
+    {
+      localPath: 'skills/visual-check/references/approved-reference.md',
+      bytes: 1040,
+      sha256: '44ad3edecfbda7639a13324aeaadd9ca581aa5379c105fdf6c2dba806274a424',
+      exactUpstreamCopy: false,
+    },
+    {
+      localPath: 'skills/visual-check/references/durable-evidence.md',
+      bytes: 3056,
+      sha256: 'bc543ab07c275a12d0c110f839562f9e5884f97281920dae38fe55c0a402a1cd',
       exactUpstreamCopy: false,
     },
   ],
@@ -371,7 +391,7 @@ const EXPECTED_SKILL_CONTRACT_V5 = {
   semanticImprovement: 'not-asserted',
   promotionPass: false,
 };
-const EXPECTED_CURRENT_EVALUATION = {
+const EXPECTED_SKILL_CONTRACT_V6 = {
   mode: 'active-skill-contract-v6',
   version: 6,
   state: 'unvalidated',
@@ -393,6 +413,39 @@ const EXPECTED_CURRENT_EVALUATION = {
     sha256: 'ba605b10c5428a0c9074f514dd3e32e9c93435843ef78427188a0561af94594b',
     disposition: 'semantic-review-rejected',
   }],
+  hardGate: 'unverified',
+  classification: 'candidate',
+  outcomeReview: 'pending',
+  semanticImprovement: 'not-asserted',
+  promotionPass: false,
+};
+const EXPECTED_CURRENT_EVALUATION = {
+  mode: 'active-skill-contract-v7',
+  version: 7,
+  state: 'unvalidated',
+  cases: {
+    path: 'evals/skill-contracts/cases-v7.json',
+    sha256: '09ae4db37fa1d7d7697947486629836ac93da1957cc107bc55473502b39610e8',
+  },
+  visualPredecessorEvidence: {
+    pressure: {
+      path: 'evals/skill-contracts/visual-verdict-pressure-v5.json',
+      sha256: 'e1dec17c021bbb9fb68dd562d67b6c00dce5cb9e6e387918366fe15c8fe347ee',
+    },
+    skill: {
+      path: 'evals/candidates/visual-check-skill-v5.md',
+      bytes: 7290,
+      sha256: 'a90a23f72b48581a65a3ba30e2fa7b3592a64d30506d7c4122754323e568e1bf',
+    },
+    metadata: {
+      path: 'evals/candidates/visual-check-openai-v5.yaml',
+      bytes: 1114,
+      sha256: '564320118d97ade92d8645c92bf08026694662c0a47979cb4ea4bce745e67ee8',
+    },
+    scope: 'Rejected or superseded predecessor evidence only; it does not validate the compact current skill.',
+  },
+  specPressureEvidence: EXPECTED_SKILL_CONTRACT_V6.specPressureEvidence,
+  specPressureHistory: EXPECTED_SKILL_CONTRACT_V6.specPressureHistory,
   hardGate: 'unverified',
   classification: 'candidate',
   outcomeReview: 'pending',
@@ -645,11 +698,14 @@ test('the interaction safety core is active without rewriting broader Core evide
     'e7a3c02d4c147eaadde2c00a0452c7de21b3e0f51fa02cf7bd7085c43d97ac4d',
   );
   assert.deepEqual(manifest.activeCommonCore, {
-    path: 'evals/candidates/interaction-safety-core-v4.md',
-    sha256: '5efd93bc041d328b41a9424b9f5593d90da26fe8263cf4a502894d4fdfc2926b',
+    path: 'evals/candidates/interaction-safety-core-v5.md',
+    sha256: '160a10f476d2503054e02697c8588a2ae58155b91adb17387763ae0e21e515c3',
   });
+  assert.equal(lstatSync(INTERACTION_SAFETY_CORE_V5).size, 2040);
+  assert.equal(sha256(INTERACTION_SAFETY_CORE_V5), manifest.activeCommonCore.sha256);
+  assert.match(readFileSync(INTERACTION_SAFETY_CORE_V5, 'utf8'), /^# JOENESS Core$/m);
   assert.equal(lstatSync(INTERACTION_SAFETY_CORE_V4).size, 2047);
-  assert.equal(sha256(INTERACTION_SAFETY_CORE_V4), manifest.activeCommonCore.sha256);
+  assert.equal(sha256(INTERACTION_SAFETY_CORE_V4), '5efd93bc041d328b41a9424b9f5593d90da26fe8263cf4a502894d4fdfc2926b');
   assert.equal(lstatSync(INTERACTION_SAFETY_CORE_V3).size, 2048);
   assert.equal(sha256(INTERACTION_SAFETY_CORE_V3), '75a2ecd35404e98ecdbb4a429805b2c59e1f00e445d5daf680cb34b61e785191');
   assert.equal(lstatSync(INTERACTION_SAFETY_CORE_V2).size, 2048);
@@ -671,15 +727,20 @@ test('the interaction safety core is active without rewriting broader Core evide
   assert.match(readFileSync(GITATTRIBUTES, 'utf8'), /^\/evals\/candidates\/interaction-safety-core-v2\.md text eol=lf$/m);
   assert.match(readFileSync(GITATTRIBUTES, 'utf8'), /^\/evals\/candidates\/interaction-safety-core-v3\.md text eol=lf$/m);
   assert.match(readFileSync(GITATTRIBUTES, 'utf8'), /^\/evals\/candidates\/interaction-safety-core-v4\.md text eol=lf$/m);
+  assert.match(readFileSync(GITATTRIBUTES, 'utf8'), /^\/evals\/candidates\/interaction-safety-core-v5\.md text eol=lf$/m);
+  assert.match(readFileSync(GITATTRIBUTES, 'utf8'), /^\/evals\/candidates\/visual-check-skill-v5\.md text eol=lf$/m);
+  assert.match(readFileSync(GITATTRIBUTES, 'utf8'), /^\/evals\/candidates\/visual-check-openai-v5\.yaml text eol=lf$/m);
   assert.match(readFileSync(GITATTRIBUTES, 'utf8'), /^\/evals\/candidates\/spec-delivery-skill-v1\.md text eol=lf$/m);
   assert.match(readFileSync(GITATTRIBUTES, 'utf8'), /^\/docs\/superpowers\/specs\/2026-08-11-joeness-silent-core-and-spec-delivery-design\.md text eol=lf$/m);
+  assert.match(readFileSync(GITATTRIBUTES, 'utf8'), /^\/docs\/superpowers\/specs\/2026-08-11-joeness-routing-and-plugin-policy-design\.md text eol=lf$/m);
+  assert.match(readFileSync(GITATTRIBUTES, 'utf8'), /^\/docs\/superpowers\/plans\/2026-08-11-joeness-routing-and-plugin-policy\.md text eol=lf$/m);
 });
 
 test('candidate ledger separates the unvalidated active contract from retained hybrid evidence', async () => {
   const manifest = JSON.parse(readFileSync(MANIFEST, 'utf8'));
   const current = manifest.evaluation.current;
   assert.deepEqual(current, EXPECTED_CURRENT_EVALUATION);
-  assert.deepEqual(manifest.evaluation.history, [EXPECTED_HYBRID_EVALUATION, EXPECTED_SKILL_CONTRACT_V2, EXPECTED_SKILL_CONTRACT_V3_REJECTED, EXPECTED_SKILL_CONTRACT_V4_REJECTED, EXPECTED_SKILL_CONTRACT_V5]);
+  assert.deepEqual(manifest.evaluation.history, [EXPECTED_HYBRID_EVALUATION, EXPECTED_SKILL_CONTRACT_V2, EXPECTED_SKILL_CONTRACT_V3_REJECTED, EXPECTED_SKILL_CONTRACT_V4_REJECTED, EXPECTED_SKILL_CONTRACT_V5, EXPECTED_SKILL_CONTRACT_V6]);
 
   for (const [name, expected] of Object.entries(EXPECTED_SOURCE_EVALUATION)) {
     assert.equal(manifest.sources[name].evaluationStatus, expected.evaluationStatus);
@@ -708,11 +769,17 @@ test('candidate ledger separates the unvalidated active contract from retained h
   assert.equal(sha256(v4Pressure), EXPECTED_SKILL_CONTRACT_V4_REJECTED.pressureEvidence.sha256);
   assert.equal(lstatSync(v4Raw).size, 14333);
   assert.equal(sha256(v4Raw), EXPECTED_SKILL_CONTRACT_V4_REJECTED.rawEvidence.sha256);
-  assert.equal(lstatSync(path.join(ROOT, ...current.cases.path.split('/'))).size, 1121);
+  assert.equal(lstatSync(path.join(ROOT, ...current.cases.path.split('/'))).size, 1237);
   assert.equal(sha256(path.join(ROOT, ...current.cases.path.split('/'))), current.cases.sha256);
-  const visualV5 = manifest.evaluation.history.at(-1);
-  assert.equal(current.inheritedPressureEvidence.path, visualV5.pressureEvidence.path);
-  assert.equal(current.inheritedPressureEvidence.sha256, visualV5.pressureEvidence.sha256);
+  const visualV5 = manifest.evaluation.history.find(({ mode }) => mode === 'active-skill-contract-v5');
+  assert.equal(current.visualPredecessorEvidence.pressure.path, visualV5.pressureEvidence.path);
+  assert.equal(current.visualPredecessorEvidence.pressure.sha256, visualV5.pressureEvidence.sha256);
+  for (const key of ['skill', 'metadata']) {
+    const archived = current.visualPredecessorEvidence[key];
+    const archivedPath = path.join(ROOT, ...archived.path.split('/'));
+    assert.equal(lstatSync(archivedPath).size, archived.bytes);
+    assert.equal(sha256(archivedPath), archived.sha256);
+  }
   const pressurePath = path.join(ROOT, ...visualV5.pressureEvidence.path.split('/'));
   assert.equal(lstatSync(pressurePath).size, 6107);
   assert.equal(sha256(pressurePath), visualV5.pressureEvidence.sha256);
@@ -724,8 +791,8 @@ test('candidate ledger separates the unvalidated active contract from retained h
   assert.equal(pressure.supersedes.cases.sha256, EXPECTED_SKILL_CONTRACT_V4_REJECTED.cases.sha256);
   assert.equal(pressure.supersedes.pressureEvidence.sha256, EXPECTED_SKILL_CONTRACT_V4_REJECTED.pressureEvidence.sha256);
   assert.equal(pressure.supersedes.rawEvidence.sha256, EXPECTED_SKILL_CONTRACT_V4_REJECTED.rawEvidence.sha256);
-  assert.equal(pressure.finalCandidate.skillSha256, EXPECTED_VISUAL_CHECK_SKILL.files[0].sha256);
-  assert.equal(pressure.finalCandidate.metadataSha256, EXPECTED_VISUAL_CHECK_SKILL.files[1].sha256);
+  assert.equal(pressure.finalCandidate.skillSha256, current.visualPredecessorEvidence.skill.sha256);
+  assert.equal(pressure.finalCandidate.metadataSha256, current.visualPredecessorEvidence.metadata.sha256);
   assert.equal(pressure.finalCandidate.casesSha256, visualV5.cases.sha256);
   const rawPath = path.join(ROOT, ...pressure.rawEvidence.path.split('/'));
   assert.equal(lstatSync(rawPath).size, 19133);
@@ -776,12 +843,13 @@ test('candidate ledger separates the unvalidated active contract from retained h
     assert.equal(lstatSync(fixture).size, evidence.bytes);
     assert.equal(sha256(fixture), evidence.sha256);
   }
-  const specPressurePath = path.join(ROOT, ...current.specPressureEvidence.path.split('/'));
+  const specContractV6 = manifest.evaluation.history.find(({ mode }) => mode === 'active-skill-contract-v6');
+  const specPressurePath = path.join(ROOT, ...specContractV6.specPressureEvidence.path.split('/'));
   assert.equal(lstatSync(specPressurePath).size, 2151);
-  assert.equal(sha256(specPressurePath), current.specPressureEvidence.sha256);
+  assert.equal(sha256(specPressurePath), specContractV6.specPressureEvidence.sha256);
   const specPressure = JSON.parse(readFileSync(specPressurePath, 'utf8'));
   assert.equal(specPressure.skill.sha256, EXPECTED_SPEC_SKILL.files[0].sha256);
-  assert.equal(specPressure.cases.sha256, current.cases.sha256);
+  assert.equal(specPressure.cases.sha256, specContractV6.cases.sha256);
   assert.equal(specPressure.candidate.sampleCount, 5);
   assert.equal(specPressure.candidate.scores.exactArtifactMarkdownLink, '5/5');
   assert.equal(specPressure.candidate.scores.implementationDecisionsAtMostThree, '5/5');
@@ -796,11 +864,11 @@ test('candidate ledger separates the unvalidated active contract from retained h
   assert.equal(lstatSync(specRaw).size, specPressure.rawEvidence.bytes);
   assert.equal(sha256(specRaw), specPressure.rawEvidence.sha256);
   assert.match(readFileSync(specRaw, 'utf8'), /## Candidate 1[\s\S]*## Candidate 5/);
-  assert.equal(current.specPressureHistory.length, 1);
-  assert.equal(specPressure.predecessor.sha256, current.specPressureHistory[0].sha256);
+  assert.equal(specContractV6.specPressureHistory.length, 1);
+  assert.equal(specPressure.predecessor.sha256, specContractV6.specPressureHistory[0].sha256);
   assert.equal(specPressure.predecessor.disposition, 'semantic-review-rejected');
-  const rejectedSpecPressurePath = path.join(ROOT, ...current.specPressureHistory[0].path.split('/'));
-  assert.equal(sha256(rejectedSpecPressurePath), current.specPressureHistory[0].sha256);
+  const rejectedSpecPressurePath = path.join(ROOT, ...specContractV6.specPressureHistory[0].path.split('/'));
+  assert.equal(sha256(rejectedSpecPressurePath), specContractV6.specPressureHistory[0].sha256);
   const rejectedSpecReview = JSON.parse(readFileSync(rejectedSpecPressurePath, 'utf8'));
   assert.equal(rejectedSpecReview.disposition, 'semantic-review-rejected');
   assert.equal(rejectedSpecReview.scores.noApprovalOrTransitionCeremony, '0/5');
@@ -893,6 +961,22 @@ test('operational skills bound handoff context and high-cost validation', () => 
   assert.match(projectSetup, /project-documented, risk-proportional acceptance and release evidence/i);
   assert.match(projectSetup, /preserve only project-specified review requirements.*do not invent validation topology or duplicate unchanged clean builds/i);
   assert.doesNotMatch(projectSetup, /reviewer trees|one controller check|at most one independent reviewer|at most one evidence-scoped re-review/i);
+});
+
+test('README keeps the public Core, Spec, and external-plugin policy explicit', () => {
+  const readme = readFileSync(README, 'utf8');
+  const [korean, english] = readme.split('## English Guide');
+  assert.ok(english, 'README must retain the English guide');
+  for (const section of [korean, english]) {
+    assert.match(section, /JOENESS Core/);
+    assert.match(section, /model routing|모델 라우팅/i);
+    assert.match(section, /Figma[\s\S]{0,180}conditional/i);
+    assert.match(section, /Superpowers[\s\S]{0,220}explicit-only/i);
+    assert.match(section, /Ponytail[\s\S]{0,180}default disabled/i);
+    assert.match(section, /\$spec/);
+    assert.doesNotMatch(section, /\$summary/i);
+  }
+  assert.match(readme, /does not change their installation or enablement settings|설치·활성화 설정을 바꾸지 않습니다/i);
 });
 
 test('Git preserves exact vendor and active skill bytes on checkout', () => {

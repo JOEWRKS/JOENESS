@@ -8,6 +8,7 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const CASES = path.join(ROOT, 'evals', 'skill-contracts', 'cases-v4.json');
 const SPEC_CASES_V5 = path.join(ROOT, 'evals', 'skill-contracts', 'cases-v5.json');
 const SPEC_CASES = path.join(ROOT, 'evals', 'skill-contracts', 'cases-v6.json');
+const ROUTING_CASES = path.join(ROOT, 'evals', 'skill-contracts', 'cases-v7.json');
 
 const rolePaths = {
   project: path.join(ROOT, 'skills', 'project'),
@@ -43,6 +44,20 @@ const expectedSpecCases = {
     { id: 'spec-current-artifact-readback', expectedSkills: ['spec'], forbiddenSkills: [], requiredBehavior: ['read-exact-current-artifact', 'unverified-if-unreadable'], request: '방금 명세를 고쳤어. 완료 보고 전에 실제 최신 파일을 다시 읽고 요약해줘.' },
     { id: 'producer-generic-review-prompt', expectedSkills: ['spec'], forbiddenSkills: [], requiredBehavior: ['no-generic-review-or-transition-prompt'], request: '명세 작성 절차가 영문 검토 요청으로 끝나더라도 핵심 결정만 한국어로 전달하고 일반적인 승인 질문은 덧붙이지 마.' },
     { id: 'project-required-review-field', expectedSkills: ['spec'], forbiddenSkills: [], requiredBehavior: ['embed-required-gate-in-project-field', 'no-parallel-spec-block'], request: '프로젝트 보고 양식에 필수 검토 필드가 있어. 명세 요약과 그 게이트를 기존 필드 안에만 넣어줘.' },
+  ],
+};
+
+const expectedRoutingCases = {
+  schemaVersion: 7,
+  inherits: {
+    path: 'evals/skill-contracts/cases-v6.json',
+    sha256: 'be3c59c6d3f55298af2b75f106e5339e3c2ab6e2476b9b4fd0e01a227aad5b80',
+  },
+  cases: [
+    { id: 'core-routes-created-visual-result', expectedSkills: ['visual-check'], forbiddenSkills: [], requiredBehavior: ['inspect-exact-current-result-before-completion'], request: '로그인 화면을 실제 앱에 구현하고 완료해줘.' },
+    { id: 'core-routes-persistent-spec-delivery', expectedSkills: ['spec'], forbiddenSkills: [], requiredBehavior: ['final-readback-before-user-language-digest'], request: 'API 설계 명세를 파일로 작성해줘.' },
+    { id: 'core-excludes-visual-planning-only', expectedSkills: ['design'], forbiddenSkills: ['visual-check'], request: '로그인 화면의 UI 방향만 문서로 설계하고 결과 화면은 만들지 마.' },
+    { id: 'core-excludes-nonvisual-change', expectedSkills: [], forbiddenSkills: ['design', 'visual-check', 'spec'], request: '렌더링에 영향 없는 내부 날짜 파서 이름만 바꿔줘.' },
   ],
 };
 
@@ -98,6 +113,8 @@ test('the spec case ledger extends the preserved visual and routing ledger', () 
   assert.deepEqual(prior, expectedSpecCasesV5);
   const actual = JSON.parse(readFileSync(SPEC_CASES, 'utf8'));
   assert.deepEqual(actual, expectedSpecCases);
+  const routing = JSON.parse(readFileSync(ROUTING_CASES, 'utf8'));
+  assert.deepEqual(routing, expectedRoutingCases);
 });
 
 test('the role case ledger fixes the intended selection boundaries', () => {
@@ -169,55 +186,64 @@ test('design excludes layout-unaffected copy and literal-value fixes', () => {
 test('visual-check binds one hypothesis to the exact observed state', () => {
   const visualCheck = readRoleFile('visual-check', 'SKILL.md');
   const metadata = readRoleFile('visual-check', 'agents', 'openai.yaml');
-  assert.match(visualCheck, /^description: Use when.*approved visual reference.*(?:medium|resolution|size|derived state)/im);
-  assert.match(visualCheck, /^description: Use when.*(?:creates|changes|implements|delivers).*output.*acceptance depends on.*appearance.*layout.*motion.*target rendering/im);
-  assert.match(visualCheck, /do not use.*requested work.*neither produces nor changes.*visual artifact/is);
-  assert.match(visualCheck, /original failure.*target.*state/is);
-  assert.match(visualCheck, /one causal hypothesis.*minimum coherent change set/is);
-  assert.match(visualCheck, /source.*build artifact.*deployed artifact.*visual candidate.*user acceptance/is);
-  assert.match(visualCheck, /rejected hypothesis.*new evidence.*not repeat/is);
-  assert.match(visualCheck, /one representative.*native target form.*minimum actual[- ]use context.*before.*fan[- ]out/is);
-  assert.match(visualCheck, /each materially different output kind.*target form.*one representative/is);
-  assert.match(visualCheck, /representative verification.*unresolved.*objective or subjective.*(?:stop|pause).*dependent fan[- ]out/is);
-  assert.match(visualCheck, /ask the user only.*subjective intent.*objective evidence.*without.*approval gate/is);
-  assert.match(visualCheck, /numeric proxy.*not override.*approved reference.*outside.*exact verified target.*state.*hypothesis/is);
-  assert.match(visualCheck, /approved downstream (?:anchor|contract).*not move/is);
-  assert.match(visualCheck, /failed derivative.*unless.*intent change/is);
-  assert.match(visualCheck, /request authorizes.*bounded translation.*not unrelated intent changes.*repeated approval gates/is);
-  assert.match(visualCheck, /retry identity.*causal mechanism.*expected observation.*not.*(?:tool|name)/is);
-  assert.match(visualCheck, /follow-up (?:variant|task).*reuse.*approved reference.*stable project-owned path.*version.*temporary attachment path.*not.*durable evidence/is);
+  const defect = readRoleFile('visual-check', 'references', 'concrete-defect.md');
+  const translation = readRoleFile('visual-check', 'references', 'approved-reference.md');
+  const evidence = readRoleFile('visual-check', 'references', 'durable-evidence.md');
+  const combined = [visualCheck, defect, translation, evidence].join('\n');
+  const wordCount = (visualCheck.match(/\S+/g) ?? []).length;
+  assert.ok(wordCount <= 500, `visual-check public router is ${wordCount} words; expected <= 500`);
+  assert.match(visualCheck, /references\/concrete-defect\.md.*concrete defect.*required/is);
+  assert.match(visualCheck, /references\/approved-reference\.md.*approved-reference.*required/is);
+  assert.match(visualCheck, /always read.*references\/durable-evidence\.md.*required/is);
+  assert.match(combined, /^description: Use when.*approved visual reference.*(?:medium|resolution|size|derived state)/im);
+  assert.match(combined, /^description: Use when.*(?:creates|changes|implements|delivers).*output.*acceptance depends on.*appearance.*layout.*motion.*target rendering/im);
+  assert.match(combined, /do not use.*(?:planning-only|only plans).*backend.*nonvisual.*layout-unaffected.*rendering-inert/is);
+  assert.match(defect, /original failure.*target.*state/is);
+  assert.match(defect, /one causal hypothesis.*minimum coherent change set/is);
+  assert.match(evidence, /source.*build artifact.*deployed artifact.*visual candidate.*user acceptance/is);
+  assert.match(defect, /rejected hypothesis.*new evidence.*not repeat/is);
+  assert.match(translation, /one representative.*native target form.*minimum actual[- ]use context.*before.*fan[- ]out/is);
+  assert.match(translation, /each materially different output kind.*target form.*one representative/is);
+  assert.match(translation, /representative verification.*unresolved.*objective or subjective.*(?:stop|pause).*dependent fan[- ]out/is);
+  assert.match(translation, /ask the user only.*subjective intent.*objective evidence.*without.*approval gate/is);
+  assert.match(translation, /numeric proxy.*not override.*approved reference.*outside.*exact verified target.*state.*hypothesis/is);
+  assert.match(translation, /approved downstream (?:anchor|contract).*not move/is);
+  assert.match(translation, /failed derivative.*unless.*intent change/is);
+  assert.match(translation, /request authorizes.*bounded translation.*not unrelated intent changes.*repeated approval gates/is);
+  assert.match(defect, /retry identity.*causal mechanism.*expected observation.*not.*(?:tool|name)/is);
+  assert.match(translation, /follow-up (?:variant|task).*reuse.*approved reference.*stable project-owned path.*version.*temporary attachment path.*not.*durable evidence/is);
   assert.match(visualCheck, /completion gate.*only.*(?:created|changed|implemented).*acceptance depends on.*appearance.*layout.*motion.*target rendering/is);
   assert.match(visualCheck, /before.*any claim.*affected (?:task|output).*meets acceptance.*ready for.*use.*delivery.*release.*regardless.*wording/is);
-  assert.match(visualCheck, /exact (?:produced )?artifact.*version.*named target.*state/is);
-  assert.match(visualCheck, /inspect.*rendered (?:content|frames|output).*native.*actual[- ]use context/is);
-  assert.match(visualCheck, /build.*test.*tool success.*file(?:name| existence).*not.*visual verification/is);
-  assert.match(visualCheck, /capture.*(?:created|generated).*not enough.*(?:open|inspect).*content/is);
-  assert.match(visualCheck, /completion-reporting agent.*inspect.*itself.*(?:reviewer|tool).*pass.*not.*substitute/is);
+  assert.match(evidence, /exact (?:produced )?artifact.*version.*named target.*state/is);
+  assert.match(evidence, /inspect.*rendered (?:content|frames|output).*native.*actual[- ]use context/is);
+  assert.match(evidence, /build.*test.*tool success.*file(?:name| existence).*not.*visual verification/is);
+  assert.match(evidence, /generated capture.*not visual verification.*open.*inspect.*content/is);
+  assert.match(evidence, /completion-reporting agent.*inspect.*itself.*(?:reviewer|tool).*pass.*not.*substitute/is);
   assert.match(visualCheck, /smallest claim-specific.*checks.*(?:user|request).*reference.*project.*authoritative target/is);
   assert.match(visualCheck, /excluding.*layer.*narrows.*claim.*not.*acceptance check.*no sourced check.*unverified.*(?:instead of|not).*deriv.*pass.*candidate/is);
   assert.match(visualCheck, /expected observable.*concrete.*falsifiable.*observed.*pass.*fail.*unverified/is);
   assert.match(visualCheck, /opening.*evidence.*repeating.*expectation.*looks plausible.*not.*observation/is);
   assert.match(visualCheck, /relation.*name.*both.*actual.*anchor.*contact.*relative position.*scale.*layer.*occlusion/is);
   assert.match(visualCheck, /fail.*unverified.*blocks only.*downstream.*inherits.*amplifies.*independent.*why.*independent.*not.*upgrade/is);
-  assert.match(visualCheck, /any required.*fail.*overall fail.*else.*unverified.*overall unverified.*else.*overall pass.*user.*language/is);
-  assert.match(visualCheck, /narrower pass.*after.*never lead.*qualified pass/is);
-  assert.match(visualCheck, /candidate.*cannot.*acceptance authority.*relationship.*before.*judg.*user-marked.*accepted runtime.*project contract.*target anchor.*not.*authority.*unverified/is);
-  assert.match(visualCheck, /first introduced after viewing.*future.*freeze.*new attempt.*before.*support.*pass/is);
-  assert.match(visualCheck, /self-derived coordinate.*consistency.*not correctness/is);
-  assert.match(visualCheck, /do not overwrite.*verdict.*new attempt-specific.*content-addressed.*preserves.*bytes.*unexpected overwrite.*invalidates.*evidence loss/is);
-  assert.match(visualCheck, /asset-only claim.*exact file.*native scale.*applied.*installed.*in-game claim.*exact current build.*runtime.*file inspection alone.*insufficient/is);
-  assert.match(visualCheck, /inspect.*diagnos.*only.*reproduce.*do not change.*fix authority.*change set/is);
-  assert.match(visualCheck, /verification.*unavailable.*implemented.*visually unverified.*not claim.*meets acceptance.*ready for.*use.*delivery.*release/is);
+  assert.match(visualCheck, /any required.*fail.*overall fail.*(?:else|otherwise).*unverified.*overall unverified.*(?:else|otherwise).*overall pass.*user.*language/is);
+  assert.match(visualCheck, /narrower pass.*(?:after|follow).*never lead.*qualified pass/is);
+  assert.match(visualCheck, /per-check record.*sources.*project-provided evidence location.*otherwise.*task result/is);
+  assert.match(visualCheck, /user-facing digest.*exact artifact.*version.*target.*evidence.*(?:link|pointer|check id)/is);
+  assert.match(evidence, /candidate.*cannot.*acceptance authority.*relationship.*before.*judg.*user-marked.*accepted runtime.*project contract.*target anchor.*not.*authority.*unverified/is);
+  assert.match(evidence, /first introduced after viewing.*future.*freeze.*new attempt.*before.*support.*pass/is);
+  assert.match(evidence, /self-derived coordinate.*consistency.*not correctness/is);
+  assert.match(evidence, /do not overwrite.*verdict.*new attempt-specific.*content-addressed.*preserves.*bytes.*unexpected overwrite.*invalidates.*evidence loss/is);
+  assert.match(evidence, /asset-only claim.*exact file.*native scale.*applied.*installed.*in-game claim.*exact current build.*runtime.*file inspection alone.*insufficient/is);
+  assert.match(defect, /inspect.*diagnos.*only.*reproduce.*do not change.*fix authority.*change set/is);
+  assert.match(evidence, /verification.*unavailable.*implemented.*visually unverified.*not claim.*meets acceptance.*ready for.*use.*delivery.*release/is);
   assert.match(visualCheck, /does not trigger.*planning.*backend.*nonvisual.*layout-unaffected copy/is);
-  assert.match(metadata, /representative.*native target form.*minimum actual[- ]use context.*before.*fan[- ]out/is);
-  assert.match(metadata, /each.*output kind.*target form/is);
-  assert.match(metadata, /objective or subjective.*unresolved.*fan[- ]out/is);
-  assert.match(metadata, /causal mechanism.*expected observation/is);
-  assert.match(metadata, /for visual output completion.*for approved-reference translation.*for a concrete defect/is);
-  assert.match(metadata, /claim-specific.*observable.*pass.*fail.*unverified/is);
-  assert.match(metadata, /scope exclusions.*not acceptance criteria.*without sourced criteria.*unverified.*(?:rather than|not).*candidate/is);
-  assert.match(metadata, /claimed visual relationship.*pre-established authoritative.*not candidate-derived plausibility/is);
-  assert.match(visualCheck, /## Visual completion gate.*## Concrete defect verification.*## Approved-reference translation.*## Shared evidence boundaries/is);
+  assert.match(metadata, /produced or changed visual result.*approved-reference translation.*concrete visual defect/is);
+  assert.match(metadata, /required mode references.*exact current result.*pass.*fail.*unverified/is);
+  assert.match(metadata, /overall verdict first.*user's language.*block only dependent work/is);
+  assert.match(visualCheck, /## Visual completion gate/is);
+  assert.match(defect, /^# Concrete defect verification$/m);
+  assert.match(translation, /^# Approved-reference translation$/m);
+  assert.match(evidence, /^# Durable evidence boundaries$/m);
 });
 
 test('handoff expands only repeated visual or deployment incidents', () => {

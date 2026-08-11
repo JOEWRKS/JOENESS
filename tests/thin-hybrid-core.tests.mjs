@@ -20,37 +20,46 @@ test("the interaction safety core stays silent on clean success without rewritin
   const interactionDecision = JSON.parse(
     await readFile(path.join(root, "evals", "experiments", "joeness-0.1-interaction-safety-core-v1.json"), "utf8"),
   );
-  assert.equal(manifest.activeCommonCore.path, "evals/candidates/interaction-safety-core-v4.md");
+  assert.equal(manifest.activeCommonCore.path, "evals/candidates/interaction-safety-core-v5.md");
 
   const core = await readFile(path.join(root, manifest.activeCommonCore.path), "utf8");
+  const visualSkill = await readFile(path.join(root, "skills", "visual-check", "SKILL.md"), "utf8");
+  const visualEvidence = await readFile(path.join(root, "skills", "visual-check", "references", "durable-evidence.md"), "utf8");
+  const specSkill = await readFile(path.join(root, "skills", "spec", "SKILL.md"), "utf8");
   const disabledCore = await readFile(path.join(root, "evals", "candidates", "no-common-core.md"), "utf8");
   const projectAgents = await readFile(path.join(root, "AGENTS.md"), "utf8");
-  assert.equal(Buffer.byteLength(core, "utf8"), 2047);
+  assert.ok(Buffer.byteLength(core, "utf8") <= 2048, "active JOENESS Core stays within 2 KiB");
   assert.equal(createHash("sha256").update(core).digest("hex"), manifest.activeCommonCore.sha256);
-  assert.match(core, /silent on clean success.*no JOENESS block\/receipt\/cause\/menu\/next step/is);
-  assert.match(core, /user\/project owns workflow\/report\/approval\/tool requirements/is);
-  assert.match(core, /material unresolved choice.*user\/project format.*user-language question.*max3.*recommendation.*what waits.*reversible assumption.*within authority/is);
-  assert.match(core, /crash.*contain task-owned PID.*restore temp state.*readback.*stop\/no relaunch/is);
-  assert.match(core, /same command\/mechanism retry=0.*new PID=new attempt.*user signal overrides liveness/is);
-  assert.match(core, /deterministic.*read exact error.*(?:1|one) evidence-driven retry after cause fix\/method change/is);
+  assert.match(core, /^# JOENESS Core$/m);
+  assert.match(core, /visual output create\/change:\$visual-check pre-completion/is);
+  assert.match(visualSkill, /acceptance depends on appearance, layout, motion, or target rendering.*do not use.*plans.*neither produces nor changes.*visual artifact/is);
+  assert.match(visualEvidence, /exact produced artifact and version.*exact current build/is);
+  assert.match(core, /persistent spec create\/material revision:\$spec post-final-write/is);
+  assert.match(specSkill, /inspect.*exact current artifact.*after.*final write.*unreadable.*unverified/is);
+  assert.match(specSkill, /do not use.*read-only review.*unchanged.*typo.*format.*link-only/is);
+  assert.match(core, /clean success:no JOENESS block\/receipt\/cause\/menu\/next step/is);
+  assert.match(core, /user\/project owns workflow\/report\/approval\/tool/is);
+  assert.match(core, /material unresolved blocking\/outcome-changing choice.*user\/project format.*user-language question.*max3 choices.*recommendation.*what waits.*reversible\+authorized/is);
+  assert.match(core, /crash.*user crash\/relaunch\/stop.*contain task-owned PID.*restore\+readback temp state.*stop\/no relaunch/is);
+  assert.match(core, /same command\/mechanism retry=0.*new PID=new attempt.*user signal outranks liveness/is);
+  assert.match(core, /deterministic.*read exact error.*(?:1|one) evidence-(?:driven|based) retry after cause[- ]fix\/method[- ]change/is);
   assert.match(core, /(?:transient.*idempotent.*(?:one|1)|idempotent transient.*once)/is);
-  assert.match(core, /classify writes by target effect.*local project dependency install.*(?:isn't|not) automatically shared\/external/is);
-  assert.match(core, /shared\/external write uncertain.*inspect state.*recover with same stable idempotency key.*unknown\+stop writes/is);
-  assert.match(core, /(?:intentional|intended) temp project\/shared\/external state.*exact pre-state.*every exit restore\+readback.*unverified=unresolved\+stop writes/is);
-  assert.match(core, /fresh authoritative.*invocation-bound result\/exit.*ends bounded op.*content decides/is);
-  assert.match(core, /generic liveness.*cleanup only.*never wait\/relaunch evidence/is);
+  assert.match(core, /writes classify by target effect.*local project dependency install alone isn't shared\/external/is);
+  assert.match(core, /shared\/external unclear.*inspect state\/same-key idempotent recovery.*else unknown/is);
+  assert.match(core, /intended temp project\/shared\/external state.*exact pre-state.*every exit restore\+readback.*unknown\/unverified=unresolved\+stop writes/is);
+  assert.match(core, /fresh authoritative invocation-bound result\/exit ends bounded op.*content decides/is);
+  assert.match(core, /generic liveness=cleanup.*never wait\/relaunch evidence/is);
   assert.match(core, /filename\/narration\/liveness!=success/is);
   assert.match(core, /evidence=exact artifact\/version\+target\/state\+observed property/is);
   assert.match(core, /fixed needs original-failure recheck.*verified layer\+missing check/is);
-  assert.match(core, /project decides if GUI\/tool is required.*user-visible goal.*primary\+(?:1|one) materially different fallback.*helper\/PID\/delegation.*doesn't reset.*both fail=unverified\/blocked.*new evidence\/user decision/is);
+  assert.match(core, /GUI\/tool need:project decides.*user-visible goal.*primary\+(?:1|one) materially different fallback.*helper\/PID\/delegation.*don't reset.*both fail=unverified\/blocked.*new evidence\/user decision/is);
   assert.match(core, /WER\/dump needs crash signal/is);
   assert.doesNotMatch(core, /unblocked end.*one realistic next step/is);
-  assert.match(core, /material failure\/workaround changing outcome\/safety\/verification\/continuation.*evidence.*cause confidence.*handling.*verification.*risk.*user\/project report.*no duplicate\/fixed lines/is);
-  assert.match(core, /no format.*concise user-language prose/is);
+  assert.match(core, /material failure\/workaround changing outcome\/safety\/verification\/continuation.*user\/project report.*evidence.*cause confidence.*handling.*verification.*risk.*no duplicate\/fixed lines.*concise user-language prose/is);
   assert.doesNotMatch(core, /exactly (?:five|5) lines/is);
   assert.doesNotMatch(core, /^  (?:Evidence|Cause|Handling|Verification|Remaining risk):/m);
-  assert.match(core, /omit routine.*never invent cause.*workaround a fix/is);
-  assert.match(core, /kill only with launch\/post-baseline record\+matching start time\+resolved path\+command\+lineage/is);
+  assert.match(core, /omit routine.*(?:never invent|no invented) cause.*(?:workaround a fix|workaround-as-fix)/is);
+  assert.match(core, /kill:launch\/post-baseline record must match start time\+resolved path\+command\+lineage/is);
   assert.match(core, /name\/port(?: alone)? never.*ambiguous.*leave\/report/is);
   assert.doesNotMatch(core, /every external GUI launch must record/i);
   assert.doesNotMatch(core, /(?:always|every task|all operations).{0,80}(?:process inventory|process logging|launch logging)/is);
@@ -61,6 +70,15 @@ test("the interaction safety core stays silent on clean success without rewritin
   assert.match(projectAgents, /rejected broad.*always-on Core.*disabled.*preserved.*evidence/is);
   assert.match(projectAgents, /thin Interaction Safety Core.*activeCommonCore.*manifest/is);
   assert.doesNotMatch(projectAgents, /^# JOENESS Interaction Safety Core$/m);
+  const coreV4 = await readFile(
+    path.join(root, "evals", "candidates", "interaction-safety-core-v4.md"),
+    "utf8",
+  );
+  assert.equal(Buffer.byteLength(coreV4, "utf8"), 2047);
+  assert.equal(
+    createHash("sha256").update(coreV4).digest("hex"),
+    "5efd93bc041d328b41a9424b9f5593d90da26fe8263cf4a502894d4fdfc2926b",
+  );
   const coreV2 = await readFile(
     path.join(root, "evals", "candidates", "interaction-safety-core-v2.md"),
     "utf8",
