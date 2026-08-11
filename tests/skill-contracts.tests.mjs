@@ -228,7 +228,11 @@ test('visual-check binds one hypothesis to the exact observed state', () => {
   assert.match(visualCheck, /any required.*fail.*overall fail.*(?:else|otherwise).*unverified.*overall unverified.*(?:else|otherwise).*overall pass.*user.*language/is);
   assert.match(visualCheck, /narrower pass.*(?:after|follow).*never lead.*qualified pass/is);
   assert.match(visualCheck, /per-check record.*sources.*project-provided evidence location.*otherwise.*task result/is);
-  assert.match(visualCheck, /user-facing digest.*exact artifact.*version.*target.*evidence.*(?:link|pointer|check id)/is);
+  assert.match(visualCheck, /do not create.*(?:file|document|check).*solely.*(?:report|reporting)/is);
+  assert.match(visualCheck, /user-facing (?:summary|digest).*overall verdict.*first.*user.*language.*only (?:by )?applicable.*result.*verification.*(?:missing|unverified).*boundary/is);
+  assert.match(visualCheck, /exact artifact\/version.*target.*(?:detailed-record pointer|check ids)/is);
+  assert.match(visualCheck, /no fixed labels.*line count.*empty fields/is);
+  assert.doesNotMatch(visualCheck, /<exact artifact\/version \+ target>.*<localized overall verdict>/is);
   assert.match(evidence, /candidate.*cannot.*acceptance authority.*relationship.*before.*judg.*user-marked.*accepted runtime.*project contract.*target anchor.*not.*authority.*unverified/is);
   assert.match(evidence, /first introduced after viewing.*future.*freeze.*new attempt.*before.*support.*pass/is);
   assert.match(evidence, /self-derived coordinate.*consistency.*not correctness/is);
@@ -249,6 +253,11 @@ test('visual-check binds one hypothesis to the exact observed state', () => {
 test('handoff expands only repeated visual or deployment incidents', () => {
   const handoff = readRoleFile('handoff', 'SKILL.md');
   assert.match(handoff, /last accepted.*build.*deploy.*hash.*next single hypothesis/is);
+  assert.match(handoff, /existing incident.*link.*(?:do not|without).*repeat/is);
+  assert.match(handoff, /only.*observed.*useful.*resum/is);
+  assert.match(handoff, /omit unavailable.*(?:do not|never).*reconstruct/is);
+  assert.match(handoff, /do not (?:run|create|add).*(?:check|document|log).*fill.*handoff/is);
+  assert.doesNotMatch(handoff, /Mark unavailable fields unavailable/is);
 });
 
 test('the five public roles are the exact active manifest skills', () => {

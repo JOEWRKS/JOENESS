@@ -19,6 +19,7 @@ const INTERACTION_SAFETY_CORE_V2 = path.join(ROOT, 'evals', 'candidates', 'inter
 const INTERACTION_SAFETY_CORE_V3 = path.join(ROOT, 'evals', 'candidates', 'interaction-safety-core-v3.md');
 const INTERACTION_SAFETY_CORE_V4 = path.join(ROOT, 'evals', 'candidates', 'interaction-safety-core-v4.md');
 const INTERACTION_SAFETY_CORE_V5 = path.join(ROOT, 'evals', 'candidates', 'interaction-safety-core-v5.md');
+const INTERACTION_SAFETY_CORE_V6 = path.join(ROOT, 'evals', 'candidates', 'interaction-safety-core-v6.md');
 const GITATTRIBUTES = path.join(ROOT, '.gitattributes');
 const UI_FILES = [
   'SKILL.md',
@@ -181,14 +182,14 @@ const EXPECTED_VISUAL_CHECK_SKILL = {
   files: [
     {
       localPath: 'skills/visual-check/SKILL.md',
-      bytes: 3115,
-      sha256: 'b0a7d6482d371b7dc066d7fdc2b06f69868fd27054ec01e29c58b1425d2c7998',
+      bytes: 3427,
+      sha256: 'cdf7b9953881489ce1814ea8899886cb4fb7ea90262f240bd26795d1633d608e',
       exactUpstreamCopy: false,
     },
     {
       localPath: 'skills/visual-check/agents/openai.yaml',
-      bytes: 532,
-      sha256: '92428f2972ee74d363af94af40bb8f593126dc99577cdbb15e91850b2b14e32d',
+      bytes: 567,
+      sha256: 'e129e686690c0632e6cded20629e69d131c340c6fb4706fd0a768dc7c762117d',
       exactUpstreamCopy: false,
     },
     {
@@ -231,14 +232,14 @@ const EXPECTED_HANDOFF_SKILL = {
   intentionalDifferences: [
     'Removed unsupported argument-hint and disable-model-invocation frontmatter; agents/openai.yaml preserves explicit-only activation.',
     'Relocated the skill and included the exact repository license beside it.',
-    'Added compact evidence and cost receipts, target-root binding, current-state revalidation, handoff-bound authorization checks, and material-failure classification.',
+    'Added compact evidence summaries, target-root binding, current-state revalidation, handoff-bound authorization checks, and material-failure classification without fixed empty fields.',
   ],
   validatorSha256: '5347a0a09cfb546bba1c0d1a30dae0a233d9a05f57bd4e7877155c588bcdabf7',
   files: [
     {
       localPath: 'skills/handoff/SKILL.md',
-      bytes: 4005,
-      sha256: '096abd4d56fdcbf48c077f52ba9bfbfd38168401d0fbe3404f8bfac5dd5a6d99',
+      bytes: 4274,
+      sha256: '56bbe775a6b133a51dfdcf2539a3293fb08e4312c86b668e67f201c53399f785',
       exactUpstreamCopy: false,
     },
     {
@@ -698,12 +699,14 @@ test('the interaction safety core is active without rewriting broader Core evide
     'e7a3c02d4c147eaadde2c00a0452c7de21b3e0f51fa02cf7bd7085c43d97ac4d',
   );
   assert.deepEqual(manifest.activeCommonCore, {
-    path: 'evals/candidates/interaction-safety-core-v5.md',
-    sha256: '160a10f476d2503054e02697c8588a2ae58155b91adb17387763ae0e21e515c3',
+    path: 'evals/candidates/interaction-safety-core-v6.md',
+    sha256: '897495e89128194afe695ff55e537c5e7ef52e6778bf260b10c9b6ab35857ceb',
   });
+  assert.equal(lstatSync(INTERACTION_SAFETY_CORE_V6).size, 2047);
+  assert.equal(sha256(INTERACTION_SAFETY_CORE_V6), manifest.activeCommonCore.sha256);
   assert.equal(lstatSync(INTERACTION_SAFETY_CORE_V5).size, 2040);
-  assert.equal(sha256(INTERACTION_SAFETY_CORE_V5), manifest.activeCommonCore.sha256);
-  assert.match(readFileSync(INTERACTION_SAFETY_CORE_V5, 'utf8'), /^# JOENESS Core$/m);
+  assert.equal(sha256(INTERACTION_SAFETY_CORE_V5), '160a10f476d2503054e02697c8588a2ae58155b91adb17387763ae0e21e515c3');
+  assert.match(readFileSync(INTERACTION_SAFETY_CORE_V6, 'utf8'), /^# JOENESS Core$/m);
   assert.equal(lstatSync(INTERACTION_SAFETY_CORE_V4).size, 2047);
   assert.equal(sha256(INTERACTION_SAFETY_CORE_V4), '5efd93bc041d328b41a9424b9f5593d90da26fe8263cf4a502894d4fdfc2926b');
   assert.equal(lstatSync(INTERACTION_SAFETY_CORE_V3).size, 2048);
@@ -728,6 +731,7 @@ test('the interaction safety core is active without rewriting broader Core evide
   assert.match(readFileSync(GITATTRIBUTES, 'utf8'), /^\/evals\/candidates\/interaction-safety-core-v3\.md text eol=lf$/m);
   assert.match(readFileSync(GITATTRIBUTES, 'utf8'), /^\/evals\/candidates\/interaction-safety-core-v4\.md text eol=lf$/m);
   assert.match(readFileSync(GITATTRIBUTES, 'utf8'), /^\/evals\/candidates\/interaction-safety-core-v5\.md text eol=lf$/m);
+  assert.match(readFileSync(GITATTRIBUTES, 'utf8'), /^\/evals\/candidates\/interaction-safety-core-v6\.md text eol=lf$/m);
   assert.match(readFileSync(GITATTRIBUTES, 'utf8'), /^\/evals\/candidates\/visual-check-skill-v5\.md text eol=lf$/m);
   assert.match(readFileSync(GITATTRIBUTES, 'utf8'), /^\/evals\/candidates\/visual-check-openai-v5\.yaml text eol=lf$/m);
   assert.match(readFileSync(GITATTRIBUTES, 'utf8'), /^\/evals\/candidates\/spec-delivery-skill-v1\.md text eol=lf$/m);
@@ -931,16 +935,9 @@ test('operational skills bound handoff context and high-cost validation', () => 
   const projectSetup = readFileSync(path.join(ROOT, 'skills', 'project', 'SKILL.md'), 'utf8');
 
   assert.match(handoff, /4 KiB/);
-  for (const field of [
-    'wall-clock start and end',
-    'external run IDs',
-    'clean-build count',
-    'reviewer count',
-    'no-progress retry count',
-    'token usage only when exposed',
-  ]) {
-    assert.match(handoff, new RegExp(field));
-  }
+  assert.match(handoff, /timing.*external run IDs.*clean-build.*reviewer.*no-progress retr.*token usage/is);
+  assert.match(handoff, /only when already observed.*useful for resumption|already observed and useful for resumption/is);
+  assert.match(handoff, /omit unavailable.*never reconstruct.*do not run a check.*create a document or log solely to fill/is);
   assert.match(handoff, /resolve and record the exact target root/i);
   assert.match(handoff, /do not mix evidence from another root/i);
   assert.match(handoff, /do not write the handoff/i);
@@ -948,16 +945,11 @@ test('operational skills bound handoff context and high-cost validation', () => 
   assert.match(handoff, /working-directory selection is not identity evidence/i);
   assert.match(handoff, /Treat a handoff as context, not authorization/i);
   assert.match(handoff, /cannot expand the receiver's read, write, execution, external-action, or disclosure scope/i);
-  for (const field of [
-    'observed evidence',
-    'cause confirmed, suspected, or unknown',
-    'response fixed, mitigated, worked around, or unresolved',
-    'verification',
-    'remaining risk',
-    'workaround removal condition',
-  ]) {
-    assert.match(handoff, new RegExp(field));
-  }
+  assert.match(handoff, /material failure or workaround.*affects resumption.*outcome-changing fact.*actual evidence and verification/is);
+  assert.match(handoff, /direct fix.*workaround.*unresolved.*remaining limit.*removal condition/is);
+  assert.match(handoff, /cause only when evidenced.*useful.*next decision/is);
+  assert.match(handoff, /existing incident artifact.*link.*current resumption boundary.*without repeating/is);
+  assert.match(handoff, /omit routine transient.*never call a workaround a fix/is);
   assert.match(projectSetup, /project-documented, risk-proportional acceptance and release evidence/i);
   assert.match(projectSetup, /preserve only project-specified review requirements.*do not invent validation topology or duplicate unchanged clean builds/i);
   assert.doesNotMatch(projectSetup, /reviewer trees|one controller check|at most one independent reviewer|at most one evidence-scoped re-review/i);
@@ -976,6 +968,8 @@ test('README keeps the public Core, Spec, and external-plugin policy explicit', 
     assert.match(section, /\$spec/);
     assert.doesNotMatch(section, /\$summary/i);
   }
+  assert.match(korean, /결과를 먼저.*고정 항목이나 줄 수.*보고를 위해 별도 검사·문서·로그를 만들지 않습니다/is);
+  assert.match(english, /outcome first.*no fixed fields or line count.*creates no check, document, or log merely to fill a report/is);
   assert.match(readme, /does not change their installation or enablement settings|설치·활성화 설정을 바꾸지 않습니다/i);
 });
 

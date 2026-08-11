@@ -30,6 +30,9 @@ function Test-ReadmeContract {
     $koreanFirstUse = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('7LKY7J2MIOyCrOyaqTogNeuLqOqzhA=='))
     $koreanRoles = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('7Jet7ZWg'))
     $koreanCompatibility = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('7Zi47ZmYIOydtOumhA=='))
+    $koreanOutcomeFirst = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('6rKw6rO866W8IOuovOyggA=='))
+    $koreanNoFixedFields = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('6rOg7KCVIO2VreuqqeydtOuCmCDspIQg7IiY'))
+    $koreanNoReportFiller = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('67O06rOg66W8IOychO2VtCDrs4Trj4Qg6rKA7IKswrfrrLjshJzCt+uhnOq3uOulvCDrp4zrk6Tsp4Ag7JWK7Iq164uI64ukLg=='))
 
     function Get-ReadmeSubsection {
         param([string] $Text, [string] $Heading)
@@ -61,6 +64,11 @@ function Test-ReadmeContract {
         Assert-True ($section -match '(?is)UI UX Pro Max.{0,120}Apple Design.{0,120}\$design') "$language guide describes design references"
         Assert-True ($section.Contains('JOENESS Core')) "$language guide uses the public Core name"
         Assert-True ($section.Contains('model routing') -or $section.Contains($koreanModelRouting)) "$language guide explains that implicit skill selection is model routing"
+        if ($language -eq 'English') {
+            Assert-True ($section.Contains('outcome first') -and $section.Contains('no fixed fields or line count') -and $section.Contains('creates no check, document, or log merely to fill a report')) "$language guide explains adaptive outcome-first reporting"
+        } else {
+            Assert-True ($section.Contains($koreanOutcomeFirst) -and $section.Contains($koreanNoFixedFields) -and $section.Contains($koreanNoReportFiller)) "$language guide explains adaptive outcome-first reporting"
+        }
         Assert-True ($section -match '(?is)Figma.{0,160}conditional') "$language guide makes Figma conditional"
         Assert-True ($section -match '(?is)Superpowers.{0,160}explicit-only') "$language guide makes Superpowers explicit-only"
         Assert-True ($section -match '(?is)Ponytail.{0,160}default disabled') "$language guide makes Ponytail default disabled"

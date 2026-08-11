@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "release": {"name":"JOENESS","version":"0.1","entrypoint":"JOENESS.ps1"},
-  "activeCommonCore": {"path":"evals/candidates/interaction-safety-core-v5.md","sha256":"160a10f476d2503054e02697c8588a2ae58155b91adb17387763ae0e21e515c3"},
+  "activeCommonCore": {"path":"evals/candidates/interaction-safety-core-v6.md","sha256":"897495e89128194afe695ff55e537c5e7ef52e6778bf260b10c9b6ab35857ceb"},
   "evaluation": {
     "state": "candidate",
     "tests": ["tests/design-vendor-integrity.tests.mjs", "tests/thin-hybrid-core.tests.mjs", "tests/skill-contracts.tests.mjs", "vendor/ui-ux-pro-max/scripts/validate_data.py", "vendor/ui-ux-pro-max/scripts/tests/test_core.py"],
@@ -163,10 +163,10 @@
         "upstreamPath": "skills/productivity/handoff",
         "license": {"name":"MIT","upstreamPath":"LICENSE","localPath":"skills/handoff/LICENSE","sha256":"0e7ac423bf2c6e223b7c5b156f8cf72da49d748e56a1641402c31f22ad07dbb5"}
       },
-      "intentionalDifferences": ["Removed unsupported argument-hint and disable-model-invocation frontmatter; agents/openai.yaml preserves explicit-only activation.", "Relocated the skill and included the exact repository license beside it.", "Added compact evidence and cost receipts, target-root binding, current-state revalidation, handoff-bound authorization checks, and material-failure classification."],
+      "intentionalDifferences": ["Removed unsupported argument-hint and disable-model-invocation frontmatter; agents/openai.yaml preserves explicit-only activation.", "Relocated the skill and included the exact repository license beside it.", "Added compact evidence summaries, target-root binding, current-state revalidation, handoff-bound authorization checks, and material-failure classification without fixed empty fields."],
       "validatorSha256": "5347a0a09cfb546bba1c0d1a30dae0a233d9a05f57bd4e7877155c588bcdabf7",
       "files": [
-        {"localPath":"skills/handoff/SKILL.md","bytes":4005,"sha256":"096abd4d56fdcbf48c077f52ba9bfbfd38168401d0fbe3404f8bfac5dd5a6d99","exactUpstreamCopy":false},
+        {"localPath":"skills/handoff/SKILL.md","bytes":4274,"sha256":"56bbe775a6b133a51dfdcf2539a3293fb08e4312c86b668e67f201c53399f785","exactUpstreamCopy":false},
         {"localPath":"skills/handoff/agents/openai.yaml","bytes":141,"sha256":"5c479fd562c691851690e8b18c8501045bef0943c10743d636b2fae26add1d28","exactUpstreamCopy":true},
         {"localPath":"skills/handoff/LICENSE","bytes":1068,"sha256":"0e7ac423bf2c6e223b7c5b156f8cf72da49d748e56a1641402c31f22ad07dbb5","exactUpstreamCopy":true}
       ]
@@ -204,8 +204,8 @@
       "intentionalDifferences": ["Compact visual-completion router with always-required durable evidence and conditional defect or translation references.", "Local OpenAI product metadata."],
       "validatorSha256": "5347a0a09cfb546bba1c0d1a30dae0a233d9a05f57bd4e7877155c588bcdabf7",
       "files": [
-        {"localPath":"skills/visual-check/SKILL.md","bytes":3115,"sha256":"b0a7d6482d371b7dc066d7fdc2b06f69868fd27054ec01e29c58b1425d2c7998","exactUpstreamCopy":false},
-        {"localPath":"skills/visual-check/agents/openai.yaml","bytes":532,"sha256":"92428f2972ee74d363af94af40bb8f593126dc99577cdbb15e91850b2b14e32d","exactUpstreamCopy":false},
+        {"localPath":"skills/visual-check/SKILL.md","bytes":3427,"sha256":"cdf7b9953881489ce1814ea8899886cb4fb7ea90262f240bd26795d1633d608e","exactUpstreamCopy":false},
+        {"localPath":"skills/visual-check/agents/openai.yaml","bytes":567,"sha256":"e129e686690c0632e6cded20629e69d131c340c6fb4706fd0a768dc7c762117d","exactUpstreamCopy":false},
         {"localPath":"skills/visual-check/references/concrete-defect.md","bytes":646,"sha256":"8d16f895a6e40e4325139de00c4d547aca7f9228913495237348ac77df51d2c6","exactUpstreamCopy":false},
         {"localPath":"skills/visual-check/references/approved-reference.md","bytes":1040,"sha256":"44ad3edecfbda7639a13324aeaadd9ca581aa5379c105fdf6c2dba806274a424","exactUpstreamCopy":false},
         {"localPath":"skills/visual-check/references/durable-evidence.md","bytes":3056,"sha256":"bc543ab07c275a12d0c110f839562f9e5884f97281920dae38fe55c0a402a1cd","exactUpstreamCopy":false}

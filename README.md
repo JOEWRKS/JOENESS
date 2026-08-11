@@ -10,6 +10,8 @@ JOENESS는 Windows용 Codex 작업환경입니다. 프로젝트 맥락, UI/UX �
 
 **JOENESS Core**는 모든 작업에서 보이는 얇은 안전 규칙입니다. 정상 작업에는 별도 보고 양식을 만들지 않고, 시각 결과나 영구 명세가 실제로 생긴 경우에만 알맞은 스킬로 넘깁니다.
 
+보고할 때는 목표와 성공 조건, 중요한 작업 방식이나 변경, 완료·부분 완료·차단 상태, 직접 해결·우회·미해결 상태, 실제 결과와 검증, 남은 경계를 내부적으로 구분합니다. 사용자에게는 결과를 먼저 말하고 해당하는 내용만 자연스럽게 전달합니다. 고정 항목이나 줄 수를 강제하지 않으며, 빈칸을 채우거나 보고를 위해 별도 검사·문서·로그를 만들지 않습니다.
+
 ### 처음 사용: 5단계
 
 1. 받은 ZIP을 **전체 압축 해제**합니다. `JOENESS.ps1`만 따로 옮기지 마세요.
@@ -78,6 +80,8 @@ powershell.exe -NoProfile -File .\JOENESS.ps1 -Remove
 JOENESS is a Windows Codex work environment. It helps with project context, UI/UX design, visual-result checks, specification summaries, and handoffs only when a task needs them.
 
 **JOENESS Core** is the thin safety instruction visible in every task. It adds no special report format to clean work and routes only an actual visual result or persistent-specification delivery to the applicable skill.
+
+For reporting, it internally separates the goal and success criteria, material method or deviation, complete/partial/blocked outcome, direct fix/workaround/unresolved handling, actual result and verification, and remaining boundary. It tells the user the outcome first and includes only applicable facts in natural prose. It imposes no fixed fields or line count and creates no check, document, or log merely to fill a report.
 
 ### First use: five steps
 
