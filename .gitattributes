@@ -40,4 +40,6 @@
 /skills/design/** text eol=lf
 /skills/visual-check/** text eol=lf
 /evals/skill-contracts/*.json text eol=lf
+/evals/skill-contracts/visual-verdict-pressure-v*-raw.md text eol=lf
+/evals/skill-contracts/fixtures/** binary
 vendor/** -text

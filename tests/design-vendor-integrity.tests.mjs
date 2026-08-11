@@ -178,14 +178,14 @@ const EXPECTED_VISUAL_CHECK_SKILL = {
   files: [
     {
       localPath: 'skills/visual-check/SKILL.md',
-      bytes: 5036,
-      sha256: '576086766efeba9e3e879bffc89e2fbcbb25c1356d828bbccedb92834e6ae349',
+      bytes: 7290,
+      sha256: 'a90a23f72b48581a65a3ba30e2fa7b3592a64d30506d7c4122754323e568e1bf',
       exactUpstreamCopy: false,
     },
     {
       localPath: 'skills/visual-check/agents/openai.yaml',
-      bytes: 717,
-      sha256: '2de2948af8bb491e049515d90af0e19b5ef2b3e5e6458f7c8a4a277b1058ff9e',
+      bytes: 1114,
+      sha256: '564320118d97ade92d8645c92bf08026694662c0a47979cb4ea4bce745e67ee8',
       exactUpstreamCopy: false,
     },
   ],
@@ -272,13 +272,75 @@ const EXPECTED_HYBRID_EVALUATION = {
   semanticImprovement: 'not-asserted',
   promotionPass: false,
 };
-const EXPECTED_CURRENT_EVALUATION = {
+const EXPECTED_SKILL_CONTRACT_V2 = {
   mode: 'active-skill-contract-v2',
   version: 2,
   state: 'unvalidated',
   cases: {
     path: 'evals/skill-contracts/cases-v2.json',
     sha256: '5f0b06d4041ff276967c49cbf17d110ff0942db900e94eeac9c2dac2421a040b',
+  },
+  hardGate: 'unverified',
+  classification: 'candidate',
+  outcomeReview: 'pending',
+  semanticImprovement: 'not-asserted',
+  promotionPass: false,
+};
+const EXPECTED_SKILL_CONTRACT_V3_REJECTED = {
+  mode: 'active-skill-contract-v3',
+  version: 3,
+  state: 'semantic-review-rejected',
+  cases: {
+    path: 'evals/skill-contracts/cases-v3.json',
+    sha256: '6067437488db01ce3660f4df7ff97d3b45bfed17b94812f3a4c3851557243a9f',
+  },
+  pressureEvidence: {
+    path: 'evals/skill-contracts/visual-verdict-pressure-v3.json',
+    sha256: 'd0b22bcdd34f3bedb7b6a9db90ab156ce4eb877e1b142858bd77fd6168104d0d',
+  },
+  rawEvidence: {
+    path: 'evals/skill-contracts/visual-verdict-pressure-v3-raw.md',
+    sha256: '91fb643ad327ddff8ccb3180d8fd00377476405adc87c4dfd35d5e77fa0a9979',
+  },
+  hardGate: 'failed-semantic-review',
+  classification: 'semantic-review-rejected',
+  outcomeReview: 'failed',
+  semanticImprovement: 'not-asserted',
+  promotionPass: false,
+};
+const EXPECTED_SKILL_CONTRACT_V4_REJECTED = {
+  mode: 'active-skill-contract-v4',
+  version: 4,
+  state: 'semantic-review-rejected',
+  cases: {
+    path: 'evals/skill-contracts/cases-v4.json',
+    sha256: '4bc1005c00129cb478703aaae9edf030dfad211ead7660d220c45f3768c836c3',
+  },
+  pressureEvidence: {
+    path: 'evals/skill-contracts/visual-verdict-pressure-v4.json',
+    sha256: '7af70b6048985cedfae82b8122c75d1ed76a376c4283be9aacb22fb4c2d14d2e',
+  },
+  rawEvidence: {
+    path: 'evals/skill-contracts/visual-verdict-pressure-v4-raw.md',
+    sha256: '95bfca841a49c22e2697f044d850c5515557c5f8da7f0f1a18a6aaf0841ededd',
+  },
+  hardGate: 'failed-semantic-review',
+  classification: 'semantic-review-rejected',
+  outcomeReview: 'failed',
+  semanticImprovement: 'not-asserted',
+  promotionPass: false,
+};
+const EXPECTED_CURRENT_EVALUATION = {
+  mode: 'active-skill-contract-v5',
+  version: 5,
+  state: 'unvalidated',
+  cases: {
+    path: 'evals/skill-contracts/cases-v4.json',
+    sha256: '4bc1005c00129cb478703aaae9edf030dfad211ead7660d220c45f3768c836c3',
+  },
+  pressureEvidence: {
+    path: 'evals/skill-contracts/visual-verdict-pressure-v5.json',
+    sha256: 'e1dec17c021bbb9fb68dd562d67b6c00dce5cb9e6e387918366fe15c8fe347ee',
   },
   hardGate: 'unverified',
   classification: 'candidate',
@@ -557,7 +619,7 @@ test('candidate ledger separates the unvalidated active contract from retained h
   const manifest = JSON.parse(readFileSync(MANIFEST, 'utf8'));
   const current = manifest.evaluation.current;
   assert.deepEqual(current, EXPECTED_CURRENT_EVALUATION);
-  assert.deepEqual(manifest.evaluation.history, [EXPECTED_HYBRID_EVALUATION]);
+  assert.deepEqual(manifest.evaluation.history, [EXPECTED_HYBRID_EVALUATION, EXPECTED_SKILL_CONTRACT_V2, EXPECTED_SKILL_CONTRACT_V3_REJECTED, EXPECTED_SKILL_CONTRACT_V4_REJECTED]);
 
   for (const [name, expected] of Object.entries(EXPECTED_SOURCE_EVALUATION)) {
     assert.equal(manifest.sources[name].evaluationStatus, expected.evaluationStatus);
@@ -566,10 +628,91 @@ test('candidate ledger separates the unvalidated active contract from retained h
 
   const [historical] = manifest.evaluation.history;
   const v1Cases = path.join(ROOT, 'evals', 'skill-contracts', 'cases.json');
+  const v2Cases = path.join(ROOT, 'evals', 'skill-contracts', 'cases-v2.json');
   assert.equal(lstatSync(v1Cases).size, 1664);
   assert.equal(sha256(v1Cases), '6f2148c44e5565563a71c850ab66fd78c5261402f375e927e20b9e2509779f81');
-  assert.equal(lstatSync(path.join(ROOT, ...current.cases.path.split('/'))).size, 4353);
+  assert.equal(lstatSync(v2Cases).size, 4353);
+  assert.equal(sha256(v2Cases), EXPECTED_SKILL_CONTRACT_V2.cases.sha256);
+  const v3Cases = path.join(ROOT, ...EXPECTED_SKILL_CONTRACT_V3_REJECTED.cases.path.split('/'));
+  const v3Pressure = path.join(ROOT, ...EXPECTED_SKILL_CONTRACT_V3_REJECTED.pressureEvidence.path.split('/'));
+  const v3Raw = path.join(ROOT, ...EXPECTED_SKILL_CONTRACT_V3_REJECTED.rawEvidence.path.split('/'));
+  assert.equal(lstatSync(v3Cases).size, 7112);
+  assert.equal(sha256(v3Cases), EXPECTED_SKILL_CONTRACT_V3_REJECTED.cases.sha256);
+  assert.equal(lstatSync(v3Pressure).size, 7440);
+  assert.equal(sha256(v3Pressure), EXPECTED_SKILL_CONTRACT_V3_REJECTED.pressureEvidence.sha256);
+  assert.equal(lstatSync(v3Raw).size, 13987);
+  assert.equal(sha256(v3Raw), EXPECTED_SKILL_CONTRACT_V3_REJECTED.rawEvidence.sha256);
+  const v4Pressure = path.join(ROOT, ...EXPECTED_SKILL_CONTRACT_V4_REJECTED.pressureEvidence.path.split('/'));
+  const v4Raw = path.join(ROOT, ...EXPECTED_SKILL_CONTRACT_V4_REJECTED.rawEvidence.path.split('/'));
+  assert.equal(lstatSync(v4Pressure).size, 8427);
+  assert.equal(sha256(v4Pressure), EXPECTED_SKILL_CONTRACT_V4_REJECTED.pressureEvidence.sha256);
+  assert.equal(lstatSync(v4Raw).size, 14333);
+  assert.equal(sha256(v4Raw), EXPECTED_SKILL_CONTRACT_V4_REJECTED.rawEvidence.sha256);
+  assert.equal(lstatSync(path.join(ROOT, ...current.cases.path.split('/'))).size, 8771);
   assert.equal(sha256(path.join(ROOT, ...current.cases.path.split('/'))), current.cases.sha256);
+  const pressurePath = path.join(ROOT, ...current.pressureEvidence.path.split('/'));
+  assert.equal(lstatSync(pressurePath).size, 6107);
+  assert.equal(sha256(pressurePath), current.pressureEvidence.sha256);
+  const pressure = JSON.parse(readFileSync(pressurePath, 'utf8'));
+  assert.equal(pressure.classification, 'candidate-pressure-sample-pass');
+  assert.equal(pressure.promotionPass, false);
+  assert.equal(pressure.supersedes.disposition, 'semantic-review-rejected');
+  assert.equal(pressure.supersedes.reasons.length, 2);
+  assert.equal(pressure.supersedes.cases.sha256, EXPECTED_SKILL_CONTRACT_V4_REJECTED.cases.sha256);
+  assert.equal(pressure.supersedes.pressureEvidence.sha256, EXPECTED_SKILL_CONTRACT_V4_REJECTED.pressureEvidence.sha256);
+  assert.equal(pressure.supersedes.rawEvidence.sha256, EXPECTED_SKILL_CONTRACT_V4_REJECTED.rawEvidence.sha256);
+  assert.equal(pressure.finalCandidate.skillSha256, EXPECTED_VISUAL_CHECK_SKILL.files[0].sha256);
+  assert.equal(pressure.finalCandidate.metadataSha256, EXPECTED_VISUAL_CHECK_SKILL.files[1].sha256);
+  assert.equal(pressure.finalCandidate.casesSha256, current.cases.sha256);
+  const rawPath = path.join(ROOT, ...pressure.rawEvidence.path.split('/'));
+  assert.equal(lstatSync(rawPath).size, 19133);
+  assert.equal(sha256(rawPath), pressure.rawEvidence.sha256);
+  const raw = readFileSync(rawPath, 'utf8');
+  const samples = pressure.finalCandidate.samples;
+  assert.equal(samples.length, 5);
+  assert.equal(new Set(samples.map((sample) => sample.sampleId)).size, 5);
+  assert.deepEqual(pressure.finalCandidate.sharedOutcome, {
+    overall: 'unverified-first-korean',
+    authorityBoundNarrowPass: 'tracked-approved-source-only',
+    relationship: 'unverified-no-authority',
+    representatives: 'separate-representative-required-not-prepassed',
+    bulkAndInGame: 'blocked-or-unverified',
+    explicitAssetContract: 'pass-without-runtime-overreach',
+    overwriteControl: 'requires-old-verdict-invalidation-byte-preserved-new-evidence-recheck',
+    visibleFailure: 'fail-first-korean',
+    postViewCriterion: 'future-only-new-attempt',
+    noCriteriaAsset: 'unverified-no-candidate-derived-pass',
+    candidateSelfLabel: 'unverified-not-authority',
+  });
+  for (const sample of samples) {
+    assert.equal(sample.rawSection, sample.sampleId);
+    const heading = `## ${sample.rawSection}`;
+    const start = raw.indexOf(heading);
+    assert.notEqual(start, -1, `missing raw section ${sample.rawSection}`);
+    const next = raw.indexOf('\n## ', start + heading.length);
+    const section = raw.slice(start, next === -1 ? raw.length : next);
+    assert.match(section, /A\.[\s\S]{0,80}(?:UNVERIFIED|미검증)/, `${sample.sampleId} A verdict`);
+    assert.match(section, /B\.[\s\S]{0,80}(?:PASS|합격|통과)/, `${sample.sampleId} B verdict`);
+    assert.match(section, /C\.[\s\S]{0,80}(?:무효|invalid)/i, `${sample.sampleId} C verdict`);
+    assert.match(section, /D\.[\s\S]{0,80}(?:FAIL|실패)/, `${sample.sampleId} D verdict`);
+    assert.match(section, /E\.[\s\S]{0,120}(?:UNVERIFIED|미검증|PASS 불가)/, `${sample.sampleId} E verdict`);
+    assert.match(section, /F\.[\s\S]{0,120}(?:UNVERIFIED|미검증|PASS 불가)/, `${sample.sampleId} F verdict`);
+    assert.match(section, /G\.[\s\S]{0,120}(?:UNVERIFIED|미검증|PASS 불가)/, `${sample.sampleId} G verdict`);
+    assert.match(section, /C\.[\s\S]{0,350}(?:새 시도별 프로젝트 경로|콘텐츠 주소)/, `${sample.sampleId} C evidence preservation`);
+    assert.match(section, /F\.[\s\S]{0,350}(?:합격 기준|출처 있는)[\s\S]{0,250}(?:될 수 없다|만들 수 없다|PASS 불가|PASS.*없)/, `${sample.sampleId} F no candidate-derived pass`);
+    assert.match(section, /G\.[\s\S]{0,350}User authority[\s\S]{0,250}(?:승인 권위|증거가 아니다|권위가 될 수 없다|PASS.*불가)/, `${sample.sampleId} G candidate label rejected`);
+  }
+  assert.match(raw, /Git 추적된 사용자 승인 4방향 총기 원본/);
+  assert.match(raw, /reference-comparison\.png.*character-scale\.png.*후보 출력물/s);
+  assert.match(raw, /32×32 캔버스.*비투명 픽셀.*총열은 오른쪽/s);
+  assert.match(raw, /합격 기준이 없다.*후보에서 발견한 특징만으로/s);
+  assert.equal(pressure.evidence.filter((entry) => entry.role === 'user-approved-four-direction-authority' && entry.sourceTracked).length, 1);
+  assert.equal(pressure.evidence.filter((entry) => entry.role === 'candidate-comparison-not-authority' && !entry.sourceTracked).length, 1);
+  for (const evidence of pressure.evidence) {
+    const fixture = path.join(ROOT, ...evidence.fixturePath.split('/'));
+    assert.equal(lstatSync(fixture).size, evidence.bytes);
+    assert.equal(sha256(fixture), evidence.sha256);
+  }
   for (const [key, evidence] of Object.entries({
     artifact: historical.artifact,
     collector: historical.collector,
@@ -656,6 +799,8 @@ test('Git preserves exact vendor and active skill bytes on checkout', () => {
   assert.match(readFileSync(GITATTRIBUTES, 'utf8'), /^\/skills\/project\/\*\* text eol=lf$/m);
   assert.match(readFileSync(GITATTRIBUTES, 'utf8'), /^\/skills\/design\/\*\* text eol=lf$/m);
   assert.match(readFileSync(GITATTRIBUTES, 'utf8'), /^\/skills\/visual-check\/\*\* text eol=lf$/m);
+  assert.match(readFileSync(GITATTRIBUTES, 'utf8'), /^\/evals\/skill-contracts\/visual-verdict-pressure-v\*-raw\.md text eol=lf$/m);
+  assert.match(readFileSync(GITATTRIBUTES, 'utf8'), /^\/evals\/skill-contracts\/fixtures\/\*\* binary$/m);
   assert.match(readFileSync(GITATTRIBUTES, 'utf8'), /^\/evals\/skill-contracts\/\*\.json text eol=lf$/m);
   assert.match(readFileSync(GITATTRIBUTES, 'utf8'), /^vendor\/\*\* -text$/m);
 });

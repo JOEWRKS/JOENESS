@@ -6,10 +6,11 @@
     "state": "candidate",
     "tests": ["tests/design-vendor-integrity.tests.mjs", "tests/thin-hybrid-core.tests.mjs", "tests/skill-contracts.tests.mjs", "vendor/ui-ux-pro-max/scripts/validate_data.py", "vendor/ui-ux-pro-max/scripts/tests/test_core.py"],
     "current": {
-      "mode": "active-skill-contract-v2",
-      "version": 2,
+      "mode": "active-skill-contract-v5",
+      "version": 5,
       "state": "unvalidated",
-      "cases": {"path":"evals/skill-contracts/cases-v2.json","sha256":"5f0b06d4041ff276967c49cbf17d110ff0942db900e94eeac9c2dac2421a040b"},
+      "cases": {"path":"evals/skill-contracts/cases-v4.json","sha256":"4bc1005c00129cb478703aaae9edf030dfad211ead7660d220c45f3768c836c3"},
+      "pressureEvidence": {"path":"evals/skill-contracts/visual-verdict-pressure-v5.json","sha256":"e1dec17c021bbb9fb68dd562d67b6c00dce5cb9e6e387918366fe15c8fe347ee"},
       "hardGate": "unverified",
       "classification": "candidate",
       "outcomeReview": "pending",
@@ -33,6 +34,40 @@
       "classification": "implicit-unverified",
       "hardGate": "pass",
       "outcomeReview": "human-review-required",
+      "semanticImprovement": "not-asserted",
+      "promotionPass": false
+    }, {
+      "mode": "active-skill-contract-v2",
+      "version": 2,
+      "state": "unvalidated",
+      "cases": {"path":"evals/skill-contracts/cases-v2.json","sha256":"5f0b06d4041ff276967c49cbf17d110ff0942db900e94eeac9c2dac2421a040b"},
+      "hardGate": "unverified",
+      "classification": "candidate",
+      "outcomeReview": "pending",
+      "semanticImprovement": "not-asserted",
+      "promotionPass": false
+    }, {
+      "mode": "active-skill-contract-v3",
+      "version": 3,
+      "state": "semantic-review-rejected",
+      "cases": {"path":"evals/skill-contracts/cases-v3.json","sha256":"6067437488db01ce3660f4df7ff97d3b45bfed17b94812f3a4c3851557243a9f"},
+      "pressureEvidence": {"path":"evals/skill-contracts/visual-verdict-pressure-v3.json","sha256":"d0b22bcdd34f3bedb7b6a9db90ab156ce4eb877e1b142858bd77fd6168104d0d"},
+      "rawEvidence": {"path":"evals/skill-contracts/visual-verdict-pressure-v3-raw.md","sha256":"91fb643ad327ddff8ccb3180d8fd00377476405adc87c4dfd35d5e77fa0a9979"},
+      "hardGate": "failed-semantic-review",
+      "classification": "semantic-review-rejected",
+      "outcomeReview": "failed",
+      "semanticImprovement": "not-asserted",
+      "promotionPass": false
+    }, {
+      "mode": "active-skill-contract-v4",
+      "version": 4,
+      "state": "semantic-review-rejected",
+      "cases": {"path":"evals/skill-contracts/cases-v4.json","sha256":"4bc1005c00129cb478703aaae9edf030dfad211ead7660d220c45f3768c836c3"},
+      "pressureEvidence": {"path":"evals/skill-contracts/visual-verdict-pressure-v4.json","sha256":"7af70b6048985cedfae82b8122c75d1ed76a376c4283be9aacb22fb4c2d14d2e"},
+      "rawEvidence": {"path":"evals/skill-contracts/visual-verdict-pressure-v4-raw.md","sha256":"95bfca841a49c22e2697f044d850c5515557c5f8da7f0f1a18a6aaf0841ededd"},
+      "hardGate": "failed-semantic-review",
+      "classification": "semantic-review-rejected",
+      "outcomeReview": "failed",
       "semanticImprovement": "not-asserted",
       "promotionPass": false
     }]
@@ -126,8 +161,8 @@
       "intentionalDifferences": ["Concrete visual-verification and approved-reference translation contract.", "Local OpenAI product metadata."],
       "validatorSha256": "5347a0a09cfb546bba1c0d1a30dae0a233d9a05f57bd4e7877155c588bcdabf7",
       "files": [
-        {"localPath":"skills/visual-check/SKILL.md","bytes":5036,"sha256":"576086766efeba9e3e879bffc89e2fbcbb25c1356d828bbccedb92834e6ae349","exactUpstreamCopy":false},
-        {"localPath":"skills/visual-check/agents/openai.yaml","bytes":717,"sha256":"2de2948af8bb491e049515d90af0e19b5ef2b3e5e6458f7c8a4a277b1058ff9e","exactUpstreamCopy":false}
+        {"localPath":"skills/visual-check/SKILL.md","bytes":7290,"sha256":"a90a23f72b48581a65a3ba30e2fa7b3592a64d30506d7c4122754323e568e1bf","exactUpstreamCopy":false},
+        {"localPath":"skills/visual-check/agents/openai.yaml","bytes":1114,"sha256":"564320118d97ade92d8645c92bf08026694662c0a47979cb4ea4bce745e67ee8","exactUpstreamCopy":false}
       ]
     }
   },
