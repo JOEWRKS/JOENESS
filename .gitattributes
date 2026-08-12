@@ -39,6 +39,7 @@
 /evals/coding/results/*.json text eol=lf
 /evals/experiments/*.json text eol=lf
 /evals/experiments/joeness-ticket-m1-*.md text eol=lf
+/evals/experiments/joeness-ticket-m1b-*.md text eol=lf
 /evals/fixtures/ticket-m1b/** text eol=lf
 /evals/p0/*.json text eol=lf
 /evals/reviews/*.json text eol=lf

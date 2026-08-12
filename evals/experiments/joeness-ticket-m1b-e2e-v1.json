@@ -1,0 +1,189 @@
+{
+  "schemaVersion": 1,
+  "mode": "joeness-ticket-m1b-rework-stop-e2e",
+  "recordedAt": "2026-08-12T10:15:21.8472952Z",
+  "base": {
+    "sha": "6b9dd05bfd83a7471741c4b501a91e8c7458752e",
+    "tree": "6fd96577ee9720c893140236d096127a399519ca",
+    "pmStayedAtBaseThroughVerdicts": true,
+    "trackerSha256": "736ba19c4d8b978baba93a9f2403daf79badbd586ea577d6c8761ab6287c0098",
+    "ticketSkillSha256": "1c783553bbc3a0bd0b7e8a1dd376ee912ef00840670e06fa4945bde1ab78211f",
+    "checkerSha256": "4bea3847cee310a2ad41df43625ed01196295909d660cb8ed7f930b96defbe35",
+    "faultSeedSha256": "a250b2290065c64a88478c2d9f0b9ea0d021cdd9c307deb94e248518feebb7a7",
+    "fixtureTestSha256": "fda07cb6de878800085d6e784f475a2e808a317636dd773c86f2949d7c9c7051",
+    "criteria": ["target-ready", "guard-stable", "evidence-present"]
+  },
+  "roles": {
+    "normalImplementer": {
+      "task": "m1b_normal_implementer",
+      "forkTurns": "none",
+      "automaticReworkTurns": 1,
+      "automaticReworkLimit": 1
+    },
+    "fixtureController": {
+      "task": "m1b_fault_controller",
+      "forkTurns": "none",
+      "isProductImplementer": false
+    },
+    "evaluators": [
+      "m1b_eval_normal",
+      "m1b_eval_fault",
+      "m1b_eval_pass",
+      "m1b_eval_noop",
+      "m1b_eval_repeat_v2",
+      "m1b_eval_missing"
+    ],
+    "everyEvaluatorForkTurns": "none",
+    "implementerOrControllerNarrativeWithheldUntilFirstVerdict": "unverified",
+    "storedEvaluatorPromptBodiesReadableByHistoryAuditor": false
+  },
+  "candidates": [
+    {
+      "id": "c1-normal",
+      "sha": "6de8e690856ffae891d37dbb3abc6d2f37650791",
+      "tree": "0adb7f5aaf0818e6262ccbd3c1f06490e84aae92",
+      "parent": "6b9dd05bfd83a7471741c4b501a91e8c7458752e",
+      "remoteRef": "refs/heads/codex/ticket-m1b-normal",
+      "changed": ["A evals/fixtures/ticket-m1b/candidate.json", "A evals/fixtures/ticket-m1b/evidence.json"],
+      "evaluator": "m1b_eval_normal",
+      "criteria": {"target-ready": "PASS", "guard-stable": "PASS", "evidence-present": "PASS"},
+      "verdict": "ACCEPTED",
+      "focused": {"passed": 3, "failed": 0},
+      "fullNode": {"passed": 240, "failed": 0},
+      "observedStateUnchanged": true,
+      "generatedOrIgnoredStateVerified": true
+    },
+    {
+      "id": "c2-controlled-fault",
+      "sha": "b399205ed2e89da368a554b9caeab33fb84f8698",
+      "tree": "5931633a96bd151ec6bd4d7d2ad45219f85f6bc1",
+      "parent": "6de8e690856ffae891d37dbb3abc6d2f37650791",
+      "remoteRef": "refs/heads/codex/ticket-m1b-fault",
+      "changed": ["M evals/fixtures/ticket-m1b/candidate.json#/target"],
+      "invalidatedVerdictFor": "6de8e690856ffae891d37dbb3abc6d2f37650791",
+      "evaluator": "m1b_eval_fault",
+      "criteria": {"target-ready": "FAIL", "guard-stable": "PASS", "evidence-present": "PASS"},
+      "failedIds": ["target-ready"],
+      "verdict": "REWORK",
+      "focused": {"passed": 8, "failed": 0},
+      "fullNode": {"passed": 240, "failed": 0},
+      "observedStateUnchanged": true,
+      "generatedOrIgnoredStateVerified": "unverified"
+    },
+    {
+      "id": "c3-successful-rework",
+      "sha": "ceacba63354fba223428e112d367327b32c706a0",
+      "tree": "0adb7f5aaf0818e6262ccbd3c1f06490e84aae92",
+      "parent": "b399205ed2e89da368a554b9caeab33fb84f8698",
+      "remoteRef": "refs/heads/codex/ticket-m1b-rework",
+      "changed": ["M evals/fixtures/ticket-m1b/candidate.json#/target"],
+      "reworkRound": 1,
+      "reworkLimitedToFailedIds": true,
+      "invalidatedVerdictFor": "b399205ed2e89da368a554b9caeab33fb84f8698",
+      "evaluator": "m1b_eval_pass",
+      "criteria": {"target-ready": "PASS", "guard-stable": "PASS", "evidence-present": "PASS"},
+      "verdict": "ACCEPTED",
+      "focused": {"passed": 8, "failed": 0},
+      "fullNode": {"passed": 240, "failed": 0},
+      "observedStateUnchanged": true,
+      "generatedOrIgnoredStateVerified": "unverified"
+    },
+    {
+      "id": "c3-unchanged-control",
+      "sha": "409ee785f09eed2ab6c9e390c9c9de3fb304692a",
+      "tree": "5931633a96bd151ec6bd4d7d2ad45219f85f6bc1",
+      "parent": "b399205ed2e89da368a554b9caeab33fb84f8698",
+      "remoteRef": "refs/heads/codex/ticket-m1b-noop",
+      "treeEqualsParent": true,
+      "changed": [],
+      "reworkRound": 1,
+      "evaluator": "m1b_eval_noop",
+      "criteria": {"target-ready": "FAIL", "guard-stable": "PASS", "evidence-present": "PASS"},
+      "failedIds": ["target-ready"],
+      "checkerState": "REWORK",
+      "finalState": "USER_DECISION",
+      "furtherAutomaticAttemptAllowed": false,
+      "observedStateUnchanged": true,
+      "generatedOrIgnoredStateVerified": "unverified"
+    },
+    {
+      "id": "c3-repeated-failure-control",
+      "sha": "7111f1ce9c4132e3d0d4cf932e9a8a4691eb9b1b",
+      "tree": "a07e32eb50c808b94f408cfd8392281150659e43",
+      "parent": "b399205ed2e89da368a554b9caeab33fb84f8698",
+      "remoteRef": "refs/heads/codex/ticket-m1b-repeat",
+      "treeEqualsParent": false,
+      "changed": ["M evals/fixtures/ticket-m1b/candidate.json#/target"],
+      "reworkRound": 1,
+      "evaluator": "m1b_eval_repeat_v2",
+      "criteria": {"target-ready": "FAIL", "guard-stable": "PASS", "evidence-present": "PASS"},
+      "failedIds": ["target-ready"],
+      "checkerState": "REWORK",
+      "finalState": "USER_DECISION",
+      "furtherAutomaticAttemptAllowed": false,
+      "observedStateUnchanged": true,
+      "generatedOrIgnoredStateVerified": "unverified"
+    },
+    {
+      "id": "missing-evidence-control",
+      "sha": "e9069c3c83b987a09560e52033337a9a393a09df",
+      "tree": "74f5caf730d5c75bca20050c691d45f76ce1a467",
+      "parent": "6de8e690856ffae891d37dbb3abc6d2f37650791",
+      "remoteRef": "refs/heads/codex/ticket-m1b-missing",
+      "changed": ["D evals/fixtures/ticket-m1b/evidence.json"],
+      "evaluator": "m1b_eval_missing",
+      "criteria": {"target-ready": "PASS", "guard-stable": "PASS", "evidence-present": "UNVERIFIED"},
+      "unverifiedRequiredIds": ["evidence-present"],
+      "finalState": "UNVERIFIED",
+      "codeReworkAllowed": false,
+      "observedStateUnchanged": true,
+      "generatedOrIgnoredStateVerified": true
+    }
+  ],
+  "remoteRefsVerified": true,
+  "rawEvidence": {
+    "path": "evals/experiments/joeness-ticket-m1b-e2e-v1-raw.md",
+    "bytes": 5477,
+    "sha256": "14052c929bc91ed552cc66c4a8d161b04cd69bf9c110432a10c799093ea6959f",
+    "contents": "normalized context and final-report record"
+  },
+  "agentTranscript": {
+    "path": "evals/experiments/joeness-ticket-m1b-e2e-v1-transcript.md",
+    "bytes": 10504,
+    "sha256": "ae86744510a1015a026f43454f268f34b48eb8e42eac9a40b7de69463b48b915",
+    "contents": "normalized final-output extracts plus full-history event audit"
+  },
+  "orchestrationEvents": [
+    {
+      "event": "The fixture controller's first shell relied on a misapplied workdir and resolved to another repository.",
+      "candidateChanged": false,
+      "handling": "Stopped before edits; all later commands used explicit Set-Location plus root, branch, and HEAD checks."
+    },
+    {
+      "event": "The normal evaluator discarded one initial wrong-workdir read.",
+      "candidateChanged": false,
+      "handling": "Review began only after an explicit correct-root snapshot."
+    },
+    {
+      "event": "A read-only evidence inventory command had a PowerShell parse error before execution.",
+      "candidateChanged": false,
+      "handling": "The corrected read-only command ran once."
+    },
+    {
+      "event": "The first m1b_eval_repeat spawn used fork_turns:none but hit the agent thread limit.",
+      "candidateChanged": false,
+      "handling": "No evaluator was created; m1b_eval_repeat_v2 was later created as the actual fresh evaluator."
+    }
+  ],
+  "result": "m1b-controlled-behavior-observed-prompt-and-state-provenance-unverified",
+  "classification": "controlled-ticket-contract-partial",
+  "promotionPass": false,
+  "limitations": [
+    "This controlled repository fixture does not prove real-project quality, time, or cost improvement.",
+    "Context separation used the same model family, filesystem, and permissions; it is not organizational independence or a security boundary.",
+    "Implicit Ticket routing and personal installation discovery remain unverified.",
+    "Full tool-event streams and complete terminal stdout were not retained; final reports are normalized and exact Git candidates are retained by remote refs.",
+    "A full-history reviewer verified spawn timing, fork_turns, the single implementer follow-up, stop behavior, and PM BASE state; encrypted stored prompt bodies left narrative withholding unverified.",
+    "Generated/ignored before-and-after state was retained for C1 and missing-evidence only; that layer remains unverified for fault, successful-rework, no-op, and repeated-failure evaluations."
+  ]
+}
