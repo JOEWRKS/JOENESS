@@ -15,14 +15,15 @@
 
   | 단계 | 기대 결과 | 합격 조건 | 상태 |
   |---|---|---|---|
-  | M0 | 재현 가능한 V9 배포 후보 | 전체 회귀와 격리 수명주기 통과, clean tree, exact hash, 원상복구 | 진행 중 |
+  | M0 | 재현 가능한 V9 배포 후보 | 전체 회귀와 격리 수명주기 통과, clean tree, exact hash, 원상복구 | 완료 대기 — 증거 커밋·push·최종 clean readback |
+  | M1 | Ticket 검토 루프의 실제 종단 증거 | 무이력 평가자 완료, 조건별 직접 판정, 평가 전후 비변경 | 다음 |
 
 - **차단 / 결정 / 링크:**
   - 검증 기간에는 검증 실패를 고치는 최소 변경 외 새 기능을 추가하지 않는다.
-  - 현재 기준은 `codex/joeness-interface`의 `0598cad`; 로컬은 원격 feature branch보다 2커밋 앞서 있다.
-  - 사용자 홈은 V7·스킬 5개이며 `$ticket`과 최신 Design/Visual 규칙이 아직 적용되지 않았다. M0 격리 검증 전에 개인 설치를 갱신하지 않는다.
+  - M0 검증 기준은 `codex/joeness-interface`의 `f3b4b30`; 원격 feature branch와 일치한다.
+  - 사용자 홈은 V7·스킬 5개이며 `$ticket`과 최신 Design/Visual 규칙이 아직 적용되지 않았다. M1~M3의 격리 검증 후 M4 직전에 exact `Check → Apply → Check`로 갱신하고 새 Codex 작업에서 라우팅을 검증한다.
   - 공식 상태와 증거 포인터: [`vendor/source-manifest.json`](vendor/source-manifest.json)
-- **증거 / 검토:** 2026-08-12에 clean Git 상태, HEAD, manifest V9, 개인 설치 V7, `JOENESS.ps1 -Check`의 `ready`와 변경 9건을 확인했다. 상태 변경은 exact 커밋·실행 결과·산출물·대상 상태를 다시 읽은 뒤에만 한다. 필수 검증이 남으면 `부분 완료` 또는 `미검증`으로 유지한다.
+- **증거 / 검토:** 2026-08-12에 M0 전체 회귀와 격리 공개 진입점 수명주기를 통과했다. 개인 설치는 V7이며 아직 갱신하지 않았다. 상태 변경은 exact 커밋·실행 결과·산출물·대상 상태를 다시 읽은 뒤에만 한다. 필수 검증이 남으면 `부분 완료` 또는 `미검증`으로 유지한다.
 
 ## 갱신 규칙
 

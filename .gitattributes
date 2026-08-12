@@ -1,5 +1,6 @@
 /.gitattributes text eol=lf
 /AGENTS.md text eol=lf
+/TASKS.md text eol=lf
 /README.md text eol=lf
 /docs/superpowers/specs/2026-08-11-joeness-silent-core-and-spec-delivery-design.md text eol=lf
 /docs/superpowers/specs/2026-08-11-joeness-silent-core-and-spec-delivery-design.md whitespace=-blank-at-eol
