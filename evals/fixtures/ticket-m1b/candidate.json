@@ -1,4 +1,4 @@
 {
-  "target": "M1B_FAULT_SEED",
+  "target": "M1B_REPEAT_FAULT",
   "guard": "STABLE"
 }
