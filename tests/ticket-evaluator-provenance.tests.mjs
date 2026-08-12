@@ -110,7 +110,11 @@ async function createTicketRepository(t) {
 
 function createTicketSession(
   finalOutput,
-  { lateForbiddenEvent = false, omitToolLifecycle = false } = {},
+  {
+    lateForbiddenEvent = false,
+    omitToolLifecycle = false,
+    operationOnly = false,
+  } = {},
 ) {
   const listeners = new Set();
   let dynamicToolHandler = null;
@@ -164,7 +168,7 @@ function createTicketSession(
             },
           });
           let callNumber = 0;
-          for (const argumentsValue of [
+          const requests = [
             { operation: "InspectAncestry" },
             { operation: "InspectDiff" },
             {
@@ -176,7 +180,11 @@ function createTicketSession(
               path: "evals/fixtures/ticket-m1b/evidence.json",
             },
             { operation: "RunChecker" },
-          ]) {
+          ];
+          if (operationOnly) {
+            for (const request of requests) delete request.path;
+          }
+          for (const argumentsValue of requests) {
             callNumber += 1;
             const item = {
               id: `call-${callNumber}`,
@@ -342,6 +350,11 @@ test("evaluation prompt accepts only declared authority and controlled reads", a
     built.dynamicTool.inputSchema.properties.operation.enum,
     evaluationInput().inspection.requiredOperations,
   );
+  assert.deepEqual(
+    built.dynamicTool.inputSchema.properties.path.enum,
+    evaluationInput().inspection.allowedPaths,
+  );
+  assert.equal(Array.isArray(built.dynamicTool.inputSchema.allOf), true);
 
   const contaminated = evaluationInput();
   contaminated.authorityFiles["reports/implementer.md"] =
@@ -349,6 +362,70 @@ test("evaluation prompt accepts only declared authority and controlled reads", a
   assert.throws(
     () => subject.buildTicketEvaluationPrompt(contaminated),
     /input allowlist/i,
+  );
+});
+
+test("operation-only Ticket reads bind controller-owned fixed paths", async (t) => {
+  const subject = await loadSubject();
+  const input = evaluationInput();
+  input.inspection.operationPaths = {
+    ReadCandidate: input.inspection.allowedPaths[0],
+    ReadEvidence: input.inspection.allowedPaths[1],
+  };
+  const built = subject.buildTicketEvaluationPrompt(input);
+  assert.deepEqual(Object.keys(built.dynamicTool.inputSchema.properties), [
+    "operation",
+  ]);
+  assert.deepEqual(built.dynamicTool.inputSchema.required, ["operation"]);
+  assert.equal(Object.hasOwn(built.dynamicTool.inputSchema, "allOf"), false);
+
+  const fixture = await createTicketRepository(t);
+  const context = {
+    root: fixture.root,
+    baseSha: fixture.base,
+    candidateSha: fixture.candidate,
+    previousSha: fixture.base,
+    allowedPaths: input.inspection.allowedPaths,
+    operationPaths: input.inspection.operationPaths,
+  };
+  const candidate = await subject.inspectTicketCandidate(
+    { operation: "ReadCandidate" },
+    context,
+  );
+  assert.equal(candidate.path, input.inspection.allowedPaths[0]);
+  assert.equal(candidate.exists, true);
+  const evidence = [];
+  const response = await subject.handleTicketEvaluatorToolCall(
+    {
+      method: "item/tool/call",
+      params: {
+        threadId: "thread-v3",
+        turnId: "turn-v3",
+        callId: "call-v3",
+        tool: "ticket-evaluator-read",
+        arguments: { operation: "ReadEvidence" },
+      },
+    },
+    {
+      threadId: "thread-v3",
+      turnId: "turn-v3",
+      context,
+      evidence,
+    },
+  );
+  assert.equal(response.success, true);
+  assert.equal(evidence[0].path, null);
+  assert.equal(evidence[0].result.path, input.inspection.allowedPaths[1]);
+  await assert.rejects(
+    () =>
+      subject.inspectTicketCandidate(
+        {
+          operation: "ReadCandidate",
+          path: input.inspection.allowedPaths[0],
+        },
+        context,
+      ),
+    /operation shape/i,
   );
 });
 
@@ -438,6 +515,14 @@ test("controlled reader inspects the pinned Git candidate and rejects unknown re
   );
   assert.equal(candidate.exists, true);
   assert.match(candidate.text, /"READY"/);
+  await assert.rejects(
+    () =>
+      subject.inspectTicketCandidate(
+        { operation: "ReadCandidate" },
+        context,
+      ),
+    /operation shape/i,
+  );
   await assert.rejects(
     () =>
       subject.inspectTicketCandidate(
@@ -699,6 +784,76 @@ test("one fresh Ticket turn collects all controlled reads before accepting outpu
     input.inspection.requiredOperations,
   );
   assert.equal(result.output.checkerState, "ACCEPTED");
+  assert.equal(result.blockers.length, 0);
+});
+
+test("one fresh Ticket turn completes the v3 operation-only contract", async (t) => {
+  const subject = await loadSubject();
+  const runner = await loadRunner();
+  const fixture = await createTicketRepository(t);
+  const input = evaluationInput();
+  input.base = {
+    sha: fixture.base,
+    tree: git(fixture.root, "rev-parse", `${fixture.base}^{tree}`),
+  };
+  input.candidate = {
+    id: "c1-normal",
+    sha: fixture.candidate,
+    tree: git(fixture.root, "rev-parse", "HEAD^{tree}"),
+    parent: fixture.base,
+    previousSha: fixture.base,
+    reworkRound: 0,
+  };
+  input.inspection.operationPaths = {
+    ReadCandidate: input.inspection.allowedPaths[0],
+    ReadEvidence: input.inspection.allowedPaths[1],
+  };
+  const finalOutput = JSON.stringify({
+    candidateSha: fixture.candidate,
+    alignment: "PASS",
+    criteria: [
+      { id: "target-ready", verdict: "PASS", observation: "target READY" },
+      { id: "guard-stable", verdict: "PASS", observation: "guard STABLE" },
+      { id: "evidence-present", verdict: "PASS", observation: "evidence exists" },
+    ],
+    checkerState: "ACCEPTED",
+  });
+  const result = await runner.runTicketEvaluatorTurn({
+    session: createTicketSession(finalOutput, { operationOnly: true }),
+    candidateRoot: fixture.root,
+    built: subject.buildTicketEvaluationPrompt(input),
+    context: {
+      root: fixture.root,
+      baseSha: fixture.base,
+      candidateSha: fixture.candidate,
+      previousSha: fixture.base,
+      allowedPaths: input.inspection.allowedPaths,
+      operationPaths: input.inspection.operationPaths,
+    },
+    turnTimeoutMs: 1000,
+  });
+  assert.deepEqual(
+    result.toolEvidence.map(({ operation, path, result: evidenceResult }) => ({
+      operation,
+      path,
+      resolvedPath: evidenceResult.path ?? null,
+    })),
+    [
+      { operation: "InspectAncestry", path: null, resolvedPath: null },
+      { operation: "InspectDiff", path: null, resolvedPath: null },
+      {
+        operation: "ReadCandidate",
+        path: null,
+        resolvedPath: input.inspection.allowedPaths[0],
+      },
+      {
+        operation: "ReadEvidence",
+        path: null,
+        resolvedPath: input.inspection.allowedPaths[1],
+      },
+      { operation: "RunChecker", path: null, resolvedPath: null },
+    ],
+  );
   assert.equal(result.blockers.length, 0);
 });
 
@@ -1001,6 +1156,97 @@ test("M1C plans preserve v1 and pin the v2 runtime without expected evaluator an
   );
   assert.equal(failure.id, "joeness-ticket-m1c-smoke-v2");
   assert.deepEqual(failure.manifestRequest, request);
+});
+
+test("M1C v3 pins the blocked v2 method and operation-only path map", async () => {
+  const runner = await loadRunner();
+  const v2Path = new URL(
+    "../evals/experiments/joeness-ticket-m1c-prompt-manifest-v2.json",
+    import.meta.url,
+  );
+  const v3Path = new URL(
+    "../evals/experiments/joeness-ticket-m1c-prompt-manifest-v3.json",
+    import.meta.url,
+  );
+  const blockedV2Path = new URL(
+    "../evals/experiments/joeness-ticket-m1c-smoke-v2-blocked.json",
+    import.meta.url,
+  );
+  const v2Text = await readFile(v2Path, "utf8");
+  assert.equal(Buffer.byteLength(v2Text), 3738);
+  assert.equal(
+    createHash("sha256").update(v2Text).digest("hex"),
+    "69d4a1f31d7f7dda9d4b30a05e7a26350df69f48787820afa72947f6377efcc5",
+  );
+  const v3Text = await readFile(v3Path, "utf8");
+  assert.equal(Buffer.byteLength(v3Text), 3918);
+  assert.equal(
+    createHash("sha256").update(v3Text).digest("hex"),
+    "81efba907a5cb424d0dabd4a989f2366b9c0837992495b16d9e50a33e9b9fe8c",
+  );
+  const plan = runner.validateTicketEvaluationPlan(JSON.parse(v3Text));
+  assert.equal(plan.id, "joeness-ticket-m1c-prompt-manifest-v3");
+  assert.equal(plan.schemaVersion, 3);
+  assert.deepEqual(plan.runtime, { codexVersion: "codex-cli 0.146.0" });
+  assert.deepEqual(runner.resolveTicketRuntimeContract(plan), {
+    codexVersion: "codex-cli 0.146.0",
+    generation: "v3",
+  });
+  assert.deepEqual(plan.inspection.operationPaths, {
+    ReadCandidate: "evals/fixtures/ticket-m1b/candidate.json",
+    ReadEvidence: "evals/fixtures/ticket-m1b/evidence.json",
+  });
+  assert.deepEqual(plan.predecessor, {
+    path: "evals/experiments/joeness-ticket-m1c-prompt-manifest-v2.json",
+    byteLength: 3738,
+    sha256: "69d4a1f31d7f7dda9d4b30a05e7a26350df69f48787820afa72947f6377efcc5",
+    methodChange: "dynamic-tool-operation-only-fixed-paths",
+  });
+  const blockedV2Text = await readFile(blockedV2Path, "utf8");
+  assert.equal(Buffer.byteLength(blockedV2Text), 2235);
+  assert.equal(
+    createHash("sha256").update(blockedV2Text).digest("hex"),
+    "d27c0829f7f5bf2c862afb318e7b406dd1693597aa71b14b093a6ed7e78c2771",
+  );
+  const blockedV2 = JSON.parse(blockedV2Text);
+  assert.equal(blockedV2.result, "blocked");
+  assert.equal(blockedV2.promotionPass, false);
+  assert.equal(
+    blockedV2.rawArtifact.sha256,
+    "4f040a59332d6bbb5edcaeecf0c5f3283df157732997539c8a82dab6bde832b5",
+  );
+  const repositoryRoot = path.resolve(fileURLToPath(new URL("..", import.meta.url)));
+  assert.deepEqual(await runner.verifyTicketPlanPredecessor(repositoryRoot, plan), {
+    path: "evals/experiments/joeness-ticket-m1c-prompt-manifest-v2.json",
+    byteLength: 3738,
+    sha256: "69d4a1f31d7f7dda9d4b30a05e7a26350df69f48787820afa72947f6377efcc5",
+  });
+
+  for (const mutate of [
+    (value) => delete value.inspection.operationPaths,
+    (value) => {
+      [
+        value.inspection.operationPaths.ReadCandidate,
+        value.inspection.operationPaths.ReadEvidence,
+      ] = [
+        value.inspection.operationPaths.ReadEvidence,
+        value.inspection.operationPaths.ReadCandidate,
+      ];
+    },
+    (value) => {
+      value.inspection.operationPaths.InspectDiff = "TASKS.md";
+    },
+    (value) => {
+      value.inspection.operationPaths.ReadCandidate = "TASKS.md";
+    },
+  ]) {
+    const changed = JSON.parse(v3Text);
+    mutate(changed);
+    assert.throws(
+      () => runner.validateTicketEvaluationPlan(changed),
+      /malformed/i,
+    );
+  }
 });
 
 test("M1C CLI separates disposable smoke from the immutable six-case batch", async () => {

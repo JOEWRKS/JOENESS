@@ -37,6 +37,10 @@ export const TICKET_REQUIRED_OPERATIONS = Object.freeze([
   "ReadEvidence",
   "RunChecker",
 ]);
+export const TICKET_OPERATION_PATHS = Object.freeze({
+  ReadCandidate: TICKET_READ_PATHS[0],
+  ReadEvidence: TICKET_READ_PATHS[1],
+});
 const SNAPSHOT_LAYERS = Object.freeze([
   "identity",
   "tracked",
@@ -136,48 +140,70 @@ function validateEvaluationInput(input) {
     TICKET_AUTHORITY_PATHS,
     "authority input",
   );
+  const operationOnly = exactKeys(input.inspection, [
+    "allowedPaths",
+    "requiredOperations",
+    "operationPaths",
+  ]);
   if (
-    !exactKeys(input.inspection, ["allowedPaths", "requiredOperations"]) ||
+    (!operationOnly &&
+      !exactKeys(input.inspection, ["allowedPaths", "requiredOperations"])) ||
     stableStringify(input.inspection.allowedPaths) !==
       stableStringify(TICKET_READ_PATHS) ||
     stableStringify(input.inspection.requiredOperations) !==
-      stableStringify(TICKET_REQUIRED_OPERATIONS)
+      stableStringify(TICKET_REQUIRED_OPERATIONS) ||
+    (operationOnly &&
+      stableStringify(input.inspection.operationPaths) !==
+        stableStringify(TICKET_OPERATION_PATHS))
   ) {
     throw new Error("controlled inspection differs from the input allowlist");
   }
+  return { operationOnly };
 }
 
 export function buildTicketEvaluationPrompt(input) {
-  validateEvaluationInput(input);
+  const { operationOnly } = validateEvaluationInput(input);
   const dynamicTool = {
     type: "function",
     name: TICKET_EVALUATOR_TOOL_NAME,
     description:
       "Read the exact pinned Ticket candidate through controlled, non-writing operations. Call every required operation exactly once.",
-    inputSchema: {
-      type: "object",
-      properties: {
-        operation: {
-          type: "string",
-          enum: [...TICKET_REQUIRED_OPERATIONS],
-        },
-        path: { type: "string", enum: [...TICKET_READ_PATHS] },
-      },
-      required: ["operation"],
-      additionalProperties: false,
-      allOf: [
-        {
-          if: {
-            properties: {
-              operation: { enum: ["ReadCandidate", "ReadEvidence"] },
+    inputSchema: operationOnly
+      ? {
+          type: "object",
+          properties: {
+            operation: {
+              type: "string",
+              enum: [...TICKET_REQUIRED_OPERATIONS],
             },
-            required: ["operation"],
           },
-          then: { required: ["path"] },
-          else: { not: { required: ["path"] } },
+          required: ["operation"],
+          additionalProperties: false,
+        }
+      : {
+          type: "object",
+          properties: {
+            operation: {
+              type: "string",
+              enum: [...TICKET_REQUIRED_OPERATIONS],
+            },
+            path: { type: "string", enum: [...TICKET_READ_PATHS] },
+          },
+          required: ["operation"],
+          additionalProperties: false,
+          allOf: [
+            {
+              if: {
+                properties: {
+                  operation: { enum: ["ReadCandidate", "ReadEvidence"] },
+                },
+                required: ["operation"],
+              },
+              then: { required: ["path"] },
+              else: { not: { required: ["path"] } },
+            },
+          ],
         },
-      ],
-    },
     deferLoading: false,
   };
   const manifestCore = {
@@ -560,23 +586,36 @@ export function validateTicketInspectionEvidence(
 }
 
 function validateInspectionContext(context) {
+  const operationOnly = exactKeys(context, [
+    "root",
+    "baseSha",
+    "candidateSha",
+    "previousSha",
+    "allowedPaths",
+    "operationPaths",
+  ]);
   if (
-    !exactKeys(context, [
-      "root",
-      "baseSha",
-      "candidateSha",
-      "previousSha",
-      "allowedPaths",
-    ]) ||
+    (!operationOnly &&
+      !exactKeys(context, [
+        "root",
+        "baseSha",
+        "candidateSha",
+        "previousSha",
+        "allowedPaths",
+      ])) ||
     typeof context.root !== "string" ||
     stableStringify(context.allowedPaths) !==
-      stableStringify(TICKET_READ_PATHS)
+      stableStringify(TICKET_READ_PATHS) ||
+    (operationOnly &&
+      stableStringify(context.operationPaths) !==
+        stableStringify(TICKET_OPERATION_PATHS))
   ) {
     throw new Error("Ticket inspection context is malformed");
   }
   requireSha(context.baseSha, "inspection BASE SHA");
   requireSha(context.candidateSha, "inspection candidate SHA");
   requireSha(context.previousSha, "inspection previous SHA");
+  return { operationOnly };
 }
 
 async function readAllowedArtifact(operation, inputPath, context) {
@@ -619,7 +658,7 @@ async function readAllowedArtifact(operation, inputPath, context) {
 }
 
 export async function inspectTicketCandidate(request, context) {
-  validateInspectionContext(context);
+  const { operationOnly } = validateInspectionContext(context);
   if (
     !request ||
     typeof request !== "object" ||
@@ -628,9 +667,9 @@ export async function inspectTicketCandidate(request, context) {
   ) {
     throw new Error("Ticket inspection operation is invalid");
   }
-  const requiresPath = ["ReadCandidate", "ReadEvidence"].includes(
-    request.operation,
-  );
+  const requiresPath =
+    !operationOnly &&
+    ["ReadCandidate", "ReadEvidence"].includes(request.operation);
   if (
     !exactKeys(request, requiresPath ? ["operation", "path"] : ["operation"])
   ) {
@@ -688,7 +727,10 @@ export async function inspectTicketCandidate(request, context) {
     };
   }
   if (["ReadCandidate", "ReadEvidence"].includes(request.operation)) {
-    return readAllowedArtifact(request.operation, request.path, {
+    const inputPath = operationOnly
+      ? context.operationPaths[request.operation]
+      : request.path;
+    return readAllowedArtifact(request.operation, inputPath, {
       ...context,
       root: resolvedRoot,
     });

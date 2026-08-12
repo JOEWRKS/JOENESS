@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "id": "joeness-ticket-m1c-smoke-v2-blocked",
+  "result": "blocked",
+  "promotionPass": false,
+  "repositoryHead": "ec923e14b786dcfabd99a2a1b6fd4bf46b857975",
+  "plan": {
+    "path": "evals/experiments/joeness-ticket-m1c-prompt-manifest-v2.json",
+    "byteLength": 3738,
+    "sha256": "69d4a1f31d7f7dda9d4b30a05e7a26350df69f48787820afa72947f6377efcc5"
+  },
+  "rawArtifact": {
+    "repositoryTracked": false,
+    "path": "C:/Users/tjdwo/AppData/Local/Temp/joeness-ticket-m1c-smoke-attempt-04-08a4493b254e4070b0e8fddd6370f02a/joeness-ticket-m1c-smoke-attempt-04.json",
+    "byteLength": 453625,
+    "sha256": "4f040a59332d6bbb5edcaeecf0c5f3283df157732997539c8a82dab6bde832b5"
+  },
+  "observed": {
+    "candidateId": "c1-normal",
+    "freshThreadPriorTurnCount": 0,
+    "instructionSources": [],
+    "successfulOperations": [
+      "InspectAncestry",
+      "InspectDiff",
+      "RunChecker"
+    ],
+    "failedOperations": [
+      "unknown-operation-and-path",
+      "ReadCandidate-without-path",
+      "ReadEvidence-without-path"
+    ],
+    "blockers": [
+      "runtime-drift",
+      "required-ticket-inspection-missing",
+      "ticket-tool-lifecycle-mismatch",
+      "runtime-control-blocker"
+    ],
+    "appServer": {
+      "exitCode": 0,
+      "stderrByteLength": 1476,
+      "stderrSha256": "ec79c8b47cb6e4e0ee2d920faa7a0edaaa0f1330eed54f18d33af8e597b1f47a",
+      "remoteControlDisabled": true
+    },
+    "cleanup": {
+      "processTerminationConfirmed": true,
+      "candidateWorktreeRemoved": true,
+      "isolatedHomeRemoved": true,
+      "diagnosticRunRootAtCapture": {
+        "path": "C:/Users/tjdwo/AppData/Local/Temp/joewrks-eval-t-s-b07340a342a641cb8486c5669187b3ea",
+        "state": "retained"
+      }
+    }
+  },
+  "methodChangeForNextAttempt": "Remove model-selected path arguments; bind ReadCandidate and ReadEvidence to controller-owned fixed paths in a new v3 plan.",
+  "limitations": [
+    "The full raw artifact remains outside the repository and may not be durable.",
+    "The redacted stderr bytes cannot be causally tied to the failed dynamic-tool calls.",
+    "The first failed call lacks retained original arguments, so only its normalized missing operation/path state is known."
+  ]
+}

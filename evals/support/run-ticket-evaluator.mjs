@@ -34,6 +34,7 @@ import {
   validateTicketInspectionEvidence,
   TICKET_AUTHORITY_PATHS,
   TICKET_EVALUATOR_TOOL_NAME,
+  TICKET_OPERATION_PATHS,
   TICKET_READ_PATHS,
   TICKET_REQUIRED_OPERATIONS,
 } from "./ticket-evaluator-provenance.mjs";
@@ -63,13 +64,21 @@ const PLAN_FORBIDDEN_SOURCES = Object.freeze([
 const FULL_SHA = /^[0-9a-f]{40}$/u;
 const PLAN_V1_ID = "joeness-ticket-m1c-prompt-manifest-v1";
 const PLAN_V2_ID = "joeness-ticket-m1c-prompt-manifest-v2";
+const PLAN_V3_ID = "joeness-ticket-m1c-prompt-manifest-v3";
 const PLAN_V1_RUNTIME = Object.freeze({ codexVersion: "codex-cli 0.145.0" });
 const PLAN_V2_RUNTIME = Object.freeze({ codexVersion: "codex-cli 0.146.0" });
+const PLAN_V3_RUNTIME = Object.freeze({ codexVersion: "codex-cli 0.146.0" });
 const PLAN_V2_PREDECESSOR = Object.freeze({
   path: "evals/experiments/joeness-ticket-m1c-prompt-manifest-v1.json",
   byteLength: 3428,
   sha256: "ddb28bb1c9c3795a77ef9b37158ab70210a549fe4a2ed33205bb280345680501",
   methodChange: "pin-codex-cli-0.146.0",
+});
+const PLAN_V3_PREDECESSOR = Object.freeze({
+  path: "evals/experiments/joeness-ticket-m1c-prompt-manifest-v2.json",
+  byteLength: 3738,
+  sha256: "69d4a1f31d7f7dda9d4b30a05e7a26350df69f48787820afa72947f6377efcc5",
+  methodChange: "dynamic-tool-operation-only-fixed-paths",
 });
 const TICKET_CHECKOUT_PATH_LIMIT = 248;
 
@@ -212,6 +221,8 @@ function exactObjectKeys(value, keys) {
 export function validateTicketEvaluationPlan(value) {
   const isV1 = value?.id === PLAN_V1_ID;
   const isV2 = value?.id === PLAN_V2_ID;
+  const isV3 = value?.id === PLAN_V3_ID;
+  const hasRuntimeContract = isV2 || isV3;
   const expectedKeys = [
     "schemaVersion",
     "id",
@@ -221,15 +232,19 @@ export function validateTicketEvaluationPlan(value) {
     "inspection",
     "forbiddenNarrativeSources",
     "candidates",
-    ...(isV2 ? ["runtime", "predecessor"] : []),
+    ...(hasRuntimeContract ? ["runtime", "predecessor"] : []),
   ];
+  const expectedRuntime = isV3 ? PLAN_V3_RUNTIME : PLAN_V2_RUNTIME;
+  const expectedPredecessor = isV3
+    ? PLAN_V3_PREDECESSOR
+    : PLAN_V2_PREDECESSOR;
   if (
     !exactObjectKeys(value, expectedKeys) ||
-    value.schemaVersion !== (isV2 ? 2 : 1) ||
-    (!isV1 && !isV2) ||
-    (isV2 &&
+    value.schemaVersion !== (isV3 ? 3 : isV2 ? 2 : 1) ||
+    (!isV1 && !isV2 && !isV3) ||
+    (hasRuntimeContract &&
       (!exactObjectKeys(value.runtime, ["codexVersion"]) ||
-        stableStringify(value.runtime) !== stableStringify(PLAN_V2_RUNTIME) ||
+        stableStringify(value.runtime) !== stableStringify(expectedRuntime) ||
         !exactObjectKeys(value.predecessor, [
           "path",
           "byteLength",
@@ -237,7 +252,7 @@ export function validateTicketEvaluationPlan(value) {
           "methodChange",
         ]) ||
         stableStringify(value.predecessor) !==
-          stableStringify(PLAN_V2_PREDECESSOR))) ||
+          stableStringify(expectedPredecessor))) ||
     typeof value.originalGoal !== "string" ||
     !value.originalGoal.trim() ||
     !exactObjectKeys(value.base, ["sha", "tree"]) ||
@@ -247,11 +262,19 @@ export function validateTicketEvaluationPlan(value) {
     value.authority.revision !== value.base.sha ||
     stableStringify(value.authority.paths) !==
       stableStringify(PLAN_AUTHORITY_PATHS) ||
-    !exactObjectKeys(value.inspection, ["allowedPaths", "requiredOperations"]) ||
+    !exactObjectKeys(
+      value.inspection,
+      isV3
+        ? ["allowedPaths", "requiredOperations", "operationPaths"]
+        : ["allowedPaths", "requiredOperations"],
+    ) ||
     stableStringify(value.inspection.allowedPaths) !==
       stableStringify(TICKET_READ_PATHS) ||
     stableStringify(value.inspection.requiredOperations) !==
       stableStringify(TICKET_REQUIRED_OPERATIONS) ||
+    (isV3 &&
+      stableStringify(value.inspection.operationPaths) !==
+        stableStringify(TICKET_OPERATION_PATHS)) ||
     stableStringify(value.forbiddenNarrativeSources) !==
       stableStringify(PLAN_FORBIDDEN_SOURCES) ||
     !Array.isArray(value.candidates) ||
@@ -340,6 +363,13 @@ export function resolveTicketRuntimeContract(plan) {
     stableStringify(plan.runtime) === stableStringify(PLAN_V2_RUNTIME)
   ) {
     return { ...PLAN_V2_RUNTIME, generation: "v2" };
+  }
+  if (
+    plan?.id === PLAN_V3_ID &&
+    plan?.schemaVersion === 3 &&
+    stableStringify(plan.runtime) === stableStringify(PLAN_V3_RUNTIME)
+  ) {
+    return { ...PLAN_V3_RUNTIME, generation: "v3" };
   }
   throw new Error("Ticket runtime contract is malformed");
 }
@@ -1197,6 +1227,9 @@ export async function runTicketEvaluationBatch({
           candidateSha: candidate.sha,
           previousSha: candidate.previousSha,
           allowedPaths: plan.inspection.allowedPaths,
+          ...(plan.inspection.operationPaths
+            ? { operationPaths: plan.inspection.operationPaths }
+            : {}),
         },
       });
       session = null;
