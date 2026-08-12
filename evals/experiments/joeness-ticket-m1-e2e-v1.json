@@ -1,0 +1,127 @@
+{
+  "schemaVersion": 1,
+  "mode": "joeness-ticket-m1-context-separated-e2e",
+  "recordedAt": "2026-08-12T09:16:40.6841645Z",
+  "ticket": {
+    "tracker": "TASKS.md at BASE",
+    "trackerSha256": "57aa2ff192176d2d349382eb7e099deeb3895ef9c0f7ed54d6ac115f4389a782",
+    "skillPath": "skills/ticket/SKILL.md",
+    "skillSha256": "1c783553bbc3a0bd0b7e8a1dd376ee912ef00840670e06fa4945bde1ab78211f",
+    "testPath": "tests/ticket-verdict.tests.mjs",
+    "testSha256": "4a404378a4f41a620f11cdc148648de1cea77af21f5bf52566a93835bc9976c4",
+    "criteria": [
+      "named export summarizeTicketVerdicts(criteria)",
+      "validate unique non-empty id, boolean required, and PASS|FAIL|UNVERIFIED without mutating input",
+      "FAIL -> REWORK; else required UNVERIFIED -> UNVERIFIED; else ACCEPTED",
+      "deterministic state, counts, failedIds, and unverifiedRequiredIds",
+      "focused and full Node suites pass"
+    ]
+  },
+  "identity": {
+    "base": "093c1e528532af0a6744085c0c8daaddae1c1cc7",
+    "candidate": "b6e6f3124fbae9adcaadc4005e81e8a0a687b5e4",
+    "candidateTree": "dcd397482527974cf65027d7e6d85237fa2bb651",
+    "candidateParentEqualsBase": true,
+    "changedFiles": [
+      "A evals/support/ticket-verdict.mjs"
+    ],
+    "implementationBytes": 1460,
+    "implementationSha256": "5dbf67c419a1a957e8435e1b9b4313d3d7914dfff6486608ae95057e9211bdac"
+  },
+  "contextSeparation": {
+    "implementerForkTurns": "none",
+    "evaluatorForkTurns": "none",
+    "candidateFixedBeforeEvaluatorCreation": true,
+    "implementerNarrativeWithheldUntilFirstVerdict": true,
+    "evaluatorWorktreeDetached": true,
+    "evaluatorWorktreeCleanAtStart": true,
+    "evaluatorReceivedOriginalGoalAndAuthoritativeContracts": true
+  },
+  "implementer": {
+    "task": "ticket_m1_implementer",
+    "onlyIntentionalWriter": true,
+    "branch": "codex/ticket-e2e-impl",
+    "changedFiles": [
+      "evals/support/ticket-verdict.mjs"
+    ],
+    "focused": { "exitCode": 0, "passed": 5, "failed": 0 },
+    "fullNode": { "exitCode": 0, "passed": 237, "failed": 0 },
+    "postCommitClean": true
+  },
+  "evaluator": {
+    "task": "ticket_m1_evaluator",
+    "verdict": "ACCEPTED",
+    "goalAlignment": "PASS",
+    "criteria": [
+      { "id": "named-export", "verdict": "PASS" },
+      { "id": "validation-and-no-mutation", "verdict": "PASS" },
+      { "id": "state-precedence", "verdict": "PASS" },
+      { "id": "deterministic-result", "verdict": "PASS" },
+      { "id": "focused-and-full-tests", "verdict": "PASS" }
+    ],
+    "directChecks": {
+      "ancestryAndDiffInspected": true,
+      "implementationInspected": true,
+      "focused": { "exitCode": 0, "passed": 5, "failed": 0 },
+      "fullNode": { "exitCode": 0, "passed": 237, "failed": 0 }
+    },
+    "before": {
+      "head": "b6e6f3124fbae9adcaadc4005e81e8a0a687b5e4",
+      "tree": "dcd397482527974cf65027d7e6d85237fa2bb651",
+      "detached": true,
+      "trackedOrIndexChanges": 0,
+      "untracked": 0
+    },
+    "after": {
+      "head": "b6e6f3124fbae9adcaadc4005e81e8a0a687b5e4",
+      "tree": "dcd397482527974cf65027d7e6d85237fa2bb651",
+      "workingDiffExitCode": 0,
+      "indexDiffExitCode": 0,
+      "untracked": 0,
+      "ignoredOrGeneratedCandidates": 0
+    },
+    "mutatedEvaluationWorkspace": false
+  },
+  "rawEvidence": {
+    "path": "evals/experiments/joeness-ticket-m1-e2e-v1-raw.md",
+    "bytes": 3687,
+    "sha256": "39ebe55272de0c664590144fbed3016473747fa29db857e24edafb2ebdf15aab",
+    "contents": "root context record plus normalized implementer and evaluator final reports"
+  },
+  "integration": {
+    "method": "fast-forward",
+    "integratedCandidate": "b6e6f3124fbae9adcaadc4005e81e8a0a687b5e4",
+    "mainCleanBefore": true,
+    "mainHeadAfter": "b6e6f3124fbae9adcaadc4005e81e8a0a687b5e4",
+    "mainTreeAfter": "dcd397482527974cf65027d7e6d85237fa2bb651",
+    "mainCleanAfter": true,
+    "candidateDiffCheck": "pass"
+  },
+  "orchestrationEvents": [
+    {
+      "event": "Initial read-only BASE..CANDIDATE preflight used an unquoted PowerShell range and stopped before evaluator worktree creation.",
+      "candidateOrTrackerChanged": false,
+      "handling": "Passed the range as one explicit string."
+    },
+    {
+      "event": "Evaluator worktree creation succeeded, but the combined status reporter called Trim on an empty detached-branch value.",
+      "duplicateWorktreeCreated": false,
+      "handling": "Kept the existing worktree and performed a separate readback."
+    },
+    {
+      "event": "Fast-forward integration succeeded; an optional summary diff repeated the unquoted-range warning after integration.",
+      "integrationSucceeded": true,
+      "handling": "Used the already verified pre-integration diff and separately read back HEAD, tree, and clean status."
+    }
+  ],
+  "result": "m1-happy-path-pass",
+  "classification": "context-separated-ticket-e2e-pass",
+  "promotionPass": false,
+  "limitations": [
+    "This is one synthetic deterministic ticket, not a real product-quality or efficiency evaluation.",
+    "The evaluator used the same model family, filesystem, and tool permissions; context separation is not organizational independence or a security boundary.",
+    "Candidate-change invalidation, failed-criterion rework, the one-rework ceiling, and USER_DECISION escalation were not exercised end to end.",
+    "Implicit Ticket routing, personal installation discovery, and cross-project behavior remain unverified.",
+    "Agent final reports were retained in a normalized Markdown record; full tool-event streams and complete terminal stdout were not."
+  ]
+}
