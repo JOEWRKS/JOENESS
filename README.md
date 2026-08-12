@@ -46,6 +46,8 @@ JOENESS는 Windows용 Codex 작업환경입니다. 프로젝트 맥락, 중요 �
 
 `$spec`은 최종 명세 파일을 다시 확인한 뒤 보고합니다. 프로젝트가 요구하지 않는 검토·승인 질문을 새로 만들지 않습니다.
 
+`$visual-check`는 복합 화면을 화면·상태별로 따로 판정하며, 일부 항목의 통과를 화면 전체 통과로 확대하지 않습니다.
+
 새 장기 프로젝트에 계획이 없으면 `$project`, 기존 계획에 준비된 중요 작업이 있으면 `$ticket`을 사용합니다. 오타·읽기 전용 조사·단일 자동검사로 완전히 판정되는 저위험 수정에는 둘 다 붙이지 않습니다. `$ticket` 검토자는 구현자의 설명을 먼저 받지 않는 새 컨텍스트이지만 같은 Codex 계열과 권한을 쓰므로 객관성을 보증하는 외부 심판은 아닙니다.
 
 자동 선택은 강제 후크가 아니라 **모델 라우팅(model routing)** 입니다. JOENESS Core가 시각 결과와 명세 전달 조건을 항상 알려 누락 가능성을 줄이지만, 특정 스킬 사용을 확실히 지정하려면 요청에 `$visual-check` 또는 `$spec`처럼 호출명을 적으세요.
@@ -119,6 +121,8 @@ Statuses such as `ready`, `current`, and `blocked` are **PowerShell output**, no
 | `$handoff` | Creates a brief handoff for the next task | Never automatic; use it when requested |
 
 `$spec` rechecks the final specification file before reporting. It does not invent a review or approval prompt that the project does not require.
+
+`$visual-check` judges each named surface and state separately and does not expand a narrow PASS into a whole-screen PASS.
 
 Use `$project` when a new long-running project lacks a plan, and `$ticket` for an important prepared item in that plan. Skip both for typos, read-only investigation, or a low-risk change fully decided by one deterministic check. The `$ticket` evaluator starts with fresh context and does not receive the implementer's narrative first, but it uses the same Codex family and permissions and therefore is not an objective external judge.
 

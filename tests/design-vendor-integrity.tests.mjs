@@ -127,8 +127,8 @@ const EXPECTED_DESIGN_SKILL = {
   files: [
     {
       localPath: 'skills/design/SKILL.md',
-      bytes: 4234,
-      sha256: '8c3f872e412eb8d46abe505884dca650471373ce2130d7ff618013e2007394f8',
+      bytes: 4779,
+      sha256: '517ac4d6281b0ff00303d7ba86874c7381a1e4ee2b360f3a11e46c9a77b52771',
       exactUpstreamCopy: false,
     },
     {
@@ -182,20 +182,20 @@ const EXPECTED_VISUAL_CHECK_SKILL = {
   files: [
     {
       localPath: 'skills/visual-check/SKILL.md',
-      bytes: 3427,
-      sha256: 'cdf7b9953881489ce1814ea8899886cb4fb7ea90262f240bd26795d1633d608e',
+      bytes: 3453,
+      sha256: '7bd9b1406073f844da71c0075d5cddb69778425997bb2ec42b74b36fa3996903',
       exactUpstreamCopy: false,
     },
     {
       localPath: 'skills/visual-check/agents/openai.yaml',
-      bytes: 567,
-      sha256: 'e129e686690c0632e6cded20629e69d131c340c6fb4706fd0a768dc7c762117d',
+      bytes: 603,
+      sha256: 'bffc2c66c0534431d56ae1998f2680fde94742775fc43b9d7bf7e74dbdb8021f',
       exactUpstreamCopy: false,
     },
     {
       localPath: 'skills/visual-check/references/concrete-defect.md',
-      bytes: 646,
-      sha256: '8d16f895a6e40e4325139de00c4d547aca7f9228913495237348ac77df51d2c6',
+      bytes: 935,
+      sha256: '1a620c8ef21081597ab1bf87b84b7dfc0d9b7ebe8cdacffbc10a31318831a209',
       exactUpstreamCopy: false,
     },
     {
@@ -206,8 +206,8 @@ const EXPECTED_VISUAL_CHECK_SKILL = {
     },
     {
       localPath: 'skills/visual-check/references/durable-evidence.md',
-      bytes: 3056,
-      sha256: 'bc543ab07c275a12d0c110f839562f9e5884f97281920dae38fe55c0a402a1cd',
+      bytes: 3853,
+      sha256: '3a2b56bd7ad8474c0f05f9cf46a4df29b6bd2a29fc777e2b28bdef952b6a8246',
       exactUpstreamCopy: false,
     },
   ],
@@ -477,7 +477,7 @@ const EXPECTED_SKILL_CONTRACT_V7 = {
   semanticImprovement: 'not-asserted',
   promotionPass: false,
 };
-const EXPECTED_CURRENT_EVALUATION = {
+const EXPECTED_SKILL_CONTRACT_V8 = {
   ...EXPECTED_SKILL_CONTRACT_V7,
   mode: 'active-skill-contract-v8',
   version: 8,
@@ -488,6 +488,28 @@ const EXPECTED_CURRENT_EVALUATION = {
   ticketPressureEvidence: {
     path: 'evals/skill-contracts/ticket-delivery-pressure-v1.json',
     sha256: 'c682e16e377eda576cb981d81d9db833067b2b5a5a8be3aa189604f99342b882',
+  },
+};
+const EXPECTED_CURRENT_EVALUATION = {
+  ...EXPECTED_SKILL_CONTRACT_V8,
+  mode: 'active-skill-contract-v9',
+  version: 9,
+  cases: {
+    path: 'evals/skill-contracts/cases-v9.json',
+    sha256: 'b9aa05ea16b0e57f3bc233dc148db046bf4b9d1ea0306c0e5a8ca5bac27d40b2',
+  },
+  visualCoverageEvidence: {
+    path: 'evals/skill-contracts/visual-verdict-pressure-v7.json',
+    sha256: '9998b9fbce625ebd720bf33d4696d64e1cda3b26f2477d4d49b1b4550223835b',
+  },
+  visualCoverageHistory: [{
+    path: 'evals/skill-contracts/visual-verdict-pressure-v6.json',
+    sha256: '1ce225c361bfb5185c8cac0f2870a5794eca5aedcb1b219af765c5231baaffba',
+    disposition: 'semantic-review-rejected',
+  }],
+  ticketPressureEvidence: {
+    ...EXPECTED_SKILL_CONTRACT_V8.ticketPressureEvidence,
+    scope: 'Validates inherited ticket cases only; it does not validate v9 visual coverage.',
   },
 };
 const EXPECTED_SOURCE_EVALUATION = {
@@ -775,6 +797,7 @@ test('the interaction safety core is active without rewriting broader Core evide
   assert.match(readFileSync(GITATTRIBUTES, 'utf8'), /^\/evals\/candidates\/interaction-safety-core-v6\.md text eol=lf$/m);
   assert.match(readFileSync(GITATTRIBUTES, 'utf8'), /^\/evals\/candidates\/visual-check-skill-v5\.md text eol=lf$/m);
   assert.match(readFileSync(GITATTRIBUTES, 'utf8'), /^\/evals\/candidates\/visual-check-openai-v5\.yaml text eol=lf$/m);
+  assert.match(readFileSync(GITATTRIBUTES, 'utf8'), /^\/evals\/candidates\/visual-check-durable-evidence-v6\.md text eol=lf$/m);
   assert.match(readFileSync(GITATTRIBUTES, 'utf8'), /^\/evals\/candidates\/spec-delivery-skill-v1\.md text eol=lf$/m);
   assert.match(readFileSync(GITATTRIBUTES, 'utf8'), /^\/docs\/superpowers\/specs\/2026-08-11-joeness-silent-core-and-spec-delivery-design\.md text eol=lf$/m);
   assert.match(readFileSync(GITATTRIBUTES, 'utf8'), /^\/docs\/superpowers\/specs\/2026-08-11-joeness-routing-and-plugin-policy-design\.md text eol=lf$/m);
@@ -785,7 +808,7 @@ test('candidate ledger separates the unvalidated active contract from retained h
   const manifest = JSON.parse(readFileSync(MANIFEST, 'utf8'));
   const current = manifest.evaluation.current;
   assert.deepEqual(current, EXPECTED_CURRENT_EVALUATION);
-  assert.deepEqual(manifest.evaluation.history, [EXPECTED_HYBRID_EVALUATION, EXPECTED_SKILL_CONTRACT_V2, EXPECTED_SKILL_CONTRACT_V3_REJECTED, EXPECTED_SKILL_CONTRACT_V4_REJECTED, EXPECTED_SKILL_CONTRACT_V5, EXPECTED_SKILL_CONTRACT_V6, EXPECTED_SKILL_CONTRACT_V7]);
+  assert.deepEqual(manifest.evaluation.history, [EXPECTED_HYBRID_EVALUATION, EXPECTED_SKILL_CONTRACT_V2, EXPECTED_SKILL_CONTRACT_V3_REJECTED, EXPECTED_SKILL_CONTRACT_V4_REJECTED, EXPECTED_SKILL_CONTRACT_V5, EXPECTED_SKILL_CONTRACT_V6, EXPECTED_SKILL_CONTRACT_V7, EXPECTED_SKILL_CONTRACT_V8]);
 
   for (const [name, expected] of Object.entries(EXPECTED_SOURCE_EVALUATION)) {
     assert.equal(manifest.sources[name].evaluationStatus, expected.evaluationStatus);
@@ -817,8 +840,60 @@ test('candidate ledger separates the unvalidated active contract from retained h
   const v7Cases = path.join(ROOT, ...EXPECTED_SKILL_CONTRACT_V7.cases.path.split('/'));
   assert.equal(lstatSync(v7Cases).size, 1237);
   assert.equal(sha256(v7Cases), EXPECTED_SKILL_CONTRACT_V7.cases.sha256);
-  assert.equal(lstatSync(path.join(ROOT, ...current.cases.path.split('/'))).size, 4376);
+  const v8Cases = path.join(ROOT, ...EXPECTED_SKILL_CONTRACT_V8.cases.path.split('/'));
+  assert.equal(lstatSync(v8Cases).size, 4376);
+  assert.equal(sha256(v8Cases), EXPECTED_SKILL_CONTRACT_V8.cases.sha256);
+  assert.equal(lstatSync(path.join(ROOT, ...current.cases.path.split('/'))).size, 2621);
   assert.equal(sha256(path.join(ROOT, ...current.cases.path.split('/'))), current.cases.sha256);
+  const coveragePressurePath = path.join(ROOT, ...current.visualCoverageEvidence.path.split('/'));
+  assert.equal(lstatSync(coveragePressurePath).size, 3148);
+  assert.equal(sha256(coveragePressurePath), current.visualCoverageEvidence.sha256);
+  const coveragePressure = JSON.parse(readFileSync(coveragePressurePath, 'utf8'));
+  assert.equal(coveragePressure.candidate.skill.sha256, EXPECTED_VISUAL_CHECK_SKILL.files[0].sha256);
+  assert.equal(coveragePressure.candidate.durableEvidence.sha256, EXPECTED_VISUAL_CHECK_SKILL.files[4].sha256);
+  assert.equal(coveragePressure.candidate.concreteDefect.sha256, EXPECTED_VISUAL_CHECK_SKILL.files[2].sha256);
+  assert.deepEqual(coveragePressure.samples.scores, {
+    controlMeaningDefectDetection: '2/2',
+    defaultPreviewDefectDetection: '2/2',
+    pixelPreviewDefectDetection: '2/2',
+    pairwiseGapOverlapObservation: '2/2',
+    opticalCenterObservation: '2/2',
+    narrowPassDoesNotUpgradeWholeScreen: '2/2',
+    combinedSurfacesIndependentVerdicts: '2/2',
+    userRejectionWithdrawsPropertyPass: '2/2',
+    userLanguageOverallVerdictFirst: '2/2',
+  });
+  assert.equal(coveragePressure.result, 'candidate-pressure-regression-pass');
+  assert.equal(coveragePressure.classification, 'candidate-unvalidated');
+  assert.equal(coveragePressure.semanticImprovement, 'not-asserted');
+  assert.equal(coveragePressure.promotionPass, false);
+  assert.equal(coveragePressure.evidence.every(({ sourceTracked }) => sourceTracked === false), true);
+  const coverageRawPath = path.join(ROOT, ...coveragePressure.rawEvidence.path.split('/'));
+  assert.equal(lstatSync(coverageRawPath).size, 5638);
+  assert.equal(lstatSync(coverageRawPath).size, coveragePressure.rawEvidence.bytes);
+  assert.equal(sha256(coverageRawPath), coveragePressure.rawEvidence.sha256);
+  const coverageRaw = readFileSync(coverageRawPath, 'utf8');
+  assert.match(coverageRaw, /## Sample 1[\s\S]*## Sample 2[\s\S]*## Limitations/);
+  assert.match(coverageRaw, /### A[\s\S]*FAIL[\s\S]*### B[\s\S]*UNVERIFIED[\s\S]*### C[\s\S]*Collection[\s\S]*UNVERIFIED[\s\S]*### D[\s\S]*(?:철회|withdraw)/);
+  const rejectedCoveragePath = path.join(ROOT, ...current.visualCoverageHistory[0].path.split('/'));
+  assert.equal(lstatSync(rejectedCoveragePath).size, 3050);
+  assert.equal(sha256(rejectedCoveragePath), current.visualCoverageHistory[0].sha256);
+  const rejectedCoverage = JSON.parse(readFileSync(rejectedCoveragePath, 'utf8'));
+  assert.equal(rejectedCoverage.result, 'candidate-pressure-partial-failure');
+  assert.equal(rejectedCoverage.classification, 'semantic-review-rejected');
+  assert.deepEqual(rejectedCoverage.samples.scores, {
+    controlMeaningDefectDetection: '2/2',
+    defaultPreviewDefectDetection: '0/2',
+    pixelPreviewDefectDetection: '2/2',
+    narrowPassDoesNotUpgradeWholeScreen: '2/2',
+    combinedSurfacesIndependentVerdicts: '2/2',
+    userRejectionWithdrawsPropertyPass: '2/2',
+    userLanguageOverallVerdictFirst: '2/2',
+  });
+  assert.equal(coveragePressure.supersedes.sha256, current.visualCoverageHistory[0].sha256);
+  const rejectedDurable = path.join(ROOT, ...rejectedCoverage.candidate.durableEvidence.path.split('/'));
+  assert.equal(lstatSync(rejectedDurable).size, rejectedCoverage.candidate.durableEvidence.bytes);
+  assert.equal(sha256(rejectedDurable), rejectedCoverage.candidate.durableEvidence.sha256);
   const visualV5 = manifest.evaluation.history.find(({ mode }) => mode === 'active-skill-contract-v5');
   assert.equal(current.visualPredecessorEvidence.pressure.path, visualV5.pressureEvidence.path);
   assert.equal(current.visualPredecessorEvidence.pressure.sha256, visualV5.pressureEvidence.sha256);
@@ -937,7 +1012,7 @@ test('candidate ledger separates the unvalidated active contract from retained h
   assert.equal(sha256(ticketPressurePath), current.ticketPressureEvidence.sha256);
   const ticketPressure = JSON.parse(readFileSync(ticketPressurePath, 'utf8'));
   assert.equal(ticketPressure.skill.sha256, EXPECTED_TICKET_SKILL.files[0].sha256);
-  assert.equal(ticketPressure.cases.sha256, current.cases.sha256);
+  assert.equal(ticketPressure.cases.sha256, EXPECTED_SKILL_CONTRACT_V8.cases.sha256);
   assert.equal(ticketPressure.routing.candidateSampleCount, 5);
   assert.deepEqual(new Set(Object.values(ticketPressure.routing.scores)), new Set(['5/5']));
   assert.equal(ticketPressure.orchestration.implementerCandidateCreated, true);

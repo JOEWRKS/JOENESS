@@ -6,10 +6,12 @@
     "state": "candidate",
     "tests": ["tests/design-vendor-integrity.tests.mjs", "tests/thin-hybrid-core.tests.mjs", "tests/skill-contracts.tests.mjs", "vendor/ui-ux-pro-max/scripts/validate_data.py", "vendor/ui-ux-pro-max/scripts/tests/test_core.py"],
     "current": {
-      "mode": "active-skill-contract-v8",
-      "version": 8,
+      "mode": "active-skill-contract-v9",
+      "version": 9,
       "state": "unvalidated",
-      "cases": {"path":"evals/skill-contracts/cases-v8.json","sha256":"9f59ccbe5e52c66de08abd5ebf483a0bdb9036c726c742439e641ab856ac4f4c"},
+      "cases": {"path":"evals/skill-contracts/cases-v9.json","sha256":"b9aa05ea16b0e57f3bc233dc148db046bf4b9d1ea0306c0e5a8ca5bac27d40b2"},
+      "visualCoverageEvidence": {"path":"evals/skill-contracts/visual-verdict-pressure-v7.json","sha256":"9998b9fbce625ebd720bf33d4696d64e1cda3b26f2477d4d49b1b4550223835b"},
+      "visualCoverageHistory": [{"path":"evals/skill-contracts/visual-verdict-pressure-v6.json","sha256":"1ce225c361bfb5185c8cac0f2870a5794eca5aedcb1b219af765c5231baaffba","disposition":"semantic-review-rejected"}],
       "visualPredecessorEvidence": {
         "pressure": {"path":"evals/skill-contracts/visual-verdict-pressure-v5.json","sha256":"e1dec17c021bbb9fb68dd562d67b6c00dce5cb9e6e387918366fe15c8fe347ee"},
         "skill": {"path":"evals/candidates/visual-check-skill-v5.md","bytes":7290,"sha256":"a90a23f72b48581a65a3ba30e2fa7b3592a64d30506d7c4122754323e568e1bf"},
@@ -18,7 +20,7 @@
       },
       "specPressureEvidence": {"path":"evals/skill-contracts/spec-delivery-pressure-v2.json","sha256":"46e9eae98f0507d1af3c05d43a4409bcf09d85d12cd1ecb33b48d9bb958103d2"},
       "specPressureHistory": [{"path":"evals/skill-contracts/spec-delivery-pressure-v1-semantic-review.json","sha256":"ba605b10c5428a0c9074f514dd3e32e9c93435843ef78427188a0561af94594b","disposition":"semantic-review-rejected"}],
-      "ticketPressureEvidence": {"path":"evals/skill-contracts/ticket-delivery-pressure-v1.json","sha256":"c682e16e377eda576cb981d81d9db833067b2b5a5a8be3aa189604f99342b882"},
+      "ticketPressureEvidence": {"path":"evals/skill-contracts/ticket-delivery-pressure-v1.json","sha256":"c682e16e377eda576cb981d81d9db833067b2b5a5a8be3aa189604f99342b882","scope":"Validates inherited ticket cases only; it does not validate v9 visual coverage."},
       "hardGate": "unverified",
       "classification": "candidate",
       "outcomeReview": "pending",
@@ -120,6 +122,25 @@
       "outcomeReview": "pending",
       "semanticImprovement": "not-asserted",
       "promotionPass": false
+    }, {
+      "mode": "active-skill-contract-v8",
+      "version": 8,
+      "state": "unvalidated",
+      "cases": {"path":"evals/skill-contracts/cases-v8.json","sha256":"9f59ccbe5e52c66de08abd5ebf483a0bdb9036c726c742439e641ab856ac4f4c"},
+      "visualPredecessorEvidence": {
+        "pressure": {"path":"evals/skill-contracts/visual-verdict-pressure-v5.json","sha256":"e1dec17c021bbb9fb68dd562d67b6c00dce5cb9e6e387918366fe15c8fe347ee"},
+        "skill": {"path":"evals/candidates/visual-check-skill-v5.md","bytes":7290,"sha256":"a90a23f72b48581a65a3ba30e2fa7b3592a64d30506d7c4122754323e568e1bf"},
+        "metadata": {"path":"evals/candidates/visual-check-openai-v5.yaml","bytes":1114,"sha256":"564320118d97ade92d8645c92bf08026694662c0a47979cb4ea4bce745e67ee8"},
+        "scope": "Rejected or superseded predecessor evidence only; it does not validate the compact current skill."
+      },
+      "specPressureEvidence": {"path":"evals/skill-contracts/spec-delivery-pressure-v2.json","sha256":"46e9eae98f0507d1af3c05d43a4409bcf09d85d12cd1ecb33b48d9bb958103d2"},
+      "specPressureHistory": [{"path":"evals/skill-contracts/spec-delivery-pressure-v1-semantic-review.json","sha256":"ba605b10c5428a0c9074f514dd3e32e9c93435843ef78427188a0561af94594b","disposition":"semantic-review-rejected"}],
+      "ticketPressureEvidence": {"path":"evals/skill-contracts/ticket-delivery-pressure-v1.json","sha256":"c682e16e377eda576cb981d81d9db833067b2b5a5a8be3aa189604f99342b882"},
+      "hardGate": "unverified",
+      "classification": "candidate",
+      "outcomeReview": "pending",
+      "semanticImprovement": "not-asserted",
+      "promotionPass": false
     }]
   },
   "compatibility": {
@@ -166,7 +187,7 @@
       "intentionalDifferences": ["Local activation and routing contract.", "Local OpenAI product metadata."],
       "validatorSha256": "5347a0a09cfb546bba1c0d1a30dae0a233d9a05f57bd4e7877155c588bcdabf7",
       "files": [
-        {"localPath":"skills/design/SKILL.md","bytes":4234,"sha256":"8c3f872e412eb8d46abe505884dca650471373ce2130d7ff618013e2007394f8","exactUpstreamCopy":false},
+        {"localPath":"skills/design/SKILL.md","bytes":4779,"sha256":"517ac4d6281b0ff00303d7ba86874c7381a1e4ee2b360f3a11e46c9a77b52771","exactUpstreamCopy":false},
         {"localPath":"skills/design/agents/openai.yaml","bytes":389,"sha256":"84f5e052fcb403f3f2675fc16d25e60197defcc07128c383f8181e34a886a17a","exactUpstreamCopy":false}
       ]
     },
@@ -235,11 +256,11 @@
       "intentionalDifferences": ["Compact visual-completion router with always-required durable evidence and conditional defect or translation references.", "Local OpenAI product metadata."],
       "validatorSha256": "5347a0a09cfb546bba1c0d1a30dae0a233d9a05f57bd4e7877155c588bcdabf7",
       "files": [
-        {"localPath":"skills/visual-check/SKILL.md","bytes":3427,"sha256":"cdf7b9953881489ce1814ea8899886cb4fb7ea90262f240bd26795d1633d608e","exactUpstreamCopy":false},
-        {"localPath":"skills/visual-check/agents/openai.yaml","bytes":567,"sha256":"e129e686690c0632e6cded20629e69d131c340c6fb4706fd0a768dc7c762117d","exactUpstreamCopy":false},
-        {"localPath":"skills/visual-check/references/concrete-defect.md","bytes":646,"sha256":"8d16f895a6e40e4325139de00c4d547aca7f9228913495237348ac77df51d2c6","exactUpstreamCopy":false},
+        {"localPath":"skills/visual-check/SKILL.md","bytes":3453,"sha256":"7bd9b1406073f844da71c0075d5cddb69778425997bb2ec42b74b36fa3996903","exactUpstreamCopy":false},
+        {"localPath":"skills/visual-check/agents/openai.yaml","bytes":603,"sha256":"bffc2c66c0534431d56ae1998f2680fde94742775fc43b9d7bf7e74dbdb8021f","exactUpstreamCopy":false},
+        {"localPath":"skills/visual-check/references/concrete-defect.md","bytes":935,"sha256":"1a620c8ef21081597ab1bf87b84b7dfc0d9b7ebe8cdacffbc10a31318831a209","exactUpstreamCopy":false},
         {"localPath":"skills/visual-check/references/approved-reference.md","bytes":1040,"sha256":"44ad3edecfbda7639a13324aeaadd9ca581aa5379c105fdf6c2dba806274a424","exactUpstreamCopy":false},
-        {"localPath":"skills/visual-check/references/durable-evidence.md","bytes":3056,"sha256":"bc543ab07c275a12d0c110f839562f9e5884f97281920dae38fe55c0a402a1cd","exactUpstreamCopy":false}
+        {"localPath":"skills/visual-check/references/durable-evidence.md","bytes":3853,"sha256":"3a2b56bd7ad8474c0f05f9cf46a4df29b6bd2a29fc777e2b28bdef952b6a8246","exactUpstreamCopy":false}
       ]
     }
   },

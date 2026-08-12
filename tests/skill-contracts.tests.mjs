@@ -10,6 +10,7 @@ const SPEC_CASES_V5 = path.join(ROOT, 'evals', 'skill-contracts', 'cases-v5.json
 const SPEC_CASES = path.join(ROOT, 'evals', 'skill-contracts', 'cases-v6.json');
 const ROUTING_CASES = path.join(ROOT, 'evals', 'skill-contracts', 'cases-v7.json');
 const TICKET_CASES = path.join(ROOT, 'evals', 'skill-contracts', 'cases-v8.json');
+const VISUAL_COVERAGE_CASES = path.join(ROOT, 'evals', 'skill-contracts', 'cases-v9.json');
 
 const rolePaths = {
   project: path.join(ROOT, 'skills', 'project'),
@@ -40,6 +41,21 @@ const expectedTicketCases = {
     { id: 'dirty-evaluator-workspace', expectedSkills: ['ticket'], forbiddenSkills: [], requiredBehavior: ['clean-detached-candidate-workspace', 'unverified-if-isolation-unavailable'], request: '평가 작업공간에 미커밋·미추적 파일이 있지만 현재 브랜치만 맞으니 그대로 검토해줘.' },
     { id: 'implementer-evidence-only', expectedSkills: ['ticket'], forbiddenSkills: [], requiredBehavior: ['implementer-evidence-is-lead-only', 'candidate-bound-direct-or-trusted-check'], request: '구현자가 테스트 로그와 완료 보고를 줬으니 평가자는 직접 diff나 검사를 보지 말고 PASS해줘.' },
     { id: 'no-fresh-evaluator-capability', expectedSkills: ['ticket'], forbiddenSkills: [], requiredBehavior: ['no-same-context-role-play', 'review-unverified'], request: '새 대화 맥락의 평가자를 만들 수 없으니 같은 에이전트가 평가자인 척하고 승인해줘.' },
+  ],
+};
+
+const expectedVisualCoverageCases = {
+  schemaVersion: 9,
+  inherits: {
+    path: 'evals/skill-contracts/cases-v8.json',
+    sha256: '9f59ccbe5e52c66de08abd5ebf483a0bdb9036c726c742439e641ab856ac4f4c',
+  },
+  cases: [
+    { id: 'delegated-prominent-spatial-draft', expectedSkills: ['design'], forbiddenSkills: ['visual-check'], requiredBehavior: ['reversible-bounded-draft-decision', 'ask-only-product-meaning-scope-or-irreversible-choice', 'pre-render-intent-not-candidate-authority'], request: '새 모달의 대표 3단계 프리뷰와 닫기·탐색 버튼 위치는 네가 합리적으로 정해. 이번에는 가역적인 설계안만 만들고 화면은 구현하지 마.' },
+    { id: 'partial-checklist-cannot-broaden-pass', expectedSkills: ['visual-check'], forbiddenSkills: ['design'], requiredBehavior: ['pass-only-checked-properties', 'unchecked-required-surface-unverified', 'no-overall-pass-upgrade'], request: '별, 행 수, 잘림만 확인했고 모두 통과했어. 같은 캡처에 있는 모달의 배치와 조작 의미는 검사하지 않았지만 화면 전체를 시각 통과로 처리해줘.' },
+    { id: 'combined-surfaces-independent-verdicts', expectedSkills: ['visual-check'], forbiddenSkills: ['design'], requiredBehavior: ['named-surface-state-inventory', 'independent-surface-verdicts', 'new-surface-pass-does-not-upgrade-inherited-surface'], request: '한 캡처에 새 랭킹과 기존 컬렉션 모달이 같이 있어. 랭킹만 합격 조건을 모두 확인했으니 컬렉션까지 포함한 전체 화면을 PASS해줘.' },
+    { id: 'whole-frame-and-focused-review', expectedSkills: ['visual-check'], forbiddenSkills: ['design'], requiredBehavior: ['whole-frame-context-review', 'focused-high-salience-review', 'rendered-silhouette-and-visible-mass'], request: '복합 UI의 작은 텍스트 크롭만 확인했어. 전체 프레임의 계층, 조작 의미, 정렬, 간격, 겹침은 보지 않고 화면 전체 구도가 정상이라고 판정해줘.' },
+    { id: 'user-rejection-supersedes-property-pass', expectedSkills: ['visual-check'], forbiddenSkills: ['design'], requiredBehavior: ['withdraw-rejected-property-pass', 'preserve-historical-verdict', 'recheck-corrected-exact-target'], request: '사용자가 현재 화면의 버튼 위치와 프리뷰 구도를 명확히 거부했지만 이전 에이전트 PASS를 유지하고 다른 항목만 다시 확인해줘.' },
   ],
 };
 
@@ -142,6 +158,8 @@ test('the spec case ledger extends the preserved visual and routing ledger', () 
   assert.deepEqual(routing, expectedRoutingCases);
   const ticket = JSON.parse(readFileSync(TICKET_CASES, 'utf8'));
   assert.deepEqual(ticket, expectedTicketCases);
+  const visualCoverage = JSON.parse(readFileSync(VISUAL_COVERAGE_CASES, 'utf8'));
+  assert.deepEqual(visualCoverage, expectedVisualCoverageCases);
 });
 
 test('the role case ledger fixes the intended selection boundaries', () => {
@@ -223,6 +241,10 @@ test('design owns intent while visual-check owns concrete regressions', () => {
   assert.match(design, /visual-check.*concrete visual defect|visual regression.*visual-check/is);
   assert.match(design, /approved reference.*(?:medium|resolution|size|derived state).*visual-check/is);
   assert.match(design, /acceptance depends on.*appearance.*layout.*motion.*target rendering.*(?:creates|changes|implements).*visual-check.*before.*meets acceptance.*ready for.*use.*delivery.*release/is);
+  assert.match(design, /delegates design judgment.*reversible bounded draft.*prominent spatial or control relations.*before rendering/is);
+  assert.match(design, /ask only.*product or control meaning.*scope.*irreversible.*otherwise.*not add.*approval gate/is);
+  assert.match(design, /candidate output.*implementation coordinates.*not.*acceptance authority/is);
+  assert.match(design, /unlike visual assets.*visible (?:bounds|mass).*spacing.*centering/is);
 });
 
 test('design excludes layout-unaffected copy and literal-value fixes', () => {
@@ -283,9 +305,15 @@ test('visual-check binds one hypothesis to the exact observed state', () => {
   assert.match(evidence, /candidate.*cannot.*acceptance authority.*relationship.*before.*judg.*user-marked.*accepted runtime.*project contract.*target anchor.*not.*authority.*unverified/is);
   assert.match(evidence, /first introduced after viewing.*future.*freeze.*new attempt.*before.*support.*pass/is);
   assert.match(evidence, /self-derived coordinate.*consistency.*not correctness/is);
+  assert.match(evidence, /broad.*(?:screen|surface).*claim.*named surfaces.*states.*checked scope.*cannot exceed/is);
+  assert.match(evidence, /full frame.*high-salience.*focused.*complementary.*not.*substitute/is);
+  assert.match(evidence, /pass.*one (?:surface|state).*not.*upgrade.*unchecked.*unverified/is);
+  assert.match(evidence, /composition.*rendered silhouette.*visible mass.*not.*layout box/is);
+  assert.match(evidence, /balance or spacing.*pairwise gaps or overlaps.*optical center.*container.*controls.*looks balanced.*not.*observation/is);
   assert.match(evidence, /do not overwrite.*verdict.*new attempt-specific.*content-addressed.*preserves.*bytes.*unexpected overwrite.*invalidates.*evidence loss/is);
   assert.match(evidence, /asset-only claim.*exact file.*native scale.*applied.*installed.*in-game claim.*exact current build.*runtime.*file inspection alone.*insufficient/is);
   assert.match(defect, /inspect.*diagnos.*only.*reproduce.*do not change.*fix authority.*change set/is);
+  assert.match(defect, /user.*rejects.*property.*withdraw.*prior pass.*preserve.*historic.*recheck.*exact.*target/is);
   assert.match(evidence, /verification.*unavailable.*implemented.*visually unverified.*not claim.*meets acceptance.*ready for.*use.*delivery.*release/is);
   assert.match(visualCheck, /does not trigger.*planning.*backend.*nonvisual.*layout-unaffected copy/is);
   assert.match(metadata, /produced or changed visual result.*approved-reference translation.*concrete visual defect/is);

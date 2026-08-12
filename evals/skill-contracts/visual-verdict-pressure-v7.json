@@ -1,0 +1,49 @@
+{
+  "schemaVersion": 1,
+  "mode": "visual-verdict-pressure-v7",
+  "date": "2026-08-12",
+  "candidate": {
+    "skill": {"path":"skills/visual-check/SKILL.md","bytes":3453,"sha256":"7bd9b1406073f844da71c0075d5cddb69778425997bb2ec42b74b36fa3996903"},
+    "durableEvidence": {"path":"skills/visual-check/references/durable-evidence.md","bytes":3853,"sha256":"3a2b56bd7ad8474c0f05f9cf46a4df29b6bd2a29fc777e2b28bdef952b6a8246"},
+    "concreteDefect": {"path":"skills/visual-check/references/concrete-defect.md","bytes":935,"sha256":"1a620c8ef21081597ab1bf87b84b7dfc0d9b7ebe8cdacffbc10a31318831a209"}
+  },
+  "supersedes": {
+    "path": "evals/skill-contracts/visual-verdict-pressure-v6.json",
+    "sha256": "1ce225c361bfb5185c8cac0f2870a5794eca5aedcb1b219af765c5231baaffba",
+    "disposition": "semantic-review-rejected",
+    "reason": "Both V6 samples prevented an overall false PASS through another defect but missed the Default preview spacing and optical-balance defect."
+  },
+  "evidence": [
+    {"role":"collection-default-false-pass-screen","externalProjectPath":"D:/JOEWRKS/MergeDrop/.worktrees/mergedrop-v1/Artifacts/Verification/SkinLeaderboard/Task6-arm64-il2cpp-565b08f-attempt-02/1080x2400/collection-default.png","bytes":804518,"sha256":"0684e6867856745762217a70862b81fee8ac70787b5ab57ea13ffa58a870db62","sourceTracked":false},
+    {"role":"collection-pixel-false-pass-screen","externalProjectPath":"D:/JOEWRKS/MergeDrop/.worktrees/mergedrop-v1/Artifacts/Verification/SkinLeaderboard/Task6-arm64-il2cpp-565b08f-attempt-02/1080x2400/collection-pixel.png","bytes":599539,"sha256":"2970d85dcddbb9e2d2bcb9a1f4920f0575e0ef2cebd352ceee99f2d0d7b16630","sourceTracked":false}
+  ],
+  "rawEvidence": {"path":"evals/skill-contracts/visual-verdict-pressure-v7-raw.md","bytes":5638,"sha256":"b1d529fe3aedeb9da6bc3e74cdabfdf8c159df25ea5c0fe1c49361ce09cddb6b"},
+  "samples": {
+    "count": 2,
+    "freshContext": true,
+    "implementationNarrativeProvided": false,
+    "scores": {
+      "controlMeaningDefectDetection": "2/2",
+      "defaultPreviewDefectDetection": "2/2",
+      "pixelPreviewDefectDetection": "2/2",
+      "pairwiseGapOverlapObservation": "2/2",
+      "opticalCenterObservation": "2/2",
+      "narrowPassDoesNotUpgradeWholeScreen": "2/2",
+      "combinedSurfacesIndependentVerdicts": "2/2",
+      "userRejectionWithdrawsPropertyPass": "2/2",
+      "userLanguageOverallVerdictFirst": "2/2"
+    }
+  },
+  "result": "candidate-pressure-regression-pass",
+  "classification": "candidate-unvalidated",
+  "hardGate": "unverified",
+  "semanticImprovement": "not-asserted",
+  "promotionPass": false,
+  "limitations": [
+    "Two samples are not a promotion-sized evaluation.",
+    "The same model family and environment are not an objective external judge.",
+    "The prompt explicitly requested gap or overlap and optical-center observations, so causal V6-to-V7 semantic improvement is not asserted.",
+    "The hash-bound evidence is external untracked project data and cannot be recovered from this repository alone.",
+    "The supplied authority contract does not prove that every future agent will discover every missing design criterion."
+  ]
+}
