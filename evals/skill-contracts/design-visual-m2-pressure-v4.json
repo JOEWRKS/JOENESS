@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 4,
+  "id": "design-visual-m2-pressure-v4",
+  "date": "2026-08-12",
+  "predecessor": {
+    "path": "evals/skill-contracts/design-visual-m2-pressure-v3.json",
+    "bytes": 1919,
+    "sha256": "e6c853ab502ef24b1043858054f9548d2b648f72f769eddfd4fe77e1f9bec1a1",
+    "disposition": "semantic-review-rejected"
+  },
+  "candidate": {
+    "cases": {"path":"evals/skill-contracts/cases-v12.json","bytes":1235,"sha256":"94b5eec0368769e568f13c491b4ca05bc56fd3f2c795cb1caf84089134c4692d"},
+    "designSkill": {"path":"skills/design/SKILL.md","bytes":5136,"sha256":"02fd9c60cab4a82e956618d975c676285fb778ebc8c7781ff62bff13275550b1"},
+    "visualSkill": {"path":"skills/visual-check/SKILL.md","bytes":3453,"sha256":"7bd9b1406073f844da71c0075d5cddb69778425997bb2ec42b74b36fa3996903"},
+    "approvedReference": {"path":"skills/visual-check/references/approved-reference.md","bytes":2972,"sha256":"caea02b7f176d07fbca66133f82b4e7ebb8a5bb8ec441e1e4defa26d0f2c9525"},
+    "durableEvidence": {"path":"skills/visual-check/references/durable-evidence.md","bytes":3853,"sha256":"3a2b56bd7ad8474c0f05f9cf46a4df29b6bd2a29fc777e2b28bdef952b6a8246"},
+    "fixtureManifest": {"path":"evals/skill-contracts/visual-m2-fixtures-v2.json","bytes":4310,"sha256":"e5316787de5e543a6c550f7f0f43da7276b110f01980ef8f6904a27b01a58b63"}
+  },
+  "rawEvidence": {
+    "path": "evals/skill-contracts/design-visual-m2-pressure-v4-raw.json",
+    "bytes": 6901,
+    "sha256": "3b760f5bc8082bda84beb62cde495ce860adca5f1c197a35f9ed714e45eed4f8",
+    "form": "root-normalized-agent-final-reports"
+  },
+  "samples": {
+    "reportedFreshContextRuns": 6,
+    "scores": {
+      "designCriteriaSelfDerivedBeforeCandidate": "1/1",
+      "candidateCoordinatesRejectedAsAuthority": "1/1",
+      "mergeDropKnownDefectsDetected": "2/2",
+      "mergeDropInstalledPositiveControlsPassed": "2/2",
+      "rvrV4IconFailureDetected": "1/1",
+      "rvrV4DirectionFailuresDetected": "2/2",
+      "rvrAcceptedEastStructuralPassPreserved": "1/1",
+      "rvrAcceptedEastNativeAmbiguityNotOverclaimed": "1/1",
+      "rvrRejectedRuntimeFailureDetected": "1/1",
+      "rvrCorrectedStaticRelationPassScoped": "1/1",
+      "correctedRuntimeLeftUnverified": "1/1",
+      "partialAndOverallVerdictsSeparated": "3/6",
+      "finalFalsePositiveCount": 0,
+      "finalFalseNegativeCount": 0
+    }
+  },
+  "groundTruth": [
+    {"path":"evals/skill-contracts/fixtures/visual-m2-v1/ground-truth/49a38c9f319d90a4c06ff0fce554520cd3c89bef5e9a441ab6e1340ea7acffb0.md","bytes":52647,"sha256":"49a38c9f319d90a4c06ff0fce554520cd3c89bef5e9a441ab6e1340ea7acffb0"},
+    {"path":"evals/skill-contracts/fixtures/visual-m2-v1/ground-truth/4c911da1d44bb717872c1bdba683139b5ce514b0b7fb5165537c46f9b8224ad1.md","bytes":2863,"sha256":"4c911da1d44bb717872c1bdba683139b5ce514b0b7fb5165537c46f9b8224ad1"}
+  ],
+  "result": "m2-curated-static-regression-pass",
+  "classification": "candidate-m2-partial",
+  "semanticImprovement": "observed-for-curated-static-scenarios",
+  "hardGate": "m2-static-pass-only",
+  "outcomeReview": "partial",
+  "promotionPass": false,
+  "limitations": [
+    "The final corrected RVR runtime, diagonal aim, and firing state remain UNVERIFIED.",
+    "The MergeDrop positive controls are exact installed static captures; interaction, focus, pressed state, and other viewports remain UNVERIFIED.",
+    "Design criteria and Visual Check inputs were not retained as one content-bound handoff artifact in this run.",
+    "Fresh-context flags and ground-truth withholding are root-normalized reports, not retained transport-level provenance.",
+    "M3 through M6 are not validated; this evidence cannot promote the complete JOENESS contract."
+  ]
+}

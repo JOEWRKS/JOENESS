@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 2,
+  "id": "design-visual-m2-visual-run-manifest-v2",
+  "date": "2026-08-12",
+  "predecessor": {
+    "manifest": {"path":"evals/skill-contracts/design-visual-m2-visual-run-manifest-v1.json","bytes":908,"sha256":"f83058ebe195415933cf933f4955cfb21e5ee0ba5cb905f2b0223a1a7a8b234e"},
+    "blockedResult": {"path":"evals/skill-contracts/design-visual-m2-visual-run-v1-blocked.json","bytes":1069,"sha256":"e6dacf1b316a8522b38248022315122511ed2f20667f60a7108e4c77167c082b"}
+  },
+  "methodChange": "Group all applicable Design IDs into at most seven observed check groups per candidate; acceptance rules and input bytes are unchanged.",
+  "prompt": {"path":"evals/skill-contracts/design-visual-m2-visual-prompt-v2.md","bytes":1406,"sha256":"8c70a67256094098dc9523308de1783833f81521077c7739ed1729b72fb46d78"},
+  "handoff": {"path":"evals/skill-contracts/design-visual-m2-handoff-v1.json","bytes":2215,"sha256":"310900eae7a271f2adbaf7a138a7ffb5a2293b307c0deda45858139c3e11e03a"},
+  "visualInput": {"path":"evals/skill-contracts/design-visual-m2-visual-input-v1.json","bytes":3109,"sha256":"55df43bfc23234457d4156cb115e36c1ea71882abcc06bcd06cf6b24ac16546f"},
+  "execution": {
+    "forkTurns": "none",
+    "writePolicy": "read-only",
+    "expectedOutput": "one JSON object under 2500 words",
+    "forbiddenBeforeVerdict": ["fixture manifests", "pressure artifacts", "ground-truth documents", "incident reports", "prior verdicts", "external project files"]
+  }
+}

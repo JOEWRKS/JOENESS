@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "id": "design-visual-m2-visual-run-v1-blocked",
+  "date": "2026-08-12",
+  "runManifest": {"path":"evals/skill-contracts/design-visual-m2-visual-run-manifest-v1.json","bytes":908,"sha256":"f83058ebe195415933cf933f4955cfb21e5ee0ba5cb905f2b0223a1a7a8b234e"},
+  "taskName": "/root/m2_visual_fresh_v1",
+  "forkTurns": "none",
+  "observedProgress": "The evaluator reported that every pinned hash was verified and the approved source plus four candidates were opened at original detail.",
+  "result": "blocked-no-final-output",
+  "handling": "The root interrupted after repeated bounded waits and a direct request for a concise final response produced no terminal result.",
+  "methodChangeForNextRun": "Keep the same authority and candidate bytes, but group multiple Design check IDs under at most seven directly observed check groups per candidate.",
+  "limitations": [
+    "No evaluator final verdict was returned, so this run proves no behavior outcome.",
+    "The progress statement is an agent report, not retained tool-event provenance."
+  ]
+}

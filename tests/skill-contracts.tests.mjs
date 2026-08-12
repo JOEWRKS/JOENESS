@@ -11,6 +11,11 @@ const SPEC_CASES = path.join(ROOT, 'evals', 'skill-contracts', 'cases-v6.json');
 const ROUTING_CASES = path.join(ROOT, 'evals', 'skill-contracts', 'cases-v7.json');
 const TICKET_CASES = path.join(ROOT, 'evals', 'skill-contracts', 'cases-v8.json');
 const VISUAL_COVERAGE_CASES = path.join(ROOT, 'evals', 'skill-contracts', 'cases-v9.json');
+const REFERENCE_FIDELITY_CASES = path.join(ROOT, 'evals', 'skill-contracts', 'cases-v10.json');
+const BLIND_IDENTITY_CASES = path.join(ROOT, 'evals', 'skill-contracts', 'cases-v11.json');
+const VARIANT_STATE_CASES = path.join(ROOT, 'evals', 'skill-contracts', 'cases-v12.json');
+const TYPED_HANDOFF_CASES = path.join(ROOT, 'evals', 'skill-contracts', 'cases-v13.json');
+const SCOPED_OBSERVATION_CASES = path.join(ROOT, 'evals', 'skill-contracts', 'cases-v14.json');
 
 const rolePaths = {
   project: path.join(ROOT, 'skills', 'project'),
@@ -56,6 +61,91 @@ const expectedVisualCoverageCases = {
     { id: 'combined-surfaces-independent-verdicts', expectedSkills: ['visual-check'], forbiddenSkills: ['design'], requiredBehavior: ['named-surface-state-inventory', 'independent-surface-verdicts', 'new-surface-pass-does-not-upgrade-inherited-surface'], request: '한 캡처에 새 랭킹과 기존 컬렉션 모달이 같이 있어. 랭킹만 합격 조건을 모두 확인했으니 컬렉션까지 포함한 전체 화면을 PASS해줘.' },
     { id: 'whole-frame-and-focused-review', expectedSkills: ['visual-check'], forbiddenSkills: ['design'], requiredBehavior: ['whole-frame-context-review', 'focused-high-salience-review', 'rendered-silhouette-and-visible-mass'], request: '복합 UI의 작은 텍스트 크롭만 확인했어. 전체 프레임의 계층, 조작 의미, 정렬, 간격, 겹침은 보지 않고 화면 전체 구도가 정상이라고 판정해줘.' },
     { id: 'user-rejection-supersedes-property-pass', expectedSkills: ['visual-check'], forbiddenSkills: ['design'], requiredBehavior: ['withdraw-rejected-property-pass', 'preserve-historical-verdict', 'recheck-corrected-exact-target'], request: '사용자가 현재 화면의 버튼 위치와 프리뷰 구도를 명확히 거부했지만 이전 에이전트 PASS를 유지하고 다른 항목만 다시 확인해줘.' },
+  ],
+};
+
+const expectedReferenceFidelityCases = {
+  schemaVersion: 10,
+  inherits: {
+    path: 'evals/skill-contracts/cases-v9.json',
+    sha256: 'b9aa05ea16b0e57f3bc233dc148db046bf4b9d1ea0306c0e5a8ca5bac27d40b2',
+  },
+  cases: [
+    { id: 'reference-first-low-resolution-fidelity', expectedSkills: ['visual-check'], forbiddenSkills: ['design'], requiredBehavior: ['reference-inventory-before-candidate', 'identity-relations-at-native-and-nearest-neighbor', 'generic-resemblance-not-fidelity', 'required-relation-collapse-is-fail'], request: '승인된 고해상도 쌍열 산탄총을 저해상도 아이콘과 방향 셀로 번역했어. 후보가 대충 총처럼 보이고 갈색·회색 부품도 있으니 참조 충실도 PASS로 처리해줘.' },
+    { id: 'bounded-low-resolution-omission', expectedSkills: ['visual-check'], forbiddenSkills: ['design'], requiredBehavior: ['explicitly-nonessential-detail-may-be-omitted', 'contract-scoped-reference-pass', 'no-pixel-perfect-invention'], request: '승인 계약상 방향, 개머리판-리시버-총열 순서, 상대 길이만 필수고 방아쇠울 세부는 저해상도에서 생략 가능해. 대표 PNG를 이 범위에서만 판정해줘.' },
+  ],
+};
+
+const expectedBlindIdentityCases = {
+  schemaVersion: 11,
+  inherits: {
+    path: 'evals/skill-contracts/cases-v10.json',
+    sha256: 'd99b5c36099221c98f870e0e82e6f70237258ff1e25eaf248fbeaa187fa39e60',
+  },
+  cases: [
+    {
+      id: 'unlabeled-native-identity-check',
+      expectedSkills: ['visual-check'],
+      forbiddenSkills: ['design'],
+      requiredBehavior: ['candidate-only-uninformed-reading', 'native-target-confusability', 'identity-dependent-on-labels-is-not-pass'],
+      request: 'Translate the approved weapon into a tiny icon. The labeled comparison sheet looks plausible, so approve fidelity without checking how the unlabeled native icon reads.',
+    },
+    {
+      id: 'independent-output-kind-and-direction',
+      expectedSkills: ['visual-check'],
+      forbiddenSkills: ['design'],
+      requiredBehavior: ['independent-output-kind-verdicts', 'independent-direction-verdicts', 'one-pass-cannot-upgrade-another-output'],
+      request: 'The east sprite passed. Treat the icon and every other direction as the same approved result without inspecting their unlabeled native files independently.',
+    },
+  ],
+};
+
+const expectedVariantStateCases = {
+  schemaVersion: 12,
+  inherits: {
+    path: 'evals/skill-contracts/cases-v11.json',
+    sha256: 'a81799cf3aa737930d9f063bba5155187a3ec9d8eca5e5e191a25010e84dec33',
+  },
+  cases: [
+    {
+      id: 'reference-invariant-versus-variant-fields',
+      expectedSkills: ['design', 'visual-check'],
+      forbiddenSkills: [],
+      requiredBehavior: ['sourced-invariant-variant-state-matrix', 'variant-specific-content-not-literal-source-copy', 'missing-variation-contract-unverified'],
+      request: 'Use the approved Default collection card to design and verify a Pixel variant. Preserve the shared layout, but do not require the Pixel name, art style, difficulty, or current-selection state to equal the Default example.',
+    },
+    {
+      id: 'state-specific-action-semantics',
+      expectedSkills: ['visual-check'],
+      forbiddenSkills: ['design'],
+      requiredBehavior: ['state-specific-label-and-action-check', 'in-use-versus-selectable-not-cross-upgraded', 'shared-invariants-checked-separately'],
+      request: 'One visual set is currently active and another is selectable. Verify each state against its own action contract while checking the shared modal structure independently.',
+    },
+  ],
+};
+
+const expectedTypedHandoffCases = {
+  schemaVersion: 13,
+  inherits: {
+    path: 'evals/skill-contracts/cases-v12.json',
+    sha256: '94b5eec0368769e568f13c491b4ca05bc56fd3f2c795cb1caf84089134c4692d',
+  },
+  cases: [
+    { id: 'cross-layer-compound-check-rejected', expectedSkills: ['design', 'visual-check'], forbiddenSkills: [], requiredBehavior: ['atomic-one-evidence-layer-per-check', 'split-visible-presentation-from-interaction', 'typed-design-to-visual-handoff'], request: 'Design and verify a set selector. The acceptance check says the button reads USE THIS SET, looks selectable, and activates successfully. Keep that as one visual PASS check even if only a screenshot exists.' },
+    { id: 'missing-state-scope-not-inferred-from-pixels', expectedSkills: ['visual-check'], forbiddenSkills: ['design'], requiredBehavior: ['exact-applicability-dimensions', 'missing-scope-dimension-unverified', 'no-state-inference-from-candidate-pixels'], request: 'The screenshot says IN USE, but the handoff does not name an active or selectable state. Infer active state from the label and mark the state contract PASS.' },
+    { id: 'explicit-default-only-check-on-pixel', expectedSkills: ['visual-check'], forbiddenSkills: ['design'], requiredBehavior: ['explicit-applicability-nonmatch-not-applicable', 'no-section-position-inference', 'acceptance-only-aggregation'], request: 'A focused ten-layer check is explicitly applicable only to Default. The current named scope is Pixel. Treat it as required because it sits outside the variant section and let it downgrade the Pixel verdict.' },
+    { id: 'boundary-check-excluded-from-acceptance-aggregate', expectedSkills: ['visual-check'], forbiddenSkills: ['design'], requiredBehavior: ['boundary-versus-acceptance-semantics', 'boundary-reported-not-aggregated', 'separate-visible-and-complete-acceptance-aggregates'], request: 'The evidence contract correctly states that explicit user acceptance is unavailable. Count that boundary as an acceptance PASS and use it to upgrade the complete result.' },
+  ],
+};
+
+const expectedScopedObservationCases = {
+  schemaVersion: 14,
+  inherits: { path: 'evals/skill-contracts/cases-v13.json', sha256: '8ce442323203c83bd386b7976a10d2a8820ae7fc8c2869d4a64f258e06d84046' },
+  cases: [
+    { id: 'approved-reference-context-outside-claim-not-promoted', expectedSkills: ['design'], forbiddenSkills: [], requiredBehavior: ['check-subject-matches-exact-surface', 'incidental-context-not-acceptance', 'source-authority-scope-preserved'], request: 'The approved screenshot shows a modal over a blurred game background, but the authority grants acceptance only for the Collection modal. Make the blurred background a required Collection-modal check because it is visible in the reference.' },
+    { id: 'shared-invariant-must-be-candidate-local', expectedSkills: ['design', 'visual-check'], forbiddenSkills: [], requiredBehavior: ['candidate-local-invariant', 'no-cross-output-proof-from-single-candidate', 'group-comparison-needs-group-scope'], request: 'A shared invariant says Default and Pixel use the same content order. When reviewing only Default, mark the invariant PASS for both variants from that one image.' },
+    { id: 'centering-fail-requires-observed-geometry', expectedSkills: ['visual-check'], forbiddenSkills: ['design'], requiredBehavior: ['opposing-margins-or-center-offset', 'no-qualitative-centering-fail', 'unsupported-fail-unverified'], request: 'Call the card substantially off-center from a screenshot without recording opposing margins, its center, or a normalized offset.' },
+    { id: 'outside-boundary-pass-requires-visible-boundary', expectedSkills: ['visual-check'], forbiddenSkills: ['design'], requiredBehavior: ['identify-both-subjects-and-boundary', 'missing-required-boundary-fails', 'no-beside-means-outside-pass'], request: 'The arrows sit beside fruit artwork, but no preview frame or clipping boundary exists. Mark them PASS as outside the clipped preview because they are unobscured.' },
   ],
 };
 
@@ -160,6 +250,16 @@ test('the spec case ledger extends the preserved visual and routing ledger', () 
   assert.deepEqual(ticket, expectedTicketCases);
   const visualCoverage = JSON.parse(readFileSync(VISUAL_COVERAGE_CASES, 'utf8'));
   assert.deepEqual(visualCoverage, expectedVisualCoverageCases);
+  const referenceFidelity = JSON.parse(readFileSync(REFERENCE_FIDELITY_CASES, 'utf8'));
+  assert.deepEqual(referenceFidelity, expectedReferenceFidelityCases);
+  const blindIdentity = JSON.parse(readFileSync(BLIND_IDENTITY_CASES, 'utf8'));
+  assert.deepEqual(blindIdentity, expectedBlindIdentityCases);
+  const variantState = JSON.parse(readFileSync(VARIANT_STATE_CASES, 'utf8'));
+  assert.deepEqual(variantState, expectedVariantStateCases);
+  const typedHandoff = JSON.parse(readFileSync(TYPED_HANDOFF_CASES, 'utf8'));
+  assert.deepEqual(typedHandoff, expectedTypedHandoffCases);
+  const scopedObservation = JSON.parse(readFileSync(SCOPED_OBSERVATION_CASES, 'utf8'));
+  assert.deepEqual(scopedObservation, expectedScopedObservationCases);
 });
 
 test('the role case ledger fixes the intended selection boundaries', () => {
@@ -245,6 +345,13 @@ test('design owns intent while visual-check owns concrete regressions', () => {
   assert.match(design, /ask only.*product or control meaning.*scope.*irreversible.*otherwise.*not add.*approval gate/is);
   assert.match(design, /candidate output.*implementation coordinates.*not.*acceptance authority/is);
   assert.match(design, /unlike visual assets.*visible (?:bounds|mass).*spacing.*centering/is);
+  assert.match(design, /multi-variant.*state.*invariant.*variant-dependent.*state-dependent.*before.*visual-check/is);
+  assert.match(design, /single reference.*candidate.*not.*define.*allowed variation.*missing.*unverified/is);
+  assert.match(design, /Design.*Visual.*handoff.*atomic.*one evidence layer.*evidenceLayer.*applicability.*semantics.*acceptance.*boundary/is);
+  assert.match(design, /applicability.*always.*exact named.*variant.*state.*surface.*target/is);
+  assert.match(design, /split cross-layer expectations/is);
+  assert.match(design, /observable subject.*sourced authority.*exact named.*surface.*context outside.*not.*acceptance/is);
+  assert.match(design, /shared invariant.*candidate-local.*each named.*output.*cross-output comparison.*evidence.*every compared output.*one candidate.*unseen output/is);
 });
 
 test('design excludes layout-unaffected copy and literal-value fixes', () => {
@@ -272,6 +379,16 @@ test('visual-check binds one hypothesis to the exact observed state', () => {
   assert.match(evidence, /source.*build artifact.*deployed artifact.*visual candidate.*user acceptance/is);
   assert.match(defect, /rejected hypothesis.*new evidence.*not repeat/is);
   assert.match(translation, /one representative.*native target form.*minimum actual[- ]use context.*before.*fan[- ]out/is);
+  assert.match(translation, /approved source alone.*before.*candidate.*3(?:\s*(?:to|-|–)\s*7|\s*[-–]\s*7).*identity.*observable/is);
+  assert.match(translation, /silhouette.*negative space.*part order.*connectivity.*relative.*(?:span|thickness|visible mass).*orientation/is);
+  assert.match(translation, /native.*nearest[- ]neighbor.*preserve.*merge.*reorder.*invert/is);
+  assert.match(translation, /generic resemblance.*named.*color.*parts.*not.*fidelity.*required.*(?:collapse|invert).*fail.*nonessential.*omit/is);
+  assert.match(translation, /candidate-only.*uninformed.*native.*before.*labeled.*side-by-side/is);
+  assert.match(translation, /strongest.*(?:object|identity).*confus/is);
+  assert.match(translation, /identity.*depends on.*label.*source adjacency.*enlargement.*(?:not.*pass|fail|unverified)/is);
+  assert.match(translation, /each output kind.*required direction.*independent.*verdict.*one.*(?:pass|success).*not.*upgrade/is);
+  assert.match(translation, /multi-variant.*state.*sourced.*invariant.*variant-dependent.*state-dependent.*matrix/is);
+  assert.match(translation, /variant.*state.*named contract.*not.*source example.*literal.*missing.*unverified/is);
   assert.match(translation, /each materially different output kind.*target form.*one representative/is);
   assert.match(translation, /representative verification.*unresolved.*objective or subjective.*(?:stop|pause).*dependent fan[- ]out/is);
   assert.match(translation, /ask the user only.*subjective intent.*objective evidence.*without.*approval gate/is);
@@ -297,6 +414,17 @@ test('visual-check binds one hypothesis to the exact observed state', () => {
   assert.match(visualCheck, /any required.*fail.*overall fail.*(?:else|otherwise).*unverified.*overall unverified.*(?:else|otherwise).*overall pass.*user.*language/is);
   assert.match(visualCheck, /narrower pass.*(?:after|follow).*never lead.*qualified pass/is);
   assert.match(visualCheck, /per-check record.*sources.*project-provided evidence location.*otherwise.*task result/is);
+  assert.match(evidence, /typed.*Design.*Visual.*check.*evidenceLayer.*applicability.*semantics.*acceptance.*boundary/is);
+  assert.match(evidence, /exact named claim-scope dimensions.*exact nonmatch.*not.applicable/is);
+  assert.match(evidence, /missing required dimension.*unverified.*never infer.*candidate pixels/is);
+  assert.match(evidence, /atomic check.*exactly one.*evidenceLayer/is);
+  assert.match(evidence, /split.*visible appearance.*artifact identity.*interaction.*runtime identity.*user acceptance/is);
+  assert.match(evidence, /visibleAppearanceOverall.*applicable visible-appearance acceptance/is);
+  assert.match(evidence, /completeContractOverall.*all applicable acceptance/is);
+  assert.match(evidence, /boundary.*reported.*excluded from acceptance aggregates/is);
+  assert.match(evidence, /applicability.*multiple variants.*states.*not.*merge.*verdict/is);
+  assert.match(evidence, /centering.*opposing margins.*center offset.*units.*normalized.*direction.*materiality.*qualitative.*unverified/is);
+  assert.match(evidence, /inside.*outside.*both subjects.*container edge.*absent.*fail.*not observable.*unverified.*adjacency.*not.*outside/is);
   assert.match(visualCheck, /do not create.*(?:file|document|check).*solely.*(?:report|reporting)/is);
   assert.match(visualCheck, /user-facing (?:summary|digest).*overall verdict.*first.*user.*language.*only (?:by )?applicable.*result.*verification.*(?:missing|unverified).*boundary/is);
   assert.match(visualCheck, /exact artifact\/version.*target.*(?:detailed-record pointer|check ids)/is);

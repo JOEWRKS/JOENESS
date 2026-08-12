@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 2,
+  "id": "design-visual-m2-check-groups-v2",
+  "methodChange": "Evaluate both mutually exclusive state-presentation rules from visible pixels instead of assigning a state from the variant name.",
+  "predecessor": {"path":"evals/skill-contracts/design-visual-m2-check-groups-v1.json","bytes":2043,"sha256":"d06a1ac33b5164e22e7d0e8fde0628246fa650b9242062f999a88d16cdd9f879","disposition":"variant-state-coupling-rejected"},
+  "designOutput": {"path":"evals/skill-contracts/design-visual-m2-design-v2-raw.json","bytes":11718,"sha256":"3562f37ac2a6c8e8c4cda36e311dfd04d0162d6c8d16e89594de90cc275e9f34"},
+  "rule": "For each variant, every Design ID appears exactly once in a group or notApplicableDesignCheckIds. statePresentation judges the visible label and styling only; underlying state and interaction remain separate. Boundary-group UNVERIFIED does not downgrade an otherwise complete in-scope visual PASS.",
+  "commonGroups": {
+    "shell": ["collection-modal-shell","collection-title-and-hierarchy","whole-frame-modal-separation","whole-frame-visual-balance","whole-frame-language-consistency","focused-title-banner"],
+    "sprite": ["sprite-rendering","focused-sprite-integrity"],
+    "navigation": ["navigation-model","whole-frame-navigation-count","focused-navigation-placement"],
+    "target": ["named-target-containment","whole-frame-target-fit"],
+    "statePresentation": ["active-action","selectable-action","state-distinction","focused-state-action"],
+    "boundaries": ["external-source-readback","pixel-exact-art-direction","selectable-style-details","additional-states","additional-viewports-and-inputs","runtime-and-package-readback","candidate-geometry-boundary","user-acceptance"]
+  },
+  "variants": {
+    "Default": {
+      "composition": ["produce-mass-composition","variant-isolation","default-preview","focused-default-layer-count"],
+      "metadata": ["default-name","default-difficulty","unlocked-status","focused-variant-metadata","focused-difficulty-encoding"],
+      "notApplicableDesignCheckIds": ["pixel-name","pixel-difficulty","pixel-preview"]
+    },
+    "Pixel": {
+      "composition": ["produce-mass-composition","variant-isolation","pixel-preview"],
+      "metadata": ["pixel-name","pixel-difficulty","unlocked-status","focused-variant-metadata","focused-difficulty-encoding"],
+      "notApplicableDesignCheckIds": ["default-name","default-difficulty","default-preview","focused-default-layer-count"]
+    }
+  }
+}

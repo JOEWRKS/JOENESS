@@ -1,0 +1,188 @@
+{
+  "schemaVersion": 1,
+  "id": "design-visual-m2-fixtures-v1",
+  "date": "2026-08-12",
+  "root": "evals/skill-contracts/fixtures/visual-m2-v1/blind",
+  "repositories": {
+    "MergeDrop": {
+      "observedHead": "565b08f79834a860b1cc889d542cd665aee347fd",
+      "observedDirtyEntryCount": 183,
+      "boundary": "The external worktree is not durable authority. Only the content-addressed copies below are evaluation evidence."
+    },
+    "Red-Valley-Redemption": {
+      "observedHead": "fd4a4d49007b344be5a641123ec37bca49735218",
+      "observedDirtyEntryCount": 2,
+      "boundary": "The external worktree continued moving during JOENESS validation. Exact copied bytes and tracked authority documents, not its later HEAD, bind this fixture."
+    }
+  },
+  "files": [
+    {
+      "id": "mergedrop-approved-reference",
+      "path": "evals/skill-contracts/fixtures/visual-m2-v1/blind/ff71c6e9919567b251659f00fda0a224a5f91fab24ed36042eb070310d739110.png",
+      "bytes": 1509822,
+      "width": 941,
+      "height": 1672,
+      "sha256": "ff71c6e9919567b251659f00fda0a224a5f91fab24ed36042eb070310d739110",
+      "role": "approved-reference",
+      "source": {"repository":"MergeDrop","path":"docs/art-review/2026-08-12-collection-produce-box-approved.png","tracked":false,"ignored":false}
+    },
+    {
+      "id": "mergedrop-rejected-default",
+      "path": "evals/skill-contracts/fixtures/visual-m2-v1/blind/0684e6867856745762217a70862b81fee8ac70787b5ab57ea13ffa58a870db62.png",
+      "bytes": 804518,
+      "width": 1080,
+      "height": 2400,
+      "sha256": "0684e6867856745762217a70862b81fee8ac70787b5ab57ea13ffa58a870db62",
+      "role": "known-visual-failure",
+      "expectedVisualVerdict": "FAIL",
+      "source": {"repository":"MergeDrop","path":"Artifacts/Verification/SkinLeaderboard/Task6-arm64-il2cpp-565b08f-attempt-02/1080x2400/collection-default.png","tracked":false,"ignored":true}
+    },
+    {
+      "id": "mergedrop-rejected-pixel",
+      "path": "evals/skill-contracts/fixtures/visual-m2-v1/blind/2970d85dcddbb9e2d2bcb9a1f4920f0575e0ef2cebd352ceee99f2d0d7b16630.png",
+      "bytes": 599539,
+      "width": 1080,
+      "height": 2400,
+      "sha256": "2970d85dcddbb9e2d2bcb9a1f4920f0575e0ef2cebd352ceee99f2d0d7b16630",
+      "role": "known-visual-failure",
+      "expectedVisualVerdict": "FAIL",
+      "source": {"repository":"MergeDrop","path":"Artifacts/Verification/SkinLeaderboard/Task6-arm64-il2cpp-565b08f-attempt-02/1080x2400/collection-pixel.png","tracked":false,"ignored":true}
+    },
+    {
+      "id": "mergedrop-current-default",
+      "path": "evals/skill-contracts/fixtures/visual-m2-v1/blind/545a332a92e5b2b9e9f13415553511f07fbdcf189bc13a4852f123c9a943a7df.png",
+      "bytes": 1776406,
+      "width": 1800,
+      "height": 2880,
+      "sha256": "545a332a92e5b2b9e9f13415553511f07fbdcf189bc13a4852f123c9a943a7df",
+      "role": "installed-positive-control",
+      "expectedVisualVerdict": "PASS",
+      "expectedProductAcceptance": "UNVERIFIED",
+      "source": {"repository":"MergeDrop","path":"Artifacts/VisualChecks/CollectionProduceBox-20260812/attempt-13-device-dense-wide/collection-default-final.png","tracked":false,"ignored":true}
+    },
+    {
+      "id": "mergedrop-current-pixel",
+      "path": "evals/skill-contracts/fixtures/visual-m2-v1/blind/9a56225310f6fd552082a02dd4712a5f8aa8c89cb78c485d5b4a2eb6baaa308a.png",
+      "bytes": 950267,
+      "width": 1800,
+      "height": 2880,
+      "sha256": "9a56225310f6fd552082a02dd4712a5f8aa8c89cb78c485d5b4a2eb6baaa308a",
+      "role": "installed-positive-control",
+      "expectedVisualVerdict": "PASS",
+      "expectedProductAcceptance": "UNVERIFIED",
+      "source": {"repository":"MergeDrop","path":"Artifacts/VisualChecks/CollectionProduceBox-20260812/attempt-13-device-dense-wide/collection-open.png","tracked":false,"ignored":true}
+    },
+    {
+      "id": "rvr-high-resolution-side-authority",
+      "path": "evals/skill-contracts/fixtures/visual-m2-v1/blind/aad48ca8ec8cd4513e5639f7241d8eee0fa4bdf4ac36ca107e42242f1da682f2.png",
+      "bytes": 695903,
+      "width": 1536,
+      "height": 1024,
+      "sha256": "aad48ca8ec8cd4513e5639f7241d8eee0fa4bdf4ac36ca107e42242f1da682f2",
+      "role": "approved-reference",
+      "source": {"repository":"Red-Valley-Redemption","path":"art/reference/shotgun-gate-a/side-reference.png","tracked":true,"ignored":false}
+    },
+    {
+      "id": "rvr-v4-low-resolution-translation",
+      "path": "evals/skill-contracts/fixtures/visual-m2-v1/blind/68245b2f873803af0584bf0ee265750231c5d07a38e8004cfe843284db3201af.png",
+      "bytes": 818866,
+      "width": 2200,
+      "height": 1720,
+      "sha256": "68245b2f873803af0584bf0ee265750231c5d07a38e8004cfe843284db3201af",
+      "role": "known-visual-failure",
+      "expectedVisualVerdict": "FAIL",
+      "source": {"repository":"Red-Valley-Redemption","path":".superpowers/art-review/shotgun-v4/comparison-sheet.png","tracked":false,"ignored":true},
+      "groundTruth": "docs/incidents/2026-08-10-shotgun-art-redesign-pipeline-incident-report.md identifies V4 as losing identity into axe, block, pipe, and stick forms."
+    },
+    {
+      "id": "rvr-compact-four-direction-authority",
+      "path": "evals/skill-contracts/fixtures/visual-m2-v1/blind/bde2be6c4f7757c77cd5e559a5dab719041b8f81a9231b897ed4a1d20c405f88.png",
+      "bytes": 6455,
+      "width": 877,
+      "height": 285,
+      "sha256": "bde2be6c4f7757c77cd5e559a5dab719041b8f81a9231b897ed4a1d20c405f88",
+      "role": "approved-reference",
+      "source": {"repository":"JOENESS","path":"evals/skill-contracts/fixtures/visual-verdict-v3/bde2be6c4f7757c77cd5e559a5dab719041b8f81a9231b897ed4a1d20c405f88-four-direction-reference.png","tracked":true,"ignored":false}
+    },
+    {
+      "id": "rvr-east-native-positive-control",
+      "path": "evals/skill-contracts/fixtures/visual-m2-v1/blind/1836b001060615f0e91b99981891b620497aa0655236a84eaad6563167c2c06c.png",
+      "bytes": 218,
+      "width": 32,
+      "height": 32,
+      "sha256": "1836b001060615f0e91b99981891b620497aa0655236a84eaad6563167c2c06c",
+      "role": "asset-only-positive-control",
+      "expectedStructuralVerdict": "PASS",
+      "expectedNativeIdentityVerdict": "UNVERIFIED",
+      "source": {"repository":"JOENESS","path":"evals/skill-contracts/fixtures/visual-verdict-v3/1836b001060615f0e91b99981891b620497aa0655236a84eaad6563167c2c06c-east-native.png","tracked":true,"ignored":false}
+    },
+    {
+      "id": "rvr-east-nearest-neighbor-positive-control",
+      "path": "evals/skill-contracts/fixtures/visual-m2-v1/blind/e8ad17da9ac81398ce89a0d8e2afd6a4c4e93aa6cd593e53025092b08924ba13.png",
+      "bytes": 1351,
+      "width": 256,
+      "height": 256,
+      "sha256": "e8ad17da9ac81398ce89a0d8e2afd6a4c4e93aa6cd593e53025092b08924ba13",
+      "role": "enlarged-diagnostic-only",
+      "source": {"repository":"Red-Valley-Redemption","path":".superpowers/art-review/shotgun-reference-faithful-east/east-8x.png","tracked":false,"ignored":true}
+    },
+    {
+      "id": "rvr-farmer-scale-authority",
+      "path": "evals/skill-contracts/fixtures/visual-m2-v1/blind/8471780c5bf5de7828da845df45d41813aeeb33515be2593724a0322103ec395.png",
+      "bytes": 9886,
+      "width": 153,
+      "height": 143,
+      "sha256": "8471780c5bf5de7828da845df45d41813aeeb33515be2593724a0322103ec395",
+      "role": "scale-and-character-appearance-authority-only",
+      "source": {"repository":"JOENESS","path":"evals/skill-contracts/fixtures/visual-verdict-v3/8471780c5bf5de7828da845df45d41813aeeb33515be2593724a0322103ec395-farmer-scale-reference.png","tracked":true,"ignored":false}
+    },
+    {
+      "id": "rvr-static-character-composite",
+      "path": "evals/skill-contracts/fixtures/visual-m2-v1/blind/38659484902b9befa439ce26ccc9cf076e691537d6132e1cfafc35f91761183f.png",
+      "bytes": 18119,
+      "width": 640,
+      "height": 360,
+      "sha256": "38659484902b9befa439ce26ccc9cf076e691537d6132e1cfafc35f91761183f",
+      "role": "unverified-static-composite",
+      "expectedVisualVerdict": "UNVERIFIED",
+      "source": {"repository":"JOENESS","path":"evals/skill-contracts/fixtures/visual-verdict-v3/38659484902b9befa439ce26ccc9cf076e691537d6132e1cfafc35f91761183f-character-scale.png","tracked":true,"ignored":false}
+    },
+    {
+      "id": "rvr-rejected-installed-runtime",
+      "path": "evals/skill-contracts/fixtures/visual-m2-v1/blind/195e2efbd64813a320c60f8c7cde4641bec0dc67d2c99f56e7f11197aa03d3d9.png",
+      "bytes": 6740,
+      "width": 100,
+      "height": 109,
+      "sha256": "195e2efbd64813a320c60f8c7cde4641bec0dc67d2c99f56e7f11197aa03d3d9",
+      "role": "known-runtime-failure",
+      "expectedVisualVerdict": "FAIL",
+      "source": {"repository":"Red-Valley-Redemption","path":".superpowers/art-review/shotgun-side-origin-fix/rejected-runtime-5994958.png","tracked":false,"ignored":true},
+      "groundTruth": "docs/validation/2026-08-11-shotgun-side-origin-visual-check.md binds this exact rejected version to a stock crossing the torso and shoulder."
+    },
+    {
+      "id": "rvr-static-shoulder-comparison",
+      "path": "evals/skill-contracts/fixtures/visual-m2-v1/blind/9405dcfed9af0b2dd229268bc5b6d779fb5ad11772061afea603c576aecf2a1e.png",
+      "bytes": 20012,
+      "width": 900,
+      "height": 500,
+      "sha256": "9405dcfed9af0b2dd229268bc5b6d779fb5ad11772061afea603c576aecf2a1e",
+      "role": "static-relation-positive-control",
+      "expectedVisualVerdict": "PASS",
+      "expectedRuntimeVerdict": "UNVERIFIED",
+      "source": {"repository":"Red-Valley-Redemption","path":".superpowers/art-review/shotgun-side-origin-fix/east-shoulder-origin-comparison.png","tracked":false,"ignored":true}
+    }
+  ],
+  "installedMergeDropBinding": {
+    "apkSha256": "945ea3d4dab3f7b1b3cb5de7e72a1b5f220d7e157646ee7670feff35d01f8307",
+    "package": "com.joewrks.mergedrop.visual",
+    "version": "0.1.3 (4)",
+    "device": "Xiaomi 23043RP34G",
+    "source": "MergeDrop TASK.md working-tree lines 3623-3644 as observed on 2026-08-12",
+    "boundary": "Agent-observable visual checks may pass; explicit user acceptance remains UNVERIFIED."
+  },
+  "limitations": [
+    "The content-addressed copies preserve exact image bytes but do not preserve event-level proof of how the external captures were produced.",
+    "Ground truth is hidden from blind evaluators and is used only for post-verdict scoring.",
+    "A filename-free path prevents label leakage; prompt content and fresh-context separation remain separate evidence."
+  ]
+}

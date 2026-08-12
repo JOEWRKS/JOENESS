@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "id": "design-visual-m2-pressure-v1",
+  "date": "2026-08-12",
+  "candidate": {
+    "cases": {"path":"evals/skill-contracts/cases-v9.json","sha256":"b9aa05ea16b0e57f3bc233dc148db046bf4b9d1ea0306c0e5a8ca5bac27d40b2"},
+    "visualSkill": {"path":"skills/visual-check/SKILL.md","bytes":3453,"sha256":"7bd9b1406073f844da71c0075d5cddb69778425997bb2ec42b74b36fa3996903"},
+    "approvedReference": {"path":"evals/candidates/visual-check-approved-reference-v9.md","bytes":1040,"sha256":"44ad3edecfbda7639a13324aeaadd9ca581aa5379c105fdf6c2dba806274a424"},
+    "fixtureManifest": {"path":"evals/skill-contracts/visual-m2-fixtures-v1.json","bytes":10450,"sha256":"48e25b47700ccc42bd527ce65fc8975cceb9f58234fa8b81d529819aa0927b15"}
+  },
+  "attempt": {
+    "mode": "fresh-context-source-and-labeled-comparison",
+    "fixtureSha256": "68245b2f873803af0584bf0ee265750231c5d07a38e8004cfe843284db3201af",
+    "observedVerdict": "PASS",
+    "groundTruthVerdict": "FAIL",
+    "failure": "The reviewer accepted the RVR V4 icon and direction sheet from a labeled comparison despite the tracked incident ground truth that the icon reads as an axe and directions lose required structure."
+  },
+  "result": "semantic-review-rejected",
+  "classification": "false-positive",
+  "methodChangeRequired": "Freeze source identity relations before the candidate and inspect native outputs rather than relying on the labeled comparison.",
+  "retention": "Root-normalized final verdict; the original agent transport envelope was not retained.",
+  "promotionPass": false
+}

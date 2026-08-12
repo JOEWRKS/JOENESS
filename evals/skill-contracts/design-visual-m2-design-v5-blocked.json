@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "id": "design-visual-m2-design-v5-blocked",
+  "date": "2026-08-13",
+  "result": "blocked-no-final-evaluator-output",
+  "classification": "orchestration-unverified",
+  "promotionPass": false,
+  "authority": {"path":"evals/skill-contracts/design-visual-m2-authority-v5.json","bytes":3893,"sha256":"4c5d4932f55c9a7a23e0204823f449d4043d5c076776a077eaaca7dfda68cecd"},
+  "prompt": {"path":"evals/skill-contracts/design-visual-m2-design-prompt-v5.md","bytes":2731,"sha256":"57a37439e12dccfb96ac3ecd26d96d8150acc5e9a5435f0203b17c41b64a2aef"},
+  "plannedVisualPrompt": {"path":"evals/skill-contracts/design-visual-m2-visual-prompt-v8.md","bytes":3924,"sha256":"9d326ad18ee2ce0fd522edbded393f19bd6c033472f9e4a7b53a6e4301059fa1","status":"not-run"},
+  "attempts": [
+    {"id":"v5-a","method":"unbounded fresh contract","observed":"direct pins verified, current Design skill and frozen facts read, approved PNG inspected","result":"interrupted-after-no-final-output"},
+    {"id":"v5-b","method":"fresh contract capped at 24 checks","observed":"direct pins verified, current Design skill and frozen facts read, approved PNG inspected","result":"interrupted-after-no-final-output"},
+    {"id":"v5-c","method":"fresh contract fixed at 12 checks","observed":"no durable final output retained before bounded stop","result":"interrupted-after-no-final-output"}
+  ],
+  "retryAudit": {
+    "result": "budget-violation",
+    "authorizedShape": "primary plus one materially different fallback",
+    "observed": "v5-c was a third evaluator attempt on the same path with only a tighter output cap and no new evidence or user decision",
+    "handling": "preserved as history; automatic attempts stopped one attempt late and no fourth attempt is allowed"
+  },
+  "preservedState": {
+    "productWrites": 0,
+    "evaluatorArtifactWrites": 0,
+    "candidateImagesInspected": 0,
+    "priorVerdictsInspected": 0
+  },
+  "nextDecision": "Do not auto-retry the same evaluator path. Resume only with new evidence and a materially different orchestration method, or explicit user decision.",
+  "limitations": [
+    "No transport-level evaluator transcript or partial draft is retained; checkpoint messages are root-normalized observations only.",
+    "Because no final JSON exists, v5 Design-to-Visual handoff behavior remains UNVERIFIED."
+  ]
+}

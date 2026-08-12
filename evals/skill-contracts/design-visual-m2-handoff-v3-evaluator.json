@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 3,
+  "id": "design-visual-m2-handoff-v3-evaluator",
+  "date": "2026-08-13",
+  "designAuthority": {"path":"evals/skill-contracts/design-visual-m2-authority-v2.json","bytes":2122,"sha256":"d4071c79e4f6d19919fc308ebff57d123a3bdc959bb0d689cb88846b07267fb1"},
+  "designOutput": {"path":"evals/skill-contracts/design-visual-m2-design-v2-raw.json","bytes":11718,"sha256":"3562f37ac2a6c8e8c4cda36e311dfd04d0162d6c8d16e89594de90cc275e9f34","form":"verbatim-agent-final-json"},
+  "contract": {
+    "authority": "The exact Design output is the complete acceptance contract for this evaluation. Candidate pixels may be observed but may not create or weaken acceptance rules.",
+    "perCheck": "Return every Design check ID exactly once. Preserve each check's sourceIds and exact observableFact. A compound check is PASS only when every part is directly evidenced; otherwise FAIL for a contradicted part or UNVERIFIED for a missing part.",
+    "state": "Variant identity does not establish active/selectable state. The pixels may establish a visible action label or style, but a still cannot prove underlying runtime state, interaction, or operability.",
+    "target": "A still may establish visible containment and fit. It cannot by itself establish named-device provenance, current runtime identity, or operability.",
+    "overall": "contractOverall is FAIL if any required check FAILs, otherwise UNVERIFIED if any required check is UNVERIFIED, otherwise PASS. visualAppearanceOverall separately reports only directly visible appearance and must not upgrade contractOverall."
+  },
+  "provenanceBoundary": "The evaluator-facing handoff contains no prior visual verdict, candidate role, expected result, or incident narrative."
+}

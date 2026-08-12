@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 2,
+  "id": "design-visual-m2-authority-v2",
+  "date": "2026-08-12",
+  "methodChange": "The evaluator reads a self-contained, hash-bound authority snapshot instead of being instructed to open absent external repository files.",
+  "predecessor": {
+    "path": "evals/skill-contracts/design-visual-m2-authority-v1.json",
+    "bytes": 3361,
+    "sha256": "db21c5a2917efa39228d4649ab35ad39cbd67c1c018d31e031b1319eb5f09252",
+    "disposition": "source-readback-unverified"
+  },
+  "designSkill": {
+    "path": "skills/design/SKILL.md",
+    "bytes": 5136,
+    "sha256": "02fd9c60cab4a82e956618d975c676285fb778ebc8c7781ff62bff13275550b1"
+  },
+  "approvedSource": {
+    "path": "evals/skill-contracts/fixtures/visual-m2-v1/blind/ff71c6e9919567b251659f00fda0a224a5f91fab24ed36042eb070310d739110.png",
+    "bytes": 1509822,
+    "sha256": "ff71c6e9919567b251659f00fda0a224a5f91fab24ed36042eb070310d739110",
+    "inspection": "original-detail"
+  },
+  "authorityContract": {
+    "factsSource": "Use the predecessor JSON's embedded source facts as the frozen controller-supplied project contract for this evaluation.",
+    "externalOriginals": "The three external MergeDrop source files are not included in this JOENESS fixture and must not be claimed as reread by the evaluator.",
+    "scope": "This run tests whether Design turns the supplied intent, approved image, and frozen facts into a sourced implementation-independent contract. It does not independently prove the external source files or current runtime.",
+    "forbidden": [
+      "candidate screenshots",
+      "candidate coordinates",
+      "known-defect labels",
+      "incident reports",
+      "pressure results",
+      "expected evaluator verdicts"
+    ]
+  },
+  "requiredOutput": {
+    "form": "JSON object",
+    "fields": ["invariants", "variants", "states", "wholeFrameChecks", "focusedChecks", "unverifiedBoundaries"],
+    "rule": "Every check names sourceIds and an observableFact. Do not include candidate coordinates or predicted verdicts. State the unavailable external-source readback boundary without inventing a new acceptance rule."
+  }
+}

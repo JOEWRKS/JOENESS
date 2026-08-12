@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 2,
+  "id": "design-visual-m2-visual-input-v2",
+  "date": "2026-08-12",
+  "methodChange": "Remove controller-supplied active/selectable labels. The evaluator derives visible action presentation from the image while leaving underlying runtime state and interaction unverified.",
+  "predecessor": {
+    "path": "evals/skill-contracts/design-visual-m2-visual-input-v1.json",
+    "bytes": 3109,
+    "sha256": "55df43bfc23234457d4156cb115e36c1ea71882abcc06bcd06cf6b24ac16546f",
+    "disposition": "controller-state-label-rejected"
+  },
+  "visualContract": {
+    "skill": {"path":"skills/visual-check/SKILL.md","bytes":3453,"sha256":"7bd9b1406073f844da71c0075d5cddb69778425997bb2ec42b74b36fa3996903"},
+    "durableEvidence": {"path":"skills/visual-check/references/durable-evidence.md","bytes":3853,"sha256":"3a2b56bd7ad8474c0f05f9cf46a4df29b6bd2a29fc777e2b28bdef952b6a8246"},
+    "approvedReference": {"path":"skills/visual-check/references/approved-reference.md","bytes":2972,"sha256":"caea02b7f176d07fbca66133f82b4e7ebb8a5bb8ec441e1e4defa26d0f2c9525"}
+  },
+  "target": {
+    "project": "MergeDrop",
+    "observedProjectHead": "565b08f79834a860b1cc889d542cd665aee347fd",
+    "namedDevice": "Xiaomi 23043RP34G",
+    "package": "com.joewrks.mergedrop.visual",
+    "version": "0.1.3 (4)",
+    "installedPackageSha256": "945ea3d4dab3f7b1b3cb5de7e72a1b5f220d7e157646ee7670feff35d01f8307",
+    "runtimeBoundary": "The preserved capture binding does not prove the current live installed state or interaction."
+  },
+  "candidates": [
+    {"id":"amber","variant":"Default","path":"evals/skill-contracts/fixtures/visual-m2-v1/blind/0684e6867856745762217a70862b81fee8ac70787b5ab57ea13ffa58a870db62.png","bytes":804518,"sha256":"0684e6867856745762217a70862b81fee8ac70787b5ab57ea13ffa58a870db62","runtimeBinding":"preserved-full-frame-capture-only"},
+    {"id":"ivory","variant":"Pixel","path":"evals/skill-contracts/fixtures/visual-m2-v1/blind/2970d85dcddbb9e2d2bcb9a1f4920f0575e0ef2cebd352ceee99f2d0d7b16630.png","bytes":599539,"sha256":"2970d85dcddbb9e2d2bcb9a1f4920f0575e0ef2cebd352ceee99f2d0d7b16630","runtimeBinding":"preserved-full-frame-capture-only"},
+    {"id":"cobalt","variant":"Default","path":"evals/skill-contracts/fixtures/visual-m2-v1/blind/545a332a92e5b2b9e9f13415553511f07fbdcf189bc13a4852f123c9a943a7df.png","bytes":1776406,"sha256":"545a332a92e5b2b9e9f13415553511f07fbdcf189bc13a4852f123c9a943a7df","runtimeBinding":"project-ledger-bound-preserved-capture; not a current live session"},
+    {"id":"jade","variant":"Pixel","path":"evals/skill-contracts/fixtures/visual-m2-v1/blind/9a56225310f6fd552082a02dd4712a5f8aa8c89cb78c485d5b4a2eb6baaa308a.png","bytes":950267,"sha256":"9a56225310f6fd552082a02dd4712a5f8aa8c89cb78c485d5b4a2eb6baaa308a","runtimeBinding":"project-ledger-bound-preserved-capture; not a current live session"}
+  ],
+  "stateBoundary": "No candidate is labeled active or selectable by the controller. Report the visible action presentation from the exact pixels and keep underlying runtime state and interaction UNVERIFIED.",
+  "groundTruthBoundary": "Candidate roles and expected verdicts are intentionally absent. Do not read fixture manifests, pressure artifacts, ground-truth documents, incident reports, prior verdicts, or external project files."
+}

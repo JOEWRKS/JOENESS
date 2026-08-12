@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 2,
+  "id": "design-visual-m2-visual-run-v2-blocked",
+  "date": "2026-08-12",
+  "runManifest": {"path":"evals/skill-contracts/design-visual-m2-visual-run-manifest-v2.json","bytes":1471,"sha256":"a0d03aaef0f6523067a2eced17dbe0fd260882443ae7da1cf27c4e3aff614875"},
+  "taskName": "/root/m2_visual_fresh_v2",
+  "forkTurns": "none",
+  "result": "blocked-no-final-output",
+  "handling": "The root interrupted after bounded waits produced no terminal result.",
+  "methodChangeForNextRun": "The controller pre-partitions the exact 37 Design IDs into six in-scope observation groups plus one boundary group for each variant; the evaluator returns only seven group verdicts per candidate.",
+  "limitations": [
+    "No evaluator final verdict was returned, so this run proves no behavior outcome.",
+    "No progress or tool-event report was retained for this run."
+  ]
+}

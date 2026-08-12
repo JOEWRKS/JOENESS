@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 7,
+  "id": "design-visual-m2-visual-run-v7-ivory",
+  "date": "2026-08-13",
+  "candidateId": "ivory",
+  "prompt": {"path":"evals/skill-contracts/design-visual-m2-visual-prompt-v7.md","bytes":3062,"sha256":"8d9639fa1e3a805ebd7a72ce9b5975e000e220ef17975a084b1579f671fced8c"},
+  "visualSkill": {"path":"skills/visual-check/SKILL.md","bytes":3453,"sha256":"7bd9b1406073f844da71c0075d5cddb69778425997bb2ec42b74b36fa3996903"},
+  "durableEvidence": {"path":"skills/visual-check/references/durable-evidence.md","bytes":4766,"sha256":"0d63afd17182fb50cc8a6fad1c95d5cdd77fd3c4c5d0e1b4e2f566f4eb4ba18e"},
+  "approvedReferenceRules": {"path":"skills/visual-check/references/approved-reference.md","bytes":2972,"sha256":"caea02b7f176d07fbca66133f82b4e7ebb8a5bb8ec441e1e4defa26d0f2c9525"},
+  "designOutput": {"path":"evals/skill-contracts/design-visual-m2-design-v4-raw.json","bytes":17467,"sha256":"95a978bea678ab16e6707ece648a191bde2b2ec70dc80cf59fdb5c2b20dc8647"},
+  "approvedSource": {"path":"evals/skill-contracts/fixtures/visual-m2-v1/blind/ff71c6e9919567b251659f00fda0a224a5f91fab24ed36042eb070310d739110.png","bytes":1509822,"sha256":"ff71c6e9919567b251659f00fda0a224a5f91fab24ed36042eb070310d739110"},
+  "candidate": {"path":"evals/skill-contracts/fixtures/visual-m2-v1/blind/2970d85dcddbb9e2d2bcb9a1f4920f0575e0ef2cebd352ceee99f2d0d7b16630.png","bytes":599539,"sha256":"2970d85dcddbb9e2d2bcb9a1f4920f0575e0ef2cebd352ceee99f2d0d7b16630"},
+  "claimScope": {"variant":"Pixel","surface":"Collection modal"},
+  "evidenceBoundary": {"candidateForm":"preserved full-frame capture","notSupplied":["underlying state","interaction","capture target provenance","live runtime","installed-package binding","explicit user acceptance"]},
+  "execution": {"forkTurns":"none","priorTurns":0,"writePolicy":"read-only","forbiddenNarrative":true}
+}

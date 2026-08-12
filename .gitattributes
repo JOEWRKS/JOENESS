@@ -25,6 +25,10 @@
 /evals/candidates/visual-check-skill-v5.md text eol=lf
 /evals/candidates/visual-check-openai-v5.yaml text eol=lf
 /evals/candidates/visual-check-durable-evidence-v6.md text eol=lf
+/evals/candidates/visual-check-durable-evidence-m2-v7.md text eol=lf
+/evals/candidates/visual-check-approved-reference-v9.md text eol=lf
+/evals/candidates/visual-check-approved-reference-v10.md text eol=lf
+/evals/candidates/visual-check-approved-reference-v11.md text eol=lf
 /evals/candidates/spec-delivery-skill-v1.md text eol=lf
 /evals/candidates/common-core-lite-v1.md text eol=lf
 /evals/candidates/common-core-lean-v1.md text eol=lf
@@ -57,6 +61,7 @@
 /skills/spec/** text eol=lf
 /skills/ticket/** text eol=lf
 /evals/skill-contracts/*.json text eol=lf
+/evals/skill-contracts/design-visual-m2-*.md text eol=lf
 /evals/skill-contracts/visual-verdict-pressure-v*-raw.md text eol=lf
 /evals/skill-contracts/spec-delivery-pressure-v*-raw.md text eol=lf
 /evals/skill-contracts/spec-delivery-pressure-v*-raw.md whitespace=-blank-at-eol

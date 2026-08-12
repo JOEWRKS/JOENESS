@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 3,
+  "id": "design-visual-m2-visual-run-manifest-v3",
+  "date": "2026-08-12",
+  "predecessor": {
+    "manifest": {"path":"evals/skill-contracts/design-visual-m2-visual-run-manifest-v2.json","bytes":1471,"sha256":"a0d03aaef0f6523067a2eced17dbe0fd260882443ae7da1cf27c4e3aff614875"},
+    "blockedResult": {"path":"evals/skill-contracts/design-visual-m2-visual-run-v2-blocked.json","bytes":880,"sha256":"72fa0d830e97e4d21e5f1258eab476761fd8a7a972423d4368407b09e218c92a"}
+  },
+  "methodChange": "Use a controller-pinned exhaustive partition of all Design IDs into seven fixed groups per candidate.",
+  "prompt": {"path":"evals/skill-contracts/design-visual-m2-visual-prompt-v3.md","bytes":1533,"sha256":"a94d82dfbc0f5dbe35c5277a97a5bbc707c8e5decdd5405961406038d9245046"},
+  "handoff": {"path":"evals/skill-contracts/design-visual-m2-handoff-v1.json","bytes":2215,"sha256":"310900eae7a271f2adbaf7a138a7ffb5a2293b307c0deda45858139c3e11e03a"},
+  "visualInput": {"path":"evals/skill-contracts/design-visual-m2-visual-input-v1.json","bytes":3109,"sha256":"55df43bfc23234457d4156cb115e36c1ea71882abcc06bcd06cf6b24ac16546f"},
+  "checkGroups": {"path":"evals/skill-contracts/design-visual-m2-check-groups-v1.json","bytes":2043,"sha256":"d06a1ac33b5164e22e7d0e8fde0628246fa650b9242062f999a88d16cdd9f879"},
+  "execution": {
+    "forkTurns": "none",
+    "writePolicy": "read-only",
+    "expectedOutput": "one JSON object under 1800 words",
+    "forbiddenBeforeVerdict": ["fixture manifests", "pressure artifacts", "ground-truth documents", "incident reports", "prior verdicts", "external project files"]
+  }
+}

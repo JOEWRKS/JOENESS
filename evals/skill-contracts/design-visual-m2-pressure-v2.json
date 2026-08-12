@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 2,
+  "id": "design-visual-m2-pressure-v2",
+  "date": "2026-08-12",
+  "predecessor": {"path":"evals/skill-contracts/design-visual-m2-pressure-v1.json","bytes":1563,"sha256":"c0f601d801015fa295a346efb40a497993a5d437d7494a7a845a43296de2566d","disposition":"semantic-review-rejected"},
+  "candidate": {
+    "cases": {"path":"evals/skill-contracts/cases-v10.json","bytes":1262,"sha256":"d99b5c36099221c98f870e0e82e6f70237258ff1e25eaf248fbeaa187fa39e60"},
+    "approvedReference": {"path":"evals/candidates/visual-check-approved-reference-v10.md","bytes":1746,"sha256":"77120af5f25a60a1174cf848ed584ce884c01576211b04ed880be4d001cf3a73"}
+  },
+  "attempts": [
+    {
+      "id": "source-first-a",
+      "freshContext": true,
+      "observedV4Verdict": "PASS",
+      "groundTruthVerdict": "FAIL",
+      "failure": "Named parts and coarse ordering were treated as fidelity even though the native identity was not independently inspected."
+    },
+    {
+      "id": "source-first-b",
+      "freshContext": true,
+      "observedV4Verdict": "UNVERIFIED",
+      "groundTruthVerdict": "FAIL",
+      "boundary": "This sample correctly refused a broad PASS but still lacked the unlabeled native evidence needed to identify the concrete failure."
+    }
+  ],
+  "result": "semantic-review-rejected",
+  "classification": "one-of-two-false-positive",
+  "methodChangeRequired": "Add a separate candidate-only uninformed native reading and independent verdicts per output kind and direction.",
+  "retention": "Root-normalized final verdicts; original agent transport envelopes were not retained.",
+  "promotionPass": false
+}
