@@ -5,3 +5,7 @@
 - Preserve historical candidates and experiment reports as evidence. Record a rerun as a new artifact instead of rewriting an earlier failure.
 - Keep installers deterministic and byte-preserving outside their owned marker blocks. Validate source hashes before applying changes.
 - Use the repository's existing PowerShell and Node tests. Run only the smallest relevant set while editing, then the documented suite before release claims.
+<!-- JOEWRKS-PROJECT:BEGIN -->
+- Active planning ledger: `TASKS.md`.
+- Before changing plan status, reconcile current Git, files, tests, and evidence. Update the ledger only at milestone, scope, release-condition, decision, blocker, or planned-handoff boundaries; never per edit, command, response, or commit.
+<!-- JOEWRKS-PROJECT:END -->

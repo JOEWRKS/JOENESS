@@ -1,0 +1,29 @@
+# JOENESS 검증 부채 로드맵
+
+이 파일은 현재 검증 작업의 유일한 활성 원장이다. 날짜별 계획·실험·사고 보고서는 역사 증거로만 링크하고 진행 상태를 중복 기록하지 않는다.
+
+- **목표 / 릴리스:** V9 후보의 설치·행동·실프로젝트 효과를 기능별로 검증한다. 증거가 없는 기능은 `candidate/unvalidated`를 유지하고 전체를 한 번에 승격하지 않는다.
+- **마일스톤:**
+  - [ ] **M0 후보 고정·설치:** 전체 회귀, 격리 `Check → Apply → Check → 재Apply → Remove → Check`, 원상복구, feature branch push
+  - [ ] **M1 Ticket E2E:** 고정 티켓 → 구현자 → 고정 커밋 → 무이력 평가자 → 조건별 판정 → 재작업 1회 제한
+  - [ ] **M2 Design→Visual:** MergeDrop·RVR 결함과 정상 대조군에서 기준 자가도출, 부분/전체 판정 분리, 실제 화면 확인
+  - [ ] **M3 Core V6:** clean·partial·blocked·workaround·반복 오류·복구 상황의 한국어 결과 우선 보고와 중단 규칙
+  - [ ] **M4 암묵 라우팅:** Project·Ticket·Design·Visual Check·Spec·Handoff의 양성/음성 사례
+  - [ ] **M5 결합 흐름:** Project → Ticket → Spec → Handoff 재개의 종단 검증
+  - [ ] **M6 실프로젝트 파일럿:** Unity, .NET 게임 모드, 웹/앱에서 품질·재작업·시간을 기록하고 기능별 승격 판정
+- **현재:**
+
+  | 단계 | 기대 결과 | 합격 조건 | 상태 |
+  |---|---|---|---|
+  | M0 | 재현 가능한 V9 배포 후보 | 전체 회귀와 격리 수명주기 통과, clean tree, exact hash, 원상복구 | 진행 중 |
+
+- **차단 / 결정 / 링크:**
+  - 검증 기간에는 검증 실패를 고치는 최소 변경 외 새 기능을 추가하지 않는다.
+  - 현재 기준은 `codex/joeness-interface`의 `0598cad`; 로컬은 원격 feature branch보다 2커밋 앞서 있다.
+  - 사용자 홈은 V7·스킬 5개이며 `$ticket`과 최신 Design/Visual 규칙이 아직 적용되지 않았다. M0 격리 검증 전에 개인 설치를 갱신하지 않는다.
+  - 공식 상태와 증거 포인터: [`vendor/source-manifest.json`](vendor/source-manifest.json)
+- **증거 / 검토:** 2026-08-12에 clean Git 상태, HEAD, manifest V9, 개인 설치 V7, `JOENESS.ps1 -Check`의 `ready`와 변경 9건을 확인했다. 상태 변경은 exact 커밋·실행 결과·산출물·대상 상태를 다시 읽은 뒤에만 한다. 필수 검증이 남으면 `부분 완료` 또는 `미검증`으로 유지한다.
+
+## 갱신 규칙
+
+마일스톤, 범위, 릴리스 조건, 결정, 차단, 계획된 인계가 바뀔 때만 갱신한다. 편집·명령·응답·커밋마다 쓰지 않는다. 실패 재실행은 새 증거로 보존하고 이전 실패를 덮어쓰지 않는다.
