@@ -1,9 +1,11 @@
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
+import { createHash } from "node:crypto";
 import { mkdtemp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import test from "node:test";
+import { fileURLToPath } from "node:url";
 
 const MODULE_URL = new URL(
   "../evals/support/ticket-evaluator-provenance.mjs",
@@ -832,15 +834,70 @@ test("invalid evaluator output preserves prompt, events, and tool evidence", asy
   assert.equal(failure.error.ticketEvidence.toolEvidence.length, 5);
 });
 
-test("M1C plan freezes six candidates without expected evaluator answers", async () => {
+test("M1C plans preserve v1 and pin the v2 runtime without expected evaluator answers", async () => {
   const runner = await loadRunner();
   assert.equal(typeof runner?.validateTicketEvaluationPlan, "function");
-  const planPath = new URL(
+  const predecessorPath = new URL(
     "../evals/experiments/joeness-ticket-m1c-prompt-manifest-v1.json",
     import.meta.url,
   );
+  const planPath = new URL(
+    "../evals/experiments/joeness-ticket-m1c-prompt-manifest-v2.json",
+    import.meta.url,
+  );
+  const predecessorText = await readFile(predecessorPath, "utf8");
+  const predecessor = runner.validateTicketEvaluationPlan(
+    JSON.parse(predecessorText),
+  );
+  assert.equal(predecessor.id, "joeness-ticket-m1c-prompt-manifest-v1");
+  assert.equal(Object.hasOwn(predecessor, "runtime"), false);
+  assert.equal(Buffer.byteLength(predecessorText), 3428);
+  assert.equal(
+    createHash("sha256").update(predecessorText).digest("hex"),
+    "ddb28bb1c9c3795a77ef9b37158ab70210a549fe4a2ed33205bb280345680501",
+  );
+  assert.deepEqual(runner.resolveTicketRuntimeContract(predecessor), {
+    codexVersion: "codex-cli 0.145.0",
+    generation: "v1",
+  });
   const text = await readFile(planPath, "utf8");
   const plan = runner.validateTicketEvaluationPlan(JSON.parse(text));
+  assert.equal(plan.id, "joeness-ticket-m1c-prompt-manifest-v2");
+  assert.equal(plan.schemaVersion, 2);
+  assert.deepEqual(plan.runtime, { codexVersion: "codex-cli 0.146.0" });
+  assert.deepEqual(runner.resolveTicketRuntimeContract(plan), {
+    codexVersion: "codex-cli 0.146.0",
+    generation: "v2",
+  });
+  assert.deepEqual(plan.predecessor, {
+    path: "evals/experiments/joeness-ticket-m1c-prompt-manifest-v1.json",
+    byteLength: 3428,
+    sha256: "ddb28bb1c9c3795a77ef9b37158ab70210a549fe4a2ed33205bb280345680501",
+    methodChange: "pin-codex-cli-0.146.0",
+  });
+  const repositoryRoot = path.resolve(fileURLToPath(new URL("..", import.meta.url)));
+  assert.deepEqual(await runner.verifyTicketPlanPredecessor(repositoryRoot, plan), {
+    path: "evals/experiments/joeness-ticket-m1c-prompt-manifest-v1.json",
+    byteLength: 3428,
+    sha256: "ddb28bb1c9c3795a77ef9b37158ab70210a549fe4a2ed33205bb280345680501",
+  });
+  const driftRoot = await mkdtemp(path.join(tmpdir(), "joeness-ticket-predecessor-"));
+  await mkdir(path.join(driftRoot, "evals", "experiments"), { recursive: true });
+  await writeFile(
+    path.join(
+      driftRoot,
+      "evals",
+      "experiments",
+      "joeness-ticket-m1c-prompt-manifest-v1.json",
+    ),
+    "drift\n",
+    "utf8",
+  );
+  await assert.rejects(
+    () => runner.verifyTicketPlanPredecessor(driftRoot, plan),
+    /predecessor artifact differs/i,
+  );
+  await rm(driftRoot, { recursive: true, force: true });
   assert.deepEqual(
     plan.candidates.map(({ id }) => id),
     [
@@ -866,6 +923,84 @@ test("M1C plan freezes six candidates without expected evaluator answers", async
     () => runner.validateTicketEvaluationPlan(invalidGraph),
     /candidate graph/i,
   );
+  const arbitraryRuntime = structuredClone(plan);
+  arbitraryRuntime.runtime.codexVersion = "codex-cli 0.999.0";
+  assert.throws(
+    () => runner.validateTicketEvaluationPlan(arbitraryRuntime),
+    /malformed/i,
+  );
+  const extraRuntimeKey = structuredClone(plan);
+  extraRuntimeKey.runtime.latest = true;
+  assert.throws(
+    () => runner.validateTicketEvaluationPlan(extraRuntimeKey),
+    /malformed/i,
+  );
+  let preparedOptions;
+  const prepared = await runner.prepareTicketRuntime(
+    "unused-run-root",
+    plan,
+    async (_runRoot, options) => {
+      preparedOptions = options;
+      return {
+        version: "codex-cli 0.146.0",
+        doctor: { codexVersion: "0.146.0" },
+      };
+    },
+  );
+  assert.deepEqual(preparedOptions, {
+    expectedCodexVersion: "codex-cli 0.146.0",
+  });
+  assert.equal(prepared.version, "codex-cli 0.146.0");
+  await assert.rejects(
+    () =>
+      runner.prepareTicketRuntime("unused-run-root", plan, async () => ({
+        version: "codex-cli 0.146.0",
+        doctor: { codexVersion: "0.145.0" },
+      })),
+    /runtime contract/i,
+  );
+  assert.deepEqual(
+    runner.assertTicketSessionRuntime(
+      {
+        initializeResult: {
+          userAgent:
+            "joewrks-codex-evidence-collector/0.146.0 (Windows 10; x86_64)",
+        },
+      },
+      runner.resolveTicketRuntimeContract(plan),
+    ),
+    {
+      expectedCodexVersion: "codex-cli 0.146.0",
+      userAgent:
+        "joewrks-codex-evidence-collector/0.146.0 (Windows 10; x86_64)",
+    },
+  );
+  assert.throws(
+    () =>
+      runner.assertTicketSessionRuntime(
+        {
+          initializeResult: {
+            userAgent: "joewrks-codex-evidence-collector/10.146.0",
+          },
+        },
+        runner.resolveTicketRuntimeContract(plan),
+      ),
+    /user agent differs/i,
+  );
+  const request = await runner.snapshotTicketManifestRequest(
+    fileURLToPath(planPath),
+  );
+  assert.equal(request.status, "validated");
+  assert.equal(request.id, "joeness-ticket-m1c-prompt-manifest-v2");
+  assert.equal(request.runtime.codexVersion, "codex-cli 0.146.0");
+  assert.equal(request.sha256, createHash("sha256").update(text).digest("hex"));
+  const failure = runner.buildTicketFailureRecord(
+    "smoke",
+    new Error("fixture failure"),
+    request,
+  );
+  assert.equal(failure.id, "joeness-ticket-m1c-smoke-v2");
+  assert.deepEqual(failure.manifestRequest, request);
 });
 
 test("M1C CLI separates disposable smoke from the immutable six-case batch", async () => {

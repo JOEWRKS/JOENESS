@@ -61,6 +61,16 @@ const PLAN_FORBIDDEN_SOURCES = Object.freeze([
   "M1B aggregate evidence",
 ]);
 const FULL_SHA = /^[0-9a-f]{40}$/u;
+const PLAN_V1_ID = "joeness-ticket-m1c-prompt-manifest-v1";
+const PLAN_V2_ID = "joeness-ticket-m1c-prompt-manifest-v2";
+const PLAN_V1_RUNTIME = Object.freeze({ codexVersion: "codex-cli 0.145.0" });
+const PLAN_V2_RUNTIME = Object.freeze({ codexVersion: "codex-cli 0.146.0" });
+const PLAN_V2_PREDECESSOR = Object.freeze({
+  path: "evals/experiments/joeness-ticket-m1c-prompt-manifest-v1.json",
+  byteLength: 3428,
+  sha256: "ddb28bb1c9c3795a77ef9b37158ab70210a549fe4a2ed33205bb280345680501",
+  methodChange: "pin-codex-cli-0.146.0",
+});
 
 export function parseTicketEvaluatorCli(argv) {
   if (!Array.isArray(argv)) {
@@ -120,19 +130,34 @@ function exactObjectKeys(value, keys) {
 }
 
 export function validateTicketEvaluationPlan(value) {
+  const isV1 = value?.id === PLAN_V1_ID;
+  const isV2 = value?.id === PLAN_V2_ID;
+  const expectedKeys = [
+    "schemaVersion",
+    "id",
+    "originalGoal",
+    "base",
+    "authority",
+    "inspection",
+    "forbiddenNarrativeSources",
+    "candidates",
+    ...(isV2 ? ["runtime", "predecessor"] : []),
+  ];
   if (
-    !exactObjectKeys(value, [
-      "schemaVersion",
-      "id",
-      "originalGoal",
-      "base",
-      "authority",
-      "inspection",
-      "forbiddenNarrativeSources",
-      "candidates",
-    ]) ||
-    value.schemaVersion !== 1 ||
-    value.id !== "joeness-ticket-m1c-prompt-manifest-v1" ||
+    !exactObjectKeys(value, expectedKeys) ||
+    value.schemaVersion !== (isV2 ? 2 : 1) ||
+    (!isV1 && !isV2) ||
+    (isV2 &&
+      (!exactObjectKeys(value.runtime, ["codexVersion"]) ||
+        stableStringify(value.runtime) !== stableStringify(PLAN_V2_RUNTIME) ||
+        !exactObjectKeys(value.predecessor, [
+          "path",
+          "byteLength",
+          "sha256",
+          "methodChange",
+        ]) ||
+        stableStringify(value.predecessor) !==
+          stableStringify(PLAN_V2_PREDECESSOR))) ||
     typeof value.originalGoal !== "string" ||
     !value.originalGoal.trim() ||
     !exactObjectKeys(value.base, ["sha", "tree"]) ||
@@ -223,6 +248,57 @@ export function validateTicketEvaluationPlan(value) {
     throw new Error("Ticket authority virtual path set drifted");
   }
   return structuredClone(value);
+}
+
+export function resolveTicketRuntimeContract(plan) {
+  if (plan?.id === PLAN_V1_ID && plan?.schemaVersion === 1) {
+    return { ...PLAN_V1_RUNTIME, generation: "v1" };
+  }
+  if (
+    plan?.id === PLAN_V2_ID &&
+    plan?.schemaVersion === 2 &&
+    stableStringify(plan.runtime) === stableStringify(PLAN_V2_RUNTIME)
+  ) {
+    return { ...PLAN_V2_RUNTIME, generation: "v2" };
+  }
+  throw new Error("Ticket runtime contract is malformed");
+}
+
+function assertPreparedTicketRuntime(runtime, contract) {
+  if (
+    runtime?.version !== contract.codexVersion ||
+    runtime?.doctor?.codexVersion !== contract.codexVersion.replace("codex-cli ", "")
+  ) {
+    throw new Error("prepared Ticket runtime contract differs");
+  }
+  return true;
+}
+
+export async function prepareTicketRuntime(
+  runRoot,
+  plan,
+  prepareImpl = prepareRuntime,
+) {
+  const contract = resolveTicketRuntimeContract(plan);
+  const runtime = await prepareImpl(runRoot, {
+    expectedCodexVersion: contract.codexVersion,
+  });
+  assertPreparedTicketRuntime(runtime, contract);
+  return runtime;
+}
+
+export function assertTicketSessionRuntime(session, contract) {
+  const userAgent = session?.initializeResult?.userAgent;
+  const version = contract.codexVersion.replace("codex-cli ", "");
+  const escapedVersion = version.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
+  const exactUserAgent = new RegExp(
+    `^joewrks-codex-evidence-collector/${escapedVersion}(?:$|[ (])`,
+    "u",
+  );
+  if (typeof userAgent !== "string" || !exactUserAgent.test(userAgent)) {
+    throw new Error("Ticket App Server user agent differs from runtime contract");
+  }
+  return { expectedCodexVersion: contract.codexVersion, userAgent };
 }
 
 function unique(values) {
@@ -782,6 +858,20 @@ async function snapshotFile(repositoryRoot, relativePath) {
   };
 }
 
+export async function verifyTicketPlanPredecessor(repositoryRoot, plan) {
+  if (plan.id === PLAN_V1_ID) return null;
+  const observed = await snapshotFile(repositoryRoot, plan.predecessor.path);
+  const expected = {
+    path: plan.predecessor.path,
+    byteLength: plan.predecessor.byteLength,
+    sha256: plan.predecessor.sha256,
+  };
+  if (stableStringify(observed) !== stableStringify(expected)) {
+    throw new Error("Ticket predecessor artifact differs from the plan");
+  }
+  return observed;
+}
+
 function runtimeEvidence(runtime) {
   return {
     version: runtime.version,
@@ -883,6 +973,11 @@ export async function runTicketEvaluationBatch({
   const resolvedRepository = await realpath(repositoryRoot);
   const manifestText = await readFile(manifestPath, "utf8");
   const plan = validateTicketEvaluationPlan(JSON.parse(manifestText));
+  const runtimeContract = resolveTicketRuntimeContract(plan);
+  const predecessorEvidence = await verifyTicketPlanPredecessor(
+    resolvedRepository,
+    plan,
+  );
   const selected =
     mode === "smoke"
       ? plan.candidates.filter(({ id }) => id === candidateId)
@@ -925,10 +1020,11 @@ export async function runTicketEvaluationBatch({
   let worktreesRemoved = true;
   let isolatedHomeRemoved = true;
   try {
-    runtime = await prepareRuntime(runRoot);
+    runtime = await prepareTicketRuntime(runRoot, plan);
 
     for (const [index, candidate] of selected.entries()) {
       session = await openAppServer(runtime);
+      const runtimeSession = assertTicketSessionRuntime(session, runtimeContract);
       const initialMcp = await listMcpServerStatus(session.client);
       verifyMcpRuntimeIsInert(session.mcpInventory, initialMcp);
       const candidateRoot = path.join(
@@ -984,7 +1080,7 @@ export async function runTicketEvaluationBatch({
         promptManifest: built.manifest,
         promptText: built.prompt,
         dynamicTool: built.dynamicTool,
-        isolation: { hookControl, writeIsolation },
+        isolation: { hookControl, writeIsolation, runtimeSession },
         before,
       };
       const turn = await runTicketEvaluatorTurn({
@@ -1154,7 +1250,7 @@ export async function runTicketEvaluationBatch({
     repositoryCleanAfter;
   return {
     schemaVersion: 1,
-    id: `joeness-ticket-m1c-${mode}-v1`,
+    id: `joeness-ticket-m1c-${mode}-${runtimeContract.generation}`,
     result: allPassed
       ? "ticket-evaluator-provenance-pass"
       : "ticket-evaluator-provenance-fail",
@@ -1166,6 +1262,7 @@ export async function runTicketEvaluationBatch({
       byteLength: Buffer.byteLength(manifestText),
       sha256: sha256(manifestText),
       value: plan,
+      predecessorEvidence,
       gitEvidence: planGitEvidence,
     },
     infrastructure: {
@@ -1206,7 +1303,11 @@ export async function runTicketEvaluationBatch({
 }
 
 async function writeFailure(options, error) {
-  const value = buildTicketFailureRecord(options.mode, error);
+  const value = buildTicketFailureRecord(
+    options.mode,
+    error,
+    options.manifestRequest,
+  );
   if (options.mode === "batch" && options.rawOutput) {
     const rawPath = path.resolve(options.rawOutput);
     const summaryPath = path.resolve(options.output);
@@ -1224,11 +1325,48 @@ async function writeFailure(options, error) {
   }
 }
 
-export function buildTicketFailureRecord(mode, error) {
+export async function snapshotTicketManifestRequest(manifestPath) {
+  const resolvedPath = path.resolve(manifestPath);
+  try {
+    const bytes = await readFile(resolvedPath);
+    const request = {
+      path: resolvedPath,
+      byteLength: bytes.length,
+      sha256: sha256(bytes),
+    };
+    try {
+      const plan = validateTicketEvaluationPlan(JSON.parse(bytes.toString("utf8")));
+      const runtime = resolveTicketRuntimeContract(plan);
+      return {
+        ...request,
+        status: "validated",
+        id: plan.id,
+        runtime,
+      };
+    } catch (error) {
+      return {
+        ...request,
+        status: "invalid",
+        validationError: serializeTicketError(error),
+      };
+    }
+  } catch (error) {
+    return {
+      path: resolvedPath,
+      status: "unreadable",
+      readError: serializeTicketError(error),
+    };
+  }
+}
+
+export function buildTicketFailureRecord(mode, error, manifestRequest = null) {
+  const generation = manifestRequest?.runtime?.generation;
   return {
     schemaVersion: 1,
+    ...(generation ? { id: `joeness-ticket-m1c-${mode}-${generation}` } : {}),
     status: "blocked",
     mode,
+    ...(manifestRequest ? { manifestRequest } : {}),
     error: serializeTicketError(error),
     promotionPass: false,
   };
@@ -1248,6 +1386,7 @@ export async function main(argv = process.argv.slice(2)) {
     return 1;
   }
   let exitCode = 1;
+  options.manifestRequest = await snapshotTicketManifestRequest(options.manifest);
   try {
     const raw = await runTicketEvaluationBatch({
       repositoryRoot: process.cwd(),
@@ -1268,7 +1407,7 @@ export async function main(argv = process.argv.slice(2)) {
       );
       const summary = {
         schemaVersion: 1,
-        id: "joeness-ticket-m1c-e2e-v1",
+        id: `joeness-ticket-m1c-e2e-${resolveTicketRuntimeContract(raw.plan.value).generation}`,
         result: raw.m1cPass
           ? "m1c-strict-ticket-provenance-pass"
           : "m1c-strict-ticket-provenance-fail",

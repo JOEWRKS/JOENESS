@@ -58,6 +58,10 @@ const CASE_METRIC_KEYS = Object.freeze([
 ]);
 const TOKEN_USAGE_KEYS = Object.freeze(CASE_METRIC_KEYS.slice(0, 5));
 export const EXPECTED_CODEX_VERSION = "codex-cli 0.145.0";
+const ALLOWED_EXPECTED_CODEX_VERSIONS = new Set([
+  EXPECTED_CODEX_VERSION,
+  "codex-cli 0.146.0",
+]);
 export const OUTPUT_LIMIT_BYTES = 64 * 1024;
 export const EVENT_LIMIT = 256;
 const MESSAGE_DELTA_COUNT_LIMIT = EVENT_LIMIT * 16;
@@ -1643,7 +1647,24 @@ export async function materializeIsolatedCodexHome(
   }
 }
 
-export async function prepareRuntime(runRoot) {
+export function assertExpectedCodexVersion(
+  actualVersion,
+  expectedVersion = EXPECTED_CODEX_VERSION,
+) {
+  if (!ALLOWED_EXPECTED_CODEX_VERSIONS.has(expectedVersion)) {
+    throw new Error("expected Codex version is malformed");
+  }
+  if (actualVersion !== expectedVersion) {
+    throw new Error(`protocol-version-drift: ${actualVersion}`);
+  }
+  return true;
+}
+
+export async function prepareRuntime(
+  runRoot,
+  { expectedCodexVersion = EXPECTED_CODEX_VERSION } = {},
+) {
+  assertExpectedCodexVersion(expectedCodexVersion, expectedCodexVersion);
   const runRootStat = await stat(runRoot);
   if (!runRootStat.isDirectory()) {
     throw new Error("run root must be a directory");
@@ -1686,9 +1707,7 @@ export async function prepareRuntime(runRoot) {
     env: appServerEnvironment,
   });
   const version = requireSuccessfulProcess(versionResult, "codex --version").trim();
-  if (version !== EXPECTED_CODEX_VERSION) {
-    throw new Error(`protocol-version-drift: ${version}`);
-  }
+  assertExpectedCodexVersion(version, expectedCodexVersion);
 
   const originalMcp = parseJsonProcess(
     await runBuffered(executable, ["mcp", "list", "--json"], {
@@ -1716,7 +1735,7 @@ export async function prepareRuntime(runRoot) {
   if (
     doctor?.schemaVersion !== 1 ||
     doctor?.overallStatus !== "ok" ||
-    doctor?.codexVersion !== EXPECTED_CODEX_VERSION.replace("codex-cli ", "")
+    doctor?.codexVersion !== expectedCodexVersion.replace("codex-cli ", "")
   ) {
     throw new Error("Codex doctor overall status is not ok");
   }

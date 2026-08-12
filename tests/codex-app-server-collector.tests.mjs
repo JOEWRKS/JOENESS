@@ -18,6 +18,7 @@ import { fileURLToPath } from "node:url";
 
 import {
   approvalDenialResponse,
+  assertExpectedCodexVersion,
   assertEvaluationSourceConfigSafe,
   boundUtf8,
   buildAppServerEnvironment,
@@ -69,7 +70,31 @@ import {
   verifyDisabledMcp,
   verifyMcpRuntimeIsInert,
   writeResultExclusive,
+  EXPECTED_CODEX_VERSION,
 } from "../evals/support/collect-codex-app-server.mjs";
+
+test("runtime version pins are explicit and fail closed", () => {
+  assert.equal(EXPECTED_CODEX_VERSION, "codex-cli 0.145.0");
+  assert.equal(
+    assertExpectedCodexVersion(
+      "codex-cli 0.146.0",
+      "codex-cli 0.146.0",
+    ),
+    true,
+  );
+  assert.throws(
+    () =>
+      assertExpectedCodexVersion(
+        "codex-cli 0.146.0",
+        "codex-cli 0.145.0",
+      ),
+    /protocol-version-drift: codex-cli 0\.146\.0/u,
+  );
+  assert.throws(
+    () => assertExpectedCodexVersion("codex-cli 0.146.0", "latest"),
+    /expected Codex version is malformed/u,
+  );
+});
 
 const SAFE_REMOTE_CONTROL_SNAPSHOT = {
   seen: true,
