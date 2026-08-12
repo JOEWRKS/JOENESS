@@ -692,9 +692,15 @@ async function runGit(repositoryRoot, args, { requireEmptyStderr = false } = {})
     result.signal !== null ||
     (requireEmptyStderr && result.stderr !== "")
   ) {
-    throw new Error(`Git command failed: git ${args.join(" ")}`);
+    const error = new Error(`Git command failed: git ${args.join(" ")}`);
+    error.ticketEvidence = { process: processEvidence(result) };
+    throw error;
   }
   return result;
+}
+
+export async function runTicketGit(repositoryRoot, args, options = {}) {
+  return runGit(repositoryRoot, args, options);
 }
 
 function processEvidence(result) {
@@ -964,6 +970,10 @@ function safeRunRoot(runRoot) {
   return relative !== "" && !relative.startsWith("..") && !path.isAbsolute(relative);
 }
 
+export function ticketRunRootRetentionRequired(bodyError, cleanupErrors) {
+  return bodyError !== null || cleanupErrors.length !== 0;
+}
+
 export async function runTicketEvaluationBatch({
   repositoryRoot,
   manifestPath,
@@ -1016,9 +1026,11 @@ export async function runTicketEvaluationBatch({
   const cleanupErrors = [];
   let worktreesAfter = null;
   let statusAfter = null;
-  let sessionClosed = true;
+  let processTerminationConfirmed = true;
+  let sessionHealthy = true;
   let worktreesRemoved = true;
   let isolatedHomeRemoved = true;
+  let runRootState = "retained";
   try {
     runtime = await prepareTicketRuntime(runRoot, plan);
 
@@ -1142,56 +1154,55 @@ export async function runTicketEvaluationBatch({
     bodyError = error;
   } finally {
     if (session !== null) {
-      sessionClosed = false;
+      processTerminationConfirmed = false;
+      sessionHealthy = false;
       try {
         await session.close();
-        sessionClosed = true;
+        processTerminationConfirmed = true;
+        sessionHealthy = true;
         if (session.processExitCode !== 0) {
           cleanupErrors.push(new Error("Ticket App Server exited nonzero"));
-          sessionClosed = false;
+          sessionHealthy = false;
         }
         if (session.stderr.truncated || session.stderr.byteLength !== 0) {
           cleanupErrors.push(new Error("Ticket App Server wrote stderr"));
-          sessionClosed = false;
+          sessionHealthy = false;
         }
         if (!remoteControlSnapshotIsSafe(session.remoteControlSnapshot)) {
           cleanupErrors.push(
             new Error("Ticket App Server remote control is not safely disabled"),
           );
-          sessionClosed = false;
+          sessionHealthy = false;
         }
       } catch (error) {
+        processTerminationConfirmed = session.processCloseConfirmed === true;
         cleanupErrors.push(error);
       }
     }
-    for (const candidateRoot of [...candidateRoots].reverse()) {
-      try {
-        await runGit(resolvedRepository, ["worktree", "remove", candidateRoot]);
-      } catch (error) {
-        worktreesRemoved = false;
-        cleanupErrors.push(error);
+    if (processTerminationConfirmed) {
+      for (const candidateRoot of [...candidateRoots].reverse()) {
+        try {
+          await runGit(resolvedRepository, ["worktree", "remove", candidateRoot]);
+        } catch (error) {
+          worktreesRemoved = false;
+          cleanupErrors.push(error);
+        }
       }
+    } else {
+      worktreesRemoved = false;
+      cleanupErrors.push(
+        new Error("Ticket candidate worktrees retained because process termination is unconfirmed"),
+      );
     }
     if (runtime !== null) {
       isolatedHomeRemoved = false;
-      if (sessionClosed) {
+      if (processTerminationConfirmed) {
         try {
           await removeIsolatedCodexHome(runRoot, runtime.isolatedCodexHome);
           isolatedHomeRemoved = true;
         } catch (error) {
           cleanupErrors.push(error);
         }
-      }
-    }
-    if (sessionClosed && worktreesRemoved && isolatedHomeRemoved) {
-      if (safeRunRoot(runRoot)) {
-        try {
-          await rm(runRoot, { recursive: true, force: false });
-        } catch (error) {
-          cleanupErrors.push(error);
-        }
-      } else {
-        cleanupErrors.push(new Error("Ticket evaluator run root is unsafe to remove"));
       }
     }
     try {
@@ -1212,6 +1223,41 @@ export async function runTicketEvaluationBatch({
     } catch (error) {
       cleanupErrors.push(error);
     }
+    if (
+      processTerminationConfirmed &&
+      worktreesRemoved &&
+      isolatedHomeRemoved &&
+      !ticketRunRootRetentionRequired(bodyError, cleanupErrors)
+    ) {
+      if (safeRunRoot(runRoot)) {
+        try {
+          await rm(runRoot, { recursive: true, force: false });
+          try {
+            await lstat(runRoot);
+            runRootState = "retained";
+            cleanupErrors.push(new Error("Ticket evaluator run root still exists after removal"));
+          } catch (error) {
+            if (error?.code === "ENOENT") {
+              runRootState = "removed";
+            } else {
+              runRootState = "unknown";
+              cleanupErrors.push(error);
+            }
+          }
+        } catch (error) {
+          cleanupErrors.push(error);
+          try {
+            await lstat(runRoot);
+            runRootState = "retained";
+          } catch (readbackError) {
+            runRootState = readbackError?.code === "ENOENT" ? "removed" : "unknown";
+            if (readbackError?.code !== "ENOENT") cleanupErrors.push(readbackError);
+          }
+        }
+      } else {
+        cleanupErrors.push(new Error("Ticket evaluator run root is unsafe to remove"));
+      }
+    }
   }
   if (bodyError !== null || cleanupErrors.length !== 0) {
     const error = new AggregateError(
@@ -1224,13 +1270,26 @@ export async function runTicketEvaluationBatch({
     error.ticketEvidence = {
       runRoot: {
         path: runRoot,
-        retained: cleanupErrors.length !== 0,
+        state: runRootState,
       },
       cases,
       cleanup: {
-        sessionClosed,
+        processTerminationConfirmed,
+        sessionHealthy,
         worktreesRemoved,
+        candidateRoots: [...candidateRoots],
         isolatedHomeRemoved,
+        isolatedCodexHome:
+          runtime === null
+            ? null
+            : {
+                path: runtime.isolatedCodexHome,
+                state: isolatedHomeRemoved
+                  ? "removed"
+                  : processTerminationConfirmed
+                    ? "unknown"
+                    : "retained-process-unconfirmed",
+              },
         errors: cleanupErrors.map(serializeTicketError),
       },
     };

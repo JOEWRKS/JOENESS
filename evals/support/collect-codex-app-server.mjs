@@ -2075,6 +2075,9 @@ export async function openAppServer(
       get processExitCode() {
         return processExitCode;
       },
+      get processCloseConfirmed() {
+        return processCloseConfirmed;
+      },
       setDynamicToolHandler(handler) {
         if (typeof handler !== "function") {
           throw new TypeError("dynamic tool handler must be a function");

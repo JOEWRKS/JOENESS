@@ -1065,3 +1065,22 @@ test("live output paths are reserved before evaluation and existing artifacts bl
     /exists/i,
   );
 });
+
+test("failed Ticket Git commands retain exact process evidence and run roots", async (t) => {
+  const runner = await loadRunner();
+  const fixture = await createTicketRepository(t);
+  let observed;
+  await assert.rejects(
+    () => runner.runTicketGit(fixture.root, ["rev-parse", "not-a-real-revision"]),
+    (error) => {
+      observed = error;
+      return /Git command failed/u.test(error.message);
+    },
+  );
+  assert.equal(observed.ticketEvidence.process.exitCode, 128);
+  assert.equal(observed.ticketEvidence.process.stderr.byteLength > 0, true);
+  assert.match(observed.ticketEvidence.process.stderr.text, /fatal:/iu);
+  assert.equal(runner.ticketRunRootRetentionRequired(new Error("body"), []), true);
+  assert.equal(runner.ticketRunRootRetentionRequired(null, [new Error("cleanup")]), true);
+  assert.equal(runner.ticketRunRootRetentionRequired(null, []), false);
+});
