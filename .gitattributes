@@ -50,9 +50,12 @@
 /skills/design/** text eol=lf
 /skills/visual-check/** text eol=lf
 /skills/spec/** text eol=lf
+/skills/ticket/** text eol=lf
 /evals/skill-contracts/*.json text eol=lf
 /evals/skill-contracts/visual-verdict-pressure-v*-raw.md text eol=lf
 /evals/skill-contracts/spec-delivery-pressure-v*-raw.md text eol=lf
 /evals/skill-contracts/spec-delivery-pressure-v*-raw.md whitespace=-blank-at-eol
+/evals/skill-contracts/ticket-delivery-pressure-v*-raw.md text eol=lf
+/evals/skill-contracts/ticket-delivery-pressure-v*-raw.md whitespace=-blank-at-eol
 /evals/skill-contracts/fixtures/** binary
 vendor/** -text

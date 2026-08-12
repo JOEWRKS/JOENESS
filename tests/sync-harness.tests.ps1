@@ -83,14 +83,17 @@ function Test-ReadmeContract {
         $roleLines = @($roles -split '\r?\n')
         Assert-True (($roleLines[0] -eq '| Call | What it does | Automatic selection condition |') -or ($roleLines[0] -eq $koreanRolesHeader)) "$language roles table has only the public three-column header"
         $roleRows = @($roleLines | Select-Object -Skip 2)
-        Assert-Equal $roleRows.Count 5 "$language roles table has exactly five calls"
-        Assert-Equal (@($roleRows | ForEach-Object { ($_ -split '\|')[1].Trim().Trim('`') }) -join ',') '$project,$design,$visual-check,$spec,$handoff' "$language roles table has only the active calls"
+        Assert-Equal $roleRows.Count 6 "$language roles table has exactly six calls"
+        Assert-Equal (@($roleRows | ForEach-Object { ($_ -split '\|')[1].Trim().Trim('`') }) -join ',') '$project,$ticket,$design,$visual-check,$spec,$handoff' "$language roles table has only the active calls"
         Assert-True (@($roleLines | Where-Object { $_ -notmatch '^\|[^|]+\|[^|]+\|[^|]+\|$' }).Count -eq 0) "$language roles table has exactly three columns"
         if ($language -eq 'English') {
+            Assert-True $section.Contains('low-risk change fully decided by one deterministic check') 'English guide limits the deterministic-check ticket bypass to low-risk work'
             Assert-True $roles.Contains('moving an approved image to another size or format') 'English visual-check row explains approved-image translation'
             Assert-True $roles.Contains('visual output before completion') 'English visual-check row explains the visual completion gate'
             Assert-True ($roles.Contains('persistent specification') -and $roles.Contains("user's language")) 'English spec row explains conditional user-language delivery'
         } else {
+            $koreanLowRisk = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('64uo7J28IOyekOuPmeqygOyCrOuhnCDsmYTsoITtnogg7YyQ7KCV65CY64qUIOyggOychO2XmCDsiJjsoJU='))
+            Assert-True $section.Contains($koreanLowRisk) 'Korean guide limits the deterministic-check ticket bypass to low-risk work'
             $koreanApprovedImage = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('7Iq57J2465CcIOydtOuvuOyngOulvCDri6Trpbgg7YGs6riwwrftmJXsi53snLzroZwg7Jiu6ri4IOuVjA=='))
             $koreanVisualCompletion = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('7Iuc6rCBIOqysOqzvOusvOydhCDsmYTro4wg7KCE7JeQIOyngeygkSDtmZXsnbg='))
             $koreanSpec = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('66qF7IS4'))
@@ -739,6 +742,7 @@ function Test-RemoveContract {
         }
         Assert-True (-not (Test-Path -LiteralPath (Join-Path $f.AgentsHome 'skills\design'))) 'owned remove deletes the empty design skill directory'
         Assert-True (-not (Test-Path -LiteralPath (Join-Path $f.AgentsHome 'skills\project'))) 'owned remove deletes the empty project skill directory'
+        Assert-True (-not (Test-Path -LiteralPath (Join-Path $f.AgentsHome 'skills\ticket'))) 'owned remove deletes the empty ticket skill directory'
         Assert-True (-not (Test-Path -LiteralPath (Join-Path $f.AgentsHome 'skills\visual-check'))) 'owned remove deletes the empty visual-check skill directory'
         Assert-True (-not (Test-Path -LiteralPath (Join-Path $f.AgentsHome 'vendor'))) 'owned remove deletes the empty managed vendor directory'
         Assert-BytesEqual ([IO.File]::ReadAllBytes((Join-Path $removed.backupPath 'codex\AGENTS.md'))) $installedAgentsBytes 'owned remove backs up exact AGENTS bytes'
@@ -1457,6 +1461,8 @@ function Test-OptionalBundleStateAndDrift {
         Assert-True (Test-Path (Join-Path $f.AgentsHome 'skills\handoff\LICENSE')) 'handoff license installs'
         Assert-True (Test-Path (Join-Path $f.AgentsHome 'skills\project\scripts\project-setup.ps1')) 'project helper installs'
         Assert-True (([IO.File]::ReadAllText((Join-Path $f.AgentsHome 'skills\project\agents\openai.yaml'))) -match 'allow_implicit_invocation:\s*true') 'project setup allows conditional implicit selection'
+        Assert-True (Test-Path (Join-Path $f.AgentsHome 'skills\ticket\SKILL.md')) 'ticket skill installs'
+        Assert-True (([IO.File]::ReadAllText((Join-Path $f.AgentsHome 'skills\ticket\agents\openai.yaml'))) -match 'allow_implicit_invocation:\s*true') 'ticket allows conditional implicit selection'
         Assert-True (Test-Path (Join-Path $f.AgentsHome 'skills\visual-check\SKILL.md')) 'visual-check skill installs'
         $before = Get-TreeHashes $f.AgentsHome
         $beforeState = [IO.File]::ReadAllBytes($f.State)
@@ -1622,8 +1628,8 @@ function Test-LegacyNamedV2Migration {
         $apply = Read-Result (Invoke-Harness $f Apply) 'legacy named V2 migration apply'
         Assert-Equal $apply.status 'current' 'legacy named V2 migration reaches current'
         $installedManifest = Get-Content -Raw -LiteralPath (Join-Path $f.AgentsHome 'vendor\source-manifest.json') | ConvertFrom-Json
-        Assert-Equal (($installedManifest.activeSkills.PSObject.Properties.Name | Sort-Object) -join ',') 'design,handoff,project,spec,visual-check' 'legacy named V2 migration installs exact clean skill keys'
-        Assert-Equal ((Get-ChildItem -LiteralPath (Join-Path $f.AgentsHome 'skills') -Directory | Select-Object -ExpandProperty Name | Sort-Object) -join ',') 'design,handoff,project,spec,visual-check' 'legacy named V2 migration leaves only clean skill directories'
+        Assert-Equal (($installedManifest.activeSkills.PSObject.Properties.Name | Sort-Object) -join ',') 'design,handoff,project,spec,ticket,visual-check' 'legacy named V2 migration installs exact clean skill keys'
+        Assert-Equal ((Get-ChildItem -LiteralPath (Join-Path $f.AgentsHome 'skills') -Directory | Select-Object -ExpandProperty Name | Sort-Object) -join ',') 'design,handoff,project,spec,ticket,visual-check' 'legacy named V2 migration leaves only clean skill directories'
         Assert-True (-not (Test-Path -LiteralPath (Join-Path $f.AgentsHome 'skills\joewrks-design-frontend'))) 'legacy named V2 migration removes the empty design directory'
         Assert-True (-not (Test-Path -LiteralPath (Join-Path $f.AgentsHome 'skills\joewrks-project-setup'))) 'legacy named V2 migration removes the empty project directory'
         Assert-StringSetEqual @((Get-TreeHashes $f.AgentsHome).Keys) (Get-OptionalFiles $f.SourceRoot) 'legacy named V2 migration materializes the exact current manifest unit'
@@ -1757,6 +1763,7 @@ function Test-V1StateMigration {
             Assert-Equal $state.schemaVersion 2 "$($case.Name) migration writes schema V2"
             Assert-Equal $state.agentsHomeIdentitySha256 (Get-PathIdentity $f.AgentsHome) "$($case.Name) migration binds AgentsHome"
             Assert-True (Test-Path -LiteralPath (Join-Path $f.AgentsHome 'skills\project\SKILL.md')) "$($case.Name) migration installs the project skill"
+            Assert-True (Test-Path -LiteralPath (Join-Path $f.AgentsHome 'skills\ticket\SKILL.md')) "$($case.Name) migration installs the ticket skill"
             Assert-StringSetEqual @((Get-TreeHashes $f.AgentsHome).Keys) (Get-OptionalFiles $f.SourceRoot) "$($case.Name) migration installs the full manifest unit"
         } finally { Remove-Fixture $f }
     }

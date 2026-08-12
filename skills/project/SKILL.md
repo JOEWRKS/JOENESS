@@ -13,6 +13,7 @@ Keep one verified durable project contract and at most one planning ledger. Pers
 |---|---|
 | Small fix, edit, research, explanation, or brainstorming | Stop this skill; continue normally. |
 | No verifiable Git project root | Use a compact chat plan; create nothing. |
+| Tracker has an important planned task with observable acceptance criteria | Stop this skill and use `$ticket`; do not duplicate the tracker or ledger. |
 | Usable authoritative tracker exists | Use it as the single source; do not offer or copy another ledger. |
 | Project-level start or major release-scope expansion, no concrete plan or ledger | Make the read-only offer below once in the current task. |
 | Explicit persist/setup/apply request | Disclose exact targets, then write only the approved targets. |

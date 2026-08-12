@@ -151,8 +151,8 @@ const EXPECTED_PROJECT_SKILL = {
   files: [
     {
       localPath: 'skills/project/SKILL.md',
-      bytes: 6592,
-      sha256: '9c930573910f526b6354096b59d29474432eed8b436685438e00152f15d62884',
+      bytes: 6747,
+      sha256: 'be0ca981423bab2cf657fd76415938491a1adfde3084526ecdb4a1d56ae7d847',
       exactUpstreamCopy: false,
     },
     {
@@ -274,6 +274,30 @@ const EXPECTED_SPEC_SKILL = {
       localPath: 'skills/spec/agents/openai.yaml',
       bytes: 411,
       sha256: 'c0236e7b365a2f329f463c43c37033f8d7d8b443090a71b475f88799d3389dc8',
+      exactUpstreamCopy: false,
+    },
+  ],
+};
+const EXPECTED_TICKET_SKILL = {
+  authorship: 'joewrks-canonical',
+  evaluationState: 'candidate',
+  activationPolicy: 'implicit-important-ticket-review',
+  sourceDependencies: [],
+  intentionalDifferences: [
+    'Conditional single-writer delivery and new-context candidate review for important prepared work, with explicit shared-model and shared-permission limitations.',
+  ],
+  validatorSha256: '5347a0a09cfb546bba1c0d1a30dae0a233d9a05f57bd4e7877155c588bcdabf7',
+  files: [
+    {
+      localPath: 'skills/ticket/SKILL.md',
+      bytes: 3619,
+      sha256: '1c783553bbc3a0bd0b7e8a1dd376ee912ef00840670e06fa4945bde1ab78211f',
+      exactUpstreamCopy: false,
+    },
+    {
+      localPath: 'skills/ticket/agents/openai.yaml',
+      bytes: 339,
+      sha256: '9c145a3c51ae22611fdb00d00c4793be83f87cfffc8a3741b8ff6dff9a0b04de',
       exactUpstreamCopy: false,
     },
   ],
@@ -420,7 +444,7 @@ const EXPECTED_SKILL_CONTRACT_V6 = {
   semanticImprovement: 'not-asserted',
   promotionPass: false,
 };
-const EXPECTED_CURRENT_EVALUATION = {
+const EXPECTED_SKILL_CONTRACT_V7 = {
   mode: 'active-skill-contract-v7',
   version: 7,
   state: 'unvalidated',
@@ -452,6 +476,19 @@ const EXPECTED_CURRENT_EVALUATION = {
   outcomeReview: 'pending',
   semanticImprovement: 'not-asserted',
   promotionPass: false,
+};
+const EXPECTED_CURRENT_EVALUATION = {
+  ...EXPECTED_SKILL_CONTRACT_V7,
+  mode: 'active-skill-contract-v8',
+  version: 8,
+  cases: {
+    path: 'evals/skill-contracts/cases-v8.json',
+    sha256: '9f59ccbe5e52c66de08abd5ebf483a0bdb9036c726c742439e641ab856ac4f4c',
+  },
+  ticketPressureEvidence: {
+    path: 'evals/skill-contracts/ticket-delivery-pressure-v1.json',
+    sha256: 'c682e16e377eda576cb981d81d9db833067b2b5a5a8be3aa189604f99342b882',
+  },
 };
 const EXPECTED_SOURCE_EVALUATION = {
   'ui-ux-pro-max': {
@@ -566,23 +603,26 @@ test('vendor bundle is exactly the pinned non-discoverable source set', () => {
     'handoff',
     'project',
     'spec',
+    'ticket',
     'visual-check',
   ]);
   const design = manifest.activeSkills.design;
   const handoff = manifest.activeSkills.handoff;
   const project = manifest.activeSkills.project;
   const spec = manifest.activeSkills.spec;
+  const ticket = manifest.activeSkills.ticket;
   const visualCheck = manifest.activeSkills['visual-check'];
   assert.equal(handoff.activationPolicy, 'explicit-only');
   assert.equal(design.activationPolicy, 'hybrid');
   assert.equal(project.activationPolicy, 'hybrid-offer-explicit-write');
   assert.equal(spec.activationPolicy, 'implicit-persistent-spec-delivery');
+  assert.equal(ticket.activationPolicy, 'implicit-important-ticket-review');
   assert.equal(visualCheck.activationPolicy, 'hybrid-visual-verification');
   for (const skill of Object.values(manifest.activeSkills)) {
     assert.equal(skill.evaluationState, 'candidate');
   }
   assert.deepEqual(design.sourceDependencies, ['ui-ux-pro-max', 'apple-design']);
-  for (const skill of [handoff, project, spec, visualCheck]) {
+  for (const skill of [handoff, project, spec, ticket, visualCheck]) {
     assert.deepEqual(skill.sourceDependencies, []);
   }
   assert.deepEqual(
@@ -590,7 +630,7 @@ test('vendor bundle is exactly the pinned non-discoverable source set', () => {
     EXPECTED_PROJECT_SKILL.files.map(({ localPath }) => localPath),
   );
 
-  for (const skillName of ['design', 'handoff', 'project', 'spec', 'visual-check']) {
+  for (const skillName of ['design', 'handoff', 'project', 'spec', 'ticket', 'visual-check']) {
     for (const entry of manifest.activeSkills[skillName].files) {
       const text = readFileSync(path.join(ROOT, entry.localPath), 'utf8');
       assert.doesNotMatch(
@@ -603,6 +643,7 @@ test('vendor bundle is exactly the pinned non-discoverable source set', () => {
   assert.deepEqual(design, EXPECTED_DESIGN_SKILL);
   assert.deepEqual(project, EXPECTED_PROJECT_SKILL);
   assert.deepEqual(spec, EXPECTED_SPEC_SKILL);
+  assert.deepEqual(ticket, EXPECTED_TICKET_SKILL);
   assert.deepEqual(visualCheck, EXPECTED_VISUAL_CHECK_SKILL);
   assert.deepEqual(handoff, EXPECTED_HANDOFF_SKILL);
   assert.deepEqual(manifest.sources['ui-ux-pro-max'].upstreamAuditNotes, [
@@ -650,7 +691,7 @@ test('vendor bundle is exactly the pinned non-discoverable source set', () => {
       assert.equal(sha256(localFile), file.sha256, `wrong hash: ${file.localPath}`);
     }
   }
-  for (const skill of [EXPECTED_DESIGN_SKILL, EXPECTED_PROJECT_SKILL, EXPECTED_VISUAL_CHECK_SKILL, EXPECTED_SPEC_SKILL, EXPECTED_HANDOFF_SKILL]) {
+  for (const skill of [EXPECTED_DESIGN_SKILL, EXPECTED_PROJECT_SKILL, EXPECTED_VISUAL_CHECK_SKILL, EXPECTED_SPEC_SKILL, EXPECTED_TICKET_SKILL, EXPECTED_HANDOFF_SKILL]) {
     for (const file of skill.files) {
       const localFile = path.join(ROOT, ...file.localPath.split('/'));
       assert.equal(lstatSync(localFile).size, file.bytes, `wrong active byte length: ${file.localPath}`);
@@ -744,7 +785,7 @@ test('candidate ledger separates the unvalidated active contract from retained h
   const manifest = JSON.parse(readFileSync(MANIFEST, 'utf8'));
   const current = manifest.evaluation.current;
   assert.deepEqual(current, EXPECTED_CURRENT_EVALUATION);
-  assert.deepEqual(manifest.evaluation.history, [EXPECTED_HYBRID_EVALUATION, EXPECTED_SKILL_CONTRACT_V2, EXPECTED_SKILL_CONTRACT_V3_REJECTED, EXPECTED_SKILL_CONTRACT_V4_REJECTED, EXPECTED_SKILL_CONTRACT_V5, EXPECTED_SKILL_CONTRACT_V6]);
+  assert.deepEqual(manifest.evaluation.history, [EXPECTED_HYBRID_EVALUATION, EXPECTED_SKILL_CONTRACT_V2, EXPECTED_SKILL_CONTRACT_V3_REJECTED, EXPECTED_SKILL_CONTRACT_V4_REJECTED, EXPECTED_SKILL_CONTRACT_V5, EXPECTED_SKILL_CONTRACT_V6, EXPECTED_SKILL_CONTRACT_V7]);
 
   for (const [name, expected] of Object.entries(EXPECTED_SOURCE_EVALUATION)) {
     assert.equal(manifest.sources[name].evaluationStatus, expected.evaluationStatus);
@@ -773,7 +814,10 @@ test('candidate ledger separates the unvalidated active contract from retained h
   assert.equal(sha256(v4Pressure), EXPECTED_SKILL_CONTRACT_V4_REJECTED.pressureEvidence.sha256);
   assert.equal(lstatSync(v4Raw).size, 14333);
   assert.equal(sha256(v4Raw), EXPECTED_SKILL_CONTRACT_V4_REJECTED.rawEvidence.sha256);
-  assert.equal(lstatSync(path.join(ROOT, ...current.cases.path.split('/'))).size, 1237);
+  const v7Cases = path.join(ROOT, ...EXPECTED_SKILL_CONTRACT_V7.cases.path.split('/'));
+  assert.equal(lstatSync(v7Cases).size, 1237);
+  assert.equal(sha256(v7Cases), EXPECTED_SKILL_CONTRACT_V7.cases.sha256);
+  assert.equal(lstatSync(path.join(ROOT, ...current.cases.path.split('/'))).size, 4376);
   assert.equal(sha256(path.join(ROOT, ...current.cases.path.split('/'))), current.cases.sha256);
   const visualV5 = manifest.evaluation.history.find(({ mode }) => mode === 'active-skill-contract-v5');
   assert.equal(current.visualPredecessorEvidence.pressure.path, visualV5.pressureEvidence.path);
@@ -888,6 +932,27 @@ test('candidate ledger separates the unvalidated active contract from retained h
   const originalSpecRawPath = path.join(ROOT, ...rejectedSpecReview.rawEvidence.path.split('/'));
   assert.equal(lstatSync(originalSpecRawPath).size, 4786);
   assert.equal(sha256(originalSpecRawPath), rejectedSpecReview.rawEvidence.sha256);
+  const ticketPressurePath = path.join(ROOT, ...current.ticketPressureEvidence.path.split('/'));
+  assert.equal(lstatSync(ticketPressurePath).size, 2163);
+  assert.equal(sha256(ticketPressurePath), current.ticketPressureEvidence.sha256);
+  const ticketPressure = JSON.parse(readFileSync(ticketPressurePath, 'utf8'));
+  assert.equal(ticketPressure.skill.sha256, EXPECTED_TICKET_SKILL.files[0].sha256);
+  assert.equal(ticketPressure.cases.sha256, current.cases.sha256);
+  assert.equal(ticketPressure.routing.candidateSampleCount, 5);
+  assert.deepEqual(new Set(Object.values(ticketPressure.routing.scores)), new Set(['5/5']));
+  assert.equal(ticketPressure.orchestration.implementerCandidateCreated, true);
+  assert.equal(ticketPressure.orchestration.candidateBindingVerified, true);
+  assert.equal(ticketPressure.orchestration.cleanDetachedEvaluationWorkspaceCreated, true);
+  assert.equal(ticketPressure.orchestration.freshEvaluatorPass, false);
+  assert.equal(ticketPressure.orchestration.result, 'unverified');
+  assert.equal(ticketPressure.result, 'routing-pressure-pass-orchestration-unverified');
+  assert.equal(ticketPressure.classification, 'candidate-unvalidated');
+  assert.equal(ticketPressure.promotionPass, false);
+  const ticketRawPath = path.join(ROOT, ...ticketPressure.rawEvidence.path.split('/'));
+  assert.equal(lstatSync(ticketRawPath).size, ticketPressure.rawEvidence.bytes);
+  assert.equal(sha256(ticketRawPath), ticketPressure.rawEvidence.sha256);
+  assert.match(readFileSync(ticketRawPath, 'utf8'), /## Candidate 1[\s\S]*## Candidate 5[\s\S]*## Live orchestration smoke/);
+  assert.equal(ticketPressure.predecessorCases.sha256, EXPECTED_SKILL_CONTRACT_V7.cases.sha256);
   for (const [key, evidence] of Object.entries({
     artifact: historical.artifact,
     collector: historical.collector,
@@ -981,6 +1046,7 @@ test('Git preserves exact vendor and active skill bytes on checkout', () => {
   assert.match(readFileSync(GITATTRIBUTES, 'utf8'), /^\/skills\/design\/\*\* text eol=lf$/m);
   assert.match(readFileSync(GITATTRIBUTES, 'utf8'), /^\/skills\/visual-check\/\*\* text eol=lf$/m);
   assert.match(readFileSync(GITATTRIBUTES, 'utf8'), /^\/skills\/spec\/\*\* text eol=lf$/m);
+  assert.match(readFileSync(GITATTRIBUTES, 'utf8'), /^\/skills\/ticket\/\*\* text eol=lf$/m);
   assert.match(readFileSync(GITATTRIBUTES, 'utf8'), /^\/evals\/skill-contracts\/visual-verdict-pressure-v\*-raw\.md text eol=lf$/m);
   assert.match(readFileSync(GITATTRIBUTES, 'utf8'), /^\/evals\/skill-contracts\/spec-delivery-pressure-v\*-raw\.md text eol=lf$/m);
   assert.match(readFileSync(GITATTRIBUTES, 'utf8'), /^\/evals\/skill-contracts\/fixtures\/\*\* binary$/m);

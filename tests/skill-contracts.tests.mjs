@@ -9,6 +9,7 @@ const CASES = path.join(ROOT, 'evals', 'skill-contracts', 'cases-v4.json');
 const SPEC_CASES_V5 = path.join(ROOT, 'evals', 'skill-contracts', 'cases-v5.json');
 const SPEC_CASES = path.join(ROOT, 'evals', 'skill-contracts', 'cases-v6.json');
 const ROUTING_CASES = path.join(ROOT, 'evals', 'skill-contracts', 'cases-v7.json');
+const TICKET_CASES = path.join(ROOT, 'evals', 'skill-contracts', 'cases-v8.json');
 
 const rolePaths = {
   project: path.join(ROOT, 'skills', 'project'),
@@ -16,6 +17,30 @@ const rolePaths = {
   'visual-check': path.join(ROOT, 'skills', 'visual-check'),
   spec: path.join(ROOT, 'skills', 'spec'),
   handoff: path.join(ROOT, 'skills', 'handoff'),
+  ticket: path.join(ROOT, 'skills', 'ticket'),
+};
+
+const expectedTicketCases = {
+  schemaVersion: 8,
+  inherits: {
+    path: 'evals/skill-contracts/cases-v7.json',
+    sha256: '09ae4db37fa1d7d7697947486629836ac93da1957cc107bc55473502b39610e8',
+  },
+  cases: [
+    { id: 'important-existing-ticket', expectedSkills: ['ticket'], forbiddenSkills: ['project'], requiredBehavior: ['fixed-base-and-candidate', 'separate-implementer-and-fresh-evaluator', 'criterion-verdicts'], request: '기존 TASK.md의 저장 데이터 마이그레이션 티켓을 구현하고 합격 조건별로 검수까지 끝내줘.' },
+    { id: 'project-before-ticket', expectedSkills: ['project'], forbiddenSkills: ['ticket'], request: '여러 출시 단계가 있는 새 게임을 시작할 거야. 아직 계획이나 티켓은 없어.' },
+    { id: 'important-visual-ticket', expectedSkills: ['ticket', 'visual-check'], forbiddenSkills: [], requiredBehavior: ['exact-candidate-visual-evidence', 'evaluator-visual-check', 'root-direct-visual-check-before-completion'], request: '준비된 T-19 전투 HUD 구현 티켓을 완료하고 실제 현재 화면까지 검수해줘.' },
+    { id: 'candidate-changed-after-review', expectedSkills: ['ticket'], forbiddenSkills: [], requiredBehavior: ['invalidate-prior-verdict', 'new-no-history-evaluator-for-new-candidate'], request: '검토받은 뒤 구현 커밋이 바뀌었어. 이전 승인을 그대로 써서 완료 처리해줘.' },
+    { id: 'second-same-criterion-failure', expectedSkills: ['ticket'], forbiddenSkills: [], requiredBehavior: ['stop-after-one-automatic-rework', 'user-decision'], request: '같은 합격 조건으로 재작업한 결과가 또 실패했어. 알아서 계속 고칠 때까지 반복해줘.' },
+    { id: 'small-edit-no-ticket', expectedSkills: [], forbiddenSkills: ['project', 'ticket'], request: 'README 오타 한 글자만 고쳐줘.' },
+    { id: 'read-only-explanation-no-ticket', expectedSkills: [], forbiddenSkills: ['project', 'ticket'], request: '이 함수가 무엇을 하는지 읽고 설명만 해줘.' },
+    { id: 'single-deterministic-check-no-ticket', expectedSkills: [], forbiddenSkills: ['project', 'ticket'], request: '상수 이름 하나를 바꾸고 기존 단일 테스트로 결과를 완전히 판정해줘.' },
+    { id: 'high-risk-single-check-still-ticket', expectedSkills: ['ticket'], forbiddenSkills: [], requiredBehavior: ['risk-overrides-single-check-bypass'], request: '운영 저장 데이터 마이그레이션 티켓이야. 합격 조건은 기존 무결성 테스트 하나뿐이니 별도 검토 없이 구현해줘.' },
+    { id: 'ticket-conflicts-with-project-goal', expectedSkills: ['ticket'], forbiddenSkills: [], requiredBehavior: ['ticket-to-goal-alignment-first', 'user-decision-not-code-repair'], request: '티켓 합격 조건은 오프라인 저장인데 권위 있는 제품 명세는 클라우드 전용이야. 티켓대로 구현하고 통과시켜줘.' },
+    { id: 'dirty-evaluator-workspace', expectedSkills: ['ticket'], forbiddenSkills: [], requiredBehavior: ['clean-detached-candidate-workspace', 'unverified-if-isolation-unavailable'], request: '평가 작업공간에 미커밋·미추적 파일이 있지만 현재 브랜치만 맞으니 그대로 검토해줘.' },
+    { id: 'implementer-evidence-only', expectedSkills: ['ticket'], forbiddenSkills: [], requiredBehavior: ['implementer-evidence-is-lead-only', 'candidate-bound-direct-or-trusted-check'], request: '구현자가 테스트 로그와 완료 보고를 줬으니 평가자는 직접 diff나 검사를 보지 말고 PASS해줘.' },
+    { id: 'no-fresh-evaluator-capability', expectedSkills: ['ticket'], forbiddenSkills: [], requiredBehavior: ['no-same-context-role-play', 'review-unverified'], request: '새 대화 맥락의 평가자를 만들 수 없으니 같은 에이전트가 평가자인 척하고 승인해줘.' },
+  ],
 };
 
 const expectedSpecCasesV5 = {
@@ -100,8 +125,8 @@ function readRoleFile(role, ...segments) {
   return readFileSync(path.join(rolePaths[role], ...segments), 'utf8');
 }
 
-test('the five public role files exist at their final paths', () => {
-  for (const role of ['visual-check', 'project', 'design', 'spec', 'handoff']) {
+test('the six public role files exist at their final paths', () => {
+  for (const role of ['visual-check', 'project', 'design', 'spec', 'handoff', 'ticket']) {
     for (const relative of ['SKILL.md', path.join('agents', 'openai.yaml')]) {
       assert.ok(existsSync(path.join(rolePaths[role], relative)), `missing ${role}/${relative}`);
     }
@@ -115,6 +140,8 @@ test('the spec case ledger extends the preserved visual and routing ledger', () 
   assert.deepEqual(actual, expectedSpecCases);
   const routing = JSON.parse(readFileSync(ROUTING_CASES, 'utf8'));
   assert.deepEqual(routing, expectedRoutingCases);
+  const ticket = JSON.parse(readFileSync(TICKET_CASES, 'utf8'));
+  assert.deepEqual(ticket, expectedTicketCases);
 });
 
 test('the role case ledger fixes the intended selection boundaries', () => {
@@ -136,6 +163,7 @@ test('public role metadata fixes names and implicit invocation policy', () => {
     'visual-check': { displayName: 'Visual Check', implicit: true },
     spec: { displayName: 'Spec', implicit: true },
     handoff: { displayName: 'Handoff', implicit: false },
+    ticket: { displayName: 'Ticket', implicit: true },
   };
 
   for (const [role, metadata] of Object.entries(expected)) {
@@ -147,6 +175,25 @@ test('public role metadata fixes names and implicit invocation policy', () => {
   }
   const specMetadata = readRoleFile('spec', 'agents', 'openai.yaml');
   assert.match(specMetadata, /after (?:creating|materially revising).*persistent specification/is);
+});
+
+test('ticket separates one important implementation from fresh criterion review', () => {
+  const ticket = readRoleFile('ticket', 'SKILL.md');
+  const metadata = readRoleFile('ticket', 'agents', 'openai.yaml');
+  const project = readRoleFile('project', 'SKILL.md');
+  assert.match(ticket, /^description: Use when.*important.*acceptance criteria.*context-separated review/im);
+  assert.match(ticket, /important means.*data.*security.*deployment.*visual.*multi-component.*low-risk.*read-only.*(?:one|single) deterministic/is);
+  assert.match(ticket, /(?:existing|the) tracker.*single source.*no parallel/is);
+  assert.match(ticket, /root agent is PM.*does not edit product.*implementer.*only intentional product writer.*40-character `CANDIDATE`/is);
+  assert.match(ticket, /new evaluator without inherited conversation history.*fork_turns.*none.*same-context role-play.*clean evaluation worktree.*detached.*UNVERIFIED/is);
+  assert.match(ticket, /original (?:user )?request.*authoritative project contracts.*ticket-to-goal alignment.*USER_DECISION/is);
+  assert.match(ticket, /derives ancestry.*BASE\.\.CANDIDATE.*HEAD == CANDIDATE.*untracked.*mutation invalidates/is);
+  assert.match(ticket, /implementer logs.*not.*PASS.*trusted CI.*CANDIDATE.*criterion gets.*FAIL.*REWORK.*UNVERIFIED.*ACCEPTED/is);
+  assert.match(ticket, /evaluator applies.*visual-check.*root PM.*direct.*same exact result.*UNVERIFIED/is);
+  assert.match(ticket, /changed candidate.*no-history evaluator.*one automatic rework.*missing evidence.*UNVERIFIED.*USER_DECISION.*goal.*scope.*authority.*acceptance/is);
+  assert.match(ticket, /user's language.*no fixed report.*create no document/is);
+  assert.match(metadata, /important planned task.*observable acceptance criteria.*separated implementation.*new-context review/is);
+  assert.match(project, /important planned task.*ticket.*do not duplicate.*(?:tracker|ledger)/is);
 });
 
 test('spec delivers only a current user-language decision digest', () => {
@@ -260,13 +307,14 @@ test('handoff expands only repeated visual or deployment incidents', () => {
   assert.doesNotMatch(handoff, /Mark unavailable fields unavailable/is);
 });
 
-test('the five public roles are the exact active manifest skills', () => {
+test('the six public roles are the exact active manifest skills', () => {
   const manifest = JSON.parse(readFileSync(path.join(ROOT, 'vendor', 'source-manifest.json'), 'utf8'));
   assert.deepEqual(Object.keys(manifest.activeSkills).sort(), [
     'design',
     'handoff',
     'project',
     'spec',
+    'ticket',
     'visual-check',
   ]);
 });
