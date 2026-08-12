@@ -1084,3 +1084,46 @@ test("failed Ticket Git commands retain exact process evidence and run roots", a
   assert.equal(runner.ticketRunRootRetentionRequired(null, [new Error("cleanup")]), true);
   assert.equal(runner.ticketRunRootRetentionRequired(null, []), false);
 });
+
+test("Ticket evaluator uses short checkout paths and rejects unsafe path budgets", async () => {
+  const runner = await loadRunner();
+  const uuid = "12345678-1234-1234-1234-1234567890ab";
+  const runId = runner.buildTicketRunId("smoke", uuid);
+  assert.equal(runId, "t-s-123456781234123412341234567890ab");
+  assert.equal(runner.buildTicketCandidateDirectory(0), "c1");
+
+  const candidateRoot = path.join(
+    tmpdir(),
+    `joewrks-eval-${runId}`,
+    runner.buildTicketCandidateDirectory(0),
+  );
+  const knownLongFixture =
+    "evals/skill-contracts/fixtures/visual-verdict-v3/reference-comparison.png";
+  const safe = runner.assertTicketCheckoutPathBudget(candidateRoot, [
+    knownLongFixture,
+  ]);
+  assert.equal(safe.limit, 248);
+  assert.equal(safe.longestPath, knownLongFixture);
+  assert.equal(safe.maxFullPathLength < safe.limit, true);
+
+  assert.throws(
+    () =>
+      runner.assertTicketCheckoutPathBudget(candidateRoot, [
+        `${"nested/".repeat(40)}artifact.png`,
+      ]),
+    /checkout path budget exceeded/iu,
+  );
+
+  assert.deepEqual(
+    runner.ticketAppServerFailureState({
+      ticketEvidence: {
+        appServer: { processCloseConfirmed: false, pid: 4242 },
+      },
+    }),
+    {
+      processTerminationConfirmed: false,
+      sessionHealthy: false,
+      launchEvidence: { processCloseConfirmed: false, pid: 4242 },
+    },
+  );
+});

@@ -1504,6 +1504,43 @@ test("App Server initialization failure waits for confirmed child close", async 
   assert.deepEqual(child.killSignals, ["SIGTERM"]);
 });
 
+test("App Server initialization failure preserves launch identity when close is unconfirmed", async (t) => {
+  const runRoot = await createTestRoot(t);
+  const child = createFakeAppServerChild({ initializeResult: {} });
+  let observed;
+
+  await assert.rejects(
+    () =>
+      openAppServer(
+        fakeAppServerRuntime(runRoot),
+        {},
+        {
+          spawnProcess: () => child,
+          gracefulCloseMs: 5,
+          killedCloseMs: 10,
+        },
+      ),
+    (error) => {
+      observed = error;
+      return /termination was not confirmed/u.test(error.message);
+    },
+  );
+
+  assert.equal(observed.ticketEvidence.appServer.processCloseConfirmed, false);
+  assert.equal(observed.ticketEvidence.appServer.pid, 4242);
+  assert.equal(observed.ticketEvidence.appServer.parentPid, process.pid);
+  assert.equal(observed.ticketEvidence.appServer.executable, "unused-in-test");
+  assert.deepEqual(observed.ticketEvidence.appServer.argv, [
+    "unused-in-test",
+    "app-server",
+    "--strict-config",
+    "--stdio",
+  ]);
+  assert.equal(observed.ticketEvidence.appServer.cwd, runRoot);
+  assert.match(observed.ticketEvidence.appServer.spawnedAtUtc, /^\d{4}-\d{2}-\d{2}T/u);
+  assert.deepEqual(child.killSignals, ["SIGTERM"]);
+});
+
 function createFakeSession({
   notifications = [],
   notificationsBeforeTurnResponse = [],

@@ -1949,15 +1949,17 @@ export async function openAppServer(
     }
   }
 
+  const appServerArgs = [
+    "app-server",
+    ...runtime.runtimeIsolationArgs,
+    ...runtime.permissionArgs,
+    "--strict-config",
+    "--stdio",
+  ];
+  const spawnedAtUtc = new Date().toISOString();
   const child = spawnProcess(
     runtime.executable,
-    [
-      "app-server",
-      ...runtime.runtimeIsolationArgs,
-      ...runtime.permissionArgs,
-      "--strict-config",
-      "--stdio",
-    ],
+    appServerArgs,
     {
       cwd: runtime.runRoot,
       env: runtime.appServerEnvironment,
@@ -1971,6 +1973,27 @@ export async function openAppServer(
   let stderrDigest = null;
   let processExitCode = null;
   let processCloseConfirmed = false;
+  const appServerLaunchEvidence = () => ({
+    pid: Number.isSafeInteger(child.pid) ? child.pid : null,
+    parentPid: process.pid,
+    executable: runtime.executable,
+    argv: [runtime.executable, ...appServerArgs],
+    cwd: runtime.runRoot,
+    spawnedAtUtc,
+    processCloseConfirmed,
+    processExitCode,
+  });
+  const attachAppServerLaunchEvidence = (error) => {
+    const existing =
+      error?.ticketEvidence && typeof error.ticketEvidence === "object"
+        ? error.ticketEvidence
+        : {};
+    error.ticketEvidence = {
+      ...existing,
+      appServer: appServerLaunchEvidence(),
+    };
+    return error;
+  };
   child.stderr.on("data", (chunk) => {
     stderrBytes += chunk.length;
     stderrHash.update(chunk);
@@ -2144,13 +2167,13 @@ export async function openAppServer(
         () => processCloseConfirmed,
       );
     } catch (terminationError) {
-      throw new AggregateError(
+      throw attachAppServerLaunchEvidence(new AggregateError(
         [error, terminationError],
         "app server initialization failed and process termination was not confirmed",
         { cause: error },
-      );
+      ));
     }
-    throw error;
+    throw attachAppServerLaunchEvidence(error);
   }
 }
 

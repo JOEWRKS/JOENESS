@@ -71,6 +71,86 @@ const PLAN_V2_PREDECESSOR = Object.freeze({
   sha256: "ddb28bb1c9c3795a77ef9b37158ab70210a549fe4a2ed33205bb280345680501",
   methodChange: "pin-codex-cli-0.146.0",
 });
+const TICKET_CHECKOUT_PATH_LIMIT = 248;
+
+export function buildTicketRunId(mode, uuid = randomUUID()) {
+  if (!["smoke", "batch"].includes(mode)) {
+    throw new Error("Ticket evaluator run mode is invalid");
+  }
+  const compactUuid = uuid.replaceAll("-", "").toLowerCase();
+  if (!/^[0-9a-f]{32}$/u.test(compactUuid)) {
+    throw new Error("Ticket evaluator run UUID is invalid");
+  }
+  return `t-${mode === "smoke" ? "s" : "b"}-${compactUuid}`;
+}
+
+export function buildTicketCandidateDirectory(index) {
+  if (!Number.isSafeInteger(index) || index < 0) {
+    throw new Error("Ticket evaluator candidate index is invalid");
+  }
+  return `c${index + 1}`;
+}
+
+export function assertTicketCheckoutPathBudget(
+  candidateRoot,
+  repositoryPaths,
+  limit = TICKET_CHECKOUT_PATH_LIMIT,
+) {
+  if (
+    typeof candidateRoot !== 'string' ||
+    !Array.isArray(repositoryPaths) ||
+    repositoryPaths.length === 0 ||
+    !Number.isSafeInteger(limit) ||
+    limit < 1
+  ) {
+    throw new Error("Ticket evaluator checkout path budget input is invalid");
+  }
+  const resolvedRoot = path.resolve(candidateRoot);
+  let longestPath = null;
+  let maxFullPathLength = -1;
+  for (const repositoryPath of repositoryPaths) {
+    if (
+      typeof repositoryPath !== 'string' ||
+      !repositoryPath ||
+      repositoryPath.includes('\0') ||
+      path.isAbsolute(repositoryPath)
+    ) {
+      throw new Error("Ticket evaluator repository path is invalid");
+    }
+    const fullPath = path.resolve(
+      resolvedRoot,
+      ...repositoryPath.split("/"),
+    );
+    if (
+      fullPath !== resolvedRoot &&
+      !fullPath.startsWith(`${resolvedRoot}${path.sep}`)
+    ) {
+      throw new Error("Ticket evaluator repository path escapes checkout root");
+    }
+    if (fullPath.length > maxFullPathLength) {
+      maxFullPathLength = fullPath.length;
+      longestPath = repositoryPath;
+    }
+  }
+  if (maxFullPathLength >= limit) {
+    throw new Error(
+      `Ticket evaluator checkout path budget exceeded: ${maxFullPathLength} >= ${limit}`,
+    );
+  }
+  return { limit, maxFullPathLength, longestPath };
+}
+
+export function ticketAppServerFailureState(error) {
+  const evidence = error?.ticketEvidence?.appServer;
+  if (!evidence || typeof evidence !== 'object') {
+    return null;
+  }
+  return {
+    processTerminationConfirmed: evidence.processCloseConfirmed === true,
+    sessionHealthy: false,
+    launchEvidence: evidence,
+  };
+}
 
 export function parseTicketEvaluatorCli(argv) {
   if (!Array.isArray(argv)) {
@@ -1014,9 +1094,7 @@ export async function runTicketEvaluationBatch({
     }),
   ]);
   const authorityFiles = await buildAuthorityFiles(resolvedRepository, plan);
-  const runRoot = await createExclusiveRunRoot(
-    `ticket-m1c-${mode}-${randomUUID()}`,
-  );
+  const runRoot = await createExclusiveRunRoot(buildTicketRunId(mode));
   const candidateRoots = [];
   let runtime = null;
   let session = null;
@@ -1041,7 +1119,16 @@ export async function runTicketEvaluationBatch({
       verifyMcpRuntimeIsInert(session.mcpInventory, initialMcp);
       const candidateRoot = path.join(
         runRoot,
-        `candidate-${String(index + 1).padStart(2, "0")}-${candidate.id}`,
+        buildTicketCandidateDirectory(index),
+      );
+      const treePaths = await runGit(
+        resolvedRepository,
+        ["ls-tree", "-r", "--name-only", "-z", candidate.sha],
+        { requireEmptyStderr: true },
+      );
+      const checkoutPathBudget = assertTicketCheckoutPathBudget(
+        candidateRoot,
+        treePaths.stdout.split("\0").filter(Boolean),
       );
       await runGit(resolvedRepository, [
         "worktree",
@@ -1092,7 +1179,12 @@ export async function runTicketEvaluationBatch({
         promptManifest: built.manifest,
         promptText: built.prompt,
         dynamicTool: built.dynamicTool,
-        isolation: { hookControl, writeIsolation, runtimeSession },
+        isolation: {
+          hookControl,
+          writeIsolation,
+          runtimeSession,
+          checkoutPathBudget,
+        },
         before,
       };
       const turn = await runTicketEvaluatorTurn({
@@ -1142,6 +1234,12 @@ export async function runTicketEvaluationBatch({
       activeCase = null;
     }
   } catch (error) {
+    const appServerFailure = ticketAppServerFailureState(error);
+    if (appServerFailure !== null) {
+      processTerminationConfirmed =
+        appServerFailure.processTerminationConfirmed;
+      sessionHealthy = appServerFailure.sessionHealthy;
+    }
     if (activeCase !== null) {
       cases.push({
         ...activeCase,
