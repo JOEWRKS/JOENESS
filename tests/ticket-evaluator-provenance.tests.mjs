@@ -1249,6 +1249,135 @@ test("M1C v3 pins the blocked v2 method and operation-only path map", async () =
   }
 });
 
+test("M1C v3 batch evidence binds six fresh evaluators to exact candidates", async () => {
+  const indexPath = new URL(
+    "../evals/experiments/joeness-ticket-m1c-e2e-v3-index.json",
+    import.meta.url,
+  );
+  const indexText = await readFile(indexPath, "utf8");
+  assert.equal(Buffer.byteLength(indexText), 694);
+  assert.equal(
+    createHash("sha256").update(indexText).digest("hex"),
+    "da17c18137ab4e1b245d9e2ee7de2354a875f3138e220b7594615a33063dbaf3",
+  );
+  const evidenceIndex = JSON.parse(indexText);
+  const summaryPath = new URL(`../${evidenceIndex.summary.repositoryPath}`, import.meta.url);
+  const rawPath = new URL(`../${evidenceIndex.raw.repositoryPath}`, import.meta.url);
+  const summaryText = await readFile(summaryPath, "utf8");
+  const rawText = await readFile(rawPath, "utf8");
+  assert.equal(Buffer.byteLength(summaryText), 1181);
+  assert.equal(
+    createHash("sha256").update(summaryText).digest("hex"),
+    "7812435da05184cf4adcf70240de95231969a9ccd2ec42671ba3504229cae14e",
+  );
+  assert.equal(Buffer.byteLength(rawText), 1157280);
+  assert.equal(
+    createHash("sha256").update(rawText).digest("hex"),
+    "d221070a61cb38492f89268a627cbe447c459a14b18e1f0281a968458b914f7e",
+  );
+  assert.deepEqual(evidenceIndex.summary, {
+    repositoryPath: "evals/experiments/joeness-ticket-m1c-e2e-v3.json",
+    byteLength: Buffer.byteLength(summaryText),
+    sha256: createHash("sha256").update(summaryText).digest("hex"),
+  });
+  assert.deepEqual(evidenceIndex.raw, {
+    repositoryPath: "evals/experiments/joeness-ticket-m1c-e2e-v3-raw.json",
+    byteLength: Buffer.byteLength(rawText),
+    sha256: createHash("sha256").update(rawText).digest("hex"),
+  });
+
+  const summary = JSON.parse(summaryText);
+  const raw = JSON.parse(rawText);
+  assert.equal(summary.result, "m1c-strict-ticket-provenance-pass");
+  assert.equal(summary.m1cPass, true);
+  assert.equal(summary.promotionPass, false);
+  assert.equal(summary.raw.byteLength, Buffer.byteLength(rawText));
+  assert.equal(
+    summary.raw.sha256,
+    createHash("sha256").update(rawText).digest("hex"),
+  );
+  assert.equal(
+    summary.raw.path.replaceAll("\\", "/").split("/").at(-1),
+    "joeness-ticket-m1c-e2e-v3-raw.json",
+  );
+
+  const expectedStates = {
+    "c1-normal": "ACCEPTED",
+    "c2-controlled-fault": "REWORK",
+    "c3-successful-rework": "ACCEPTED",
+    "c3-unchanged-control": "USER_DECISION",
+    "c3-repeated-failure-control": "USER_DECISION",
+    "missing-evidence-control": "UNVERIFIED",
+  };
+  assert.equal(raw.result, "ticket-evaluator-provenance-pass");
+  assert.equal(raw.classification, "m1c-strict-e2e");
+  assert.equal(raw.m1cPass, true);
+  assert.equal(raw.promotionPass, false);
+  assert.equal(raw.repositoryCleanBefore, true);
+  assert.equal(raw.repositoryCleanAfter, true);
+  assert.equal(raw.worktreeRegistry.equal, true);
+  assert.equal(raw.uniqueThreadIds, true);
+  assert.equal(raw.uniqueTurnIds, true);
+  assert.equal(raw.infrastructure.runtime.version, "codex-cli 0.146.0");
+  assert.equal(raw.infrastructure.runtime.doctor.codexVersion, "0.146.0");
+  assert.deepEqual(summary.states, expectedStates);
+  assert.equal(raw.cases.length, 6);
+
+  const requiredOperations = [
+    "InspectAncestry",
+    "InspectDiff",
+    "ReadCandidate",
+    "ReadEvidence",
+    "RunChecker",
+  ];
+  const threadIds = [];
+  const turnIds = [];
+  for (const observed of raw.cases) {
+    const expected = expectedStates[observed.candidate.id];
+    assert.equal(typeof expected, "string");
+    assert.equal(observed.status, "pass");
+    assert.equal(observed.expectedPolicyState, expected);
+    assert.equal(observed.policy.state, expected);
+    assert.equal(observed.turn.thread.priorTurnCount, 0);
+    assert.deepEqual(observed.turn.thread.instructionSources, []);
+    assert.deepEqual(
+      observed.promptManifest.forbiddenNarrativeArtifactsProvided,
+      [],
+    );
+    assert.equal(observed.before.identity.head, observed.candidate.sha);
+    assert.equal(observed.after.identity.head, observed.candidate.sha);
+    assert.equal(observed.before.identity.detached, true);
+    assert.equal(observed.after.identity.detached, true);
+    assert.equal(observed.stateComparison.equal, true);
+    assert.deepEqual(observed.stateComparison.changedLayers, []);
+    assert.equal(observed.before.sha256, observed.after.sha256);
+    assert.deepEqual(
+      observed.turn.toolEvidence.map(({ operation }) => operation),
+      requiredOperations,
+    );
+    assert.equal(
+      observed.turn.toolEvidence.every(({ path: requestPath }) => requestPath === null),
+      true,
+    );
+    assert.deepEqual(
+      observed.turn.toolEvidence
+        .filter(({ operation }) => operation.startsWith("Read"))
+        .map(({ result }) => result.path),
+      [
+        "evals/fixtures/ticket-m1b/candidate.json",
+        "evals/fixtures/ticket-m1b/evidence.json",
+      ],
+    );
+    assert.deepEqual(observed.turn.blockers, []);
+    assert.equal(observed.criteriaMatch, true);
+    assert.equal(observed.inspectionEvidenceValid, true);
+    threadIds.push(observed.turn.thread.id);
+    turnIds.push(observed.turn.turn.id);
+  }
+  assert.equal(new Set(threadIds).size, 6);
+  assert.equal(new Set(turnIds).size, 6);
+});
+
 test("M1C CLI separates disposable smoke from the immutable six-case batch", async () => {
   const runner = await loadRunner();
   assert.equal(typeof runner?.parseTicketEvaluatorCli, "function");
