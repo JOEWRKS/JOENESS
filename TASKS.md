@@ -4,7 +4,7 @@
 
 - **목표 / 릴리스:** V9 후보의 설치·행동·실프로젝트 효과를 기능별로 검증한다. 증거가 없는 기능은 `candidate/unvalidated`를 유지하고 전체를 한 번에 승격하지 않는다.
 - **마일스톤:**
-  - [ ] **M0 후보 고정·설치:** 전체 회귀, 격리 `Check → Apply → Check → 재Apply → Remove → Check`, 원상복구, feature branch push
+  - [x] **M0 후보 고정·설치:** 전체 회귀, 격리 `Check → Apply → Check → 재Apply → Remove → Check`, 원상복구, feature branch push
   - [ ] **M1 Ticket E2E:** 고정 티켓 → 구현자 → 고정 커밋 → 무이력 평가자 → 조건별 판정 → 재작업 1회 제한
   - [ ] **M2 Design→Visual:** MergeDrop·RVR 결함과 정상 대조군에서 기준 자가도출, 부분/전체 판정 분리, 실제 화면 확인
   - [ ] **M3 Core V6:** clean·partial·blocked·workaround·반복 오류·복구 상황의 한국어 결과 우선 보고와 중단 규칙
@@ -15,7 +15,7 @@
 
   | 단계 | 기대 결과 | 합격 조건 | 상태 |
   |---|---|---|---|
-  | M0 | 재현 가능한 V9 배포 후보 | 전체 회귀와 격리 수명주기 통과, clean tree, exact hash, 원상복구 | 완료 대기 — 증거 커밋·push·최종 clean readback |
+  | M0 | 재현 가능한 V9 배포 후보 | 전체 회귀와 격리 수명주기 통과, clean tree, exact hash, 원상복구 | 완료 — [`joeness-v9-m0-validation-v1.json`](evals/experiments/joeness-v9-m0-validation-v1.json), 증거 `4ce9b25` |
   | M1 | Ticket 검토 루프의 실제 종단 증거 | 무이력 평가자 완료, 조건별 직접 판정, 평가 전후 비변경 | 다음 |
 
 - **차단 / 결정 / 링크:**
