@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
+import { EventEmitter } from "node:events";
 import { readFileSync, readdirSync } from "node:fs";
 import {
   mkdir,
@@ -48,6 +49,7 @@ import {
   liveRunModes,
   materializeIsolatedCodexHome,
   normalizeEvent,
+  openAppServer,
   parseCli,
   prepareInstructionDiscoveryReceipt,
   probeInstructionDiscovery,
@@ -1358,6 +1360,125 @@ async function createTestRoot(t) {
   return root;
 }
 
+function createFakeAppServerChild({ initializeResult, onKill } = {}) {
+  const child = new EventEmitter();
+  child.stdin = new PassThrough();
+  child.stdout = new PassThrough();
+  child.stderr = new PassThrough();
+  child.exitCode = null;
+  child.signalCode = null;
+  child.pid = 4242;
+  child.killSignals = [];
+  child.kill = (signal = "SIGTERM") => {
+    child.killSignals.push(signal);
+    onKill?.(child, signal);
+    return true;
+  };
+  child.confirmClose = (code = null, signal = "SIGTERM") => {
+    if (child.exitCode !== null || child.signalCode !== null) {
+      return;
+    }
+    child.exitCode = code;
+    child.signalCode = signal;
+    child.stdout.end();
+    child.stderr.end();
+    child.emit("close", code, signal);
+  };
+
+  let input = "";
+  let initialized = false;
+  child.stdin.setEncoding("utf8");
+  child.stdin.on("data", (chunk) => {
+    input += chunk;
+    const lines = input.split("\n");
+    input = lines.pop();
+    for (const line of lines) {
+      if (!line.trim()) {
+        continue;
+      }
+      const message = JSON.parse(line);
+      if (message.method === "initialize" && !initialized) {
+        initialized = true;
+        child.stdout.write(
+          `${JSON.stringify({ id: message.id, result: initializeResult })}\n`,
+        );
+      }
+    }
+  });
+  return child;
+}
+
+function fakeAppServerRuntime(runRoot) {
+  return {
+    executable: "unused-in-test",
+    runtimeIsolationArgs: [],
+    permissionArgs: [],
+    runRoot,
+    appServerEnvironment: {},
+    mcpInventory: [],
+  };
+}
+
+test("App Server close rejects within a bound when kill is not confirmed", async (t) => {
+  const runRoot = await createTestRoot(t);
+  const child = createFakeAppServerChild({
+    initializeResult: {
+      userAgent: "test-agent",
+      codexHome: runRoot,
+      platformFamily: "windows",
+      platformOs: "windows",
+    },
+  });
+  const session = await openAppServer(
+    fakeAppServerRuntime(runRoot),
+    {},
+    {
+      spawnProcess: () => child,
+      gracefulCloseMs: 5,
+      killedCloseMs: 10,
+    },
+  );
+
+  const startedAt = Date.now();
+  await assert.rejects(
+    () => session.close(),
+    /process did not close within 10ms after kill/u,
+  );
+  assert.equal(Date.now() - startedAt < 500, true);
+  assert.equal(child.stdin.writableEnded, true);
+  assert.deepEqual(child.killSignals, ["SIGTERM"]);
+});
+
+test("App Server initialization failure waits for confirmed child close", async (t) => {
+  const runRoot = await createTestRoot(t);
+  let closeConfirmed = false;
+  const child = createFakeAppServerChild({
+    initializeResult: {},
+    onKill(fakeChild) {
+      setTimeout(() => {
+        closeConfirmed = true;
+        fakeChild.confirmClose();
+      }, 15);
+    },
+  });
+
+  await assert.rejects(
+    () =>
+      openAppServer(
+        fakeAppServerRuntime(runRoot),
+        {},
+        {
+          spawnProcess: () => child,
+          gracefulCloseMs: 5,
+          killedCloseMs: 50,
+        },
+      ),
+    /initialize response is malformed/u,
+  );
+  assert.equal(closeConfirmed, true);
+  assert.deepEqual(child.killSignals, ["SIGTERM"]);
+});
+
 function createFakeSession({
   notifications = [],
   notificationsBeforeTurnResponse = [],
@@ -1762,6 +1883,34 @@ test("one case attempt uses one explicit local thread and its sticky turn", asyn
     1,
   );
   assert.equal(evidence.automatedJudgment, "reviewRequired");
+});
+
+test("evaluation rejects an ephemeral thread that already has turn history", async (t) => {
+  const parent = await createTestRoot(t);
+  const caseRoot = path.join(parent, "prior-turn-case");
+  const session = createFakeSession({
+    notifications: terminalNotifications,
+    threadResponsePatch: {
+      thread: {
+        turns: [{ id: "prior-turn" }],
+      },
+    },
+  });
+  await assert.rejects(
+    () =>
+      runSubjectCase({
+        caseDefinition: {
+          id: "pressure-08-claim-integrity",
+          prompt: "report evidence",
+          setup: "read only",
+          fixtureFiles: { "CURRENT-EVIDENCE.json": "{}" },
+        },
+        caseRoot,
+        session,
+        turnTimeoutMs: 1000,
+      }),
+    /prior turn history/i,
+  );
 });
 
 test("valid message deltas are coalesced while unsafe deltas stay blocking", async (t) => {

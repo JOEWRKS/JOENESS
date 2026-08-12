@@ -1,0 +1,95 @@
+{
+  "schemaVersion": 1,
+  "id": "joeness-ticket-m1c-prompt-manifest-v1",
+  "originalGoal": "후보 변경 시 판정 무효화, 실패 조건만 1회 재작업, 반복 실패와 무변경 중단, 증거 누락 분리를 정확한 후보에서 새 평가자로 검증한다.",
+  "base": {
+    "sha": "6b9dd05bfd83a7471741c4b501a91e8c7458752e",
+    "tree": "6fd96577ee9720c893140236d096127a399519ca"
+  },
+  "authority": {
+    "revision": "6b9dd05bfd83a7471741c4b501a91e8c7458752e",
+    "paths": [
+      "AGENTS.md",
+      "TASKS.md",
+      "skills/ticket/SKILL.md",
+      "evals/fixtures/ticket-m1b/check.mjs",
+      "evals/support/ticket-verdict.mjs"
+    ]
+  },
+  "inspection": {
+    "allowedPaths": [
+      "evals/fixtures/ticket-m1b/candidate.json",
+      "evals/fixtures/ticket-m1b/evidence.json"
+    ],
+    "requiredOperations": [
+      "InspectAncestry",
+      "InspectDiff",
+      "ReadCandidate",
+      "ReadEvidence",
+      "RunChecker"
+    ]
+  },
+  "forbiddenNarrativeSources": [
+    "implementer final report",
+    "controller final report",
+    "prior evaluator prose",
+    "M1B raw transcript",
+    "M1B aggregate evidence"
+  ],
+  "candidates": [
+    {
+      "id": "c1-normal",
+      "sha": "6de8e690856ffae891d37dbb3abc6d2f37650791",
+      "tree": "0adb7f5aaf0818e6262ccbd3c1f06490e84aae92",
+      "parent": "6b9dd05bfd83a7471741c4b501a91e8c7458752e",
+      "previousSha": "6b9dd05bfd83a7471741c4b501a91e8c7458752e",
+      "reworkRound": 0,
+      "remoteRef": "refs/remotes/origin/codex/ticket-m1b-normal"
+    },
+    {
+      "id": "c2-controlled-fault",
+      "sha": "b399205ed2e89da368a554b9caeab33fb84f8698",
+      "tree": "5931633a96bd151ec6bd4d7d2ad45219f85f6bc1",
+      "parent": "6de8e690856ffae891d37dbb3abc6d2f37650791",
+      "previousSha": "6de8e690856ffae891d37dbb3abc6d2f37650791",
+      "reworkRound": 0,
+      "remoteRef": "refs/remotes/origin/codex/ticket-m1b-fault"
+    },
+    {
+      "id": "c3-successful-rework",
+      "sha": "ceacba63354fba223428e112d367327b32c706a0",
+      "tree": "0adb7f5aaf0818e6262ccbd3c1f06490e84aae92",
+      "parent": "b399205ed2e89da368a554b9caeab33fb84f8698",
+      "previousSha": "b399205ed2e89da368a554b9caeab33fb84f8698",
+      "reworkRound": 1,
+      "remoteRef": "refs/remotes/origin/codex/ticket-m1b-rework"
+    },
+    {
+      "id": "c3-unchanged-control",
+      "sha": "409ee785f09eed2ab6c9e390c9c9de3fb304692a",
+      "tree": "5931633a96bd151ec6bd4d7d2ad45219f85f6bc1",
+      "parent": "b399205ed2e89da368a554b9caeab33fb84f8698",
+      "previousSha": "b399205ed2e89da368a554b9caeab33fb84f8698",
+      "reworkRound": 1,
+      "remoteRef": "refs/remotes/origin/codex/ticket-m1b-noop"
+    },
+    {
+      "id": "c3-repeated-failure-control",
+      "sha": "7111f1ce9c4132e3d0d4cf932e9a8a4691eb9b1b",
+      "tree": "a07e32eb50c808b94f408cfd8392281150659e43",
+      "parent": "b399205ed2e89da368a554b9caeab33fb84f8698",
+      "previousSha": "b399205ed2e89da368a554b9caeab33fb84f8698",
+      "reworkRound": 1,
+      "remoteRef": "refs/remotes/origin/codex/ticket-m1b-repeat"
+    },
+    {
+      "id": "missing-evidence-control",
+      "sha": "e9069c3c83b987a09560e52033337a9a393a09df",
+      "tree": "74f5caf730d5c75bca20050c691d45f76ce1a467",
+      "parent": "6de8e690856ffae891d37dbb3abc6d2f37650791",
+      "previousSha": "6de8e690856ffae891d37dbb3abc6d2f37650791",
+      "reworkRound": 0,
+      "remoteRef": "refs/remotes/origin/codex/ticket-m1b-missing"
+    }
+  ]
+}

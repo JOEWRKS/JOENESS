@@ -1819,7 +1819,82 @@ export function approvalDenialResponse(method) {
   return null;
 }
 
-export async function openAppServer(runtime, callbacks = {}) {
+function waitForAppServerChildClose(child, timeoutMs, closeConfirmed) {
+  if (closeConfirmed()) {
+    return Promise.resolve(true);
+  }
+  return new Promise((resolve) => {
+    let settled = false;
+    const finish = (closed) => {
+      if (settled) {
+        return;
+      }
+      settled = true;
+      clearTimeout(timer);
+      child.removeListener("close", onClose);
+      resolve(closed);
+    };
+    const onClose = () => finish(true);
+    child.once("close", onClose);
+    const timer = setTimeout(() => finish(false), timeoutMs);
+    if (closeConfirmed()) {
+      finish(true);
+    }
+  });
+}
+
+async function terminateAppServerChild(
+  child,
+  { gracefulCloseMs, killedCloseMs },
+  closeConfirmed,
+) {
+  if (closeConfirmed()) {
+    return;
+  }
+
+  const gracefulClose = waitForAppServerChildClose(
+    child,
+    gracefulCloseMs,
+    closeConfirmed,
+  );
+  child.stdin.end();
+  if (await gracefulClose) {
+    return;
+  }
+
+  child.kill("SIGTERM");
+  if (
+    !(await waitForAppServerChildClose(
+      child,
+      killedCloseMs,
+      closeConfirmed,
+    ))
+  ) {
+    throw new Error(
+      `app server process did not close within ${killedCloseMs}ms after kill`,
+    );
+  }
+}
+
+export async function openAppServer(
+  runtime,
+  callbacks = {},
+  lifecycle = {},
+) {
+  const spawnProcess = lifecycle.spawnProcess ?? spawn;
+  const gracefulCloseMs = lifecycle.gracefulCloseMs ?? 5000;
+  const killedCloseMs = lifecycle.killedCloseMs ?? 5000;
+  if (typeof spawnProcess !== "function") {
+    throw new TypeError("app server spawn process must be a function");
+  }
+  for (const [name, value] of [
+    ["gracefulCloseMs", gracefulCloseMs],
+    ["killedCloseMs", killedCloseMs],
+  ]) {
+    if (!Number.isSafeInteger(value) || value < 1) {
+      throw new RangeError(`${name} must be a positive safe integer`);
+    }
+  }
   const notificationListeners = new Set();
   const notificationHistory = [];
   let dynamicToolHandler = null;
@@ -1855,7 +1930,7 @@ export async function openAppServer(runtime, callbacks = {}) {
     }
   }
 
-  const child = spawn(
+  const child = spawnProcess(
     runtime.executable,
     [
       "app-server",
@@ -1876,11 +1951,13 @@ export async function openAppServer(runtime, callbacks = {}) {
   const stderrHash = createHash("sha256");
   let stderrDigest = null;
   let processExitCode = null;
+  let processCloseConfirmed = false;
   child.stderr.on("data", (chunk) => {
     stderrBytes += chunk.length;
     stderrHash.update(chunk);
   });
   child.once("close", (code) => {
+    processCloseConfirmed = true;
     processExitCode = code;
     stderrDigest ??= stderrHash.digest("hex");
   });
@@ -2006,25 +2083,50 @@ export async function openAppServer(runtime, callbacks = {}) {
       async close() {
         closePromise ??= (async () => {
           const inputClosed = client.waitForInputClose();
-          if (child.exitCode === null) {
-            const exited = new Promise((resolve) =>
-              child.once("close", resolve),
+          let terminationError = null;
+          try {
+            await terminateAppServerChild(
+              child,
+              { gracefulCloseMs, killedCloseMs },
+              () => processCloseConfirmed,
             );
-            child.stdin.end();
-            const timeout = setTimeout(() => child.kill(), 5000);
-            timeout.unref?.();
-            await exited;
-            clearTimeout(timeout);
+          } catch (error) {
+            terminationError = error;
+          } finally {
+            client.close(
+              terminationError ?? new Error("app server session closed"),
+            );
           }
-          await inputClosed;
+          let inputError = null;
+          try {
+            await inputClosed;
+          } catch (error) {
+            inputError = error;
+          }
+          if (terminationError !== null) {
+            throw terminationError;
+          }
+          if (inputError !== null) {
+            throw inputError;
+          }
         })();
         await closePromise;
       },
     };
   } catch (error) {
     client.close(error);
-    if (child.exitCode === null) {
-      child.kill();
+    try {
+      await terminateAppServerChild(
+        child,
+        { gracefulCloseMs, killedCloseMs },
+        () => processCloseConfirmed,
+      );
+    } catch (terminationError) {
+      throw new AggregateError(
+        [error, terminationError],
+        "app server initialization failed and process termination was not confirmed",
+        { cause: error },
+      );
     }
     throw error;
   }
@@ -2720,7 +2822,7 @@ function observedRuntimeSettingIsSafe(value, { nullable = false } = {}) {
   );
 }
 
-function parseThreadStartResponse(response, request) {
+export function parseThreadStartResponse(response, request) {
   const thread = response?.thread;
   const threadId = thread?.id;
   if (typeof threadId !== "string" || !threadId) {
@@ -2728,6 +2830,9 @@ function parseThreadStartResponse(response, request) {
   }
   if (thread?.ephemeral !== true) {
     throw new Error("thread/start did not create an ephemeral thread");
+  }
+  if (!Array.isArray(thread?.turns) || thread.turns.length !== 0) {
+    throw new Error("thread/start returned prior turn history");
   }
   if (
     comparablePath(response?.cwd) !== comparablePath(request.cwd) ||
@@ -2826,6 +2931,7 @@ function parseThreadStartResponse(response, request) {
     cwd: response.cwd,
     runtimeWorkspaceRoots: response.runtimeWorkspaceRoots,
     ephemeral: thread.ephemeral,
+    priorTurnCount: thread.turns.length,
     instructionSources: response.instructionSources,
     request,
   };
