@@ -16,7 +16,7 @@
   | 단계 | 기대 결과 | 합격 조건 | 상태 |
   |---|---|---|---|
   | M0 | 재현 가능한 V9 배포 후보 | 전체 회귀와 격리 수명주기 통과, clean tree, exact hash, 원상복구 | 완료 — [`joeness-v9-m0-validation-v1.json`](evals/experiments/joeness-v9-m0-validation-v1.json), 증거 `4ce9b25` |
-  | M1A | 첫 후보 승인 경로 | 무이력 평가자, 조건별 직접 판정, 평가 전후 비변경 | 완료 대기 — 증거 커밋·push·최종 clean readback |
+  | M1A | 첫 후보 승인 경로 | 무이력 평가자, 조건별 직접 판정, 평가 전후 비변경 | 완료 — [`joeness-ticket-m1-e2e-v1.json`](evals/experiments/joeness-ticket-m1-e2e-v1.json), 증거 `80bae67` |
   | M1B | 실패·변경 후보·재작업 상한 경로 | 기존 판정 무효, 실패 조건만 1회 재작업, 반복 실패·무변경은 USER_DECISION | 다음 |
 
 - **차단 / 결정 / 링크:**
