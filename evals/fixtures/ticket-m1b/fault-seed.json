@@ -1,0 +1,8 @@
+{
+  "normalTarget": "READY",
+  "faultTarget": "M1B_FAULT_SEED",
+  "stableGuard": "STABLE",
+  "expectedFailedId": "target-ready",
+  "missingEvidenceState": "UNVERIFIED",
+  "unchangedReworkState": "USER_DECISION"
+}
