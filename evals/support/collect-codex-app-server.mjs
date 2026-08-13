@@ -21,6 +21,7 @@ import { createConnection, createServer } from "node:net";
 import path from "node:path";
 import { createInterface } from "node:readline";
 import { fileURLToPath, pathToFileURL } from "node:url";
+import { types as utilTypes } from "node:util";
 
 export const CASE_IDS = Object.freeze([
   "pressure-08-claim-integrity",
@@ -383,6 +384,17 @@ function normalizeDiagnosticValue(
     (typeof value === "number" && Number.isFinite(value))
   ) {
     return { safe: value, redacted: false, unsupported: false };
+  }
+  if (
+    value !== null &&
+    (typeof value === "object" || typeof value === "function") &&
+    utilTypes.isProxy(value)
+  ) {
+    return {
+      safe: "[UNSUPPORTED:proxy]",
+      redacted: false,
+      unsupported: true,
+    };
   }
   if (
     typeof value !== "object" ||

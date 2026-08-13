@@ -419,6 +419,28 @@ test("runtime diagnostic fields use descriptors without invoking getters", () =>
   });
 });
 
+test("diagnostic sanitizer rejects nested proxies without invoking traps", () => {
+  let trapCalls = 0;
+  const nested = new Proxy({}, {
+    getOwnPropertyDescriptor() {
+      trapCalls += 1;
+      return undefined;
+    },
+    getPrototypeOf() {
+      trapCalls += 1;
+      return Object.prototype;
+    },
+    ownKeys() {
+      trapCalls += 1;
+      return [];
+    },
+  });
+  const result = sanitizeDiagnosticEvidence({ details: { nested } });
+  assert.equal(trapCalls, 0);
+  assert.equal(result.unsupported, true);
+  assert.equal(result.text.includes("[UNSUPPORTED:proxy]"), true);
+});
+
 test("diagnostic sanitizer redacts credential keys, inline auth, paths, and cycles without leaking", () => {
   const details = {
     authorization: "Bearer top-secret-token-value",

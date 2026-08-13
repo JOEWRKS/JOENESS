@@ -3,6 +3,7 @@ import { chmod, copyFile, lstat, mkdir, mkdtemp, readFile, realpath, rm, writeFi
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { types as utilTypes } from "node:util";
 
 import {
   containsCredentialText,
@@ -921,21 +922,401 @@ async function removeEvaluatorRoots(stagedRoots) {
   return evidence;
 }
 
-function sanitizedCause(error) {
+function diagnosticContainer(value) {
+  return value !== null && (typeof value === "object" || typeof value === "function");
+}
+
+function diagnosticProxy(value) {
+  return diagnosticContainer(value) && utilTypes.isProxy(value);
+}
+
+function safeDiagnosticOwnData(value, key) {
+  if (diagnosticProxy(value)) {
+    return { found: false, value: undefined, unsupported: "proxy" };
+  }
+  return diagnosticOwnData(value, key);
+}
+
+function preserveSanitizedDiagnostic(value, limitBytes) {
+  if (!diagnosticContainer(value) || diagnosticProxy(value)) return null;
+  const text = safeDiagnosticOwnData(value, "text");
+  const head = safeDiagnosticOwnData(value, "head");
+  const tail = safeDiagnosticOwnData(value, "tail");
+  const byteLength = safeDiagnosticOwnData(value, "byteLength");
+  const digestProperty = safeDiagnosticOwnData(value, "sha256");
+  const truncated = safeDiagnosticOwnData(value, "truncated");
+  const redacted = safeDiagnosticOwnData(value, "redacted");
+  const unsupported = safeDiagnosticOwnData(value, "unsupported");
+  const budgetExceeded = safeDiagnosticOwnData(value, "budgetExceeded");
+  const validFlags =
+    typeof truncated.value === "boolean" &&
+    typeof redacted.value === "boolean" &&
+    typeof unsupported.value === "boolean" &&
+    typeof digestProperty.value === "string" &&
+    /^[a-f0-9]{64}$/u.test(digestProperty.value);
+  if (!validFlags) return null;
+  if (text.found && typeof text.value === "string") {
+    const safe = sanitizeDiagnosticEvidence(text.value, limitBytes);
+    if (safe.text !== text.value || safe.truncated) return safe;
+    const textBytes = Buffer.byteLength(text.value);
+    const normalTuple =
+      truncated.value === false &&
+      Number.isSafeInteger(byteLength.value) &&
+      byteLength.value === textBytes &&
+      digestProperty.value === sha256(text.value) &&
+      !budgetExceeded.found;
+    const budgetTuple =
+      text.value === "[TRUNCATED:diagnostic-budget]" &&
+      truncated.value === true &&
+      redacted.value === true &&
+      unsupported.value === true &&
+      budgetExceeded.value === true &&
+      (byteLength.value === null || Number.isSafeInteger(byteLength.value)) &&
+      digestProperty.value === sha256(text.value);
+    if (!normalTuple && !budgetTuple) return null;
+    return {
+      text: text.value,
+      byteLength: byteLength.value,
+      sha256: digestProperty.value,
+      truncated: truncated.value,
+      redacted: redacted.value || safe.redacted,
+      unsupported: unsupported.value || safe.unsupported,
+      ...(budgetTuple ? { budgetExceeded: true } : {}),
+    };
+  }
+  if (
+    head.found &&
+    tail.found &&
+    typeof head.value === "string" &&
+    typeof tail.value === "string" &&
+    truncated.value === true &&
+    Number.isSafeInteger(byteLength.value) &&
+    byteLength.value >= Buffer.byteLength(head.value) + Buffer.byteLength(tail.value)
+  ) {
+    const safeHead = sanitizeDiagnosticEvidence(head.value, limitBytes);
+    const safeTail = sanitizeDiagnosticEvidence(tail.value, limitBytes);
+    const retainedHead = safeHead.text ?? `${safeHead.head ?? ""}${safeHead.tail ?? ""}`;
+    const retainedTail = safeTail.text ?? `${safeTail.head ?? ""}${safeTail.tail ?? ""}`;
+    return {
+      head: retainedHead,
+      tail: retainedTail,
+      byteLength: byteLength.value,
+      sha256: digestProperty.value,
+      truncated: true,
+      redacted: redacted.value || safeHead.redacted || safeTail.redacted,
+      unsupported: unsupported.value || safeHead.unsupported || safeTail.unsupported,
+      ...(budgetExceeded.value === true ? { budgetExceeded: true } : {}),
+    };
+  }
+  return null;
+}
+
+function retainDiagnosticValue(value, _label, limitBytes = 1024) {
+  if (
+    value === null ||
+    typeof value === "boolean" ||
+    (typeof value === "number" && Number.isFinite(value))
+  ) {
+    return value;
+  }
+  if (diagnosticProxy(value)) {
+    return sanitizeDiagnosticEvidence("[UNSUPPORTED:proxy]", limitBytes);
+  }
+  if (diagnosticContainer(value)) {
+    const preserved = preserveSanitizedDiagnostic(value, limitBytes);
+    if (preserved !== null) return preserved;
+  }
+  return sanitizeDiagnosticEvidence(value, limitBytes);
+}
+
+function sanitizedCause(error, depth = 0, seen = new Set()) {
+  if (error === null || (typeof error !== "object" && typeof error !== "function")) {
+    return { value: sanitizeDiagnosticEvidence(error) };
+  }
+  if (diagnosticProxy(error)) {
+    return { value: sanitizeDiagnosticEvidence("[UNSUPPORTED:proxy]") };
+  }
+  if (seen.has(error)) return { cycle: true };
+  if (depth >= 3) return { depthLimitReached: true };
+  seen.add(error);
   const cause = {};
   for (const key of ["name", "code", "message", "details"]) {
-    const property = diagnosticOwnData(error, key);
+    const property = safeDiagnosticOwnData(error, key);
     if (property.found) cause[key] = sanitizeDiagnosticEvidence(property.value);
+  }
+  const nested = safeDiagnosticOwnData(error, "cause");
+  if (nested.found) {
+    cause.cause = nested.value !== null &&
+        (typeof nested.value === "object" || typeof nested.value === "function")
+      ? sanitizedCause(nested.value, depth + 1, seen)
+      : { value: sanitizeDiagnosticEvidence(nested.value) };
   }
   return cause;
 }
 
-function retainPartialEvidence(value) {
-  if (!isObject(value)) return {};
+function diagnosticArrayLength(value) {
+  if (diagnosticProxy(value)) return null;
   try {
-    return safeBoundedClone(value, "partial", 128 * 1024);
+    if (!Array.isArray(value)) return null;
   } catch {
-    return { sanitized: sanitizeDiagnosticEvidence(value, 64 * 1024) };
+    return null;
+  }
+  const lengthProperty = safeDiagnosticOwnData(value, "length");
+  return Number.isSafeInteger(lengthProperty.value) && lengthProperty.value >= 0
+    ? lengthProperty.value
+    : null;
+}
+
+function diagnosticArrayEntries(value, indices) {
+  const entries = [];
+  for (const index of indices) {
+    const item = safeDiagnosticOwnData(value, String(index));
+    if (item.found) entries.push({ index, value: item.value });
+  }
+  return entries;
+}
+
+function boundedArrayPrefix(value, limit = 16) {
+  const count = diagnosticArrayLength(value);
+  if (count === null) return { count: null, entries: [] };
+  const indices = Array.from({ length: Math.min(count, limit) }, (_, index) => index);
+  return { count, entries: diagnosticArrayEntries(value, indices) };
+}
+
+function diagnosticEventWindows(value) {
+  const count = diagnosticArrayLength(value);
+  if (count === null) {
+    return {
+      count: null,
+      scanIndices: [],
+      scannedEntries: [],
+      headEntries: [],
+      tailEntries: [],
+    };
+  }
+  const headIndices = Array.from({ length: Math.min(count, 2) }, (_, index) => index);
+  const tailStart = Math.max(headIndices.length, count - 2);
+  const tailIndices = Array.from(
+    { length: Math.max(0, count - tailStart) },
+    (_, index) => tailStart + index,
+  );
+  const scanHead = Array.from({ length: Math.min(count, 256) }, (_, index) => index);
+  const scanTailStart = Math.max(scanHead.length, count - 256);
+  const scanTail = Array.from(
+    { length: Math.max(0, count - scanTailStart) },
+    (_, index) => scanTailStart + index,
+  );
+  const scanIndices = [...new Set([...scanHead, ...scanTail])];
+  return {
+    count,
+    scanIndices,
+    scannedEntries: diagnosticArrayEntries(value, scanIndices),
+    headEntries: diagnosticArrayEntries(value, headIndices),
+    tailEntries: diagnosticArrayEntries(value, tailIndices),
+  };
+}
+
+function retainDiagnosticRecord(value, label) {
+  if (diagnosticProxy(value)) {
+    return { value: sanitizeDiagnosticEvidence("[UNSUPPORTED:proxy]") };
+  }
+  if (!diagnosticContainer(value)) return { value: retainDiagnosticValue(value, label) };
+  const record = {};
+  for (const key of ["name", "code", "message", "details"]) {
+    const property = safeDiagnosticOwnData(value, key);
+    if (property.found) {
+      record[key] = retainDiagnosticValue(property.value, `${label} ${key}`, 1024);
+    }
+  }
+  return record;
+}
+
+function retainFailureEvent(value) {
+  if (diagnosticProxy(value)) {
+    return { unavailable: sanitizeDiagnosticEvidence("[UNSUPPORTED:proxy]") };
+  }
+  if (!diagnosticContainer(value)) {
+    return { unavailable: retainDiagnosticValue(value, "failure event", 256) };
+  }
+  const retained = {};
+  for (const key of ["method", "threadId", "turnId", "complete", "postTerminal"]) {
+    const property = safeDiagnosticOwnData(value, key);
+    if (property.found) {
+      retained[key] = retainDiagnosticValue(property.value, `failure event ${key}`, 256);
+    }
+  }
+  const blockers = safeDiagnosticOwnData(value, "blockers");
+  if (blockers.found) {
+    const prefix = boundedArrayPrefix(blockers.value, 4);
+    retained.blockers = prefix.entries
+      .map(({ value: item }) => retainDiagnosticValue(item, "failure event blocker", 256));
+    retained.blockerArrayLength = prefix.count ?? "UNVERIFIED";
+  }
+  const turn = safeDiagnosticOwnData(value, "turn");
+  if (turn.found && diagnosticContainer(turn.value)) {
+    retained.turn = {};
+    for (const key of ["id", "status"]) {
+      const property = safeDiagnosticOwnData(turn.value, key);
+      if (property.found) {
+        retained.turn[key] = retainDiagnosticValue(property.value, `failure turn ${key}`, 256);
+      }
+    }
+  }
+  const item = safeDiagnosticOwnData(value, "item");
+  if (item.found && diagnosticContainer(item.value)) {
+    retained.item = {};
+    for (const key of ["id", "type", "tool", "status", "success"]) {
+      const property = safeDiagnosticOwnData(item.value, key);
+      if (property.found) {
+        retained.item[key] = retainDiagnosticValue(property.value, `failure item ${key}`, 256);
+      }
+    }
+  }
+  const runtimeError = safeDiagnosticOwnData(value, "runtimeError");
+  if (runtimeError.found) {
+    retained.runtimeError = retainDiagnosticRecord(runtimeError.value, "runtime error");
+  }
+  return retained;
+}
+
+function retainFailureObjectFields(value, fields, label) {
+  if (diagnosticProxy(value)) {
+    return { value: sanitizeDiagnosticEvidence("[UNSUPPORTED:proxy]") };
+  }
+  if (!diagnosticContainer(value)) return {};
+  const retained = {};
+  for (const key of fields) {
+    const property = safeDiagnosticOwnData(value, key);
+    if (property.found) {
+      retained[key] = retainDiagnosticValue(property.value, `${label} ${key}`, 2048);
+    }
+  }
+  return retained;
+}
+
+function minimalPartialEvidence(value, projectionError = null) {
+  const primaryCauseProperty = safeDiagnosticOwnData(value, "primaryCause");
+  const blockersProperty = safeDiagnosticOwnData(value, "blockers");
+  const blockers = boundedArrayPrefix(blockersProperty.found ? blockersProperty.value : [], 8);
+  const appServerProperty = safeDiagnosticOwnData(value, "appServer");
+  const eventsProperty = safeDiagnosticOwnData(value, "events");
+  const eventCount = diagnosticArrayLength(eventsProperty.found ? eventsProperty.value : []);
+  return {
+    retention: "minimal",
+    primaryCause: primaryCauseProperty.found
+      ? retainDiagnosticRecord(primaryCauseProperty.value, "primary cause")
+      : {},
+    blockers: blockers.entries.map(({ value: item }) =>
+      retainDiagnosticValue(item, "failure blocker", 256)),
+    blockerArrayLength: blockers.count ?? "UNVERIFIED",
+    appServer: appServerProperty.found
+      ? retainFailureObjectFields(
+          appServerProperty.value,
+          ["processExitCode", "stderr", "remoteControl"],
+          "App Server",
+        )
+      : {},
+    events: { arrayLength: eventCount ?? "UNVERIFIED" },
+    projectionError: projectionError === null
+      ? null
+      : sanitizedCause(projectionError),
+  };
+}
+
+function prioritizedPartialEvidence(value) {
+  const eventsProperty = safeDiagnosticOwnData(value, "events");
+  const events = diagnosticEventWindows(eventsProperty.found ? eventsProperty.value : []);
+  const eventHead = events.headEntries.map(({ value }) => retainFailureEvent(value));
+  const eventTail = events.tailEntries.map(({ value }) => retainFailureEvent(value));
+  const observedRuntimeErrors = events.scannedEntries
+    .map(({ value: event }) => safeDiagnosticOwnData(event, "runtimeError"))
+    .filter(({ found }) => found)
+    .map(({ value: runtimeError }) => retainDiagnosticRecord(runtimeError, "runtime error"));
+  const primaryCauseProperty = safeDiagnosticOwnData(value, "primaryCause");
+  const blockersProperty = safeDiagnosticOwnData(value, "blockers");
+  const blockers = boundedArrayPrefix(blockersProperty.found ? blockersProperty.value : [], 16);
+  const appServerProperty = safeDiagnosticOwnData(value, "appServer");
+  const threadProperty = safeDiagnosticOwnData(value, "thread");
+  const turnProperty = safeDiagnosticOwnData(value, "turn");
+  const inputProperty = safeDiagnosticOwnData(value, "input");
+  const outputSchemaProperty = safeDiagnosticOwnData(value, "outputSchema");
+  const projection = {
+    retention: "prioritized",
+    primaryCause: primaryCauseProperty.found
+      ? retainDiagnosticRecord(primaryCauseProperty.value, "primary cause")
+      : {},
+    runtimeErrors: {
+      records: observedRuntimeErrors.slice(0, 4),
+      observedCount: observedRuntimeErrors.length,
+      omittedObservedCount: Math.max(0, observedRuntimeErrors.length - 4),
+      scanIndexCount: events.scanIndices.length,
+      observedEventCount: events.scannedEntries.length,
+      unscannedIndexCount: events.count === null
+        ? "UNVERIFIED"
+        : Math.max(0, events.count - events.scanIndices.length),
+      totalCount: "UNVERIFIED",
+    },
+    blockers: blockers.entries.map(({ value: item }) =>
+      retainDiagnosticValue(item, "failure blocker", 512)),
+    blockerArrayLength: blockers.count ?? "UNVERIFIED",
+    appServer: appServerProperty.found
+      ? retainFailureObjectFields(
+          appServerProperty.value,
+          ["processExitCode", "stderr", "remoteControl"],
+          "App Server",
+        )
+      : {},
+    thread: threadProperty.found
+      ? retainFailureObjectFields(threadProperty.value, ["id"], "thread")
+      : {},
+    turn: turnProperty.found
+      ? retainFailureObjectFields(turnProperty.value, ["id"], "turn")
+      : {},
+    input: inputProperty.found
+      ? retainFailureObjectFields(inputProperty.value, ["requestSha256", "descriptors"], "input")
+      : {},
+    outputSchema: outputSchemaProperty.found
+      ? retainFailureObjectFields(outputSchemaProperty.value, ["byteLength", "sha256"], "output schema")
+      : {},
+    events: {
+      arrayLength: events.count ?? "UNVERIFIED",
+      scanIndexCount: events.scanIndices.length,
+      observedEventCount: events.scannedEntries.length,
+      window: {
+        head: eventHead,
+        headIndices: events.headEntries.map(({ index }) => index),
+        tail: eventTail,
+        tailIndices: events.tailEntries.map(({ index }) => index),
+      },
+      windowOmittedIndexCount: events.count === null
+        ? "UNVERIFIED"
+        : Math.max(0, events.count - eventHead.length - eventTail.length),
+    },
+  };
+  projection.events.windowSha256 = sha256(stableStringify({
+    arrayLength: projection.events.arrayLength,
+    scanIndexCount: projection.events.scanIndexCount,
+    observedEventCount: projection.events.observedEventCount,
+    window: projection.events.window,
+    windowOmittedIndexCount: projection.events.windowOmittedIndexCount,
+  }));
+  try {
+    return safeBoundedClone(projection, "prioritized partial", 80 * 1024);
+  } catch (error) {
+    return minimalPartialEvidence(value, error);
+  }
+}
+
+function retainPartialEvidence(value) {
+  if (!diagnosticContainer(value)) return {};
+  try {
+    return safePartialEvidenceClone(value, 128 * 1024);
+  } catch {
+    try {
+      return prioritizedPartialEvidence(value);
+    } catch (error) {
+      return minimalPartialEvidence(value, error);
+    }
   }
 }
 
@@ -983,6 +1364,75 @@ function safeBoundedClone(value, label, limitBytes = 64 * 1024) {
     throw new Error(`M2B1 ${label} evidence is unsafe or unbounded`);
   }
   return JSON.parse(serialized);
+}
+
+function cloneDataWithoutAccessors(value, state = { nodes: 0, seen: new Set() }, depth = 0) {
+  state.nodes += 1;
+  if (state.nodes > 4096 || depth > 16) {
+    throw new Error("M2B1 partial evidence structure is too broad or deep");
+  }
+  if (
+    value === null ||
+    typeof value === "string" ||
+    typeof value === "boolean" ||
+    (typeof value === "number" && Number.isFinite(value))
+  ) {
+    return value;
+  }
+  if (typeof value !== "object" || utilTypes.isProxy(value)) {
+    throw new Error("M2B1 partial evidence value is unsupported");
+  }
+  if (state.seen.has(value)) throw new Error("M2B1 partial evidence is cyclic");
+  state.seen.add(value);
+  let isArray;
+  let prototype;
+  let keys;
+  try {
+    isArray = Array.isArray(value);
+    prototype = Object.getPrototypeOf(value);
+    keys = Object.keys(value);
+  } catch {
+    throw new Error("M2B1 partial evidence reflection failed");
+  }
+  if (!isArray && prototype !== Object.prototype && prototype !== null) {
+    throw new Error("M2B1 partial evidence object is not plain data");
+  }
+  if (keys.length > 1024) {
+    throw new Error("M2B1 partial evidence has too many keys");
+  }
+  if (isArray) {
+    const length = safeDiagnosticOwnData(value, "length");
+    if (
+      !Number.isSafeInteger(length.value) ||
+      length.value < 0 ||
+      length.value > 1024 ||
+      keys.length !== length.value ||
+      Array.from({ length: length.value }, (_, index) => String(index))
+        .some((key, index) => keys[index] !== key)
+    ) {
+      throw new Error("M2B1 partial evidence array is sparse or too large");
+    }
+  }
+  const output = isArray ? [] : Object.create(null);
+  for (const key of keys) {
+    let descriptor;
+    try {
+      descriptor = Object.getOwnPropertyDescriptor(value, key);
+    } catch {
+      throw new Error("M2B1 partial evidence descriptor failed");
+    }
+    if (!descriptor || !Object.hasOwn(descriptor, "value")) {
+      throw new Error("M2B1 partial evidence accessor is unsupported");
+    }
+    output[key] = cloneDataWithoutAccessors(descriptor.value, state, depth + 1);
+  }
+  state.seen.delete(value);
+  return output;
+}
+
+function safePartialEvidenceClone(value, limitBytes) {
+  const cloned = cloneDataWithoutAccessors(value);
+  return safeBoundedClone(cloned, "partial", limitBytes);
 }
 
 function retainInputEvidence(input) {

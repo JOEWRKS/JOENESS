@@ -452,7 +452,11 @@ test("M2B1 successor run emits v2 summary and blocked identities", async (t) => 
   ]) {
     const destination = path.join(root, ...pin.path.split("/"));
     await mkdir(path.dirname(destination), { recursive: true });
-    if (pin === plan.source.runner) {
+    if ([
+      plan.source.runner,
+      plan.source.freshTurnAdapter,
+      plan.source.collector,
+    ].includes(pin)) {
       const source = await execFile(
         "git",
         ["show", `${plan.source.repositoryCommit}:${pin.path}`],
@@ -857,4 +861,368 @@ test("M2B1 failure stops without retry, preserves verified partial evidence, and
   );
   assert.equal(unsafe.sessions.length, 1);
   assert.equal(unsafe.writes.length, 0);
+});
+
+test("M2B1 oversized failure evidence keeps prioritized diagnostics instead of one budget marker", async (t) => {
+  const subject = await loadSubject();
+  const { root, planPath } = await fixtureRoot(t);
+  const dependencies = successfulDependencies();
+  const diagnostic = (text) => ({
+    text,
+    byteLength: Buffer.byteLength(text),
+    sha256: digest(text),
+    truncated: false,
+    redacted: false,
+    unsupported: false,
+  });
+  dependencies.runTurn = async (options) => {
+    options.session.closed = true;
+    options.session.processExitCode = 0;
+    const inner = new Error("schema rejected sk-proj-SYNTHETIC_TEST_ONLY_abcdefghijklmnop");
+    inner.code = "invalid_json_schema";
+    const error = new Error("fresh evaluator turn validation failed", { cause: inner });
+    error.freshEvaluatorEvidence = {
+      primaryCause: {
+        code: diagnostic("invalid_json_schema"),
+        message: diagnostic("response schema was rejected"),
+      },
+      thread: { id: "thread-large" },
+      turn: { id: "turn-large", request: { padding: "x".repeat(160 * 1024) } },
+      input: { requestSha256: "a".repeat(64), descriptors: [] },
+      outputSchema: { byteLength: 4096, sha256: "b".repeat(64), value: { padding: "y".repeat(32 * 1024) } },
+      events: Array.from({ length: 40 }, (_, index) => ({
+        method: index === 39 ? "turn/completed" : "item/completed",
+        threadId: "thread-large",
+        turnId: "turn-large",
+        complete: index !== 17,
+        blockers: index === 17 ? ["runtime-error"] : [],
+        ...(index === 17
+          ? {
+              runtimeError: {
+                code: diagnostic("invalid_json_schema"),
+                message: diagnostic("response schema was rejected"),
+              },
+            }
+          : {}),
+        padding: "z".repeat(4096),
+      })),
+      toolEvidence: [],
+      mcpAfter: [],
+      blockers: ["runtime-error", "turn-not-completed", "runtime-control-blocker"],
+      appServer: {
+        processExitCode: 0,
+        stderr: { byteLength: 0, truncated: false },
+        remoteControl: { enabled: false },
+      },
+    };
+    throw error;
+  };
+
+  await assert.rejects(
+    subject.runDesignVisualM2B1({ repositoryRoot: root, planPath, ...dependencies }),
+    /fresh evaluator turn validation failed/,
+  );
+  const blocked = dependencies.writes.find(({ file }) => file.endsWith("blocked.json")).value;
+  assert.equal(blocked.partialEvidence.retention, "prioritized");
+  assert.equal(blocked.partialEvidence.primaryCause.code.text, "invalid_json_schema");
+  assert.equal(blocked.partialEvidence.runtimeErrors.observedCount, 1);
+  assert.equal(blocked.partialEvidence.runtimeErrors.records[0].code.text, "invalid_json_schema");
+  assert.deepEqual(blocked.partialEvidence.blockers.map(({ text }) => text), [
+    "runtime-error",
+    "turn-not-completed",
+    "runtime-control-blocker",
+  ]);
+  assert.equal(blocked.partialEvidence.appServer.processExitCode, 0);
+  assert.equal(blocked.partialEvidence.events.arrayLength, 40);
+  assert.equal(blocked.partialEvidence.events.windowOmittedIndexCount > 0, true);
+  assert.equal(blocked.partialEvidence.outputSchema.byteLength, 4096);
+  assert.equal(blocked.error.cause.code.text, "invalid_json_schema");
+  assert.equal(blocked.error.cause.message.redacted, true);
+  assert.equal(JSON.stringify(blocked).includes("SYNTHETIC_TEST_ONLY"), false);
+  assert.equal(JSON.stringify(blocked).includes("z".repeat(256)), false);
+  assert.notDeepEqual(blocked.partialEvidence, {
+    sanitized: { text: "[TRUNCATED:diagnostic-budget]" },
+  });
+});
+
+test("M2B1 nested failure cause is bounded without invoking accessors or following cycles", async (t) => {
+  const subject = await loadSubject();
+  const { root, planPath } = await fixtureRoot(t);
+  const dependencies = successfulDependencies();
+  let getterCalls = 0;
+  dependencies.runTurn = async (options) => {
+    options.session.closed = true;
+    options.session.processExitCode = 0;
+    const inner = new Error("inner failure");
+    inner.code = "inner-code";
+    Object.defineProperty(inner, "details", {
+      enumerable: true,
+      get() {
+        getterCalls += 1;
+        return "must not run";
+      },
+    });
+    inner.cause = inner;
+    const outer = new Error("outer failure", { cause: inner });
+    outer.freshEvaluatorEvidence = { appServer: { processExitCode: 0 } };
+    throw outer;
+  };
+
+  await assert.rejects(
+    subject.runDesignVisualM2B1({ repositoryRoot: root, planPath, ...dependencies }),
+    /outer failure/,
+  );
+  const blocked = dependencies.writes.find(({ file }) => file.endsWith("blocked.json")).value;
+  assert.equal(getterCalls, 0);
+  assert.equal(blocked.error.cause.code.text, "inner-code");
+  assert.equal(blocked.error.cause.details.text, "[UNSUPPORTED:accessor]");
+  assert.equal(blocked.error.cause.cause.cycle, true);
+});
+
+test("M2B1 prioritized diagnostics read the true event tail and label bounded observations", async (t) => {
+  const subject = await loadSubject();
+  const { root, planPath } = await fixtureRoot(t);
+  const dependencies = successfulDependencies();
+  const diagnostic = (text) => ({
+    text,
+    byteLength: Buffer.byteLength(text),
+    sha256: digest(text),
+    truncated: false,
+    redacted: false,
+    unsupported: false,
+  });
+  dependencies.runTurn = async (options) => {
+    options.session.closed = true;
+    options.session.processExitCode = 0;
+    const events = Array.from({ length: 600 }, (_, index) => ({
+      method: "item/completed",
+      threadId: "thread-window",
+      turnId: "turn-window",
+      complete: true,
+      blockers: [],
+      item: { id: `item-${index}`, type: "agentMessage", status: "completed" },
+    }));
+    events[599] = {
+      method: "turn/completed",
+      threadId: "thread-window",
+      turnId: "turn-window",
+      complete: false,
+      blockers: ["runtime-error"],
+      runtimeError: {
+        code: diagnostic("tail_runtime_error"),
+        message: diagnostic("the actual last event failed"),
+      },
+      turn: { id: "turn-window", status: "failed" },
+    };
+    const error = new Error("windowed evidence failed");
+    error.freshEvaluatorEvidence = {
+      primaryCause: { message: diagnostic("windowed evidence failed") },
+      turn: { id: "turn-window", request: { padding: "x".repeat(160 * 1024) } },
+      events,
+      blockers: ["runtime-error"],
+      appServer: { processExitCode: 0 },
+    };
+    throw error;
+  };
+
+  await assert.rejects(
+    subject.runDesignVisualM2B1({ repositoryRoot: root, planPath, ...dependencies }),
+    /windowed evidence failed/,
+  );
+  const blocked = dependencies.writes.find(({ file }) => file.endsWith("blocked.json")).value;
+  assert.equal(blocked.partialEvidence.events.arrayLength, 600);
+  assert.equal(blocked.partialEvidence.events.scanIndexCount < 600, true);
+  assert.equal(blocked.partialEvidence.events.observedEventCount, 512);
+  assert.equal(blocked.partialEvidence.events.window.tail.at(-1).turn.status.text, "failed");
+  assert.equal(blocked.partialEvidence.runtimeErrors.records[0].code.text, "tail_runtime_error");
+  assert.equal(blocked.partialEvidence.runtimeErrors.observedCount, 1);
+  assert.equal(blocked.partialEvidence.runtimeErrors.totalCount, "UNVERIFIED");
+  assert.equal(blocked.partialEvidence.events.windowSha256.length, 64);
+  assert.equal(Object.hasOwn(blocked.partialEvidence.events, "sha256"), false);
+});
+
+test("M2B1 prioritized diagnostics fail closed around accessors, revoked proxies, paths, and large sums", async (t) => {
+  const subject = await loadSubject();
+  const { root, planPath } = await fixtureRoot(t);
+  const dependencies = successfulDependencies();
+  let getterCalls = 0;
+  const remoteControl = {};
+  Object.defineProperty(remoteControl, "hidden", {
+    enumerable: true,
+    get() {
+      getterCalls += 1;
+      return "must not run";
+    },
+  });
+  const revocable = Proxy.revocable({}, {});
+  revocable.revoke();
+  dependencies.runTurn = async (options) => {
+    options.session.closed = true;
+    options.session.processExitCode = 0;
+    const error = new Error("hostile evidence failed");
+    error.freshEvaluatorEvidence = {
+      primaryCause: revocable.proxy,
+      turn: { id: "turn-hostile", request: { padding: "x".repeat(160 * 1024) } },
+      events: Array.from({ length: 40 }, (_, index) => ({
+        method: "item/completed",
+        threadId: "thread-hostile",
+        turnId: "turn-hostile",
+        complete: false,
+        blockers: ["runtime-error"],
+        runtimeError: {
+          code: "C:\\Users\\private\\runtime.log",
+          message: "m".repeat(32 * 1024),
+          details: { apiKey: "SYNTHETIC_TEST_ONLY_abcdefghijklmnop" },
+        },
+        padding: "p".repeat(4096),
+      })),
+      blockers: Array.from({ length: 32 }, (_, index) => `blocker-${index}-${"b".repeat(4096)}`),
+      appServer: {
+        processExitCode: 0,
+        stderr: { path: "C:\\Users\\private\\stderr.log" },
+        remoteControl,
+      },
+    };
+    throw error;
+  };
+
+  await assert.rejects(
+    subject.runDesignVisualM2B1({ repositoryRoot: root, planPath, ...dependencies }),
+    /hostile evidence failed/,
+  );
+  const blocked = dependencies.writes.find(({ file }) => file.endsWith("blocked.json")).value;
+  assert.equal(getterCalls, 0);
+  assert.equal(["prioritized", "minimal"].includes(blocked.partialEvidence.retention), true);
+  assert.equal(JSON.stringify(blocked).includes("SYNTHETIC_TEST_ONLY"), false);
+  assert.equal(JSON.stringify(blocked).includes("C:\\\\Users\\\\private"), false);
+  assert.equal(JSON.stringify(blocked).includes("[REDACTED_PATH]"), true);
+  assert.equal(Buffer.byteLength(JSON.stringify(blocked.partialEvidence)) < 96 * 1024, true);
+});
+
+test("M2B1 prioritized diagnostics preserve trusted sanitizer flags", async (t) => {
+  const subject = await loadSubject();
+  const { root, planPath } = await fixtureRoot(t);
+  const dependencies = successfulDependencies();
+  const redactedText = "[REDACTED]";
+  const budgetText = "[TRUNCATED:diagnostic-budget]";
+  dependencies.runTurn = async (options) => {
+    options.session.closed = true;
+    options.session.processExitCode = 0;
+    const error = new Error("sanitizer metadata failed");
+    error.freshEvaluatorEvidence = {
+      primaryCause: {
+        message: {
+          text: redactedText,
+          byteLength: Buffer.byteLength(redactedText),
+          sha256: digest(redactedText),
+          truncated: false,
+          redacted: true,
+          unsupported: false,
+        },
+        details: {
+          text: budgetText,
+          byteLength: null,
+          sha256: digest(budgetText),
+          truncated: true,
+          redacted: true,
+          unsupported: true,
+          budgetExceeded: true,
+        },
+      },
+      turn: { id: "turn-sanitizer", request: { padding: "x".repeat(160 * 1024) } },
+      events: [],
+      blockers: ["runtime-error"],
+      appServer: { processExitCode: 0 },
+    };
+    throw error;
+  };
+
+  await assert.rejects(
+    subject.runDesignVisualM2B1({ repositoryRoot: root, planPath, ...dependencies }),
+    /sanitizer metadata failed/,
+  );
+  const blocked = dependencies.writes.find(({ file }) => file.endsWith("blocked.json")).value;
+  assert.equal(blocked.partialEvidence.primaryCause.message.text, redactedText);
+  assert.equal(blocked.partialEvidence.primaryCause.message.redacted, true);
+  assert.equal(blocked.partialEvidence.primaryCause.details.text, budgetText);
+  assert.equal(blocked.partialEvidence.primaryCause.details.truncated, true);
+  assert.equal(blocked.partialEvidence.primaryCause.details.budgetExceeded, true);
+});
+
+test("M2B1 prioritized diagnostics reject live proxy traps without invoking them", async (t) => {
+  const subject = await loadSubject();
+  const { root, planPath } = await fixtureRoot(t);
+  const dependencies = successfulDependencies();
+  let trapCalls = 0;
+  const proxy = new Proxy({}, {
+    getOwnPropertyDescriptor() {
+      trapCalls += 1;
+      return undefined;
+    },
+    getPrototypeOf() {
+      trapCalls += 1;
+      return Object.prototype;
+    },
+    ownKeys() {
+      trapCalls += 1;
+      return [];
+    },
+  });
+  dependencies.runTurn = async (options) => {
+    options.session.closed = true;
+    options.session.processExitCode = 0;
+    const error = new Error("proxy evidence failed");
+    error.freshEvaluatorEvidence = {
+      primaryCause: proxy,
+      turn: { id: "turn-proxy", request: { padding: "x".repeat(160 * 1024) } },
+      events: [],
+      blockers: ["runtime-error"],
+      appServer: { processExitCode: 0, remoteControl: proxy },
+    };
+    throw error;
+  };
+
+  await assert.rejects(
+    subject.runDesignVisualM2B1({ repositoryRoot: root, planPath, ...dependencies }),
+    /proxy evidence failed/,
+  );
+  const blocked = dependencies.writes.find(({ file }) => file.endsWith("blocked.json")).value;
+  assert.equal(trapCalls, 0);
+  assert.equal(blocked.partialEvidence.primaryCause.value.text, "[UNSUPPORTED:proxy]");
+  assert.equal(blocked.partialEvidence.appServer.remoteControl.text, "[UNSUPPORTED:proxy]");
+});
+
+test("M2B1 small exact evidence ignores hidden keys and keeps __proto__ as plain data", async (t) => {
+  const subject = await loadSubject();
+  const { root, planPath } = await fixtureRoot(t);
+  const dependencies = successfulDependencies();
+  dependencies.runTurn = async (options) => {
+    options.session.closed = true;
+    options.session.processExitCode = 0;
+    const evidence = { appServer: { processExitCode: 0 }, events: [] };
+    Object.defineProperty(evidence, "hidden", {
+      enumerable: false,
+      value: "SYNTHETIC_TEST_ONLY_hidden_value",
+    });
+    Object.defineProperty(evidence, "__proto__", {
+      enumerable: true,
+      configurable: true,
+      writable: true,
+      value: { retainedAsData: true },
+    });
+    const error = new Error("plain data evidence failed");
+    error.freshEvaluatorEvidence = evidence;
+    throw error;
+  };
+
+  await assert.rejects(
+    subject.runDesignVisualM2B1({ repositoryRoot: root, planPath, ...dependencies }),
+    /plain data evidence failed/,
+  );
+  const blocked = dependencies.writes.find(({ file }) => file.endsWith("blocked.json")).value;
+  assert.equal(Object.hasOwn(blocked.partialEvidence, "hidden"), false);
+  assert.equal(JSON.stringify(blocked).includes("SYNTHETIC_TEST_ONLY_hidden_value"), false);
+  assert.equal(Object.hasOwn(blocked.partialEvidence, "__proto__"), true);
+  assert.deepEqual(blocked.partialEvidence.__proto__, { retainedAsData: true });
+  assert.equal(Object.getPrototypeOf(blocked.partialEvidence), Object.prototype);
 });
