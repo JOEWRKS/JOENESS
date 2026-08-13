@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { execFile as execFileCallback } from "node:child_process";
 import { createHash } from "node:crypto";
-import { cp, mkdtemp, mkdir, readFile, readdir, rm, writeFile } from "node:fs/promises";
+import { chmod, copyFile, cp, lstat, mkdtemp, mkdir, readFile, readdir, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import test from "node:test";
@@ -161,6 +161,10 @@ async function listRelativeFiles(root, current = root) {
   return files.sort();
 }
 
+async function assertPathMissing(file) {
+  await assert.rejects(lstat(file), (error) => error?.code === "ENOENT");
+}
+
 function closedSession(id) {
   return { id, closed: false, processExitCode: null };
 }
@@ -244,6 +248,112 @@ test("M2B1 plan pins the successor prompt and opaque approved/defect/control inp
   assert.equal(JSON.stringify(plan).match(/ground.?truth|known.?failure|positive.?control|TASKS/iu), null);
   assert.deepEqual(plan.claimScope, { variant: "Default", surface: "Collection modal" });
   assert.equal(plan.originalDetail, "UNVERIFIED");
+});
+
+test("M2B1 evaluator-root staging rolls back and reads back absence after copy failure", async (t) => {
+  const subject = await loadSubject();
+  assert.equal(typeof subject?.stageEvaluatorRoot, "function");
+  const { root, planPath } = await fixtureRoot(t);
+  const preflight = await subject.preflightDesignVisualM2B1({
+    repositoryRoot: root,
+    planPath,
+    gitStatus: async () => "",
+  });
+  let stagedRoot;
+  let copyCalls = 0;
+  const original = new Error("fixture copy failed");
+  await assert.rejects(
+    subject.stageEvaluatorRoot(preflight, "sample-a", {
+      mkdtemp: async (prefix) => {
+        stagedRoot = await mkdtemp(prefix);
+        return stagedRoot;
+      },
+      copyFile: async (...argumentsValue) => {
+        copyCalls += 1;
+        if (copyCalls === 2) throw original;
+        return copyFile(...argumentsValue);
+      },
+      chmod,
+      rm,
+      lstat,
+    }),
+    (error) =>
+      error === original &&
+      error.stagingEvidence?.root === stagedRoot &&
+      error.stagingEvidence?.rollback?.readback === "absent",
+  );
+  await assertPathMissing(stagedRoot);
+});
+
+test("M2B1 evaluator-root staging rolls back and reads back absence after chmod failure", async (t) => {
+  const subject = await loadSubject();
+  assert.equal(typeof subject?.stageEvaluatorRoot, "function");
+  const { root, planPath } = await fixtureRoot(t);
+  const preflight = await subject.preflightDesignVisualM2B1({
+    repositoryRoot: root,
+    planPath,
+    gitStatus: async () => "",
+  });
+  let stagedRoot;
+  let chmodCalls = 0;
+  const original = new Error("fixture chmod failed");
+  await assert.rejects(
+    subject.stageEvaluatorRoot(preflight, "sample-a", {
+      mkdtemp: async (prefix) => {
+        stagedRoot = await mkdtemp(prefix);
+        return stagedRoot;
+      },
+      copyFile,
+      chmod: async (...argumentsValue) => {
+        chmodCalls += 1;
+        if (chmodCalls === 2) throw original;
+        return chmod(...argumentsValue);
+      },
+      rm,
+      lstat,
+    }),
+    (error) =>
+      error === original &&
+      error.stagingEvidence?.root === stagedRoot &&
+      error.stagingEvidence?.rollback?.readback === "absent",
+  );
+  await assertPathMissing(stagedRoot);
+});
+
+test("M2B1 staging rollback failure surfaces both errors and the exact retained root", async (t) => {
+  const subject = await loadSubject();
+  assert.equal(typeof subject?.stageEvaluatorRoot, "function");
+  const { root, planPath } = await fixtureRoot(t);
+  const preflight = await subject.preflightDesignVisualM2B1({
+    repositoryRoot: root,
+    planPath,
+    gitStatus: async () => "",
+  });
+  let stagedRoot;
+  const original = new Error("fixture copy failed");
+  const rollback = new Error("fixture rollback failed");
+  t.after(async () => {
+    if (stagedRoot) await rm(stagedRoot, { recursive: true, force: true });
+  });
+  await assert.rejects(
+    subject.stageEvaluatorRoot(preflight, "design", {
+      mkdtemp: async (prefix) => {
+        stagedRoot = await mkdtemp(prefix);
+        return stagedRoot;
+      },
+      copyFile: async () => { throw original; },
+      chmod,
+      rm: async () => { throw rollback; },
+      lstat,
+    }),
+    (error) =>
+      error instanceof AggregateError &&
+      error.errors[0] === original &&
+      error.errors[1] === rollback &&
+      error.stagingEvidence?.root === stagedRoot &&
+      error.stagingEvidence?.rollback?.readback === "retained",
+  );
+  assert.equal((await lstat(stagedRoot)).isDirectory(), true);
 });
 
 test("M2B1 orchestrator uses three sessions, one raw Design tuple, and candidate-isolated Visual turns", async (t) => {

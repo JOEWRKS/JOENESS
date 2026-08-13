@@ -547,20 +547,75 @@ async function verifyPreflightPins(preflight) {
   }
 }
 
-async function stageEvaluatorRoot(preflight, phase) {
-  const root = await mkdtemp(path.join(tmpdir(), `joeness-m2b1-${phase}-`));
-  const approved = path.join(root, "approved.png");
-  await copyFile(preflight.pins.approvedSource.absolutePath, approved);
-  await chmod(approved, 0o444);
-  if (phase !== "design") {
-    const candidate = preflight.plan.candidates.find(({ id }) => id === phase);
-    const pin = preflight.pins.candidates.find(({ path: pinPath }) => pinPath === candidate.image.path);
-    const candidateFile = path.join(root, "candidate.png");
-    await copyFile(pin.absolutePath, candidateFile);
-    await chmod(candidateFile, 0o444);
+export async function stageEvaluatorRoot(preflight, phase, operations = {}) {
+  const makeDirectory = operations.mkdtemp ?? mkdtemp;
+  const copy = operations.copyFile ?? copyFile;
+  const setMode = operations.chmod ?? chmod;
+  const rollbackSetMode = operations.rollbackChmod ?? chmod;
+  const remove = operations.rm ?? rm;
+  const inspect = operations.lstat ?? lstat;
+  let root = null;
+  try {
+    root = await makeDirectory(path.join(tmpdir(), `joeness-m2b1-${phase}-`));
+    const approved = path.join(root, "approved.png");
+    await copy(preflight.pins.approvedSource.absolutePath, approved);
+    await setMode(approved, 0o444);
+    if (phase !== "design") {
+      const candidate = preflight.plan.candidates.find(({ id }) => id === phase);
+      const pin = preflight.pins.candidates.find(({ path: pinPath }) => pinPath === candidate.image.path);
+      const candidateFile = path.join(root, "candidate.png");
+      await copy(pin.absolutePath, candidateFile);
+      await setMode(candidateFile, 0o444);
+    }
+    await setMode(root, 0o555);
+    return { phase, runId: `${phase}-${randomUUID()}`, root };
+  } catch (originalError) {
+    if (root === null) throw originalError;
+    const cleanupErrors = [];
+    try {
+      await rollbackSetMode(root, 0o755);
+    } catch (error) {
+      cleanupErrors.push(error);
+    }
+    try {
+      await remove(root, { recursive: true, force: false });
+    } catch (error) {
+      cleanupErrors.push(error);
+    }
+    let readback = "retained";
+    try {
+      await inspect(root);
+    } catch (error) {
+      if (error?.code === "ENOENT") {
+        readback = "absent";
+      } else {
+        readback = "unknown";
+        cleanupErrors.push(error);
+      }
+    }
+    const stagingEvidence = {
+      root,
+      rollback: {
+        attempted: true,
+        readback,
+        cleanupErrors: cleanupErrors.map((error) => String(error?.message ?? error)),
+      },
+    };
+    if (readback === "absent") {
+      originalError.stagingEvidence = stagingEvidence;
+      throw originalError;
+    }
+    const rollbackError = cleanupErrors.length === 1
+      ? cleanupErrors[0]
+      : new AggregateError(cleanupErrors, "M2B1 staging rollback failed");
+    const failure = new AggregateError(
+      [originalError, rollbackError],
+      "M2B1 evaluator root staging and rollback failed",
+      { cause: originalError },
+    );
+    failure.stagingEvidence = stagingEvidence;
+    throw failure;
   }
-  await chmod(root, 0o555);
-  return { phase, runId: `${phase}-${randomUUID()}`, root };
 }
 
 async function removeEvaluatorRoots(stagedRoots) {
