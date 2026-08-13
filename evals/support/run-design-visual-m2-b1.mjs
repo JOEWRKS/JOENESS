@@ -1408,6 +1408,19 @@ const SUCCESSFUL_IMAGE_VIEW_ITEM_KEYS = Object.freeze([
 const SUCCESSFUL_IMAGE_VIEW_ITEM_LIMIT = 8;
 const SUCCESSFUL_IMAGE_VIEW_EVENT_LIMIT = 16;
 const SUCCESSFUL_IMAGE_VIEW_TEXT_BYTES = 128;
+const SUCCESSFUL_IMAGE_VIEW_ID_PATTERN = /^[A-Za-z0-9._:-]{1,128}$/u;
+const SUCCESSFUL_IMAGE_VIEW_BLOCKERS = new Set([
+  "image-view-limit-exceeded",
+  "image-view-invalid-id",
+  "image-view-duplicate-started",
+  "image-view-completed-without-started",
+  "image-view-duplicate-completed",
+  "image-view-extra-shape",
+  "image-view-target-mismatch",
+  "image-view-target-unverified",
+  "image-view-target-drift",
+  "image-view-lifecycle-incomplete",
+]);
 
 function retainImageDiagnostics(value) {
   if (diagnosticProxy(value) || !isObject(value) || !exactKeys(value, IMAGE_DIAGNOSTIC_KEYS)) {
@@ -1559,7 +1572,8 @@ function retainSuccessfulImageViews(value) {
       typeof blocker !== "string" ||
       !blocker ||
       Buffer.byteLength(blocker, "utf8") > SUCCESSFUL_IMAGE_VIEW_TEXT_BYTES ||
-      containsCredentialText(blocker)
+      containsCredentialText(blocker) ||
+      !SUCCESSFUL_IMAGE_VIEW_BLOCKERS.has(blocker)
     ) {
       return null;
     }
@@ -1599,6 +1613,7 @@ function retainSuccessfulImageViews(value) {
       typeof retained.id !== "string" ||
       !retained.id ||
       Buffer.byteLength(retained.id, "utf8") > SUCCESSFUL_IMAGE_VIEW_TEXT_BYTES ||
+      !SUCCESSFUL_IMAGE_VIEW_ID_PATTERN.test(retained.id) ||
       containsCredentialText(retained.id) ||
       ids.has(retained.id) ||
       !Number.isSafeInteger(retained.matchedInputIndex) ||
@@ -1763,6 +1778,116 @@ function controllerLocalImagesFromInput(value) {
   return source === null ? undefined : retainControllerLocalImages(source);
 }
 
+function retainExpectedLocalImageInputIndexes(value) {
+  const count = diagnosticArrayLength(value);
+  if (count === null || count > 8) return null;
+  const entries = diagnosticArrayEntries(
+    value,
+    Array.from({ length: count }, (_, index) => index),
+  );
+  if (entries.length !== count) return null;
+  const retained = entries.map(({ value: inputIndex }) => inputIndex);
+  if (
+    retained.some((inputIndex) => !Number.isSafeInteger(inputIndex) || inputIndex < 0) ||
+    new Set(retained).size !== retained.length
+  ) {
+    return null;
+  }
+  return retained;
+}
+
+function expectedLocalImageInputIndexes(expectedInput) {
+  const count = diagnosticArrayLength(expectedInput);
+  if (count === null || count > 16) return [];
+  const entries = diagnosticArrayEntries(
+    expectedInput,
+    Array.from({ length: count }, (_, index) => index),
+  );
+  if (entries.length !== count) return [];
+  return entries
+    .filter(({ value }) => safeDiagnosticOwnData(value, "type").value === "localImage")
+    .map(({ index }) => index);
+}
+
+function retainPostValidationStderrSummary(value) {
+  if (diagnosticProxy(value) || !isObject(value)) return null;
+  const byteLength = safeDiagnosticOwnData(value, "byteLength");
+  const truncated = safeDiagnosticOwnData(value, "truncated");
+  const captureTruncated = safeDiagnosticOwnData(value, "captureTruncated");
+  if (
+    !Number.isSafeInteger(byteLength.value) ||
+    byteLength.value < 0 ||
+    typeof truncated.value !== "boolean" ||
+    typeof captureTruncated.value !== "boolean"
+  ) {
+    return null;
+  }
+  return {
+    byteLength: byteLength.value,
+    truncated: truncated.value,
+    captureTruncated: captureTruncated.value,
+  };
+}
+
+function retainPostValidationFreshEvidence(result, expectedInput) {
+  const expectedIndexes = expectedLocalImageInputIndexes(expectedInput);
+  const inputProperty = safeDiagnosticOwnData(result, "input");
+  const controllerLocalImages = inputProperty.found
+    ? controllerLocalImagesFromInput(inputProperty.value)
+    : undefined;
+  const input = {
+    expectedLocalImageInputIndexes: expectedIndexes,
+    ...(controllerLocalImages === undefined || controllerLocalImages === null
+      ? {}
+      : { controllerLocalImages }),
+  };
+  const appServerProperty = safeDiagnosticOwnData(result, "appServer");
+  const appServerValue = appServerProperty.found ? appServerProperty.value : null;
+  const processExitCode = safeDiagnosticOwnData(appServerValue, "processExitCode");
+  const stderr = safeDiagnosticOwnData(appServerValue, "stderr");
+  const imageDiagnostics = safeDiagnosticOwnData(appServerValue, "imageDiagnostics");
+  const successfulImageViews = safeDiagnosticOwnData(appServerValue, "successfulImageViews");
+  const retainedStderr = stderr.found
+    ? retainPostValidationStderrSummary(stderr.value)
+    : null;
+  const retainedImageDiagnostics = imageDiagnostics.found
+    ? retainImageDiagnostics(imageDiagnostics.value)
+    : null;
+  const retainedSuccessfulImageViews = successfulImageViews.found
+    ? retainSuccessfulImageViews(successfulImageViews.value)
+    : null;
+  const appServer = {
+    ...(Number.isSafeInteger(processExitCode.value)
+      ? { processExitCode: processExitCode.value }
+      : {}),
+    ...(retainedStderr === null ? {} : { stderr: retainedStderr }),
+    ...(retainedImageDiagnostics === null
+      ? {}
+      : { imageDiagnostics: retainedImageDiagnostics }),
+    ...(retainedSuccessfulImageViews === null
+      ? {}
+      : { successfulImageViews: retainedSuccessfulImageViews }),
+  };
+  try {
+    return safeBoundedClone({ input, appServer }, "post-validation failure", 32 * 1024);
+  } catch {
+    return {
+      input: { expectedLocalImageInputIndexes: expectedIndexes },
+      appServer: {},
+    };
+  }
+}
+
+function attachPostValidationFreshEvidence(error, result, expectedInput) {
+  Object.defineProperty(error, "freshEvaluatorEvidence", {
+    configurable: true,
+    enumerable: false,
+    writable: true,
+    value: retainPostValidationFreshEvidence(result, expectedInput),
+  });
+  return error;
+}
+
 function correlateSuccessfulImageEvidence(result, expectedInput) {
   const descriptors = result?.input?.descriptors;
   const controllerImages = controllerLocalImagesFromInput(result?.input);
@@ -1868,6 +1993,18 @@ function retainFailureInputEvidence(value) {
   const controllerLocalImages = controllerLocalImagesFromInput(value);
   if (controllerLocalImages !== undefined && controllerLocalImages !== null) {
     retained.controllerLocalImages = controllerLocalImages;
+  }
+  const expectedIndexesProperty = safeDiagnosticOwnData(
+    value,
+    "expectedLocalImageInputIndexes",
+  );
+  if (expectedIndexesProperty.found) {
+    const expectedIndexes = retainExpectedLocalImageInputIndexes(
+      expectedIndexesProperty.value,
+    );
+    if (expectedIndexes !== null) {
+      retained.expectedLocalImageInputIndexes = expectedIndexes;
+    }
   }
   return retained;
 }
@@ -2263,7 +2400,11 @@ function retainTask1Evidence(result, expectedInput) {
     throw new Error("M2B1 Task 1 evidence is incomplete, blocked, or unbounded");
   }
   assertSuccessfulSecurityEvidence(result, expectedInput);
-  correlateSuccessfulImageEvidence(result, expectedInput);
+  try {
+    correlateSuccessfulImageEvidence(result, expectedInput);
+  } catch (error) {
+    throw attachPostValidationFreshEvidence(error, result, expectedInput);
+  }
   const eventRecords = result.events.map(retainLifecycleEvent);
   const mcpRecords = safeBoundedClone(result.mcpAfter, "MCP after", 32 * 1024);
   return safeBoundedClone({

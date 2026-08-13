@@ -1852,6 +1852,179 @@ test("M2B1 success requires exactly one complete image-view lifecycle per phase 
   }
 });
 
+test("M2B1 runner correlation failure attaches and persists path-private fresh evidence", async (t) => {
+  const subject = await loadSubject();
+  const { root, planPath } = await fixtureRoot(t);
+  const dependencies = successfulDependencies();
+  const originalRunTurn = dependencies.runTurn;
+  const rawDiagnosticText = "raw image diagnostic text must not persist";
+  const rawStderrSha256 = "f".repeat(64);
+  let rawStagedRoot;
+  dependencies.runTurn = async (options) => {
+    const result = await originalRunTurn(options);
+    if (dependencies.calls.length === 1) {
+      rawStagedRoot = options.root;
+      result.input.cwd = options.root;
+      result.appServer.stderr.diagnostic = { text: rawDiagnosticText };
+      result.appServer.stderr.pathSha256 = digest(options.root);
+      result.appServer.successfulImageViews = safeSuccessfulImageViews();
+    }
+    return result;
+  };
+
+  let failure;
+  await assert.rejects(
+    subject.runDesignVisualM2B1({ repositoryRoot: root, planPath, ...dependencies }),
+    (error) => {
+      failure = error;
+      assert.match(error.message, /successful image-view evidence is not correlated/iu);
+      assert.deepEqual(error.freshEvaluatorEvidence, {
+        input: {
+          expectedLocalImageInputIndexes: [1],
+          controllerLocalImages: controllerImageEvidence(digest("image-0-1")),
+        },
+        appServer: {
+          processExitCode: 0,
+          stderr: {
+            byteLength: 0,
+            truncated: false,
+            captureTruncated: false,
+          },
+          imageDiagnostics: safeImageDiagnostics({
+            status: "NO_ROUTER_IMAGE_ERROR",
+            observationCount: 0,
+            expectedTargetCount: 1,
+            effectivePathMatch: "UNVERIFIED",
+            matchedInputIndex: null,
+            effectivePathAbsolute: "UNVERIFIED",
+            effectivePathWithinRoot: "UNVERIFIED",
+            outerCategory: "UNVERIFIED",
+            reportedCategory: "UNVERIFIED",
+          }),
+          successfulImageViews: safeSuccessfulImageViews(),
+        },
+      });
+      return true;
+    },
+  );
+  assert.notEqual(failure, undefined);
+  const blocked = dependencies.writes.find(({ file }) => file.endsWith("blocked.json")).value;
+  assert.deepEqual(blocked.partialEvidence.input.expectedLocalImageInputIndexes, [1]);
+  assert.deepEqual(
+    blocked.partialEvidence.input.controllerLocalImages,
+    controllerImageEvidence(digest("image-0-1")),
+  );
+  assert.deepEqual(
+    blocked.partialEvidence.appServer.successfulImageViews,
+    safeSuccessfulImageViews(),
+  );
+  assert.equal(blocked.partialEvidence.appServer.processExitCode, 0);
+  assert.deepEqual(blocked.partialEvidence.appServer.stderr, {
+    byteLength: 0,
+    truncated: false,
+    captureTruncated: false,
+  });
+  const serialized = JSON.stringify(blocked);
+  for (const forbidden of [
+    rawStagedRoot,
+    rawStagedRoot.replaceAll("\\", "/"),
+    rawDiagnosticText,
+    rawStderrSha256,
+    digest(rawStagedRoot),
+    "Collection modal frame is visibly intact",
+  ]) {
+    assert.equal(serialized.includes(forbidden), false, forbidden);
+  }
+  assert.equal(serialized.includes('"cwd"'), false);
+  assert.equal(serialized.includes('"path"'), false);
+});
+
+test("M2B1 runner correlation failure projection fails closed on unsafe nested evidence", async (t) => {
+  const subject = await loadSubject();
+  for (const mode of [
+    "accessor",
+    "proxy",
+    "secret",
+    "path-id",
+    "path-blocker",
+    "oversize",
+  ]) {
+    const { root, planPath } = await fixtureRoot(t);
+    const dependencies = successfulDependencies();
+    const originalRunTurn = dependencies.runTurn;
+    const forbiddenSecret = "sk-proj-SYNTHETIC_TEST_ONLY_abcdefghijklmnop";
+    const forbiddenPath = "C:\\Users\\Private\\unexpected.png";
+    let trapCalls = 0;
+    dependencies.runTurn = async (options) => {
+      const result = await originalRunTurn(options);
+      if (dependencies.calls.length !== 1) return result;
+      if (mode === "accessor") {
+        Object.defineProperty(result.appServer.stderr, "diagnostic", {
+          enumerable: true,
+          get() {
+            trapCalls += 1;
+            return { text: "unsafe accessor text" };
+          },
+        });
+        result.appServer.successfulImageViews = safeSuccessfulImageViews();
+      } else if (mode === "proxy") {
+        result.appServer.imageDiagnostics.privacy = new Proxy({}, {
+          ownKeys() { trapCalls += 1; throw new Error("privacy ownKeys trap"); },
+          getOwnPropertyDescriptor() { trapCalls += 1; throw new Error("privacy descriptor trap"); },
+          get() { trapCalls += 1; throw new Error("privacy get trap"); },
+        });
+      } else if (mode === "secret") {
+        const views = safeSuccessfulImageViews([1]);
+        views.items[0].id = forbiddenSecret;
+        result.appServer.successfulImageViews = views;
+      } else if (mode === "path-id") {
+        const views = safeSuccessfulImageViews([1]);
+        views.items[0].id = forbiddenPath;
+        result.appServer.successfulImageViews = views;
+      } else if (mode === "path-blocker") {
+        result.appServer.successfulImageViews = {
+          ...safeSuccessfulImageViews([1]),
+          complete: false,
+          blockers: [forbiddenPath],
+        };
+      } else {
+        result.appServer.successfulImageViews = safeSuccessfulImageViews(
+          Array.from({ length: 9 }, () => 1),
+        );
+      }
+      return result;
+    };
+
+    let failure;
+    await assert.rejects(
+      subject.runDesignVisualM2B1({ repositoryRoot: root, planPath, ...dependencies }),
+      (error) => {
+        failure = error;
+        assert.deepEqual(error.freshEvaluatorEvidence.input.expectedLocalImageInputIndexes, [1]);
+        return true;
+      },
+      mode,
+    );
+    assert.notEqual(failure, undefined, mode);
+    assert.equal(trapCalls, 0, mode);
+    const blocked = dependencies.writes.find(({ file }) => file.endsWith("blocked.json")).value;
+    const serialized = JSON.stringify(blocked);
+    assert.equal(serialized.includes(forbiddenSecret), false, mode);
+    assert.equal(serialized.includes(forbiddenPath), false, mode);
+    assert.equal(Buffer.byteLength(serialized) < 96 * 1024, true, mode);
+    if (mode === "proxy") {
+      assert.equal(Object.hasOwn(blocked.partialEvidence.appServer, "imageDiagnostics"), false);
+    }
+    if (["secret", "path-id", "path-blocker", "oversize"].includes(mode)) {
+      assert.equal(
+        Object.hasOwn(blocked.partialEvidence.appServer, "successfulImageViews"),
+        false,
+        mode,
+      );
+    }
+  }
+});
+
 test("M2B1 success requires exact safe evaluator security summaries", async (t) => {
   const subject = await loadSubject();
   for (const mutation of [
