@@ -399,12 +399,7 @@ function successfulDependencies(design = designOutput()) {
             outerCategory: "UNVERIFIED",
             reportedCategory: "UNVERIFIED",
           }),
-          successfulImageViews: safeSuccessfulImageViews(
-            options.input
-              .map((entry, inputIndex) => ({ entry, inputIndex }))
-              .filter(({ entry }) => entry.type === "localImage")
-              .map(({ inputIndex }) => inputIndex),
-          ),
+          successfulImageViews: safeSuccessfulImageViews(),
         },
       };
     },
@@ -1001,8 +996,8 @@ test("M2B1 orchestrator uses three sessions, one raw Design tuple, and candidate
   assert.equal(result.visuals[0].evidence.thread.id, "thread-2");
   assert.equal(result.visuals[0].evidence.turn.id, "turn-2");
   assert.deepEqual(Object.keys(result.visuals[0].evidence).sort(), [
-    "appServer", "blockers", "events", "input", "mcpAfter", "outputSchema",
-    "thread", "threadStart", "toolEvidence", "turn",
+    "appServer", "attachmentBoundary", "blockers", "events", "input", "mcpAfter",
+    "outputSchema", "thread", "threadStart", "toolEvidence", "turn",
   ]);
   assert.deepEqual(result.visuals[0].evidence.events.records.map(({ method }) => method), [
     "turn/started", "item/started", "item/completed", "turn/completed",
@@ -1728,8 +1723,20 @@ test("M2B1 success evidence omits evaluator paths, cwd, and root identities", as
   assert.equal(handoff.evidence.appServer.imageDiagnostics.status, "NO_ROUTER_IMAGE_ERROR");
   assert.deepEqual(
     handoff.evidence.appServer.successfulImageViews,
-    safeSuccessfulImageViews([1]),
+    safeSuccessfulImageViews(),
   );
+  assert.deepEqual(handoff.evidence.attachmentBoundary, {
+    localImageRequestSubmission: "VERIFIED",
+    localSourceFileReadback: "VERIFIED",
+    attachmentConversion: "UNVERIFIED",
+    providerInclusion: "UNVERIFIED",
+    modelPixelUse: "UNVERIFIED",
+    originalDetail: "UNVERIFIED",
+    imageViewTelemetryRole: "OPTIONAL_SEPARATE_TOOL",
+  });
+  for (const visual of result.visuals) {
+    assert.deepEqual(visual.evidence.attachmentBoundary, handoff.evidence.attachmentBoundary);
+  }
   assert.deepEqual(
     handoff.evidence.input.controllerLocalImages,
     controllerImageEvidence(digest("image-0-1")),
@@ -1806,12 +1813,12 @@ test("M2B1 success requires a zero-stderr NO_ROUTER_IMAGE_ERROR observation", as
   }
 });
 
-test("M2B1 success requires exactly one complete image-view lifecycle per phase image", async (t) => {
+test("M2B1 attachment success accepts zero or repeated optional view_image lifecycles", async (t) => {
   const subject = await loadSubject();
   const cases = [
     {
       phaseCall: 1,
-      views: safeSuccessfulImageViews(),
+      views: safeSuccessfulImageViews([1]),
     },
     {
       phaseCall: 1,
@@ -1829,6 +1836,18 @@ test("M2B1 success requires exactly one complete image-view lifecycle per phase 
       phaseCall: 2,
       views: safeSuccessfulImageViews([1]),
     },
+    {
+      phaseCall: 2,
+      views: {
+        ...safeSuccessfulImageViews([2]),
+        eventCount: 4,
+        completedCount: 2,
+        items: [
+          ...safeSuccessfulImageViews([2]).items,
+          { ...safeSuccessfulImageViews([2]).items[0], id: "image-view-2-repeat" },
+        ],
+      },
+    },
   ];
   for (const { phaseCall, views } of cases) {
     const { root, planPath } = await fixtureRoot(t);
@@ -1841,9 +1860,79 @@ test("M2B1 success requires exactly one complete image-view lifecycle per phase 
       }
       return result;
     };
+    const result = await subject.runDesignVisualM2B1({
+      repositoryRoot: root,
+      planPath,
+      ...dependencies,
+    });
+    assert.equal(result.executionStatus, "completed");
+    assert.equal(result.m2b1Status, "partial-unvalidated");
+    assert.equal(result.promotionPass, false);
+    assert.equal(result.summary.m2b1Status, "partial-unvalidated");
+    assert.equal(result.summary.promotionPass, false);
+    assert.equal(result.summary.originalDetail, "UNVERIFIED");
+    for (const evidence of [result.design.evidence, ...result.visuals.map(({ evidence }) => evidence)]) {
+      assert.equal(evidence.attachmentBoundary.attachmentConversion, "UNVERIFIED");
+      assert.equal(evidence.attachmentBoundary.providerInclusion, "UNVERIFIED");
+      assert.equal(evidence.attachmentBoundary.modelPixelUse, "UNVERIFIED");
+      assert.equal(evidence.attachmentBoundary.originalDetail, "UNVERIFIED");
+      assert.equal(
+        evidence.attachmentBoundary.imageViewTelemetryRole,
+        "OPTIONAL_SEPARATE_TOOL",
+      );
+    }
+    assert.equal(dependencies.writes.some(({ file }) => file.endsWith("blocked.json")), false);
+  }
+});
+
+test("M2B1 optional view_image evidence rejects unexpected or unsafe lifecycles", async (t) => {
+  const subject = await loadSubject();
+  const cases = [
+    safeSuccessfulImageViews([2]),
+    {
+      complete: false,
+      eventCount: 1,
+      completedCount: 0,
+      items: [{
+        id: "image-view-incomplete",
+        matchedInputIndex: 1,
+        eventCount: 1,
+        startedCount: 1,
+        completedCount: 0,
+        complete: false,
+      }],
+      blockers: ["image-view-lifecycle-incomplete"],
+      privacy: {
+        rawPathPersisted: false,
+        pathDigestPersisted: false,
+        rawDiagnosticDigestPersisted: false,
+      },
+    },
+    {
+      ...safeSuccessfulImageViews([1]),
+      eventCount: 4,
+      completedCount: 2,
+      items: [
+        ...safeSuccessfulImageViews([1]).items,
+        structuredClone(safeSuccessfulImageViews([1]).items[0]),
+      ],
+    },
+    safeSuccessfulImageViews(Array.from({ length: 9 }, () => 1)),
+  ];
+  for (const views of cases) {
+    const { root, planPath } = await fixtureRoot(t);
+    const dependencies = successfulDependencies();
+    const originalRunTurn = dependencies.runTurn;
+    dependencies.runTurn = async (options) => {
+      const result = await originalRunTurn(options);
+      if (dependencies.calls.length === 1) {
+        result.appServer.successfulImageViews = structuredClone(views);
+      }
+      return result;
+    };
     await assert.rejects(
       subject.runDesignVisualM2B1({ repositoryRoot: root, planPath, ...dependencies }),
-      /successful image-view|image evidence|correlated/iu,
+      /successful image-view|image evidence|diagnostic evidence/iu,
     );
     assert.equal(
       dependencies.writes.every(({ file }) => file.endsWith("blocked.json")),
@@ -1867,7 +1956,7 @@ test("M2B1 runner correlation failure attaches and persists path-private fresh e
       result.input.cwd = options.root;
       result.appServer.stderr.diagnostic = { text: rawDiagnosticText };
       result.appServer.stderr.pathSha256 = digest(options.root);
-      result.appServer.successfulImageViews = safeSuccessfulImageViews();
+      result.appServer.successfulImageViews = safeSuccessfulImageViews([2]);
     }
     return result;
   };
@@ -1901,7 +1990,7 @@ test("M2B1 runner correlation failure attaches and persists path-private fresh e
             outerCategory: "UNVERIFIED",
             reportedCategory: "UNVERIFIED",
           }),
-          successfulImageViews: safeSuccessfulImageViews(),
+          successfulImageViews: safeSuccessfulImageViews([2]),
         },
       });
       return true;
@@ -1909,6 +1998,7 @@ test("M2B1 runner correlation failure attaches and persists path-private fresh e
   );
   assert.notEqual(failure, undefined);
   const blocked = dependencies.writes.find(({ file }) => file.endsWith("blocked.json")).value;
+  assert.equal(Object.hasOwn(blocked.partialEvidence, "attachmentBoundary"), false);
   assert.deepEqual(blocked.partialEvidence.input.expectedLocalImageInputIndexes, [1]);
   assert.deepEqual(
     blocked.partialEvidence.input.controllerLocalImages,
@@ -1916,7 +2006,7 @@ test("M2B1 runner correlation failure attaches and persists path-private fresh e
   );
   assert.deepEqual(
     blocked.partialEvidence.appServer.successfulImageViews,
-    safeSuccessfulImageViews(),
+    safeSuccessfulImageViews([2]),
   );
   assert.equal(blocked.partialEvidence.appServer.processExitCode, 0);
   assert.deepEqual(blocked.partialEvidence.appServer.stderr, {
@@ -1966,7 +2056,7 @@ test("M2B1 runner correlation failure projection fails closed on unsafe nested e
             return { text: "unsafe accessor text" };
           },
         });
-        result.appServer.successfulImageViews = safeSuccessfulImageViews();
+        result.appServer.successfulImageViews = safeSuccessfulImageViews([2]);
       } else if (mode === "proxy") {
         result.appServer.imageDiagnostics.privacy = new Proxy({}, {
           ownKeys() { trapCalls += 1; throw new Error("privacy ownKeys trap"); },
@@ -2047,6 +2137,33 @@ test("M2B1 success requires exact safe evaluator security summaries", async (t) 
       /security evidence/iu,
     );
     assert.equal(dependencies.writes.every(({ file }) => file.endsWith("blocked.json")), true);
+  }
+});
+
+test("M2B1 attachment boundary is emitted only after submitted turn evidence returns safely", async (t) => {
+  const subject = await loadSubject();
+  for (const mutation of [
+    (result) => { result.turn.request.inputDescriptorCount = 0; },
+    (result) => { result.blockers = ["missing-terminal-event"]; },
+  ]) {
+    const { root, planPath } = await fixtureRoot(t);
+    const dependencies = successfulDependencies();
+    const originalRunTurn = dependencies.runTurn;
+    dependencies.runTurn = async (options) => {
+      const result = await originalRunTurn(options);
+      if (dependencies.calls.length === 1) mutation(result);
+      return result;
+    };
+    await assert.rejects(
+      subject.runDesignVisualM2B1({ repositoryRoot: root, planPath, ...dependencies }),
+      /security evidence|incomplete|blocked/iu,
+    );
+    assert.equal(
+      dependencies.writes.some(({ file }) => !file.endsWith("blocked.json")),
+      false,
+    );
+    const blocked = dependencies.writes.find(({ file }) => file.endsWith("blocked.json")).value;
+    assert.equal(Object.hasOwn(blocked.partialEvidence, "attachmentBoundary"), false);
   }
 });
 

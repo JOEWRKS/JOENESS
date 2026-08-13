@@ -1951,14 +1951,7 @@ function correlateSuccessfulImageEvidence(result, expectedInput) {
   }
   const expectedIndexes = expectedImages.map(({ inputIndex }) => inputIndex);
   const observedIndexes = successfulViews.items.map(({ matchedInputIndex }) => matchedInputIndex);
-  if (
-    successfulViews.items.length !== expectedIndexes.length ||
-    successfulViews.eventCount !== expectedIndexes.length * 2 ||
-    successfulViews.completedCount !== expectedIndexes.length ||
-    new Set(observedIndexes).size !== observedIndexes.length ||
-    expectedIndexes.some((inputIndex) =>
-      observedIndexes.filter((observedIndex) => observedIndex === inputIndex).length !== 1)
-  ) {
+  if (observedIndexes.some((inputIndex) => !expectedIndexes.includes(inputIndex))) {
     throw new Error("M2B1 successful image-view evidence is not correlated");
   }
 }
@@ -2429,6 +2422,15 @@ function retainTask1Evidence(result, expectedInput) {
     },
     blockers: [],
     appServer: retainAppServer(result.appServer),
+    attachmentBoundary: {
+      localImageRequestSubmission: "VERIFIED",
+      localSourceFileReadback: "VERIFIED",
+      attachmentConversion: "UNVERIFIED",
+      providerInclusion: "UNVERIFIED",
+      modelPixelUse: "UNVERIFIED",
+      originalDetail: "UNVERIFIED",
+      imageViewTelemetryRole: "OPTIONAL_SEPARATE_TOOL",
+    },
   }, "Task 1", 256 * 1024);
 }
 
