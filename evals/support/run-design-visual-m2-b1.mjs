@@ -83,22 +83,45 @@ const REQUIRED_OUTCOMES = Object.freeze({
   "sample-a": "applicable-visible-fail-and-aggregate-fail",
   "sample-b": "zero-fails-with-unsupported-layers-unverified",
 });
-const M2B1_V2_PREDECESSOR = Object.freeze({
-  plan: Object.freeze({
-    path: "evals/skill-contracts/design-visual-m2-b1-smoke-plan-v1.json",
-    bytes: 4136,
-    sha256: "817566dbadd085f4b4b5e13200ccccbdc8c0c536c7b4e7f9d3c0b2db9ecc6a82",
+const M2B1_PREDECESSORS = Object.freeze({
+  2: Object.freeze({
+    plan: Object.freeze({
+      path: "evals/skill-contracts/design-visual-m2-b1-smoke-plan-v1.json",
+      bytes: 4136,
+      sha256: "817566dbadd085f4b4b5e13200ccccbdc8c0c536c7b4e7f9d3c0b2db9ecc6a82",
+    }),
+    blockedAttempt: Object.freeze({
+      path: "evals/skill-contracts/design-visual-m2-b1-v1-blocked.json",
+      bytes: 41149,
+      sha256: "cfdd9d78b40d60809b481fa02b4118b38837326ae202cf52e8c9751d2c89472e",
+    }),
+    latestReceipt: Object.freeze({
+      path: "evals/skill-contracts/design-visual-m2-attempt-index-v3.json",
+      bytes: 3469,
+      sha256: "c15029f52e9988fc670170b6ebc00029ce0a8d5a078aa0c128f612d257411fdf",
+    }),
   }),
-  blockedAttempt: Object.freeze({
-    path: "evals/skill-contracts/design-visual-m2-b1-v1-blocked.json",
-    bytes: 41149,
-    sha256: "cfdd9d78b40d60809b481fa02b4118b38837326ae202cf52e8c9751d2c89472e",
+  3: Object.freeze({
+    plan: Object.freeze({
+      path: "evals/skill-contracts/design-visual-m2-b1-smoke-plan-v2.json",
+      bytes: 5599,
+      sha256: "758f6087d628db856e48752e8172126cd7c1f70e00ccf733b2f8afbfc76ffe0d",
+    }),
+    blockedAttempt: Object.freeze({
+      path: "evals/skill-contracts/design-visual-m2-b1-v2-blocked.json",
+      bytes: 44050,
+      sha256: "979399d04ecba4fa48fb59c081c0aee22e8ae838391169b89ea1fd7ab69dd700",
+    }),
+    latestReceipt: Object.freeze({
+      path: "evals/skill-contracts/design-visual-m2-attempt-index-v4.json",
+      bytes: 3681,
+      sha256: "12bcf3f41105a3d4b955204f81efee451e21792d61e787af1d33f90176f2caf0",
+    }),
   }),
-  latestReceipt: Object.freeze({
-    path: "evals/skill-contracts/design-visual-m2-attempt-index-v3.json",
-    bytes: 3469,
-    sha256: "c15029f52e9988fc670170b6ebc00029ce0a8d5a078aa0c128f612d257411fdf",
-  }),
+});
+const M2B1_METHOD_CHANGES = Object.freeze({
+  2: "bounded-sanitized-runtime-error-and-primary-cause-capture",
+  3: "closed-object-response-schemas-required-by-observed-api-error",
 });
 
 function isObject(value) {
@@ -145,7 +168,7 @@ function assertOutputPath(value, label) {
 }
 
 export function validateDesignVisualM2B1Plan(value) {
-  const isSuccessor = value?.schemaVersion === 2;
+  const isSuccessor = [2, 3].includes(value?.schemaVersion);
   const expectedKeys = [
     "schemaVersion", "id", "date",
     ...(isSuccessor ? ["predecessor", "source"] : []),
@@ -156,7 +179,7 @@ export function validateDesignVisualM2B1Plan(value) {
     throw new Error("M2B1 plan is malformed");
   }
   if (
-    ![1, 2].includes(value.schemaVersion) ||
+    ![1, 2, 3].includes(value.schemaVersion) ||
     value.id !== `design-visual-m2-b1-smoke-plan-v${value.schemaVersion}` ||
     typeof value.date !== "string" ||
     !exactKeys(value.runtime, ["codexVersion", "sessionOrder", "retryCount"]) ||
@@ -171,7 +194,7 @@ export function validateDesignVisualM2B1Plan(value) {
       !exactKeys(value.predecessor, [
         "plan", "blockedAttempt", "latestReceipt", "methodChange", "attemptPolicy",
       ]) ||
-      value.predecessor.methodChange !== "bounded-sanitized-runtime-error-and-primary-cause-capture" ||
+      value.predecessor.methodChange !== M2B1_METHOD_CHANGES[value.schemaVersion] ||
       value.predecessor.attemptPolicy !== "one-method-changed-attempt-no-automatic-retry"
     ) {
       throw new Error("M2B1 predecessor contract is malformed");
@@ -182,7 +205,7 @@ export function validateDesignVisualM2B1Plan(value) {
       latestReceipt: value.predecessor.latestReceipt,
     })) {
       assertPin(pin, `M2B1 predecessor ${key}`);
-      if (stableStringify(pin) !== stableStringify(M2B1_V2_PREDECESSOR[key])) {
+      if (stableStringify(pin) !== stableStringify(M2B1_PREDECESSORS[value.schemaVersion][key])) {
         throw new Error(`M2B1 predecessor ${key} pin differs`);
       }
     }
@@ -586,12 +609,98 @@ export async function preflightDesignVisualM2B1({
   };
 }
 
-function designSchema() {
-  return { type: "object", additionalProperties: true };
+function strictObject(properties) {
+  return {
+    type: "object",
+    properties,
+    required: Object.keys(properties),
+    additionalProperties: false,
+  };
 }
 
-function visualSchema() {
-  return { type: "object", additionalProperties: true };
+function stringArraySchema() {
+  return { type: "array", minItems: 1, items: { type: "string", minLength: 1 } };
+}
+
+function applicabilitySchema() {
+  const dimensionNames = ["variant", "state", "surface", "target"];
+  const dimensionOptions = [];
+  for (let mask = 1; mask < 2 ** dimensionNames.length; mask += 1) {
+    const properties = {};
+    dimensionNames.forEach((name, index) => {
+      if ((mask & (1 << index)) !== 0) properties[name] = stringArraySchema();
+    });
+    dimensionOptions.push(strictObject(properties));
+  }
+  return {
+    anyOf: [
+      strictObject({ mode: { type: "string", enum: ["always"] } }),
+      strictObject({
+        mode: { type: "string", enum: ["match"] },
+        dimensions: { anyOf: dimensionOptions },
+      }),
+    ],
+  };
+}
+
+function designCheckSchema(semantics) {
+  return strictObject({
+    id: { type: "string", minLength: 1 },
+    sourceIds: stringArraySchema(),
+    observableFact: { type: "string", minLength: 1 },
+    evidenceLayer: { type: "string", enum: [...EVIDENCE_LAYERS] },
+    applicability: applicabilitySchema(),
+    semantics: { type: "string", enum: [semantics] },
+  });
+}
+
+export function designSchema() {
+  const checkArray = (semantics) => ({
+    type: "array",
+    items: designCheckSchema(semantics),
+  });
+  return strictObject({
+    schemaVersion: { type: "integer", enum: [5] },
+    invariants: checkArray("acceptance"),
+    variants: checkArray("acceptance"),
+    states: checkArray("acceptance"),
+    wholeFrameChecks: checkArray("acceptance"),
+    focusedChecks: checkArray("acceptance"),
+    unverifiedBoundaries: checkArray("boundary"),
+  });
+}
+
+export function visualSchema(candidateId = null, expectedCheckCount = null) {
+  const check = strictObject({
+    id: { type: "string", minLength: 1 },
+    sourceIds: stringArraySchema(),
+    evidenceLayer: { type: "string", enum: [...EVIDENCE_LAYERS] },
+    applicability: applicabilitySchema(),
+    semantics: { type: "string", enum: ["acceptance", "boundary"] },
+    expected: { type: "string", minLength: 1 },
+    scopeMatch: { type: "string", enum: ["APPLICABLE", "NOT_APPLICABLE", "UNVERIFIED"] },
+    observed: { type: "string", minLength: 1 },
+    verdict: { type: "string", enum: ["PASS", "FAIL", "UNVERIFIED", "NOT_APPLICABLE"] },
+  });
+  return strictObject({
+    candidateId: {
+      type: "string",
+      enum: candidateId === null ? ["sample-a", "sample-b"] : [candidateId],
+    },
+    claimScope: strictObject({
+      variant: { type: "string", enum: ["Default"] },
+      surface: { type: "string", enum: ["Collection modal"] },
+    }),
+    checks: {
+      type: "array",
+      ...(expectedCheckCount === null
+        ? {}
+        : { minItems: expectedCheckCount, maxItems: expectedCheckCount }),
+      items: check,
+    },
+    visibleAppearanceOverall: { type: "string", enum: ["PASS", "FAIL", "UNVERIFIED"] },
+    completeContractOverall: { type: "string", enum: ["PASS", "FAIL", "UNVERIFIED"] },
+  });
 }
 
 function textEntry(text) {
@@ -1150,7 +1259,7 @@ export async function runDesignVisualM2B1({
         session: activeSession,
         root: visualRoot.root,
         input: buildVisualInput(preflight, candidate, designRaw, visualRoot.root),
-        outputSchema: visualSchema(),
+        outputSchema: visualSchema(candidate.id, flattenDesign(design).length),
         dynamicTools,
         dynamicToolController: async ({ tool, arguments: argumentsValue }) => {
           if (

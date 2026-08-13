@@ -283,6 +283,78 @@ test("M2B1 plan pins the successor prompt and opaque approved/defect/control inp
   assert.equal(plan.originalDetail, "UNVERIFIED");
 });
 
+test("M2B1 response schemas are recursively strict and match the runtime validators", async () => {
+  const subject = await loadSubject();
+  assert.equal(typeof subject?.designSchema, "function");
+  assert.equal(typeof subject?.visualSchema, "function");
+
+  function assertStrict(schema, label = "root") {
+    if (schema.type === "object") {
+      assert.equal(schema.additionalProperties, false, `${label} allows extra properties`);
+      assert.deepEqual(
+        [...schema.required].sort(),
+        Object.keys(schema.properties).sort(),
+        `${label} required keys differ`,
+      );
+      for (const [key, value] of Object.entries(schema.properties)) {
+        assertStrict(value, `${label}.${key}`);
+      }
+    } else if (schema.type === "array") {
+      assertStrict(schema.items, `${label}[]`);
+    } else if (Array.isArray(schema.anyOf)) {
+      schema.anyOf.forEach((item, index) => assertStrict(item, `${label}.anyOf[${index}]`));
+    }
+  }
+
+  function assertAccepts(schema, value, label = "root") {
+    if (Array.isArray(schema.anyOf)) {
+      const failures = [];
+      for (const option of schema.anyOf) {
+        try {
+          assertAccepts(option, value, label);
+          return;
+        } catch (error) {
+          failures.push(error);
+        }
+      }
+      assert.fail(`${label} matches no anyOf branch: ${failures.map(({ message }) => message).join(" | ")}`);
+    }
+    if (schema.type === "object") {
+      assert.equal(value !== null && typeof value === "object" && !Array.isArray(value), true, label);
+      assert.deepEqual(Object.keys(value).sort(), [...schema.required].sort(), label);
+      for (const [key, child] of Object.entries(schema.properties)) {
+        assertAccepts(child, value[key], `${label}.${key}`);
+      }
+    } else if (schema.type === "array") {
+      assert.equal(Array.isArray(value), true, label);
+      if (schema.minItems !== undefined) assert.equal(value.length >= schema.minItems, true, label);
+      if (schema.maxItems !== undefined) assert.equal(value.length <= schema.maxItems, true, label);
+      value.forEach((item, index) => assertAccepts(schema.items, item, `${label}[${index}]`));
+    } else if (schema.type === "string") {
+      assert.equal(typeof value, "string", label);
+      if (schema.minLength !== undefined) assert.equal(value.length >= schema.minLength, true, label);
+    } else if (schema.type === "integer") {
+      assert.equal(Number.isInteger(value), true, label);
+    }
+    if (schema.enum) assert.equal(schema.enum.includes(value), true, label);
+  }
+
+  const design = subject.designSchema();
+  const designFixture = designOutput();
+  const visualFixture = visualOutput(designFixture, "sample-b", false);
+  const visual = subject.visualSchema("sample-b", visualFixture.checks.length);
+  assertStrict(design, "design");
+  assertStrict(visual, "visual");
+  assertAccepts(design, designFixture, "designFixture");
+  assertAccepts(visual, visualFixture, "visualFixture");
+  assert.doesNotThrow(() => subject.validateDesignM2B1Output(designFixture));
+  assert.doesNotThrow(() => subject.validateVisualM2B1Output(
+    visualFixture,
+    designFixture,
+    "sample-b",
+  ));
+});
+
 test("M2B1 successor plan preserves v1 evidence and uses disjoint v2 outputs", async () => {
   const subject = await loadSubject();
   const plan = JSON.parse(await readFile(SUCCESSOR_PLAN_PATH, "utf8"));
