@@ -12,6 +12,8 @@ JOENESS는 Windows용 Codex 작업환경입니다. 프로젝트 맥락, 중요 �
 
 보고할 때는 목표와 성공 조건, 중요한 작업 방식이나 변경, 완료·부분 완료·차단 상태, 직접 해결·우회·미해결 상태, 실제 결과와 검증, 남은 경계를 내부적으로 구분합니다. 사용자에게는 결과를 먼저 말하고 해당하는 내용만 자연스럽게 전달합니다. 고정 항목이나 줄 수를 강제하지 않으며, 빈칸을 채우거나 보고를 위해 별도 검사·문서·로그를 만들지 않습니다.
 
+사용자에게 보내는 경과·설명·의견·질문은 비전공자가 이해할 수 있는 말을 기본으로 합니다. 꼭 필요한 전문용어는 처음 쓸 때 바로 풀어 쓰고, 내부 작업 용어나 어색한 직역은 일상적인 말로 바꿉니다. 에이전트끼리의 내부 대화는 이 제한을 받지 않으며, 사용자가 기술 수준이나 형식을 직접 지정하면 그 요청을 따릅니다.
+
 ### 처음 사용: 5단계
 
 1. 받은 ZIP을 **전체 압축 해제**합니다. `JOENESS.ps1`만 따로 옮기지 마세요.
@@ -87,6 +89,8 @@ JOENESS is a Windows Codex work environment. It helps with project context, sepa
 **JOENESS Core** is the thin safety instruction visible in every task. It adds no special report format to clean work and routes only an actual visual result or persistent-specification delivery to the applicable skill.
 
 For reporting, it internally separates the goal and success criteria, material method or deviation, complete/partial/blocked outcome, direct fix/workaround/unresolved handling, actual result and verification, and remaining boundary. It tells the user the outcome first and includes only applicable facts in natural prose. It imposes no fixed fields or line count and creates no check, document, or log merely to fill a report.
+
+User-facing progress, explanations, opinions, and questions default to language a non-specialist can understand. Necessary technical terms are explained when first used, while internal workflow labels and awkward literal translations are replaced with ordinary words. Internal agent communication is exempt; an explicitly requested technical level or format takes precedence.
 
 ### First use: five steps
 

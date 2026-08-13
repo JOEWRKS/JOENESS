@@ -20,6 +20,7 @@ const INTERACTION_SAFETY_CORE_V3 = path.join(ROOT, 'evals', 'candidates', 'inter
 const INTERACTION_SAFETY_CORE_V4 = path.join(ROOT, 'evals', 'candidates', 'interaction-safety-core-v4.md');
 const INTERACTION_SAFETY_CORE_V5 = path.join(ROOT, 'evals', 'candidates', 'interaction-safety-core-v5.md');
 const INTERACTION_SAFETY_CORE_V6 = path.join(ROOT, 'evals', 'candidates', 'interaction-safety-core-v6.md');
+const INTERACTION_SAFETY_CORE_V7 = path.join(ROOT, 'evals', 'candidates', 'interaction-safety-core-v7.md');
 const GITATTRIBUTES = path.join(ROOT, '.gitattributes');
 const UI_FILES = [
   'SKILL.md',
@@ -886,11 +887,14 @@ test('the interaction safety core is active without rewriting broader Core evide
     'e7a3c02d4c147eaadde2c00a0452c7de21b3e0f51fa02cf7bd7085c43d97ac4d',
   );
   assert.deepEqual(manifest.activeCommonCore, {
-    path: 'evals/candidates/interaction-safety-core-v6.md',
-    sha256: '897495e89128194afe695ff55e537c5e7ef52e6778bf260b10c9b6ab35857ceb',
+    path: 'evals/candidates/interaction-safety-core-v7.md',
+    sha256: '4c7cc5836f99d19ce67837ad3a138acc3a6522f4a1c1d3fc07b37a6396b383d7',
   });
+  assert.equal(lstatSync(INTERACTION_SAFETY_CORE_V7).size, 2441);
+  assert.ok(lstatSync(INTERACTION_SAFETY_CORE_V7).size <= 3072);
+  assert.equal(sha256(INTERACTION_SAFETY_CORE_V7), manifest.activeCommonCore.sha256);
   assert.equal(lstatSync(INTERACTION_SAFETY_CORE_V6).size, 2047);
-  assert.equal(sha256(INTERACTION_SAFETY_CORE_V6), manifest.activeCommonCore.sha256);
+  assert.equal(sha256(INTERACTION_SAFETY_CORE_V6), '897495e89128194afe695ff55e537c5e7ef52e6778bf260b10c9b6ab35857ceb');
   assert.equal(lstatSync(INTERACTION_SAFETY_CORE_V5).size, 2040);
   assert.equal(sha256(INTERACTION_SAFETY_CORE_V5), '160a10f476d2503054e02697c8588a2ae58155b91adb17387763ae0e21e515c3');
   assert.match(readFileSync(INTERACTION_SAFETY_CORE_V6, 'utf8'), /^# JOENESS Core$/m);
@@ -919,6 +923,7 @@ test('the interaction safety core is active without rewriting broader Core evide
   assert.match(readFileSync(GITATTRIBUTES, 'utf8'), /^\/evals\/candidates\/interaction-safety-core-v4\.md text eol=lf$/m);
   assert.match(readFileSync(GITATTRIBUTES, 'utf8'), /^\/evals\/candidates\/interaction-safety-core-v5\.md text eol=lf$/m);
   assert.match(readFileSync(GITATTRIBUTES, 'utf8'), /^\/evals\/candidates\/interaction-safety-core-v6\.md text eol=lf$/m);
+  assert.match(readFileSync(GITATTRIBUTES, 'utf8'), /^\/evals\/candidates\/interaction-safety-core-v7\.md text eol=lf$/m);
   assert.match(readFileSync(GITATTRIBUTES, 'utf8'), /^\/evals\/candidates\/visual-check-skill-v5\.md text eol=lf$/m);
   assert.match(readFileSync(GITATTRIBUTES, 'utf8'), /^\/evals\/candidates\/visual-check-openai-v5\.yaml text eol=lf$/m);
   assert.match(readFileSync(GITATTRIBUTES, 'utf8'), /^\/evals\/candidates\/visual-check-durable-evidence-v6\.md text eol=lf$/m);
@@ -929,6 +934,7 @@ test('the interaction safety core is active without rewriting broader Core evide
   assert.match(readFileSync(GITATTRIBUTES, 'utf8'), /^\/evals\/candidates\/spec-delivery-skill-v1\.md text eol=lf$/m);
   assert.match(readFileSync(GITATTRIBUTES, 'utf8'), /^\/docs\/superpowers\/specs\/2026-08-11-joeness-silent-core-and-spec-delivery-design\.md text eol=lf$/m);
   assert.match(readFileSync(GITATTRIBUTES, 'utf8'), /^\/docs\/superpowers\/specs\/2026-08-11-joeness-routing-and-plugin-policy-design\.md text eol=lf$/m);
+  assert.match(readFileSync(GITATTRIBUTES, 'utf8'), /^\/docs\/superpowers\/specs\/2026-08-13-joeness-user-language-and-core-size-decision\.md text eol=lf$/m);
   assert.match(readFileSync(GITATTRIBUTES, 'utf8'), /^\/docs\/superpowers\/plans\/2026-08-11-joeness-routing-and-plugin-policy\.md text eol=lf$/m);
 });
 

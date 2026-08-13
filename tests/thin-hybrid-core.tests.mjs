@@ -20,7 +20,7 @@ test("the interaction safety core stays silent on clean success without rewritin
   const interactionDecision = JSON.parse(
     await readFile(path.join(root, "evals", "experiments", "joeness-0.1-interaction-safety-core-v1.json"), "utf8"),
   );
-  assert.equal(manifest.activeCommonCore.path, "evals/candidates/interaction-safety-core-v6.md");
+  assert.equal(manifest.activeCommonCore.path, "evals/candidates/interaction-safety-core-v7.md");
 
   const core = await readFile(path.join(root, manifest.activeCommonCore.path), "utf8");
   const visualSkill = await readFile(path.join(root, "skills", "visual-check", "SKILL.md"), "utf8");
@@ -28,7 +28,7 @@ test("the interaction safety core stays silent on clean success without rewritin
   const specSkill = await readFile(path.join(root, "skills", "spec", "SKILL.md"), "utf8");
   const disabledCore = await readFile(path.join(root, "evals", "candidates", "no-common-core.md"), "utf8");
   const projectAgents = await readFile(path.join(root, "AGENTS.md"), "utf8");
-  assert.ok(Buffer.byteLength(core, "utf8") <= 2048, "active JOENESS Core stays within 2 KiB");
+  assert.ok(Buffer.byteLength(core, "utf8") <= 3072, "active JOENESS Core stays within 3 KiB");
   assert.equal(createHash("sha256").update(core).digest("hex"), manifest.activeCommonCore.sha256);
   assert.match(core, /^# JOENESS Core$/m);
   assert.match(core, /visual(?: output)? create\/change:\$visual-check pre-completion/is);
@@ -58,6 +58,10 @@ test("the interaction safety core stays silent on clean success without rewritin
   assert.match(core, /track:goal\/criteria.*method\/change.*outcome.*handling.*result\/checks.*limit/is);
   assert.match(core, /state:blocked by blocker.*else partial if required work\/check remains.*else complete/is);
   assert.match(core, /user:outcome\+verification first.*only relevant facts.*show workaround\/unverified\/unresolved\/boundary/is);
+  assert.match(core, /user-facing progress.*explanations.*opinions.*questions.*non-specialist.*understand/is);
+  assert.match(core, /plain words.*explain needed technical terms.*first used/is);
+  assert.match(core, /internal workflow labels.*agent jargon.*awkward literal translations.*ordinary words/is);
+  assert.match(core, /internal agent coordination is exempt.*explicit user-requested format or technical level overrides/is);
   assert.match(core, /cause=evidenced\+relevant/is);
   assert.match(core, /no fixed labels\/lines\/empties\/filler work/is);
   assert.match(core, /workaround.*(?:!=|not).*fix/is);
@@ -92,6 +96,15 @@ test("the interaction safety core stays silent on clean success without rewritin
   assert.equal(
     createHash("sha256").update(coreV5).digest("hex"),
     "160a10f476d2503054e02697c8588a2ae58155b91adb17387763ae0e21e515c3",
+  );
+  const coreV6 = await readFile(
+    path.join(root, "evals", "candidates", "interaction-safety-core-v6.md"),
+    "utf8",
+  );
+  assert.equal(Buffer.byteLength(coreV6, "utf8"), 2047);
+  assert.equal(
+    createHash("sha256").update(coreV6).digest("hex"),
+    "897495e89128194afe695ff55e537c5e7ef52e6778bf260b10c9b6ab35857ceb",
   );
   const coreV2 = await readFile(
     path.join(root, "evals", "candidates", "interaction-safety-core-v2.md"),

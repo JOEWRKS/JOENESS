@@ -5,6 +5,7 @@
 /docs/superpowers/specs/2026-08-11-joeness-silent-core-and-spec-delivery-design.md text eol=lf
 /docs/superpowers/specs/2026-08-11-joeness-silent-core-and-spec-delivery-design.md whitespace=-blank-at-eol
 /docs/superpowers/specs/2026-08-11-joeness-routing-and-plugin-policy-design.md text eol=lf
+/docs/superpowers/specs/2026-08-13-joeness-user-language-and-core-size-decision.md text eol=lf
 /docs/superpowers/plans/2026-08-11-joeness-routing-and-plugin-policy.md text eol=lf
 /JOENESS.ps1 text eol=lf
 /JOENESS-0.1.ps1 text eol=lf
@@ -22,6 +23,7 @@
 /evals/candidates/interaction-safety-core-v4.md text eol=lf
 /evals/candidates/interaction-safety-core-v5.md text eol=lf
 /evals/candidates/interaction-safety-core-v6.md text eol=lf
+/evals/candidates/interaction-safety-core-v7.md text eol=lf
 /evals/candidates/visual-check-skill-v5.md text eol=lf
 /evals/candidates/visual-check-openai-v5.yaml text eol=lf
 /evals/candidates/visual-check-durable-evidence-v6.md text eol=lf
