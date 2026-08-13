@@ -63,6 +63,7 @@ import {
   runBuffered,
   runSubjectCase,
   selectCases,
+  sanitizeDiagnosticEvidence,
   sha256,
   startSyntheticWriteBroker,
   stableStringify,
@@ -72,6 +73,115 @@ import {
   writeResultExclusive,
   EXPECTED_CODEX_VERSION,
 } from "../evals/support/collect-codex-app-server.mjs";
+
+test("runtime error notifications retain correlated bounded diagnostics without changing the blocker", () => {
+  const event = normalizeEvent({
+    method: "error",
+    params: {
+      threadId: "thread-17",
+      turnId: "turn-23",
+      error: {
+        code: "backend_unavailable",
+        message: "backend unavailable",
+        details: { retryable: false, status: 503 },
+      },
+    },
+  });
+
+  assert.deepEqual(event, {
+    method: "error",
+    threadId: "thread-17",
+    turnId: "turn-23",
+    complete: false,
+    blockers: ["runtime-error"],
+    runtimeError: {
+      code: {
+        text: "backend_unavailable",
+        byteLength: 19,
+        sha256: "1193dc739c09548fe6c9eb2ceb8f032b8c06c22482a15242f4783042be3ae620",
+        truncated: false,
+        redacted: false,
+        unsupported: false,
+      },
+      message: {
+        text: "backend unavailable",
+        byteLength: 19,
+        sha256: "0d737f043c65afca5d1c7c58a66ebfa8be80fa857b22904fb8354f1caf44dc10",
+        truncated: false,
+        redacted: false,
+        unsupported: false,
+      },
+      details: {
+        text: '{"retryable":false,"status":503}',
+        byteLength: 32,
+        sha256: "73ea2c27a016b463cc8bf67733cc69e413d1ffd5a44c56c2017039d8e62610bb",
+        truncated: false,
+        redacted: false,
+        unsupported: false,
+      },
+    },
+  });
+});
+
+test("diagnostic sanitizer redacts credential keys, inline auth, paths, and cycles without leaking", () => {
+  const details = {
+    authorization: "Bearer top-secret-token-value",
+    cookie: "session=private-cookie-value",
+    safe: "backend failed at C:\\Users\\alice\\.codex\\auth.json",
+    token: "private-token-value",
+  };
+  details.self = details;
+
+  const evidence = sanitizeDiagnosticEvidence(details, 4096);
+
+  assert.deepEqual(JSON.parse(evidence.text), {
+    authorization: "[REDACTED]",
+    cookie: "[REDACTED]",
+    safe: "backend failed at [REDACTED_PATH]",
+    self: "[CIRCULAR]",
+    token: "[REDACTED]",
+  });
+  assert.equal(evidence.redacted, true);
+  assert.equal(evidence.unsupported, true);
+  assert.equal(evidence.truncated, false);
+  assert.equal(evidence.byteLength, 202);
+  assert.equal(evidence.sha256, "a450eb6d8a5cc1ea7e223195dbba4d537b532a5517e3378f97cc6956577210d0");
+  assert.equal(JSON.stringify(evidence).includes("top-secret-token-value"), false);
+  assert.equal(JSON.stringify(evidence).includes("private-cookie-value"), false);
+  assert.equal(JSON.stringify(evidence).includes("private-token-value"), false);
+  assert.equal(JSON.stringify(evidence).includes("alice"), false);
+});
+
+test("diagnostic sanitizer truncates UTF-8 deterministically with original metadata", () => {
+  const evidence = sanitizeDiagnosticEvidence("é".repeat(700), 16);
+
+  assert.deepEqual(evidence, {
+    head: "éééé",
+    tail: "éééé",
+    byteLength: 1400,
+    sha256: "d38660012f0eb48612dc61fddd811bc17f33dc93d9008be525540d2a698d7965",
+    truncated: true,
+    redacted: false,
+    unsupported: false,
+  });
+});
+
+test("diagnostic sanitizer catches camel-case credential keys and generic absolute paths", () => {
+  const evidence = sanitizeDiagnosticEvidence({
+    accessToken: "opaque-value",
+    apiKey: "opaque-value",
+    location: "/workspace/private/auth.json",
+    setCookie: "opaque-value",
+  });
+
+  assert.deepEqual(JSON.parse(evidence.text), {
+    accessToken: "[REDACTED]",
+    apiKey: "[REDACTED]",
+    location: "[REDACTED_PATH]",
+    setCookie: "[REDACTED]",
+  });
+  assert.equal(evidence.redacted, true);
+});
 
 test("runtime version pins are explicit and fail closed", () => {
   assert.equal(EXPECTED_CODEX_VERSION, "codex-cli 0.145.0");

@@ -9,6 +9,7 @@ import {
   normalizeEvent,
   parseThreadStartResponse,
   remoteControlSnapshotIsSafe,
+  sanitizeDiagnosticEvidence,
   sha256,
   stableStringify,
   verifyMcpRuntimeIsInert,
@@ -298,6 +299,21 @@ function finalAgentText(message) {
 }
 
 function attachEvidence(error, evidence) {
+  const primaryCause = {};
+  for (const key of ["name", "code", "message", "details"]) {
+    let value;
+    try {
+      value = error?.[key];
+    } catch {
+      value = "[UNSUPPORTED:accessor]";
+    }
+    if (value !== undefined) {
+      primaryCause[key] = sanitizeDiagnosticEvidence(value);
+    }
+  }
+  if (Object.keys(primaryCause).length > 0) {
+    evidence.primaryCause = primaryCause;
+  }
   const failure = new Error("fresh evaluator turn validation failed", {
     cause: error,
   });

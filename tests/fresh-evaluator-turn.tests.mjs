@@ -71,6 +71,8 @@ function createSession({
   releaseToolThrows = false,
   unsubscribeThrows = false,
   remoteSnapshotThrowsOnRead = null,
+  runtimeError = null,
+  mcpAfterError = null,
 } = {}) {
   const listeners = new Set();
   const requests = [];
@@ -143,6 +145,16 @@ function createSession({
               turn: { id: "fresh-turn" },
             },
           });
+          if (runtimeError !== null) {
+            emit({
+              method: "error",
+              params: {
+                threadId: params.threadId,
+                turnId: "fresh-turn",
+                error: runtimeError,
+              },
+            });
+          }
           if (foreignEvent) {
             emit({
               method: "item/started",
@@ -226,6 +238,7 @@ function createSession({
         }
         if (method === "turn/interrupt") return {};
         if (method === "mcpServerStatus/list") {
+          if (mcpAfterError !== null) throw mcpAfterError;
           return { data: [], nextCursor: null };
         }
         throw new Error(`unexpected request: ${method}`);
@@ -592,6 +605,82 @@ test("fresh evaluator rejects malformed final JSON with partial evidence", async
   assert.equal(evidence.events.length > 0, true);
   assert.deepEqual(evidence.toolEvidence, []);
   assert.equal(evidence.appServer.processExitCode, 0);
+});
+
+test("fresh evaluator partial evidence includes the runtime diagnostic and wrapped primary cause", async (t) => {
+  const subject = await loadSubject();
+  assert.equal(typeof subject?.runFreshEvaluatorTurn, "function");
+  const root = await createRoot(t);
+  const primary = new Error("adapter backend failed");
+  primary.code = "adapter_failure";
+  primary.details = { authorization: "Bearer hidden-adapter-secret" };
+  const evidence = await rejectedEvidence(
+    subject.runFreshEvaluatorTurn({
+      session: createSession({
+        runtimeError: {
+          code: "backend_failure",
+          message: "backend rejected request",
+          details: { cookie: "session=hidden-runtime-secret", status: 503 },
+        },
+        mcpAfterError: primary,
+      }),
+      root,
+      input: [{ type: "text", text: "Return JSON." }],
+      outputSchema: outputSchema(),
+      turnTimeoutMs: 100,
+    }),
+  );
+
+  assert.deepEqual(evidence.events.map(({ method }) => method), [
+    "thread/started",
+    "turn/started",
+    "error",
+    "item/completed",
+    "turn/completed",
+  ]);
+  assert.equal(evidence.events[2].threadId, "fresh-thread");
+  assert.equal(evidence.events[2].turnId, "fresh-turn");
+  assert.equal(evidence.events[2].runtimeError.code.text, "backend_failure");
+  assert.deepEqual(JSON.parse(evidence.events[2].runtimeError.details.text), {
+    cookie: "[REDACTED]",
+    status: 503,
+  });
+  assert.deepEqual(evidence.primaryCause, {
+    name: {
+      text: "Error",
+      byteLength: 5,
+      sha256: "54a0e8c17ebb21a11f8a25b8042786ef7efe52441e6cc87e92c67e0c4c0c6e78",
+      truncated: false,
+      redacted: false,
+      unsupported: false,
+    },
+    code: {
+      text: "adapter_failure",
+      byteLength: 15,
+      sha256: "360bc120cb95f8deff40988b58edfaf75a8dae8740ef913143a6b49a8cb02148",
+      truncated: false,
+      redacted: false,
+      unsupported: false,
+    },
+    message: {
+      text: "adapter backend failed",
+      byteLength: 22,
+      sha256: "5ee7f96503f7b45ff8445ec93039ea32831f84fdd00c1ac68dd6812e4bccae2f",
+      truncated: false,
+      redacted: false,
+      unsupported: false,
+    },
+    details: {
+      text: '{"authorization":"[REDACTED]"}',
+      byteLength: 48,
+      sha256: "ba7d5f9dbc48cf87b728aad5366401a1a806b1276a4c6fe4567558c7baca54ed",
+      truncated: false,
+      redacted: true,
+      unsupported: false,
+    },
+  });
+  assert.equal(JSON.stringify(evidence).includes("hidden-runtime-secret"), false);
+  assert.equal(JSON.stringify(evidence).includes("hidden-adapter-secret"), false);
 });
 
 test("fresh evaluator rejects missing or duplicate terminals, stderr, nonzero exit, and unsafe remote control", async (t) => {
