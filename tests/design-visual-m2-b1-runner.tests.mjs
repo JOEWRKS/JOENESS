@@ -1,0 +1,361 @@
+import assert from "node:assert/strict";
+import { execFile as execFileCallback } from "node:child_process";
+import { createHash } from "node:crypto";
+import { cp, mkdtemp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import path from "node:path";
+import test from "node:test";
+import { promisify } from "node:util";
+
+const execFile = promisify(execFileCallback);
+
+const ROOT = path.resolve(import.meta.dirname, "..");
+const MODULE_URL = new URL(
+  "../evals/support/run-design-visual-m2-b1.mjs",
+  import.meta.url,
+);
+const PLAN_PATH = path.join(
+  ROOT,
+  "evals/skill-contracts/design-visual-m2-b1-smoke-plan-v1.json",
+);
+
+async function loadSubject() {
+  try {
+    return await import(MODULE_URL.href);
+  } catch {
+    return null;
+  }
+}
+
+function digest(value) {
+  return createHash("sha256").update(value).digest("hex");
+}
+
+function designOutput() {
+  const check = (id, observableFact, evidenceLayer, applicability, semantics = "acceptance") => ({
+    id,
+    sourceIds: [`source-${id}`],
+    observableFact,
+    evidenceLayer,
+    applicability,
+    semantics,
+  });
+  return {
+    schemaVersion: 5,
+    invariants: [
+      check("modal-frame", "The Collection modal frame is visibly intact.", "visible-appearance", {
+        mode: "match",
+        dimensions: { variant: ["Default"], surface: ["Collection modal"] },
+      }),
+    ],
+    variants: [
+      check("default-spacing", "The Default cards have balanced visible spacing.", "visible-appearance", {
+        mode: "match",
+        dimensions: { variant: ["Default"], surface: ["Collection modal"] },
+      }),
+    ],
+    states: [
+      check("selected-state", "The selected state remains visually distinct.", "visible-appearance", {
+        mode: "match",
+        dimensions: { variant: ["Default"], state: ["Selected"], surface: ["Collection modal"] },
+      }),
+    ],
+    wholeFrameChecks: [
+      check("runtime-target", "The named runtime target is proven.", "runtime-identity", {
+        mode: "match",
+        dimensions: { target: ["Xiaomi 23043RP34G"] },
+      }),
+    ],
+    focusedChecks: [
+      check("artifact-id", "The installed artifact identity is proven.", "artifact-identity", {
+        mode: "always",
+      }),
+    ],
+    unverifiedBoundaries: [
+      check("user-acceptance", "Explicit user acceptance is not supplied.", "user-acceptance", {
+        mode: "always",
+      }, "boundary"),
+    ],
+  };
+}
+
+function visualOutput(design, candidateId, defect) {
+  const checks = Object.values(design)
+    .filter(Array.isArray)
+    .flat()
+    .map((item) => {
+      const missingState = item.applicability.dimensions?.state;
+      const missingTarget = item.applicability.dimensions?.target;
+      const unsupportedLayer = item.evidenceLayer !== "visible-appearance";
+      let scopeMatch = "APPLICABLE";
+      let verdict = "PASS";
+      let observed = "The named visible relation is present in the Collection modal.";
+      if (missingState || missingTarget) {
+        scopeMatch = "UNVERIFIED";
+        verdict = "UNVERIFIED";
+        observed = `Claim scope omits ${missingState ? "state" : "target"}.`;
+      } else if (unsupportedLayer && item.semantics === "acceptance") {
+        verdict = "UNVERIFIED";
+        observed = `The still image does not prove ${item.evidenceLayer}.`;
+      } else if (item.semantics === "boundary") {
+        verdict = "PASS";
+        observed = "No user-acceptance evidence is supplied.";
+      }
+      if (defect && item.id === "default-spacing") {
+        verdict = "FAIL";
+        observed = "The left gap is visibly much smaller than the right gap.";
+      }
+      return {
+        id: item.id,
+        sourceIds: item.sourceIds,
+        evidenceLayer: item.evidenceLayer,
+        applicability: item.applicability,
+        semantics: item.semantics,
+        expected: item.observableFact,
+        scopeMatch,
+        observed,
+        verdict,
+      };
+    });
+  return {
+    candidateId,
+    claimScope: { variant: "Default", surface: "Collection modal" },
+    checks,
+    visibleAppearanceOverall: defect ? "FAIL" : "UNVERIFIED",
+    completeContractOverall: defect ? "FAIL" : "UNVERIFIED",
+  };
+}
+
+async function fixtureRoot(t) {
+  const root = await mkdtemp(path.join(tmpdir(), "joeness-m2-b1-"));
+  t.after(() => rm(root, { recursive: true, force: true }));
+  const plan = JSON.parse(await readFile(PLAN_PATH, "utf8"));
+  const pins = [
+    ...Object.values(plan.inputs),
+    ...plan.candidates.map(({ image }) => image),
+  ];
+  for (const pin of pins) {
+    const destination = path.join(root, ...pin.path.split("/"));
+    await mkdir(path.dirname(destination), { recursive: true });
+    await cp(path.join(ROOT, ...pin.path.split("/")), destination);
+  }
+  const copiedPlan = path.join(root, ...path.relative(ROOT, PLAN_PATH).split(path.sep));
+  await mkdir(path.dirname(copiedPlan), { recursive: true });
+  await writeFile(copiedPlan, JSON.stringify(plan, null, 2) + "\n");
+  return { root, plan, planPath: copiedPlan };
+}
+
+function closedSession(id) {
+  return { id, closed: false, processExitCode: null };
+}
+
+function successfulDependencies(design = designOutput()) {
+  const sessions = [];
+  const calls = [];
+  const writes = [];
+  return {
+    sessions,
+    calls,
+    writes,
+    createSession: async () => {
+      const session = closedSession(`session-${sessions.length + 1}`);
+      sessions.push(session);
+      return session;
+    },
+    runTurn: async (options) => {
+      const index = calls.length;
+      calls.push(structuredClone({
+        input: options.input,
+        dynamicTools: options.dynamicTools,
+      }));
+      let output;
+      let toolEvidence = [];
+      if (index === 0) {
+        output = design;
+      } else {
+        const response = await options.dynamicToolController({
+          tool: options.dynamicTools[0].name,
+          arguments: { contract: "design-raw" },
+        });
+        const raw = response.contentItems[0].text;
+        toolEvidence = [{
+          tool: options.dynamicTools[0].name,
+          arguments: { contract: "design-raw" },
+          response: { byteLength: Buffer.byteLength(raw), sha256: digest(raw) },
+          status: "completed",
+        }];
+        output = visualOutput(design, index === 1 ? "sample-a" : "sample-b", index === 1);
+      }
+      options.session.closed = true;
+      options.session.processExitCode = 0;
+      const text = JSON.stringify(output);
+      return {
+        output,
+        outputText: { text, byteLength: Buffer.byteLength(text), sha256: digest(text) },
+        toolEvidence,
+        appServer: { processExitCode: 0, stderr: { byteLength: 0 } },
+      };
+    },
+    gitStatus: async () => "",
+    writeArtifact: async (file, value) => {
+      assert.equal(sessions.every(({ closed }) => closed), true, "artifact written before session shutdown");
+      writes.push({ file, value: structuredClone(value) });
+    },
+  };
+}
+
+test("M2B1 plan pins the successor prompt and opaque approved/defect/control inputs", async () => {
+  const subject = await loadSubject();
+  assert.equal(typeof subject?.validateDesignVisualM2B1Plan, "function");
+  const plan = JSON.parse(await readFile(PLAN_PATH, "utf8"));
+  assert.equal(subject.validateDesignVisualM2B1Plan(plan).id, "design-visual-m2-b1-smoke-plan-v1");
+  assert.equal(plan.inputs.visualPrompt.path.endsWith("visual-prompt-v9.md"), true);
+  assert.deepEqual(plan.candidates.map(({ id }) => id), ["sample-a", "sample-b"]);
+  assert.deepEqual(plan.candidates.map(({ image: { path } }) => path), [
+    "evals/skill-contracts/fixtures/visual-m2-v1/blind/0684e6867856745762217a70862b81fee8ac70787b5ab57ea13ffa58a870db62.png",
+    "evals/skill-contracts/fixtures/visual-m2-v1/blind/545a332a92e5b2b9e9f13415553511f07fbdcf189bc13a4852f123c9a943a7df.png",
+  ]);
+  assert.equal(JSON.stringify(plan).match(/ground.?truth|known.?failure|positive.?control|TASKS/iu), null);
+  assert.deepEqual(plan.claimScope, { variant: "Default", surface: "Collection modal" });
+  assert.equal(plan.originalDetail, "UNVERIFIED");
+});
+
+test("M2B1 orchestrator uses three sessions, one raw Design tuple, and candidate-isolated Visual turns", async (t) => {
+  const subject = await loadSubject();
+  assert.equal(typeof subject?.runDesignVisualM2B1, "function");
+  const { root, planPath } = await fixtureRoot(t);
+  const dependencies = successfulDependencies();
+  const result = await subject.runDesignVisualM2B1({
+    repositoryRoot: root,
+    planPath,
+    ...dependencies,
+  });
+
+  assert.equal(result.status, "complete");
+  assert.equal(dependencies.sessions.length, 3);
+  assert.equal(new Set(dependencies.sessions.map(({ id }) => id)).size, 3);
+  assert.equal(dependencies.calls.length, 3);
+  const visualCalls = dependencies.calls.slice(1);
+  const imagePaths = visualCalls.map(({ input }) => input.filter(({ type }) => type === "localImage").map(({ path: file }) => file));
+  assert.equal(imagePaths.every((paths) => paths.length === 2), true);
+  assert.equal(imagePaths[0][0], imagePaths[1][0]);
+  assert.notEqual(imagePaths[0][1], imagePaths[1][1]);
+  assert.equal(JSON.stringify(visualCalls[0]).includes(path.basename(imagePaths[1][1], ".png")), false);
+  assert.equal(JSON.stringify(visualCalls[1]).includes(path.basename(imagePaths[0][1], ".png")), false);
+  for (const call of visualCalls) {
+    assert.equal(JSON.stringify(call).match(/ground.?truth|known.?failure|positive.?control|TASKS/iu), null);
+  }
+  assert.equal(result.design.raw.sha256, result.visuals[0].designRaw.sha256);
+  assert.equal(result.design.raw.sha256, result.visuals[1].designRaw.sha256);
+  assert.equal(result.visuals[0].output.completeContractOverall, "FAIL");
+  assert.equal(result.visuals[1].output.checks.some(({ verdict }) => verdict === "FAIL"), false);
+  assert.equal(result.visuals[1].output.checks.some(({ verdict }) => verdict === "UNVERIFIED"), true);
+});
+
+test("M2B1 validators reject altered pins, escaping paths, reordered transfer, and broad PASS", async (t) => {
+  const subject = await loadSubject();
+  assert.equal(typeof subject?.preflightDesignVisualM2B1, "function");
+  const { root, plan, planPath } = await fixtureRoot(t);
+  const changed = path.join(root, ...plan.inputs.designPrompt.path.split("/"));
+  await writeFile(changed, "changed bytes");
+  await assert.rejects(
+    subject.preflightDesignVisualM2B1({ repositoryRoot: root, planPath, gitStatus: async () => "" }),
+    /pin.*(?:byte|hash)|provenance/iu,
+  );
+
+  const escaped = structuredClone(plan);
+  escaped.inputs.designPrompt.path = "../outside.md";
+  assert.throws(() => subject.validateDesignVisualM2B1Plan(escaped), /path/iu);
+
+  const design = designOutput();
+  const reordered = visualOutput(design, "sample-a", true);
+  [reordered.checks[0], reordered.checks[1]] = [reordered.checks[1], reordered.checks[0]];
+  assert.throws(() => subject.validateVisualM2B1Output(reordered, design, "sample-a"), /order|transfer/iu);
+  const broadPass = visualOutput(design, "sample-b", false);
+  broadPass.completeContractOverall = "PASS";
+  assert.throws(() => subject.validateVisualM2B1Output(broadPass, design, "sample-b"), /aggregate|overall/iu);
+});
+
+test("M2B1 preflight rejects dirty repositories and every output collision before sessions start", async (t) => {
+  const subject = await loadSubject();
+  const { root, plan, planPath } = await fixtureRoot(t);
+  let sessions = 0;
+  await assert.rejects(
+    subject.runDesignVisualM2B1({
+      repositoryRoot: root,
+      planPath,
+      gitStatus: async () => " M changed.md\n",
+      createSession: async () => { sessions += 1; },
+    }),
+    /clean repository/iu,
+  );
+  assert.equal(sessions, 0);
+
+  const collision = path.join(root, ...plan.outputs.summary.split("/"));
+  await mkdir(path.dirname(collision), { recursive: true });
+  await writeFile(collision, "existing evidence");
+  await assert.rejects(
+    subject.runDesignVisualM2B1({
+      repositoryRoot: root,
+      planPath,
+      gitStatus: async () => "",
+      createSession: async () => { sessions += 1; },
+    }),
+    /collision|exists/iu,
+  );
+  assert.equal(sessions, 0);
+  assert.equal(await readFile(collision, "utf8"), "existing evidence");
+});
+
+test("M2B1 real Git preflight accepts an exact clean fixture repository", async (t) => {
+  const subject = await loadSubject();
+  const { root, planPath } = await fixtureRoot(t);
+  await execFile("git", ["init"], { cwd: root });
+  await execFile("git", ["config", "user.email", "m2b1@example.invalid"], { cwd: root });
+  await execFile("git", ["config", "user.name", "M2B1 Fixture"], { cwd: root });
+  await execFile("git", ["add", "."], { cwd: root });
+  await execFile("git", ["commit", "-m", "fixture"], { cwd: root });
+  const result = await subject.preflightDesignVisualM2B1({ repositoryRoot: root, planPath });
+  assert.equal(result.plan.id, "design-visual-m2-b1-smoke-plan-v1");
+});
+
+test("M2B1 failure stops without retry, preserves verified partial evidence, and never writes after unsafe cleanup", async (t) => {
+  const subject = await loadSubject();
+  const { root, planPath } = await fixtureRoot(t);
+  const verified = successfulDependencies();
+  const successfulRunTurn = verified.runTurn;
+  verified.runTurn = async (options) => {
+    if (verified.calls.length === 1) {
+      verified.calls.push({ failed: true });
+      options.session.closed = true;
+      options.session.processExitCode = 0;
+      const error = new Error("sample-a evaluator failed");
+      error.freshEvaluatorEvidence = { appServer: { processExitCode: 0 }, events: [{ id: "partial" }] };
+      throw error;
+    }
+    return successfulRunTurn(options);
+  };
+  await assert.rejects(
+    subject.runDesignVisualM2B1({ repositoryRoot: root, planPath, ...verified }),
+    /sample-a evaluator failed/,
+  );
+  assert.equal(verified.sessions.length, 2);
+  assert.equal(verified.writes.length, 1);
+  assert.equal(verified.writes[0].file.endsWith("blocked.json"), true);
+  assert.deepEqual(verified.writes[0].value.partialEvidence.events, [{ id: "partial" }]);
+
+  const unsafe = successfulDependencies();
+  unsafe.runTurn = async (options) => {
+    unsafe.calls.push({ failed: true });
+    options.session.closed = false;
+    const error = new Error("close unverified");
+    error.freshEvaluatorEvidence = { appServer: { processExitCode: null } };
+    throw error;
+  };
+  await assert.rejects(
+    subject.runDesignVisualM2B1({ repositoryRoot: root, planPath, ...unsafe }),
+    /close unverified/,
+  );
+  assert.equal(unsafe.sessions.length, 1);
+  assert.equal(unsafe.writes.length, 0);
+});
