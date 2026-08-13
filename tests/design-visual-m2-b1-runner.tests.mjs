@@ -191,11 +191,40 @@ async function successorFixtureRoot(t, plan) {
   }
   const planPath = path.join(
     root,
-    "evals/skill-contracts/design-visual-m2-b1-smoke-plan-v4.json",
+    `evals/skill-contracts/design-visual-m2-b1-smoke-plan-v${plan.schemaVersion}.json`,
   );
   await mkdir(path.dirname(planPath), { recursive: true });
   await writeFile(planPath, JSON.stringify(plan, null, 2) + "\n");
   return { root, planPath };
+}
+
+function stderrDiagnosticPlanFromV4(plan) {
+  const successor = structuredClone(plan);
+  successor.schemaVersion = 5;
+  successor.id = "design-visual-m2-b1-smoke-plan-v5";
+  successor.predecessor = {
+    plan: {
+      path: "evals/skill-contracts/design-visual-m2-b1-smoke-plan-v4.json",
+      bytes: 5616,
+      sha256: "6a2c1a3408d7d10c9044a86db336653772365f57a0cd01b130b4c4658c740737",
+    },
+    blockedAttempt: {
+      path: "evals/skill-contracts/design-visual-m2-b1-v4-blocked.json",
+      bytes: 10898,
+      sha256: "da48853672e3b10b26dd7c083a29c50c7d2e2f8e663c38422cbaab44930c021b",
+    },
+    latestReceipt: {
+      path: "evals/skill-contracts/design-visual-m2-attempt-index-v6.json",
+      bytes: 4948,
+      sha256: "bdfcb2ebd064e01632a5251f7c7b1603d8ffb8ab5f5d8fa58eb52da0ba413840",
+    },
+    methodChange: "bounded-sanitized-app-server-stderr-diagnostic-retention-no-evaluator-contract-change",
+    attemptPolicy: "one-method-changed-attempt-no-automatic-retry",
+  };
+  successor.outputs = Object.fromEntries(
+    Object.entries(successor.outputs).map(([key, value]) => [key, value.replace("-v4-", "-v5-")]),
+  );
+  return successor;
 }
 
 async function listRelativeFiles(root, current = root) {
@@ -521,6 +550,73 @@ test("M2B1 v4 preflight rejects input and candidate drift from the pinned v3 con
         gitIdentity: async () => "f".repeat(40),
       }),
       /contract|predecessor|unchanged/iu,
+    );
+  }
+});
+
+test("M2B1 stderr-diagnostic generation preserves v4 evidence and uses only v5 outputs", async () => {
+  const subject = await loadSubject();
+  const predecessor = JSON.parse(await readFile(BOUNDED_DIAGNOSTIC_PLAN_PATH, "utf8"));
+  const plan = stderrDiagnosticPlanFromV4(predecessor);
+
+  const validated = subject.validateDesignVisualM2B1Plan(plan);
+  assert.equal(validated.schemaVersion, 5);
+  assert.equal(validated.id, "design-visual-m2-b1-smoke-plan-v5");
+  assert.equal(
+    validated.predecessor.methodChange,
+    "bounded-sanitized-app-server-stderr-diagnostic-retention-no-evaluator-contract-change",
+  );
+  assert.equal(validated.runtime.retryCount, 0);
+  assert.equal(Object.values(validated.outputs).every((file) => file.includes("-v5-")), true);
+  assert.equal(
+    Object.values(validated.outputs).some((file) =>
+      ["-v1-", "-v2-", "-v3-", "-v4-"].some((generation) => file.includes(generation))),
+    false,
+  );
+  assert.equal(new Set(Object.values(validated.outputs)).size, 8);
+
+  for (const predecessorKey of ["plan", "blockedAttempt", "latestReceipt"]) {
+    const changed = structuredClone(plan);
+    changed.predecessor[predecessorKey].sha256 = "0".repeat(64);
+    assert.throws(() => subject.validateDesignVisualM2B1Plan(changed), /predecessor|pin/iu);
+  }
+});
+
+test("M2B1 v5 preflight accepts the unchanged v4 evaluator contract and rejects drift", async (t) => {
+  const subject = await loadSubject();
+  const predecessor = JSON.parse(await readFile(BOUNDED_DIAGNOSTIC_PLAN_PATH, "utf8"));
+
+  const acceptedPlan = stderrDiagnosticPlanFromV4(predecessor);
+  const acceptedFixture = await successorFixtureRoot(t, acceptedPlan);
+  const accepted = await subject.preflightDesignVisualM2B1({
+    repositoryRoot: acceptedFixture.root,
+    planPath: acceptedFixture.planPath,
+    gitStatus: async () => "",
+    gitIdentity: async () => "f".repeat(40),
+  });
+  assert.equal(accepted.plan.schemaVersion, 5);
+
+  for (const target of ["input", "candidate"]) {
+    const changedPlan = stderrDiagnosticPlanFromV4(predecessor);
+    const changedBytes = Buffer.from(`changed-v5-${target}\n`, "utf8");
+    const pin = target === "input"
+      ? changedPlan.inputs.designSkill
+      : changedPlan.candidates[0].image;
+    pin.bytes = changedBytes.byteLength;
+    pin.sha256 = digest(changedBytes);
+    const changedFixture = await successorFixtureRoot(t, changedPlan);
+    await writeFile(
+      path.join(changedFixture.root, ...pin.path.split("/")),
+      changedBytes,
+    );
+    await assert.rejects(
+      subject.preflightDesignVisualM2B1({
+        repositoryRoot: changedFixture.root,
+        planPath: changedFixture.planPath,
+        gitStatus: async () => "",
+        gitIdentity: async () => "f".repeat(40),
+      }),
+      /contract|unchanged/iu,
     );
   }
 });

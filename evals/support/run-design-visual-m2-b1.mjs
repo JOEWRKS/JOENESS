@@ -136,11 +136,29 @@ const M2B1_PREDECESSORS = Object.freeze({
       sha256: "04ce185d3918cfa9096d71e8dc7bbe86ccbf2834813c980113b11a3182a332ed",
     }),
   }),
+  5: Object.freeze({
+    plan: Object.freeze({
+      path: "evals/skill-contracts/design-visual-m2-b1-smoke-plan-v4.json",
+      bytes: 5616,
+      sha256: "6a2c1a3408d7d10c9044a86db336653772365f57a0cd01b130b4c4658c740737",
+    }),
+    blockedAttempt: Object.freeze({
+      path: "evals/skill-contracts/design-visual-m2-b1-v4-blocked.json",
+      bytes: 10898,
+      sha256: "da48853672e3b10b26dd7c083a29c50c7d2e2f8e663c38422cbaab44930c021b",
+    }),
+    latestReceipt: Object.freeze({
+      path: "evals/skill-contracts/design-visual-m2-attempt-index-v6.json",
+      bytes: 4948,
+      sha256: "bdfcb2ebd064e01632a5251f7c7b1603d8ffb8ab5f5d8fa58eb52da0ba413840",
+    }),
+  }),
 });
 const M2B1_METHOD_CHANGES = Object.freeze({
   2: "bounded-sanitized-runtime-error-and-primary-cause-capture",
   3: "closed-object-response-schemas-required-by-observed-api-error",
   4: "prioritized-bounded-failure-evidence-retention-no-evaluator-contract-change",
+  5: "bounded-sanitized-app-server-stderr-diagnostic-retention-no-evaluator-contract-change",
 });
 const M2B1_UNCHANGED_EVALUATOR_CONTRACT_KEYS = Object.freeze([
   "runtime",
@@ -195,7 +213,7 @@ function assertOutputPath(value, label) {
 }
 
 export function validateDesignVisualM2B1Plan(value) {
-  const isSuccessor = [2, 3, 4].includes(value?.schemaVersion);
+  const isSuccessor = [2, 3, 4, 5].includes(value?.schemaVersion);
   const expectedKeys = [
     "schemaVersion", "id", "date",
     ...(isSuccessor ? ["predecessor", "source"] : []),
@@ -206,7 +224,7 @@ export function validateDesignVisualM2B1Plan(value) {
     throw new Error("M2B1 plan is malformed");
   }
   if (
-    ![1, 2, 3, 4].includes(value.schemaVersion) ||
+    ![1, 2, 3, 4, 5].includes(value.schemaVersion) ||
     value.id !== `design-visual-m2-b1-smoke-plan-v${value.schemaVersion}` ||
     typeof value.date !== "string" ||
     !exactKeys(value.runtime, ["codexVersion", "sessionOrder", "retryCount"]) ||
@@ -323,7 +341,7 @@ export function validateDesignVisualM2B1Plan(value) {
 }
 
 function assertUnchangedM2B1EvaluatorContract(plan, predecessorBytes) {
-  if (plan.schemaVersion !== 4) return;
+  if (![4, 5].includes(plan.schemaVersion)) return;
   let predecessor;
   try {
     predecessor = validateDesignVisualM2B1Plan(
