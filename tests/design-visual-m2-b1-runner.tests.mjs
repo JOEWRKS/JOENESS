@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { execFile as execFileCallback } from "node:child_process";
 import { createHash } from "node:crypto";
-import { cp, mkdtemp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
+import { cp, mkdtemp, mkdir, readFile, readdir, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import test from "node:test";
@@ -142,7 +142,23 @@ async function fixtureRoot(t) {
   const copiedPlan = path.join(root, ...path.relative(ROOT, PLAN_PATH).split(path.sep));
   await mkdir(path.dirname(copiedPlan), { recursive: true });
   await writeFile(copiedPlan, JSON.stringify(plan, null, 2) + "\n");
+  await writeFile(path.join(root, "TASKS.md"), "controller-only tasks\n");
+  await mkdir(path.join(root, "history"));
+  await writeFile(path.join(root, "history", "prior-verdict.json"), "{}\n");
+  await mkdir(path.join(root, "ground-truth"));
+  await writeFile(path.join(root, "ground-truth", "roles.json"), "{}\n");
   return { root, plan, planPath: copiedPlan };
+}
+
+async function listRelativeFiles(root, current = root) {
+  const entries = await readdir(current, { withFileTypes: true });
+  const files = [];
+  for (const entry of entries) {
+    const absolute = path.join(current, entry.name);
+    if (entry.isDirectory()) files.push(...await listRelativeFiles(root, absolute));
+    else files.push(path.relative(root, absolute).replaceAll("\\", "/"));
+  }
+  return files.sort();
 }
 
 function closedSession(id) {
@@ -165,6 +181,14 @@ function successfulDependencies(design = designOutput()) {
     runTurn: async (options) => {
       const index = calls.length;
       calls.push(structuredClone({
+        root: options.root,
+        rootFiles: await listRelativeFiles(options.root),
+        rootFileHashes: Object.fromEntries(await Promise.all(
+          (await listRelativeFiles(options.root)).map(async (file) => [
+            file,
+            digest(await readFile(path.join(options.root, ...file.split("/")))),
+          ]),
+        )),
         input: options.input,
         dynamicTools: options.dynamicTools,
       }));
@@ -192,6 +216,8 @@ function successfulDependencies(design = designOutput()) {
       return {
         output,
         outputText: { text, byteLength: Buffer.byteLength(text), sha256: digest(text) },
+        thread: { id: `thread-${index + 1}` },
+        turn: { id: `turn-${index + 1}` },
         toolEvidence,
         appServer: { processExitCode: 0, stderr: { byteLength: 0 } },
       };
@@ -235,13 +261,25 @@ test("M2B1 orchestrator uses three sessions, one raw Design tuple, and candidate
   assert.equal(dependencies.sessions.length, 3);
   assert.equal(new Set(dependencies.sessions.map(({ id }) => id)).size, 3);
   assert.equal(dependencies.calls.length, 3);
+  assert.equal(new Set(dependencies.calls.map(({ root }) => root)).size, 3);
+  assert.deepEqual(dependencies.calls.map(({ rootFiles }) => rootFiles), [
+    ["approved.png"],
+    ["approved.png", "candidate.png"],
+    ["approved.png", "candidate.png"],
+  ]);
+  for (const call of dependencies.calls) {
+    assert.equal(call.rootFiles.some((file) => /TASKS|smoke-plan|history|ground-truth/iu.test(file)), false);
+  }
   const visualCalls = dependencies.calls.slice(1);
   const imagePaths = visualCalls.map(({ input }) => input.filter(({ type }) => type === "localImage").map(({ path: file }) => file));
   assert.equal(imagePaths.every((paths) => paths.length === 2), true);
-  assert.equal(imagePaths[0][0], imagePaths[1][0]);
+  assert.notEqual(imagePaths[0][0], imagePaths[1][0]);
+  assert.equal(path.basename(imagePaths[0][0]), "approved.png");
+  assert.equal(path.basename(imagePaths[1][0]), "approved.png");
+  assert.equal(visualCalls[0].rootFileHashes["approved.png"], visualCalls[1].rootFileHashes["approved.png"]);
   assert.notEqual(imagePaths[0][1], imagePaths[1][1]);
-  assert.equal(JSON.stringify(visualCalls[0]).includes(path.basename(imagePaths[1][1], ".png")), false);
-  assert.equal(JSON.stringify(visualCalls[1]).includes(path.basename(imagePaths[0][1], ".png")), false);
+  assert.equal(visualCalls[0].rootFileHashes["candidate.png"], "0684e6867856745762217a70862b81fee8ac70787b5ab57ea13ffa58a870db62");
+  assert.equal(visualCalls[1].rootFileHashes["candidate.png"], "545a332a92e5b2b9e9f13415553511f07fbdcf189bc13a4852f123c9a943a7df");
   for (const call of visualCalls) {
     assert.equal(JSON.stringify(call).match(/ground.?truth|known.?failure|positive.?control|TASKS/iu), null);
   }
@@ -250,6 +288,13 @@ test("M2B1 orchestrator uses three sessions, one raw Design tuple, and candidate
   assert.equal(result.visuals[0].output.completeContractOverall, "FAIL");
   assert.equal(result.visuals[1].output.checks.some(({ verdict }) => verdict === "FAIL"), false);
   assert.equal(result.visuals[1].output.checks.some(({ verdict }) => verdict === "UNVERIFIED"), true);
+  assert.deepEqual(result.summary.evaluatorIdentities.map(({ threadId, turnId }) => [threadId, turnId]), [
+    ["thread-1", "turn-1"],
+    ["thread-2", "turn-2"],
+    ["thread-3", "turn-3"],
+  ]);
+  assert.equal(result.visuals[0].evidence.thread.id, "thread-2");
+  assert.equal(result.visuals[0].evidence.turn.id, "turn-2");
 });
 
 test("M2B1 validators reject altered pins, escaping paths, reordered transfer, and broad PASS", async (t) => {
@@ -274,6 +319,61 @@ test("M2B1 validators reject altered pins, escaping paths, reordered transfer, a
   const broadPass = visualOutput(design, "sample-b", false);
   broadPass.completeContractOverall = "PASS";
   assert.throws(() => subject.validateVisualM2B1Output(broadPass, design, "sample-b"), /aggregate|overall/iu);
+
+  const boundaryFail = visualOutput(design, "sample-b", false);
+  boundaryFail.checks.find(({ semantics }) => semantics === "boundary").verdict = "FAIL";
+  assert.throws(() => subject.validateVisualM2B1Output(boundaryFail, design, "sample-b"), /sample-b|control|fail/iu);
+
+});
+
+test("M2B1 plan rejects contradictory candidate outcome literals", async () => {
+  const subject = await loadSubject();
+  const plan = JSON.parse(await readFile(PLAN_PATH, "utf8"));
+  plan.candidates[0].requiredOutcome = "zero-fails-with-unsupported-layers-unverified";
+  assert.throws(() => subject.validateDesignVisualM2B1Plan(plan), /outcome/iu);
+});
+
+test("M2B1 rejects reused evaluator thread or turn identity before success artifacts", async (t) => {
+  const subject = await loadSubject();
+  const { root, planPath } = await fixtureRoot(t);
+  const dependencies = successfulDependencies();
+  const originalRunTurn = dependencies.runTurn;
+  dependencies.runTurn = async (options) => {
+    const result = await originalRunTurn(options);
+    result.thread.id = "reused-thread";
+    result.turn.id = "reused-turn";
+    return result;
+  };
+  await assert.rejects(
+    subject.runDesignVisualM2B1({ repositoryRoot: root, planPath, ...dependencies }),
+    /identity|thread|turn/iu,
+  );
+  assert.equal(dependencies.writes.some(({ file }) => file.endsWith("summary.json")), false);
+});
+
+test("M2B1 runtime cleanup runs once before success writes and cleanup failure leaves only blocked evidence", async (t) => {
+  const subject = await loadSubject();
+  const { root, planPath } = await fixtureRoot(t);
+  const dependencies = successfulDependencies();
+  let finishCalls = 0;
+  const finishRuntime = async () => {
+    finishCalls += 1;
+    const error = new Error("runtime cleanup failed");
+    error.runtimeCleanupEvidence = { processTerminationConfirmed: true };
+    throw error;
+  };
+  await assert.rejects(
+    subject.runDesignVisualM2B1({
+      repositoryRoot: root,
+      planPath,
+      ...dependencies,
+      finishRuntime,
+    }),
+    /runtime cleanup failed/,
+  );
+  assert.equal(finishCalls, 1);
+  assert.equal(dependencies.writes.filter(({ file }) => !file.endsWith("blocked.json")).length, 0);
+  assert.equal(dependencies.writes.filter(({ file }) => file.endsWith("blocked.json")).length, 1);
 });
 
 test("M2B1 preflight rejects dirty repositories and every output collision before sessions start", async (t) => {

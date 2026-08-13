@@ -1,4 +1,6 @@
-import { lstat, mkdir, readFile, realpath, rm, writeFile } from "node:fs/promises";
+import { randomUUID } from "node:crypto";
+import { chmod, copyFile, lstat, mkdir, mkdtemp, readFile, realpath, rm, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -73,6 +75,10 @@ const EXPECTED_IMAGE_PATHS = Object.freeze({
   approvedSource: "evals/skill-contracts/fixtures/visual-m2-v1/blind/ff71c6e9919567b251659f00fda0a224a5f91fab24ed36042eb070310d739110.png",
   "sample-a": "evals/skill-contracts/fixtures/visual-m2-v1/blind/0684e6867856745762217a70862b81fee8ac70787b5ab57ea13ffa58a870db62.png",
   "sample-b": "evals/skill-contracts/fixtures/visual-m2-v1/blind/545a332a92e5b2b9e9f13415553511f07fbdcf189bc13a4852f123c9a943a7df.png",
+});
+const REQUIRED_OUTCOMES = Object.freeze({
+  "sample-a": "applicable-visible-fail-and-aggregate-fail",
+  "sample-b": "zero-fails-with-unsupported-layers-unverified",
 });
 
 function isObject(value) {
@@ -157,9 +163,9 @@ export function validateDesignVisualM2B1Plan(value) {
     if (
       !exactKeys(candidate, ["id", "image", "requiredOutcome"]) ||
       candidate.id !== expectedId ||
-      typeof candidate.requiredOutcome !== "string"
+      candidate.requiredOutcome !== REQUIRED_OUTCOMES[expectedId]
     ) {
-      throw new Error("M2B1 opaque candidate order is malformed");
+      throw new Error("M2B1 opaque candidate order or required outcome is malformed");
     }
     assertPin(candidate.image, `M2B1 ${expectedId}`);
     if (candidate.image.path !== EXPECTED_IMAGE_PATHS[expectedId]) {
@@ -364,7 +370,7 @@ export function validateVisualM2B1Output(value, designValue, candidateId) {
     }
   } else if (candidateId === "sample-b") {
     if (
-      acceptance.some(({ verdict }) => verdict === "FAIL") ||
+      value.checks.some(({ verdict }) => verdict === "FAIL") ||
       !acceptance.some(({ verdict }) => verdict === "UNVERIFIED") ||
       !acceptance.some((check) => check.evidenceLayer !== "visible-appearance" && check.verdict === "UNVERIFIED")
     ) {
@@ -469,7 +475,7 @@ function pinnedText(label, pin) {
   return `\n\n--- ${label}; bytes=${pin.bytes}; sha256=${pin.sha256} ---\n${pin.content.toString("utf8")}`;
 }
 
-function buildDesignInput(preflight) {
+function buildDesignInput(preflight, evaluatorRoot) {
   const { pins } = preflight;
   const text = [
     pins.designPrompt.content.toString("utf8"),
@@ -477,7 +483,7 @@ function buildDesignInput(preflight) {
     pinnedText("authority v5", pins.authority),
     pinnedText("frozen facts v1", pins.frozenFacts),
   ].join("");
-  return [textEntry(text), imageEntry(pins.approvedSource.absolutePath)];
+  return [textEntry(text), imageEntry(path.join(evaluatorRoot, "approved.png"))];
 }
 
 function visualTool() {
@@ -495,7 +501,7 @@ function visualTool() {
   };
 }
 
-function buildVisualInput(preflight, candidate, designRaw) {
+function buildVisualInput(preflight, candidate, designRaw, evaluatorRoot) {
   const { pins, plan } = preflight;
   const candidatePin = pins.candidates.find(({ path: pinPath }) => pinPath === candidate.image.path);
   const launch = [
@@ -512,8 +518,8 @@ function buildVisualInput(preflight, candidate, designRaw) {
   ].join("");
   return [
     textEntry(launch),
-    imageEntry(pins.approvedSource.absolutePath),
-    imageEntry(candidatePin.absolutePath),
+    imageEntry(path.join(evaluatorRoot, "approved.png")),
+    imageEntry(path.join(evaluatorRoot, "candidate.png")),
   ];
 }
 
@@ -541,6 +547,81 @@ async function verifyPreflightPins(preflight) {
   }
 }
 
+async function stageEvaluatorRoot(preflight, phase) {
+  const root = await mkdtemp(path.join(tmpdir(), `joeness-m2b1-${phase}-`));
+  const approved = path.join(root, "approved.png");
+  await copyFile(preflight.pins.approvedSource.absolutePath, approved);
+  await chmod(approved, 0o444);
+  if (phase !== "design") {
+    const candidate = preflight.plan.candidates.find(({ id }) => id === phase);
+    const pin = preflight.pins.candidates.find(({ path: pinPath }) => pinPath === candidate.image.path);
+    const candidateFile = path.join(root, "candidate.png");
+    await copyFile(pin.absolutePath, candidateFile);
+    await chmod(candidateFile, 0o444);
+  }
+  await chmod(root, 0o555);
+  return { phase, runId: `${phase}-${randomUUID()}`, root };
+}
+
+async function removeEvaluatorRoots(stagedRoots) {
+  const errors = [];
+  for (const staged of stagedRoots) {
+    try {
+      await chmod(staged.root, 0o755);
+      await rm(staged.root, { recursive: true, force: false });
+    } catch (error) {
+      errors.push(error);
+    }
+  }
+  if (errors.length === 1) throw errors[0];
+  if (errors.length > 1) throw new AggregateError(errors, "M2B1 evaluator root cleanup failed");
+}
+
+function scalarIdentity(value, label) {
+  if ((typeof value !== "string" || !value) && !Number.isSafeInteger(value)) {
+    throw new Error(`M2B1 ${label} identity is missing`);
+  }
+  return String(value);
+}
+
+function buildEvaluatorIdentity(phase, staged, session, result) {
+  return {
+    phase,
+    runId: scalarIdentity(staged.runId, "run"),
+    evaluatorRoot: staged.root,
+    sessionId: scalarIdentity(session?.id ?? session?.process?.pid, "session"),
+    threadId: scalarIdentity(result?.thread?.id, "thread"),
+    turnId: scalarIdentity(result?.turn?.id, "turn"),
+  };
+}
+
+function validateEvaluatorIdentities(identities) {
+  if (
+    identities.length !== 3 ||
+    stableStringify(identities.map(({ phase }) => phase)) !==
+      stableStringify(["design", "sample-a", "sample-b"])
+  ) {
+    throw new Error("M2B1 evaluator identity order is invalid");
+  }
+  for (const field of ["runId", "evaluatorRoot", "sessionId", "threadId", "turnId"]) {
+    if (new Set(identities.map((identity) => identity[field])).size !== identities.length) {
+      throw new Error(`M2B1 evaluator ${field} identity was reused`);
+    }
+  }
+  return clone(identities);
+}
+
+function retainTask1Evidence(result) {
+  return clone({
+    threadStart: result.threadStart ?? null,
+    thread: result.thread ?? null,
+    turn: result.turn ?? null,
+    input: result.input ?? null,
+    toolEvidence: result.toolEvidence ?? [],
+    appServer: result.appServer ?? null,
+  });
+}
+
 async function defaultRuntimeFactory(plan) {
   const runRoot = await createExclusiveRunRoot(`design-visual-m2-b1-${Date.now()}`);
   const runtime = await prepareRuntime(runRoot, { expectedCodexVersion: plan.runtime.codexVersion });
@@ -563,6 +644,7 @@ export async function runDesignVisualM2B1({
   planPath,
   gitStatus = defaultGitStatus,
   createSession,
+  finishRuntime,
   runTurn = runFreshEvaluatorTurn,
   writeArtifact = writeExclusive,
 } = {}) {
@@ -571,25 +653,65 @@ export async function runDesignVisualM2B1({
   if (typeof createSession !== "function") {
     runtimeFactory = await defaultRuntimeFactory(preflight.plan);
     createSession = runtimeFactory.createSession;
+    finishRuntime ??= runtimeFactory.finish;
   }
-  if (typeof runTurn !== "function" || typeof writeArtifact !== "function") {
+  finishRuntime ??= async () => {};
+  if (
+    typeof runTurn !== "function" ||
+    typeof writeArtifact !== "function" ||
+    typeof finishRuntime !== "function"
+  ) {
     throw new TypeError("M2B1 orchestration dependencies are malformed");
   }
   const sessions = [];
   const completed = [];
+  const stagedRoots = [];
+  const identities = [];
   let activeSession = null;
   let safeShutdown = true;
+  let finishAttempted = false;
+
+  async function finishOnce(safe) {
+    if (finishAttempted) return;
+    finishAttempted = true;
+    const errors = [];
+    try {
+      await finishRuntime(safe);
+    } catch (error) {
+      errors.push(error);
+    }
+    if (safe) {
+      try {
+        await removeEvaluatorRoots(stagedRoots);
+      } catch (error) {
+        errors.push(error);
+      }
+    }
+    if (errors.length === 1) throw errors[0];
+    if (errors.length > 1) throw new AggregateError(errors, "M2B1 runtime cleanup failed", { cause: errors[0] });
+  }
+
+  function registerSession(session) {
+    if (sessions.includes(session)) throw new Error("M2B1 evaluator session object was reused");
+    sessions.push(session);
+    return session;
+  }
+
   try {
     await verifyPreflightPins(preflight);
-    activeSession = await createSession({ phase: "design" });
-    sessions.push(activeSession);
+    const designRoot = await stageEvaluatorRoot(preflight, "design");
+    stagedRoots.push(designRoot);
+    activeSession = registerSession(await createSession({ phase: "design", runId: designRoot.runId }));
     const designResult = await runTurn({
       session: activeSession,
-      root: preflight.root,
-      input: buildDesignInput(preflight),
+      root: designRoot.root,
+      input: buildDesignInput(preflight, designRoot.root),
       outputSchema: designSchema(),
     });
     assertTurnShutdown(designResult, activeSession);
+    const designIdentity = buildEvaluatorIdentity("design", designRoot, activeSession, designResult);
+    identities.push(designIdentity);
+    const designEvidence = retainTask1Evidence(designResult);
     completed.push("design");
     const designRaw = {
       text: designResult.outputText.text,
@@ -606,13 +728,14 @@ export async function runDesignVisualM2B1({
     const visuals = [];
     for (const candidate of preflight.plan.candidates) {
       await verifyPreflightPins(preflight);
-      activeSession = await createSession({ phase: "visual", candidateId: candidate.id });
-      sessions.push(activeSession);
+      const visualRoot = await stageEvaluatorRoot(preflight, candidate.id);
+      stagedRoots.push(visualRoot);
+      activeSession = registerSession(await createSession({ phase: "visual", candidateId: candidate.id, runId: visualRoot.runId }));
       const dynamicTools = [visualTool()];
       const visualResult = await runTurn({
         session: activeSession,
-        root: preflight.root,
-        input: buildVisualInput(preflight, candidate, designRaw),
+        root: visualRoot.root,
+        input: buildVisualInput(preflight, candidate, designRaw, visualRoot.root),
         outputSchema: visualSchema(),
         dynamicTools,
         dynamicToolController: async ({ tool, arguments: argumentsValue }) => {
@@ -627,6 +750,8 @@ export async function runDesignVisualM2B1({
         },
       });
       assertTurnShutdown(visualResult, activeSession);
+      const identity = buildEvaluatorIdentity(candidate.id, visualRoot, activeSession, visualResult);
+      identities.push(identity);
       completed.push(candidate.id);
       if (
         visualResult.toolEvidence?.length !== 1 ||
@@ -644,11 +769,19 @@ export async function runDesignVisualM2B1({
         designRaw: { byteLength: designRaw.byteLength, sha256: designRaw.sha256 },
         raw: clone(visualResult.outputText),
         output,
-        evidence: clone({ input: visualResult.input, toolEvidence: visualResult.toolEvidence, appServer: visualResult.appServer }),
+        identity,
+        evidence: retainTask1Evidence(visualResult),
       });
     }
     await verifyPreflightPins(preflight);
-    const handoff = { schemaVersion: 1, designRaw: { byteLength: designRaw.byteLength, sha256: designRaw.sha256 }, sections: clone(design) };
+    const evaluatorIdentities = validateEvaluatorIdentities(identities);
+    const handoff = {
+      schemaVersion: 1,
+      designRaw: { byteLength: designRaw.byteLength, sha256: designRaw.sha256 },
+      identity: designIdentity,
+      evidence: designEvidence,
+      sections: clone(design),
+    };
     const summary = {
       schemaVersion: 1,
       id: "design-visual-m2-b1-v1-summary",
@@ -657,6 +790,7 @@ export async function runDesignVisualM2B1({
       originalDetail: "UNVERIFIED",
       claimScope: clone(preflight.plan.claimScope),
       designRaw: handoff.designRaw,
+      evaluatorIdentities,
       outcomes: visuals.map(({ candidateId, output }) => ({
         candidateId,
         visibleAppearanceOverall: output.visibleAppearanceOverall,
@@ -672,16 +806,23 @@ export async function runDesignVisualM2B1({
       ["sampleBEnvelope", visuals[1]],
       ["summary", summary],
     ];
+    await finishOnce(true);
     for (const [key, value] of writes) await writeArtifact(outputFile(preflight, key), value);
-    await runtimeFactory?.finish(true);
     return {
       status: "complete",
-      design: { raw: handoff.designRaw, output: design },
+      design: { raw: handoff.designRaw, output: design, identity: designIdentity, evidence: designEvidence },
       visuals,
       summary,
     };
   } catch (error) {
-    safeShutdown = activeSession === null || verifiedFailureShutdown(error, activeSession);
+    safeShutdown =
+      (activeSession === null || verifiedFailureShutdown(error, activeSession)) &&
+      sessions.every((session) => session?.processExitCode === 0);
+    try {
+      await finishOnce(safeShutdown);
+    } catch (cleanupError) {
+      if (cleanupError !== error) error.runtimeCleanupError = cleanupError;
+    }
     if (safeShutdown) {
       const blocked = {
         schemaVersion: 1,
@@ -692,6 +833,7 @@ export async function runDesignVisualM2B1({
         error: String(error?.message ?? error),
         partialEvidence: clone(error?.freshEvaluatorEvidence ?? {}),
         retryCount: 0,
+        evaluatorIdentities: clone(identities),
       };
       try {
         await writeArtifact(outputFile(preflight, "blocked"), blocked);
@@ -699,9 +841,6 @@ export async function runDesignVisualM2B1({
         error.blockedArtifactError = writeError;
       }
     }
-    await runtimeFactory?.finish(safeShutdown).catch((cleanupError) => {
-      error.runtimeCleanupError = cleanupError;
-    });
     throw error;
   }
 }
