@@ -1216,6 +1216,561 @@ test("M2B1 failure stops without retry, preserves verified partial evidence, and
   assert.equal(unsafe.writes.length, 0);
 });
 
+test("M2B1 Task 1 prevalidation retains only bounded count evidence for every exceeded limit", async (t) => {
+  const subject = await loadSubject();
+  const { root, planPath } = await fixtureRoot(t);
+  let elementTrapCalls = 0;
+  const hostileElement = (pathCanary) => new Proxy({
+    pathCanary,
+    credentialCanary: "sk-proj-SYNTHETIC_TEST_ONLY_abcdefghijklmnop",
+  }, {
+    get() {
+      elementTrapCalls += 1;
+      throw new Error("Task 1 array elements must not be read");
+    },
+    ownKeys() {
+      elementTrapCalls += 1;
+      throw new Error("Task 1 array elements must not be reflected");
+    },
+  });
+  const cases = [
+    {
+      label: "events only",
+      eventsCount: 513,
+      mcpAfterCount: 0,
+      expected: {
+        eventsCount: 513,
+        eventsLimit: 512,
+        eventsOverLimit: true,
+        mcpAfterCount: 0,
+        mcpAfterLimit: 128,
+        mcpAfterOverLimit: false,
+        rawPayloadRetained: false,
+      },
+    },
+    {
+      label: "MCP only",
+      eventsCount: 2,
+      mcpAfterCount: 129,
+      expected: {
+        eventsCount: 2,
+        eventsLimit: 512,
+        eventsOverLimit: false,
+        mcpAfterCount: 129,
+        mcpAfterLimit: 128,
+        mcpAfterOverLimit: true,
+        rawPayloadRetained: false,
+      },
+    },
+    {
+      label: "both",
+      eventsCount: 513,
+      mcpAfterCount: 129,
+      expected: {
+        eventsCount: 513,
+        eventsLimit: 512,
+        eventsOverLimit: true,
+        mcpAfterCount: 129,
+        mcpAfterLimit: 128,
+        mcpAfterOverLimit: true,
+        rawPayloadRetained: false,
+      },
+    },
+  ];
+  for (const current of cases) {
+    const dependencies = successfulDependencies();
+    const successfulRunTurn = dependencies.runTurn;
+    dependencies.runTurn = async (options) => {
+      const result = await successfulRunTurn(options);
+      result.events = Array.from({ length: current.eventsCount }, (_, index) => index === 0
+        ? hostileElement("C:\\Users\\private\\task1-events.log")
+        : { method: index === current.eventsCount - 1 ? "turn/completed" : "item/completed" });
+      result.mcpAfter = Array.from({ length: current.mcpAfterCount }, (_, index) => index === 0
+        ? hostileElement("C:\\Users\\private\\task1-mcp.json")
+        : { name: `server-${index}` });
+      return result;
+    };
+
+    await assert.rejects(
+      subject.runDesignVisualM2B1({ repositoryRoot: root, planPath, ...dependencies }),
+      /Task 1 evidence is incomplete, blocked, or unbounded/,
+      current.label,
+    );
+    const blocked = dependencies.writes.find(({ file }) => file.endsWith("blocked.json")).value;
+    assert.deepEqual(blocked.task1Prevalidation, current.expected, current.label);
+    assert.deepEqual(Object.keys(blocked.task1Prevalidation).sort(), [
+      "eventsCount",
+      "eventsLimit",
+      "eventsOverLimit",
+      "mcpAfterCount",
+      "mcpAfterLimit",
+      "mcpAfterOverLimit",
+      "rawPayloadRetained",
+    ]);
+    const serialized = JSON.stringify(blocked);
+    assert.equal(serialized.includes("SYNTHETIC_TEST_ONLY"), false, current.label);
+    assert.equal(serialized.includes("private"), false, current.label);
+    assert.deepEqual(blocked.partialEvidence, {}, current.label);
+  }
+  assert.equal(elementTrapCalls, 0);
+});
+
+test("M2B1 Task 1 prevalidation keeps the existing 512-event and 128-MCP limits inclusive", async (t) => {
+  const subject = await loadSubject();
+  const { root, planPath } = await fixtureRoot(t);
+  const dependencies = successfulDependencies();
+  const successfulRunTurn = dependencies.runTurn;
+  dependencies.runTurn = async (options) => {
+    const result = await successfulRunTurn(options);
+    result.events = Array.from({ length: 512 }, (_, index) => ({
+      method: index === 511 ? "turn/completed" : "item/completed",
+      threadId: result.thread.id,
+      turnId: result.turn.id,
+      complete: true,
+      blockers: [],
+      ...(index === 511 ? { turn: { id: result.turn.id, status: "completed" } } : {}),
+    }));
+    result.mcpAfter = Array.from({ length: 128 }, (_, index) => ({
+      name: `server-${index}`,
+      status: "disabled",
+    }));
+    return result;
+  };
+
+  const summary = await subject.runDesignVisualM2B1({
+    repositoryRoot: root,
+    planPath,
+    ...dependencies,
+  });
+  assert.equal(summary.executionStatus, "completed");
+  assert.equal(dependencies.writes.some(({ file }) => file.endsWith("blocked.json")), false);
+});
+
+test("M2B1 Task 1 prevalidation omits a count summary for malformed or proxy arrays", async (t) => {
+  const subject = await loadSubject();
+  const { root, planPath } = await fixtureRoot(t);
+  const cases = [
+    { label: "non-array events", apply: (result) => { result.events = {}; } },
+    { label: "non-array MCP", apply: (result) => { result.mcpAfter = {}; } },
+    { label: "blocked result", apply: (result) => { result.blockers = ["synthetic-blocker"]; } },
+    { label: "missing output schema", apply: (result) => { result.outputSchema = null; } },
+  ];
+  let trapCalls = 0;
+  cases.push({
+    label: "proxy events",
+    apply: (result) => {
+      result.events = new Proxy([], {
+        get() {
+          trapCalls += 1;
+          throw new Error("proxy event trap must not run");
+        },
+      });
+    },
+  });
+  cases.push({
+    label: "proxy MCP",
+    apply: (result) => {
+      result.mcpAfter = new Proxy([], {
+        get() {
+          trapCalls += 1;
+          throw new Error("proxy MCP trap must not run");
+        },
+      });
+    },
+  });
+  cases.push({
+    label: "proxy blockers",
+    apply: (result) => {
+      result.blockers = new Proxy([], {
+        get() {
+          trapCalls += 1;
+          throw new Error("proxy blocker trap must not run");
+        },
+      });
+    },
+  });
+  cases.push({
+    label: "proxy output schema",
+    apply: (result) => {
+      result.outputSchema = new Proxy({}, {
+        get() {
+          trapCalls += 1;
+          throw new Error("proxy output schema trap must not run");
+        },
+      });
+    },
+  });
+  cases.push({
+    label: "accessor events",
+    apply: (result) => {
+      Object.defineProperty(result, "events", {
+        configurable: true,
+        enumerable: true,
+        get() {
+          trapCalls += 1;
+          throw new Error("event accessor must not run");
+        },
+      });
+    },
+  });
+  cases.push({
+    label: "accessor MCP",
+    apply: (result) => {
+      Object.defineProperty(result, "mcpAfter", {
+        configurable: true,
+        enumerable: true,
+        get() {
+          trapCalls += 1;
+          throw new Error("MCP accessor must not run");
+        },
+      });
+    },
+  });
+  cases.push({
+    label: "accessor blockers",
+    apply: (result) => {
+      Object.defineProperty(result, "blockers", {
+        configurable: true,
+        enumerable: true,
+        get() {
+          trapCalls += 1;
+          throw new Error("blocker accessor must not run");
+        },
+      });
+    },
+  });
+  cases.push({
+    label: "accessor output schema",
+    apply: (result) => {
+      Object.defineProperty(result, "outputSchema", {
+        configurable: true,
+        enumerable: true,
+        get() {
+          trapCalls += 1;
+          throw new Error("output schema accessor must not run");
+        },
+      });
+    },
+  });
+  for (const [label, key, value] of [
+    ["revoked events", "events", []],
+    ["revoked MCP", "mcpAfter", []],
+    ["revoked blockers", "blockers", []],
+    ["revoked output schema", "outputSchema", {}],
+  ]) {
+    cases.push({
+      label,
+      apply: (result) => {
+        const revocable = Proxy.revocable(value, {});
+        revocable.revoke();
+        result[key] = revocable.proxy;
+      },
+    });
+  }
+
+  for (const current of cases) {
+    const dependencies = successfulDependencies();
+    const successfulRunTurn = dependencies.runTurn;
+    dependencies.runTurn = async (options) => {
+      const result = await successfulRunTurn(options);
+      return current.apply(result) ?? result;
+    };
+    await assert.rejects(
+      subject.runDesignVisualM2B1({ repositoryRoot: root, planPath, ...dependencies }),
+      /Task 1 evidence is incomplete, blocked, or unbounded/,
+      current.label,
+    );
+    const blocked = dependencies.writes.find(({ file }) => file.endsWith("blocked.json")).value;
+    assert.equal(Object.hasOwn(blocked, "task1Prevalidation"), false, current.label);
+  }
+  assert.equal(trapCalls, 0);
+});
+
+test("M2B1 prevalidation seams fail closed without invoking result identity or shutdown traps", async (t) => {
+  const subject = await loadSubject();
+  const { root, planPath } = await fixtureRoot(t);
+  let trapCalls = 0;
+  const trappingProxy = (target, label) => new Proxy(target, {
+    get(source, key, receiver) {
+      if (key === "then") return undefined;
+      trapCalls += 1;
+      throw new Error(`${label} proxy trap must not run`);
+    },
+  });
+  const accessor = (result, key, label) => {
+    Object.defineProperty(result, key, {
+      configurable: true,
+      enumerable: true,
+      get() {
+        trapCalls += 1;
+        throw new Error(`${label} accessor must not run`);
+      },
+    });
+    return result;
+  };
+  const cases = [
+    {
+      label: "top-level result proxy",
+      expected: /session shutdown is unverified/,
+      mutate: (result) => trappingProxy(result, "result"),
+    },
+    {
+      label: "app server accessor",
+      expected: /session shutdown is unverified/,
+      mutate: (result) => accessor(result, "appServer", "app server"),
+    },
+    {
+      label: "app server proxy",
+      expected: /session shutdown is unverified/,
+      mutate: (result) => {
+        result.appServer = trappingProxy(result.appServer, "app server");
+        return result;
+      },
+    },
+    {
+      label: "exit-code accessor",
+      expected: /session shutdown is unverified/,
+      mutate: (result) => {
+        accessor(result.appServer, "processExitCode", "exit code");
+        return result;
+      },
+    },
+    {
+      label: "thread accessor",
+      expected: /thread identity is missing/,
+      mutate: (result) => accessor(result, "thread", "thread"),
+    },
+    {
+      label: "thread proxy",
+      expected: /thread identity is missing/,
+      mutate: (result) => {
+        result.thread = trappingProxy(result.thread, "thread");
+        return result;
+      },
+    },
+    {
+      label: "turn accessor",
+      expected: /turn identity is missing/,
+      mutate: (result) => accessor(result, "turn", "turn"),
+    },
+    {
+      label: "turn proxy",
+      expected: /turn identity is missing/,
+      mutate: (result) => {
+        result.turn = trappingProxy(result.turn, "turn");
+        return result;
+      },
+    },
+  ];
+
+  for (const current of cases) {
+    const dependencies = successfulDependencies();
+    const successfulRunTurn = dependencies.runTurn;
+    dependencies.runTurn = async (options) => {
+      const result = await successfulRunTurn(options);
+      return current.mutate(result);
+    };
+    await assert.rejects(
+      subject.runDesignVisualM2B1({ repositoryRoot: root, planPath, ...dependencies }),
+      current.expected,
+      current.label,
+    );
+  }
+  assert.equal(trapCalls, 0);
+});
+
+test("M2B1 accepts the collector session getter and process pid identity shape", async (t) => {
+  const subject = await loadSubject();
+  const { root, planPath } = await fixtureRoot(t);
+  const dependencies = successfulDependencies();
+  let exitCodeReads = 0;
+  dependencies.createSession = async () => {
+    let processExitCode = null;
+    const session = {
+      process: { pid: 41001 + dependencies.sessions.length },
+      closed: false,
+      get processExitCode() {
+        exitCodeReads += 1;
+        return processExitCode;
+      },
+      set processExitCode(value) {
+        processExitCode = value;
+      },
+      setProcessExitCode(value) {
+        processExitCode = value;
+      },
+    };
+    dependencies.sessions.push(session);
+    return session;
+  };
+  const successfulRunTurn = dependencies.runTurn;
+  dependencies.runTurn = async (options) => {
+    const result = await successfulRunTurn(options);
+    options.session.setProcessExitCode(0);
+    return result;
+  };
+
+  const summary = await subject.runDesignVisualM2B1({
+    repositoryRoot: root,
+    planPath,
+    ...dependencies,
+  });
+  assert.equal(summary.executionStatus, "completed");
+  assert.deepEqual(summary.summary.evaluatorIdentities.map(({ sessionId }) => sessionId), [
+    "41001",
+    "41002",
+    "41003",
+  ]);
+  assert.equal(exitCodeReads > 0, true);
+});
+
+test("M2B1 Task 1 prevalidation attaches its bounded summary non-enumerably", async (t) => {
+  const subject = await loadSubject();
+  const { root, planPath } = await fixtureRoot(t);
+  const dependencies = successfulDependencies();
+  const successfulRunTurn = dependencies.runTurn;
+  dependencies.runTurn = async (options) => {
+    const result = await successfulRunTurn(options);
+    result.events = Array.from({ length: 513 }, () => ({
+      pathCanary: "C:\\Users\\private\\must-not-persist.log",
+    }));
+    return result;
+  };
+
+  let failure;
+  try {
+    await subject.runDesignVisualM2B1({ repositoryRoot: root, planPath, ...dependencies });
+  } catch (error) {
+    failure = error;
+  }
+  assert.notEqual(failure, undefined);
+  assert.deepEqual(Object.getOwnPropertyDescriptor(failure, "task1Prevalidation"), {
+    configurable: true,
+    enumerable: false,
+    writable: true,
+    value: {
+      eventsCount: 513,
+      eventsLimit: 512,
+      eventsOverLimit: true,
+      mcpAfterCount: 0,
+      mcpAfterLimit: 128,
+      mcpAfterOverLimit: false,
+      rawPayloadRetained: false,
+    },
+  });
+  assert.equal(Object.keys(failure).includes("task1Prevalidation"), false);
+});
+
+test("M2B1 blocked writer copies only an exact Task 1 prevalidation projection", async (t) => {
+  const subject = await loadSubject();
+  const { root, planPath } = await fixtureRoot(t);
+  const projectionCanary = "writer-projection-canary-must-not-persist";
+  let trapCalls = 0;
+  const exact = {
+    eventsCount: 513,
+    eventsLimit: 512,
+    eventsOverLimit: true,
+    mcpAfterCount: 0,
+    mcpAfterLimit: 128,
+    mcpAfterOverLimit: false,
+    rawPayloadRetained: false,
+  };
+  const cases = [
+    { label: "exact", mutate: (value) => value, retained: true },
+    { label: "missing", mutate: (value) => { delete value.rawPayloadRetained; return value; } },
+    { label: "extra", mutate: (value) => ({ ...value, rawPayload: "must-not-persist" }) },
+    { label: "wrong limit", mutate: (value) => ({ ...value, eventsLimit: 513 }) },
+    { label: "count boolean mismatch", mutate: (value) => ({ ...value, eventsOverLimit: false }) },
+    { label: "raw retained", mutate: (value) => ({ ...value, rawPayloadRetained: true }) },
+    {
+      label: "accessor own field",
+      mutate: (value) => {
+        Object.defineProperty(value, "eventsCount", {
+          configurable: true,
+          enumerable: true,
+          get() {
+            trapCalls += 1;
+            return projectionCanary;
+          },
+        });
+        return value;
+      },
+    },
+    {
+      label: "live proxy",
+      mutate: (value) => new Proxy({ ...value, projectionCanary }, {
+        get() {
+          trapCalls += 1;
+          throw new Error("live projection proxy get trap must not run");
+        },
+        ownKeys() {
+          trapCalls += 1;
+          throw new Error("live projection proxy ownKeys trap must not run");
+        },
+        getOwnPropertyDescriptor() {
+          trapCalls += 1;
+          throw new Error("live projection proxy descriptor trap must not run");
+        },
+      }),
+    },
+    {
+      label: "revoked proxy",
+      mutate: (value) => {
+        const revocable = Proxy.revocable({ ...value, projectionCanary }, {
+          get() {
+            trapCalls += 1;
+            throw new Error("revoked projection proxy get trap must not run");
+          },
+          ownKeys() {
+            trapCalls += 1;
+            throw new Error("revoked projection proxy ownKeys trap must not run");
+          },
+          getOwnPropertyDescriptor() {
+            trapCalls += 1;
+            throw new Error("revoked projection proxy descriptor trap must not run");
+          },
+        });
+        revocable.revoke();
+        return revocable.proxy;
+      },
+    },
+  ];
+  for (const current of cases) {
+    const dependencies = successfulDependencies();
+    dependencies.runTurn = async (options) => {
+      options.session.closed = true;
+      options.session.processExitCode = 0;
+      const failure = new Error(`projection ${current.label}`);
+      Object.defineProperty(failure, "task1Prevalidation", {
+        configurable: true,
+        enumerable: false,
+        writable: true,
+        value: current.mutate(structuredClone(exact)),
+      });
+      failure.freshEvaluatorEvidence = {
+        events: {},
+        appServer: { processExitCode: 0 },
+      };
+      throw failure;
+    };
+
+    await assert.rejects(
+      subject.runDesignVisualM2B1({ repositoryRoot: root, planPath, ...dependencies }),
+      new RegExp(`projection ${current.label}`),
+    );
+    const blocked = dependencies.writes.find(({ file }) => file.endsWith("blocked.json")).value;
+    assert.equal(blocked.partialEvidence.retention, "minimal", current.label);
+    if (current.retained) {
+      assert.deepEqual(blocked.task1Prevalidation, exact);
+    } else {
+      assert.equal(Object.hasOwn(blocked, "task1Prevalidation"), false, current.label);
+    }
+    assert.equal(JSON.stringify(blocked).includes("must-not-persist"), false, current.label);
+    assert.equal(JSON.stringify(blocked).includes(projectionCanary), false, current.label);
+  }
+  assert.equal(trapCalls, 0);
+});
+
 test("M2B1 oversized failure evidence keeps prioritized diagnostics instead of one budget marker", async (t) => {
   const subject = await loadSubject();
   const { root, planPath } = await fixtureRoot(t);
@@ -3223,8 +3778,12 @@ test("M2B1 actual v8 plan pins the attached-image support commit and collision-f
     ["merge-base", "--is-ancestor", v7.source.repositoryCommit, validated.source.repositoryCommit],
     { cwd: ROOT },
   );
-  for (const output of Object.values(validated.outputs)) {
+  for (const [key, output] of Object.entries(validated.outputs)) {
+    if (key === "blocked") continue;
     await assertPathMissing(path.join(ROOT, ...output.split("/")));
   }
+  const blocked = await readFile(path.join(ROOT, ...validated.outputs.blocked.split("/")));
+  assert.equal(blocked.byteLength, 2094);
+  assert.equal(digest(blocked), "9c0f132c7ed96234b320526a163bdc3dfa5b45383dff4f648183cfc1dfd14cec");
   assert.equal(v8Bytes.at(-1), 0x0a);
 });

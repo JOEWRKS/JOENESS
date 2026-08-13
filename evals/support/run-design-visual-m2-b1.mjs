@@ -75,6 +75,17 @@ const OUTPUT_KEYS = Object.freeze([
   "summary",
   "blocked",
 ]);
+const TASK1_EVENT_LIMIT = 512;
+const TASK1_MCP_AFTER_LIMIT = 128;
+const TASK1_PREVALIDATION_KEYS = Object.freeze([
+  "eventsCount",
+  "eventsLimit",
+  "eventsOverLimit",
+  "mcpAfterCount",
+  "mcpAfterLimit",
+  "mcpAfterOverLimit",
+  "rawPayloadRetained",
+]);
 const EXPECTED_IMAGE_PATHS = Object.freeze({
   approvedSource: "evals/skill-contracts/fixtures/visual-m2-v1/blind/ff71c6e9919567b251659f00fda0a224a5f91fab24ed36042eb070310d739110.png",
   "sample-a": "evals/skill-contracts/fixtures/visual-m2-v1/blind/0684e6867856745762217a70862b81fee8ac70787b5ab57ea13ffa58a870db62.png",
@@ -987,7 +998,18 @@ function buildVisualInput(preflight, candidate, designRaw, evaluatorRoot) {
 }
 
 function assertTurnShutdown(result, session) {
-  if (result?.appServer?.processExitCode !== 0 || session?.processExitCode !== 0) {
+  const appServer = safeDiagnosticOwnData(result, "appServer");
+  const appServerExitCode = safeDiagnosticOwnData(
+    appServer.found ? appServer.value : null,
+    "processExitCode",
+  );
+  let sessionExitCode;
+  try {
+    sessionExitCode = session?.processExitCode;
+  } catch {
+    sessionExitCode = undefined;
+  }
+  if (appServerExitCode.value !== 0 || sessionExitCode !== 0) {
     throw new Error("M2B1 evaluator session shutdown is unverified");
   }
 }
@@ -2258,12 +2280,23 @@ function scalarIdentity(value, label) {
 }
 
 function buildEvaluatorIdentity(phase, staged, session, result) {
+  const stagedRunId = safeDiagnosticOwnData(staged, "runId");
+  const sessionId = safeDiagnosticOwnData(session, "id");
+  const sessionProcess = safeDiagnosticOwnData(session, "process");
+  const sessionProcessId = safeDiagnosticOwnData(
+    sessionProcess.found ? sessionProcess.value : null,
+    "pid",
+  );
+  const thread = safeDiagnosticOwnData(result, "thread");
+  const turn = safeDiagnosticOwnData(result, "turn");
+  const threadId = safeDiagnosticOwnData(thread.found ? thread.value : null, "id");
+  const turnId = safeDiagnosticOwnData(turn.found ? turn.value : null, "id");
   return {
     phase,
-    runId: scalarIdentity(staged.runId, "run"),
-    sessionId: scalarIdentity(session?.id ?? session?.process?.pid, "session"),
-    threadId: scalarIdentity(result?.thread?.id, "thread"),
-    turnId: scalarIdentity(result?.turn?.id, "turn"),
+    runId: scalarIdentity(stagedRunId.value, "run"),
+    sessionId: scalarIdentity(sessionId.value ?? sessionProcessId.value, "session"),
+    threadId: scalarIdentity(threadId.value, "thread"),
+    turnId: scalarIdentity(turnId.value, "turn"),
   };
 }
 
@@ -2488,17 +2521,99 @@ function retainToolEvidence(toolEvidence) {
   })), "tool", 32 * 1024);
 }
 
-function retainTask1Evidence(result, expectedInput) {
+function task1PrevalidationEvidence(eventsCount, mcpAfterCount) {
+  if (eventsCount === null || mcpAfterCount === null) return null;
+  const eventsOverLimit = eventsCount > TASK1_EVENT_LIMIT;
+  const mcpAfterOverLimit = mcpAfterCount > TASK1_MCP_AFTER_LIMIT;
+  if (!eventsOverLimit && !mcpAfterOverLimit) return null;
+  return {
+    eventsCount,
+    eventsLimit: TASK1_EVENT_LIMIT,
+    eventsOverLimit,
+    mcpAfterCount,
+    mcpAfterLimit: TASK1_MCP_AFTER_LIMIT,
+    mcpAfterOverLimit,
+    rawPayloadRetained: false,
+  };
+}
+
+function attachTask1Prevalidation(error, evidence) {
+  if (evidence === null) return error;
+  Object.defineProperty(error, "task1Prevalidation", {
+    configurable: true,
+    enumerable: false,
+    writable: true,
+    value: evidence,
+  });
+  return error;
+}
+
+function retainTask1Prevalidation(value) {
+  if (diagnosticProxy(value) || !isObject(value)) return null;
+  let keys;
+  try {
+    keys = Reflect.ownKeys(value);
+  } catch {
+    return null;
+  }
   if (
-    !Array.isArray(result.events) ||
-    result.events.length > 512 ||
-    !Array.isArray(result.mcpAfter) ||
-    result.mcpAfter.length > 128 ||
-    !Array.isArray(result.blockers) ||
-    result.blockers.length !== 0 ||
-    !isObject(result.outputSchema)
+    keys.length !== TASK1_PREVALIDATION_KEYS.length ||
+    keys.some((key) => typeof key !== "string" || !TASK1_PREVALIDATION_KEYS.includes(key))
   ) {
-    throw new Error("M2B1 Task 1 evidence is incomplete, blocked, or unbounded");
+    return null;
+  }
+  const retained = Object.fromEntries(TASK1_PREVALIDATION_KEYS.map((key) => {
+    const property = safeDiagnosticOwnData(value, key);
+    return [key, property.found ? property.value : undefined];
+  }));
+  if (
+    !Number.isSafeInteger(retained.eventsCount) ||
+    retained.eventsCount < 0 ||
+    retained.eventsLimit !== TASK1_EVENT_LIMIT ||
+    retained.eventsOverLimit !== (retained.eventsCount > TASK1_EVENT_LIMIT) ||
+    !Number.isSafeInteger(retained.mcpAfterCount) ||
+    retained.mcpAfterCount < 0 ||
+    retained.mcpAfterLimit !== TASK1_MCP_AFTER_LIMIT ||
+    retained.mcpAfterOverLimit !== (retained.mcpAfterCount > TASK1_MCP_AFTER_LIMIT) ||
+    (!retained.eventsOverLimit && !retained.mcpAfterOverLimit) ||
+    retained.rawPayloadRetained !== false
+  ) {
+    return null;
+  }
+  return {
+    eventsCount: retained.eventsCount,
+    eventsLimit: TASK1_EVENT_LIMIT,
+    eventsOverLimit: retained.eventsOverLimit,
+    mcpAfterCount: retained.mcpAfterCount,
+    mcpAfterLimit: TASK1_MCP_AFTER_LIMIT,
+    mcpAfterOverLimit: retained.mcpAfterOverLimit,
+    rawPayloadRetained: false,
+  };
+}
+
+function retainTask1Evidence(result, expectedInput) {
+  const events = safeDiagnosticOwnData(result, "events");
+  const mcpAfter = safeDiagnosticOwnData(result, "mcpAfter");
+  const blockers = safeDiagnosticOwnData(result, "blockers");
+  const outputSchema = safeDiagnosticOwnData(result, "outputSchema");
+  const eventsCount = diagnosticArrayLength(events.found ? events.value : null);
+  const mcpAfterCount = diagnosticArrayLength(mcpAfter.found ? mcpAfter.value : null);
+  const blockerCount = diagnosticArrayLength(blockers.found ? blockers.value : null);
+  if (
+    eventsCount === null ||
+    eventsCount > TASK1_EVENT_LIMIT ||
+    mcpAfterCount === null ||
+    mcpAfterCount > TASK1_MCP_AFTER_LIMIT ||
+    blockerCount === null ||
+    blockerCount !== 0 ||
+    !outputSchema.found ||
+    diagnosticProxy(outputSchema.value) ||
+    !isObject(outputSchema.value)
+  ) {
+    throw attachTask1Prevalidation(
+      new Error("M2B1 Task 1 evidence is incomplete, blocked, or unbounded"),
+      task1PrevalidationEvidence(eventsCount, mcpAfterCount),
+    );
   }
   assertSuccessfulSecurityEvidence(result, expectedInput);
   try {
@@ -2506,16 +2621,16 @@ function retainTask1Evidence(result, expectedInput) {
   } catch (error) {
     throw attachPostValidationFreshEvidence(error, result, expectedInput);
   }
-  const eventRecords = result.events.map(retainLifecycleEvent);
-  const mcpRecords = safeBoundedClone(result.mcpAfter, "MCP after", 32 * 1024);
+  const eventRecords = events.value.map(retainLifecycleEvent);
+  const mcpRecords = safeBoundedClone(mcpAfter.value, "MCP after", 32 * 1024);
   return safeBoundedClone({
     threadStart: retainThreadStartEvidence(result.threadStart),
     thread: retainThreadEvidence(result.thread),
     turn: retainTurnEvidence(result.turn),
     input: retainInputEvidence(result.input),
     outputSchema: {
-      byteLength: result.outputSchema.byteLength,
-      sha256: result.outputSchema.sha256,
+      byteLength: outputSchema.value.byteLength,
+      sha256: outputSchema.value.sha256,
     },
     events: {
       records: eventRecords,
@@ -2825,6 +2940,10 @@ export async function runDesignVisualM2B1({
       safeShutdown = false;
     }
     if (safeShutdown && error?.code !== ARTIFACT_PATH_LEAK_CODE) {
+      const task1PrevalidationProperty = safeDiagnosticOwnData(error, "task1Prevalidation");
+      const task1Prevalidation = task1PrevalidationProperty.found
+        ? retainTask1Prevalidation(task1PrevalidationProperty.value)
+        : null;
       const blocked = {
         schemaVersion: 1,
         id: `design-visual-m2-b1-v${preflight.plan.schemaVersion}-blocked`,
@@ -2836,6 +2955,7 @@ export async function runDesignVisualM2B1({
           ? { executionSource: clone(preflight.executionSource) }
           : {}),
         partialEvidence: retainPartialEvidence(error?.freshEvaluatorEvidence),
+        ...(task1Prevalidation === null ? {} : { task1Prevalidation }),
         cleanupEvidence: clone(cleanupEvidence ?? {
           phase: "post-evaluator-cleanup",
           finishAttempts: finishAttempted ? 1 : 0,
