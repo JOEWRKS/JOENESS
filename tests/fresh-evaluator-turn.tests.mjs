@@ -108,6 +108,8 @@ function createSession({
   onThreadStart = null,
   releaseToolThrows = false,
   unsubscribeThrows = false,
+  unsubscribeRejects = false,
+  onUnsubscribe = null,
   remoteSnapshotThrowsOnRead = null,
   runtimeError = null,
   mcpAfterError = null,
@@ -117,6 +119,9 @@ function createSession({
   onBindLocalImageDiagnostics = null,
   onTurnCompleted = null,
   onClose = null,
+  onBeforeThreadStartResponse = null,
+  onBeforeAgentMessage = null,
+  onAfterAgentMessage = null,
   turnStartError = null,
 } = {}) {
   const listeners = new Set();
@@ -206,6 +211,7 @@ function createSession({
             method: "thread/started",
             params: { thread: { id: "fresh-thread" } },
           });
+          await onBeforeThreadStartResponse?.({ emit, params });
           return {
             thread: {
               id: "fresh-thread",
@@ -302,6 +308,7 @@ function createSession({
               },
             });
           }
+          await onBeforeAgentMessage?.({ emit, params, turnId: "fresh-turn" });
           emit({
             method: "item/completed",
             params: {
@@ -314,6 +321,7 @@ function createSession({
               },
             },
           });
+          await onAfterAgentMessage?.({ emit, params, turnId: "fresh-turn" });
           if (!omitTerminal) {
             const terminal = {
               method: "turn/completed",
@@ -325,7 +333,7 @@ function createSession({
             emit(terminal);
             if (duplicateTerminal) emit(terminal);
           }
-          await onTurnCompleted?.({ params, imageBindings });
+          await onTurnCompleted?.({ emit, params, imageBindings });
           return { turn: { id: "fresh-turn", status: "inProgress" } };
         }
         if (method === "turn/interrupt") return {};
@@ -340,8 +348,12 @@ function createSession({
       listeners.add(listener);
       return () => {
         listeners.delete(listener);
+        onUnsubscribe?.({ emit, listener });
         if (unsubscribeThrows) {
           throw new Error("fixture unsubscribe failed");
+        }
+        if (unsubscribeRejects) {
+          return Promise.reject(new Error("fixture async unsubscribe failed"));
         }
       };
     },
@@ -417,6 +429,587 @@ async function rejectedEvidence(promise) {
   });
   return observed.freshEvaluatorEvidence;
 }
+
+function emitAgentDelta(emit, {
+  threadId = "fresh-thread",
+  turnId = "fresh-turn",
+  itemId,
+  delta,
+  extraParams = {},
+}) {
+  emit({
+    method: "item/agentMessage/delta",
+    params: { threadId, turnId, itemId, delta, ...extraParams },
+  });
+}
+
+function emitAgentCompletion(emit, {
+  threadId = "fresh-thread",
+  turnId = "fresh-turn",
+  itemId,
+  text,
+}) {
+  emit({
+    method: "item/completed",
+    params: {
+      threadId,
+      turnId,
+      item: { id: itemId, type: "agentMessage", text },
+    },
+  });
+}
+
+test("fresh evaluator compacts 1952 safe agent-message fragments into one retained event", async (t) => {
+  const subject = await loadSubject();
+  assert.equal(typeof subject?.runFreshEvaluatorTurn, "function");
+  const root = await createRoot(t);
+  const prefix = '{"verdict":"PASS"}';
+  const finalText = `${prefix}${" ".repeat(1952 - prefix.length)}`;
+  const session = createSession({
+    finalText,
+    onBeforeAgentMessage: ({ emit, params, turnId }) => {
+      for (const delta of finalText) {
+        emit({
+          method: "item/agentMessage/delta",
+          params: {
+            threadId: params.threadId,
+            turnId,
+            itemId: "final-message",
+            delta,
+          },
+        });
+      }
+    },
+  });
+
+  const result = await subject.runFreshEvaluatorTurn({
+    session,
+    root,
+    input: [{ type: "text", text: "Return the JSON verdict." }],
+    outputSchema: outputSchema(),
+  });
+
+  assert.deepEqual(result.output, { verdict: "PASS" });
+  assert.equal(result.events.length, 5);
+  const delta = result.events.find(({ method }) => method === "item/agentMessage/delta");
+  assert.deepEqual(delta.messageDelta, {
+    itemId: "final-message",
+    count: 1952,
+    byteLength: 1952,
+    sha256: digest(finalText),
+  });
+  assert.deepEqual(result.eventCompaction, {
+    observedEventCount: 1956,
+    retainedEventCount: 5,
+    retainedEventLimit: 512,
+    retainedEventsOverLimit: false,
+    methodHistogram: {
+      eventCount: 1956,
+      entries: [
+        { method: "item/agentMessage/delta", count: 1952 },
+        { method: "item/completed", count: 1 },
+        { method: "thread/started", count: 1 },
+        { method: "turn/completed", count: 1 },
+        { method: "turn/started", count: 1 },
+      ],
+    },
+    itemTypeHistogram: {
+      eventCount: 1,
+      entries: [{ itemType: "agentMessage", count: 1 }],
+    },
+    agentMessageDelta: {
+      groupCount: 1,
+      fragmentCount: 1952,
+      byteLength: 1952,
+      fragmentLimit: 4096,
+      byteLimit: 1048576,
+      fragmentLimitExceeded: false,
+      byteLimitExceeded: false,
+      rawTextRetained: false,
+    },
+    rawPayloadRetained: false,
+  });
+  assert.equal(JSON.stringify(result.eventCompaction).includes(finalText), false);
+});
+
+test("fresh evaluator counts queued notifications once and retains compaction on failure", async (t) => {
+  const subject = await loadSubject();
+  const root = await createRoot(t);
+  const queuedSession = createSession({
+    onBeforeThreadStartResponse: ({ emit }) => {
+      const queuedNotification = {
+        method: "thread/status/changed",
+        params: {
+          threadId: "fresh-thread",
+          status: { type: "active", activeFlags: [] },
+        },
+      };
+      emit(queuedNotification);
+      queuedNotification.method = "error";
+      queuedNotification.params = {
+        threadId: "mutated-thread",
+        error: { message: "must not be observed" },
+      };
+    },
+  });
+  const queued = await subject.runFreshEvaluatorTurn({
+    session: queuedSession,
+    root,
+    input: [{ type: "text", text: "Return the JSON verdict." }],
+    outputSchema: outputSchema(),
+  });
+  assert.equal(queued.eventCompaction.observedEventCount, 5);
+  assert.equal(queued.eventCompaction.retainedEventCount, 5);
+  assert.equal(queued.eventCompaction.methodHistogram.eventCount, 5);
+  assert.equal(
+    queued.eventCompaction.methodHistogram.entries.reduce((sum, entry) => sum + entry.count, 0),
+    5,
+  );
+  assert.deepEqual(
+    queued.eventCompaction.methodHistogram.entries.find(
+      ({ method }) => method === "thread/status/changed",
+    ),
+    { method: "thread/status/changed", count: 1 },
+  );
+  assert.equal(
+    queued.eventCompaction.methodHistogram.entries.some(({ method }) => method === "error"),
+    false,
+  );
+
+  const failed = await rejectedEvidence(subject.runFreshEvaluatorTurn({
+    session: createSession({ runtimeError: { message: "fixture runtime error" } }),
+    root,
+    input: [{ type: "text", text: "Return the JSON verdict." }],
+    outputSchema: outputSchema(),
+  }));
+  assert.equal(failed.eventCompaction.observedEventCount, 5);
+  assert.equal(failed.eventCompaction.retainedEventCount, 5);
+  assert.equal(failed.eventCompaction.rawPayloadRetained, false);
+  assert.deepEqual(
+    failed.eventCompaction.methodHistogram.entries.find(({ method }) => method === "error"),
+    { method: "error", count: 1 },
+  );
+});
+
+test("fresh evaluator compacts interleaved agent-message groups and closes each exact lifecycle", async (t) => {
+  const subject = await loadSubject();
+  const root = await createRoot(t);
+  const auxiliaryText = "αβ";
+  const finalText = '{"verdict":"PASS"}';
+  const result = await subject.runFreshEvaluatorTurn({
+    session: createSession({
+      finalText,
+      onBeforeAgentMessage: ({ emit, params, turnId }) => {
+        emitAgentDelta(emit, {
+          threadId: params.threadId,
+          turnId,
+          itemId: "aux-message",
+          delta: "α",
+        });
+        emitAgentDelta(emit, {
+          threadId: params.threadId,
+          turnId,
+          itemId: "final-message",
+          delta: '{"verdict":',
+        });
+        emitAgentDelta(emit, {
+          threadId: params.threadId,
+          turnId,
+          itemId: "aux-message",
+          delta: "β",
+        });
+        emitAgentDelta(emit, {
+          threadId: params.threadId,
+          turnId,
+          itemId: "final-message",
+          delta: '"PASS"}',
+        });
+        emitAgentCompletion(emit, {
+          threadId: params.threadId,
+          turnId,
+          itemId: "aux-message",
+          text: auxiliaryText,
+        });
+      },
+    }),
+    root,
+    input: [{ type: "text", text: "Return the JSON verdict." }],
+    outputSchema: outputSchema(),
+  });
+
+  const deltas = result.events.filter(({ method }) => method === "item/agentMessage/delta");
+  assert.deepEqual(deltas.map(({ messageDelta }) => messageDelta), [
+    {
+      itemId: "aux-message",
+      count: 2,
+      byteLength: Buffer.byteLength(auxiliaryText, "utf8"),
+      sha256: digest(auxiliaryText),
+    },
+    {
+      itemId: "final-message",
+      count: 2,
+      byteLength: Buffer.byteLength(finalText, "utf8"),
+      sha256: digest(finalText),
+    },
+  ]);
+  const auxiliaryCompletionIndex = result.events.findIndex(
+    ({ item }) => item?.id === "aux-message",
+  );
+  const finalCompletionIndex = result.events.findIndex(
+    ({ item }) => item?.id === "final-message",
+  );
+  assert.equal(result.events.indexOf(deltas[0]) < auxiliaryCompletionIndex, true);
+  assert.equal(result.events.indexOf(deltas[1]) < finalCompletionIndex, true);
+  assert.deepEqual(result.eventCompaction.agentMessageDelta, {
+    groupCount: 2,
+    fragmentCount: 4,
+    byteLength:
+      Buffer.byteLength(auxiliaryText, "utf8") + Buffer.byteLength(finalText, "utf8"),
+    fragmentLimit: 4096,
+    byteLimit: 1048576,
+    fragmentLimitExceeded: false,
+    byteLimitExceeded: false,
+    rawTextRetained: false,
+  });
+});
+
+test("fresh evaluator counts an empty agent-message fragment", async (t) => {
+  const subject = await loadSubject();
+  const root = await createRoot(t);
+  const finalText = '{"verdict":"PASS"}';
+  const result = await subject.runFreshEvaluatorTurn({
+    session: createSession({
+      finalText,
+      onBeforeAgentMessage: ({ emit, params, turnId }) => {
+        emitAgentDelta(emit, {
+          threadId: params.threadId,
+          turnId,
+          itemId: "final-message",
+          delta: "",
+        });
+        emitAgentDelta(emit, {
+          threadId: params.threadId,
+          turnId,
+          itemId: "final-message",
+          delta: finalText,
+        });
+      },
+    }),
+    root,
+    input: [{ type: "text", text: "Return the JSON verdict." }],
+    outputSchema: outputSchema(),
+  });
+
+  const delta = result.events.find(({ method }) => method === "item/agentMessage/delta");
+  assert.deepEqual(delta.messageDelta, {
+    itemId: "final-message",
+    count: 2,
+    byteLength: Buffer.byteLength(finalText, "utf8"),
+    sha256: digest(finalText),
+  });
+  assert.equal(result.eventCompaction.agentMessageDelta.fragmentCount, 2);
+});
+
+test("fresh evaluator rejects incomplete or inconsistent agent-message delta lifecycles", async (t) => {
+  const subject = await loadSubject();
+  const scenarios = [
+    ["missing completion", ({ emit, params, turnId }) => {
+      emitAgentDelta(emit, {
+        threadId: params.threadId,
+        turnId,
+        itemId: "aux-message",
+        delta: "alpha",
+      });
+    }],
+    ["completion before delta", ({ emit, params, turnId }) => {
+      emitAgentCompletion(emit, {
+        threadId: params.threadId,
+        turnId,
+        itemId: "aux-message",
+        text: "alpha",
+      });
+      emitAgentDelta(emit, {
+        threadId: params.threadId,
+        turnId,
+        itemId: "aux-message",
+        delta: "alpha",
+      });
+    }],
+    ["duplicate completion", ({ emit, params, turnId }) => {
+      emitAgentDelta(emit, {
+        threadId: params.threadId,
+        turnId,
+        itemId: "aux-message",
+        delta: "alpha",
+      });
+      for (let index = 0; index < 2; index += 1) {
+        emitAgentCompletion(emit, {
+          threadId: params.threadId,
+          turnId,
+          itemId: "aux-message",
+          text: "alpha",
+        });
+      }
+    }],
+    ["hash mismatch", ({ emit, params, turnId }) => {
+      emitAgentDelta(emit, {
+        threadId: params.threadId,
+        turnId,
+        itemId: "aux-message",
+        delta: "alpha",
+      });
+      emitAgentCompletion(emit, {
+        threadId: params.threadId,
+        turnId,
+        itemId: "aux-message",
+        text: "bravo",
+      });
+    }],
+  ];
+
+  for (const [name, onBeforeAgentMessage] of scenarios) {
+    await t.test(name, async (scenario) => {
+      const root = await createRoot(scenario);
+      const evidence = await rejectedEvidence(subject.runFreshEvaluatorTurn({
+        session: createSession({ onBeforeAgentMessage }),
+        root,
+        input: [{ type: "text", text: "Return the JSON verdict." }],
+        outputSchema: outputSchema(),
+      }));
+      assert.equal(
+        evidence.blockers.includes("message-delta-lifecycle-mismatch"),
+        true,
+      );
+      assert.equal(
+        evidence.events.some(({ blockers = [] }) =>
+          blockers.includes("message-delta-lifecycle-mismatch")),
+        true,
+      );
+    });
+  }
+});
+
+test("fresh evaluator detects a split credential without retaining raw delta text", async (t) => {
+  const subject = await loadSubject();
+  const root = await createRoot(t);
+  const fragments = ["ghp_SYNTHETIC_TEST_", "ONLY_abcdefghijklmnop"];
+  const canary = fragments.join("");
+  const evidence = await rejectedEvidence(subject.runFreshEvaluatorTurn({
+    session: createSession({
+      finalText: canary,
+      onBeforeAgentMessage: ({ emit, params, turnId }) => {
+        for (const [index, delta] of fragments.entries()) {
+          emitAgentDelta(emit, {
+            threadId: params.threadId,
+            turnId,
+            itemId: index === 0 ? "aux-message" : "final-message",
+            delta,
+          });
+        }
+      },
+    }),
+    root,
+    input: [{ type: "text", text: "Return the JSON verdict." }],
+    outputSchema: outputSchema(),
+  }));
+
+  const serialized = JSON.stringify(evidence);
+  assert.equal(evidence.blockers.includes("secret-shaped-output"), true);
+  assert.equal(evidence.eventCompaction.agentMessageDelta.fragmentCount, 2);
+  assert.equal(evidence.eventCompaction.agentMessageDelta.rawTextRetained, false);
+  assert.equal(serialized.includes(canary), false);
+  for (const fragment of fragments) assert.equal(serialized.includes(fragment), false);
+});
+
+test("fresh evaluator accepts 4096 delta fragments and rejects fragment 4097", async (t) => {
+  const subject = await loadSubject();
+  for (const [fragmentCount, shouldReject] of [[4096, false], [4097, true]]) {
+    await t.test(String(fragmentCount), async (scenario) => {
+      const root = await createRoot(scenario);
+      const prefix = '{"verdict":"PASS"}';
+      const finalText = `${prefix}${" ".repeat(fragmentCount - prefix.length)}`;
+      const session = createSession({
+        finalText,
+        unsubscribeRejects: shouldReject,
+        ...(shouldReject
+          ? {
+              onUnsubscribe: ({ listener }) => {
+                listener({
+                  method: "item/agentMessage/delta",
+                  params: {
+                    threadId: "fresh-thread",
+                    turnId: "fresh-turn",
+                    itemId: "late-message",
+                    delta: "REENTRANT_SECRET_CANARY",
+                  },
+                });
+              },
+            }
+          : {}),
+        onBeforeAgentMessage: ({ emit, params, turnId }) => {
+          for (const delta of finalText) {
+            emitAgentDelta(emit, {
+              threadId: params.threadId,
+              turnId,
+              itemId: "final-message",
+              delta,
+            });
+          }
+        },
+      });
+      const promise = subject.runFreshEvaluatorTurn({
+        session,
+        root,
+        input: [{ type: "text", text: "Return the JSON verdict." }],
+        outputSchema: outputSchema(),
+      });
+      const evidence = shouldReject ? await rejectedEvidence(promise) : await promise;
+      assert.equal(evidence.eventCompaction.agentMessageDelta.fragmentCount, fragmentCount);
+      if (shouldReject) {
+        assert.equal(evidence.eventCompaction.observedEventCount, 4099);
+        assert.equal(JSON.stringify(evidence).includes("REENTRANT_SECRET_CANARY"), false);
+      }
+      assert.equal(
+        evidence.eventCompaction.agentMessageDelta.fragmentLimitExceeded,
+        shouldReject,
+      );
+      assert.equal(
+        evidence.blockers.includes("message-delta-limit-exceeded"),
+        shouldReject,
+      );
+      assert.equal(
+        session.requests.some(({ method, params }) =>
+          method === "turn/interrupt" &&
+          params.threadId === "fresh-thread" &&
+          params.turnId === "fresh-turn"),
+        shouldReject,
+      );
+      assert.equal(
+        evidence.blockers.includes("cleanup-unsubscribe-failed"),
+        shouldReject,
+      );
+    });
+  }
+});
+
+test("fresh evaluator records the exact delta byte boundary and rejects byte 1048577", async (t) => {
+  const subject = await loadSubject();
+  for (const [byteLength, shouldExceed] of [[1048576, false], [1048577, true]]) {
+    await t.test(String(byteLength), async (scenario) => {
+      const root = await createRoot(scenario);
+      const finalText = "x".repeat(byteLength);
+      const evidence = await rejectedEvidence(subject.runFreshEvaluatorTurn({
+        session: createSession({
+          finalText,
+          onBeforeAgentMessage: ({ emit, params, turnId }) => {
+            emitAgentDelta(emit, {
+              threadId: params.threadId,
+              turnId,
+              itemId: "final-message",
+              delta: finalText,
+            });
+          },
+        }),
+        root,
+        input: [{ type: "text", text: "Return the JSON verdict." }],
+        outputSchema: outputSchema(),
+      }));
+      assert.equal(evidence.eventCompaction.agentMessageDelta.byteLength, byteLength);
+      assert.equal(
+        evidence.eventCompaction.agentMessageDelta.byteLimitExceeded,
+        shouldExceed,
+      );
+      assert.equal(
+        evidence.blockers.includes("message-delta-limit-exceeded"),
+        shouldExceed,
+      );
+      assert.equal(evidence.eventCompaction.agentMessageDelta.rawTextRetained, false);
+    });
+  }
+});
+
+test("fresh evaluator counts but does not coalesce foreign and post-terminal deltas", async (t) => {
+  const subject = await loadSubject();
+  const scenarios = [
+    ["foreign", {
+      onBeforeAgentMessage: ({ emit, turnId }) => {
+        emitAgentDelta(emit, {
+          threadId: "foreign-thread",
+          turnId,
+          itemId: "foreign-message",
+          delta: "foreign fragment",
+        });
+      },
+    }, "foreign-event"],
+    ["post terminal", {
+      onTurnCompleted: ({ emit, params }) => {
+        emitAgentDelta(emit, {
+          threadId: params.threadId,
+          turnId: "fresh-turn",
+          itemId: "late-message",
+          delta: "late fragment",
+        });
+      },
+    }, "post-terminal-event"],
+  ];
+
+  for (const [name, options, blocker] of scenarios) {
+    await t.test(name, async (scenario) => {
+      const root = await createRoot(scenario);
+      const evidence = await rejectedEvidence(subject.runFreshEvaluatorTurn({
+        session: createSession(options),
+        root,
+        input: [{ type: "text", text: "Return the JSON verdict." }],
+        outputSchema: outputSchema(),
+      }));
+      assert.equal(evidence.blockers.includes(blocker), true);
+      assert.equal(evidence.eventCompaction.agentMessageDelta.fragmentCount, 1);
+      assert.equal(
+        evidence.events.filter(({ method }) => method === "item/agentMessage/delta").length,
+        1,
+      );
+    });
+  }
+});
+
+test("fresh evaluator fails closed on malformed and hostile notifications without retaining canaries", async (t) => {
+  const subject = await loadSubject();
+  const root = await createRoot(t);
+  const canary = "HOSTILE_RAW_NOTIFICATION_CANARY";
+  let trapReads = 0;
+  const hostile = new Proxy({ canary }, {
+    get() {
+      trapReads += 1;
+      throw new Error("hostile notification trap");
+    },
+  });
+  const revoked = Proxy.revocable({ canary }, {});
+  revoked.revoke();
+  const evidence = await rejectedEvidence(subject.runFreshEvaluatorTurn({
+    session: createSession({
+      onBeforeAgentMessage: ({ emit, params, turnId }) => {
+        emitAgentDelta(emit, {
+          threadId: params.threadId,
+          turnId,
+          itemId: "malformed-message",
+          delta: "malformed",
+          extraParams: { unexpected: true },
+        });
+        emit(hostile);
+        emit(revoked.proxy);
+      },
+    }),
+    root,
+    input: [{ type: "text", text: "Return the JSON verdict." }],
+    outputSchema: outputSchema(),
+  }));
+
+  assert.equal(trapReads, 1);
+  assert.equal(evidence.blockers.includes("runtime-drift"), true);
+  assert.equal(evidence.eventCompaction.observedEventCount, 7);
+  assert.equal(evidence.eventCompaction.agentMessageDelta.fragmentCount, 0);
+  assert.equal(JSON.stringify(evidence).includes(canary), false);
+});
 
 test("fresh evaluator binds private image paths but persists only safe input and lifecycle evidence", async (t) => {
   const subject = await loadSubject();
@@ -1810,6 +2403,7 @@ test("fresh evaluator attaches partial evidence when cleanup callbacks or snapsh
   const scenarios = [
     ["dynamic-tool release", { runDynamicTool: true, releaseToolThrows: true }],
     ["unsubscribe", { unsubscribeThrows: true }],
+    ["async unsubscribe", { unsubscribeRejects: true }],
     ["snapshot getter", { remoteSnapshotThrowsOnRead: 2 }],
   ];
   for (const [name, options] of scenarios) {

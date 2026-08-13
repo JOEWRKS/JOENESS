@@ -24,9 +24,107 @@ const FORBIDDEN_ITEM_TYPES = new Set([
   "webSearch",
   "collabAgentToolCall",
 ]);
+const RETAINED_EVENT_LIMIT = 512;
+const AGENT_MESSAGE_DELTA_FRAGMENT_LIMIT = 4096;
+const AGENT_MESSAGE_DELTA_BYTE_LIMIT = 1024 * 1024;
+const EVENT_METHOD_BUCKETS = Object.freeze([
+  "account/rateLimits/updated",
+  "item/agentMessage/delta",
+  "item/commandExecution/outputDelta",
+  "item/completed",
+  "item/plan/delta",
+  "item/reasoning/summaryPartAdded",
+  "item/reasoning/summaryTextDelta",
+  "item/reasoning/textDelta",
+  "item/started",
+  "remoteControl/status/changed",
+  "serverRequest/resolved",
+  "thread/started",
+  "thread/status/changed",
+  "thread/tokenUsage/updated",
+  "turn/completed",
+  "turn/plan/updated",
+  "turn/started",
+  "windowsSandbox/setupCompleted",
+  "configWarning",
+  "error",
+  "guardianWarning",
+  "hook/completed",
+  "hook/started",
+  "item/autoApprovalReview/completed",
+  "item/autoApprovalReview/started",
+  "item/fileChange/outputDelta",
+  "item/fileChange/patchUpdated",
+  "item/mcpToolCall/progress",
+  "mcpServer/oauthLogin/completed",
+  "mcpServer/startupStatus/updated",
+  "model/rerouted",
+  "thread/settings/updated",
+  "turn/diff/updated",
+  "warning",
+  "windows/worldWritableWarning",
+  "collector/serverRequest",
+  "other",
+]);
+const EVENT_METHOD_BUCKET_SET = new Set(EVENT_METHOD_BUCKETS.slice(0, -1));
+const ITEM_TYPE_BUCKETS = Object.freeze([
+  "reasoning",
+  "imageView",
+  "commandExecution",
+  "dynamicToolCall",
+  "agentMessage",
+  "userMessage",
+  "mcpToolCall",
+  "webSearch",
+  "collabAgentToolCall",
+  "fileChange",
+  "other",
+]);
+const ITEM_TYPE_BUCKET_SET = new Set(ITEM_TYPE_BUCKETS.slice(0, -1));
 
 function unique(values) {
   return [...new Set(values)];
+}
+
+function incrementCount(counts, key, amount = 1) {
+  const next = (counts.get(key) ?? 0) + amount;
+  if (!Number.isSafeInteger(next) || next < 0) {
+    throw new Error("fresh evaluator event aggregate exceeded a safe integer");
+  }
+  counts.set(key, next);
+}
+
+function fixedHistogram(counts, buckets, label) {
+  const entries = buckets.flatMap((bucket) => {
+    const count = counts.get(bucket) ?? 0;
+    return count === 0 ? [] : [{ [label]: bucket, count }];
+  });
+  return {
+    eventCount: entries.reduce((sum, entry) => sum + entry.count, 0),
+    entries,
+  };
+}
+
+function deltaSummary(itemId, count, text) {
+  return {
+    itemId,
+    count,
+    byteLength: Buffer.byteLength(text, "utf8"),
+    sha256: sha256(text),
+  };
+}
+
+function messageDeltaKey(event, itemId) {
+  return (
+    typeof event?.threadId === "string" &&
+    event.threadId &&
+    typeof event?.turnId === "string" &&
+    event.turnId &&
+    typeof itemId === "string" &&
+    itemId
+  )
+    ? stableStringify([event.threadId, event.turnId, itemId])
+    : null;
 }
 
 function exactKeys(value, keys) {
@@ -839,6 +937,7 @@ export async function runFreshEvaluatorTurn({
     input: null,
     outputSchema: null,
     events,
+    eventCompaction: null,
     toolEvidence,
     mcpAfter: null,
     blockers,
@@ -862,32 +961,268 @@ export async function runFreshEvaluatorTurn({
   let closeError = null;
   const cleanupErrors = [];
   let unsubscribe = null;
+  let unsubscribeCompletion = Promise.resolve();
+  let deltaInterruptPromise = null;
   let releaseTool = null;
   let initialInputSnapshot = null;
   let turnStartInputSnapshot = null;
   let expectedLocalImageCount = 0;
   let successfulImageViewsMalformed = false;
   let successfulImageViewsIncomplete = false;
+  let observedEventCount = 0;
+  const methodCounts = new Map();
+  const itemTypeCounts = new Map();
+  const deltaGroupKeys = new Set();
+  const deltaStates = new Map();
+  const deltaObservations = new WeakMap();
+  const completedAgentMessageCounts = new Map();
+  let deltaFragmentCount = 0;
+  let deltaByteLength = 0;
+  let deltaTranscript = "";
+  let deltaFragmentLimitExceeded = false;
+  let deltaByteLimitExceeded = false;
+  let deltaCollectionStopped = false;
   let resolveTerminal;
   const terminalPromise = new Promise((resolve) => {
     resolveTerminal = resolve;
   });
 
-  function record(notification, allowQueue = true) {
-    let event;
+  function stopNotificationCollection() {
+    const stop = unsubscribe;
+    unsubscribe = null;
+    if (typeof stop !== "function") return;
     try {
-      event =
-        normalizeDynamicToolEvent(notification, allowedToolNames) ??
-        normalizeEvent(notification);
-    } catch {
-      event = {
-        method: notification?.method,
-        threadId: notification?.params?.threadId,
-        turnId: notification?.params?.turnId,
-        complete: false,
-        blockers: ["runtime-drift"],
-      };
+      unsubscribeCompletion = Promise.resolve(stop()).catch((error) => {
+        cleanupErrors.push(error);
+        blockers.push("cleanup-unsubscribe-failed");
+      });
+    } catch (error) {
+      cleanupErrors.push(error);
+      blockers.push("cleanup-unsubscribe-failed");
     }
+  }
+
+  function ensureDeltaOverflowInterrupt() {
+    if (
+      !deltaCollectionStopped ||
+      deltaInterruptPromise !== null ||
+      threadId === null ||
+      turnId === null
+    ) {
+      return deltaInterruptPromise ?? Promise.resolve();
+    }
+    deltaInterruptPromise = session.client
+      .request("turn/interrupt", { threadId, turnId }, 10_000)
+      .catch((error) => {
+        cleanupErrors.push(error);
+        blockers.push("cleanup-turn-interrupt-failed");
+      });
+    return deltaInterruptPromise;
+  }
+
+  function countObservedEvent(event) {
+    observedEventCount += 1;
+    if (!Number.isSafeInteger(observedEventCount)) {
+      throw new Error("fresh evaluator observed event count exceeded a safe integer");
+    }
+    const method = typeof event.method === "string" && EVENT_METHOD_BUCKET_SET.has(event.method)
+      ? event.method
+      : "other";
+    incrementCount(methodCounts, method);
+    if (typeof event.item?.type === "string") {
+      const itemType = ITEM_TYPE_BUCKET_SET.has(event.item.type)
+        ? event.item.type
+        : "other";
+      incrementCount(itemTypeCounts, itemType);
+    }
+  }
+
+  function buildEventCompactionEvidence() {
+    const methodHistogram = fixedHistogram(
+      methodCounts,
+      EVENT_METHOD_BUCKETS,
+      "method",
+    );
+    const itemTypeHistogram = fixedHistogram(
+      itemTypeCounts,
+      ITEM_TYPE_BUCKETS,
+      "itemType",
+    );
+    if (methodHistogram.eventCount !== observedEventCount) {
+      throw new Error("fresh evaluator method histogram is inconsistent");
+    }
+    return {
+      observedEventCount,
+      retainedEventCount: events.length,
+      retainedEventLimit: RETAINED_EVENT_LIMIT,
+      retainedEventsOverLimit: events.length > RETAINED_EVENT_LIMIT,
+      methodHistogram,
+      itemTypeHistogram,
+      agentMessageDelta: {
+        groupCount: deltaGroupKeys.size,
+        fragmentCount: deltaFragmentCount,
+        byteLength: deltaByteLength,
+        fragmentLimit: AGENT_MESSAGE_DELTA_FRAGMENT_LIMIT,
+        byteLimit: AGENT_MESSAGE_DELTA_BYTE_LIMIT,
+        fragmentLimitExceeded: deltaFragmentLimitExceeded,
+        byteLimitExceeded: deltaByteLimitExceeded,
+        rawTextRetained: false,
+      },
+      rawPayloadRetained: false,
+    };
+  }
+
+  function addEventBlockers(event, reasons) {
+    if (reasons.length === 0) return;
+    const additions = reasons.filter((reason) => !event.blockers.includes(reason));
+    event.blockers = unique([...event.blockers, ...additions]);
+    event.complete = false;
+    blockers.push(...additions.filter((reason) => !blockers.includes(reason)));
+  }
+
+  function observeDelta(event) {
+    if (event.method !== "item/agentMessage/delta") return null;
+    const raw = exactKeys(event.messageDelta, ["itemId", "text"]) &&
+      typeof event.messageDelta.itemId === "string" &&
+      typeof event.messageDelta.text === "string";
+    const summarized = exactKeys(event.messageDelta, [
+      "itemId", "count", "byteLength", "sha256",
+    ]) &&
+      typeof event.messageDelta.itemId === "string" &&
+      event.messageDelta.itemId.length > 0 &&
+      Number.isSafeInteger(event.messageDelta.count) &&
+      event.messageDelta.count > 0 &&
+      Number.isSafeInteger(event.messageDelta.byteLength) &&
+      event.messageDelta.byteLength >= 0 &&
+      typeof event.messageDelta.sha256 === "string" &&
+      /^[0-9a-f]{64}$/u.test(event.messageDelta.sha256);
+    if (!raw && !summarized) return null;
+    const itemId = event.messageDelta.itemId;
+    const count = raw ? 1 : event.messageDelta.count;
+    const byteLength = raw
+      ? Buffer.byteLength(event.messageDelta.text, "utf8")
+      : event.messageDelta.byteLength;
+    deltaFragmentCount += count;
+    deltaByteLength += byteLength;
+    if (!Number.isSafeInteger(deltaFragmentCount) || !Number.isSafeInteger(deltaByteLength)) {
+      addEventBlockers(event, ["message-delta-limit-exceeded"]);
+      deltaFragmentLimitExceeded = true;
+      deltaByteLimitExceeded = true;
+    }
+    deltaFragmentLimitExceeded ||= deltaFragmentCount > AGENT_MESSAGE_DELTA_FRAGMENT_LIMIT;
+    deltaByteLimitExceeded ||= deltaByteLength > AGENT_MESSAGE_DELTA_BYTE_LIMIT;
+    const key = messageDeltaKey(event, itemId);
+    const overLimit = deltaFragmentLimitExceeded || deltaByteLimitExceeded;
+    if (key !== null) deltaGroupKeys.add(key);
+    if (!raw) {
+      if (overLimit) {
+        addEventBlockers(event, ["message-delta-limit-exceeded"]);
+      }
+      return { raw: false, itemId, count, byteLength, overLimit };
+    }
+
+    const text = event.messageDelta.text;
+    const aggregateBlockers = [];
+    if (overLimit) {
+      aggregateBlockers.push("message-delta-limit-exceeded");
+    }
+    if (aggregateBlockers.length === 0) {
+      const nextTranscript = deltaTranscript + text;
+      if (containsCredentialText(nextTranscript)) {
+        aggregateBlockers.push("secret-shaped-output");
+        deltaTranscript = "";
+      } else {
+        deltaTranscript = nextTranscript;
+      }
+    } else {
+      deltaTranscript = "";
+    }
+    event.messageDelta = deltaSummary(itemId, 1, text);
+    addEventBlockers(event, aggregateBlockers);
+    return { raw: true, itemId, text, count: 1, byteLength, overLimit };
+  }
+
+  function correlateDeltaCompletion(event) {
+    if (
+      event.method !== "item/completed" ||
+      event.item?.type !== "agentMessage" ||
+      typeof event.item.id !== "string"
+    ) return;
+    const key = messageDeltaKey(event, event.item.id);
+    if (key === null) return;
+    incrementCount(completedAgentMessageCounts, key);
+    const completionCount = completedAgentMessageCounts.get(key);
+    const state = deltaStates.get(key);
+    if (!state) return;
+    const finalText = event.item.text;
+    const matches =
+      completionCount === 1 &&
+      state.closed === false &&
+      finalText?.byteLength === state.event.messageDelta.byteLength &&
+      finalText?.sha256 === state.event.messageDelta.sha256;
+    if (!matches) {
+      addEventBlockers(event, ["message-delta-lifecycle-mismatch"]);
+      addEventBlockers(state.event, ["message-delta-lifecycle-mismatch"]);
+      return;
+    }
+    state.closed = true;
+    state.text = "";
+  }
+
+  function persistEvent(event) {
+    const delta = deltaObservations.get(event) ?? null;
+    const key = delta ? messageDeltaKey(event, delta.itemId) : null;
+    if (delta?.overLimit === true) {
+      const state = key === null ? null : deltaStates.get(key);
+      if (state) {
+        state.text = "";
+        addEventBlockers(state.event, ["message-delta-limit-exceeded"]);
+      }
+      events.push(event);
+      return;
+    }
+    const coalescible =
+      delta?.raw === true &&
+      key !== null &&
+      event.complete === true &&
+      event.postTerminal !== true &&
+      event.threadId === threadId &&
+      event.turnId === turnId;
+    if (!coalescible) {
+      events.push(event);
+      correlateDeltaCompletion(event);
+      return;
+    }
+    let state = deltaStates.get(key);
+    if (
+      state?.closed === true ||
+      (key !== null && (completedAgentMessageCounts.get(key) ?? 0) > 0)
+    ) {
+      addEventBlockers(event, ["message-delta-lifecycle-mismatch"]);
+      events.push(event);
+      return;
+    }
+    if (!state) {
+      events.push(event);
+      state = {
+        event,
+        text: "",
+        fragmentCount: 0,
+        closed: false,
+      };
+      deltaStates.set(key, state);
+    }
+    const nextText = state.text + delta.text;
+    state.fragmentCount += 1;
+    state.event.messageDelta = deltaSummary(
+      delta.itemId,
+      state.fragmentCount,
+      nextText,
+    );
+    state.text = nextText;
+  }
+
+  function processEvent(event, allowQueue = true) {
     if (event.item?.type === "userMessage" && Object.hasOwn(event.item, "text")) {
       event.item = {
         id: event.item.id,
@@ -901,7 +1236,7 @@ export async function runFreshEvaluatorTurn({
       ((scope.threadScoped && threadId === null) ||
         (scope.turnScoped && turnId === null))
     ) {
-      pending.push(notification);
+      pending.push(event);
       return;
     }
     if (
@@ -928,7 +1263,7 @@ export async function runFreshEvaluatorTurn({
     event.blockers = unique(event.blockers);
     event.complete = event.blockers.length === 0;
     blockers.push(...event.blockers);
-    events.push(event);
+    persistEvent(event);
     if (
       event.method === "turn/completed" &&
       event.threadId === threadId &&
@@ -945,9 +1280,39 @@ export async function runFreshEvaluatorTurn({
     }
   }
 
+  function record(notification, allowQueue = true) {
+    if (deltaCollectionStopped) return;
+    let event;
+    try {
+      event =
+        normalizeDynamicToolEvent(notification, allowedToolNames) ??
+        normalizeEvent(notification);
+    } catch {
+      event = {
+        method: null,
+        threadId: null,
+        turnId: null,
+        complete: false,
+        blockers: ["runtime-drift"],
+      };
+    }
+    countObservedEvent(event);
+    const delta = observeDelta(event);
+    if (delta !== null) {
+      deltaObservations.set(event, delta);
+      if (delta.overLimit === true && !deltaCollectionStopped) {
+        deltaCollectionStopped = true;
+        stopNotificationCollection();
+        void ensureDeltaOverflowInterrupt();
+        resolveTerminal({ fatal: true });
+      }
+    }
+    processEvent(event, allowQueue);
+  }
+
   function flushPending() {
     const queued = pending.splice(0);
-    for (const notification of queued) record(notification, true);
+    for (const event of queued) processEvent(event, false);
   }
 
   try {
@@ -994,6 +1359,10 @@ export async function runFreshEvaluatorTurn({
         ? session.notificationCursor
         : 0,
     });
+    if (deltaCollectionStopped && unsubscribe !== null) {
+      stopNotificationCollection();
+      await unsubscribeCompletion;
+    }
     const threadResponse = await session.client.request(
       "thread/start",
       threadStartRequest,
@@ -1149,6 +1518,13 @@ export async function runFreshEvaluatorTurn({
       blockers.push("dynamic-tool-lifecycle-mismatch");
     }
     flushPending();
+    if (deltaCollectionStopped) {
+      await Promise.all([
+        unsubscribeCompletion,
+        ensureDeltaOverflowInterrupt(),
+      ]);
+      throw new Error("fresh evaluator agent-message delta exceeded its bound");
+    }
 
     let timeout;
     const timedOut = new Promise((resolve) => {
@@ -1157,6 +1533,13 @@ export async function runFreshEvaluatorTurn({
     });
     const terminal = await Promise.race([terminalPromise, timedOut]);
     clearTimeout(timeout);
+    if (deltaCollectionStopped) {
+      await Promise.all([
+        unsubscribeCompletion,
+        ensureDeltaOverflowInterrupt(),
+      ]);
+      throw new Error("fresh evaluator agent-message delta exceeded its bound");
+    }
     if (terminal === null) {
       blockers.push("missing-terminal-event");
       await session.client
@@ -1203,6 +1586,8 @@ export async function runFreshEvaluatorTurn({
   } catch (error) {
     primaryError = error;
   } finally {
+    await unsubscribeCompletion;
+    await (deltaInterruptPromise ?? Promise.resolve());
     try {
       await session?.close?.();
     } catch (error) {
@@ -1283,6 +1668,22 @@ export async function runFreshEvaluatorTurn({
     };
   }
 
+  for (const [key, state] of deltaStates) {
+    if (
+      state.closed !== true ||
+      completedAgentMessageCounts.get(key) !== 1
+    ) {
+      addEventBlockers(state.event, ["message-delta-lifecycle-mismatch"]);
+    }
+    state.text = "";
+  }
+  deltaTranscript = "";
+  try {
+    evidence.eventCompaction = buildEventCompactionEvidence();
+  } catch (error) {
+    primaryError ??= error;
+    blockers.push("event-compaction-unverified");
+  }
   if (pending.length > 0) blockers.push("unresolved-notification");
   if (terminalCount === 0) blockers.push("missing-terminal-event");
   if (terminalCount > 1) blockers.push("duplicate-terminal-event");
