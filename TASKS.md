@@ -8,7 +8,7 @@
   - [x] **M1 Ticket E2E:** M1A 승인 + M1B 재작업·중단 + M1C 평가 입력 비오염 증거
   - [ ] **M2 Design→Visual:** M2A 정적 회귀, M2B1 fresh 인계, M2B2 exact 런타임을 모두 통과해야 완료
     - [ ] **M2A 큐레이션 정적 회귀:** skill-contract 전체 suite 12/12(그중 v14 신규 사례 4건); fresh 후보 평가는 미완료
-    - [ ] **M2B1 fresh 인계:** 차단 — 첫 Design 응답 작업은 끝났지만 실행 프로그램이 이미지를 지정된 위치에서 찾지 못했다는 오류를 남겨 결과가 거부됨; 어떤 경로였고 왜 찾지 못했는지는 아직 모름; sample-a·sample-b는 미실행
+    - [ ] **M2B1 fresh 인계:** 차단 — 여섯 번째 실행에서 첫 Design 응답은 돌아왔지만, 승인 이미지 입력 1개에 대응하는 처리 완료 기록이 정확히 1개여야 하는 조건을 만족하지 못해 결과를 거부함. 실제 기록 개수가 저장되지 않아 완료 기록이 0개였는지 여러 개였는지는 아직 모름; sample-a·sample-b는 미실행
     - [ ] **M2B2 exact 런타임:** MergeDrop 폰·태블릿과 RVR 수정본을 exact commit/build/install/state/capture로 결박
   - [ ] **M3 Core V7:** 쉬운 사용자 설명, clean·partial·blocked·workaround·반복 오류·복구 상황의 결과 우선 보고, 과거 누락·실패 인정 전 원본 작업 증거 대조, 조건부 다음 행동, 중단 규칙
   - [ ] **M4 암묵 라우팅·충돌:** Project·Ticket·Design·Visual Check·Spec·Handoff의 양성/음성 사례와 외부 플러그인 계약 충돌
@@ -23,7 +23,7 @@
   | M1B | 실패·변경 후보·재작업 상한 | 판정 무효, 1회 재작업, 반복 실패·무변경 중단, 증거 누락 분리 | 행동 경로 완료 — 증거 `f614c75`; 당시 provenance 한계는 M1C에서 보완 |
   | M1C | 평가 입력·상태 증거 | prompt manifest·allowlist·hash와 전후 generated/ignored snapshot | 완료 — [index](evals/experiments/joeness-ticket-m1c-e2e-v3-index.json), [summary](evals/experiments/joeness-ticket-m1c-e2e-v3.json), [raw](evals/experiments/joeness-ticket-m1c-e2e-v3-raw.json), 증거 `115cc52` |
   | M2A | 큐레이션 정적 회귀 | blind fixture·숨긴 ground truth·출처 우선 기준·변형/상태 구분·부분/전체 판정, 실패 이력 보존 | 부분 통과 — [skill-contract suite 12/12](evals/skill-contracts/design-visual-m2-v14-contract-test-v1.json), 그중 v14 신규 사례 4건; [전체 회귀 영수증](evals/skill-contracts/design-visual-m2-v14-partial-validation-v1.json). v7은 [semantic review](evals/skill-contracts/design-visual-m2-visual-v7-semantic-review.json)에서 오판이 확인돼 거절 |
-  | M2B1 | fresh Design→Visual 인계 | Design 입력·출력과 Visual 입력을 hash로 고정, 후보별 독립 fresh 평가자, 실제 관찰 | 차단 — 최신 [attempt index v7](evals/skill-contracts/design-visual-m2-attempt-index-v7.json), [v5 차단 기록](evals/skill-contracts/design-visual-m2-b1-v5-blocked.json), 이전 [index v6](evals/skill-contracts/design-visual-m2-attempt-index-v6.json). 첫 Design 응답 작업은 끝났지만 실행 프로그램이 “이미지를 지정된 위치에서 찾지 못했다”는 오류를 남겨 검증기가 결과를 통과시키지 않았다. 어떤 이미지 경로였는지는 가려져 있고, 파일이 없었는지·경로가 잘못됐는지·접근이 막혔는지는 아직 모른다. Design 결과는 승인·저장되지 않았고 sample-a·sample-b는 실행하지 않았다. |
+  | M2B1 | fresh Design→Visual 인계 | Design 입력·출력과 Visual 입력을 hash로 고정, 후보별 독립 fresh 평가자, 실제 관찰 | 차단 — 최신 [attempt index v8](evals/skill-contracts/design-visual-m2-attempt-index-v8.json), [v6 차단 기록](evals/skill-contracts/design-visual-m2-b1-v6-blocked.json), 이전 [index v7](evals/skill-contracts/design-visual-m2-attempt-index-v7.json). 여섯 번째 실행에서는 첫 Design 응답이 돌아왔지만, 승인 이미지 입력 1개에 대응하는 처리 완료 기록이 정확히 1개여야 하는 조건을 만족하지 못해 저장 전에 차단됐다. 실제 기록 개수가 남지 않아 완료 기록이 0개였는지 여러 개였는지는 구분할 수 없다. Design 결과는 승인·저장되지 않았고 sample-a·sample-b는 실행하지 않았다. |
   | M2B2 | exact 런타임 | 정확한 소스·빌드·설치본·대상 상태·직접 화면을 하나의 증거로 결박, 사용자 수락은 별도 판정 | 미검증 — MergeDrop은 수정본 미커밋/캡처 미결박, RVR은 수정 후 런타임 프레임 미보존 |
   | M3 | 쉬운 말과 증거에 근거한 결과 보고 | 사용자 경과·설명·의견·질문은 비전공자가 이해할 수 있게 쓰고 필요한 전문용어는 즉시 설명; 내부 용어·어색한 직역은 일상어로 교체; 이전 응답·도구 결과를 먼저 대조하고 근거 없는 누락·실패 인정은 거부; 필요한 경우에만 다음 행동 하나를 제시 | 부분 반영 — Core v7 문구와 정적 검사를 추가. 실제 응답 사례, RVR 허위 누락 회귀, 다음 행동 양성·음성 검증은 남음 |
 
@@ -33,7 +33,7 @@
   - 사용자 홈은 V7·스킬 5개이며 `$ticket`과 최신 Design/Visual 규칙이 아직 적용되지 않았다. M1~M3의 격리 검증 후 M4 직전에 exact `Check → Apply → Check`로 갱신하고 새 Codex 작업에서 라우팅을 검증한다.
   - M1은 Ticket 기능만 통과했다. `promotionPass=false`이므로 JOENESS 전체는 계속 `candidate/unvalidated`이며 다음 활성 단계는 M2다.
   - M2A의 정적 계약 통과는 새 fresh 판정이나 M2 전체를 승격하지 않는다. v7 오판은 삭제·재분류하지 않고 거절 이력으로 보존한다.
-  - M2B1 다섯 번째 실행에서는 진단 내용을 안전하게 남기는 데 성공했고 “이미지를 지정된 위치에서 찾지 못했다”는 직접 오류를 확인했다. 다만 경로 원문이 가려져 있어 대상 경로와 실패 이유는 아직 모른다. 다음에는 절대경로를 노출하지 않으면서 전달한 이미지 경로의 식별값·존재·읽기 가능 상태와 실행 프로그램이 해석한 경로를 대조한다. 기존 v5 명령은 다시 실행하지 않는다.
+  - M2B1 여섯 번째 실행에서는 이미지 파일의 존재·읽기 가능 여부와 실행 전후 동일성 검사는 통과했지만, 이미지 처리 완료 기록 개수 검사에서 멈췄다. 현재 차단 기록에는 실제 개수가 없어 완료 기록이 0개였는지 여러 개였는지는 아직 모른다. 같은 v6 명령을 다시 실행하지 않고, 먼저 실패할 때도 안전한 개수와 대상 번호가 기록되도록 보강한다.
   - M2B2가 끝날 때까지 M2는 부분 완료다. 정적 비교본, 미추적 캡처, 사용자 서술은 exact corrected runtime 직접 화면을 대체하지 않는다.
   - M3 신규 회귀는 RVR 원본 세션의 기존 결정 요약과 이후의 상반된 누락 주장을 함께 고정한다. 기대 동작은 기존 전달 증거를 우선해 허위 누락을 거부하고, 결정 요약에 검증·커밋 정보를 섞은 범위 이탈만 별도로 판정하는 것이다. 일반 승인·전환 문구는 관찰상 `$spec`에 어긋나지만 Superpowers brainstorming 승인 게이트와 충돌하므로 M4에서 원인과 우선순위를 별도 판정한다. 현재 `$spec` 계약 자체를 실패 원인으로 재분류하지 않는다.
   - M3의 `다음 행동`은 고정 보고 항목이 아니다. 필수 작업·구체적 재개 조건·결과를 바꾸는 사용자 결정이 있을 때만 가장 합리적인 범위 내 행동 하나와 이유를 제시하고, 완전 완료나 단순 선택 사항이면 생략한다.
