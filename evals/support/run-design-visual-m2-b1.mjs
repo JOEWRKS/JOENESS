@@ -119,11 +119,37 @@ const M2B1_PREDECESSORS = Object.freeze({
       sha256: "12bcf3f41105a3d4b955204f81efee451e21792d61e787af1d33f90176f2caf0",
     }),
   }),
+  4: Object.freeze({
+    plan: Object.freeze({
+      path: "evals/skill-contracts/design-visual-m2-b1-smoke-plan-v3.json",
+      bytes: 5603,
+      sha256: "4df74b6887c7301e9d15054f07285146d141b50346a0cf18cbb339897d0713de",
+    }),
+    blockedAttempt: Object.freeze({
+      path: "evals/skill-contracts/design-visual-m2-b1-v3-blocked.json",
+      bytes: 2207,
+      sha256: "4fccaccb2ccbb5128e704bc5c9f2256a690da226210fca98b2eadee457530e7e",
+    }),
+    latestReceipt: Object.freeze({
+      path: "evals/skill-contracts/design-visual-m2-attempt-index-v5.json",
+      bytes: 4557,
+      sha256: "04ce185d3918cfa9096d71e8dc7bbe86ccbf2834813c980113b11a3182a332ed",
+    }),
+  }),
 });
 const M2B1_METHOD_CHANGES = Object.freeze({
   2: "bounded-sanitized-runtime-error-and-primary-cause-capture",
   3: "closed-object-response-schemas-required-by-observed-api-error",
+  4: "prioritized-bounded-failure-evidence-retention-no-evaluator-contract-change",
 });
+const M2B1_UNCHANGED_EVALUATOR_CONTRACT_KEYS = Object.freeze([
+  "runtime",
+  "inputs",
+  "candidates",
+  "claimScope",
+  "originalDetail",
+  "boundaries",
+]);
 
 function isObject(value) {
   return value !== null && typeof value === "object" && !Array.isArray(value);
@@ -169,7 +195,7 @@ function assertOutputPath(value, label) {
 }
 
 export function validateDesignVisualM2B1Plan(value) {
-  const isSuccessor = [2, 3].includes(value?.schemaVersion);
+  const isSuccessor = [2, 3, 4].includes(value?.schemaVersion);
   const expectedKeys = [
     "schemaVersion", "id", "date",
     ...(isSuccessor ? ["predecessor", "source"] : []),
@@ -180,7 +206,7 @@ export function validateDesignVisualM2B1Plan(value) {
     throw new Error("M2B1 plan is malformed");
   }
   if (
-    ![1, 2, 3].includes(value.schemaVersion) ||
+    ![1, 2, 3, 4].includes(value.schemaVersion) ||
     value.id !== `design-visual-m2-b1-smoke-plan-v${value.schemaVersion}` ||
     typeof value.date !== "string" ||
     !exactKeys(value.runtime, ["codexVersion", "sessionOrder", "retryCount"]) ||
@@ -294,6 +320,23 @@ export function validateDesignVisualM2B1Plan(value) {
     throw new Error("M2B1 plan leaks hidden evaluator information");
   }
   return clone(value);
+}
+
+function assertUnchangedM2B1EvaluatorContract(plan, predecessorBytes) {
+  if (plan.schemaVersion !== 4) return;
+  let predecessor;
+  try {
+    predecessor = validateDesignVisualM2B1Plan(
+      JSON.parse(predecessorBytes.toString("utf8")),
+    );
+  } catch (error) {
+    throw new Error("M2B1 predecessor plan contract is unreadable", { cause: error });
+  }
+  for (const key of M2B1_UNCHANGED_EVALUATOR_CONTRACT_KEYS) {
+    if (stableStringify(plan[key]) !== stableStringify(predecessor[key])) {
+      throw new Error(`M2B1 evaluator contract changed at ${key}`);
+    }
+  }
 }
 
 function validateApplicability(value, label) {
@@ -567,13 +610,16 @@ export async function preflightDesignVisualM2B1({
     }
   }
   if (plan.predecessor) {
+    let predecessorPlanBytes = null;
     for (const [key, pin] of Object.entries({
       plan: plan.predecessor.plan,
       blockedAttempt: plan.predecessor.blockedAttempt,
       latestReceipt: plan.predecessor.latestReceipt,
     })) {
-      await verifyPinnedFile(root, pin, `M2B1 predecessor ${key}`);
+      const verified = await verifyPinnedFile(root, pin, `M2B1 predecessor ${key}`);
+      if (key === "plan") predecessorPlanBytes = verified.content;
     }
+    assertUnchangedM2B1EvaluatorContract(plan, predecessorPlanBytes);
   }
   pins.candidates = [];
   for (const candidate of plan.candidates) {

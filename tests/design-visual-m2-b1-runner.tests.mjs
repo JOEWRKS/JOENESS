@@ -39,6 +39,35 @@ function digest(value) {
   return createHash("sha256").update(value).digest("hex");
 }
 
+function boundedDiagnosticPlan(strictPlan) {
+  const plan = structuredClone(strictPlan);
+  plan.schemaVersion = 4;
+  plan.id = "design-visual-m2-b1-smoke-plan-v4";
+  plan.predecessor = {
+    plan: {
+      path: "evals/skill-contracts/design-visual-m2-b1-smoke-plan-v3.json",
+      bytes: 5603,
+      sha256: "4df74b6887c7301e9d15054f07285146d141b50346a0cf18cbb339897d0713de",
+    },
+    blockedAttempt: {
+      path: "evals/skill-contracts/design-visual-m2-b1-v3-blocked.json",
+      bytes: 2207,
+      sha256: "4fccaccb2ccbb5128e704bc5c9f2256a690da226210fca98b2eadee457530e7e",
+    },
+    latestReceipt: {
+      path: "evals/skill-contracts/design-visual-m2-attempt-index-v5.json",
+      bytes: 4557,
+      sha256: "04ce185d3918cfa9096d71e8dc7bbe86ccbf2834813c980113b11a3182a332ed",
+    },
+    methodChange: "prioritized-bounded-failure-evidence-retention-no-evaluator-contract-change",
+    attemptPolicy: "one-method-changed-attempt-no-automatic-retry",
+  };
+  plan.outputs = Object.fromEntries(
+    Object.entries(plan.outputs).map(([key, value]) => [key, value.replace("-v3-", "-v4-")]),
+  );
+  return plan;
+}
+
 function designOutput() {
   const check = (id, observableFact, evidenceLayer, applicability, semantics = "acceptance") => ({
     id,
@@ -156,6 +185,42 @@ async function fixtureRoot(t) {
   await mkdir(path.join(root, "ground-truth"));
   await writeFile(path.join(root, "ground-truth", "roles.json"), "{}\n");
   return { root, plan, planPath: copiedPlan };
+}
+
+async function successorFixtureRoot(t, plan) {
+  const root = await mkdtemp(path.join(tmpdir(), "joeness-m2-b1-successor-"));
+  t.after(() => rm(root, { recursive: true, force: true }));
+  const pins = [
+    ...Object.values(plan.inputs),
+    ...plan.candidates.map(({ image }) => image),
+    plan.predecessor.plan,
+    plan.predecessor.blockedAttempt,
+    plan.predecessor.latestReceipt,
+    plan.source.runner,
+    plan.source.freshTurnAdapter,
+    plan.source.collector,
+  ];
+  for (const pin of pins) {
+    const destination = path.join(root, ...pin.path.split("/"));
+    await mkdir(path.dirname(destination), { recursive: true });
+    if ([plan.source.runner, plan.source.freshTurnAdapter, plan.source.collector].includes(pin)) {
+      const source = await execFile(
+        "git",
+        ["show", `${plan.source.repositoryCommit}:${pin.path}`],
+        { cwd: ROOT, encoding: "buffer", maxBuffer: 1024 * 1024 },
+      );
+      await writeFile(destination, source.stdout);
+    } else {
+      await cp(path.join(ROOT, ...pin.path.split("/")), destination);
+    }
+  }
+  const planPath = path.join(
+    root,
+    "evals/skill-contracts/design-visual-m2-b1-smoke-plan-v4.json",
+  );
+  await mkdir(path.dirname(planPath), { recursive: true });
+  await writeFile(planPath, JSON.stringify(plan, null, 2) + "\n");
+  return { root, planPath };
 }
 
 async function listRelativeFiles(root, current = root) {
@@ -433,6 +498,56 @@ test("M2B1 strict-schema plan preserves v2 evidence and uses only v3 outputs", a
   const changed = structuredClone(plan);
   changed.predecessor.blockedAttempt.sha256 = "0".repeat(64);
   assert.throws(() => subject.validateDesignVisualM2B1Plan(changed), /predecessor|pin/iu);
+});
+
+test("M2B1 bounded-diagnostic plan preserves v3 evidence and uses only v4 outputs", async () => {
+  const subject = await loadSubject();
+  const plan = boundedDiagnosticPlan(JSON.parse(await readFile(STRICT_PLAN_PATH, "utf8")));
+
+  const validated = subject.validateDesignVisualM2B1Plan(plan);
+  assert.equal(validated.schemaVersion, 4);
+  assert.equal(validated.id, "design-visual-m2-b1-smoke-plan-v4");
+  assert.equal(
+    validated.predecessor.methodChange,
+    "prioritized-bounded-failure-evidence-retention-no-evaluator-contract-change",
+  );
+  assert.equal(validated.runtime.retryCount, 0);
+  assert.equal(Object.values(validated.outputs).every((file) => file.includes("-v4-")), true);
+  assert.equal(
+    Object.values(validated.outputs).some((file) =>
+      file.includes("-v1-") || file.includes("-v2-") || file.includes("-v3-")),
+    false,
+  );
+
+  const changed = structuredClone(plan);
+  changed.predecessor.latestReceipt.bytes += 1;
+  assert.throws(() => subject.validateDesignVisualM2B1Plan(changed), /predecessor|pin/iu);
+});
+
+test("M2B1 v4 preflight rejects input and candidate drift from the pinned v3 contract", async (t) => {
+  const subject = await loadSubject();
+  const strictPlan = JSON.parse(await readFile(STRICT_PLAN_PATH, "utf8"));
+
+  for (const target of ["input", "candidate"]) {
+    const plan = boundedDiagnosticPlan(strictPlan);
+    const fixture = await successorFixtureRoot(t, plan);
+    const changedBytes = Buffer.from(`changed-${target}-contract\n`, "utf8");
+    const pin = target === "input" ? plan.inputs.designSkill : plan.candidates[0].image;
+    pin.bytes = changedBytes.byteLength;
+    pin.sha256 = digest(changedBytes);
+    await writeFile(path.join(fixture.root, ...pin.path.split("/")), changedBytes);
+    await writeFile(fixture.planPath, JSON.stringify(plan, null, 2) + "\n");
+
+    await assert.rejects(
+      subject.preflightDesignVisualM2B1({
+        repositoryRoot: fixture.root,
+        planPath: fixture.planPath,
+        gitStatus: async () => "",
+        gitIdentity: async () => "f".repeat(40),
+      }),
+      /contract|predecessor|unchanged/iu,
+    );
+  }
 });
 
 test("M2B1 successor run emits v2 summary and blocked identities", async (t) => {
