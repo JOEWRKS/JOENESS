@@ -22,6 +22,10 @@ const SUCCESSOR_PLAN_PATH = path.join(
   ROOT,
   "evals/skill-contracts/design-visual-m2-b1-smoke-plan-v2.json",
 );
+const STRICT_PLAN_PATH = path.join(
+  ROOT,
+  "evals/skill-contracts/design-visual-m2-b1-smoke-plan-v3.json",
+);
 
 async function loadSubject() {
   try {
@@ -380,6 +384,55 @@ test("M2B1 successor plan preserves v1 evidence and uses disjoint v2 outputs", a
   const changedSource = structuredClone(plan);
   changedSource.source.collector.path = "evals/support/not-the-collector.mjs";
   assert.throws(() => subject.validateDesignVisualM2B1Plan(changedSource), /source|path/iu);
+});
+
+test("M2B1 strict-schema plan preserves v2 evidence and uses only v3 outputs", async () => {
+  const subject = await loadSubject();
+  const plan = JSON.parse(await readFile(STRICT_PLAN_PATH, "utf8"));
+  const validated = subject.validateDesignVisualM2B1Plan(plan);
+
+  assert.equal(validated.schemaVersion, 3);
+  assert.equal(validated.id, "design-visual-m2-b1-smoke-plan-v3");
+  assert.equal(
+    validated.predecessor.methodChange,
+    "closed-object-response-schemas-required-by-observed-api-error",
+  );
+  assert.equal(validated.predecessor.attemptPolicy, "one-method-changed-attempt-no-automatic-retry");
+  assert.equal(validated.runtime.retryCount, 0);
+  assert.equal(Object.values(validated.outputs).every((file) => file.includes("-v3-")), true);
+  assert.equal(
+    Object.values(validated.outputs).some((file) => file.includes("-v1-") || file.includes("-v2-")),
+    false,
+  );
+  assert.deepEqual(validated.predecessor, {
+    plan: {
+      path: "evals/skill-contracts/design-visual-m2-b1-smoke-plan-v2.json",
+      bytes: 5599,
+      sha256: "758f6087d628db856e48752e8172126cd7c1f70e00ccf733b2f8afbfc76ffe0d",
+    },
+    blockedAttempt: {
+      path: "evals/skill-contracts/design-visual-m2-b1-v2-blocked.json",
+      bytes: 44050,
+      sha256: "979399d04ecba4fa48fb59c081c0aee22e8ae838391169b89ea1fd7ab69dd700",
+    },
+    latestReceipt: {
+      path: "evals/skill-contracts/design-visual-m2-attempt-index-v4.json",
+      bytes: 3681,
+      sha256: "12bcf3f41105a3d4b955204f81efee451e21792d61e787af1d33f90176f2caf0",
+    },
+    methodChange: "closed-object-response-schemas-required-by-observed-api-error",
+    attemptPolicy: "one-method-changed-attempt-no-automatic-retry",
+  });
+  assert.equal(validated.source.repositoryCommit, "21be38fbebe67160d1ab7c82cd88f52fe70b864c");
+  assert.deepEqual(validated.source.runner, {
+    path: "evals/support/run-design-visual-m2-b1.mjs",
+    bytes: 49921,
+    sha256: "6d0c52d7fd65bcb2b12136c5adc18596c6e6eb064238943ba876a17f8ee166ac",
+  });
+
+  const changed = structuredClone(plan);
+  changed.predecessor.blockedAttempt.sha256 = "0".repeat(64);
+  assert.throws(() => subject.validateDesignVisualM2B1Plan(changed), /predecessor|pin/iu);
 });
 
 test("M2B1 successor run emits v2 summary and blocked identities", async (t) => {
