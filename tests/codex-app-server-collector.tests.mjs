@@ -162,6 +162,90 @@ test("diagnostic and runtime credential classifiers share current provider token
   }
 });
 
+test("provider token prefixes inside ordinary UI identifiers are not credentials", () => {
+  for (const ordinaryText of [
+    "The modal-mask-background-layer remains clipped.",
+    "The modal-mask-background-layer-variant remains clipped.",
+    "The modal-mask-backgroundlayercomponent remains clipped.",
+    "The modal-mask-background-layer-v2 remains clipped.",
+    "The modal-mask_background_layer remains clipped.",
+    "The modal-mask-BackgroundLayerVariantComponent remains clipped.",
+    "The modal-mask-Background-Layer-Variant-Component remains clipped.",
+    "The task-proj-BackgroundLayerVariantComponent remains clipped.",
+    "The mask_GeneratedPanelLayerComponent remains clipped.",
+    "The modal-mask-BackgroundLayerVariantComponentV2QueueX9 remains clipped.",
+    "The modal-mask-BackgroundLayerVariantComponent-v2-dark remains clipped.",
+    "The modal-mask-BackgroundLayerXYZ123Component remains clipped.",
+    "The modal-mask-ABCDEFGHIJKLMNComponent remains clipped.",
+  ]) {
+    const diagnostic = sanitizeDiagnosticEvidence(ordinaryText);
+    const event = normalizeEvent({
+      method: "item/agentMessage/delta",
+      params: {
+        threadId: "thread-1",
+        turnId: "turn-1",
+        itemId: "item-1",
+        delta: ordinaryText,
+      },
+    });
+
+    assert.equal(containsCredentialText(ordinaryText), false, ordinaryText);
+    assert.equal(diagnostic.redacted, false, ordinaryText);
+    assert.equal(diagnostic.text, ordinaryText);
+    assert.equal(event.blockers.includes("secret-shaped-output"), false);
+  }
+});
+
+test("provider credentials remain blocked at token boundaries and in labeled values", () => {
+  for (const token of [
+    ...SYNTHETIC_TOKEN_SHAPES,
+    "sk-ABCDEFGHIJKLMNOPQRST",
+  ]) {
+    for (const text of [
+      token,
+      `value ${token}`,
+      `apiKey=x${token}`,
+      `--api-key x${token}`,
+    ]) {
+      const diagnostic = sanitizeDiagnosticEvidence(text);
+      const event = normalizeEvent({
+        method: "item/agentMessage/delta",
+        params: {
+          threadId: "thread-1",
+          turnId: "turn-1",
+          itemId: "item-1",
+          delta: text,
+        },
+      });
+
+      assert.equal(containsCredentialText(text), true, text);
+      assert.equal(diagnostic.redacted, true, text);
+      assert.equal(JSON.stringify(diagnostic).includes(token), false, text);
+      assert.equal(event.blockers.includes("secret-shaped-output"), true, text);
+    }
+  }
+});
+
+test("a repeated suffix cannot hide a labeled provider credential", () => {
+  const token = "sk-ABCDEFGHIJKLMNOPQRST";
+  const padded = `apiKey=x${token}${"A".repeat(128)}`;
+  const diagnostic = sanitizeDiagnosticEvidence(padded);
+  const event = normalizeEvent({
+    method: "item/agentMessage/delta",
+    params: {
+      threadId: "thread-1",
+      turnId: "turn-1",
+      itemId: "item-1",
+      delta: padded,
+    },
+  });
+
+  assert.equal(containsCredentialText(padded), true);
+  assert.equal(diagnostic.redacted, true);
+  assert.equal(JSON.stringify(diagnostic).includes(token), false);
+  assert.equal(event.blockers.includes("secret-shaped-output"), true);
+});
+
 test("free-form cookie and set-cookie headers redact every value and attribute", () => {
   const cookie = sanitizeDiagnosticEvidence(
     "request failed Cookie: sid=abc; refresh=supersecretvalue",

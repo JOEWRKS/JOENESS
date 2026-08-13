@@ -300,17 +300,28 @@ const DIAGNOSTIC_MAX_ARRAY_LENGTH = 32;
 const DIAGNOSTIC_BUDGET_MARKER = "[TRUNCATED:diagnostic-budget]";
 const DIAGNOSTIC_SENSITIVE_KEY =
   /(?:api[-_]?key|auth|cookie|credential|password|secret|session|token)/iu;
+const PROVIDER_TOKEN_PREFIX_SOURCE =
+  "sk-(?:proj|svcacct)-|sk-|sk_|ghp_|github_pat_";
+const PROVIDER_TOKEN_BODY_SOURCE = "[A-Za-z0-9_-]{12,}";
+// Provider-like substrings inside identifiers are ambiguous (for example,
+// "mask-background"). Require a token boundary; labeled secret values are
+// still caught by DIAGNOSTIC_INLINE_SECRET and SECRET_PATTERN.
 const CREDENTIAL_TOKEN_SHAPE_SOURCE = [
-  "(?:sk(?:-proj|-svcacct)?-|sk_|ghp_|github_pat_)[A-Za-z0-9_-]{12,}",
+  `(?<![A-Za-z0-9_-])(?:${PROVIDER_TOKEN_PREFIX_SOURCE})${PROVIDER_TOKEN_BODY_SOURCE}`,
   "(?:AKIA|ASIA)[A-Z0-9]{16}",
   "eyJ[A-Za-z0-9_-]{10,}\\.[A-Za-z0-9_-]{10,}\\.[A-Za-z0-9_-]{10,}",
 ].join("|");
+const CREDENTIAL_TOKEN_PATTERN = new RegExp(CREDENTIAL_TOKEN_SHAPE_SOURCE, "u");
+const CREDENTIAL_TOKEN_PATTERN_GLOBAL = new RegExp(
+  CREDENTIAL_TOKEN_SHAPE_SOURCE,
+  "gu",
+);
 const DIAGNOSTIC_INLINE_SECRET = new RegExp(
   [
     "(?:authorization|proxy-authorization|cookie|set-cookie)\\s*[:=]\\s*[^\\r\\n,]+",
     "bearer\\s+[A-Za-z0-9._~+/=-]{8,}",
     "(?:api[-_]?key|password|secret|token)\\s*[:=]\\s*['\\x22]?[^\\s,;'\\x22]{8,}",
-    CREDENTIAL_TOKEN_SHAPE_SOURCE,
+    "--(?:api[-_]?key|token|password|secret|cookie)(?:\\s+|=)\\s*['\\x22]?[^\\s,;'\\x22]{8,}",
   ].join("|"),
   "giu",
 );
@@ -322,6 +333,7 @@ const DIAGNOSTIC_POSIX_PATH =
 function redactDiagnosticString(value) {
   let text = value;
   text = text.replace(DIAGNOSTIC_INLINE_SECRET, "[REDACTED]");
+  text = text.replace(CREDENTIAL_TOKEN_PATTERN_GLOBAL, "[REDACTED]");
   text = text.replace(DIAGNOSTIC_WINDOWS_PATH, "[REDACTED_PATH]");
   text = text.replace(DIAGNOSTIC_POSIX_PATH, "[REDACTED_PATH]");
   return { text, redacted: text !== value };
@@ -1323,7 +1335,7 @@ export async function handleSyntheticDynamicToolCall(
     const text = stableStringify(responseBody);
     if (
       Buffer.byteLength(text) > BROKER_MESSAGE_LIMIT_BYTES ||
-      SECRET_PATTERN.test(text)
+      containsCredentialText(text)
     ) {
       throw new Error("dynamic tool response is unsafe to expose");
     }
@@ -1350,7 +1362,7 @@ function mcpNameIsSafe(name) {
   return (
     typeof name === "string" &&
     /^[A-Za-z0-9_-]{1,128}$/u.test(name) &&
-    !SECRET_PATTERN.test(name)
+    !containsCredentialText(name)
   );
 }
 
@@ -2494,7 +2506,6 @@ const SECRET_PATTERN = new RegExp(
     "bearer\\s+[A-Za-z0-9._~+/=-]{12,}",
     "(?:api[-_]?key|token|password|secret|cookie)\\s*[:=]\\s*[\"']?[A-Za-z0-9._~+/=-]{8,}",
     "--(?:api[-_]?key|token|password|secret|cookie)(?:\\s+|=)\\s*[\"']?[A-Za-z0-9._~+/=-]{8,}",
-    CREDENTIAL_TOKEN_SHAPE_SOURCE,
     "ssh-(?:rsa|ed25519)\\s+[A-Za-z0-9+/=]{20,}",
   ].join("|"),
   "iu",
@@ -2556,7 +2567,9 @@ const SESSION_FATAL_REASONS = new Set([
 ]);
 
 export function containsCredentialText(value) {
-  if (typeof value === "string") return SECRET_PATTERN.test(value);
+  if (typeof value === "string") {
+    return SECRET_PATTERN.test(value) || CREDENTIAL_TOKEN_PATTERN.test(value);
+  }
   if (Array.isArray(value)) return value.some(containsCredentialText);
   if (value !== null && typeof value === "object") {
     return Object.values(value).some(containsCredentialText);
@@ -2774,7 +2787,7 @@ export function normalizeEvent(
     } else {
       const byteLength = Buffer.byteLength(params.delta, "utf8");
       const blockers = [];
-      if (SECRET_PATTERN.test(params.delta)) {
+      if (containsCredentialText(params.delta)) {
         blockers.push("secret-shaped-output");
       }
       if (byteLength > MESSAGE_DELTA_BYTES_LIMIT) {
@@ -2960,7 +2973,7 @@ export function normalizeEvent(
     event.mcpServer = { reported: true };
   }
 
-  if (SECRET_PATTERN.test(stableStringify(event))) {
+  if (containsCredentialText(stableStringify(event))) {
     return {
       method: "collector/redacted",
       threadId: threadIdentity.value,
@@ -3175,7 +3188,7 @@ function observedRuntimeSettingIsSafe(value, { nullable = false } = {}) {
       value.trim().length > 0 &&
       Buffer.byteLength(value) <= 256 &&
       !/[\u0000-\u001f\u007f]/u.test(value) &&
-      !SECRET_PATTERN.test(value))
+      !containsCredentialText(value))
   );
 }
 
@@ -3691,7 +3704,7 @@ export async function runSubjectCase({
     ) {
       blockers.push("message-delta-limit-exceeded");
     }
-    if (SECRET_PATTERN.test(transcript)) {
+    if (containsCredentialText(transcript)) {
       blockers.push("secret-shaped-output");
     }
     return blockers;
@@ -4618,7 +4631,7 @@ function completeBoundedText(value, allowEmpty = false) {
     value.byteLength === Buffer.byteLength(value.text) &&
     value.byteLength <= OUTPUT_LIMIT_BYTES &&
     value.sha256 === sha256(value.text) &&
-    !SECRET_PATTERN.test(value.text)
+    !containsCredentialText(value.text)
   );
 }
 
@@ -4671,7 +4684,7 @@ function caseEventIsAdmissible(
     return false;
   }
   try {
-    if (SECRET_PATTERN.test(stableStringify(event))) {
+    if (containsCredentialText(stableStringify(event))) {
       return false;
     }
   } catch {
