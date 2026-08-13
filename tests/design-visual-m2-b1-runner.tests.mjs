@@ -3946,7 +3946,7 @@ test("M2B1 schema 9 rejects unchanged method source and rollback ancestry", asyn
   }), /predecessor.*ancestor|descendant.*predecessor|method.*rollback/iu);
 });
 
-test("M2B1 actual v9 plan pins bounded Task1 prevalidation support and absent outputs", async () => {
+test("M2B1 actual v9 plan pins bounded Task1 prevalidation support and preserved outcome", async () => {
   const subject = await loadSubject();
   const v8 = JSON.parse(await readFile(ATTACHED_IMAGE_PLAN_PATH, "utf8"));
   const v9Bytes = await readFile(TASK1_PREVALIDATION_PLAN_PATH);
@@ -4006,9 +4006,18 @@ test("M2B1 actual v9 plan pins bounded Task1 prevalidation support and absent ou
     summary: "evals/skill-contracts/design-visual-m2-b1-v9-summary.json",
     blocked: "evals/skill-contracts/design-visual-m2-b1-v9-blocked.json",
   });
-  for (const output of Object.values(validated.outputs)) {
+  for (const [key, output] of Object.entries(validated.outputs)) {
+    if (key === "blocked") continue;
     await assertPathMissing(path.join(ROOT, ...output.split("/")));
   }
+  const blocked = await readFile(
+    path.join(ROOT, ...validated.outputs.blocked.split("/")),
+  );
+  assert.equal(blocked.byteLength, 2317);
+  assert.equal(
+    digest(blocked),
+    "e91beb6dad95163cbbdc31b8ba326c222b72bbbc0c71ef02ccde4fd1e7605887",
+  );
   for (const pin of [
     validated.source.runner,
     validated.source.freshTurnAdapter,
