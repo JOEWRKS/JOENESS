@@ -101,6 +101,96 @@ function schema9Plan(v8) {
   return plan;
 }
 
+function schema10Plan(v9) {
+  const plan = structuredClone(v9);
+  plan.schemaVersion = 10;
+  plan.id = "design-visual-m2-b1-smoke-plan-v10";
+  plan.predecessor = {
+    plan: {
+      path: "evals/skill-contracts/design-visual-m2-b1-smoke-plan-v9.json",
+      bytes: 5648,
+      sha256: "fd1aed546ff6d92121435d6de2806a5ec99fb3f7b3f6a866d5c1a9d87707e39a",
+    },
+    blockedAttempt: {
+      path: "evals/skill-contracts/design-visual-m2-b1-v9-blocked.json",
+      bytes: 2317,
+      sha256: "e91beb6dad95163cbbdc31b8ba326c222b72bbbc0c71ef02ccde4fd1e7605887",
+    },
+    latestReceipt: {
+      path: "evals/skill-contracts/design-visual-m2-attempt-index-v11.json",
+      bytes: 8395,
+      sha256: "d8434fa1ea6524e018c793be93b0ea7913e0613e6f763dc639f4220663d60ff3",
+    },
+    methodChange: "canonical-agent-message-delta-compaction-and-bounded-event-aggregate-retention-no-task1-cap-or-evaluator-contract-change",
+    attemptPolicy: "one-method-changed-attempt-no-automatic-retry",
+  };
+  plan.source = {
+    repositoryCommit: "33d019596fc21ab5ce6ec93ec3263d5992535c5a",
+    runner: {
+      path: "evals/support/run-design-visual-m2-b1.mjs",
+      bytes: 111507,
+      sha256: "6de4c77ac18067d5bb352c1e9efaf3c6d3c89f2295490474becb5a996e732d33",
+    },
+    freshTurnAdapter: {
+      path: "evals/support/run-fresh-evaluator-turn.mjs",
+      bytes: 55477,
+      sha256: "f2c7e2e9457b0ef7d6b819425619dcde8054db530f8b920829376f39a13fd087",
+    },
+    collector: {
+      path: "evals/support/collect-codex-app-server.mjs",
+      bytes: 297632,
+      sha256: "8b81ddb28be2a803500839a2de61f9bb397aa96711d039bdb7a3a86cfad8d687",
+    },
+  };
+  plan.outputs = Object.fromEntries(
+    Object.entries(v9.outputs).map(([key, value]) => [key, value.replace("-v9-", "-v10-")]),
+  );
+  return plan;
+}
+
+function eventCompactionFixture({
+  observedEventCount = 4,
+  retainedEventCount = 4,
+  retainedEventsOverLimit = retainedEventCount > 512,
+  methodEntries = [
+    { method: "item/completed", count: 1 },
+    { method: "turn/completed", count: 1 },
+    { method: "turn/started", count: 2 },
+  ],
+  itemTypeEntries = [{ itemType: "agentMessage", count: 1 }],
+  groupCount = 0,
+  fragmentCount = 0,
+  byteLength = 0,
+  fragmentLimitExceeded = fragmentCount > 4096,
+  byteLimitExceeded = byteLength > 1048576,
+} = {}) {
+  return {
+    observedEventCount,
+    retainedEventCount,
+    retainedEventLimit: 512,
+    retainedEventsOverLimit,
+    methodHistogram: {
+      eventCount: observedEventCount,
+      entries: structuredClone(methodEntries),
+    },
+    itemTypeHistogram: {
+      eventCount: itemTypeEntries.reduce((sum, { count }) => sum + count, 0),
+      entries: structuredClone(itemTypeEntries),
+    },
+    agentMessageDelta: {
+      groupCount,
+      fragmentCount,
+      byteLength,
+      fragmentLimit: 4096,
+      byteLimit: 1048576,
+      fragmentLimitExceeded,
+      byteLimitExceeded,
+      rawTextRetained: false,
+    },
+    rawPayloadRetained: false,
+  };
+}
+
 async function loadSubject() {
   try {
     return await import(MODULE_URL.href);
@@ -438,6 +528,24 @@ function successfulDependencies(design = designOutput()) {
           sha256: digest(`schema-${index}`),
         },
         events: lifecycleEvents,
+        eventCompaction: eventCompactionFixture({
+          observedEventCount: lifecycleEvents.length,
+          retainedEventCount: lifecycleEvents.length,
+          methodEntries: index === 0
+            ? [
+                { method: "turn/completed", count: 1 },
+                { method: "turn/started", count: 1 },
+              ]
+            : [
+                { method: "item/completed", count: 1 },
+                { method: "item/started", count: 1 },
+                { method: "turn/completed", count: 1 },
+                { method: "turn/started", count: 1 },
+              ],
+          itemTypeEntries: index === 0
+            ? []
+            : [{ itemType: "dynamicToolCall", count: 2 }],
+        }),
         toolEvidence,
         mcpAfter: [],
         blockers: [],
@@ -1057,7 +1165,7 @@ test("M2B1 orchestrator uses three sessions, one raw Design tuple, and candidate
   assert.equal(result.visuals[0].evidence.thread.id, "thread-2");
   assert.equal(result.visuals[0].evidence.turn.id, "turn-2");
   assert.deepEqual(Object.keys(result.visuals[0].evidence).sort(), [
-    "appServer", "attachmentBoundary", "blockers", "events", "input", "mcpAfter",
+    "appServer", "attachmentBoundary", "blockers", "eventCompaction", "events", "input", "mcpAfter",
     "outputSchema", "thread", "threadStart", "toolEvidence", "turn",
   ]);
   assert.deepEqual(result.visuals[0].evidence.events.records.map(({ method }) => method), [
@@ -1377,6 +1485,15 @@ test("M2B1 Task 1 prevalidation keeps the existing 512-event and 128-MCP limits 
       name: `server-${index}`,
       status: "disabled",
     }));
+    result.eventCompaction = eventCompactionFixture({
+      observedEventCount: 512,
+      retainedEventCount: 512,
+      methodEntries: [
+        { method: "item/completed", count: 511 },
+        { method: "turn/completed", count: 1 },
+      ],
+      itemTypeEntries: [],
+    });
     return result;
   };
 
@@ -1387,6 +1504,290 @@ test("M2B1 Task 1 prevalidation keeps the existing 512-event and 128-MCP limits 
   });
   assert.equal(summary.executionStatus, "completed");
   assert.equal(dependencies.writes.some(({ file }) => file.endsWith("blocked.json")), false);
+});
+
+test("M2B1 retains exact event compaction and canonical message-delta evidence on success", async (t) => {
+  const subject = await loadSubject();
+  const { root, planPath } = await fixtureRoot(t);
+  const dependencies = successfulDependencies();
+  const successfulRunTurn = dependencies.runTurn;
+  const expectedCompactions = [];
+  dependencies.runTurn = async (options) => {
+    const result = await successfulRunTurn(options);
+    result.events.splice(1, 0, {
+      method: "item/agentMessage/delta",
+      threadId: result.thread.id,
+      turnId: result.turn.id,
+      messageDelta: {
+        itemId: "final-message",
+        count: 2,
+        byteLength: 18,
+        sha256: digest('{"verdict":"PASS"}'),
+      },
+      complete: true,
+      blockers: [],
+    });
+    const visual = result.events.some(({ item }) => item?.type === "dynamicToolCall");
+    result.eventCompaction = eventCompactionFixture({
+      observedEventCount: result.events.length,
+      retainedEventCount: result.events.length,
+      methodEntries: [
+        { method: "item/agentMessage/delta", count: 1 },
+        ...(visual ? [
+          { method: "item/completed", count: 1 },
+          { method: "item/started", count: 1 },
+        ] : []),
+        { method: "turn/completed", count: 1 },
+        { method: "turn/started", count: 1 },
+      ],
+      itemTypeEntries: visual
+        ? [{ itemType: "dynamicToolCall", count: 2 }]
+        : [],
+      groupCount: 1,
+      fragmentCount: 2,
+      byteLength: 18,
+    });
+    expectedCompactions.push(structuredClone(result.eventCompaction));
+    return result;
+  };
+
+  const summary = await subject.runDesignVisualM2B1({
+    repositoryRoot: root,
+    planPath,
+    ...dependencies,
+  });
+  assert.deepEqual(summary.design.evidence.eventCompaction, expectedCompactions[0]);
+  const delta = summary.design.evidence.events.records.find(
+    ({ method }) => method === "item/agentMessage/delta",
+  );
+  assert.deepEqual(delta.messageDelta, {
+    itemId: "final-message",
+    count: 2,
+    byteLength: 18,
+    sha256: digest('{"verdict":"PASS"}'),
+  });
+  assert.deepEqual(Object.keys(summary.design.evidence.eventCompaction).sort(), [
+    "agentMessageDelta",
+    "itemTypeHistogram",
+    "methodHistogram",
+    "observedEventCount",
+    "rawPayloadRetained",
+    "retainedEventCount",
+    "retainedEventLimit",
+    "retainedEventsOverLimit",
+  ]);
+});
+
+test("M2B1 accepts more than 512 observed delta fragments after bounded compaction", async (t) => {
+  const subject = await loadSubject();
+  const { root, planPath } = await fixtureRoot(t);
+  const dependencies = successfulDependencies();
+  const successfulRunTurn = dependencies.runTurn;
+  dependencies.runTurn = async (options) => {
+    const result = await successfulRunTurn(options);
+    const fragmentCount = 1950;
+    const itemId = `final-message-${dependencies.calls.length}`;
+    result.events.splice(-1, 0, {
+      method: "item/agentMessage/delta",
+      threadId: result.thread.id,
+      turnId: result.turn.id,
+      messageDelta: {
+        itemId,
+        count: fragmentCount,
+        byteLength: 18,
+        sha256: digest('{"verdict":"PASS"}'),
+      },
+      complete: true,
+      blockers: [],
+    });
+    const visual = result.events.some(({ item }) => item?.type === "dynamicToolCall");
+    result.eventCompaction = eventCompactionFixture({
+      observedEventCount: fragmentCount + (visual ? 4 : 2),
+      retainedEventCount: result.events.length,
+      methodEntries: [
+        { method: "item/agentMessage/delta", count: fragmentCount },
+        ...(visual ? [
+          { method: "item/completed", count: 1 },
+          { method: "item/started", count: 1 },
+        ] : []),
+        { method: "turn/completed", count: 1 },
+        { method: "turn/started", count: 1 },
+      ],
+      itemTypeEntries: visual
+        ? [{ itemType: "dynamicToolCall", count: 2 }]
+        : [],
+      groupCount: 1,
+      fragmentCount,
+      byteLength: 18,
+    });
+    return result;
+  };
+
+  const summary = await subject.runDesignVisualM2B1({
+    repositoryRoot: root,
+    planPath,
+    ...dependencies,
+  });
+  assert.equal(summary.executionStatus, "completed");
+  assert.equal(summary.design.evidence.eventCompaction.observedEventCount, 1952);
+  assert.equal(summary.design.evidence.eventCompaction.retainedEventCount, 3);
+  assert.equal(summary.design.evidence.eventCompaction.retainedEventsOverLimit, false);
+  assert.equal(dependencies.writes.some(({ file }) => file.endsWith("blocked.json")), false);
+});
+
+test("M2B1 binds canonical message-delta evidence only to its exact event method", async (t) => {
+  const subject = await loadSubject();
+  for (const mode of ["missing tuple", "wrong method"]) {
+    const { root, planPath } = await fixtureRoot(t);
+    const dependencies = successfulDependencies();
+    const successfulRunTurn = dependencies.runTurn;
+    let expectedCompaction;
+    dependencies.runTurn = async (options) => {
+      const result = await successfulRunTurn(options);
+      if (mode === "missing tuple") {
+        result.events[0].method = "item/agentMessage/delta";
+        result.eventCompaction.methodHistogram.entries = [
+          { method: "item/agentMessage/delta", count: 1 },
+          { method: "turn/completed", count: 1 },
+        ];
+      } else {
+        result.events[0].messageDelta = {
+          itemId: "unexpected-summary",
+          count: 1,
+          byteLength: 1,
+          sha256: digest("x"),
+        };
+      }
+      expectedCompaction = structuredClone(result.eventCompaction);
+      return result;
+    };
+    await assert.rejects(
+      subject.runDesignVisualM2B1({ repositoryRoot: root, planPath, ...dependencies }),
+      /message-delta|Task 1/iu,
+      mode,
+    );
+    const blocked = dependencies.writes.find(({ file }) => file.endsWith("blocked.json")).value;
+    assert.deepEqual(blocked.eventCompaction, expectedCompaction, mode);
+  }
+});
+
+test("M2B1 first guard failure attaches event compaction non-enumerably and writes it independently", async (t) => {
+  const subject = await loadSubject();
+  const { root, planPath } = await fixtureRoot(t);
+  const dependencies = successfulDependencies();
+  const successfulRunTurn = dependencies.runTurn;
+  const expected = eventCompactionFixture({
+    observedEventCount: 513,
+    retainedEventCount: 513,
+    methodEntries: [
+      { method: "item/completed", count: 511 },
+      { method: "turn/completed", count: 1 },
+      { method: "turn/started", count: 1 },
+    ],
+  });
+  dependencies.runTurn = async (options) => {
+    const result = await successfulRunTurn(options);
+    result.events = Array.from({ length: 513 }, () => ({}));
+    result.eventCompaction = expected;
+    return result;
+  };
+
+  let failure;
+  try {
+    await subject.runDesignVisualM2B1({ repositoryRoot: root, planPath, ...dependencies });
+  } catch (error) {
+    failure = error;
+  }
+  assert.deepEqual(Object.getOwnPropertyDescriptor(failure, "eventCompaction"), {
+    configurable: true,
+    enumerable: false,
+    writable: true,
+    value: expected,
+  });
+  assert.equal(Object.keys(failure).includes("eventCompaction"), false);
+  const blocked = dependencies.writes.find(({ file }) => file.endsWith("blocked.json")).value;
+  assert.deepEqual(blocked.eventCompaction, expected);
+  assert.equal(blocked.task1Prevalidation.eventsLimit, 512);
+  assert.equal(blocked.task1Prevalidation.mcpAfterLimit, 128);
+});
+
+test("M2B1 blocked writer projects only exact path-private event compaction", async (t) => {
+  const subject = await loadSubject();
+  const { root, planPath } = await fixtureRoot(t);
+  const exact = eventCompactionFixture();
+  const canaries = ["C:\\Users\\private\\event.log", "sk-proj-SYNTHETIC_TEST_ONLY_abcdefghijklmnop"];
+  let trapCalls = 0;
+  const cases = [
+    ["exact", (value) => value, true],
+    ["extra", (value) => ({ ...value, path: canaries[0] }), false],
+    ["wrong method sum", (value) => { value.methodHistogram.eventCount += 1; return value; }, false],
+    ["wrong item sum", (value) => { value.itemTypeHistogram.eventCount += 1; return value; }, false],
+    ["wrong delta counts", (value) => { value.agentMessageDelta.groupCount = 1; return value; }, false],
+    ["nested accessor", (value) => {
+      Object.defineProperty(value.methodHistogram, "eventCount", {
+        enumerable: true,
+        get() { trapCalls += 1; return 4; },
+      });
+      return value;
+    }, false],
+    ["nested proxy", (value) => {
+      value.itemTypeHistogram = new Proxy(value.itemTypeHistogram, {
+        get() { trapCalls += 1; throw new Error("nested event compaction proxy trap"); },
+        ownKeys() { trapCalls += 1; throw new Error("nested event compaction proxy trap"); },
+      });
+      return value;
+    }, false],
+    ["entry proxy", (value) => {
+      value.methodHistogram.entries[0] = new Proxy(value.methodHistogram.entries[0], {
+        get() { trapCalls += 1; throw new Error("event histogram entry proxy trap"); },
+        ownKeys() { trapCalls += 1; throw new Error("event histogram entry proxy trap"); },
+      });
+      return value;
+    }, false],
+    ["wrong limit", (value) => { value.retainedEventLimit = 513; return value; }, false],
+    ["wrong boolean", (value) => { value.retainedEventsOverLimit = true; return value; }, false],
+    ["raw retained", (value) => { value.rawPayloadRetained = true; return value; }, false],
+    ["delta raw retained", (value) => { value.agentMessageDelta.rawTextRetained = true; return value; }, false],
+    ["accessor", (value) => {
+      Object.defineProperty(value, "observedEventCount", {
+        enumerable: true,
+        get() { trapCalls += 1; return 4; },
+      });
+      return value;
+    }, false],
+    ["proxy", (value) => new Proxy({ ...value, credential: canaries[1] }, {
+      get() { trapCalls += 1; throw new Error("event compaction proxy trap"); },
+      ownKeys() { trapCalls += 1; throw new Error("event compaction proxy trap"); },
+    }), false],
+  ];
+
+  for (const [label, mutate, retained] of cases) {
+    const dependencies = successfulDependencies();
+    dependencies.runTurn = async (options) => {
+      options.session.closed = true;
+      options.session.processExitCode = 0;
+      const failure = new Error(`event compaction ${label}`);
+      failure.freshEvaluatorEvidence = {
+        appServer: { processExitCode: 0 },
+        events: new Proxy([], {
+          get() { trapCalls += 1; throw new Error("hostile partial evidence"); },
+          ownKeys() { trapCalls += 1; throw new Error("hostile partial evidence"); },
+        }),
+        eventCompaction: mutate(structuredClone(exact)),
+      };
+      throw failure;
+    };
+    await assert.rejects(
+      subject.runDesignVisualM2B1({ repositoryRoot: root, planPath, ...dependencies }),
+      new RegExp(`event compaction ${label}`),
+    );
+    const blocked = dependencies.writes.find(({ file }) => file.endsWith("blocked.json")).value;
+    assert.equal(Object.hasOwn(blocked, "eventCompaction"), retained, label);
+    if (retained) assert.deepEqual(blocked.eventCompaction, exact);
+    const serialized = JSON.stringify(blocked);
+    assert.equal(canaries.some((canary) => serialized.includes(canary)), false, label);
+  }
+  assert.equal(trapCalls, 0);
 });
 
 test("M2B1 Task 1 prevalidation omits a count summary for malformed or proxy arrays", async (t) => {
@@ -2608,6 +3009,15 @@ test("M2B1 runner correlation failure attaches and persists path-private fresh e
           }),
           successfulImageViews: safeSuccessfulImageViews([2]),
         },
+        eventCompaction: eventCompactionFixture({
+          observedEventCount: 2,
+          retainedEventCount: 2,
+          methodEntries: [
+            { method: "turn/completed", count: 1 },
+            { method: "turn/started", count: 1 },
+          ],
+          itemTypeEntries: [],
+        }),
       });
       return true;
     },
@@ -4038,4 +4448,99 @@ test("M2B1 actual v9 plan pins bounded Task1 prevalidation support and preserved
     { cwd: ROOT },
   );
   assert.equal(v9Bytes.at(-1), 0x0a);
+});
+
+test("M2B1 schema 10 preserves the full v9 evaluator contract and uses only v10 outputs", async (t) => {
+  const subject = await loadSubject();
+  const v9 = JSON.parse(await readFile(TASK1_PREVALIDATION_PLAN_PATH, "utf8"));
+  const v10 = schema10Plan(v9);
+  const validated = subject.validateDesignVisualM2B1Plan(v10);
+
+  assert.equal(validated.schemaVersion, 10);
+  assert.equal(validated.id, "design-visual-m2-b1-smoke-plan-v10");
+  assert.deepEqual(validated.predecessor, v10.predecessor);
+  assert.deepEqual(validated.inputs.designPrompt, ATTACHED_IMAGE_DESIGN_PROMPT);
+  assert.deepEqual(validated.inputs.visualPrompt, ATTACHED_IMAGE_VISUAL_PROMPT);
+  for (const key of [
+    "runtime", "inputs", "candidates", "claimScope", "originalDetail", "boundaries",
+  ]) {
+    assert.deepEqual(validated[key], v9[key], key);
+  }
+  assert.equal(Object.values(validated.outputs).every((file) => file.includes("-v10-")), true);
+  assert.equal(Object.values(validated.outputs).some((file) => file.includes("-v9-")), false);
+
+  const fixture = await successorFixtureRoot(t, v10);
+  const preflight = await subject.preflightDesignVisualM2B1({
+    repositoryRoot: fixture.root,
+    planPath: fixture.planPath,
+    gitStatus: async () => "",
+    gitIdentity: async (_root, sourceCommit, predecessorSourceCommit) => {
+      assert.equal(sourceCommit, v10.source.repositoryCommit);
+      assert.equal(predecessorSourceCommit, v9.source.repositoryCommit);
+      return sourceCommit;
+    },
+    gitReadBlob: copiedFixtureGitReadBlob(v10),
+  });
+  assert.equal(preflight.plan.schemaVersion, 10);
+
+  for (const [label, mutate] of [
+    ["prompt", (plan) => { plan.inputs.visualPrompt = structuredClone(v9.predecessor.plan); }],
+    ["contract", (plan) => { plan.runtime.retryCount = 1; }],
+    ["predecessor", (plan) => { plan.predecessor.latestReceipt.sha256 = "0".repeat(64); }],
+    ["method", (plan) => { plan.predecessor.methodChange = "compaction"; }],
+    ["output", (plan) => { plan.outputs.summary = v9.outputs.summary; }],
+  ]) {
+    const changed = structuredClone(v10);
+    mutate(changed);
+    assert.throws(
+      () => subject.validateDesignVisualM2B1Plan(changed),
+      /prompt|runtime|predecessor|method|output|generation|malformed|differs/iu,
+      label,
+    );
+  }
+});
+
+test("M2B1 schema 10 rejects unchanged method source, identical blobs, and rollback ancestry", async (t) => {
+  const subject = await loadSubject();
+  const v9 = JSON.parse(await readFile(TASK1_PREVALIDATION_PLAN_PATH, "utf8"));
+  const v10 = schema10Plan(v9);
+
+  const sameCommit = structuredClone(v10);
+  sameCommit.source.repositoryCommit = v9.source.repositoryCommit;
+  const sameCommitFixture = await successorFixtureRoot(t, sameCommit);
+  await assert.rejects(subject.preflightDesignVisualM2B1({
+    repositoryRoot: sameCommitFixture.root,
+    planPath: sameCommitFixture.planPath,
+    gitStatus: async () => "",
+    gitIdentity: async (_root, sourceCommit) => sourceCommit,
+    gitReadBlob: copiedFixtureGitReadBlob(sameCommit),
+  }), /source.*unchanged|method.*source/iu);
+
+  const sameBlobs = structuredClone(v10);
+  sameBlobs.source = {
+    ...structuredClone(v9.source),
+    repositoryCommit: v10.source.repositoryCommit,
+  };
+  const sameBlobFixture = await successorFixtureRoot(t, sameBlobs);
+  await assert.rejects(subject.preflightDesignVisualM2B1({
+    repositoryRoot: sameBlobFixture.root,
+    planPath: sameBlobFixture.planPath,
+    gitStatus: async () => "",
+    gitIdentity: async (_root, sourceCommit) => sourceCommit,
+    gitReadBlob: copiedFixtureGitReadBlob(sameBlobs),
+  }), /source.*unchanged|method.*source/iu);
+
+  const rollback = structuredClone(v10);
+  rollback.source = structuredClone(
+    JSON.parse(await readFile(ATTACHED_IMAGE_PLAN_PATH, "utf8")).source,
+  );
+  const planRoot = await mkdtemp(path.join(ROOT, ".m2b1-schema10-rollback-"));
+  t.after(() => rm(planRoot, { recursive: true, force: true }));
+  const planPath = path.join(planRoot, "plan.json");
+  await writeFile(planPath, JSON.stringify(rollback, null, 2) + "\n");
+  await assert.rejects(subject.preflightDesignVisualM2B1({
+    repositoryRoot: ROOT,
+    planPath,
+    gitStatus: async () => "",
+  }), /predecessor.*ancestor|descendant.*predecessor|method.*rollback/iu);
 });

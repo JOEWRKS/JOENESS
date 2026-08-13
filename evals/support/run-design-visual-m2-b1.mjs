@@ -86,6 +86,82 @@ const TASK1_PREVALIDATION_KEYS = Object.freeze([
   "mcpAfterOverLimit",
   "rawPayloadRetained",
 ]);
+const EVENT_COMPACTION_KEYS = Object.freeze([
+  "observedEventCount",
+  "retainedEventCount",
+  "retainedEventLimit",
+  "retainedEventsOverLimit",
+  "methodHistogram",
+  "itemTypeHistogram",
+  "agentMessageDelta",
+  "rawPayloadRetained",
+]);
+const EVENT_HISTOGRAM_KEYS = Object.freeze(["eventCount", "entries"]);
+const AGENT_MESSAGE_DELTA_KEYS = Object.freeze([
+  "groupCount",
+  "fragmentCount",
+  "byteLength",
+  "fragmentLimit",
+  "byteLimit",
+  "fragmentLimitExceeded",
+  "byteLimitExceeded",
+  "rawTextRetained",
+]);
+const AGENT_MESSAGE_DELTA_FRAGMENT_LIMIT = 4096;
+const AGENT_MESSAGE_DELTA_BYTE_LIMIT = 1024 * 1024;
+const EVENT_METHOD_BUCKETS = Object.freeze([
+  "account/rateLimits/updated",
+  "item/agentMessage/delta",
+  "item/commandExecution/outputDelta",
+  "item/completed",
+  "item/plan/delta",
+  "item/reasoning/summaryPartAdded",
+  "item/reasoning/summaryTextDelta",
+  "item/reasoning/textDelta",
+  "item/started",
+  "remoteControl/status/changed",
+  "serverRequest/resolved",
+  "thread/started",
+  "thread/status/changed",
+  "thread/tokenUsage/updated",
+  "turn/completed",
+  "turn/plan/updated",
+  "turn/started",
+  "windowsSandbox/setupCompleted",
+  "configWarning",
+  "error",
+  "guardianWarning",
+  "hook/completed",
+  "hook/started",
+  "item/autoApprovalReview/completed",
+  "item/autoApprovalReview/started",
+  "item/fileChange/outputDelta",
+  "item/fileChange/patchUpdated",
+  "item/mcpToolCall/progress",
+  "mcpServer/oauthLogin/completed",
+  "mcpServer/startupStatus/updated",
+  "model/rerouted",
+  "thread/settings/updated",
+  "turn/diff/updated",
+  "warning",
+  "windows/worldWritableWarning",
+  "collector/serverRequest",
+  "other",
+]);
+const ITEM_TYPE_BUCKETS = Object.freeze([
+  "reasoning",
+  "imageView",
+  "commandExecution",
+  "dynamicToolCall",
+  "agentMessage",
+  "userMessage",
+  "mcpToolCall",
+  "webSearch",
+  "collabAgentToolCall",
+  "fileChange",
+  "other",
+]);
+const MESSAGE_DELTA_ID_PATTERN = /^[A-Za-z0-9._:-]{1,128}$/u;
 const EXPECTED_IMAGE_PATHS = Object.freeze({
   approvedSource: "evals/skill-contracts/fixtures/visual-m2-v1/blind/ff71c6e9919567b251659f00fda0a224a5f91fab24ed36042eb070310d739110.png",
   "sample-a": "evals/skill-contracts/fixtures/visual-m2-v1/blind/0684e6867856745762217a70862b81fee8ac70787b5ab57ea13ffa58a870db62.png",
@@ -232,6 +308,23 @@ const M2B1_PREDECESSORS = Object.freeze({
       sha256: "4da913372536261cfc6b82298d99c408683c4fc92fde421b540a893f202e0e86",
     }),
   }),
+  10: Object.freeze({
+    plan: Object.freeze({
+      path: "evals/skill-contracts/design-visual-m2-b1-smoke-plan-v9.json",
+      bytes: 5648,
+      sha256: "fd1aed546ff6d92121435d6de2806a5ec99fb3f7b3f6a866d5c1a9d87707e39a",
+    }),
+    blockedAttempt: Object.freeze({
+      path: "evals/skill-contracts/design-visual-m2-b1-v9-blocked.json",
+      bytes: 2317,
+      sha256: "e91beb6dad95163cbbdc31b8ba326c222b72bbbc0c71ef02ccde4fd1e7605887",
+    }),
+    latestReceipt: Object.freeze({
+      path: "evals/skill-contracts/design-visual-m2-attempt-index-v11.json",
+      bytes: 8395,
+      sha256: "d8434fa1ea6524e018c793be93b0ea7913e0613e6f763dc639f4220663d60ff3",
+    }),
+  }),
 });
 const M2B1_METHOD_CHANGES = Object.freeze({
   2: "bounded-sanitized-runtime-error-and-primary-cause-capture",
@@ -242,6 +335,7 @@ const M2B1_METHOD_CHANGES = Object.freeze({
   7: "bounded-path-private-post-validation-image-evidence-retention-and-local-image-attachment-vs-optional-image-view-telemetry-separation-no-evaluator-contract-change",
   8: "attached-image-only-design-and-visual-evaluator-instructions-no-path-open-or-view-image-no-acceptance-criteria-change",
   9: "bounded-path-private-task1-prevalidation-count-and-exceeded-limit-retention-no-evaluator-contract-change",
+  10: "canonical-agent-message-delta-compaction-and-bounded-event-aggregate-retention-no-task1-cap-or-evaluator-contract-change",
 });
 const M2B1_PROMPT_PINS = Object.freeze({
   legacy: Object.freeze({
@@ -322,7 +416,7 @@ function assertOutputPath(value, label) {
 }
 
 export function validateDesignVisualM2B1Plan(value) {
-  const isSuccessor = [2, 3, 4, 5, 6, 7, 8, 9].includes(value?.schemaVersion);
+  const isSuccessor = [2, 3, 4, 5, 6, 7, 8, 9, 10].includes(value?.schemaVersion);
   const expectedKeys = [
     "schemaVersion", "id", "date",
     ...(isSuccessor ? ["predecessor", "source"] : []),
@@ -333,7 +427,7 @@ export function validateDesignVisualM2B1Plan(value) {
     throw new Error("M2B1 plan is malformed");
   }
   if (
-    ![1, 2, 3, 4, 5, 6, 7, 8, 9].includes(value.schemaVersion) ||
+    ![1, 2, 3, 4, 5, 6, 7, 8, 9, 10].includes(value.schemaVersion) ||
     value.id !== `design-visual-m2-b1-smoke-plan-v${value.schemaVersion}` ||
     typeof value.date !== "string" ||
     !exactKeys(value.runtime, ["codexVersion", "sessionOrder", "retryCount"]) ||
@@ -385,7 +479,7 @@ export function validateDesignVisualM2B1Plan(value) {
     throw new Error("M2B1 plan inputs are malformed");
   }
   for (const key of PLAN_INPUT_KEYS) assertPin(value.inputs[key], `M2B1 ${key}`);
-  const expectedPromptPins = [8, 9].includes(value.schemaVersion)
+  const expectedPromptPins = [8, 9, 10].includes(value.schemaVersion)
     ? M2B1_PROMPT_PINS[8]
     : M2B1_PROMPT_PINS.legacy;
   if (
@@ -453,7 +547,7 @@ export function validateDesignVisualM2B1Plan(value) {
 }
 
 function assertUnchangedM2B1EvaluatorContract(plan, predecessorBytes) {
-  if (![4, 5, 6, 7, 8, 9].includes(plan.schemaVersion)) return;
+  if (![4, 5, 6, 7, 8, 9, 10].includes(plan.schemaVersion)) return;
   let predecessor;
   try {
     predecessor = validateDesignVisualM2B1Plan(
@@ -779,7 +873,7 @@ export async function preflightDesignVisualM2B1({
       throw new Error("M2B1 predecessor plan contract is unreadable", { cause: error });
     }
   }
-  const requiresMethodAncestry = [6, 7, 8, 9].includes(plan.schemaVersion);
+  const requiresMethodAncestry = [6, 7, 8, 9, 10].includes(plan.schemaVersion);
   let predecessorImplementationCommit;
   if (requiresMethodAncestry) {
     predecessorImplementationCommit = predecessorPlan?.source?.repositoryCommit;
@@ -1383,6 +1477,135 @@ function diagnosticArrayEntries(value, indices) {
     if (item.found) entries.push({ index, value: item.value });
   }
   return entries;
+}
+
+function safeExactOwnDataRecord(value, keys) {
+  if (diagnosticProxy(value) || !isObject(value)) return null;
+  let ownKeys;
+  try {
+    ownKeys = Reflect.ownKeys(value);
+  } catch {
+    return null;
+  }
+  if (
+    ownKeys.length !== keys.length ||
+    ownKeys.some((key) => typeof key !== "string" || !keys.includes(key))
+  ) {
+    return null;
+  }
+  const record = {};
+  for (const key of keys) {
+    const property = safeDiagnosticOwnData(value, key);
+    if (!property.found) return null;
+    record[key] = property.value;
+  }
+  return record;
+}
+
+function retainEventHistogram(value, labelKey, bucketOrder) {
+  const record = safeExactOwnDataRecord(value, EVENT_HISTOGRAM_KEYS);
+  if (
+    record === null ||
+    !Number.isSafeInteger(record.eventCount) ||
+    record.eventCount < 0
+  ) {
+    return null;
+  }
+  const count = diagnosticArrayLength(record.entries);
+  if (count === null || count > bucketOrder.length) return null;
+  const rawEntries = diagnosticArrayEntries(
+    record.entries,
+    Array.from({ length: count }, (_, index) => index),
+  );
+  if (rawEntries.length !== count) return null;
+  const entryKeys = [labelKey, "count"];
+  const entries = [];
+  let previousOrder = -1;
+  let total = 0;
+  for (const { value: rawEntry } of rawEntries) {
+    const entry = safeExactOwnDataRecord(rawEntry, entryKeys);
+    if (entry === null) return null;
+    const order = bucketOrder.indexOf(entry[labelKey]);
+    if (
+      order <= previousOrder ||
+      !Number.isSafeInteger(entry.count) ||
+      entry.count < 1
+    ) {
+      return null;
+    }
+    total += entry.count;
+    if (!Number.isSafeInteger(total)) return null;
+    previousOrder = order;
+    entries.push({ [labelKey]: entry[labelKey], count: entry.count });
+  }
+  if (total !== record.eventCount) return null;
+  return { eventCount: record.eventCount, entries };
+}
+
+function retainEventCompaction(value) {
+  const record = safeExactOwnDataRecord(value, EVENT_COMPACTION_KEYS);
+  if (record === null) return null;
+  const methodHistogram = retainEventHistogram(
+    record.methodHistogram,
+    "method",
+    EVENT_METHOD_BUCKETS,
+  );
+  const itemTypeHistogram = retainEventHistogram(
+    record.itemTypeHistogram,
+    "itemType",
+    ITEM_TYPE_BUCKETS,
+  );
+  const delta = safeExactOwnDataRecord(record.agentMessageDelta, AGENT_MESSAGE_DELTA_KEYS);
+  if (
+    !Number.isSafeInteger(record.observedEventCount) ||
+    record.observedEventCount < 0 ||
+    !Number.isSafeInteger(record.retainedEventCount) ||
+    record.retainedEventCount < 0 ||
+    record.retainedEventCount > record.observedEventCount ||
+    record.retainedEventLimit !== TASK1_EVENT_LIMIT ||
+    record.retainedEventsOverLimit !== (record.retainedEventCount > TASK1_EVENT_LIMIT) ||
+    methodHistogram === null ||
+    methodHistogram.eventCount !== record.observedEventCount ||
+    itemTypeHistogram === null ||
+    itemTypeHistogram.eventCount > record.observedEventCount ||
+    delta === null ||
+    !Number.isSafeInteger(delta.groupCount) ||
+    delta.groupCount < 0 ||
+    !Number.isSafeInteger(delta.fragmentCount) ||
+    delta.fragmentCount < 0 ||
+    delta.groupCount > delta.fragmentCount ||
+    (delta.fragmentCount === 0 && (delta.groupCount !== 0 || delta.byteLength !== 0)) ||
+    !Number.isSafeInteger(delta.byteLength) ||
+    delta.byteLength < 0 ||
+    delta.fragmentLimit !== AGENT_MESSAGE_DELTA_FRAGMENT_LIMIT ||
+    delta.byteLimit !== AGENT_MESSAGE_DELTA_BYTE_LIMIT ||
+    delta.fragmentLimitExceeded !==
+      (delta.fragmentCount > AGENT_MESSAGE_DELTA_FRAGMENT_LIMIT) ||
+    delta.byteLimitExceeded !== (delta.byteLength > AGENT_MESSAGE_DELTA_BYTE_LIMIT) ||
+    delta.rawTextRetained !== false ||
+    record.rawPayloadRetained !== false
+  ) {
+    return null;
+  }
+  return {
+    observedEventCount: record.observedEventCount,
+    retainedEventCount: record.retainedEventCount,
+    retainedEventLimit: TASK1_EVENT_LIMIT,
+    retainedEventsOverLimit: record.retainedEventsOverLimit,
+    methodHistogram,
+    itemTypeHistogram,
+    agentMessageDelta: {
+      groupCount: delta.groupCount,
+      fragmentCount: delta.fragmentCount,
+      byteLength: delta.byteLength,
+      fragmentLimit: AGENT_MESSAGE_DELTA_FRAGMENT_LIMIT,
+      byteLimit: AGENT_MESSAGE_DELTA_BYTE_LIMIT,
+      fragmentLimitExceeded: delta.fragmentLimitExceeded,
+      byteLimitExceeded: delta.byteLimitExceeded,
+      rawTextRetained: false,
+    },
+    rawPayloadRetained: false,
+  };
 }
 
 function boundedArrayPrefix(value, limit = 16) {
@@ -1989,6 +2212,10 @@ function retainPostValidationFreshEvidence(result, expectedInput) {
       ? {}
       : { controllerLocalImages }),
   };
+  const eventCompactionProperty = safeDiagnosticOwnData(result, "eventCompaction");
+  const eventCompaction = eventCompactionProperty.found
+    ? retainEventCompaction(eventCompactionProperty.value)
+    : null;
   const appServerProperty = safeDiagnosticOwnData(result, "appServer");
   const appServerValue = appServerProperty.found ? appServerProperty.value : null;
   const processExitCode = safeDiagnosticOwnData(appServerValue, "processExitCode");
@@ -2017,7 +2244,11 @@ function retainPostValidationFreshEvidence(result, expectedInput) {
       : { successfulImageViews: retainedSuccessfulImageViews }),
   };
   try {
-    return safeBoundedClone({ input, appServer }, "post-validation failure", 32 * 1024);
+    return safeBoundedClone({
+      input,
+      appServer,
+      ...(eventCompaction === null ? {} : { eventCompaction }),
+    }, "post-validation failure", 32 * 1024);
   } catch {
     return {
       input: { expectedLocalImageInputIndexes: expectedIndexes },
@@ -2027,12 +2258,15 @@ function retainPostValidationFreshEvidence(result, expectedInput) {
 }
 
 function attachPostValidationFreshEvidence(error, result, expectedInput) {
+  const evidence = retainPostValidationFreshEvidence(result, expectedInput);
   Object.defineProperty(error, "freshEvaluatorEvidence", {
     configurable: true,
     enumerable: false,
     writable: true,
-    value: retainPostValidationFreshEvidence(result, expectedInput),
+    value: evidence,
   });
+  const eventCompaction = safeDiagnosticOwnData(evidence, "eventCompaction");
+  if (eventCompaction.found) attachEventCompaction(error, eventCompaction.value);
   return error;
 }
 
@@ -2520,6 +2754,39 @@ function retainLifecycleEvent(event) {
   if (isObject(event.runtimeError)) {
     retained.runtimeError = safeBoundedClone(event.runtimeError, "runtime error", 8 * 1024);
   }
+  const messageDeltaProperty = safeDiagnosticOwnData(event, "messageDelta");
+  if ((event.method === "item/agentMessage/delta") !== messageDeltaProperty.found) {
+    throw new Error("M2B1 Task 1 message-delta method binding differs");
+  }
+  if (messageDeltaProperty.found) {
+    const messageDelta = safeExactOwnDataRecord(
+      messageDeltaProperty.value,
+      ["itemId", "count", "byteLength", "sha256"],
+    );
+    if (
+      messageDelta === null ||
+      typeof messageDelta.itemId !== "string" ||
+      Buffer.byteLength(messageDelta.itemId, "utf8") > 128 ||
+      !MESSAGE_DELTA_ID_PATTERN.test(messageDelta.itemId) ||
+      containsCredentialText(messageDelta.itemId) ||
+      !Number.isSafeInteger(messageDelta.count) ||
+      messageDelta.count < 1 ||
+      messageDelta.count > AGENT_MESSAGE_DELTA_FRAGMENT_LIMIT ||
+      !Number.isSafeInteger(messageDelta.byteLength) ||
+      messageDelta.byteLength < 0 ||
+      messageDelta.byteLength > AGENT_MESSAGE_DELTA_BYTE_LIMIT ||
+      typeof messageDelta.sha256 !== "string" ||
+      !/^[a-f0-9]{64}$/u.test(messageDelta.sha256)
+    ) {
+      throw new Error("M2B1 Task 1 message-delta evidence is malformed");
+    }
+    retained.messageDelta = {
+      itemId: messageDelta.itemId,
+      count: messageDelta.count,
+      byteLength: messageDelta.byteLength,
+      sha256: messageDelta.sha256,
+    };
+  }
   return retained;
 }
 
@@ -2563,6 +2830,29 @@ function attachTask1Prevalidation(error, evidence) {
     writable: true,
     value: evidence,
   });
+  return error;
+}
+
+function attachEventCompaction(error, evidence) {
+  if (evidence === null) return error;
+  Object.defineProperty(error, "eventCompaction", {
+    configurable: true,
+    enumerable: false,
+    writable: true,
+    value: evidence,
+  });
+  return error;
+}
+
+function attachValidatedTask1FailureEvidence(error, result, expectedInput, eventCompaction) {
+  const nested = retainPostValidationFreshEvidence(result, expectedInput);
+  Object.defineProperty(error, "freshEvaluatorEvidence", {
+    configurable: true,
+    enumerable: false,
+    writable: true,
+    value: nested,
+  });
+  attachEventCompaction(error, eventCompaction);
   return error;
 }
 
@@ -2614,9 +2904,17 @@ function retainTask1Evidence(result, expectedInput) {
   const mcpAfter = safeDiagnosticOwnData(result, "mcpAfter");
   const blockers = safeDiagnosticOwnData(result, "blockers");
   const outputSchema = safeDiagnosticOwnData(result, "outputSchema");
+  const eventCompactionProperty = safeDiagnosticOwnData(result, "eventCompaction");
   const eventsCount = diagnosticArrayLength(events.found ? events.value : null);
   const mcpAfterCount = diagnosticArrayLength(mcpAfter.found ? mcpAfter.value : null);
   const blockerCount = diagnosticArrayLength(blockers.found ? blockers.value : null);
+  const eventCompaction = eventCompactionProperty.found
+    ? retainEventCompaction(eventCompactionProperty.value)
+    : null;
+  const eventCompactionMatches =
+    eventCompaction !== null &&
+    eventsCount !== null &&
+    eventCompaction.retainedEventCount === eventsCount;
   if (
     eventsCount === null ||
     eventsCount > TASK1_EVENT_LIMIT ||
@@ -2624,55 +2922,60 @@ function retainTask1Evidence(result, expectedInput) {
     mcpAfterCount > TASK1_MCP_AFTER_LIMIT ||
     blockerCount === null ||
     blockerCount !== 0 ||
+    !eventCompactionMatches ||
     !outputSchema.found ||
     diagnosticProxy(outputSchema.value) ||
     !isObject(outputSchema.value)
   ) {
-    throw attachTask1Prevalidation(
-      new Error("M2B1 Task 1 evidence is incomplete, blocked, or unbounded"),
-      task1PrevalidationEvidence(eventsCount, mcpAfterCount),
+    throw attachEventCompaction(
+      attachTask1Prevalidation(
+        new Error("M2B1 Task 1 evidence is incomplete, blocked, or unbounded"),
+        task1PrevalidationEvidence(eventsCount, mcpAfterCount),
+      ),
+      eventCompactionMatches ? eventCompaction : null,
     );
   }
-  assertSuccessfulSecurityEvidence(result, expectedInput);
   try {
+    assertSuccessfulSecurityEvidence(result, expectedInput);
     correlateSuccessfulImageEvidence(result, expectedInput);
+    const eventRecords = events.value.map(retainLifecycleEvent);
+    const mcpRecords = safeBoundedClone(mcpAfter.value, "MCP after", 32 * 1024);
+    return safeBoundedClone({
+      threadStart: retainThreadStartEvidence(result.threadStart),
+      thread: retainThreadEvidence(result.thread),
+      turn: retainTurnEvidence(result.turn),
+      input: retainInputEvidence(result.input),
+      outputSchema: {
+        byteLength: outputSchema.value.byteLength,
+        sha256: outputSchema.value.sha256,
+      },
+      events: {
+        records: eventRecords,
+        count: eventRecords.length,
+        sha256: sha256(stableStringify(eventRecords)),
+      },
+      eventCompaction,
+      toolEvidence: retainToolEvidence(result.toolEvidence),
+      mcpAfter: {
+        records: mcpRecords,
+        count: mcpRecords.length,
+        sha256: sha256(stableStringify(mcpRecords)),
+      },
+      blockers: [],
+      appServer: retainAppServer(result.appServer),
+      attachmentBoundary: {
+        localImageRequestSubmission: "VERIFIED",
+        localSourceFileReadback: "VERIFIED",
+        attachmentConversion: "UNVERIFIED",
+        providerInclusion: "UNVERIFIED",
+        modelPixelUse: "UNVERIFIED",
+        originalDetail: "UNVERIFIED",
+        imageViewTelemetryRole: "OPTIONAL_SEPARATE_TOOL",
+      },
+    }, "Task 1", 256 * 1024);
   } catch (error) {
-    throw attachPostValidationFreshEvidence(error, result, expectedInput);
+    throw attachValidatedTask1FailureEvidence(error, result, expectedInput, eventCompaction);
   }
-  const eventRecords = events.value.map(retainLifecycleEvent);
-  const mcpRecords = safeBoundedClone(mcpAfter.value, "MCP after", 32 * 1024);
-  return safeBoundedClone({
-    threadStart: retainThreadStartEvidence(result.threadStart),
-    thread: retainThreadEvidence(result.thread),
-    turn: retainTurnEvidence(result.turn),
-    input: retainInputEvidence(result.input),
-    outputSchema: {
-      byteLength: outputSchema.value.byteLength,
-      sha256: outputSchema.value.sha256,
-    },
-    events: {
-      records: eventRecords,
-      count: eventRecords.length,
-      sha256: sha256(stableStringify(eventRecords)),
-    },
-    toolEvidence: retainToolEvidence(result.toolEvidence),
-    mcpAfter: {
-      records: mcpRecords,
-      count: mcpRecords.length,
-      sha256: sha256(stableStringify(mcpRecords)),
-    },
-    blockers: [],
-    appServer: retainAppServer(result.appServer),
-    attachmentBoundary: {
-      localImageRequestSubmission: "VERIFIED",
-      localSourceFileReadback: "VERIFIED",
-      attachmentConversion: "UNVERIFIED",
-      providerInclusion: "UNVERIFIED",
-      modelPixelUse: "UNVERIFIED",
-      originalDetail: "UNVERIFIED",
-      imageViewTelemetryRole: "OPTIONAL_SEPARATE_TOOL",
-    },
-  }, "Task 1", 256 * 1024);
 }
 
 async function defaultRuntimeFactory(plan) {
@@ -2689,7 +2992,40 @@ async function defaultRuntimeFactory(plan) {
 }
 
 function verifiedFailureShutdown(error, session) {
-  return error?.freshEvaluatorEvidence?.appServer?.processExitCode === 0 || session?.processExitCode === 0;
+  const freshEvidence = safeDiagnosticOwnData(error, "freshEvaluatorEvidence");
+  const appServer = safeDiagnosticOwnData(
+    freshEvidence.found ? freshEvidence.value : null,
+    "appServer",
+  );
+  const processExitCode = safeDiagnosticOwnData(
+    appServer.found ? appServer.value : null,
+    "processExitCode",
+  );
+  if (processExitCode.value === 0) return true;
+  try {
+    return session?.processExitCode === 0;
+  } catch {
+    return false;
+  }
+}
+
+function retainFailureEventCompaction(error, freshEvidence) {
+  const directProperty = safeDiagnosticOwnData(error, "eventCompaction");
+  const nestedProperty = safeDiagnosticOwnData(freshEvidence, "eventCompaction");
+  const direct = directProperty.found
+    ? retainEventCompaction(directProperty.value)
+    : null;
+  const nested = nestedProperty.found
+    ? retainEventCompaction(nestedProperty.value)
+    : null;
+  if (
+    (directProperty.found && direct === null) ||
+    (nestedProperty.found && nested === null) ||
+    (direct !== null && nested !== null && stableStringify(direct) !== stableStringify(nested))
+  ) {
+    return null;
+  }
+  return direct ?? nested;
 }
 
 export async function runDesignVisualM2B1({
@@ -2958,10 +3294,15 @@ export async function runDesignVisualM2B1({
       safeShutdown = false;
     }
     if (safeShutdown && error?.code !== ARTIFACT_PATH_LEAK_CODE) {
+      const freshEvaluatorEvidenceProperty = safeDiagnosticOwnData(error, "freshEvaluatorEvidence");
+      const freshEvaluatorEvidence = freshEvaluatorEvidenceProperty.found
+        ? freshEvaluatorEvidenceProperty.value
+        : null;
       const task1PrevalidationProperty = safeDiagnosticOwnData(error, "task1Prevalidation");
       const task1Prevalidation = task1PrevalidationProperty.found
         ? retainTask1Prevalidation(task1PrevalidationProperty.value)
         : null;
+      const eventCompaction = retainFailureEventCompaction(error, freshEvaluatorEvidence);
       const blocked = {
         schemaVersion: 1,
         id: `design-visual-m2-b1-v${preflight.plan.schemaVersion}-blocked`,
@@ -2972,8 +3313,9 @@ export async function runDesignVisualM2B1({
         ...(preflight.executionSource
           ? { executionSource: clone(preflight.executionSource) }
           : {}),
-        partialEvidence: retainPartialEvidence(error?.freshEvaluatorEvidence),
+        partialEvidence: retainPartialEvidence(freshEvaluatorEvidence),
         ...(task1Prevalidation === null ? {} : { task1Prevalidation }),
+        ...(eventCompaction === null ? {} : { eventCompaction }),
         cleanupEvidence: clone(cleanupEvidence ?? {
           phase: "post-evaluator-cleanup",
           finishAttempts: finishAttempted ? 1 : 0,
