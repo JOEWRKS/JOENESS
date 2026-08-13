@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
-import { mkdtemp, mkdir, rm, writeFile } from "node:fs/promises";
+import { mkdtemp, mkdir, realpath, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import test from "node:test";
@@ -58,6 +58,33 @@ function dynamicTool() {
   };
 }
 
+function successfulImageViewItem(id, matchedInputIndex = 1) {
+  return {
+    id,
+    matchedInputIndex,
+    eventCount: 2,
+    startedCount: 1,
+    completedCount: 1,
+    complete: true,
+  };
+}
+
+function successfulImageViewSnapshot(items, overrides = {}) {
+  return {
+    complete: true,
+    eventCount: items.length * 2,
+    completedCount: items.length,
+    items,
+    blockers: [],
+    privacy: {
+      rawPathPersisted: false,
+      pathDigestPersisted: false,
+      rawDiagnosticDigestPersisted: false,
+    },
+    ...overrides,
+  };
+}
+
 function createSession({
   finalText = '{"verdict":"PASS"}',
   priorTurns = [],
@@ -84,9 +111,18 @@ function createSession({
   remoteSnapshotThrowsOnRead = null,
   runtimeError = null,
   mcpAfterError = null,
+  provideImageBinder = true,
+  imageDiagnostics = null,
+  successfulImageViews = null,
+  onBindLocalImageDiagnostics = null,
+  onTurnCompleted = null,
+  onClose = null,
+  turnStartError = null,
 } = {}) {
   const listeners = new Set();
   const requests = [];
+  const operations = [];
+  const imageBindings = [];
   let toolHandler = null;
   let processExitCode = null;
   let closed = false;
@@ -98,6 +134,8 @@ function createSession({
 
   const session = {
     requests,
+    operations,
+    imageBindings,
     notificationCursor: 0,
     mcpInventory: [],
     get remoteControlSnapshot() {
@@ -119,8 +157,48 @@ function createSession({
         ...(stderrDiagnostic === null ? {} : { diagnostic: stderrDiagnostic }),
       };
     },
+    get imageDiagnostics() {
+      if (imageBindings.length === 0) return null;
+      return structuredClone(
+        imageDiagnostics ?? {
+          status: "NO_ROUTER_IMAGE_ERROR",
+          observationCount: 0,
+          expectedTargetCount: imageBindings[0].images.length,
+          effectivePathMatch: "UNVERIFIED",
+          matchedInputIndex: null,
+          effectivePathAbsolute: "UNVERIFIED",
+          effectivePathWithinRoot: "UNVERIFIED",
+          modelArgumentAbsolute: "UNVERIFIED",
+          outerCategory: "UNVERIFIED",
+          reportedCategory: "UNVERIFIED",
+          privacy: {
+            rawPathPersisted: false,
+            pathDigestPersisted: false,
+            rawDiagnosticDigestPersisted: false,
+          },
+        },
+      );
+    },
+    get successfulImageViews() {
+      if (imageBindings.length === 0) return null;
+      return structuredClone(
+        successfulImageViews ?? {
+          complete: true,
+          eventCount: 0,
+          completedCount: 0,
+          items: [],
+          blockers: [],
+          privacy: {
+            rawPathPersisted: false,
+            pathDigestPersisted: false,
+            rawDiagnosticDigestPersisted: false,
+          },
+        },
+      );
+    },
     client: {
       async request(method, params) {
+        operations.push(method);
         requests.push({ method, params: structuredClone(params) });
         if (method === "thread/start") {
           await onThreadStart?.(params);
@@ -150,6 +228,7 @@ function createSession({
           };
         }
         if (method === "turn/start") {
+          if (turnStartError !== null) throw turnStartError;
           emit({
             method: "turn/started",
             params: {
@@ -246,6 +325,7 @@ function createSession({
             emit(terminal);
             if (duplicateTerminal) emit(terminal);
           }
+          await onTurnCompleted?.({ params, imageBindings });
           return { turn: { id: "fresh-turn", status: "inProgress" } };
         }
         if (method === "turn/interrupt") return {};
@@ -276,6 +356,7 @@ function createSession({
       };
     },
     async close() {
+      operations.push("close");
       if (lateForbiddenEvent) {
         emit({
           method: "item/completed",
@@ -304,6 +385,7 @@ function createSession({
           },
         });
       }
+      await onClose?.();
       processExitCode = closeExitCode;
       closed = true;
     },
@@ -311,6 +393,13 @@ function createSession({
       return closed;
     },
   };
+  if (provideImageBinder) {
+    session.bindLocalImageDiagnostics = async (binding) => {
+      operations.push("bindLocalImageDiagnostics");
+      imageBindings.push(structuredClone(binding));
+      await onBindLocalImageDiagnostics?.(binding);
+    };
+  }
   return session;
 }
 
@@ -329,7 +418,7 @@ async function rejectedEvidence(promise) {
   return observed.freshEvaluatorEvidence;
 }
 
-test("fresh evaluator preserves exact local-image descriptors and hashes without embedding bytes", async (t) => {
+test("fresh evaluator binds private image paths but persists only safe input and lifecycle evidence", async (t) => {
   const subject = await loadSubject();
   assert.equal(typeof subject?.runFreshEvaluatorTurn, "function");
   const root = await createRoot(t);
@@ -375,13 +464,110 @@ test("fresh evaluator preserves exact local-image descriptors and hashes without
   assert.deepEqual(result.input.descriptors[1], {
     index: 1,
     type: "localImage",
-    path: imagePath,
     byteLength: imageBytes.length,
     sha256: digest(imageBytes),
+    absolute: true,
+    withinResolvedRoot: true,
+    regularFile: true,
+    nonSymlink: true,
+    readable: true,
     originalDetail: "unverified",
   });
+  assert.deepEqual(result.input.controllerLocalImages, [
+    {
+      inputIndex: 1,
+      byteLength: imageBytes.length,
+      sha256: digest(imageBytes),
+      absolute: true,
+      withinResolvedRoot: true,
+      regularFile: true,
+      nonSymlink: true,
+      readable: true,
+      checkedBeforeThreadStart: true,
+      checkedBeforeTurnStart: true,
+      unchangedBeforeTurnStart: true,
+      postTurnPreCleanup: { readable: true, unchanged: true },
+    },
+  ]);
+  assert.deepEqual(session.imageBindings, [
+    {
+      root: await realpath(root),
+      images: [
+        {
+          inputIndex: 1,
+          sentPath: imagePath,
+          resolvedPath: await realpath(imagePath),
+          byteLength: imageBytes.length,
+          sha256: digest(imageBytes),
+        },
+      ],
+    },
+  ]);
+  assert.equal(
+    session.operations.indexOf("bindLocalImageDiagnostics") <
+      session.operations.indexOf("turn/start"),
+    true,
+  );
+  assert.equal(
+    session.operations.filter((operation) => operation === "bindLocalImageDiagnostics")
+      .length,
+    1,
+  );
+  assert.deepEqual(result.appServer.imageDiagnostics, {
+    status: "NO_ROUTER_IMAGE_ERROR",
+    observationCount: 0,
+    expectedTargetCount: 1,
+    effectivePathMatch: "UNVERIFIED",
+    matchedInputIndex: null,
+    effectivePathAbsolute: "UNVERIFIED",
+    effectivePathWithinRoot: "UNVERIFIED",
+    modelArgumentAbsolute: "UNVERIFIED",
+    outerCategory: "UNVERIFIED",
+    reportedCategory: "UNVERIFIED",
+    privacy: {
+      rawPathPersisted: false,
+      pathDigestPersisted: false,
+      rawDiagnosticDigestPersisted: false,
+    },
+  });
+  assert.deepEqual(result.appServer.successfulImageViews, {
+    complete: true,
+    eventCount: 0,
+    completedCount: 0,
+    items: [],
+    blockers: [],
+    privacy: {
+      rawPathPersisted: false,
+      pathDigestPersisted: false,
+      rawDiagnosticDigestPersisted: false,
+    },
+  });
+  assert.deepEqual(result.threadStart.request, {
+    ephemeral: true,
+    approvalPolicy: "never",
+    permissions: "joewrks-eval-control-v3",
+    projectDocMaxBytes: 0,
+    selectedCapabilityRootCount: 0,
+    dynamicToolCount: 0,
+    runtimeWorkspaceRootCount: 1,
+    environmentCount: 1,
+  });
+  assert.deepEqual(result.threadStart.response, {
+    threadId: "fresh-thread",
+    ephemeral: true,
+    priorTurnCount: 0,
+    instructionSourceCount: 0,
+  });
+  assert.equal(Object.hasOwn(result.thread, "cwd"), false);
+  assert.equal(Object.hasOwn(result.thread, "request"), false);
+  assert.equal(Object.hasOwn(result.turn.request, "input"), false);
   assert.equal(Object.hasOwn(turnStart.params.input[1], "detail"), false);
-  assert.equal(JSON.stringify(result.input).includes(imageBytes.toString("base64")), false);
+  const serialized = JSON.stringify(result);
+  assert.equal(serialized.includes(imagePath), false);
+  assert.equal(serialized.includes(root), false);
+  assert.equal(serialized.includes(input[0].text), false);
+  assert.equal(serialized.includes(imageBytes.toString("base64")), false);
+  assert.equal(serialized.includes('"cwd"'), false);
   assert.equal(session.closed, true);
 });
 
@@ -413,11 +599,808 @@ test("fresh evaluator freezes caller-owned text before awaited thread start", as
     {
       index: 0,
       type: "text",
-      text: "original prompt",
       byteLength: 15,
       sha256: digest("original prompt"),
     },
   ]);
+});
+
+test("fresh evaluator safe request hash is independent of private root and image path", async (t) => {
+  const subject = await loadSubject();
+  assert.equal(typeof subject?.runFreshEvaluatorTurn, "function");
+  const roots = [await createRoot(t), await createRoot(t)];
+  const hashes = [];
+  for (const [index, root] of roots.entries()) {
+    const directory = path.join(root, `private-${index}`);
+    await mkdir(directory);
+    const imagePath = path.join(directory, `candidate-${index}.png`);
+    await writeFile(imagePath, Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x21]));
+    const result = await subject.runFreshEvaluatorTurn({
+      session: createSession(),
+      root,
+      input: [
+        { type: "text", text: "Inspect the same logical image." },
+        { type: "localImage", path: imagePath },
+      ],
+      outputSchema: outputSchema(),
+      turnTimeoutMs: 100,
+    });
+    hashes.push(result.input.requestSha256);
+    assert.equal(JSON.stringify(result).includes(root), false);
+    assert.equal(JSON.stringify(result).includes(imagePath), false);
+  }
+  assert.equal(hashes[0], hashes[1]);
+});
+
+test("fresh evaluator gives the diagnostic binder the resolved root", async (t) => {
+  const subject = await loadSubject();
+  assert.equal(typeof subject?.runFreshEvaluatorTurn, "function");
+  const root = await createRoot(t);
+  const aliasSegment = path.join(root, "alias-segment");
+  await mkdir(aliasSegment);
+  const rootAlias = `${aliasSegment}${path.sep}..`;
+  const imagePath = path.join(root, "approved.png");
+  await writeFile(imagePath, Buffer.from([0x89, 0x50, 0x4e, 0x47]));
+  const session = createSession();
+
+  await subject.runFreshEvaluatorTurn({
+    session,
+    root: rootAlias,
+    input: [
+      { type: "text", text: "Inspect the image." },
+      { type: "localImage", path: imagePath },
+    ],
+    outputSchema: outputSchema(),
+    turnTimeoutMs: 100,
+  });
+
+  assert.equal(session.imageBindings[0].root, await realpath(rootAlias));
+});
+
+test("fresh evaluator requires the image diagnostic binder before turn start", async (t) => {
+  const subject = await loadSubject();
+  assert.equal(typeof subject?.runFreshEvaluatorTurn, "function");
+  const root = await createRoot(t);
+  const imagePath = path.join(root, "approved.png");
+  await writeFile(imagePath, Buffer.from([0x89, 0x50, 0x4e, 0x47]));
+  const session = createSession({ provideImageBinder: false });
+
+  const evidence = await rejectedEvidence(
+    subject.runFreshEvaluatorTurn({
+      session,
+      root,
+      input: [
+        { type: "text", text: "Inspect the image." },
+        { type: "localImage", path: imagePath },
+      ],
+      outputSchema: outputSchema(),
+      turnTimeoutMs: 100,
+    }),
+  );
+
+  assert.equal(evidence.blockers.includes("local-image-diagnostics-unavailable"), true);
+  assert.equal(session.requests.some(({ method }) => method === "turn/start"), false);
+  assert.equal(JSON.stringify(evidence).includes(imagePath), false);
+});
+
+test("fresh evaluator requires a successful image-view snapshot for local images", async (t) => {
+  const subject = await loadSubject();
+  const root = await createRoot(t);
+  const imagePath = path.join(root, "approved.png");
+  await writeFile(imagePath, Buffer.from([0x89, 0x50, 0x4e, 0x47]));
+  const session = createSession();
+  Object.defineProperty(session, "successfulImageViews", {
+    configurable: true,
+    get: () => null,
+  });
+
+  const evidence = await rejectedEvidence(
+    subject.runFreshEvaluatorTurn({
+      session,
+      root,
+      input: [
+        { type: "text", text: "Inspect the image." },
+        { type: "localImage", path: imagePath },
+      ],
+      outputSchema: outputSchema(),
+      turnTimeoutMs: 100,
+    }),
+  );
+
+  assert.equal(
+    evidence.blockers.includes("successful-image-view-unverified"),
+    true,
+  );
+  assert.equal(JSON.stringify(evidence).includes(imagePath), false);
+});
+
+test("fresh evaluator preserves the pre-turn image checks when turn start fails", async (t) => {
+  const subject = await loadSubject();
+  const root = await createRoot(t);
+  const imagePath = path.join(root, "approved.png");
+  const imageBytes = Buffer.from([0x89, 0x50, 0x4e, 0x47]);
+  await writeFile(imagePath, imageBytes);
+  const session = createSession({ turnStartError: new Error("fixture turn start failed") });
+
+  const evidence = await rejectedEvidence(
+    subject.runFreshEvaluatorTurn({
+      session,
+      root,
+      input: [
+        { type: "text", text: "Inspect the image." },
+        { type: "localImage", path: imagePath },
+      ],
+      outputSchema: outputSchema(),
+      turnTimeoutMs: 100,
+    }),
+  );
+
+  assert.deepEqual(evidence.input.controllerLocalImages, [{
+    inputIndex: 1,
+    byteLength: imageBytes.length,
+    sha256: digest(imageBytes),
+    absolute: true,
+    withinResolvedRoot: true,
+    regularFile: true,
+    nonSymlink: true,
+    readable: true,
+    checkedBeforeThreadStart: true,
+    checkedBeforeTurnStart: true,
+    unchangedBeforeTurnStart: true,
+    postTurnPreCleanup: { readable: false, unchanged: false },
+  }]);
+  assert.equal(session.operations.includes("bindLocalImageDiagnostics"), true);
+  assert.equal(JSON.stringify(evidence).includes(imagePath), false);
+});
+
+test("fresh evaluator rejects contradictory image diagnostics on a clean success path", async (t) => {
+  const subject = await loadSubject();
+  const root = await createRoot(t);
+  const imagePath = path.join(root, "approved.png");
+  await writeFile(imagePath, Buffer.from([0x89, 0x50, 0x4e, 0x47]));
+  const noRouter = {
+    status: "NO_ROUTER_IMAGE_ERROR",
+    observationCount: 0,
+    expectedTargetCount: 1,
+    effectivePathMatch: "UNVERIFIED",
+    matchedInputIndex: null,
+    effectivePathAbsolute: "UNVERIFIED",
+    effectivePathWithinRoot: "UNVERIFIED",
+    modelArgumentAbsolute: "UNVERIFIED",
+    outerCategory: "UNVERIFIED",
+    reportedCategory: "UNVERIFIED",
+    privacy: {
+      rawPathPersisted: false,
+      pathDigestPersisted: false,
+      rawDiagnosticDigestPersisted: false,
+    },
+  };
+  const cases = [
+    {
+      name: "target count mismatch",
+      diagnostic: { ...noRouter, expectedTargetCount: 2 },
+    },
+    {
+      name: "NO_ROUTER_IMAGE_ERROR with an observation",
+      diagnostic: { ...noRouter, observationCount: 1 },
+    },
+    {
+      name: "OBSERVED without App Server stderr",
+      diagnostic: {
+        ...noRouter,
+        status: "OBSERVED",
+        observationCount: 1,
+        effectivePathMatch: "MATCH",
+        matchedInputIndex: 1,
+        effectivePathAbsolute: "VERIFIED",
+        effectivePathWithinRoot: "VERIFIED",
+        outerCategory: "unable-to-locate",
+        reportedCategory: "not-found",
+      },
+    },
+    {
+      name: "MISMATCH without App Server stderr",
+      diagnostic: {
+        ...noRouter,
+        status: "UNVERIFIED",
+        observationCount: 1,
+        effectivePathMatch: "MISMATCH",
+      },
+    },
+    {
+      name: "privacy invariant violation",
+      diagnostic: {
+        ...noRouter,
+        privacy: { ...noRouter.privacy, rawPathPersisted: true },
+      },
+    },
+    {
+      name: "unexpected raw path field",
+      diagnostic: { ...noRouter, path: imagePath },
+    },
+  ];
+
+  for (const { name, diagnostic } of cases) {
+    await t.test(name, async () => {
+      const evidence = await rejectedEvidence(
+        subject.runFreshEvaluatorTurn({
+          session: createSession({ imageDiagnostics: diagnostic }),
+          root,
+          input: [
+            { type: "text", text: "Inspect the image." },
+            { type: "localImage", path: imagePath },
+          ],
+          outputSchema: outputSchema(),
+          turnTimeoutMs: 100,
+        }),
+      );
+
+      assert.equal(evidence.blockers.includes("image-diagnostics-unverified"), true);
+      assert.equal(JSON.stringify(evidence).includes(imagePath), false);
+    });
+  }
+});
+
+test("fresh evaluator preserves correlated successful image-view lifecycle evidence", async (t) => {
+  const subject = await loadSubject();
+  const root = await createRoot(t);
+  const imagePath = path.join(root, "approved.png");
+  await writeFile(imagePath, Buffer.from([0x89, 0x50, 0x4e, 0x47]));
+  const viewEvidence = {
+    complete: true,
+    eventCount: 2,
+    completedCount: 1,
+    items: [
+      {
+        id: "view-1",
+        matchedInputIndex: 1,
+        eventCount: 2,
+        startedCount: 1,
+        completedCount: 1,
+        complete: true,
+      },
+    ],
+    blockers: [],
+    privacy: {
+      rawPathPersisted: false,
+      pathDigestPersisted: false,
+      rawDiagnosticDigestPersisted: false,
+    },
+  };
+
+  const result = await subject.runFreshEvaluatorTurn({
+    session: createSession({ successfulImageViews: viewEvidence }),
+    root,
+    input: [
+      { type: "text", text: "Inspect the image." },
+      { type: "localImage", path: imagePath },
+    ],
+    outputSchema: outputSchema(),
+    turnTimeoutMs: 100,
+  });
+
+  assert.deepEqual(result.appServer.successfulImageViews, viewEvidence);
+  assert.equal(JSON.stringify(result).includes(imagePath), false);
+});
+
+test("fresh evaluator preserves a safe incomplete image-view lifecycle while blocking success", async (t) => {
+  const subject = await loadSubject();
+  const root = await createRoot(t);
+  const imagePath = path.join(root, "approved.png");
+  await writeFile(imagePath, Buffer.from([0x89, 0x50, 0x4e, 0x47]));
+  const incomplete = {
+    complete: false,
+    eventCount: 1,
+    completedCount: 0,
+    items: [
+      {
+        id: "view-incomplete-1",
+        matchedInputIndex: 1,
+        eventCount: 1,
+        startedCount: 1,
+        completedCount: 0,
+        complete: false,
+      },
+    ],
+    blockers: ["image-view-lifecycle-incomplete"],
+    privacy: {
+      rawPathPersisted: false,
+      pathDigestPersisted: false,
+      rawDiagnosticDigestPersisted: false,
+    },
+  };
+
+  const evidence = await rejectedEvidence(
+    subject.runFreshEvaluatorTurn({
+      session: createSession({ successfulImageViews: incomplete }),
+      root,
+      input: [
+        { type: "text", text: "Inspect the image." },
+        { type: "localImage", path: imagePath },
+      ],
+      outputSchema: outputSchema(),
+      turnTimeoutMs: 100,
+    }),
+  );
+
+  assert.equal(
+    evidence.blockers.includes("successful-image-view-unverified"),
+    true,
+  );
+  assert.deepEqual(evidence.appServer.successfulImageViews, incomplete);
+  assert.equal(JSON.stringify(evidence).includes(imagePath), false);
+});
+
+test("fresh evaluator drops incomplete image-view evidence containing path or credential text", async (t) => {
+  const subject = await loadSubject();
+  const root = await createRoot(t);
+  const imagePath = path.join(root, "approved.png");
+  await writeFile(imagePath, Buffer.from([0x89, 0x50, 0x4e, 0x47]));
+  const forbiddenPath = "C:\\Users\\Private-User\\view.png";
+  const secret = "sk-SYNTHETIC_TEST_ONLY_abcdefghijklmnop";
+  const cases = [
+    {
+      name: "path-shaped blocker",
+      value: {
+        ...successfulImageViewSnapshot([], {
+          complete: false,
+          blockers: [forbiddenPath],
+        }),
+      },
+      forbidden: forbiddenPath,
+    },
+    {
+      name: "path-shaped item id",
+      value: {
+        ...successfulImageViewSnapshot([
+          successfulImageViewItem(forbiddenPath),
+        ]),
+        complete: false,
+        blockers: ["image-view-lifecycle-incomplete"],
+      },
+      forbidden: forbiddenPath,
+    },
+    {
+      name: "credential-shaped blocker",
+      value: {
+        ...successfulImageViewSnapshot([], {
+          complete: false,
+          blockers: [secret],
+        }),
+      },
+      forbidden: secret,
+    },
+  ];
+
+  for (const { name, value, forbidden } of cases) {
+    await t.test(name, async () => {
+      const evidence = await rejectedEvidence(
+        subject.runFreshEvaluatorTurn({
+          session: createSession({ successfulImageViews: value }),
+          root,
+          input: [
+            { type: "text", text: "Inspect the image." },
+            { type: "localImage", path: imagePath },
+          ],
+          outputSchema: outputSchema(),
+          turnTimeoutMs: 100,
+        }),
+      );
+
+      assert.equal(
+        evidence.blockers.includes("successful-image-view-unverified"),
+        true,
+      );
+      assert.equal(evidence.appServer.successfulImageViews, null);
+      assert.equal(JSON.stringify(evidence).includes(forbidden), false);
+    });
+  }
+});
+
+test("fresh evaluator rejects malformed successful image-view lifecycle evidence", async (t) => {
+  const subject = await loadSubject();
+  const root = await createRoot(t);
+  const imagePath = path.join(root, "approved.png");
+  await writeFile(imagePath, Buffer.from([0x89, 0x50, 0x4e, 0x47]));
+  const base = {
+    complete: true,
+    eventCount: 0,
+    completedCount: 0,
+    items: [],
+    blockers: [],
+    privacy: {
+      rawPathPersisted: false,
+      pathDigestPersisted: false,
+      rawDiagnosticDigestPersisted: false,
+    },
+  };
+  const cases = [
+    { name: "incomplete", value: { ...base, complete: false } },
+    { name: "blocker", value: { ...base, blockers: ["view-incomplete"] } },
+    {
+      name: "uncorrelated input",
+      value: {
+        ...base,
+        eventCount: 2,
+        completedCount: 1,
+        items: [{
+          id: "view-1",
+          matchedInputIndex: 7,
+          eventCount: 2,
+          startedCount: 1,
+          completedCount: 1,
+          complete: true,
+        }],
+      },
+    },
+    {
+      name: "inconsistent counts",
+      value: { ...base, eventCount: 2 },
+    },
+    {
+      name: "privacy violation",
+      value: {
+        ...base,
+        privacy: { ...base.privacy, pathDigestPersisted: true },
+      },
+    },
+    {
+      name: "unexpected raw path",
+      value: { ...base, path: imagePath },
+    },
+  ];
+
+  for (const { name, value } of cases) {
+    await t.test(name, async () => {
+      const evidence = await rejectedEvidence(
+        subject.runFreshEvaluatorTurn({
+          session: createSession({ successfulImageViews: value }),
+          root,
+          input: [
+            { type: "text", text: "Inspect the image." },
+            { type: "localImage", path: imagePath },
+          ],
+          outputSchema: outputSchema(),
+          turnTimeoutMs: 100,
+        }),
+      );
+
+      assert.equal(
+        evidence.blockers.includes("successful-image-view-unverified"),
+        true,
+      );
+      assert.equal(JSON.stringify(evidence).includes(imagePath), false);
+    });
+  }
+});
+
+test("fresh evaluator bounds successful image-view evidence before copying it", async (t) => {
+  const subject = await loadSubject();
+  const root = await createRoot(t);
+  const imagePath = path.join(root, "approved.png");
+  await writeFile(imagePath, Buffer.from([0x89, 0x50, 0x4e, 0x47]));
+  let eventOverflowTrapCount = 0;
+  const eventOverflowItems = new Proxy([], {
+    get() {
+      eventOverflowTrapCount += 1;
+      throw new Error("event overflow items must not be inspected");
+    },
+    getOwnPropertyDescriptor() {
+      eventOverflowTrapCount += 1;
+      throw new Error("event overflow items must not be inspected");
+    },
+    getPrototypeOf() {
+      eventOverflowTrapCount += 1;
+      throw new Error("event overflow items must not be inspected");
+    },
+    ownKeys() {
+      eventOverflowTrapCount += 1;
+      throw new Error("event overflow items must not be inspected");
+    },
+  });
+  const cases = [
+    {
+      name: "more than eight items",
+      value: successfulImageViewSnapshot(
+        Array.from({ length: 9 }, (_, index) =>
+          successfulImageViewItem(`view-${index + 1}`),
+        ),
+      ),
+    },
+    {
+      name: "more than sixteen events",
+      value: {
+        complete: true,
+        eventCount: 17,
+        completedCount: 0,
+        items: eventOverflowItems,
+        blockers: [],
+        privacy: {
+          rawPathPersisted: false,
+          pathDigestPersisted: false,
+          rawDiagnosticDigestPersisted: false,
+        },
+      },
+      after: () => assert.equal(eventOverflowTrapCount, 0),
+    },
+    {
+      name: "identifier over 128 UTF-8 bytes",
+      value: successfulImageViewSnapshot([
+        successfulImageViewItem("x".repeat(129)),
+      ]),
+    },
+    {
+      name: "credential-shaped identifier",
+      value: successfulImageViewSnapshot([
+        successfulImageViewItem(
+          "sk-SYNTHETIC_TEST_ONLY_abcdefghijklmnop",
+        ),
+      ]),
+    },
+  ];
+
+  for (const { name, value, after } of cases) {
+    await t.test(name, async () => {
+      const session = createSession();
+      Object.defineProperty(session, "successfulImageViews", {
+        configurable: true,
+        get: () => value,
+      });
+      const evidence = await rejectedEvidence(
+        subject.runFreshEvaluatorTurn({
+          session,
+          root,
+          input: [
+            { type: "text", text: "Inspect the image." },
+            { type: "localImage", path: imagePath },
+          ],
+          outputSchema: outputSchema(),
+          turnTimeoutMs: 100,
+        }),
+      );
+
+      assert.equal(
+        evidence.blockers.includes("successful-image-view-unverified"),
+        true,
+      );
+      assert.equal(evidence.appServer.successfulImageViews, null);
+      after?.();
+    });
+  }
+});
+
+test("fresh evaluator never invokes nested successful image-view accessors or proxy traps", async (t) => {
+  const subject = await loadSubject();
+  const root = await createRoot(t);
+  const imagePath = path.join(root, "approved.png");
+  await writeFile(imagePath, Buffer.from([0x89, 0x50, 0x4e, 0x47]));
+  let accessorTrapCount = 0;
+  const accessorItem = successfulImageViewItem("placeholder");
+  Object.defineProperty(accessorItem, "id", {
+    enumerable: true,
+    configurable: true,
+    get() {
+      accessorTrapCount += 1;
+      return "view-accessor";
+    },
+  });
+  let proxyTrapCount = 0;
+  const proxyItems = new Proxy([], {
+    get(target, key, receiver) {
+      proxyTrapCount += 1;
+      return Reflect.get(target, key, receiver);
+    },
+    getOwnPropertyDescriptor(target, key) {
+      proxyTrapCount += 1;
+      return Reflect.getOwnPropertyDescriptor(target, key);
+    },
+    getPrototypeOf(target) {
+      proxyTrapCount += 1;
+      return Reflect.getPrototypeOf(target);
+    },
+    ownKeys(target) {
+      proxyTrapCount += 1;
+      return Reflect.ownKeys(target);
+    },
+  });
+  const revokedItemHandle = Proxy.revocable(
+    successfulImageViewItem("view-revoked"),
+    {},
+  );
+  revokedItemHandle.revoke();
+  const cases = [
+    {
+      name: "nested accessor",
+      value: successfulImageViewSnapshot([accessorItem]),
+      trapCount: () => accessorTrapCount,
+    },
+    {
+      name: "nested proxy",
+      value: {
+        complete: true,
+        eventCount: 0,
+        completedCount: 0,
+        items: proxyItems,
+        blockers: [],
+        privacy: {
+          rawPathPersisted: false,
+          pathDigestPersisted: false,
+          rawDiagnosticDigestPersisted: false,
+        },
+      },
+      trapCount: () => proxyTrapCount,
+    },
+    {
+      name: "nested revoked proxy",
+      value: successfulImageViewSnapshot([revokedItemHandle.proxy]),
+      trapCount: () => 0,
+    },
+  ];
+
+  for (const { name, value, trapCount } of cases) {
+    await t.test(name, async () => {
+      const session = createSession();
+      Object.defineProperty(session, "successfulImageViews", {
+        configurable: true,
+        get: () => value,
+      });
+      const evidence = await rejectedEvidence(
+        subject.runFreshEvaluatorTurn({
+          session,
+          root,
+          input: [
+            { type: "text", text: "Inspect the image." },
+            { type: "localImage", path: imagePath },
+          ],
+          outputSchema: outputSchema(),
+          turnTimeoutMs: 100,
+        }),
+      );
+
+      assert.equal(
+        evidence.blockers.includes("successful-image-view-unverified"),
+        true,
+      );
+      assert.equal(evidence.appServer.successfulImageViews, null);
+      assert.equal(
+        evidence.blockers.includes(
+          "cleanup-successful-image-views-snapshot-failed",
+        ),
+        false,
+      );
+      assert.equal(trapCount(), 0);
+    });
+  }
+});
+
+test("fresh evaluator blocks a malformed successful image-view snapshot without local images", async (t) => {
+  const subject = await loadSubject();
+  const root = await createRoot(t);
+  const session = createSession();
+  Object.defineProperty(session, "successfulImageViews", {
+    configurable: true,
+    get: () => ({
+      complete: true,
+      eventCount: 17,
+      completedCount: 0,
+      items: [],
+      blockers: [],
+      privacy: {
+        rawPathPersisted: false,
+        pathDigestPersisted: false,
+        rawDiagnosticDigestPersisted: false,
+      },
+    }),
+  });
+
+  const evidence = await rejectedEvidence(
+    subject.runFreshEvaluatorTurn({
+      session,
+      root,
+      input: [{ type: "text", text: "Return the controlled result." }],
+      outputSchema: outputSchema(),
+      turnTimeoutMs: 100,
+    }),
+  );
+
+  assert.equal(
+    evidence.blockers.includes("successful-image-view-unverified"),
+    true,
+  );
+  assert.equal(evidence.appServer.successfulImageViews, null);
+});
+
+test("fresh evaluator performs the third image readback before closing the session", async (t) => {
+  const subject = await loadSubject();
+  assert.equal(typeof subject?.runFreshEvaluatorTurn, "function");
+  const root = await createRoot(t);
+  const imagePath = path.join(root, "approved.png");
+  await writeFile(imagePath, Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x31]));
+  const session = createSession({
+    onClose: () => rm(imagePath),
+  });
+
+  const result = await subject.runFreshEvaluatorTurn({
+    session,
+    root,
+    input: [
+      { type: "text", text: "Inspect the image." },
+      { type: "localImage", path: imagePath },
+    ],
+    outputSchema: outputSchema(),
+    turnTimeoutMs: 100,
+  });
+
+  assert.deepEqual(result.input.controllerLocalImages[0].postTurnPreCleanup, {
+    readable: true,
+    unchanged: true,
+  });
+  assert.equal(session.operations.at(-1), "close");
+});
+
+test("fresh evaluator fails closed when the image is deleted after the terminal event", async (t) => {
+  const subject = await loadSubject();
+  assert.equal(typeof subject?.runFreshEvaluatorTurn, "function");
+  const root = await createRoot(t);
+  const imagePath = path.join(root, "approved.png");
+  await writeFile(imagePath, Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x41]));
+  const session = createSession({
+    onTurnCompleted: () => rm(imagePath),
+  });
+
+  const evidence = await rejectedEvidence(
+    subject.runFreshEvaluatorTurn({
+      session,
+      root,
+      input: [
+        { type: "text", text: "Inspect the image." },
+        { type: "localImage", path: imagePath },
+      ],
+      outputSchema: outputSchema(),
+      turnTimeoutMs: 100,
+    }),
+  );
+
+  assert.equal(evidence.blockers.includes("input-post-turn-readback-failed"), true);
+  assert.deepEqual(
+    evidence.input.controllerLocalImages[0].postTurnPreCleanup,
+    { readable: false, unchanged: false },
+  );
+  assert.equal(session.closed, true);
+  assert.equal(JSON.stringify(evidence).includes(imagePath), false);
+});
+
+test("fresh evaluator fails closed when image bytes drift after the terminal event", async (t) => {
+  const subject = await loadSubject();
+  assert.equal(typeof subject?.runFreshEvaluatorTurn, "function");
+  const root = await createRoot(t);
+  const imagePath = path.join(root, "approved.png");
+  const before = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x51]);
+  const after = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x52]);
+  await writeFile(imagePath, before);
+  const session = createSession({
+    onTurnCompleted: () => writeFile(imagePath, after),
+  });
+
+  const evidence = await rejectedEvidence(
+    subject.runFreshEvaluatorTurn({
+      session,
+      root,
+      input: [
+        { type: "text", text: "Inspect the image." },
+        { type: "localImage", path: imagePath },
+      ],
+      outputSchema: outputSchema(),
+      turnTimeoutMs: 100,
+    }),
+  );
+
+  assert.equal(evidence.blockers.includes("input-provenance-changed-after-turn"), true);
+  assert.deepEqual(
+    evidence.input.controllerLocalImages[0].postTurnPreCleanup,
+    { readable: true, unchanged: false },
+  );
+  assert.equal(JSON.stringify(evidence).includes(imagePath), false);
 });
 
 test("fresh evaluator fails closed when image bytes change during thread start", async (t) => {
@@ -455,9 +1438,13 @@ test("fresh evaluator fails closed when image bytes change during thread start",
   assert.deepEqual(evidence.input.descriptors[1], {
     index: 1,
     type: "localImage",
-    path: imagePath,
     byteLength: before.length,
     sha256: digest(before),
+    absolute: true,
+    withinResolvedRoot: true,
+    regularFile: true,
+    nonSymlink: true,
+    readable: true,
     originalDetail: "unverified",
   });
 });
@@ -467,9 +1454,9 @@ test("fresh evaluator rejects inherited turns and instruction sources", async (t
   assert.equal(typeof subject?.runFreshEvaluatorTurn, "function");
   const root = await createRoot(t);
   const instructionPath = path.join(root, "AGENTS.md");
-  for (const session of [
-    createSession({ priorTurns: [{ id: "prior-turn" }] }),
-    createSession({ instructionSources: [instructionPath] }),
+  for (const [session, expectedInstructionSourceCount] of [
+    [createSession({ priorTurns: [{ id: "prior-turn" }] }), 0],
+    [createSession({ instructionSources: [instructionPath] }), 1],
   ]) {
     const evidence = await rejectedEvidence(
       subject.runFreshEvaluatorTurn({
@@ -481,7 +1468,12 @@ test("fresh evaluator rejects inherited turns and instruction sources", async (t
       }),
     );
     assert.equal(session.closed, true);
-    assert.equal(evidence.threadStart.request.config.project_doc_max_bytes, 0);
+    assert.equal(evidence.threadStart.request.projectDocMaxBytes, 0);
+    assert.equal(
+      evidence.threadStart.response.instructionSourceCount,
+      expectedInstructionSourceCount,
+    );
+    assert.equal(JSON.stringify(evidence).includes(instructionPath), false);
   }
 });
 

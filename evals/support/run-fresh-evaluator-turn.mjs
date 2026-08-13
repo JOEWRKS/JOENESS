@@ -1,5 +1,6 @@
 import { lstat, readFile, realpath } from "node:fs/promises";
 import path from "node:path";
+import { types as utilTypes } from "node:util";
 import {
   EVALUATION_PERMISSION_PROFILE,
   buildThreadStartRequest,
@@ -39,6 +40,109 @@ function exactKeys(value, keys) {
 
 function isJsonObject(value) {
   return value !== null && typeof value === "object" && !Array.isArray(value);
+}
+
+function readExactDataObject(value, keys) {
+  if (
+    value === null ||
+    typeof value !== "object" ||
+    utilTypes.isProxy(value) ||
+    Array.isArray(value)
+  ) {
+    return null;
+  }
+  let prototype;
+  let ownKeys;
+  try {
+    prototype = Object.getPrototypeOf(value);
+    ownKeys = Reflect.ownKeys(value);
+  } catch {
+    return null;
+  }
+  if (
+    (prototype !== Object.prototype && prototype !== null) ||
+    ownKeys.length !== keys.length ||
+    ownKeys.some((key) => typeof key !== "string" || !keys.includes(key))
+  ) {
+    return null;
+  }
+  const result = Object.create(null);
+  for (const key of keys) {
+    let descriptor;
+    try {
+      descriptor = Object.getOwnPropertyDescriptor(value, key);
+    } catch {
+      return null;
+    }
+    if (
+      descriptor === undefined ||
+      !Object.hasOwn(descriptor, "value") ||
+      descriptor.enumerable !== true
+    ) {
+      return null;
+    }
+    result[key] = descriptor.value;
+  }
+  return result;
+}
+
+function readBoundedDataArray(value, maxLength) {
+  if (utilTypes.isProxy(value) || !Array.isArray(value)) {
+    return null;
+  }
+  let prototype;
+  let lengthDescriptor;
+  try {
+    prototype = Object.getPrototypeOf(value);
+    lengthDescriptor = Object.getOwnPropertyDescriptor(value, "length");
+  } catch {
+    return null;
+  }
+  if (
+    prototype !== Array.prototype ||
+    lengthDescriptor === undefined ||
+    !Object.hasOwn(lengthDescriptor, "value") ||
+    !Number.isSafeInteger(lengthDescriptor.value) ||
+    lengthDescriptor.value < 0 ||
+    lengthDescriptor.value > maxLength
+  ) {
+    return null;
+  }
+  const length = lengthDescriptor.value;
+  let ownKeys;
+  try {
+    ownKeys = Reflect.ownKeys(value);
+  } catch {
+    return null;
+  }
+  const expectedKeys = [
+    ...Array.from({ length }, (_, index) => String(index)),
+    "length",
+  ];
+  if (
+    ownKeys.length !== expectedKeys.length ||
+    ownKeys.some((key, index) => key !== expectedKeys[index])
+  ) {
+    return null;
+  }
+  const result = [];
+  for (let index = 0; index < length; index += 1) {
+    let descriptor;
+    try {
+      descriptor = Object.getOwnPropertyDescriptor(value, String(index));
+    } catch {
+      return null;
+    }
+    if (
+      descriptor === undefined ||
+      !Object.hasOwn(descriptor, "value") ||
+      descriptor.enumerable !== true
+    ) {
+      return null;
+    }
+    result.push(descriptor.value);
+  }
+  return result;
 }
 
 function cloneJson(value, label) {
@@ -115,6 +219,7 @@ async function describeInput(root, input) {
   }
   const resolvedRoot = await realpath(root);
   const descriptors = [];
+  const privateImages = [];
   let textCount = 0;
   for (const [index, entry] of input.entries()) {
     if (exactKeys(entry, ["type", "text"]) && entry.type === "text") {
@@ -125,7 +230,6 @@ async function describeInput(root, input) {
       descriptors.push({
         index,
         type: "text",
-        text: entry.text,
         byteLength: Buffer.byteLength(entry.text),
         sha256: sha256(entry.text),
       });
@@ -150,11 +254,16 @@ async function describeInput(root, input) {
       descriptors.push({
         index,
         type: "localImage",
-        path: entry.path,
         byteLength: bytes.length,
         sha256: sha256(bytes),
+        absolute: true,
+        withinResolvedRoot: true,
+        regularFile: true,
+        nonSymlink: true,
+        readable: true,
         originalDetail: "unverified",
       });
+      privateImages.push({ index, path: entry.path, resolvedPath: resolvedFile });
       continue;
     }
     throw new TypeError("fresh evaluator input descriptor is malformed");
@@ -162,9 +271,402 @@ async function describeInput(root, input) {
   if (textCount === 0) {
     throw new TypeError("fresh evaluator input requires text");
   }
-  return {
+  const evidence = {
     descriptors,
-    requestSha256: sha256(stableStringify(input)),
+    requestSha256: sha256(stableStringify(descriptors)),
+  };
+  return {
+    evidence,
+    privateBinding: {
+      root,
+      resolvedRoot,
+      images: privateImages,
+    },
+  };
+}
+
+function inputSnapshotsMatch(left, right) {
+  if (
+    stableStringify(left?.evidence) !== stableStringify(right?.evidence) ||
+    left?.privateBinding?.root !== right?.privateBinding?.root ||
+    left?.privateBinding?.resolvedRoot !== right?.privateBinding?.resolvedRoot
+  ) {
+    return false;
+  }
+  const leftImages = left.privateBinding.images;
+  const rightImages = right.privateBinding.images;
+  return (
+    Array.isArray(leftImages) &&
+    Array.isArray(rightImages) &&
+    leftImages.length === rightImages.length &&
+    leftImages.every(
+      (image, index) =>
+        image.index === rightImages[index]?.index &&
+        image.path === rightImages[index]?.path &&
+        image.resolvedPath === rightImages[index]?.resolvedPath,
+    )
+  );
+}
+
+function imageSnapshotsMatch(left, right, inputIndex) {
+  if (
+    left?.privateBinding?.root !== right?.privateBinding?.root ||
+    left?.privateBinding?.resolvedRoot !== right?.privateBinding?.resolvedRoot
+  ) {
+    return false;
+  }
+  const leftImage = left.privateBinding.images.find(
+    (image) => image.index === inputIndex,
+  );
+  const rightImage = right.privateBinding.images.find(
+    (image) => image.index === inputIndex,
+  );
+  return (
+    leftImage !== undefined &&
+    rightImage !== undefined &&
+    leftImage.path === rightImage.path &&
+    leftImage.resolvedPath === rightImage.resolvedPath &&
+    stableStringify(left.evidence.descriptors[inputIndex]) ===
+      stableStringify(right.evidence.descriptors[inputIndex])
+  );
+}
+
+function controllerLocalImageEvidence(initial, beforeTurn, postTurn = null) {
+  return initial.privateBinding.images.map((image) => {
+    const descriptor = initial.evidence.descriptors[image.index];
+    const checkedBeforeTurnStart = beforeTurn !== null;
+    const unchangedBeforeTurnStart =
+      checkedBeforeTurnStart &&
+      imageSnapshotsMatch(initial, beforeTurn, image.index);
+    const readablePostTurn = postTurn !== null;
+    const unchangedPostTurn =
+      readablePostTurn &&
+      imageSnapshotsMatch(initial, postTurn, image.index) &&
+      imageSnapshotsMatch(beforeTurn, postTurn, image.index);
+    return {
+      inputIndex: image.index,
+      byteLength: descriptor.byteLength,
+      sha256: descriptor.sha256,
+      absolute: descriptor.absolute,
+      withinResolvedRoot: descriptor.withinResolvedRoot,
+      regularFile: descriptor.regularFile,
+      nonSymlink: descriptor.nonSymlink,
+      readable: descriptor.readable,
+      checkedBeforeThreadStart: true,
+      checkedBeforeTurnStart,
+      unchangedBeforeTurnStart,
+      postTurnPreCleanup: {
+        readable: readablePostTurn,
+        unchanged: unchangedPostTurn,
+      },
+    };
+  });
+}
+
+const IMAGE_DIAGNOSTIC_KEYS = Object.freeze([
+  "status",
+  "observationCount",
+  "expectedTargetCount",
+  "effectivePathMatch",
+  "matchedInputIndex",
+  "effectivePathAbsolute",
+  "effectivePathWithinRoot",
+  "modelArgumentAbsolute",
+  "outerCategory",
+  "reportedCategory",
+  "privacy",
+]);
+
+function imageDiagnosticsAreSafe(
+  value,
+  expectedInputIndexes,
+  stderrByteLength,
+) {
+  if (
+    !exactKeys(value, IMAGE_DIAGNOSTIC_KEYS) ||
+    !Array.isArray(expectedInputIndexes) ||
+    !Number.isSafeInteger(value.observationCount) ||
+    value.observationCount < 0 ||
+    value.expectedTargetCount !== expectedInputIndexes.length ||
+    !["MATCH", "MISMATCH", "UNVERIFIED"].includes(
+      value.effectivePathMatch,
+    ) ||
+    !["VERIFIED", "UNVERIFIED"].includes(value.effectivePathAbsolute) ||
+    !["VERIFIED", "UNVERIFIED"].includes(
+      value.effectivePathWithinRoot,
+    ) ||
+    value.modelArgumentAbsolute !== "UNVERIFIED" ||
+    !["unable-to-locate", "unable-to-read", "UNVERIFIED"].includes(
+      value.outerCategory,
+    ) ||
+    ![
+      "sandbox-helper-failed",
+      "permission-denied",
+      "not-found",
+      "invalid-path",
+      "unclassified",
+      "UNVERIFIED",
+    ].includes(value.reportedCategory) ||
+    !exactKeys(value.privacy, [
+      "rawPathPersisted",
+      "pathDigestPersisted",
+      "rawDiagnosticDigestPersisted",
+    ]) ||
+    value.privacy.rawPathPersisted !== false ||
+    value.privacy.pathDigestPersisted !== false ||
+    value.privacy.rawDiagnosticDigestPersisted !== false
+  ) {
+    return false;
+  }
+  if (value.status === "NO_ROUTER_IMAGE_ERROR") {
+    return (
+      value.observationCount === 0 &&
+      value.effectivePathMatch === "UNVERIFIED" &&
+      value.matchedInputIndex === null &&
+      value.effectivePathAbsolute === "UNVERIFIED" &&
+      value.effectivePathWithinRoot === "UNVERIFIED" &&
+      value.outerCategory === "UNVERIFIED" &&
+      value.reportedCategory === "UNVERIFIED"
+    );
+  }
+  const stderrObserved =
+    Number.isSafeInteger(stderrByteLength) && stderrByteLength > 0;
+  if (value.status === "OBSERVED") {
+    return (
+      stderrObserved &&
+      value.observationCount === 1 &&
+      value.effectivePathMatch === "MATCH" &&
+      expectedInputIndexes.includes(value.matchedInputIndex) &&
+      value.effectivePathAbsolute === "VERIFIED" &&
+      value.effectivePathWithinRoot === "VERIFIED" &&
+      ["unable-to-locate", "unable-to-read"].includes(value.outerCategory) &&
+      value.reportedCategory !== "UNVERIFIED"
+    );
+  }
+  if (value.status !== "UNVERIFIED" || !stderrObserved) {
+    return false;
+  }
+  return (
+    value.matchedInputIndex === null &&
+    value.effectivePathAbsolute === "UNVERIFIED" &&
+    value.effectivePathWithinRoot === "UNVERIFIED" &&
+    value.outerCategory === "UNVERIFIED" &&
+    value.reportedCategory === "UNVERIFIED" &&
+    ((value.effectivePathMatch === "MISMATCH" &&
+      value.observationCount === 1) ||
+      value.effectivePathMatch === "UNVERIFIED")
+  );
+}
+
+const SUCCESSFUL_IMAGE_VIEW_KEYS = Object.freeze([
+  "complete",
+  "eventCount",
+  "completedCount",
+  "items",
+  "blockers",
+  "privacy",
+]);
+const SUCCESSFUL_IMAGE_VIEW_ITEM_KEYS = Object.freeze([
+  "id",
+  "matchedInputIndex",
+  "eventCount",
+  "startedCount",
+  "completedCount",
+  "complete",
+]);
+const SUCCESSFUL_IMAGE_VIEW_ITEM_LIMIT = 8;
+const SUCCESSFUL_IMAGE_VIEW_EVENT_LIMIT = 16;
+const SUCCESSFUL_IMAGE_VIEW_TEXT_BYTES = 128;
+const SUCCESSFUL_IMAGE_VIEW_ID_PATTERN = /^[A-Za-z0-9._:-]{1,128}$/u;
+const SUCCESSFUL_IMAGE_VIEW_BLOCKERS = new Set([
+  "image-view-limit-exceeded",
+  "image-view-invalid-id",
+  "image-view-duplicate-started",
+  "image-view-completed-without-started",
+  "image-view-duplicate-completed",
+  "image-view-extra-shape",
+  "image-view-target-mismatch",
+  "image-view-target-unverified",
+  "image-view-target-drift",
+  "image-view-lifecycle-incomplete",
+]);
+
+function validatedSuccessfulImageViews(value, expectedInputIndexes) {
+  const snapshot = readExactDataObject(value, SUCCESSFUL_IMAGE_VIEW_KEYS);
+  if (
+    snapshot === null ||
+    typeof snapshot.complete !== "boolean" ||
+    !Number.isSafeInteger(snapshot.eventCount) ||
+    snapshot.eventCount < 0 ||
+    snapshot.eventCount > SUCCESSFUL_IMAGE_VIEW_EVENT_LIMIT ||
+    !Number.isSafeInteger(snapshot.completedCount) ||
+    snapshot.completedCount < 0 ||
+    snapshot.completedCount > SUCCESSFUL_IMAGE_VIEW_ITEM_LIMIT ||
+    snapshot.completedCount > snapshot.eventCount
+  ) {
+    return null;
+  }
+  const items = readBoundedDataArray(
+    snapshot.items,
+    SUCCESSFUL_IMAGE_VIEW_ITEM_LIMIT,
+  );
+  const blockers = readBoundedDataArray(
+    snapshot.blockers,
+    SUCCESSFUL_IMAGE_VIEW_EVENT_LIMIT,
+  );
+  const privacy = readExactDataObject(snapshot.privacy, [
+      "rawPathPersisted",
+      "pathDigestPersisted",
+      "rawDiagnosticDigestPersisted",
+    ]);
+  if (
+    items === null ||
+    blockers === null ||
+    privacy === null ||
+    privacy.rawPathPersisted !== false ||
+    privacy.pathDigestPersisted !== false ||
+    privacy.rawDiagnosticDigestPersisted !== false
+  ) {
+    return null;
+  }
+  const validatedBlockers = [];
+  for (const blocker of blockers) {
+    if (
+      typeof blocker !== "string" ||
+      blocker.length < 1 ||
+      blocker.length > SUCCESSFUL_IMAGE_VIEW_TEXT_BYTES ||
+      Buffer.byteLength(blocker) > SUCCESSFUL_IMAGE_VIEW_TEXT_BYTES ||
+      containsCredentialText(blocker) ||
+      !SUCCESSFUL_IMAGE_VIEW_BLOCKERS.has(blocker)
+    ) {
+      return null;
+    }
+    validatedBlockers.push(blocker);
+  }
+  const ids = new Set();
+  let eventCount = 0;
+  let completedCount = 0;
+  const validatedItems = [];
+  for (const rawItem of items) {
+    const item = readExactDataObject(rawItem, SUCCESSFUL_IMAGE_VIEW_ITEM_KEYS);
+    if (
+      item === null ||
+      typeof item.id !== "string" ||
+      item.id.length < 1 ||
+      item.id.length > SUCCESSFUL_IMAGE_VIEW_TEXT_BYTES ||
+      Buffer.byteLength(item.id) > SUCCESSFUL_IMAGE_VIEW_TEXT_BYTES ||
+      !SUCCESSFUL_IMAGE_VIEW_ID_PATTERN.test(item.id) ||
+      containsCredentialText(item.id) ||
+      ids.has(item.id) ||
+      !expectedInputIndexes.includes(item.matchedInputIndex) ||
+      !Number.isSafeInteger(item.eventCount) ||
+      item.eventCount < 1 ||
+      !Number.isSafeInteger(item.startedCount) ||
+      item.startedCount < 0 ||
+      item.startedCount > SUCCESSFUL_IMAGE_VIEW_EVENT_LIMIT ||
+      !Number.isSafeInteger(item.completedCount) ||
+      item.completedCount < 0 ||
+      item.completedCount > SUCCESSFUL_IMAGE_VIEW_EVENT_LIMIT ||
+      item.eventCount !== item.startedCount + item.completedCount ||
+      typeof item.complete !== "boolean" ||
+      (item.complete &&
+        (item.eventCount !== 2 ||
+          item.startedCount !== 1 ||
+          item.completedCount !== 1))
+    ) {
+      return null;
+    }
+    ids.add(item.id);
+    eventCount += item.eventCount;
+    completedCount += item.completedCount;
+    validatedItems.push({
+      id: item.id,
+      matchedInputIndex: item.matchedInputIndex,
+      eventCount: item.eventCount,
+      startedCount: item.startedCount,
+      completedCount: item.completedCount,
+      complete: item.complete,
+    });
+  }
+  if (
+    snapshot.eventCount !== eventCount ||
+    snapshot.completedCount !== completedCount ||
+    snapshot.complete !==
+      (validatedBlockers.length === 0 &&
+        validatedItems.every(({ complete }) => complete))
+  ) {
+    return null;
+  }
+  return {
+    complete: snapshot.complete,
+    eventCount: snapshot.eventCount,
+    completedCount: snapshot.completedCount,
+    items: validatedItems,
+    blockers: validatedBlockers,
+    privacy: {
+      rawPathPersisted: false,
+      pathDigestPersisted: false,
+      rawDiagnosticDigestPersisted: false,
+    },
+  };
+}
+
+function localImageDiagnosticBinding(snapshot) {
+  return {
+    root: snapshot.privateBinding.resolvedRoot,
+    images: snapshot.privateBinding.images.map((image) => {
+      const descriptor = snapshot.evidence.descriptors[image.index];
+      return {
+        inputIndex: image.index,
+        sentPath: image.path,
+        resolvedPath: image.resolvedPath,
+        byteLength: descriptor.byteLength,
+        sha256: descriptor.sha256,
+      };
+    }),
+  };
+}
+
+function summarizeThreadStartRequest(request) {
+  return {
+    ephemeral: request.ephemeral === true,
+    approvalPolicy: request.approvalPolicy,
+    permissions: request.permissions,
+    projectDocMaxBytes: request.config?.project_doc_max_bytes,
+    selectedCapabilityRootCount: Array.isArray(request.selectedCapabilityRoots)
+      ? request.selectedCapabilityRoots.length
+      : null,
+    dynamicToolCount: Array.isArray(request.dynamicTools)
+      ? request.dynamicTools.length
+      : null,
+    runtimeWorkspaceRootCount: Array.isArray(request.runtimeWorkspaceRoots)
+      ? request.runtimeWorkspaceRoots.length
+      : null,
+    environmentCount: Array.isArray(request.environments)
+      ? request.environments.length
+      : null,
+  };
+}
+
+function durableThreadSummary(thread) {
+  return {
+    id: thread.id,
+    model: thread.model,
+    modelProvider: thread.modelProvider,
+    reasoningEffort: thread.reasoningEffort,
+    serviceTier: thread.serviceTier,
+    activePermissionProfileId: thread.activePermissionProfile?.id ?? null,
+    approvalPolicy: thread.approvalPolicy,
+    approvalsReviewer: thread.approvalsReviewer,
+    sandbox: thread.sandbox,
+    ephemeral: thread.ephemeral,
+    priorTurnCount: thread.priorTurnCount,
+    instructionSourceCount: Array.isArray(thread.instructionSources)
+      ? thread.instructionSources.length
+      : null,
+    runtimeWorkspaceRootCount: Array.isArray(thread.runtimeWorkspaceRoots)
+      ? thread.runtimeWorkspaceRoots.length
+      : null,
   };
 }
 
@@ -280,8 +782,8 @@ function summarizeThreadStart(response) {
     priorTurnCount: Array.isArray(response?.thread?.turns)
       ? response.thread.turns.length
       : null,
-    instructionSources: Array.isArray(response?.instructionSources)
-      ? [...response.instructionSources]
+    instructionSourceCount: Array.isArray(response?.instructionSources)
+      ? response.instructionSources.length
       : null,
   };
 }
@@ -344,6 +846,8 @@ export async function runFreshEvaluatorTurn({
       processExitCode: null,
       stderr: null,
       remoteControl: null,
+      imageDiagnostics: null,
+      successfulImageViews: null,
     },
   };
   let allowedToolNames = new Set();
@@ -359,6 +863,11 @@ export async function runFreshEvaluatorTurn({
   const cleanupErrors = [];
   let unsubscribe = null;
   let releaseTool = null;
+  let initialInputSnapshot = null;
+  let turnStartInputSnapshot = null;
+  let expectedLocalImageCount = 0;
+  let successfulImageViewsMalformed = false;
+  let successfulImageViewsIncomplete = false;
   let resolveTerminal;
   const terminalPromise = new Promise((resolve) => {
     resolveTerminal = resolve;
@@ -377,6 +886,13 @@ export async function runFreshEvaluatorTurn({
         turnId: notification?.params?.turnId,
         complete: false,
         blockers: ["runtime-drift"],
+      };
+    }
+    if (event.item?.type === "userMessage" && Object.hasOwn(event.item, "text")) {
+      event.item = {
+        id: event.item.id,
+        type: event.item.type,
+        ...(event.item.status === undefined ? {} : { status: event.item.status }),
       };
     }
     const scope = classifyEventScope(event);
@@ -460,11 +976,14 @@ export async function runFreshEvaluatorTurn({
       sha256: sha256(stableStringify(schemaValue)),
     };
     const requestInput = cloneJson(input, "fresh evaluator turn input");
-    evidence.input = await describeInput(root, requestInput);
-    evidence.threadStart.request = buildFreshEvaluatorThreadStartRequest(
+    initialInputSnapshot = await describeInput(root, requestInput);
+    expectedLocalImageCount = initialInputSnapshot.privateBinding.images.length;
+    evidence.input = { ...initialInputSnapshot.evidence };
+    const threadStartRequest = buildFreshEvaluatorThreadStartRequest(
       root,
       dynamicTools,
     );
+    evidence.threadStart.request = summarizeThreadStartRequest(threadStartRequest);
     if (!remoteControlSnapshotIsSafe(session.remoteControlSnapshot)) {
       blockers.push("unsafe-remote-control");
       throw new Error("fresh evaluator remote control is not safely disabled");
@@ -477,7 +996,7 @@ export async function runFreshEvaluatorTurn({
     });
     const threadResponse = await session.client.request(
       "thread/start",
-      evidence.threadStart.request,
+      threadStartRequest,
       30_000,
     );
     evidence.threadStart.response = summarizeThreadStart(threadResponse);
@@ -485,14 +1004,15 @@ export async function runFreshEvaluatorTurn({
     flushPending();
     if (
       evidence.threadStart.response.priorTurnCount !== 0 ||
-      evidence.threadStart.response.instructionSources?.length !== 0
+      evidence.threadStart.response.instructionSourceCount !== 0
     ) {
       blockers.push("inherited-context");
     }
-    evidence.thread = parseThreadStartResponse(
+    const parsedThread = parseThreadStartResponse(
       threadResponse,
-      evidence.threadStart.request,
+      threadStartRequest,
     );
+    evidence.thread = durableThreadSummary(parsedThread);
     threadId = evidence.thread.id;
     if (blockers.includes("inherited-context")) {
       throw new Error("fresh evaluator thread inherited context");
@@ -564,21 +1084,59 @@ export async function runFreshEvaluatorTurn({
       });
     }
 
-    const currentInput = await describeInput(root, requestInput);
-    if (stableStringify(currentInput) !== stableStringify(evidence.input)) {
+    try {
+      turnStartInputSnapshot = await describeInput(root, requestInput);
+    } catch (error) {
+      blockers.push("input-provenance-readback-failed");
+      throw new Error("fresh evaluator input provenance readback failed", {
+        cause: error,
+      });
+    }
+    const turnStartMatchesInitial = inputSnapshotsMatch(
+      initialInputSnapshot,
+      turnStartInputSnapshot,
+    );
+    if (!turnStartMatchesInitial) {
       blockers.push("input-provenance-changed");
       throw new Error("fresh evaluator input provenance changed before turn start");
     }
-    evidence.turn.request = {
+    if (expectedLocalImageCount > 0) {
+      if (typeof session.bindLocalImageDiagnostics !== "function") {
+        blockers.push("local-image-diagnostics-unavailable");
+        throw new Error("fresh evaluator local image diagnostics are unavailable");
+      }
+      try {
+        await session.bindLocalImageDiagnostics(
+          localImageDiagnosticBinding(turnStartInputSnapshot),
+        );
+      } catch (error) {
+        blockers.push("local-image-diagnostics-bind-failed");
+        throw new Error("fresh evaluator local image diagnostics binding failed", {
+          cause: error,
+        });
+      }
+      evidence.input.controllerLocalImages = controllerLocalImageEvidence(
+        initialInputSnapshot,
+        turnStartInputSnapshot,
+      );
+    }
+    const turnRequest = {
       threadId,
       input: requestInput,
       approvalPolicy: "never",
       permissions: EVALUATION_PERMISSION_PROFILE,
       outputSchema: schemaValue,
     };
+    evidence.turn.request = {
+      inputDescriptorCount: evidence.input.descriptors.length,
+      inputRequestSha256: evidence.input.requestSha256,
+      approvalPolicy: turnRequest.approvalPolicy,
+      permissions: turnRequest.permissions,
+      outputSchemaSha256: evidence.outputSchema.sha256,
+    };
     const turnResponse = await session.client.request(
       "turn/start",
-      evidence.turn.request,
+      turnRequest,
       turnTimeoutMs,
     );
     const turn = turnResponse?.turn ?? turnResponse;
@@ -606,6 +1164,40 @@ export async function runFreshEvaluatorTurn({
         .catch(() => {});
       throw new Error("fresh evaluator turn timed out");
     }
+    let postTurnInputSnapshot;
+    try {
+      postTurnInputSnapshot = await describeInput(root, requestInput);
+    } catch (error) {
+      if (expectedLocalImageCount > 0) {
+        evidence.input.controllerLocalImages = controllerLocalImageEvidence(
+          initialInputSnapshot,
+          turnStartInputSnapshot,
+        );
+      }
+      blockers.push("input-post-turn-readback-failed");
+      throw new Error("fresh evaluator post-turn input readback failed", {
+        cause: error,
+      });
+    }
+    const postMatchesInitial = inputSnapshotsMatch(
+      initialInputSnapshot,
+      postTurnInputSnapshot,
+    );
+    const postMatchesTurnStart = inputSnapshotsMatch(
+      turnStartInputSnapshot,
+      postTurnInputSnapshot,
+    );
+    if (expectedLocalImageCount > 0) {
+      evidence.input.controllerLocalImages = controllerLocalImageEvidence(
+        initialInputSnapshot,
+        turnStartInputSnapshot,
+        postTurnInputSnapshot,
+      );
+    }
+    if (!postMatchesInitial || !postMatchesTurnStart) {
+      blockers.push("input-provenance-changed-after-turn");
+      throw new Error("fresh evaluator input provenance changed after turn completion");
+    }
     evidence.mcpAfter = await listMcpServerStatus(session.client, threadId);
     verifyMcpRuntimeIsInert(session.mcpInventory, evidence.mcpAfter);
   } catch (error) {
@@ -632,25 +1224,62 @@ export async function runFreshEvaluatorTurn({
     let processExitCode = null;
     let stderr = null;
     let remoteControl = null;
+    let imageDiagnostics = null;
+    let successfulImageViews = null;
+    const expectedImageIndexes =
+      initialInputSnapshot?.privateBinding.images.map(({ index }) => index) ?? [];
     for (const [label, snapshot] of [
       ["process-exit", () => session?.processExitCode ?? null],
       ["stderr", () => session?.stderr ?? null],
       ["remote-control", () => session?.remoteControlSnapshot ?? null],
+      ["image-diagnostics", () => session?.imageDiagnostics ?? null],
+      ["successful-image-views", () => session?.successfulImageViews ?? null],
     ]) {
       try {
         const value = snapshot();
         if (label === "process-exit") processExitCode = value;
         if (label === "stderr") stderr = value;
         if (label === "remote-control") remoteControl = value;
+        if (label === "image-diagnostics") {
+          imageDiagnostics =
+            value === null
+              ? null
+              : cloneJson(value, "fresh evaluator image diagnostics");
+        }
+        if (label === "successful-image-views") {
+          if (value === null) {
+            successfulImageViews = null;
+          } else {
+            successfulImageViews = validatedSuccessfulImageViews(
+              value,
+              expectedImageIndexes,
+            );
+            successfulImageViewsMalformed = successfulImageViews === null;
+            successfulImageViewsIncomplete =
+              successfulImageViews?.complete === false;
+          }
+        }
       } catch (error) {
         cleanupErrors.push(error);
         blockers.push(`cleanup-${label}-snapshot-failed`);
       }
     }
+    if (
+      imageDiagnostics !== null &&
+      !imageDiagnosticsAreSafe(
+        imageDiagnostics,
+        expectedImageIndexes,
+        stderr?.byteLength,
+      )
+    ) {
+      imageDiagnostics = null;
+    }
     evidence.appServer = {
       processExitCode,
       stderr,
       remoteControl,
+      imageDiagnostics,
+      successfulImageViews,
     };
   }
 
@@ -679,6 +1308,20 @@ export async function runFreshEvaluatorTurn({
   }
   if (!remoteControlSnapshotIsSafe(evidence.appServer.remoteControl)) {
     blockers.push("unsafe-remote-control");
+  }
+  if (
+    expectedLocalImageCount > 0 &&
+    evidence.appServer.imageDiagnostics === null
+  ) {
+    blockers.push("image-diagnostics-unverified");
+  }
+  if (
+    successfulImageViewsMalformed ||
+    successfulImageViewsIncomplete ||
+    (expectedLocalImageCount > 0 &&
+      evidence.appServer.successfulImageViews === null)
+  ) {
+    blockers.push("successful-image-view-unverified");
   }
   evidence.blockers = unique(blockers);
 

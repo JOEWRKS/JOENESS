@@ -67,6 +67,10 @@ export const OUTPUT_LIMIT_BYTES = 64 * 1024;
 export const EVENT_LIMIT = 256;
 const STDERR_CAPTURE_SIDE_BYTES = 1536;
 const STDERR_CAPTURE_BYTES = STDERR_CAPTURE_SIDE_BYTES * 2;
+const LOCAL_IMAGE_DIAGNOSTIC_LINE_BYTES = 16 * 1024;
+const LOCAL_IMAGE_PATH_BYTES = 4096;
+const LOCAL_IMAGE_TARGET_LIMIT = 8;
+const LOCAL_IMAGE_VIEW_EVENT_LIMIT = LOCAL_IMAGE_TARGET_LIMIT * 2;
 const MESSAGE_DELTA_COUNT_LIMIT = EVENT_LIMIT * 16;
 const MESSAGE_DELTA_BYTES_LIMIT = OUTPUT_LIMIT_BYTES * 16;
 export const TURN_TIMEOUT_MS = 180_000;
@@ -2250,6 +2254,475 @@ async function terminateAppServerChild(
   }
 }
 
+function emptyLocalImageDiagnostics(expectedTargetCount = 0) {
+  return {
+    status: "UNVERIFIED",
+    observationCount: 0,
+    expectedTargetCount,
+    effectivePathMatch: "UNVERIFIED",
+    matchedInputIndex: null,
+    effectivePathAbsolute: "UNVERIFIED",
+    effectivePathWithinRoot: "UNVERIFIED",
+    modelArgumentAbsolute: "UNVERIFIED",
+    outerCategory: "UNVERIFIED",
+    reportedCategory: "UNVERIFIED",
+    privacy: {
+      rawPathPersisted: false,
+      pathDigestPersisted: false,
+      rawDiagnosticDigestPersisted: false,
+    },
+  };
+}
+
+function reportedImageErrorCategory(cause) {
+  if (
+    /(?:\b(?:fs )?sandbox helper failed\b|apply deny-read ACLs)/iu.test(cause)
+  ) {
+    return "sandbox-helper-failed";
+  }
+  if (
+    /(?:\bEACCES\b|\bEPERM\b|permission denied|access (?:is )?denied|os error 5)/iu.test(
+      cause,
+    )
+  ) {
+    return "permission-denied";
+  }
+  if (
+    /(?:\bENOENT\b|no such file|not found|cannot find|os error 2)/iu.test(cause)
+  ) {
+    return "not-found";
+  }
+  if (
+    /(?:\bEINVAL\b|invalid (?:file name|filename|path)|filename syntax|path syntax|volume label syntax|embedded nul|nul byte)/iu.test(
+      cause,
+    )
+  ) {
+    return "invalid-path";
+  }
+  return "unclassified";
+}
+
+function pathIsWithinOrEqual(root, candidate) {
+  const relative = path.relative(path.resolve(root), path.resolve(candidate));
+  return (
+    relative === "" ||
+    (relative !== ".." &&
+      !relative.startsWith(`..${path.sep}`) &&
+      !path.isAbsolute(relative))
+  );
+}
+
+function validateLocalImageDiagnosticBinding(value) {
+  if (
+    value === null ||
+    typeof value !== "object" ||
+    typeof value.root !== "string" ||
+    !path.isAbsolute(value.root) ||
+    !Array.isArray(value.images) ||
+    value.images.length < 1 ||
+    value.images.length > LOCAL_IMAGE_TARGET_LIMIT
+  ) {
+    throw new TypeError("local image diagnostic binding is malformed");
+  }
+  const inputIndexes = new Set();
+  const targetPaths = new Set();
+  for (const image of value.images) {
+    if (
+      image === null ||
+      typeof image !== "object" ||
+      !Number.isSafeInteger(image.inputIndex) ||
+      image.inputIndex < 0 ||
+      inputIndexes.has(image.inputIndex) ||
+      typeof image.sentPath !== "string" ||
+      typeof image.resolvedPath !== "string" ||
+      !path.isAbsolute(image.sentPath) ||
+      !path.isAbsolute(image.resolvedPath) ||
+      Buffer.byteLength(image.sentPath, "utf8") > LOCAL_IMAGE_PATH_BYTES ||
+      Buffer.byteLength(image.resolvedPath, "utf8") > LOCAL_IMAGE_PATH_BYTES ||
+      !pathIsWithinOrEqual(value.root, image.sentPath) ||
+      !pathIsWithinOrEqual(value.root, image.resolvedPath) ||
+      targetPaths.has(image.sentPath) ||
+      targetPaths.has(image.resolvedPath) ||
+      !Number.isSafeInteger(image.byteLength) ||
+      image.byteLength < 1 ||
+      typeof image.sha256 !== "string" ||
+      !/^[a-f0-9]{64}$/u.test(image.sha256)
+    ) {
+      throw new TypeError("local image diagnostic image descriptor is malformed");
+    }
+    inputIndexes.add(image.inputIndex);
+    targetPaths.add(image.sentPath);
+    targetPaths.add(image.resolvedPath);
+  }
+}
+
+function analyzeLocalImageDiagnosticLine(lineBytes, lineTruncated, binding) {
+  const line = lineBytes.toString("utf8");
+  const marker = /unable to (locate|read) image at `/gu;
+  const observations = [];
+  for (const match of line.matchAll(marker)) {
+    const pathStart = match.index + match[0].length;
+    const matchesByInput = new Map();
+    for (const image of binding.images) {
+      for (const candidate of new Set([image.sentPath, image.resolvedPath])) {
+        const terminator = `${candidate}\`: `;
+        if (line.startsWith(terminator, pathStart)) {
+          matchesByInput.set(image.inputIndex, {
+            inputIndex: image.inputIndex,
+            effectivePathAbsolute: path.isAbsolute(candidate),
+            effectivePathWithinRoot:
+              path.isAbsolute(candidate) &&
+              pathIsWithinOrEqual(binding.root, candidate),
+            cause: line.slice(pathStart + terminator.length),
+          });
+        }
+      }
+    }
+    if (matchesByInput.size === 0) {
+      observations.push({ match: "MISMATCH", truncated: lineTruncated });
+      continue;
+    }
+    if (matchesByInput.size !== 1) {
+      observations.push({ match: "UNVERIFIED", truncated: lineTruncated });
+      continue;
+    }
+    const [matched] = matchesByInput.values();
+    observations.push({
+      match: "MATCH",
+      truncated: lineTruncated,
+      inputIndex: matched.inputIndex,
+      effectivePathAbsolute: matched.effectivePathAbsolute,
+      effectivePathWithinRoot: matched.effectivePathWithinRoot,
+      outerCategory:
+        match[1] === "locate" ? "unable-to-locate" : "unable-to-read",
+      reportedCategory: reportedImageErrorCategory(matched.cause),
+    });
+  }
+  return observations;
+}
+
+function createLocalImageDiagnosticBinder() {
+  let binding = null;
+  let stderrStarted = false;
+  let completedObservationCount = 0;
+  let onlyCompletedObservation = null;
+  let captureTruncated = false;
+  let lineBuffer = Buffer.alloc(0);
+  let lineTruncated = false;
+  let imageViewEventCount = 0;
+  let imageViewCompletedCount = 0;
+  let imageViewEventLimitReported = false;
+  const imageViewStates = new Map();
+  const imageViewBlockers = [];
+
+  const addImageViewBlocker = (reason, state = null) => {
+    if (!imageViewBlockers.includes(reason)) {
+      imageViewBlockers.push(reason);
+    }
+    if (state !== null && !state.blockers.includes(reason)) {
+      state.blockers.push(reason);
+    }
+  };
+  const imageViewPathMatch = (rawItem, exactShape) => {
+    if (!exactShape || binding === null || typeof rawItem.path !== "string") {
+      return { matchedInputIndex: null, effectivePathMatch: "UNVERIFIED" };
+    }
+    const matches = new Set();
+    for (const image of binding.images) {
+      if (
+        rawItem.path === image.sentPath ||
+        rawItem.path === image.resolvedPath
+      ) {
+        matches.add(image.inputIndex);
+      }
+    }
+    if (matches.size === 0) {
+      return { matchedInputIndex: null, effectivePathMatch: "MISMATCH" };
+    }
+    if (matches.size !== 1) {
+      return { matchedInputIndex: null, effectivePathMatch: "UNVERIFIED" };
+    }
+    return {
+      matchedInputIndex: [...matches][0],
+      effectivePathMatch: "MATCH",
+    };
+  };
+  const safeImageViewId = (value) => {
+    const sanitized = sanitizeEventId(value);
+    const byteLength = typeof value === "string"
+      ? Buffer.byteLength(value, "utf8")
+      : 0;
+    if (
+      sanitized.blocker === null &&
+      byteLength >= 1 &&
+      byteLength <= 128
+    ) {
+      return sanitized;
+    }
+    return {
+      value: null,
+      blocker: sanitized.blocker ?? "runtime-drift",
+    };
+  };
+  const safeImageViewNotification = (
+    notification,
+    safeId,
+    matched,
+  ) => ({
+    method: notification.method,
+    params: {
+      threadId: notification?.params?.threadId,
+      turnId: notification?.params?.turnId,
+      item: {
+        id: safeId.blocker === null ? safeId.value : null,
+        type: "imageView",
+        matchedInputIndex: matched.matchedInputIndex,
+        effectivePathMatch: matched.effectivePathMatch,
+      },
+    },
+  });
+  const rewriteImageViewNotification = (notification) => {
+    const rawItem = notification?.params?.item;
+    if (
+      !["item/started", "item/completed"].includes(notification?.method) ||
+      rawItem?.type !== "imageView"
+    ) {
+      return notification;
+    }
+
+    const exactShape = exactKeys(rawItem, ["id", "type", "path"]);
+    const safeId = safeImageViewId(rawItem.id);
+    const matched = imageViewPathMatch(rawItem, exactShape);
+    if (imageViewEventCount >= LOCAL_IMAGE_VIEW_EVENT_LIMIT) {
+      addImageViewBlocker("image-view-limit-exceeded");
+      if (imageViewEventLimitReported) {
+        return null;
+      }
+      imageViewEventLimitReported = true;
+      return safeImageViewNotification(
+        notification,
+        { value: null, blocker: "runtime-drift" },
+        { matchedInputIndex: null, effectivePathMatch: "UNVERIFIED" },
+      );
+    }
+    imageViewEventCount += 1;
+    if (notification.method === "item/completed") {
+      imageViewCompletedCount += 1;
+    }
+    if (safeId.blocker !== null || typeof safeId.value !== "string") {
+      addImageViewBlocker("image-view-invalid-id");
+      return safeImageViewNotification(notification, safeId, matched);
+    }
+    let state = imageViewStates.get(safeId.value);
+    if (state === undefined) {
+      if (imageViewStates.size >= LOCAL_IMAGE_TARGET_LIMIT) {
+        addImageViewBlocker("image-view-limit-exceeded");
+        return safeImageViewNotification(
+          notification,
+          { value: null, blocker: "runtime-drift" },
+          { matchedInputIndex: null, effectivePathMatch: "UNVERIFIED" },
+        );
+      }
+      state = {
+        id: safeId.value,
+        matchedInputIndex: matched.matchedInputIndex,
+        eventCount: 0,
+        startedCount: 0,
+        completedCount: 0,
+        blockers: [],
+      };
+      imageViewStates.set(safeId.value, state);
+    }
+    state.eventCount += 1;
+    if (notification.method === "item/started") {
+      state.startedCount += 1;
+      if (state.startedCount > 1) {
+        addImageViewBlocker("image-view-duplicate-started", state);
+      }
+    } else {
+      state.completedCount += 1;
+      if (state.startedCount === 0) {
+        addImageViewBlocker("image-view-completed-without-started", state);
+      }
+      if (state.completedCount > 1) {
+        addImageViewBlocker("image-view-duplicate-completed", state);
+      }
+    }
+    if (!exactShape) {
+      addImageViewBlocker("image-view-extra-shape", state);
+    }
+    if (matched.effectivePathMatch === "MISMATCH") {
+      addImageViewBlocker("image-view-target-mismatch", state);
+    } else if (matched.effectivePathMatch !== "MATCH") {
+      addImageViewBlocker("image-view-target-unverified", state);
+    }
+    if (
+      state.eventCount > 1 &&
+      state.matchedInputIndex !== matched.matchedInputIndex
+    ) {
+      state.matchedInputIndex = null;
+      addImageViewBlocker("image-view-target-drift", state);
+    }
+
+    return safeImageViewNotification(notification, safeId, matched);
+  };
+
+  const appendLineBytes = (bytes) => {
+    const remaining = LOCAL_IMAGE_DIAGNOSTIC_LINE_BYTES - lineBuffer.length;
+    if (remaining > 0) {
+      lineBuffer = Buffer.concat([lineBuffer, bytes.subarray(0, remaining)]);
+    }
+    if (bytes.length > remaining) {
+      lineTruncated = true;
+      captureTruncated = true;
+    }
+  };
+  const analyzeCurrentLine = () =>
+    binding === null
+      ? []
+      : analyzeLocalImageDiagnosticLine(lineBuffer, lineTruncated, binding);
+  const finishLine = () => {
+    const observations = analyzeCurrentLine();
+    const nextCount = Math.min(
+      Number.MAX_SAFE_INTEGER,
+      completedObservationCount + observations.length,
+    );
+    if (completedObservationCount === 0 && observations.length === 1) {
+      onlyCompletedObservation = observations[0];
+    } else if (nextCount !== 1) {
+      onlyCompletedObservation = null;
+    }
+    completedObservationCount = nextCount;
+    lineBuffer = Buffer.alloc(0);
+    lineTruncated = false;
+  };
+
+  return {
+    bind(value) {
+      if (binding !== null) {
+        throw new Error("local image diagnostics are already bound");
+      }
+      if (stderrStarted) {
+        throw new Error(
+          "local image diagnostics must be bound before App Server stderr",
+        );
+      }
+      validateLocalImageDiagnosticBinding(value);
+      binding = {
+        root: value.root,
+        images: value.images.map((image) => ({
+          inputIndex: image.inputIndex,
+          sentPath: image.sentPath,
+          resolvedPath: image.resolvedPath,
+        })),
+      };
+    },
+    observe(bytes) {
+      if (bytes.length === 0) {
+        return;
+      }
+      stderrStarted = true;
+      if (binding === null) {
+        return;
+      }
+      let offset = 0;
+      while (offset < bytes.length) {
+        const newline = bytes.indexOf(0x0a, offset);
+        const end = newline === -1 ? bytes.length : newline;
+        appendLineBytes(bytes.subarray(offset, end));
+        if (newline === -1) {
+          break;
+        }
+        finishLine();
+        offset = newline + 1;
+      }
+    },
+    snapshot() {
+      const expectedTargetCount = binding?.images.length ?? 0;
+      const result = emptyLocalImageDiagnostics(expectedTargetCount);
+      if (binding === null) {
+        return result;
+      }
+      const currentObservations = analyzeCurrentLine();
+      result.observationCount = Math.min(
+        Number.MAX_SAFE_INTEGER,
+        completedObservationCount + currentObservations.length,
+      );
+      if (!captureTruncated && result.observationCount === 0) {
+        result.status = "NO_ROUTER_IMAGE_ERROR";
+        return result;
+      }
+      if (captureTruncated || result.observationCount !== 1) {
+        return result;
+      }
+      const observation =
+        completedObservationCount === 1
+          ? onlyCompletedObservation
+          : currentObservations[0];
+      if (observation.truncated || observation.match === "UNVERIFIED") {
+        return result;
+      }
+      if (observation.match === "MISMATCH") {
+        result.effectivePathMatch = "MISMATCH";
+        return result;
+      }
+      result.effectivePathMatch = "MATCH";
+      if (
+        !observation.effectivePathAbsolute ||
+        !observation.effectivePathWithinRoot
+      ) {
+        return result;
+      }
+      result.status = "OBSERVED";
+      result.matchedInputIndex = observation.inputIndex;
+      result.effectivePathAbsolute = "VERIFIED";
+      result.effectivePathWithinRoot = "VERIFIED";
+      result.outerCategory = observation.outerCategory;
+      result.reportedCategory = observation.reportedCategory;
+      return result;
+    },
+    rewriteNotification(notification) {
+      return rewriteImageViewNotification(notification);
+    },
+    successfulImageViewsSnapshot() {
+      const states = [...imageViewStates.values()];
+      const items = states.map((state) => ({
+        id: state.id,
+        matchedInputIndex: state.matchedInputIndex,
+        eventCount: state.eventCount,
+        startedCount: state.startedCount,
+        completedCount: state.completedCount,
+        complete:
+          state.blockers.length === 0 &&
+          state.startedCount === 1 &&
+          state.completedCount === 1,
+      }));
+      const blockers = [...imageViewBlockers];
+      if (
+        states.some(
+          (state) => state.startedCount > 0 && state.completedCount === 0,
+        )
+      ) {
+        blockers.push("image-view-lifecycle-incomplete");
+      }
+      return {
+        complete:
+          blockers.length === 0 &&
+          items.every((item) => item.complete),
+        eventCount: imageViewEventCount,
+        completedCount: imageViewCompletedCount,
+        items,
+        blockers,
+        privacy: {
+          rawPathPersisted: false,
+          pathDigestPersisted: false,
+          rawDiagnosticDigestPersisted: false,
+        },
+      };
+    },
+  };
+}
+
 export async function openAppServer(
   runtime,
   callbacks = {},
@@ -2269,6 +2742,7 @@ export async function openAppServer(
       throw new RangeError(`${name} must be a positive safe integer`);
     }
   }
+  const localImageDiagnostics = createLocalImageDiagnosticBinder();
   const notificationListeners = new Set();
   const notificationHistory = [];
   let dynamicToolHandler = null;
@@ -2280,7 +2754,11 @@ export async function openAppServer(
     environmentAttached: false,
   };
   async function dispatchNotification(message) {
-    const event = normalizeEvent(message);
+    const safeMessage = localImageDiagnostics.rewriteNotification(message);
+    if (safeMessage === null) {
+      return;
+    }
+    const event = normalizeEvent(safeMessage);
     notificationSequence += 1;
     notificationHistory.push({
       sequence: notificationSequence,
@@ -2298,9 +2776,9 @@ export async function openAppServer(
     if (notificationHistory.length > EVENT_LIMIT * 2) {
       notificationHistory.shift();
     }
-    await callbacks.onNotification?.(message);
+    await callbacks.onNotification?.(safeMessage);
     for (const listener of notificationListeners) {
-      await listener(message);
+      await listener(safeMessage);
     }
   }
 
@@ -2353,6 +2831,7 @@ export async function openAppServer(
   };
   child.stderr.on("data", (chunk) => {
     const bytes = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
+    localImageDiagnostics.observe(bytes);
     stderrBytes += bytes.length;
     stderrHash.update(bytes);
     if (stderrPrefix.length < STDERR_CAPTURE_BYTES) {
@@ -2485,6 +2964,15 @@ export async function openAppServer(
             dynamicToolHandler = null;
           }
         };
+      },
+      bindLocalImageDiagnostics(value) {
+        localImageDiagnostics.bind(value);
+      },
+      get imageDiagnostics() {
+        return localImageDiagnostics.snapshot();
+      },
+      get successfulImageViews() {
+        return localImageDiagnostics.successfulImageViewsSnapshot();
       },
       get stderr() {
         const captureTruncated = stderrBytes > STDERR_CAPTURE_BYTES;
@@ -2911,6 +3399,30 @@ export function normalizeEvent(
     }
     if (item.type === "reasoning") {
       event.item = itemIdentity(item);
+    } else if (item.type === "imageView") {
+      event.item = {
+        id: item.id,
+        type: "imageView",
+        matchedInputIndex: item.matchedInputIndex,
+        effectivePathMatch: item.effectivePathMatch,
+      };
+      if (
+        !exactKeys(item, [
+          "id",
+          "type",
+          "matchedInputIndex",
+          "effectivePathMatch",
+        ]) ||
+        !Number.isSafeInteger(item.matchedInputIndex) ||
+        item.matchedInputIndex < 0 ||
+        item.effectivePathMatch !== "MATCH"
+      ) {
+        event.blockers.push(
+          item.effectivePathMatch === "MISMATCH"
+            ? "image-view-target-mismatch"
+            : "image-view-target-unverified",
+        );
+      }
     } else if (item.type === "commandExecution") {
       event.item = {
         ...itemIdentity(item),
@@ -4831,6 +5343,19 @@ function caseEventIsAdmissible(
     }
     if (event.item.type === "reasoning") {
       return true;
+    }
+    if (event.item.type === "imageView") {
+      return (
+        exactKeys(event.item, [
+          "id",
+          "type",
+          "matchedInputIndex",
+          "effectivePathMatch",
+        ]) &&
+        Number.isSafeInteger(event.item.matchedInputIndex) &&
+        event.item.matchedInputIndex >= 0 &&
+        event.item.effectivePathMatch === "MATCH"
+      );
     }
     if (!PUBLIC_MESSAGE_TYPES.has(event.item.type)) {
       return false;

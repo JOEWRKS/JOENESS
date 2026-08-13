@@ -5,6 +5,7 @@ import { chmod, copyFile, cp, lstat, mkdtemp, mkdir, readFile, readdir, rm, writ
 import { tmpdir } from "node:os";
 import path from "node:path";
 import test from "node:test";
+import { pathToFileURL } from "node:url";
 import { promisify } from "node:util";
 
 const execFile = promisify(execFileCallback);
@@ -202,6 +203,24 @@ async function successorFixtureRoot(t, plan) {
   return { root, planPath };
 }
 
+function copiedFixtureGitReadBlob(plan) {
+  const pins = new Map(
+    [plan.source.runner, plan.source.freshTurnAdapter, plan.source.collector]
+      .map((pin) => [pin.path, pin]),
+  );
+  return async (_root, implementationCommit, sourcePath) => {
+    assert.equal(implementationCommit, plan.source.repositoryCommit);
+    const pin = pins.get(sourcePath);
+    if (pin === undefined) throw new Error("unexpected source blob request");
+    const bytes = await execFile(
+      "git",
+      ["show", `${implementationCommit}:${sourcePath}`],
+      { cwd: ROOT, encoding: "buffer", maxBuffer: 1024 * 1024 },
+    );
+    return bytes.stdout;
+  };
+}
+
 async function listRelativeFiles(root, current = root) {
   const entries = await readdir(current, { withFileTypes: true });
   const files = [];
@@ -285,15 +304,68 @@ function successfulDependencies(design = designOutput()) {
       return {
         output,
         outputText: { text, byteLength: Buffer.byteLength(text), sha256: digest(text) },
-        threadStart: { request: { cwd: options.root }, response: { threadId } },
-        thread: { id: threadId },
-        turn: { id: turnId, request: { input: options.input } },
+        threadStart: {
+          request: {
+            ephemeral: true,
+            approvalPolicy: "never",
+            permissions: "joewrks-eval-control-v3",
+            projectDocMaxBytes: 0,
+            selectedCapabilityRootCount: 0,
+            dynamicToolCount: index === 0 ? 0 : 1,
+            runtimeWorkspaceRootCount: 1,
+            environmentCount: 1,
+          },
+          response: {
+            threadId,
+            ephemeral: true,
+            priorTurnCount: 0,
+            instructionSourceCount: 0,
+          },
+        },
+        thread: {
+          id: threadId,
+          activePermissionProfileId: "joewrks-eval-control-v3",
+          approvalPolicy: "never",
+          approvalsReviewer: "user",
+          sandbox: { type: "readOnly", networkAccess: false },
+          ephemeral: true,
+          priorTurnCount: 0,
+          instructionSourceCount: 0,
+          runtimeWorkspaceRootCount: 1,
+        },
+        turn: {
+          id: turnId,
+          request: {
+            inputDescriptorCount: options.input.length,
+            inputRequestSha256: digest(`request-${index}`),
+            approvalPolicy: "never",
+            permissions: "joewrks-eval-control-v3",
+            outputSchemaSha256: digest(`schema-${index}`),
+          },
+        },
         input: {
           requestSha256: digest(`request-${index}`),
           descriptors: [
             { index: 0, type: "text", text: "prompt sk-proj-SYNTHETIC_TEST_ONLY_abcdefghijklmnop", byteLength: 6, sha256: digest(`prompt-${index}`) },
-            { index: 1, type: "localImage", path: path.join(options.root, "approved.png"), byteLength: 4, sha256: digest(`image-${index}`), originalDetail: "unverified", embeddedBytes: "SYNTHETIC_IMAGE_BYTES_MUST_NOT_PERSIST" },
+            ...options.input
+              .map((entry, inputIndex) => ({ entry, inputIndex }))
+              .filter(({ entry }) => entry.type === "localImage")
+              .map(({ entry, inputIndex }, imageOffset) => ({
+                index: inputIndex,
+                type: "localImage",
+                path: entry.path,
+                byteLength: 4,
+                sha256: digest(`image-${index}-${imageOffset + 1}`),
+                originalDetail: "unverified",
+                embeddedBytes: "SYNTHETIC_IMAGE_BYTES_MUST_NOT_PERSIST",
+              })),
           ],
+          controllerLocalImages: controllerImageEvidence(
+            options.input
+              .filter(({ type }) => type === "localImage")
+              .map((_, imageOffset) => digest(`image-${index}-${imageOffset + 1}`)),
+            1,
+          ),
         },
         outputSchema: {
           value: { syntheticSecret: "sk-proj-SYNTHETIC_TEST_ONLY_abcdefghijklmnop" },
@@ -304,7 +376,32 @@ function successfulDependencies(design = designOutput()) {
         toolEvidence,
         mcpAfter: [],
         blockers: [],
-        appServer: { processExitCode: 0, stderr: { byteLength: 0 } },
+        appServer: {
+          processExitCode: 0,
+          stderr: {
+            byteLength: 0,
+            sha256: "f".repeat(64),
+            truncated: false,
+            captureTruncated: false,
+          },
+          imageDiagnostics: safeImageDiagnostics({
+            status: "NO_ROUTER_IMAGE_ERROR",
+            observationCount: 0,
+            expectedTargetCount: options.input.filter(({ type }) => type === "localImage").length,
+            effectivePathMatch: "UNVERIFIED",
+            matchedInputIndex: null,
+            effectivePathAbsolute: "UNVERIFIED",
+            effectivePathWithinRoot: "UNVERIFIED",
+            outerCategory: "UNVERIFIED",
+            reportedCategory: "UNVERIFIED",
+          }),
+          successfulImageViews: safeSuccessfulImageViews(
+            options.input
+              .map((entry, inputIndex) => ({ entry, inputIndex }))
+              .filter(({ entry }) => entry.type === "localImage")
+              .map(({ inputIndex }) => inputIndex),
+          ),
+        },
       };
     },
     gitStatus: async () => "",
@@ -523,6 +620,7 @@ test("M2B1 v4 preflight rejects input and candidate drift from the pinned v3 con
         planPath: fixture.planPath,
         gitStatus: async () => "",
         gitIdentity: async () => "f".repeat(40),
+        gitReadBlob: copiedFixtureGitReadBlob(plan),
       }),
       /contract|predecessor|unchanged/iu,
     );
@@ -570,6 +668,7 @@ test("M2B1 v5 preflight accepts the unchanged v4 evaluator contract and rejects 
     planPath: acceptedFixture.planPath,
     gitStatus: async () => "",
     gitIdentity: async () => "f".repeat(40),
+    gitReadBlob: copiedFixtureGitReadBlob(acceptedPlan),
   });
   assert.equal(accepted.plan.schemaVersion, 5);
 
@@ -592,10 +691,27 @@ test("M2B1 v5 preflight accepts the unchanged v4 evaluator contract and rejects 
         planPath: changedFixture.planPath,
         gitStatus: async () => "",
         gitIdentity: async () => "f".repeat(40),
+        gitReadBlob: copiedFixtureGitReadBlob(changedPlan),
       }),
       /contract|unchanged/iu,
     );
   }
+});
+
+test("M2B1 preflight rejects a source pin whose commit blob differs", async (t) => {
+  const subject = await loadSubject();
+  const plan = JSON.parse(await readFile(STDERR_DIAGNOSTIC_PLAN_PATH, "utf8"));
+  const fixture = await successorFixtureRoot(t, plan);
+  await assert.rejects(
+    subject.preflightDesignVisualM2B1({
+      repositoryRoot: fixture.root,
+      planPath: fixture.planPath,
+      gitStatus: async () => "",
+      gitIdentity: async () => "f".repeat(40),
+      gitReadBlob: async () => Buffer.from("wrong source blob\n"),
+    }),
+    /source.*blob|blob.*pin/iu,
+  );
 });
 
 test("M2B1 successor run emits v2 summary and blocked identities", async (t) => {
@@ -639,6 +755,7 @@ test("M2B1 successor run emits v2 summary and blocked identities", async (t) => 
     assert.equal(implementationCommit, plan.source.repositoryCommit);
     return "f".repeat(40);
   };
+  success.gitReadBlob = copiedFixtureGitReadBlob(plan);
   const result = await subject.runDesignVisualM2B1({
     repositoryRoot: root,
     planPath,
@@ -651,6 +768,7 @@ test("M2B1 successor run emits v2 summary and blocked identities", async (t) => 
 
   const failure = successfulDependencies();
   failure.gitIdentity = success.gitIdentity;
+  failure.gitReadBlob = success.gitReadBlob;
   failure.runTurn = async (options) => {
     options.session.closed = true;
     options.session.processExitCode = 0;
@@ -774,6 +892,54 @@ test("M2B1 staging rollback failure surfaces both errors and the exact retained 
   assert.equal((await lstat(stagedRoot)).isDirectory(), true);
 });
 
+test("M2B1 orchestrator writes nothing unless staging rollback proves its root absent", async (t) => {
+  const subject = await loadSubject();
+  for (const readback of ["retained", "unknown"]) {
+    const { root, planPath } = await fixtureRoot(t);
+    const dependencies = successfulDependencies();
+    const original = new Error(`staging failed and root ${readback}`);
+    original.stagingEvidence = {
+      root: path.join(root, `${readback}-staging-root`),
+      rollback: { attempted: true, readback, cleanupErrors: ["fixture"] },
+    };
+    await assert.rejects(
+      subject.runDesignVisualM2B1({
+        repositoryRoot: root,
+        planPath,
+        ...dependencies,
+        runTurn: async (options) => {
+          options.session.closed = true;
+          options.session.processExitCode = 0;
+          throw original;
+        },
+      }),
+      new RegExp(`staging failed and root ${readback}`),
+    );
+    assert.deepEqual(dependencies.writes, [], readback);
+  }
+});
+
+test("M2B1 orchestrator writes nothing when staged-root cleanup is not proven removed", async (t) => {
+  const subject = await loadSubject();
+  for (const readback of ["retained", "unknown"]) {
+    const { root, planPath } = await fixtureRoot(t);
+    const dependencies = successfulDependencies();
+    await assert.rejects(
+      subject.runDesignVisualM2B1({
+        repositoryRoot: root,
+        planPath,
+        ...dependencies,
+        cleanupStagedRoots: async (stagedRoots) => stagedRoots.map((staged) => ({
+          ...staged,
+          readback,
+        })),
+      }),
+      /cleanup|removed|retained|unknown/iu,
+    );
+    assert.deepEqual(dependencies.writes, [], readback);
+  }
+});
+
 test("M2B1 orchestrator uses three sessions, one raw Design tuple, and candidate-isolated Visual turns", async (t) => {
   const subject = await loadSubject();
   assert.equal(typeof subject?.runDesignVisualM2B1, "function");
@@ -892,6 +1058,7 @@ test("M2B1 rejects reused evaluator thread or turn identity before success artif
   dependencies.runTurn = async (options) => {
     const result = await originalRunTurn(options);
     result.thread.id = "reused-thread";
+    result.threadStart.response.threadId = "reused-thread";
     result.turn.id = "reused-turn";
     return result;
   };
@@ -933,6 +1100,10 @@ test("M2B1 runtime cleanup runs once before success writes and cleanup failure l
   assert.equal(blocked.cleanupEvidence.finishAttempts, 1);
   assert.equal(blocked.cleanupEvidence.stagedRoots.length, 3);
   assert.equal(blocked.cleanupEvidence.stagedRoots.every(({ readback }) => readback === "removed"), true);
+  assert.equal(
+    blocked.cleanupEvidence.stagedRoots.every((entry) => !Object.hasOwn(entry, "root")),
+    true,
+  );
   assert.equal(blocked.cleanupEvidence.runtime.status, "failed");
   assert.deepEqual(JSON.parse(blocked.cleanupEvidence.runtime.available.text), {
     isolatedHome: { readback: "removed" },
@@ -1008,7 +1179,9 @@ test("M2B1 failure stops without retry, preserves verified partial evidence, and
   assert.equal(verified.sessions.length, 2);
   assert.equal(verified.writes.length, 1);
   assert.equal(verified.writes[0].file.endsWith("blocked.json"), true);
-  assert.deepEqual(verified.writes[0].value.partialEvidence.events, [{ id: "partial" }]);
+  assert.equal(verified.writes[0].value.partialEvidence.retention, "prioritized");
+  assert.equal(verified.writes[0].value.partialEvidence.events.arrayLength, 1);
+  assert.deepEqual(verified.writes[0].value.partialEvidence.events.window.head, [{}]);
 
   const unsafe = successfulDependencies();
   unsafe.runTurn = async (options) => {
@@ -1074,7 +1247,7 @@ test("M2B1 oversized failure evidence keeps prioritized diagnostics instead of o
       blockers: ["runtime-error", "turn-not-completed", "runtime-control-blocker"],
       appServer: {
         processExitCode: 0,
-        stderr: { byteLength: 0, truncated: false },
+        stderr: { byteLength: 0, sha256: "e".repeat(64), truncated: false },
         remoteControl: { enabled: false },
       },
     };
@@ -1096,6 +1269,7 @@ test("M2B1 oversized failure evidence keeps prioritized diagnostics instead of o
     "runtime-control-blocker",
   ]);
   assert.equal(blocked.partialEvidence.appServer.processExitCode, 0);
+  assert.equal(Object.hasOwn(blocked.partialEvidence.appServer.stderr, "sha256"), false);
   assert.equal(blocked.partialEvidence.events.arrayLength, 40);
   assert.equal(blocked.partialEvidence.events.windowOmittedIndexCount > 0, true);
   assert.equal(blocked.partialEvidence.outputSchema.byteLength, 4096);
@@ -1357,7 +1531,7 @@ test("M2B1 prioritized diagnostics preserve structured App Server stderr", async
   );
   const blocked = dependencies.writes.find(({ file }) => file.endsWith("blocked.json")).value;
   assert.equal(blocked.partialEvidence.appServer.stderr.byteLength, 383);
-  assert.equal(blocked.partialEvidence.appServer.stderr.sha256, "a".repeat(64));
+  assert.equal(Object.hasOwn(blocked.partialEvidence.appServer.stderr, "sha256"), false);
   assert.equal(blocked.partialEvidence.appServer.stderr.captureTruncated, false);
   assert.deepEqual(blocked.partialEvidence.appServer.stderr.diagnostic, diagnostic);
 });
@@ -1405,7 +1579,7 @@ test("M2B1 prioritized diagnostics reject live proxy traps without invoking them
   assert.equal(blocked.partialEvidence.appServer.remoteControl.text, "[UNSUPPORTED:proxy]");
 });
 
-test("M2B1 small exact evidence ignores hidden keys and keeps __proto__ as plain data", async (t) => {
+test("M2B1 path privacy supersedes small exact cloning and drops hidden and uncurated prototype-shaped keys", async (t) => {
   const subject = await loadSubject();
   const { root, planPath } = await fixtureRoot(t);
   const dependencies = successfulDependencies();
@@ -1433,9 +1607,792 @@ test("M2B1 small exact evidence ignores hidden keys and keeps __proto__ as plain
     /plain data evidence failed/,
   );
   const blocked = dependencies.writes.find(({ file }) => file.endsWith("blocked.json")).value;
+  assert.equal(blocked.partialEvidence.retention, "prioritized");
   assert.equal(Object.hasOwn(blocked.partialEvidence, "hidden"), false);
   assert.equal(JSON.stringify(blocked).includes("SYNTHETIC_TEST_ONLY_hidden_value"), false);
-  assert.equal(Object.hasOwn(blocked.partialEvidence, "__proto__"), true);
-  assert.deepEqual(blocked.partialEvidence.__proto__, { retainedAsData: true });
+  assert.equal(Object.hasOwn(blocked.partialEvidence, "__proto__"), false);
   assert.equal(Object.getPrototypeOf(blocked.partialEvidence), Object.prototype);
+});
+
+function safeImageDiagnostics(overrides = {}) {
+  return {
+    status: "OBSERVED",
+    observationCount: 1,
+    expectedTargetCount: 1,
+    effectivePathMatch: "MATCH",
+    matchedInputIndex: 1,
+    effectivePathAbsolute: "VERIFIED",
+    effectivePathWithinRoot: "VERIFIED",
+    modelArgumentAbsolute: "UNVERIFIED",
+    outerCategory: "unable-to-locate",
+    reportedCategory: "not-found",
+    privacy: {
+      rawPathPersisted: false,
+      pathDigestPersisted: false,
+      rawDiagnosticDigestPersisted: false,
+    },
+    ...overrides,
+  };
+}
+
+function safeSuccessfulImageViews(inputIndexes = []) {
+  const items = inputIndexes.map((matchedInputIndex) => ({
+    id: `image-view-${matchedInputIndex}`,
+    matchedInputIndex,
+    eventCount: 2,
+    startedCount: 1,
+    completedCount: 1,
+    complete: true,
+  }));
+  return {
+    complete: true,
+    eventCount: items.length * 2,
+    completedCount: items.length,
+    items,
+    blockers: [],
+    privacy: {
+      rawPathPersisted: false,
+      pathDigestPersisted: false,
+      rawDiagnosticDigestPersisted: false,
+    },
+  };
+}
+
+function controllerImageEvidence(sha256 = digest("controller-image"), inputIndex = 1) {
+  const hashes = Array.isArray(sha256) ? sha256 : [sha256];
+  return hashes.map((hash, offset) => ({
+    inputIndex: inputIndex + offset,
+    byteLength: 4,
+    sha256: hash,
+    absolute: true,
+    withinResolvedRoot: true,
+    regularFile: true,
+    nonSymlink: true,
+    readable: true,
+    checkedBeforeThreadStart: true,
+    checkedBeforeTurnStart: true,
+    unchangedBeforeTurnStart: true,
+    postTurnPreCleanup: { readable: true, unchanged: true },
+  }));
+}
+
+test("M2B1 success evidence omits evaluator paths, cwd, and root identities", async (t) => {
+  const subject = await loadSubject();
+  const { root, planPath } = await fixtureRoot(t);
+  const dependencies = successfulDependencies();
+
+  const result = await subject.runDesignVisualM2B1({
+    repositoryRoot: root,
+    planPath,
+    ...dependencies,
+  });
+
+  for (const identity of result.summary.evaluatorIdentities) {
+    assert.equal(Object.hasOwn(identity, "evaluatorRoot"), false);
+  }
+  const handoff = dependencies.writes.find(({ file }) => file.endsWith("design-handoff.json")).value;
+  assert.equal(Object.hasOwn(handoff.evidence.thread, "cwd"), false);
+  assert.equal(Object.hasOwn(handoff.evidence.thread, "runtimeWorkspaceRoots"), false);
+  assert.equal(Object.hasOwn(handoff.evidence.thread, "request"), false);
+  assert.deepEqual(handoff.evidence.threadStart.request, {
+    ephemeral: true,
+    approvalPolicy: "never",
+    permissions: "joewrks-eval-control-v3",
+    projectDocMaxBytes: 0,
+    selectedCapabilityRootCount: 0,
+    dynamicToolCount: 0,
+    runtimeWorkspaceRootCount: 1,
+    environmentCount: 1,
+  });
+  assert.equal(handoff.evidence.threadStart.response.instructionSourceCount, 0);
+  assert.equal(handoff.evidence.thread.activePermissionProfileId, "joewrks-eval-control-v3");
+  assert.equal(handoff.evidence.thread.approvalPolicy, "never");
+  assert.equal(handoff.evidence.thread.approvalsReviewer, "user");
+  assert.deepEqual(handoff.evidence.thread.sandbox, { type: "readOnly", networkAccess: false });
+  assert.equal(handoff.evidence.thread.ephemeral, true);
+  assert.equal(handoff.evidence.thread.priorTurnCount, 0);
+  assert.equal(handoff.evidence.thread.instructionSourceCount, 0);
+  assert.equal(handoff.evidence.thread.runtimeWorkspaceRootCount, 1);
+  assert.deepEqual(handoff.evidence.turn.request, {
+    inputDescriptorCount: 2,
+    inputRequestSha256: digest("request-0"),
+    approvalPolicy: "never",
+    permissions: "joewrks-eval-control-v3",
+    outputSchemaSha256: digest("schema-0"),
+  });
+  assert.equal(Object.hasOwn(handoff.evidence.appServer.stderr, "sha256"), false);
+  assert.equal(handoff.evidence.appServer.imageDiagnostics.status, "NO_ROUTER_IMAGE_ERROR");
+  assert.deepEqual(
+    handoff.evidence.appServer.successfulImageViews,
+    safeSuccessfulImageViews([1]),
+  );
+  assert.deepEqual(
+    handoff.evidence.input.controllerLocalImages,
+    controllerImageEvidence(digest("image-0-1")),
+  );
+  assert.equal(
+    handoff.evidence.input.descriptors.some((descriptor) => Object.hasOwn(descriptor, "path")),
+    false,
+  );
+  const serialized = JSON.stringify(dependencies.writes);
+  for (const stagedRoot of dependencies.calls.map(({ root: callRoot }) => callRoot)) {
+    assert.equal(serialized.includes(stagedRoot), false);
+    assert.equal(serialized.includes(stagedRoot.replaceAll("\\", "/")), false);
+  }
+});
+
+test("M2B1 success requires correlated controller and App Server image evidence", async (t) => {
+  const subject = await loadSubject();
+  for (const mutation of [
+    (result) => delete result.input.controllerLocalImages,
+    (result) => { result.input.controllerLocalImages[0].sha256 = "0".repeat(64); },
+    (result) => { result.input.controllerLocalImages[0].readable = false; },
+    (result) => { result.input.controllerLocalImages.push(structuredClone(result.input.controllerLocalImages[0])); },
+    (result) => delete result.appServer.imageDiagnostics,
+    (result) => { result.appServer.imageDiagnostics.expectedTargetCount = 2; },
+    (result) => { result.appServer.imageDiagnostics.status = "OBSERVED"; },
+    (result) => delete result.appServer.successfulImageViews,
+  ]) {
+    const { root, planPath } = await fixtureRoot(t);
+    const dependencies = successfulDependencies();
+    const originalRunTurn = dependencies.runTurn;
+    dependencies.runTurn = async (options) => {
+      const result = await originalRunTurn(options);
+      if (dependencies.calls.length === 1) mutation(result);
+      return result;
+    };
+
+    await assert.rejects(
+      subject.runDesignVisualM2B1({ repositoryRoot: root, planPath, ...dependencies }),
+      /controller image|image diagnostic|image evidence|successful image-view/iu,
+    );
+    assert.equal(
+      dependencies.writes.every(({ file }) => file.endsWith("blocked.json")),
+      true,
+    );
+  }
+});
+
+test("M2B1 success requires a zero-stderr NO_ROUTER_IMAGE_ERROR observation", async (t) => {
+  const subject = await loadSubject();
+  for (const mutate of [
+    (result) => {
+      result.appServer.imageDiagnostics = safeImageDiagnostics();
+    },
+    (result) => {
+      result.appServer.stderr.byteLength = 1;
+    },
+  ]) {
+    const { root, planPath } = await fixtureRoot(t);
+    const dependencies = successfulDependencies();
+    const originalRunTurn = dependencies.runTurn;
+    dependencies.runTurn = async (options) => {
+      const result = await originalRunTurn(options);
+      if (dependencies.calls.length === 1) mutate(result);
+      return result;
+    };
+    await assert.rejects(
+      subject.runDesignVisualM2B1({ repositoryRoot: root, planPath, ...dependencies }),
+      /image diagnostic|stderr|router image/iu,
+    );
+    assert.equal(
+      dependencies.writes.every(({ file }) => file.endsWith("blocked.json")),
+      true,
+    );
+  }
+});
+
+test("M2B1 success requires exactly one complete image-view lifecycle per phase image", async (t) => {
+  const subject = await loadSubject();
+  const cases = [
+    {
+      phaseCall: 1,
+      views: safeSuccessfulImageViews(),
+    },
+    {
+      phaseCall: 1,
+      views: {
+        ...safeSuccessfulImageViews([1]),
+        eventCount: 4,
+        completedCount: 2,
+        items: [
+          ...safeSuccessfulImageViews([1]).items,
+          { ...safeSuccessfulImageViews([1]).items[0], id: "image-view-1-duplicate" },
+        ],
+      },
+    },
+    {
+      phaseCall: 2,
+      views: safeSuccessfulImageViews([1]),
+    },
+  ];
+  for (const { phaseCall, views } of cases) {
+    const { root, planPath } = await fixtureRoot(t);
+    const dependencies = successfulDependencies();
+    const originalRunTurn = dependencies.runTurn;
+    dependencies.runTurn = async (options) => {
+      const result = await originalRunTurn(options);
+      if (dependencies.calls.length === phaseCall) {
+        result.appServer.successfulImageViews = structuredClone(views);
+      }
+      return result;
+    };
+    await assert.rejects(
+      subject.runDesignVisualM2B1({ repositoryRoot: root, planPath, ...dependencies }),
+      /successful image-view|image evidence|correlated/iu,
+    );
+    assert.equal(
+      dependencies.writes.every(({ file }) => file.endsWith("blocked.json")),
+      true,
+    );
+  }
+});
+
+test("M2B1 success requires exact safe evaluator security summaries", async (t) => {
+  const subject = await loadSubject();
+  for (const mutation of [
+    (result) => { result.threadStart.request.permissions = "other"; },
+    (result) => { result.thread.activePermissionProfileId = "other"; },
+    (result) => { result.thread.approvalsReviewer = "agent"; },
+    (result) => { result.thread.sandbox.networkAccess = true; },
+    (result) => { result.turn.request.outputSchemaSha256 = "0".repeat(64); },
+  ]) {
+    const { root, planPath } = await fixtureRoot(t);
+    const dependencies = successfulDependencies();
+    const originalRunTurn = dependencies.runTurn;
+    dependencies.runTurn = async (options) => {
+      const result = await originalRunTurn(options);
+      if (dependencies.calls.length === 1) mutation(result);
+      return result;
+    };
+    await assert.rejects(
+      subject.runDesignVisualM2B1({ repositoryRoot: root, planPath, ...dependencies }),
+      /security evidence/iu,
+    );
+    assert.equal(dependencies.writes.every(({ file }) => file.endsWith("blocked.json")), true);
+  }
+});
+
+test("M2B1 small blocked evidence uses a path-private curated projection", async (t) => {
+  const subject = await loadSubject();
+  const { root, planPath } = await fixtureRoot(t);
+  const dependencies = successfulDependencies();
+  let rawStagedRoot;
+  const rawImagePath = "C:\\Users\\Private\\approved.png";
+  const rawStderrSha256 = "d".repeat(64);
+  dependencies.runTurn = async (options) => {
+    rawStagedRoot = options.root;
+    options.session.closed = true;
+    options.session.processExitCode = 0;
+    const error = new Error("fixture image lookup failed");
+    error.freshEvaluatorEvidence = {
+      threadStart: { request: { cwd: options.root } },
+      thread: { id: "thread-private", cwd: options.root, request: { cwd: options.root } },
+      turn: { id: "turn-private", request: { cwd: options.root } },
+      input: {
+        requestSha256: digest("request-private"),
+        descriptors: [
+          { index: 0, type: "text", text: "prompt", byteLength: 6, sha256: digest("prompt") },
+          { index: 1, type: "localImage", path: rawImagePath, byteLength: 4, sha256: digest("controller-image"), originalDetail: "unverified" },
+        ],
+        controllerLocalImages: controllerImageEvidence(),
+      },
+      events: [],
+      blockers: ["app-server-stderr"],
+      appServer: {
+        processExitCode: 0,
+        stderr: {
+          byteLength: 383,
+          sha256: rawStderrSha256,
+          truncated: false,
+          captureTruncated: false,
+          diagnostic: {
+            text: "unable to locate image at [REDACTED_PATH]",
+            byteLength: 50,
+            sha256: digest("unable to locate image at [REDACTED_PATH]"),
+            truncated: false,
+            redacted: true,
+            unsupported: false,
+          },
+        },
+        imageDiagnostics: safeImageDiagnostics(),
+        successfulImageViews: safeSuccessfulImageViews(),
+      },
+    };
+    throw error;
+  };
+
+  await assert.rejects(
+    subject.runDesignVisualM2B1({ repositoryRoot: root, planPath, ...dependencies }),
+    /fixture image lookup failed/,
+  );
+  const blocked = dependencies.writes.find(({ file }) => file.endsWith("blocked.json")).value;
+  assert.equal(blocked.partialEvidence.retention, "prioritized");
+  assert.deepEqual(blocked.partialEvidence.input.controllerLocalImages, controllerImageEvidence());
+  assert.equal(
+    blocked.partialEvidence.input.descriptors.some((descriptor) => Object.hasOwn(descriptor, "path")),
+    false,
+  );
+  assert.deepEqual(blocked.partialEvidence.appServer.imageDiagnostics, safeImageDiagnostics());
+  assert.deepEqual(
+    blocked.partialEvidence.appServer.successfulImageViews,
+    safeSuccessfulImageViews(),
+  );
+  assert.equal(Object.hasOwn(blocked.partialEvidence.appServer.stderr, "sha256"), false);
+  assert.equal(blocked.cleanupEvidence.stagedRoots.every((entry) => !Object.hasOwn(entry, "root")), true);
+  const serialized = JSON.stringify(blocked);
+  for (const forbidden of [rawStagedRoot, rawStagedRoot.replaceAll("\\", "/"), rawImagePath, rawStderrSha256]) {
+    assert.equal(serialized.includes(forbidden), false);
+  }
+});
+
+test("M2B1 minimal blocked projection retains only safe image diagnostics", async (t) => {
+  const subject = await loadSubject();
+  const { root, planPath } = await fixtureRoot(t);
+  const dependencies = successfulDependencies();
+  const revoked = Proxy.revocable([], {});
+  revoked.revoke();
+  dependencies.runTurn = async (options) => {
+    options.session.closed = true;
+    options.session.processExitCode = 0;
+    const error = new Error("unreadable event collection");
+    error.freshEvaluatorEvidence = {
+      events: revoked.proxy,
+      blockers: ["app-server-stderr"],
+      input: { controllerLocalImages: controllerImageEvidence() },
+      appServer: {
+        processExitCode: 0,
+        imageDiagnostics: safeImageDiagnostics({
+          status: "UNVERIFIED",
+          observationCount: 2,
+          effectivePathMatch: "UNVERIFIED",
+          matchedInputIndex: null,
+          effectivePathAbsolute: "UNVERIFIED",
+          effectivePathWithinRoot: "UNVERIFIED",
+          outerCategory: "UNVERIFIED",
+          reportedCategory: "UNVERIFIED",
+        }),
+        successfulImageViews: safeSuccessfulImageViews(),
+      },
+    };
+    throw error;
+  };
+
+  await assert.rejects(
+    subject.runDesignVisualM2B1({ repositoryRoot: root, planPath, ...dependencies }),
+    /unreadable event collection/,
+  );
+  const blocked = dependencies.writes.find(({ file }) => file.endsWith("blocked.json")).value;
+  assert.equal(blocked.partialEvidence.retention, "minimal");
+  assert.deepEqual(blocked.partialEvidence.input.controllerLocalImages, controllerImageEvidence());
+  assert.equal(blocked.partialEvidence.appServer.imageDiagnostics.status, "UNVERIFIED");
+  assert.deepEqual(blocked.partialEvidence.appServer.imageDiagnostics.privacy, {
+    rawPathPersisted: false,
+    pathDigestPersisted: false,
+    rawDiagnosticDigestPersisted: false,
+  });
+  assert.deepEqual(
+    blocked.partialEvidence.appServer.successfulImageViews,
+    safeSuccessfulImageViews(),
+  );
+});
+
+test("M2B1 blocked projection preserves a bounded incomplete image-view lifecycle", async (t) => {
+  const subject = await loadSubject();
+  const { root, planPath } = await fixtureRoot(t);
+  const dependencies = successfulDependencies();
+  const incomplete = {
+    complete: false,
+    eventCount: 1,
+    completedCount: 0,
+    items: [{
+      id: "image-view-incomplete",
+      matchedInputIndex: 1,
+      eventCount: 1,
+      startedCount: 1,
+      completedCount: 0,
+      complete: false,
+    }],
+    blockers: ["image-view-lifecycle-incomplete"],
+    privacy: {
+      rawPathPersisted: false,
+      pathDigestPersisted: false,
+      rawDiagnosticDigestPersisted: false,
+    },
+  };
+  dependencies.runTurn = async (options) => {
+    options.session.closed = true;
+    options.session.processExitCode = 0;
+    const error = new Error("incomplete image-view lifecycle");
+    error.freshEvaluatorEvidence = {
+      events: [],
+      blockers: ["image-view-lifecycle-incomplete"],
+      appServer: { processExitCode: 0, successfulImageViews: incomplete },
+    };
+    throw error;
+  };
+
+  await assert.rejects(
+    subject.runDesignVisualM2B1({ repositoryRoot: root, planPath, ...dependencies }),
+    /incomplete image-view lifecycle/,
+  );
+  const blocked = dependencies.writes.find(({ file }) => file.endsWith("blocked.json")).value;
+  assert.deepEqual(blocked.partialEvidence.appServer.successfulImageViews, incomplete);
+});
+
+test("M2B1 image-view projection reads no accessor or nested proxy traps", async (t) => {
+  const subject = await loadSubject();
+  for (const mode of ["accessor", "proxy"]) {
+    const { root, planPath } = await fixtureRoot(t);
+    const dependencies = successfulDependencies();
+    let trapCalls = 0;
+    const views = safeSuccessfulImageViews([1]);
+    if (mode === "accessor") {
+      for (const [target, key, value] of [
+        [views, "complete", true],
+        [views, "eventCount", 2],
+        [views.privacy, "rawPathPersisted", false],
+        [views.items[0], "id", "image-view-1"],
+      ]) {
+        Object.defineProperty(target, key, {
+          enumerable: true,
+          configurable: true,
+          get() {
+            trapCalls += 1;
+            return value;
+          },
+        });
+      }
+    } else {
+      views.privacy = new Proxy(views.privacy, {
+        get() { trapCalls += 1; throw new Error("privacy get trap"); },
+        ownKeys() { trapCalls += 1; throw new Error("privacy ownKeys trap"); },
+        getOwnPropertyDescriptor() {
+          trapCalls += 1;
+          throw new Error("privacy descriptor trap");
+        },
+      });
+    }
+    dependencies.runTurn = async (options) => {
+      options.session.closed = true;
+      options.session.processExitCode = 0;
+      const error = new Error(`unsafe image-view ${mode}`);
+      error.freshEvaluatorEvidence = {
+        events: [],
+        appServer: { processExitCode: 0, successfulImageViews: views },
+      };
+      throw error;
+    };
+
+    await assert.rejects(
+      subject.runDesignVisualM2B1({ repositoryRoot: root, planPath, ...dependencies }),
+      new RegExp(`unsafe image-view ${mode}`),
+    );
+    assert.equal(trapCalls, 0, mode);
+    const blocked = dependencies.writes.find(({ file }) => file.endsWith("blocked.json")).value;
+    assert.equal(
+      Object.hasOwn(blocked.partialEvidence.appServer, "successfulImageViews"),
+      false,
+      mode,
+    );
+  }
+});
+
+test("M2B1 minimal projection cannot persist oversized or credential-shaped image-view ids", async (t) => {
+  const subject = await loadSubject();
+  for (const forbiddenId of [
+    "🙂".repeat(33),
+    "sk-proj-SYNTHETIC_TEST_ONLY_abcdefghijklmnop",
+  ]) {
+    const { root, planPath } = await fixtureRoot(t);
+    const dependencies = successfulDependencies();
+    const revoked = Proxy.revocable([], {});
+    revoked.revoke();
+    const views = safeSuccessfulImageViews([1]);
+    views.items[0].id = forbiddenId;
+    dependencies.runTurn = async (options) => {
+      options.session.closed = true;
+      options.session.processExitCode = 0;
+      const error = new Error("unsafe bounded image-view id");
+      error.freshEvaluatorEvidence = {
+        events: revoked.proxy,
+        appServer: { processExitCode: 0, successfulImageViews: views },
+      };
+      throw error;
+    };
+
+    await assert.rejects(
+      subject.runDesignVisualM2B1({ repositoryRoot: root, planPath, ...dependencies }),
+      /unsafe bounded image-view id/,
+    );
+    const blocked = dependencies.writes.find(({ file }) => file.endsWith("blocked.json")).value;
+    const serialized = JSON.stringify(blocked);
+    assert.equal(Buffer.byteLength(serialized) <= 32 * 1024, true);
+    assert.equal(serialized.includes(forbiddenId), false);
+    assert.equal(
+      Object.hasOwn(blocked.partialEvidence.appServer, "successfulImageViews"),
+      false,
+    );
+  }
+});
+
+test("M2B1 image diagnostics omit an observation with any unknown field", async (t) => {
+  const subject = await loadSubject();
+  const { root, planPath } = await fixtureRoot(t);
+  const dependencies = successfulDependencies();
+  const forbiddenPath = "C:\\Users\\Private\\unexpected.png";
+  dependencies.runTurn = async (options) => {
+    options.session.closed = true;
+    options.session.processExitCode = 0;
+    const error = new Error("unknown image diagnostic field");
+    error.freshEvaluatorEvidence = {
+      events: [],
+      appServer: {
+        processExitCode: 0,
+        imageDiagnostics: safeImageDiagnostics({ rawPath: forbiddenPath }),
+      },
+    };
+    throw error;
+  };
+
+  await assert.rejects(
+    subject.runDesignVisualM2B1({ repositoryRoot: root, planPath, ...dependencies }),
+    /unknown image diagnostic field/,
+  );
+  const blocked = dependencies.writes.find(({ file }) => file.endsWith("blocked.json")).value;
+  assert.equal(Object.hasOwn(blocked.partialEvidence.appServer, "imageDiagnostics"), false);
+  assert.equal(JSON.stringify(blocked).includes(forbiddenPath), false);
+});
+
+test("M2B1 image diagnostic privacy proxy is omitted without invoking traps", async (t) => {
+  const subject = await loadSubject();
+  const { root, planPath } = await fixtureRoot(t);
+  const dependencies = successfulDependencies();
+  let trapCalls = 0;
+  const privacy = new Proxy({}, {
+    ownKeys() { trapCalls += 1; return []; },
+    getOwnPropertyDescriptor() { trapCalls += 1; return undefined; },
+    get() { trapCalls += 1; return false; },
+  });
+  dependencies.runTurn = async (options) => {
+    options.session.closed = true;
+    options.session.processExitCode = 0;
+    const error = new Error("proxied image privacy");
+    error.freshEvaluatorEvidence = {
+      events: [],
+      appServer: {
+        processExitCode: 0,
+        imageDiagnostics: safeImageDiagnostics({ privacy }),
+      },
+    };
+    throw error;
+  };
+  await assert.rejects(
+    subject.runDesignVisualM2B1({ repositoryRoot: root, planPath, ...dependencies }),
+    /proxied image privacy/,
+  );
+  const blocked = dependencies.writes.find(({ file }) => file.endsWith("blocked.json")).value;
+  assert.equal(trapCalls, 0);
+  assert.equal(Object.hasOwn(blocked.partialEvidence.appServer, "imageDiagnostics"), false);
+});
+
+test("M2B1 blocked controller image evidence preserves false lifecycle facts", async (t) => {
+  const subject = await loadSubject();
+  const { root, planPath } = await fixtureRoot(t);
+  const dependencies = successfulDependencies();
+  const controller = controllerImageEvidence()[0];
+  controller.readable = false;
+  controller.unchangedBeforeTurnStart = false;
+  controller.postTurnPreCleanup = { readable: false, unchanged: false };
+  dependencies.runTurn = async (options) => {
+    options.session.closed = true;
+    options.session.processExitCode = 0;
+    const error = new Error("controller lifecycle failed");
+    error.freshEvaluatorEvidence = {
+      events: [],
+      input: { controllerLocalImages: [controller] },
+      appServer: { processExitCode: 0 },
+    };
+    throw error;
+  };
+  await assert.rejects(
+    subject.runDesignVisualM2B1({ repositoryRoot: root, planPath, ...dependencies }),
+    /controller lifecycle failed/,
+  );
+  const blocked = dependencies.writes.find(({ file }) => file.endsWith("blocked.json")).value;
+  assert.deepEqual(blocked.partialEvidence.input.controllerLocalImages, [controller]);
+});
+
+test("M2B1 controller image evidence fails closed on sparse arrays and unknown fields", async (t) => {
+  const subject = await loadSubject();
+  const { root, planPath } = await fixtureRoot(t);
+  const forbiddenPath = "C:\\Users\\Private\\unexpected-controller.png";
+  const sparse = new Array(1);
+  for (const controllerLocalImages of [
+    [{ ...controllerImageEvidence()[0], rawPath: forbiddenPath }],
+    sparse,
+  ]) {
+    const dependencies = successfulDependencies();
+    dependencies.runTurn = async (options) => {
+      options.session.closed = true;
+      options.session.processExitCode = 0;
+      const error = new Error("malformed controller image evidence");
+      error.freshEvaluatorEvidence = {
+        events: [],
+        input: { controllerLocalImages },
+        appServer: { processExitCode: 0 },
+      };
+      throw error;
+    };
+
+    await assert.rejects(
+      subject.runDesignVisualM2B1({ repositoryRoot: root, planPath, ...dependencies }),
+      /malformed controller image evidence/,
+    );
+    const blocked = dependencies.writes.find(({ file }) => file.endsWith("blocked.json")).value;
+    assert.equal(Object.hasOwn(blocked.partialEvidence.input, "controllerLocalImages"), false);
+    assert.equal(JSON.stringify(blocked).includes(forbiddenPath), false);
+  }
+});
+
+test("M2B1 artifact leak gate writes nothing when a staged-root variant reaches output", async (t) => {
+  const subject = await loadSubject();
+  const { root, planPath } = await fixtureRoot(t);
+  const dependencies = successfulDependencies();
+  const originalRunTurn = dependencies.runTurn;
+  dependencies.runTurn = async (options) => {
+    const result = await originalRunTurn(options);
+    if (dependencies.calls.length === 1) {
+      result.output.invariants[0].observableFact =
+        `forbidden ${options.root} ${options.root.replaceAll("\\", "/")}`;
+      const text = JSON.stringify(result.output);
+      result.outputText = {
+        text,
+        byteLength: Buffer.byteLength(text),
+        sha256: digest(text),
+      };
+    }
+    return result;
+  };
+
+  await assert.rejects(
+    subject.runDesignVisualM2B1({ repositoryRoot: root, planPath, ...dependencies }),
+    /artifact.*path|path.*artifact|private/iu,
+  );
+  assert.deepEqual(dependencies.writes, []);
+});
+
+test("M2B1 artifact leak gate rejects Windows case changes, file URLs, path digests, and nested JSON escaping", async (t) => {
+  const subject = await loadSubject();
+  for (const mode of ["case-changed", "file-url", "path-digest", "nested-json"]) {
+    const { root, planPath } = await fixtureRoot(t);
+    const dependencies = successfulDependencies();
+    const originalRunTurn = dependencies.runTurn;
+    dependencies.runTurn = async (options) => {
+      const result = await originalRunTurn(options);
+      if (dependencies.calls.length !== 1) return result;
+      let text;
+      if (mode === "case-changed") {
+        result.output.invariants[0].observableFact = options.root.toUpperCase();
+        text = JSON.stringify(result.output);
+      } else if (mode === "file-url") {
+        result.output.invariants[0].observableFact = pathToFileURL(options.root).href;
+        text = JSON.stringify(result.output);
+      } else if (mode === "path-digest") {
+        result.output.invariants[0].observableFact = digest(options.root);
+        text = JSON.stringify(result.output);
+      } else {
+        const valid = JSON.stringify(result.output);
+        const hidden = JSON.stringify(options.root);
+        text = valid.replace(
+          /"schemaVersion":5/u,
+          `"schemaVersion":${hidden},"schemaVersion":5`,
+        );
+      }
+      result.outputText = {
+        text,
+        byteLength: Buffer.byteLength(text),
+        sha256: digest(text),
+      };
+      return result;
+    };
+
+    await assert.rejects(
+      subject.runDesignVisualM2B1({ repositoryRoot: root, planPath, ...dependencies }),
+      /artifact.*path|path.*artifact|private/iu,
+    );
+    assert.deepEqual(dependencies.writes, [], mode);
+  }
+});
+
+test("M2B1 schema 6 support pins v5 history and rejects unchanged source", async (t) => {
+  const subject = await loadSubject();
+  const v5 = JSON.parse(await readFile(STDERR_DIAGNOSTIC_PLAN_PATH, "utf8"));
+  const v6 = structuredClone(v5);
+  v6.schemaVersion = 6;
+  v6.id = "design-visual-m2-b1-smoke-plan-v6";
+  v6.predecessor = {
+    plan: {
+      path: "evals/skill-contracts/design-visual-m2-b1-smoke-plan-v5.json",
+      bytes: 5627,
+      sha256: "80cf2d288d494bce456c18031935a8bd5ff2ef53f90053fc799845ad739223a5",
+    },
+    blockedAttempt: {
+      path: "evals/skill-contracts/design-visual-m2-b1-v5-blocked.json",
+      bytes: 11093,
+      sha256: "c3b5ad2e6e64c53299bcb87d662d0f4a3a316ecb27c487033fc6aa0c44cd40c3",
+    },
+    latestReceipt: {
+      path: "evals/skill-contracts/design-visual-m2-attempt-index-v7.json",
+      bytes: 5686,
+      sha256: "c11a4c5366c44563bd6118ed45cfdf4c46986083aaaf847103475eea287537e8",
+    },
+    methodChange: "path-private-controller-image-readback-and-resolved-view-image-error-correlation-no-evaluator-contract-change",
+    attemptPolicy: "one-method-changed-attempt-no-automatic-retry",
+  };
+  v6.outputs = Object.fromEntries(
+    Object.entries(v5.outputs).map(([key, value]) => [key, value.replace("-v5-", "-v6-")]),
+  );
+
+  const validated = subject.validateDesignVisualM2B1Plan(v6);
+  assert.equal(validated.schemaVersion, 6);
+  assert.equal(Object.values(validated.outputs).every((file) => file.includes("-v6-")), true);
+  for (const key of ["runtime", "inputs", "candidates", "claimScope", "originalDetail", "boundaries"]) {
+    assert.deepEqual(validated[key], v5[key]);
+  }
+  assert.equal(digest(JSON.stringify(subject.designSchema())), "83057a2d2746c3be1741dadb4a39a7fb8375c988d3bbc6fb120f8ff03d7f002b");
+  assert.equal(digest(JSON.stringify(subject.visualSchema("sample-a"))), "64682110930af7251454f45e7b4963de5f5bb16891c5a77c34b0b07b9ade5652");
+  assert.equal(digest(JSON.stringify(subject.visualSchema("sample-b"))), "a71384d54076fa83b8bcce9f033947ec6a5417fe72cf9e8d47df23fe9b7847df");
+
+  const unchangedSourceFixture = await successorFixtureRoot(t, v6);
+  await assert.rejects(subject.preflightDesignVisualM2B1({
+    repositoryRoot: unchangedSourceFixture.root,
+    planPath: unchangedSourceFixture.planPath,
+    gitStatus: async () => "",
+    gitIdentity: async () => "f".repeat(40),
+    gitReadBlob: copiedFixtureGitReadBlob(v6),
+  }), /source.*unchanged|method.*source/iu);
+
+  const distinctCommitSameBlobs = structuredClone(v6);
+  distinctCommitSameBlobs.source.repositoryCommit = "e".repeat(40);
+  const sameBlobFixture = await successorFixtureRoot(t, v6);
+  await writeFile(
+    sameBlobFixture.planPath,
+    JSON.stringify(distinctCommitSameBlobs, null, 2) + "\n",
+  );
+  await assert.rejects(subject.preflightDesignVisualM2B1({
+    repositoryRoot: sameBlobFixture.root,
+    planPath: sameBlobFixture.planPath,
+    gitStatus: async () => "",
+    gitIdentity: async () => "f".repeat(40),
+    gitReadBlob: async (_root, implementationCommit, sourcePath) => {
+      assert.equal(implementationCommit, distinctCommitSameBlobs.source.repositoryCommit);
+      const bytes = await execFile(
+        "git",
+        ["show", `${v6.source.repositoryCommit}:${sourcePath}`],
+        { cwd: ROOT, encoding: "buffer", maxBuffer: 1024 * 1024 },
+      );
+      return bytes.stdout;
+    },
+  }), /source.*unchanged|method.*source/iu);
 });

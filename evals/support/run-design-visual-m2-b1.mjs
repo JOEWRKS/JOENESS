@@ -2,7 +2,7 @@ import { randomUUID } from "node:crypto";
 import { chmod, copyFile, lstat, mkdir, mkdtemp, readFile, realpath, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import { types as utilTypes } from "node:util";
 
 import {
@@ -153,12 +153,30 @@ const M2B1_PREDECESSORS = Object.freeze({
       sha256: "bdfcb2ebd064e01632a5251f7c7b1603d8ffb8ab5f5d8fa58eb52da0ba413840",
     }),
   }),
+  6: Object.freeze({
+    plan: Object.freeze({
+      path: "evals/skill-contracts/design-visual-m2-b1-smoke-plan-v5.json",
+      bytes: 5627,
+      sha256: "80cf2d288d494bce456c18031935a8bd5ff2ef53f90053fc799845ad739223a5",
+    }),
+    blockedAttempt: Object.freeze({
+      path: "evals/skill-contracts/design-visual-m2-b1-v5-blocked.json",
+      bytes: 11093,
+      sha256: "c3b5ad2e6e64c53299bcb87d662d0f4a3a316ecb27c487033fc6aa0c44cd40c3",
+    }),
+    latestReceipt: Object.freeze({
+      path: "evals/skill-contracts/design-visual-m2-attempt-index-v7.json",
+      bytes: 5686,
+      sha256: "c11a4c5366c44563bd6118ed45cfdf4c46986083aaaf847103475eea287537e8",
+    }),
+  }),
 });
 const M2B1_METHOD_CHANGES = Object.freeze({
   2: "bounded-sanitized-runtime-error-and-primary-cause-capture",
   3: "closed-object-response-schemas-required-by-observed-api-error",
   4: "prioritized-bounded-failure-evidence-retention-no-evaluator-contract-change",
   5: "bounded-sanitized-app-server-stderr-diagnostic-retention-no-evaluator-contract-change",
+  6: "path-private-controller-image-readback-and-resolved-view-image-error-correlation-no-evaluator-contract-change",
 });
 const M2B1_UNCHANGED_EVALUATOR_CONTRACT_KEYS = Object.freeze([
   "runtime",
@@ -213,7 +231,7 @@ function assertOutputPath(value, label) {
 }
 
 export function validateDesignVisualM2B1Plan(value) {
-  const isSuccessor = [2, 3, 4, 5].includes(value?.schemaVersion);
+  const isSuccessor = [2, 3, 4, 5, 6].includes(value?.schemaVersion);
   const expectedKeys = [
     "schemaVersion", "id", "date",
     ...(isSuccessor ? ["predecessor", "source"] : []),
@@ -224,7 +242,7 @@ export function validateDesignVisualM2B1Plan(value) {
     throw new Error("M2B1 plan is malformed");
   }
   if (
-    ![1, 2, 3, 4, 5].includes(value.schemaVersion) ||
+    ![1, 2, 3, 4, 5, 6].includes(value.schemaVersion) ||
     value.id !== `design-visual-m2-b1-smoke-plan-v${value.schemaVersion}` ||
     typeof value.date !== "string" ||
     !exactKeys(value.runtime, ["codexVersion", "sessionOrder", "retryCount"]) ||
@@ -341,7 +359,7 @@ export function validateDesignVisualM2B1Plan(value) {
 }
 
 function assertUnchangedM2B1EvaluatorContract(plan, predecessorBytes) {
-  if (![4, 5].includes(plan.schemaVersion)) return;
+  if (![4, 5, 6].includes(plan.schemaVersion)) return;
   let predecessor;
   try {
     predecessor = validateDesignVisualM2B1Plan(
@@ -592,11 +610,24 @@ async function defaultGitIdentity(root, implementationCommit) {
   return head;
 }
 
+async function defaultGitReadBlob(root, implementationCommit, sourcePath) {
+  const result = await runBuffered(
+    "git",
+    ["show", `${implementationCommit}:${sourcePath}`],
+    { cwd: root, maxOutputBytes: 1024 * 1024 },
+  );
+  if (result.processExitCode !== 0 || result.stderr.length !== 0) {
+    throw new Error("M2B1 implementation source blob is unavailable");
+  }
+  return Buffer.from(result.stdout, "utf8");
+}
+
 export async function preflightDesignVisualM2B1({
   repositoryRoot,
   planPath,
   gitStatus = defaultGitStatus,
   gitIdentity = defaultGitIdentity,
+  gitReadBlob = defaultGitReadBlob,
 } = {}) {
   if (typeof repositoryRoot !== "string" || !path.isAbsolute(repositoryRoot)) {
     throw new TypeError("M2B1 repository root must be absolute");
@@ -619,12 +650,34 @@ export async function preflightDesignVisualM2B1({
     pins[key] = await verifyPinnedFile(root, pin, `M2B1 ${key}`);
   }
   if (plan.source) {
+    if (plan.schemaVersion === 6) {
+      const predecessor = JSON.parse(
+        (await readFile(resolveInside(root, plan.predecessor.plan.path))).toString("utf8"),
+      );
+      const sourceKeys = ["runner", "freshTurnAdapter", "collector"];
+      const sourcePinsUnchanged = sourceKeys.every((key) =>
+        stableStringify(plan.source[key]) === stableStringify(predecessor.source?.[key]));
+      if (
+        plan.source.repositoryCommit === predecessor.source.repositoryCommit ||
+        sourcePinsUnchanged
+      ) {
+        throw new Error("M2B1 method source is unchanged from predecessor");
+      }
+    }
     for (const [key, pin] of Object.entries({
       runner: plan.source.runner,
       freshTurnAdapter: plan.source.freshTurnAdapter,
       collector: plan.source.collector,
     })) {
       await verifyPinnedFile(root, pin, `M2B1 source ${key}`);
+      const blob = await gitReadBlob(root, plan.source.repositoryCommit, pin.path);
+      if (
+        !Buffer.isBuffer(blob) ||
+        blob.byteLength !== pin.bytes ||
+        sha256(blob) !== pin.sha256
+      ) {
+        throw new Error(`M2B1 source ${key} commit blob differs from pin`);
+      }
     }
   }
   if (plan.predecessor) {
@@ -836,6 +889,41 @@ async function writeExclusive(file, value) {
   await writeFile(file, text, { encoding: "utf8", flag: "wx" });
 }
 
+const ARTIFACT_PATH_LEAK_CODE = "M2B1_ARTIFACT_PATH_LEAK";
+
+function assertArtifactsPathPrivate(writes, stagedRoots) {
+  const serialized = stableStringify(
+    writes.map(([key, value]) => ({ key, value })),
+  ).toLowerCase();
+  for (const staged of stagedRoots) {
+    if (typeof staged?.root !== "string" || !staged.root) continue;
+    let variants = new Set([
+      staged.root,
+      staged.root.replaceAll("\\", "/"),
+      staged.root.replaceAll("/", "\\"),
+      pathToFileURL(staged.root).href,
+      encodeURI(pathToFileURL(staged.root).href),
+      sha256(staged.root),
+    ]);
+    const encodedVariants = new Set();
+    for (let depth = 0; depth < 8; depth += 1) {
+      const next = new Set();
+      for (const variant of variants) {
+        encodedVariants.add(variant.toLowerCase());
+        next.add(JSON.stringify(variant).slice(1, -1));
+      }
+      variants = next;
+    }
+    for (const variant of encodedVariants) {
+      if (serialized.includes(variant)) {
+        const error = new Error("M2B1 artifact path privacy gate blocked all writes");
+        error.code = ARTIFACT_PATH_LEAK_CODE;
+        throw error;
+      }
+    }
+  }
+}
+
 function outputFile(preflight, key) {
   return resolveInside(preflight.root, preflight.plan.outputs[key]);
 }
@@ -984,6 +1072,15 @@ async function removeEvaluatorRoots(stagedRoots) {
     throw error;
   }
   return evidence;
+}
+
+function retainStagedRootEvidence(evidence) {
+  if (!Array.isArray(evidence)) return [];
+  return evidence.map((entry) => ({
+    phase: entry?.phase ?? "UNVERIFIED",
+    runId: entry?.runId ?? "UNVERIFIED",
+    readback: entry?.readback ?? "unknown",
+  }));
 }
 
 function diagnosticContainer(value) {
@@ -1267,10 +1364,6 @@ function retainAppServerStderr(value) {
   retained.byteLength = Number.isSafeInteger(byteLength.value) && byteLength.value >= 0
     ? byteLength.value
     : "UNVERIFIED";
-  const digest = safeDiagnosticOwnData(value, "sha256");
-  retained.sha256 = typeof digest.value === "string" && /^[a-f0-9]{64}$/u.test(digest.value)
-    ? digest.value
-    : "UNVERIFIED";
   for (const key of ["truncated", "captureTruncated"]) {
     const property = safeDiagnosticOwnData(value, key);
     retained[key] = typeof property.value === "boolean" ? property.value : "UNVERIFIED";
@@ -1283,6 +1376,282 @@ function retainAppServerStderr(value) {
   return retained;
 }
 
+const IMAGE_DIAGNOSTIC_KEYS = Object.freeze([
+  "status",
+  "observationCount",
+  "expectedTargetCount",
+  "effectivePathMatch",
+  "matchedInputIndex",
+  "effectivePathAbsolute",
+  "effectivePathWithinRoot",
+  "modelArgumentAbsolute",
+  "outerCategory",
+  "reportedCategory",
+  "privacy",
+]);
+const SUCCESSFUL_IMAGE_VIEW_KEYS = Object.freeze([
+  "complete",
+  "eventCount",
+  "completedCount",
+  "items",
+  "blockers",
+  "privacy",
+]);
+const SUCCESSFUL_IMAGE_VIEW_ITEM_KEYS = Object.freeze([
+  "id",
+  "matchedInputIndex",
+  "eventCount",
+  "startedCount",
+  "completedCount",
+  "complete",
+]);
+const SUCCESSFUL_IMAGE_VIEW_ITEM_LIMIT = 8;
+const SUCCESSFUL_IMAGE_VIEW_EVENT_LIMIT = 16;
+const SUCCESSFUL_IMAGE_VIEW_TEXT_BYTES = 128;
+
+function retainImageDiagnostics(value) {
+  if (diagnosticProxy(value) || !isObject(value) || !exactKeys(value, IMAGE_DIAGNOSTIC_KEYS)) {
+    return null;
+  }
+  const data = Object.fromEntries(IMAGE_DIAGNOSTIC_KEYS.map((key) => [
+    key,
+    safeDiagnosticOwnData(value, key).value,
+  ]));
+  if (diagnosticProxy(data.privacy) || !isObject(data.privacy) || !exactKeys(data.privacy, [
+    "rawPathPersisted",
+    "pathDigestPersisted",
+    "rawDiagnosticDigestPersisted",
+  ])) {
+    return null;
+  }
+  data.privacy = Object.fromEntries([
+    "rawPathPersisted",
+    "pathDigestPersisted",
+    "rawDiagnosticDigestPersisted",
+  ].map((key) => [key, safeDiagnosticOwnData(data.privacy, key).value]));
+  if (
+    !["OBSERVED", "NO_ROUTER_IMAGE_ERROR", "UNVERIFIED"].includes(data.status) ||
+    !Number.isSafeInteger(data.observationCount) ||
+    data.observationCount < 0 ||
+    !Number.isSafeInteger(data.expectedTargetCount) ||
+    data.expectedTargetCount < 0 ||
+    !["MATCH", "MISMATCH", "UNVERIFIED"].includes(data.effectivePathMatch) ||
+    !(data.matchedInputIndex === null ||
+      (Number.isSafeInteger(data.matchedInputIndex) && data.matchedInputIndex >= 0)) ||
+    !["VERIFIED", "UNVERIFIED"].includes(data.effectivePathAbsolute) ||
+    !["VERIFIED", "UNVERIFIED"].includes(data.effectivePathWithinRoot) ||
+    data.modelArgumentAbsolute !== "UNVERIFIED" ||
+    !["unable-to-locate", "unable-to-read", "UNVERIFIED"].includes(data.outerCategory) ||
+    ![
+      "sandbox-helper-failed",
+      "permission-denied",
+      "not-found",
+      "invalid-path",
+      "unclassified",
+      "UNVERIFIED",
+    ].includes(data.reportedCategory) ||
+    data.privacy.rawPathPersisted !== false ||
+    data.privacy.pathDigestPersisted !== false ||
+    data.privacy.rawDiagnosticDigestPersisted !== false
+  ) {
+    return null;
+  }
+  if (
+    (data.status === "NO_ROUTER_IMAGE_ERROR" &&
+      (data.observationCount !== 0 ||
+        data.effectivePathMatch !== "UNVERIFIED" ||
+        data.matchedInputIndex !== null ||
+        data.effectivePathAbsolute !== "UNVERIFIED" ||
+        data.effectivePathWithinRoot !== "UNVERIFIED" ||
+        data.outerCategory !== "UNVERIFIED" ||
+        data.reportedCategory !== "UNVERIFIED")) ||
+    (data.status === "OBSERVED" &&
+      (data.observationCount !== 1 ||
+        data.expectedTargetCount < 1 ||
+        data.effectivePathMatch !== "MATCH" ||
+        data.matchedInputIndex === null ||
+        data.effectivePathAbsolute !== "VERIFIED" ||
+        data.effectivePathWithinRoot !== "VERIFIED" ||
+        data.outerCategory === "UNVERIFIED" ||
+        data.reportedCategory === "UNVERIFIED")) ||
+    (data.status === "UNVERIFIED" &&
+      (data.observationCount === 0 ||
+        data.matchedInputIndex !== null ||
+        data.effectivePathAbsolute !== "UNVERIFIED" ||
+        data.effectivePathWithinRoot !== "UNVERIFIED" ||
+        data.outerCategory !== "UNVERIFIED" ||
+        data.reportedCategory !== "UNVERIFIED" ||
+        !["MISMATCH", "UNVERIFIED"].includes(data.effectivePathMatch) ||
+        (data.effectivePathMatch === "MISMATCH" && data.observationCount !== 1)))
+  ) {
+    return null;
+  }
+  return data;
+}
+
+function retainSuccessfulImageViews(value) {
+  let keysAreExact = false;
+  try {
+    keysAreExact =
+      !diagnosticProxy(value) &&
+      isObject(value) &&
+      exactKeys(value, SUCCESSFUL_IMAGE_VIEW_KEYS);
+  } catch {
+    return null;
+  }
+  if (!keysAreExact) {
+    return null;
+  }
+  const topLevel = Object.fromEntries(SUCCESSFUL_IMAGE_VIEW_KEYS.map((key) => {
+    const property = safeDiagnosticOwnData(value, key);
+    return [key, property.found ? property.value : undefined];
+  }));
+  const blockers = topLevel.blockers;
+  const items = topLevel.items;
+  const privacy = topLevel.privacy;
+  let privacyKeysAreExact = false;
+  try {
+    privacyKeysAreExact =
+      !diagnosticProxy(privacy) &&
+      isObject(privacy) &&
+      exactKeys(privacy, [
+        "rawPathPersisted",
+        "pathDigestPersisted",
+        "rawDiagnosticDigestPersisted",
+      ]);
+  } catch {
+    return null;
+  }
+  if (!privacyKeysAreExact) return null;
+  const retainedPrivacy = Object.fromEntries([
+    "rawPathPersisted",
+    "pathDigestPersisted",
+    "rawDiagnosticDigestPersisted",
+  ].map((key) => {
+    const property = safeDiagnosticOwnData(privacy, key);
+    return [key, property.found ? property.value : undefined];
+  }));
+  if (
+    typeof topLevel.complete !== "boolean" ||
+    retainedPrivacy.rawPathPersisted !== false ||
+    retainedPrivacy.pathDigestPersisted !== false ||
+    retainedPrivacy.rawDiagnosticDigestPersisted !== false
+  ) {
+    return null;
+  }
+  const blockerCount = diagnosticArrayLength(blockers);
+  const blockerEntries = blockerCount === null
+    ? []
+    : diagnosticArrayEntries(
+        blockers,
+        Array.from({ length: blockerCount }, (_, index) => index),
+      );
+  if (
+    blockerCount === null ||
+    blockerCount > SUCCESSFUL_IMAGE_VIEW_EVENT_LIMIT ||
+    blockerEntries.length !== blockerCount
+  ) {
+    return null;
+  }
+  const retainedBlockers = [];
+  for (const { value: blocker } of blockerEntries) {
+    if (
+      typeof blocker !== "string" ||
+      !blocker ||
+      Buffer.byteLength(blocker, "utf8") > SUCCESSFUL_IMAGE_VIEW_TEXT_BYTES ||
+      containsCredentialText(blocker)
+    ) {
+      return null;
+    }
+    retainedBlockers.push(blocker);
+  }
+  const count = diagnosticArrayLength(items);
+  const entries = count === null
+    ? []
+    : diagnosticArrayEntries(items, Array.from({ length: count }, (_, index) => index));
+  if (
+    count === null ||
+    count > SUCCESSFUL_IMAGE_VIEW_ITEM_LIMIT ||
+    entries.length !== count
+  ) return null;
+  const retainedItems = [];
+  const ids = new Set();
+  let eventCount = 0;
+  let completedCount = 0;
+  for (const { value: item } of entries) {
+    let itemKeysAreExact = false;
+    try {
+      itemKeysAreExact =
+        !diagnosticProxy(item) &&
+        isObject(item) &&
+        exactKeys(item, SUCCESSFUL_IMAGE_VIEW_ITEM_KEYS);
+    } catch {
+      return null;
+    }
+    if (!itemKeysAreExact) {
+      return null;
+    }
+    const retained = Object.fromEntries(SUCCESSFUL_IMAGE_VIEW_ITEM_KEYS.map((key) => {
+      const property = safeDiagnosticOwnData(item, key);
+      return [key, property.found ? property.value : undefined];
+    }));
+    if (
+      typeof retained.id !== "string" ||
+      !retained.id ||
+      Buffer.byteLength(retained.id, "utf8") > SUCCESSFUL_IMAGE_VIEW_TEXT_BYTES ||
+      containsCredentialText(retained.id) ||
+      ids.has(retained.id) ||
+      !Number.isSafeInteger(retained.matchedInputIndex) ||
+      retained.matchedInputIndex < 0 ||
+      !Number.isSafeInteger(retained.eventCount) ||
+      retained.eventCount < 1 ||
+      retained.eventCount > SUCCESSFUL_IMAGE_VIEW_EVENT_LIMIT ||
+      !Number.isSafeInteger(retained.startedCount) ||
+      retained.startedCount < 0 ||
+      retained.startedCount > SUCCESSFUL_IMAGE_VIEW_EVENT_LIMIT ||
+      !Number.isSafeInteger(retained.completedCount) ||
+      retained.completedCount < 0 ||
+      retained.completedCount > SUCCESSFUL_IMAGE_VIEW_EVENT_LIMIT ||
+      retained.eventCount !== retained.startedCount + retained.completedCount ||
+      typeof retained.complete !== "boolean" ||
+      (retained.complete &&
+        (retained.eventCount !== 2 ||
+          retained.startedCount !== 1 ||
+          retained.completedCount !== 1))
+    ) {
+      return null;
+    }
+    ids.add(retained.id);
+    eventCount += retained.eventCount;
+    completedCount += retained.completedCount;
+    retainedItems.push(retained);
+  }
+  const totalEvents = topLevel.eventCount;
+  const totalCompleted = topLevel.completedCount;
+  const computedComplete =
+    retainedBlockers.length === 0 &&
+    retainedItems.every(({ complete }) => complete);
+  if (
+    !Number.isSafeInteger(totalEvents) ||
+    totalEvents < 0 ||
+    totalEvents > SUCCESSFUL_IMAGE_VIEW_EVENT_LIMIT ||
+    !Number.isSafeInteger(totalCompleted) ||
+    totalCompleted < 0 ||
+    totalCompleted > SUCCESSFUL_IMAGE_VIEW_ITEM_LIMIT ||
+    totalEvents !== eventCount ||
+    totalCompleted !== completedCount ||
+    topLevel.complete !== computedComplete
+  ) return null;
+  return {
+    complete: topLevel.complete,
+    eventCount: totalEvents,
+    completedCount: totalCompleted,
+    items: retainedItems,
+    blockers: retainedBlockers,
+    privacy: retainedPrivacy,
+  };
+}
+
 function retainAppServer(value) {
   const retained = retainFailureObjectFields(
     value,
@@ -1291,6 +1660,215 @@ function retainAppServer(value) {
   );
   const stderr = safeDiagnosticOwnData(value, "stderr");
   if (stderr.found) retained.stderr = retainAppServerStderr(stderr.value);
+  const imageDiagnostics = safeDiagnosticOwnData(value, "imageDiagnostics");
+  if (imageDiagnostics.found) {
+    const safe = retainImageDiagnostics(imageDiagnostics.value);
+    if (safe !== null) retained.imageDiagnostics = safe;
+  }
+  const successfulImageViews = safeDiagnosticOwnData(value, "successfulImageViews");
+  if (successfulImageViews.found) {
+    const safe = retainSuccessfulImageViews(successfulImageViews.value);
+    if (safe !== null) retained.successfulImageViews = safe;
+  }
+  return retained;
+}
+
+const CONTROLLER_LOCAL_IMAGE_KEYS = Object.freeze([
+  "inputIndex",
+  "byteLength",
+  "sha256",
+  "absolute",
+  "withinResolvedRoot",
+  "regularFile",
+  "nonSymlink",
+  "readable",
+  "checkedBeforeThreadStart",
+  "checkedBeforeTurnStart",
+  "unchangedBeforeTurnStart",
+  "postTurnPreCleanup",
+]);
+
+function retainControllerLocalImages(value) {
+  const count = diagnosticArrayLength(value);
+  if (count === null || count > 8) return null;
+  const retained = [];
+  const entries = diagnosticArrayEntries(
+    value,
+    Array.from({ length: count }, (_, index) => index),
+  );
+  if (entries.length !== count) return null;
+  for (const { value: entry } of entries) {
+    const data = diagnosticProxy(entry) || !isObject(entry)
+      ? null
+      : Object.fromEntries(CONTROLLER_LOCAL_IMAGE_KEYS.map((key) => [
+          key,
+          safeDiagnosticOwnData(entry, key).value,
+        ]));
+    const postTurnPreCleanup = data?.postTurnPreCleanup;
+    const postTurnData = diagnosticProxy(postTurnPreCleanup) || !isObject(postTurnPreCleanup)
+      ? null
+      : {
+          readable: safeDiagnosticOwnData(postTurnPreCleanup, "readable").value,
+          unchanged: safeDiagnosticOwnData(postTurnPreCleanup, "unchanged").value,
+        };
+    if (
+      data === null ||
+      !exactKeys(entry, CONTROLLER_LOCAL_IMAGE_KEYS) ||
+      !Number.isSafeInteger(data.inputIndex) ||
+      data.inputIndex < 0 ||
+      !Number.isSafeInteger(data.byteLength) ||
+      data.byteLength < 1 ||
+      typeof data.sha256 !== "string" ||
+      !/^[a-f0-9]{64}$/u.test(data.sha256) ||
+      [
+        "absolute",
+        "withinResolvedRoot",
+        "regularFile",
+        "nonSymlink",
+        "readable",
+        "checkedBeforeThreadStart",
+        "checkedBeforeTurnStart",
+        "unchangedBeforeTurnStart",
+      ].some((key) => typeof data[key] !== "boolean") ||
+      postTurnData === null ||
+      !exactKeys(postTurnPreCleanup, ["readable", "unchanged"]) ||
+      typeof postTurnData.readable !== "boolean" ||
+      typeof postTurnData.unchanged !== "boolean"
+    ) {
+      return null;
+    }
+    retained.push({
+      inputIndex: data.inputIndex,
+      byteLength: data.byteLength,
+      sha256: data.sha256,
+      absolute: data.absolute,
+      withinResolvedRoot: data.withinResolvedRoot,
+      regularFile: data.regularFile,
+      nonSymlink: data.nonSymlink,
+      readable: data.readable,
+      checkedBeforeThreadStart: data.checkedBeforeThreadStart,
+      checkedBeforeTurnStart: data.checkedBeforeTurnStart,
+      unchangedBeforeTurnStart: data.unchangedBeforeTurnStart,
+      postTurnPreCleanup: postTurnData,
+    });
+  }
+  return retained;
+}
+
+function controllerLocalImagesFromInput(value) {
+  const controller = safeDiagnosticOwnData(value, "controllerLocalImages");
+  const legacy = safeDiagnosticOwnData(value, "localImages");
+  if (controller.found && legacy.found) return null;
+  const source = controller.found ? controller.value : legacy.found ? legacy.value : null;
+  return source === null ? undefined : retainControllerLocalImages(source);
+}
+
+function correlateSuccessfulImageEvidence(result, expectedInput) {
+  const descriptors = result?.input?.descriptors;
+  const controllerImages = controllerLocalImagesFromInput(result?.input);
+  if (!Array.isArray(descriptors) || controllerImages === undefined || controllerImages === null) {
+    throw new Error("M2B1 controller image evidence is missing or malformed");
+  }
+  const expectedImages = expectedInput
+    .map((entry, inputIndex) => ({ entry, inputIndex }))
+    .filter(({ entry }) => entry?.type === "localImage");
+  const descriptorImages = descriptors.filter(({ type }) => type === "localImage");
+  if (
+    controllerImages.length !== expectedImages.length ||
+    descriptorImages.length !== expectedImages.length ||
+    new Set(controllerImages.map(({ inputIndex }) => inputIndex)).size !== controllerImages.length
+  ) {
+    throw new Error("M2B1 controller image evidence count or index differs");
+  }
+  for (const { inputIndex } of expectedImages) {
+    const descriptor = descriptors[inputIndex];
+    const controller = controllerImages.find((entry) => entry.inputIndex === inputIndex);
+    if (
+      descriptor?.type !== "localImage" ||
+      controller === undefined ||
+      descriptor.byteLength !== controller.byteLength ||
+      descriptor.sha256 !== controller.sha256 ||
+      [
+        "absolute",
+        "withinResolvedRoot",
+        "regularFile",
+        "nonSymlink",
+        "readable",
+        "checkedBeforeThreadStart",
+        "checkedBeforeTurnStart",
+        "unchangedBeforeTurnStart",
+      ].some((key) => controller[key] !== true) ||
+      controller.postTurnPreCleanup.readable !== true ||
+      controller.postTurnPreCleanup.unchanged !== true
+    ) {
+      throw new Error("M2B1 controller image evidence differs from descriptor");
+    }
+  }
+  const diagnostics = retainImageDiagnostics(result?.appServer?.imageDiagnostics);
+  const successfulViews = retainSuccessfulImageViews(result?.appServer?.successfulImageViews);
+  const stderr = safeDiagnosticOwnData(result?.appServer, "stderr");
+  const stderrByteLength = safeDiagnosticOwnData(stderr.value, "byteLength");
+  if (
+    diagnostics === null ||
+    successfulViews === null ||
+    stderr.value === null ||
+    diagnosticProxy(stderr.value) ||
+    stderrByteLength.value !== 0 ||
+    diagnostics.expectedTargetCount !== expectedImages.length ||
+    diagnostics.status !== "NO_ROUTER_IMAGE_ERROR" ||
+    diagnostics.observationCount !== 0 ||
+    diagnostics.effectivePathMatch !== "UNVERIFIED" ||
+    diagnostics.matchedInputIndex !== null ||
+    successfulViews.complete !== true ||
+    successfulViews.blockers.length !== 0
+  ) {
+    throw new Error("M2B1 App Server image diagnostic evidence is inconsistent");
+  }
+  const expectedIndexes = expectedImages.map(({ inputIndex }) => inputIndex);
+  const observedIndexes = successfulViews.items.map(({ matchedInputIndex }) => matchedInputIndex);
+  if (
+    successfulViews.items.length !== expectedIndexes.length ||
+    successfulViews.eventCount !== expectedIndexes.length * 2 ||
+    successfulViews.completedCount !== expectedIndexes.length ||
+    new Set(observedIndexes).size !== observedIndexes.length ||
+    expectedIndexes.some((inputIndex) =>
+      observedIndexes.filter((observedIndex) => observedIndex === inputIndex).length !== 1)
+  ) {
+    throw new Error("M2B1 successful image-view evidence is not correlated");
+  }
+}
+
+function retainFailureInputEvidence(value) {
+  if (diagnosticProxy(value) || !diagnosticContainer(value)) return {};
+  const retained = {};
+  const requestSha256 = safeDiagnosticOwnData(value, "requestSha256");
+  if (requestSha256.found) {
+    retained.requestSha256 = retainDiagnosticValue(
+      requestSha256.value,
+      "input request sha256",
+      256,
+    );
+  }
+  const descriptorsProperty = safeDiagnosticOwnData(value, "descriptors");
+  if (descriptorsProperty.found) {
+    const descriptors = boundedArrayPrefix(descriptorsProperty.value, 16);
+    retained.descriptors = descriptors.entries.map(({ value: descriptor }) => {
+      if (diagnosticProxy(descriptor) || !diagnosticContainer(descriptor)) return {};
+      const safe = {};
+      for (const key of ["index", "type", "byteLength", "sha256", "originalDetail"]) {
+        const property = safeDiagnosticOwnData(descriptor, key);
+        if (property.found) {
+          safe[key] = retainDiagnosticValue(property.value, `input descriptor ${key}`, 256);
+        }
+      }
+      return safe;
+    });
+    retained.descriptorArrayLength = descriptors.count ?? "UNVERIFIED";
+  }
+  const controllerLocalImages = controllerLocalImagesFromInput(value);
+  if (controllerLocalImages !== undefined && controllerLocalImages !== null) {
+    retained.controllerLocalImages = controllerLocalImages;
+  }
   return retained;
 }
 
@@ -1299,9 +1877,10 @@ function minimalPartialEvidence(value, projectionError = null) {
   const blockersProperty = safeDiagnosticOwnData(value, "blockers");
   const blockers = boundedArrayPrefix(blockersProperty.found ? blockersProperty.value : [], 8);
   const appServerProperty = safeDiagnosticOwnData(value, "appServer");
+  const inputProperty = safeDiagnosticOwnData(value, "input");
   const eventsProperty = safeDiagnosticOwnData(value, "events");
   const eventCount = diagnosticArrayLength(eventsProperty.found ? eventsProperty.value : []);
-  return {
+  const projection = {
     retention: "minimal",
     primaryCause: primaryCauseProperty.found
       ? retainDiagnosticRecord(primaryCauseProperty.value, "primary cause")
@@ -1312,16 +1891,43 @@ function minimalPartialEvidence(value, projectionError = null) {
     appServer: appServerProperty.found
       ? retainAppServer(appServerProperty.value)
       : {},
+    input: inputProperty.found ? retainFailureInputEvidence(inputProperty.value) : {},
     events: { arrayLength: eventCount ?? "UNVERIFIED" },
     projectionError: projectionError === null
       ? null
       : sanitizedCause(projectionError),
   };
+  try {
+    return safeBoundedClone(projection, "minimal partial", 32 * 1024);
+  } catch {
+    return {
+      retention: "minimal",
+      primaryCause: {},
+      blockers: [],
+      blockerArrayLength: "UNVERIFIED",
+      appServer: {},
+      input: {},
+      events: { arrayLength: "UNVERIFIED" },
+      projectionError: {
+        message: {
+          text: "[UNSUPPORTED:minimal-evidence]",
+          byteLength: Buffer.byteLength("[UNSUPPORTED:minimal-evidence]"),
+          sha256: sha256("[UNSUPPORTED:minimal-evidence]"),
+          truncated: false,
+          redacted: true,
+          unsupported: true,
+        },
+      },
+    };
+  }
 }
 
 function prioritizedPartialEvidence(value) {
   const eventsProperty = safeDiagnosticOwnData(value, "events");
   const events = diagnosticEventWindows(eventsProperty.found ? eventsProperty.value : []);
+  if (eventsProperty.found && events.count === null) {
+    return minimalPartialEvidence(value);
+  }
   const eventHead = events.headEntries.map(({ value }) => retainFailureEvent(value));
   const eventTail = events.tailEntries.map(({ value }) => retainFailureEvent(value));
   const observedRuntimeErrors = events.scannedEntries
@@ -1364,9 +1970,7 @@ function prioritizedPartialEvidence(value) {
     turn: turnProperty.found
       ? retainFailureObjectFields(turnProperty.value, ["id"], "turn")
       : {},
-    input: inputProperty.found
-      ? retainFailureObjectFields(inputProperty.value, ["requestSha256", "descriptors"], "input")
-      : {},
+    input: inputProperty.found ? retainFailureInputEvidence(inputProperty.value) : {},
     outputSchema: outputSchemaProperty.found
       ? retainFailureObjectFields(outputSchemaProperty.value, ["byteLength", "sha256"], "output schema")
       : {},
@@ -1402,13 +2006,9 @@ function prioritizedPartialEvidence(value) {
 function retainPartialEvidence(value) {
   if (!diagnosticContainer(value)) return {};
   try {
-    return safePartialEvidenceClone(value, 128 * 1024);
-  } catch {
-    try {
-      return prioritizedPartialEvidence(value);
-    } catch (error) {
-      return minimalPartialEvidence(value, error);
-    }
+    return prioritizedPartialEvidence(value);
+  } catch (error) {
+    return minimalPartialEvidence(value, error);
   }
 }
 
@@ -1423,7 +2023,6 @@ function buildEvaluatorIdentity(phase, staged, session, result) {
   return {
     phase,
     runId: scalarIdentity(staged.runId, "run"),
-    evaluatorRoot: staged.root,
     sessionId: scalarIdentity(session?.id ?? session?.process?.pid, "session"),
     threadId: scalarIdentity(result?.thread?.id, "thread"),
     turnId: scalarIdentity(result?.turn?.id, "turn"),
@@ -1438,7 +2037,7 @@ function validateEvaluatorIdentities(identities) {
   ) {
     throw new Error("M2B1 evaluator identity order is invalid");
   }
-  for (const field of ["runId", "evaluatorRoot", "sessionId", "threadId", "turnId"]) {
+  for (const field of ["runId", "sessionId", "threadId", "turnId"]) {
     if (new Set(identities.map((identity) => identity[field])).size !== identities.length) {
       throw new Error(`M2B1 evaluator ${field} identity was reused`);
     }
@@ -1458,75 +2057,6 @@ function safeBoundedClone(value, label, limitBytes = 64 * 1024) {
   return JSON.parse(serialized);
 }
 
-function cloneDataWithoutAccessors(value, state = { nodes: 0, seen: new Set() }, depth = 0) {
-  state.nodes += 1;
-  if (state.nodes > 4096 || depth > 16) {
-    throw new Error("M2B1 partial evidence structure is too broad or deep");
-  }
-  if (
-    value === null ||
-    typeof value === "string" ||
-    typeof value === "boolean" ||
-    (typeof value === "number" && Number.isFinite(value))
-  ) {
-    return value;
-  }
-  if (typeof value !== "object" || utilTypes.isProxy(value)) {
-    throw new Error("M2B1 partial evidence value is unsupported");
-  }
-  if (state.seen.has(value)) throw new Error("M2B1 partial evidence is cyclic");
-  state.seen.add(value);
-  let isArray;
-  let prototype;
-  let keys;
-  try {
-    isArray = Array.isArray(value);
-    prototype = Object.getPrototypeOf(value);
-    keys = Object.keys(value);
-  } catch {
-    throw new Error("M2B1 partial evidence reflection failed");
-  }
-  if (!isArray && prototype !== Object.prototype && prototype !== null) {
-    throw new Error("M2B1 partial evidence object is not plain data");
-  }
-  if (keys.length > 1024) {
-    throw new Error("M2B1 partial evidence has too many keys");
-  }
-  if (isArray) {
-    const length = safeDiagnosticOwnData(value, "length");
-    if (
-      !Number.isSafeInteger(length.value) ||
-      length.value < 0 ||
-      length.value > 1024 ||
-      keys.length !== length.value ||
-      Array.from({ length: length.value }, (_, index) => String(index))
-        .some((key, index) => keys[index] !== key)
-    ) {
-      throw new Error("M2B1 partial evidence array is sparse or too large");
-    }
-  }
-  const output = isArray ? [] : Object.create(null);
-  for (const key of keys) {
-    let descriptor;
-    try {
-      descriptor = Object.getOwnPropertyDescriptor(value, key);
-    } catch {
-      throw new Error("M2B1 partial evidence descriptor failed");
-    }
-    if (!descriptor || !Object.hasOwn(descriptor, "value")) {
-      throw new Error("M2B1 partial evidence accessor is unsupported");
-    }
-    output[key] = cloneDataWithoutAccessors(descriptor.value, state, depth + 1);
-  }
-  state.seen.delete(value);
-  return output;
-}
-
-function safePartialEvidenceClone(value, limitBytes) {
-  const cloned = cloneDataWithoutAccessors(value);
-  return safeBoundedClone(cloned, "partial", limitBytes);
-}
-
 function retainInputEvidence(input) {
   if (!isObject(input) || !Array.isArray(input.descriptors)) {
     throw new Error("M2B1 Task 1 input evidence is malformed");
@@ -1540,15 +2070,131 @@ function retainInputEvidence(input) {
       sha256: descriptor.sha256,
     };
     if (descriptor.type === "localImage") {
-      retained.path = descriptor.path;
       retained.originalDetail = descriptor.originalDetail;
     }
     return retained;
   });
+  const controllerLocalImages = controllerLocalImagesFromInput(input);
+  if (controllerLocalImages === null) {
+    throw new Error("M2B1 Task 1 controller image evidence is malformed");
+  }
   return safeBoundedClone({
     descriptors,
     requestSha256: input.requestSha256,
+    ...(controllerLocalImages === undefined ? {} : { controllerLocalImages }),
   }, "input", 32 * 1024);
+}
+
+function retainThreadStartEvidence(value) {
+  if (!isObject(value)) return null;
+  const request = isObject(value.request) ? value.request : {};
+  const response = isObject(value.response) ? value.response : {};
+  const instructionSourceCount = Number.isSafeInteger(response.instructionSourceCount) &&
+      response.instructionSourceCount >= 0
+    ? response.instructionSourceCount
+    : null;
+  return safeBoundedClone({
+    request: {
+      ephemeral: request.ephemeral ?? null,
+      approvalPolicy: request.approvalPolicy ?? null,
+      permissions: request.permissions ?? null,
+      projectDocMaxBytes: request.projectDocMaxBytes ?? null,
+      selectedCapabilityRootCount: request.selectedCapabilityRootCount ?? null,
+      dynamicToolCount: request.dynamicToolCount ?? null,
+      runtimeWorkspaceRootCount: request.runtimeWorkspaceRootCount ?? null,
+      environmentCount: request.environmentCount ?? null,
+    },
+    response: {
+      threadId: response.threadId ?? null,
+      ephemeral: response.ephemeral ?? null,
+      priorTurnCount: response.priorTurnCount ?? null,
+      instructionSourceCount,
+    },
+  }, "thread start", 8 * 1024);
+}
+
+function retainTurnEvidence(value) {
+  if (!isObject(value)) return null;
+  const request = isObject(value.request) ? value.request : {};
+  return safeBoundedClone({
+    id: value.id ?? null,
+    request: {
+      inputDescriptorCount: request.inputDescriptorCount ?? null,
+      inputRequestSha256: request.inputRequestSha256 ?? null,
+      approvalPolicy: request.approvalPolicy ?? null,
+      permissions: request.permissions ?? null,
+      outputSchemaSha256: request.outputSchemaSha256 ?? null,
+    },
+  }, "turn", 8 * 1024);
+}
+
+function assertSuccessfulSecurityEvidence(result, expectedInput) {
+  const startRequest = result?.threadStart?.request;
+  const startResponse = result?.threadStart?.response;
+  const thread = result?.thread;
+  const turnRequest = result?.turn?.request;
+  if (
+    !isObject(startRequest) ||
+    startRequest.ephemeral !== true ||
+    startRequest.approvalPolicy !== "never" ||
+    startRequest.permissions !== "joewrks-eval-control-v3" ||
+    startRequest.projectDocMaxBytes !== 0 ||
+    startRequest.selectedCapabilityRootCount !== 0 ||
+    startRequest.dynamicToolCount !== (expectedInput.length === 2 ? 0 : 1) ||
+    startRequest.runtimeWorkspaceRootCount !== 1 ||
+    startRequest.environmentCount !== 1 ||
+    !isObject(startResponse) ||
+    startResponse.ephemeral !== true ||
+    startResponse.priorTurnCount !== 0 ||
+    startResponse.instructionSourceCount !== 0 ||
+    !isObject(thread) ||
+    startResponse.threadId !== thread.id ||
+    thread.activePermissionProfileId !== "joewrks-eval-control-v3" ||
+    thread.approvalPolicy !== "never" ||
+    thread.approvalsReviewer !== "user" ||
+    !exactKeys(thread.sandbox, ["type", "networkAccess"]) ||
+    thread.sandbox.type !== "readOnly" ||
+    thread.sandbox.networkAccess !== false ||
+    thread.ephemeral !== true ||
+    thread.priorTurnCount !== 0 ||
+    thread.instructionSourceCount !== 0 ||
+    thread.runtimeWorkspaceRootCount !== 1 ||
+    !isObject(turnRequest) ||
+    turnRequest.inputDescriptorCount !== expectedInput.length ||
+    turnRequest.inputRequestSha256 !== result.input.requestSha256 ||
+    turnRequest.approvalPolicy !== "never" ||
+    turnRequest.permissions !== "joewrks-eval-control-v3" ||
+    turnRequest.outputSchemaSha256 !== result.outputSchema.sha256
+  ) {
+    throw new Error("M2B1 evaluator security evidence is missing or differs");
+  }
+}
+
+function retainThreadEvidence(value) {
+  if (!isObject(value)) return null;
+  const instructionSourceCount = Number.isSafeInteger(value.instructionSourceCount) &&
+      value.instructionSourceCount >= 0
+    ? value.instructionSourceCount
+    : null;
+  const runtimeWorkspaceRootCount = Number.isSafeInteger(value.runtimeWorkspaceRootCount) &&
+      value.runtimeWorkspaceRootCount >= 0
+    ? value.runtimeWorkspaceRootCount
+    : null;
+  return safeBoundedClone({
+    id: value.id ?? null,
+    model: value.model ?? null,
+    modelProvider: value.modelProvider ?? null,
+    reasoningEffort: value.reasoningEffort ?? null,
+    serviceTier: value.serviceTier ?? null,
+    activePermissionProfileId: value.activePermissionProfileId ?? null,
+    approvalPolicy: value.approvalPolicy ?? null,
+    approvalsReviewer: value.approvalsReviewer ?? null,
+    sandbox: value.sandbox ?? null,
+    ephemeral: value.ephemeral ?? null,
+    priorTurnCount: value.priorTurnCount ?? null,
+    instructionSourceCount,
+    runtimeWorkspaceRootCount,
+  }, "thread", 16 * 1024);
 }
 
 function retainLifecycleEvent(event) {
@@ -1604,7 +2250,7 @@ function retainToolEvidence(toolEvidence) {
   })), "tool", 32 * 1024);
 }
 
-function retainTask1Evidence(result) {
+function retainTask1Evidence(result, expectedInput) {
   if (
     !Array.isArray(result.events) ||
     result.events.length > 512 ||
@@ -1616,12 +2262,14 @@ function retainTask1Evidence(result) {
   ) {
     throw new Error("M2B1 Task 1 evidence is incomplete, blocked, or unbounded");
   }
+  assertSuccessfulSecurityEvidence(result, expectedInput);
+  correlateSuccessfulImageEvidence(result, expectedInput);
   const eventRecords = result.events.map(retainLifecycleEvent);
   const mcpRecords = safeBoundedClone(result.mcpAfter, "MCP after", 32 * 1024);
   return safeBoundedClone({
-    threadStart: result.threadStart ?? null,
-    thread: result.thread ?? null,
-    turn: isObject(result.turn) ? { id: result.turn.id } : null,
+    threadStart: retainThreadStartEvidence(result.threadStart),
+    thread: retainThreadEvidence(result.thread),
+    turn: retainTurnEvidence(result.turn),
     input: retainInputEvidence(result.input),
     outputSchema: {
       byteLength: result.outputSchema.byteLength,
@@ -1639,7 +2287,7 @@ function retainTask1Evidence(result) {
       sha256: sha256(stableStringify(mcpRecords)),
     },
     blockers: [],
-    appServer: result.appServer ?? null,
+    appServer: retainAppServer(result.appServer),
   }, "Task 1", 256 * 1024);
 }
 
@@ -1665,8 +2313,10 @@ export async function runDesignVisualM2B1({
   planPath,
   gitStatus = defaultGitStatus,
   gitIdentity = defaultGitIdentity,
+  gitReadBlob = defaultGitReadBlob,
   createSession,
   finishRuntime,
+  cleanupStagedRoots = removeEvaluatorRoots,
   runTurn = runFreshEvaluatorTurn,
   writeArtifact = writeExclusive,
 } = {}) {
@@ -1675,6 +2325,7 @@ export async function runDesignVisualM2B1({
     planPath,
     gitStatus,
     gitIdentity,
+    gitReadBlob,
   });
   let runtimeFactory = null;
   if (typeof createSession !== "function") {
@@ -1686,7 +2337,8 @@ export async function runDesignVisualM2B1({
   if (
     typeof runTurn !== "function" ||
     typeof writeArtifact !== "function" ||
-    typeof finishRuntime !== "function"
+    typeof finishRuntime !== "function" ||
+    typeof cleanupStagedRoots !== "function"
   ) {
     throw new TypeError("M2B1 orchestration dependencies are malformed");
   }
@@ -1725,15 +2377,29 @@ export async function runDesignVisualM2B1({
     let stagedRootEvidence;
     if (safe) {
       try {
-        stagedRootEvidence = await removeEvaluatorRoots(stagedRoots);
+        stagedRootEvidence = retainStagedRootEvidence(
+          await cleanupStagedRoots(stagedRoots),
+        );
+        if (
+          stagedRootEvidence.length !== stagedRoots.length ||
+          stagedRootEvidence.some(({ readback }) => readback !== "removed")
+        ) {
+          const error = new Error("M2B1 evaluator root cleanup was not proven removed");
+          error.stagedRootEvidence = stagedRootEvidence;
+          throw error;
+        }
       } catch (error) {
         errors.push(error);
-        stagedRootEvidence = Array.isArray(error?.stagedRootEvidence)
-          ? clone(error.stagedRootEvidence)
-          : await inspectEvaluatorRoots(stagedRoots);
+        stagedRootEvidence = retainStagedRootEvidence(
+          Array.isArray(error?.stagedRootEvidence)
+            ? error.stagedRootEvidence
+            : await inspectEvaluatorRoots(stagedRoots),
+        );
       }
     } else {
-      stagedRootEvidence = await inspectEvaluatorRoots(stagedRoots);
+      stagedRootEvidence = retainStagedRootEvidence(
+        await inspectEvaluatorRoots(stagedRoots),
+      );
     }
     cleanupEvidence = {
       phase: "post-evaluator-cleanup",
@@ -1764,16 +2430,17 @@ export async function runDesignVisualM2B1({
     const designRoot = await stageEvaluatorRoot(preflight, "design");
     stagedRoots.push(designRoot);
     activeSession = registerSession(await createSession({ phase: "design", runId: designRoot.runId }));
+    const designInput = buildDesignInput(preflight, designRoot.root);
     const designResult = await runTurn({
       session: activeSession,
       root: designRoot.root,
-      input: buildDesignInput(preflight, designRoot.root),
+      input: designInput,
       outputSchema: designSchema(),
     });
     assertTurnShutdown(designResult, activeSession);
     const designIdentity = buildEvaluatorIdentity("design", designRoot, activeSession, designResult);
     identities.push(designIdentity);
-    const designEvidence = retainTask1Evidence(designResult);
+    const designEvidence = retainTask1Evidence(designResult, designInput);
     completed.push("design");
     const designRaw = {
       text: designResult.outputText.text,
@@ -1794,10 +2461,11 @@ export async function runDesignVisualM2B1({
       stagedRoots.push(visualRoot);
       activeSession = registerSession(await createSession({ phase: "visual", candidateId: candidate.id, runId: visualRoot.runId }));
       const dynamicTools = [visualTool()];
+      const visualInput = buildVisualInput(preflight, candidate, designRaw, visualRoot.root);
       const visualResult = await runTurn({
         session: activeSession,
         root: visualRoot.root,
-        input: buildVisualInput(preflight, candidate, designRaw, visualRoot.root),
+        input: visualInput,
         outputSchema: visualSchema(candidate.id),
         dynamicTools,
         dynamicToolController: async ({ tool, arguments: argumentsValue }) => {
@@ -1832,7 +2500,7 @@ export async function runDesignVisualM2B1({
         raw: clone(visualResult.outputText),
         output,
         identity,
-        evidence: retainTask1Evidence(visualResult),
+        evidence: retainTask1Evidence(visualResult, visualInput),
       });
     }
     await verifyPreflightPins(preflight);
@@ -1873,6 +2541,7 @@ export async function runDesignVisualM2B1({
       ["sampleBEnvelope", visuals[1]],
       ["summary", summary],
     ];
+    assertArtifactsPathPrivate(writes, stagedRoots);
     await finishOnce(true);
     for (const [key, value] of writes) await writeArtifact(outputFile(preflight, key), value);
     return {
@@ -1884,7 +2553,11 @@ export async function runDesignVisualM2B1({
       summary,
     };
   } catch (error) {
+    const stagingRollbackUnresolved =
+      error?.stagingEvidence !== undefined &&
+      error?.stagingEvidence?.rollback?.readback !== "absent";
     safeShutdown =
+      !stagingRollbackUnresolved &&
       (activeSession === null || verifiedFailureShutdown(error, activeSession)) &&
       sessions.every((session) => session?.processExitCode === 0);
     try {
@@ -1892,7 +2565,15 @@ export async function runDesignVisualM2B1({
     } catch (cleanupError) {
       cleanupEvidence = cleanupError?.cleanupEvidence ?? cleanupEvidence;
     }
-    if (safeShutdown) {
+    if (
+      stagedRoots.length > 0 &&
+      (!Array.isArray(cleanupEvidence?.stagedRoots) ||
+        cleanupEvidence.stagedRoots.length !== stagedRoots.length ||
+        cleanupEvidence.stagedRoots.some(({ readback }) => readback !== "removed"))
+    ) {
+      safeShutdown = false;
+    }
+    if (safeShutdown && error?.code !== ARTIFACT_PATH_LEAK_CODE) {
       const blocked = {
         schemaVersion: 1,
         id: `design-visual-m2-b1-v${preflight.plan.schemaVersion}-blocked`,
@@ -1909,12 +2590,15 @@ export async function runDesignVisualM2B1({
           finishAttempts: finishAttempted ? 1 : 0,
           safeShutdownRequested: safeShutdown,
           runtime: { status: "not-attempted" },
-          stagedRoots: await inspectEvaluatorRoots(stagedRoots),
+          stagedRoots: retainStagedRootEvidence(
+            await inspectEvaluatorRoots(stagedRoots),
+          ),
         }),
         retryCount: 0,
         evaluatorIdentities: clone(identities),
       };
       try {
+        assertArtifactsPathPrivate([["blocked", blocked]], stagedRoots);
         await writeArtifact(outputFile(preflight, "blocked"), blocked);
       } catch (writeError) {
         error.blockedArtifactError = writeError;

@@ -2053,6 +2053,71 @@ function fakeAppServerRuntime(runRoot) {
   };
 }
 
+async function createImageDiagnosticTestSession(t, callbacks = {}) {
+  const runRoot = await createTestRoot(t);
+  const child = createFakeAppServerChild({
+    initializeResult: {
+      userAgent: "test-agent",
+      codexHome: runRoot,
+      platformFamily: "windows",
+      platformOs: "windows",
+    },
+  });
+  const session = await openAppServer(
+    fakeAppServerRuntime(runRoot),
+    callbacks,
+    { spawnProcess: () => child },
+  );
+  t.after(async () => {
+    child.confirmClose(0, null);
+    await session.close().catch(() => {});
+  });
+  return { child, runRoot, session };
+}
+
+async function emitAppServerNotification(child, notification) {
+  child.stdout.write(`${JSON.stringify(notification)}\n`);
+  await new Promise((resolve) => setImmediate(resolve));
+  await new Promise((resolve) => setImmediate(resolve));
+}
+
+function expectedImageDiagnostics(expectedTargetCount, overrides = {}) {
+  return {
+    status: "UNVERIFIED",
+    observationCount: 0,
+    expectedTargetCount,
+    effectivePathMatch: "UNVERIFIED",
+    matchedInputIndex: null,
+    effectivePathAbsolute: "UNVERIFIED",
+    effectivePathWithinRoot: "UNVERIFIED",
+    modelArgumentAbsolute: "UNVERIFIED",
+    outerCategory: "UNVERIFIED",
+    reportedCategory: "UNVERIFIED",
+    privacy: {
+      rawPathPersisted: false,
+      pathDigestPersisted: false,
+      rawDiagnosticDigestPersisted: false,
+    },
+    ...overrides,
+  };
+}
+
+function expectedSuccessfulImageViews(overrides = {}) {
+  return {
+    complete: true,
+    eventCount: 0,
+    completedCount: 0,
+    items: [],
+    blockers: [],
+    privacy: {
+      rawPathPersisted: false,
+      pathDigestPersisted: false,
+      rawDiagnosticDigestPersisted: false,
+    },
+    ...overrides,
+  };
+}
+
 test("App Server stderr keeps a sanitized short diagnostic with the exact full hash", async (t) => {
   const runRoot = await createTestRoot(t);
   const child = createFakeAppServerChild({
@@ -2179,6 +2244,781 @@ test("App Server stderr drops partial lines at both capture boundaries", async (
 
   child.confirmClose(0, null);
   await session.close();
+});
+
+test("local image diagnostics match a split Unicode path without persisting private input", async (t) => {
+  const { child, runRoot, session } = await createImageDiagnosticTestSession(t);
+  const privateSegment = "Alice-sk-SYNTHETIC_TEST_ONLY_abcdefghijklmnop";
+  const sentPath = path.join(runRoot, privateSegment, "sent image.png");
+  const resolvedPath = path.join(runRoot, privateSegment, "실제 이미지.png");
+  session.bindLocalImageDiagnostics({
+    root: runRoot,
+    images: [
+      {
+        inputIndex: 7,
+        sentPath,
+        resolvedPath,
+        byteLength: 1234,
+        sha256: "a".repeat(64),
+      },
+    ],
+  });
+  const raw = Buffer.from(
+    `\u001b[31mERROR\u001b[0m error=unable to locate image at \`${resolvedPath}\`: fs sandbox helper failed: apply deny-read ACLs\n`,
+    "utf8",
+  );
+  const unicodeStart = raw.indexOf(Buffer.from("실", "utf8"));
+  assert.notEqual(unicodeStart, -1);
+  child.stderr.write(raw.subarray(0, unicodeStart + 1));
+  child.stderr.write(raw.subarray(unicodeStart + 1));
+
+  assert.deepEqual(
+    session.imageDiagnostics,
+    expectedImageDiagnostics(1, {
+      status: "OBSERVED",
+      observationCount: 1,
+      effectivePathMatch: "MATCH",
+      matchedInputIndex: 7,
+      effectivePathAbsolute: "VERIFIED",
+      effectivePathWithinRoot: "VERIFIED",
+      outerCategory: "unable-to-locate",
+      reportedCategory: "sandbox-helper-failed",
+    }),
+  );
+  const serialized = JSON.stringify(session.imageDiagnostics);
+  assert.equal(serialized.includes(sentPath), false);
+  assert.equal(serialized.includes(resolvedPath), false);
+  assert.equal(serialized.includes(privateSegment), false);
+  assert.equal(serialized.includes("a".repeat(64)), false);
+  assert.equal(serialized.includes(sha256(sentPath)), false);
+  assert.equal(serialized.includes(sha256(resolvedPath)), false);
+});
+
+test("local image diagnostics also match the exact sent path before resolution", async (t) => {
+  const { child, runRoot, session } = await createImageDiagnosticTestSession(t);
+  const sentPath = path.join(runRoot, "sent path.png");
+  const resolvedPath = path.join(runRoot, "different resolved path.png");
+  session.bindLocalImageDiagnostics({
+    root: runRoot,
+    images: [{
+      inputIndex: 8,
+      sentPath,
+      resolvedPath,
+      byteLength: 64,
+      sha256: "9".repeat(64),
+    }],
+  });
+  child.stderr.write(
+    `unable to locate image at \`${sentPath}\`: ENOENT: no such file\n`,
+  );
+
+  assert.deepEqual(
+    session.imageDiagnostics,
+    expectedImageDiagnostics(1, {
+      status: "OBSERVED",
+      observationCount: 1,
+      effectivePathMatch: "MATCH",
+      matchedInputIndex: 8,
+      effectivePathAbsolute: "VERIFIED",
+      effectivePathWithinRoot: "VERIFIED",
+      outerCategory: "unable-to-locate",
+      reportedCategory: "not-found",
+    }),
+  );
+});
+
+test("local image diagnostics classify one exact router failure without retaining its cause", async (t) => {
+  const cases = [
+    ["read", "Access is denied (os error 5)", "unable-to-read", "permission-denied"],
+    ["locate", "ENOENT: no such file or directory", "unable-to-locate", "not-found"],
+    ["locate", "EINVAL: filename syntax is incorrect", "unable-to-locate", "invalid-path"],
+    ["read", "synthetic unrecognized filesystem failure", "unable-to-read", "unclassified"],
+  ];
+
+  for (const [index, [verb, cause, outerCategory, reportedCategory]] of cases.entries()) {
+    await t.test(reportedCategory, async (subtest) => {
+      const { child, runRoot, session } = await createImageDiagnosticTestSession(subtest);
+      const resolvedPath = path.join(runRoot, `image-${index}.png`);
+      session.bindLocalImageDiagnostics({
+        root: runRoot,
+        images: [{
+          inputIndex: index,
+          sentPath: resolvedPath,
+          resolvedPath,
+          byteLength: 32,
+          sha256: `${index}`.repeat(64),
+        }],
+      });
+      child.stderr.write(`unable to ${verb} image at \`${resolvedPath}\`: ${cause}\n`);
+      assert.deepEqual(
+        session.imageDiagnostics,
+        expectedImageDiagnostics(1, {
+          status: "OBSERVED",
+          observationCount: 1,
+          effectivePathMatch: "MATCH",
+          matchedInputIndex: index,
+          effectivePathAbsolute: "VERIFIED",
+          effectivePathWithinRoot: "VERIFIED",
+          outerCategory,
+          reportedCategory,
+        }),
+      );
+      assert.equal(JSON.stringify(session.imageDiagnostics).includes(cause), false);
+    });
+  }
+});
+
+test("local image diagnostics report a mismatched effective path without classifying it", async (t) => {
+  const { child, runRoot, session } = await createImageDiagnosticTestSession(t);
+  const expectedPath = path.join(runRoot, "expected.png");
+  const unexpectedPath = path.join(runRoot, "private-user", "unexpected.png");
+  session.bindLocalImageDiagnostics({
+    root: runRoot,
+    images: [{
+      inputIndex: 3,
+      sentPath: expectedPath,
+      resolvedPath: expectedPath,
+      byteLength: 1,
+      sha256: "b".repeat(64),
+    }],
+  });
+  child.stderr.write(`unable to read image at \`${unexpectedPath}\`: EACCES\n`);
+  assert.deepEqual(
+    session.imageDiagnostics,
+    expectedImageDiagnostics(1, {
+      observationCount: 1,
+      effectivePathMatch: "MISMATCH",
+    }),
+  );
+  assert.equal(JSON.stringify(session.imageDiagnostics).includes(unexpectedPath), false);
+});
+
+test("local image diagnostics distinguish zero from multiple router markers", async (t) => {
+  for (const markerCount of [0, 2]) {
+    await t.test(`${markerCount} markers`, async (subtest) => {
+      const { child, runRoot, session } = await createImageDiagnosticTestSession(subtest);
+      const resolvedPath = path.join(runRoot, "expected.png");
+      session.bindLocalImageDiagnostics({
+        root: runRoot,
+        images: [{
+          inputIndex: 1,
+          sentPath: resolvedPath,
+          resolvedPath,
+          byteLength: 1,
+          sha256: "c".repeat(64),
+        }],
+      });
+      child.stderr.write(markerCount === 0
+        ? "unrelated App Server warning\n"
+        : [
+            `unable to locate image at \`${resolvedPath}\`: ENOENT`,
+            `unable to read image at \`${resolvedPath}\`: EACCES`,
+            "",
+          ].join("\n"));
+      assert.deepEqual(
+        session.imageDiagnostics,
+        expectedImageDiagnostics(1, {
+          status:
+            markerCount === 0 ? "NO_ROUTER_IMAGE_ERROR" : "UNVERIFIED",
+          observationCount: markerCount,
+        }),
+      );
+    });
+  }
+});
+
+test("local image diagnostics fail closed for overlong observations", async (t) => {
+  await t.test("overlong unterminated line", async (subtest) => {
+    const { child, runRoot, session } = await createImageDiagnosticTestSession(subtest);
+    const resolvedPath = path.join(runRoot, "expected.png");
+    session.bindLocalImageDiagnostics({
+      root: runRoot,
+      images: [{
+        inputIndex: 2,
+        sentPath: resolvedPath,
+        resolvedPath,
+        byteLength: 1,
+        sha256: "e".repeat(64),
+      }],
+    });
+    child.stderr.write(
+      `unable to locate image at \`${resolvedPath}\`: ${"x".repeat(128 * 1024)}`,
+    );
+    assert.deepEqual(
+      session.imageDiagnostics,
+      expectedImageDiagnostics(1, { observationCount: 1 }),
+    );
+  });
+});
+
+test("local image diagnostic binding is single-use and must precede stderr", async (t) => {
+  const first = await createImageDiagnosticTestSession(t);
+  const resolvedPath = path.join(first.runRoot, "expected.png");
+  const binding = {
+    root: first.runRoot,
+    images: [{
+      inputIndex: 1,
+      sentPath: resolvedPath,
+      resolvedPath,
+      byteLength: 1,
+      sha256: "f".repeat(64),
+    }],
+  };
+  first.session.bindLocalImageDiagnostics(binding);
+  assert.throws(() => first.session.bindLocalImageDiagnostics(binding), /already bound/u);
+
+  const late = await createImageDiagnosticTestSession(t);
+  late.child.stderr.write("warning before binding\n");
+  assert.throws(
+    () => late.session.bindLocalImageDiagnostics(binding),
+    /before App Server stderr/u,
+  );
+});
+
+test("local image diagnostic binding is bounded to absolute in-root image targets", async (t) => {
+  const { runRoot, session } = await createImageDiagnosticTestSession(t);
+  const validImage = (root, inputIndex) => ({
+    inputIndex,
+    sentPath: path.join(root, `sent-${inputIndex}.png`),
+    resolvedPath: path.join(root, `resolved-${inputIndex}.png`),
+    byteLength: 1,
+    sha256: `${inputIndex}`.repeat(64).slice(0, 64),
+  });
+  const invalidCases = [
+    (root) => [],
+    (root) => Array.from({ length: 9 }, (_, index) => validImage(root, index + 1)),
+    (root) => [{ ...validImage(root, 1), sentPath: "relative.png" }],
+    (root) => [{ ...validImage(root, 1), resolvedPath: "relative.png" }],
+    (root) => [{
+      ...validImage(root, 1),
+      sentPath: path.resolve(root, "..", "outside-sent.png"),
+    }],
+    (root) => [{
+      ...validImage(root, 1),
+      resolvedPath: path.resolve(root, "..", "outside-resolved.png"),
+    }],
+    (root) => [{
+      ...validImage(root, 1),
+      sentPath: path.join(root, `${"한".repeat(4097)}.png`),
+    }],
+    (root) => [{
+      ...validImage(root, 1),
+      resolvedPath: path.join(root, `${"x".repeat(4097)}.png`),
+    }],
+    (root) => [{ ...validImage(root, 1), byteLength: 0 }],
+    (root) => [validImage(root, 1), validImage(root, 1)],
+    (root) => {
+      const first = validImage(root, 1);
+      return [first, { ...validImage(root, 2), sentPath: first.sentPath }];
+    },
+    (root) => {
+      const first = validImage(root, 1);
+      return [first, { ...validImage(root, 2), resolvedPath: first.sentPath }];
+    },
+  ];
+  for (const createImages of invalidCases) {
+    const current = await createImageDiagnosticTestSession(t);
+    assert.throws(
+      () => current.session.bindLocalImageDiagnostics({
+        root: current.runRoot,
+        images: createImages(current.runRoot),
+      }),
+      /binding|descriptor|target|bounded|in-root/iu,
+    );
+  }
+
+  assert.doesNotThrow(() => session.bindLocalImageDiagnostics({
+    root: runRoot,
+    images: Array.from(
+      { length: 8 },
+      (_, index) => validImage(runRoot, index + 1),
+    ),
+  }));
+});
+
+test("successful imageView lifecycle is path-free and matches one bound image", async (t) => {
+  const delivered = [];
+  const { child, runRoot, session } = await createImageDiagnosticTestSession(t, {
+    onNotification(notification) {
+      delivered.push(structuredClone(notification));
+    },
+  });
+  const username = "Alice-SYNTHETIC_TEST_ONLY";
+  const sentPath = path.join(runRoot, username, "sent image.png");
+  const resolvedPath = path.join(runRoot, username, "실제 이미지.png");
+  session.bindLocalImageDiagnostics({
+    root: runRoot,
+    images: [{
+      inputIndex: 4,
+      sentPath,
+      resolvedPath,
+      byteLength: 128,
+      sha256: "a".repeat(64),
+    }],
+  });
+  for (const method of ["item/started", "item/completed"]) {
+    await emitAppServerNotification(child, {
+      method,
+      params: {
+        threadId: "thread-1",
+        turnId: "turn-1",
+        item: { id: "image-1", type: "imageView", path: resolvedPath },
+      },
+    });
+  }
+
+  assert.deepEqual(delivered, ["item/started", "item/completed"].map((method) => ({
+    method,
+    params: {
+      threadId: "thread-1",
+      turnId: "turn-1",
+      item: {
+        id: "image-1",
+        type: "imageView",
+        matchedInputIndex: 4,
+        effectivePathMatch: "MATCH",
+      },
+    },
+  })));
+  assert.deepEqual(session.successfulImageViews, expectedSuccessfulImageViews({
+    eventCount: 2,
+    completedCount: 1,
+    items: [{
+      id: "image-1",
+      matchedInputIndex: 4,
+      eventCount: 2,
+      startedCount: 1,
+      completedCount: 1,
+      complete: true,
+    }],
+  }));
+  const replayed = [];
+  const unsubscribe = session.subscribe(
+    (notification) => replayed.push(notification),
+    { afterCursor: 0 },
+  );
+  unsubscribe();
+  assert.deepEqual(
+    replayed.map((notification) => notification.params.event),
+    ["item/started", "item/completed"].map((method) => ({
+      method,
+      threadId: "thread-1",
+      turnId: "turn-1",
+      complete: true,
+      blockers: [],
+      item: {
+        id: "image-1",
+        type: "imageView",
+        matchedInputIndex: 4,
+        effectivePathMatch: "MATCH",
+      },
+    })),
+  );
+  const serialized = JSON.stringify({ delivered, snapshot: session.successfulImageViews });
+  for (const forbidden of [sentPath, resolvedPath, username, sha256(sentPath), sha256(resolvedPath)]) {
+    assert.equal(serialized.includes(forbidden), false, forbidden);
+  }
+});
+
+test("successful imageView lifecycle distinguishes two bound images without paths", async (t) => {
+  const { child, runRoot, session } = await createImageDiagnosticTestSession(t);
+  const images = [2, 7].map((inputIndex) => ({
+    inputIndex,
+    sentPath: path.join(runRoot, `sent-${inputIndex}.png`),
+    resolvedPath: path.join(runRoot, `resolved-${inputIndex}.png`),
+    byteLength: inputIndex,
+    sha256: `${inputIndex}`.repeat(64),
+  }));
+  session.bindLocalImageDiagnostics({ root: runRoot, images });
+  for (const [itemIndex, image] of images.entries()) {
+    for (const method of ["item/started", "item/completed"]) {
+      await emitAppServerNotification(child, {
+        method,
+        params: {
+          threadId: "thread-1",
+          turnId: "turn-1",
+          item: {
+            id: `image-${itemIndex + 1}`,
+            type: "imageView",
+            path: image.sentPath,
+          },
+        },
+      });
+    }
+  }
+
+  assert.deepEqual(session.successfulImageViews, expectedSuccessfulImageViews({
+    eventCount: 4,
+    completedCount: 2,
+    items: images.map((image, index) => ({
+      id: `image-${index + 1}`,
+      matchedInputIndex: image.inputIndex,
+      eventCount: 2,
+      startedCount: 1,
+      completedCount: 1,
+      complete: true,
+    })),
+  }));
+});
+
+test("unexpected imageView path is rewritten path-free and blocks the lifecycle", async (t) => {
+  const delivered = [];
+  const { child, runRoot, session } = await createImageDiagnosticTestSession(t, {
+    onNotification(notification) {
+      delivered.push(structuredClone(notification));
+    },
+  });
+  const expectedPath = path.join(runRoot, "expected.png");
+  const unexpectedPath = path.join(runRoot, "Private-User", "unexpected.png");
+  session.bindLocalImageDiagnostics({
+    root: runRoot,
+    images: [{
+      inputIndex: 1,
+      sentPath: expectedPath,
+      resolvedPath: path.join(runRoot, "resolved.png"),
+      byteLength: 1,
+      sha256: "b".repeat(64),
+    }],
+  });
+  await emitAppServerNotification(child, {
+    method: "item/started",
+    params: {
+      threadId: "thread-1",
+      turnId: "turn-1",
+      item: { id: "image-bad", type: "imageView", path: unexpectedPath },
+    },
+  });
+
+  assert.deepEqual(delivered[0].params.item, {
+    id: "image-bad",
+    type: "imageView",
+    matchedInputIndex: null,
+    effectivePathMatch: "MISMATCH",
+  });
+  assert.equal(session.successfulImageViews.complete, false);
+  assert.deepEqual(session.successfulImageViews.blockers, [
+    "image-view-target-mismatch",
+    "image-view-lifecycle-incomplete",
+  ]);
+  assert.equal(JSON.stringify(delivered).includes(unexpectedPath), false);
+  assert.equal(JSON.stringify(session.successfulImageViews).includes("Private-User"), false);
+});
+
+test("imageView extra shape and invalid lifecycle fail closed", async (t) => {
+  await t.test("unknown item key", async (subtest) => {
+    const delivered = [];
+    const { child, runRoot, session } = await createImageDiagnosticTestSession(
+      subtest,
+      { onNotification: (notification) => delivered.push(structuredClone(notification)) },
+    );
+    const expectedPath = path.join(runRoot, "expected.png");
+    session.bindLocalImageDiagnostics({
+      root: runRoot,
+      images: [{
+        inputIndex: 1,
+        sentPath: expectedPath,
+        resolvedPath: path.join(runRoot, "resolved.png"),
+        byteLength: 1,
+        sha256: "c".repeat(64),
+      }],
+    });
+    await emitAppServerNotification(child, {
+      method: "item/started",
+      params: {
+        threadId: "thread-1",
+        turnId: "turn-1",
+        item: {
+          id: "image-extra",
+          type: "imageView",
+          path: expectedPath,
+          status: "inProgress",
+        },
+      },
+    });
+    assert.equal(JSON.stringify(delivered).includes(expectedPath), false);
+    assert.deepEqual(delivered[0].params.item, {
+      id: "image-extra",
+      type: "imageView",
+      matchedInputIndex: null,
+      effectivePathMatch: "UNVERIFIED",
+    });
+    assert.deepEqual(session.successfulImageViews.blockers, [
+      "image-view-extra-shape",
+      "image-view-target-unverified",
+      "image-view-lifecycle-incomplete",
+    ]);
+  });
+
+  for (const [label, methods, expectedBlockers] of [
+    [
+      "completed without started",
+      ["item/completed"],
+      ["image-view-completed-without-started"],
+    ],
+    [
+      "duplicate started",
+      ["item/started", "item/started", "item/completed"],
+      ["image-view-duplicate-started"],
+    ],
+    [
+      "duplicate completed",
+      ["item/started", "item/completed", "item/completed"],
+      ["image-view-duplicate-completed"],
+    ],
+  ]) {
+    await t.test(label, async (subtest) => {
+      const { child, runRoot, session } = await createImageDiagnosticTestSession(subtest);
+      const expectedPath = path.join(runRoot, "expected.png");
+      session.bindLocalImageDiagnostics({
+        root: runRoot,
+        images: [{
+          inputIndex: 1,
+          sentPath: expectedPath,
+          resolvedPath: path.join(runRoot, "resolved.png"),
+          byteLength: 1,
+          sha256: "d".repeat(64),
+        }],
+      });
+      for (const method of methods) {
+        await emitAppServerNotification(child, {
+          method,
+          params: {
+            threadId: "thread-1",
+            turnId: "turn-1",
+            item: { id: "image-life", type: "imageView", path: expectedPath },
+          },
+        });
+      }
+      assert.equal(session.successfulImageViews.complete, false);
+      assert.deepEqual(session.successfulImageViews.blockers, expectedBlockers);
+    });
+  }
+});
+
+test("successful imageView snapshot is complete when no image view occurred", async (t) => {
+  const { runRoot, session } = await createImageDiagnosticTestSession(t);
+  session.bindLocalImageDiagnostics({
+    root: runRoot,
+    images: [{
+      inputIndex: 1,
+      sentPath: path.join(runRoot, "sent.png"),
+      resolvedPath: path.join(runRoot, "resolved.png"),
+      byteLength: 1,
+      sha256: "e".repeat(64),
+    }],
+  });
+  assert.deepEqual(session.successfulImageViews, expectedSuccessfulImageViews());
+});
+
+test("reading an incomplete imageView snapshot does not poison its later completion", async (t) => {
+  const { child, runRoot, session } = await createImageDiagnosticTestSession(t);
+  const expectedPath = path.join(runRoot, "expected.png");
+  session.bindLocalImageDiagnostics({
+    root: runRoot,
+    images: [{
+      inputIndex: 1,
+      sentPath: expectedPath,
+      resolvedPath: path.join(runRoot, "resolved.png"),
+      byteLength: 1,
+      sha256: "f".repeat(64),
+    }],
+  });
+  const notification = (method) => ({
+    method,
+    params: {
+      threadId: "thread-1",
+      turnId: "turn-1",
+      item: { id: "image-late", type: "imageView", path: expectedPath },
+    },
+  });
+  await emitAppServerNotification(child, notification("item/started"));
+  assert.deepEqual(session.successfulImageViews.blockers, [
+    "image-view-lifecycle-incomplete",
+  ]);
+  await emitAppServerNotification(child, notification("item/completed"));
+  assert.deepEqual(session.successfulImageViews, expectedSuccessfulImageViews({
+    eventCount: 2,
+    completedCount: 1,
+    items: [{
+      id: "image-late",
+      matchedInputIndex: 1,
+      eventCount: 2,
+      startedCount: 1,
+      completedCount: 1,
+      complete: true,
+    }],
+  }));
+});
+
+test("imageView lifecycle bounds distinct IDs before retaining a ninth state", async (t) => {
+  const callbackNotifications = [];
+  const liveNotifications = [];
+  const { child, runRoot, session } = await createImageDiagnosticTestSession(t, {
+    onNotification(notification) {
+      callbackNotifications.push(structuredClone(notification));
+    },
+  });
+  const expectedPath = path.join(
+    runRoot,
+    "Private-User-SYNTHETIC_TEST_ONLY",
+    "expected image.png",
+  );
+  session.bindLocalImageDiagnostics({
+    root: runRoot,
+    images: [{
+      inputIndex: 1,
+      sentPath: expectedPath,
+      resolvedPath: expectedPath,
+      byteLength: 1,
+      sha256: "1".repeat(64),
+    }],
+  });
+  const unsubscribe = session.subscribe((notification) => {
+    liveNotifications.push(structuredClone(notification));
+  });
+
+  for (let index = 0; index < 9; index += 1) {
+    await emitAppServerNotification(child, {
+      method: "item/started",
+      params: {
+        threadId: "thread-limit",
+        turnId: "turn-limit",
+        item: {
+          id: `image-${index + 1}`,
+          type: "imageView",
+          path: expectedPath,
+        },
+      },
+    });
+  }
+  unsubscribe();
+
+  const snapshot = session.successfulImageViews;
+  assert.equal(snapshot.items.length, 8);
+  assert.equal(snapshot.eventCount <= 16, true);
+  assert.equal(snapshot.blockers.includes("image-view-limit-exceeded"), true);
+  const serialized = JSON.stringify({
+    callbackNotifications,
+    liveNotifications,
+    snapshot,
+  });
+  assert.equal(serialized.includes(expectedPath), false);
+  assert.equal(serialized.includes("Private-User-SYNTHETIC_TEST_ONLY"), false);
+  assert.equal(
+    [...callbackNotifications, ...liveNotifications].every(
+      (notification) => !Object.hasOwn(notification.params.item, "path"),
+    ),
+    true,
+  );
+});
+
+test("imageView lifecycle stops counting after sixteen events", async (t) => {
+  const delivered = [];
+  const { child, runRoot, session } = await createImageDiagnosticTestSession(t, {
+    onNotification(notification) {
+      delivered.push(structuredClone(notification));
+    },
+  });
+  const expectedPath = path.join(runRoot, "private-event-limit", "expected.png");
+  session.bindLocalImageDiagnostics({
+    root: runRoot,
+    images: [{
+      inputIndex: 1,
+      sentPath: expectedPath,
+      resolvedPath: expectedPath,
+      byteLength: 1,
+      sha256: "2".repeat(64),
+    }],
+  });
+
+  for (let index = 0; index < 17; index += 1) {
+    await emitAppServerNotification(child, {
+      method: index % 2 === 0 ? "item/started" : "item/completed",
+      params: {
+        threadId: "thread-event-limit",
+        turnId: "turn-event-limit",
+        item: { id: "image-repeat", type: "imageView", path: expectedPath },
+      },
+    });
+  }
+
+  const snapshot = session.successfulImageViews;
+  assert.equal(snapshot.eventCount, 16);
+  assert.equal(snapshot.items.length, 1);
+  assert.equal(snapshot.blockers.includes("image-view-limit-exceeded"), true);
+  assert.equal(JSON.stringify(delivered).includes(expectedPath), false);
+  assert.equal(
+    delivered.every((notification) => !Object.hasOwn(notification.params.item, "path")),
+    true,
+  );
+});
+
+test("imageView IDs are bounded and credential-shaped IDs never enter lifecycle state", async (t) => {
+  const valid = await createImageDiagnosticTestSession(t);
+  const validPath = path.join(valid.runRoot, "valid.png");
+  const validId = "i".repeat(128);
+  valid.session.bindLocalImageDiagnostics({
+    root: valid.runRoot,
+    images: [{
+      inputIndex: 1,
+      sentPath: validPath,
+      resolvedPath: validPath,
+      byteLength: 1,
+      sha256: "3".repeat(64),
+    }],
+  });
+  for (const method of ["item/started", "item/completed"]) {
+    await emitAppServerNotification(valid.child, {
+      method,
+      params: {
+        threadId: "thread-valid-id",
+        turnId: "turn-valid-id",
+        item: { id: validId, type: "imageView", path: validPath },
+      },
+    });
+  }
+  assert.equal(valid.session.successfulImageViews.items[0].id, validId);
+
+  for (const [label, invalidId] of [
+    ["empty", ""],
+    ["overlong UTF-8", "한".repeat(43)],
+    ["credential-shaped", "sk-SYNTHETIC_TEST_ONLY_abcdefghijklmnop"],
+  ]) {
+    await t.test(label, async (subtest) => {
+      const delivered = [];
+      const current = await createImageDiagnosticTestSession(subtest, {
+        onNotification(notification) {
+          delivered.push(structuredClone(notification));
+        },
+      });
+      const expectedPath = path.join(current.runRoot, `private-${label}.png`);
+      current.session.bindLocalImageDiagnostics({
+        root: current.runRoot,
+        images: [{
+          inputIndex: 1,
+          sentPath: expectedPath,
+          resolvedPath: expectedPath,
+          byteLength: 1,
+          sha256: "4".repeat(64),
+        }],
+      });
+      await emitAppServerNotification(current.child, {
+        method: "item/started",
+        params: {
+          threadId: "thread-invalid-id",
+          turnId: "turn-invalid-id",
+          item: { id: invalidId, type: "imageView", path: expectedPath },
+        },
+      });
+
+      const snapshot = current.session.successfulImageViews;
+      assert.equal(snapshot.items.length, 0);
+      assert.equal(snapshot.blockers.includes("image-view-invalid-id"), true);
+      const serialized = JSON.stringify({ delivered, snapshot });
+      assert.equal(serialized.includes(expectedPath), false);
+      if (invalidId) assert.equal(serialized.includes(invalidId), false);
+    });
+  }
 });
 
 test("App Server close rejects within a bound when kill is not confirmed", async (t) => {
