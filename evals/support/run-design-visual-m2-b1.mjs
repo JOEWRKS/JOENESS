@@ -619,7 +619,7 @@ function strictObject(properties) {
 }
 
 function stringArraySchema() {
-  return { type: "array", minItems: 1, items: { type: "string", minLength: 1 } };
+  return { type: "array", items: { type: "string" } };
 }
 
 function applicabilitySchema() {
@@ -645,9 +645,9 @@ function applicabilitySchema() {
 
 function designCheckSchema(semantics) {
   return strictObject({
-    id: { type: "string", minLength: 1 },
+    id: { type: "string" },
     sourceIds: stringArraySchema(),
-    observableFact: { type: "string", minLength: 1 },
+    observableFact: { type: "string" },
     evidenceLayer: { type: "string", enum: [...EVIDENCE_LAYERS] },
     applicability: applicabilitySchema(),
     semantics: { type: "string", enum: [semantics] },
@@ -670,16 +670,16 @@ export function designSchema() {
   });
 }
 
-export function visualSchema(candidateId = null, expectedCheckCount = null) {
+export function visualSchema(candidateId = null) {
   const check = strictObject({
-    id: { type: "string", minLength: 1 },
+    id: { type: "string" },
     sourceIds: stringArraySchema(),
     evidenceLayer: { type: "string", enum: [...EVIDENCE_LAYERS] },
     applicability: applicabilitySchema(),
     semantics: { type: "string", enum: ["acceptance", "boundary"] },
-    expected: { type: "string", minLength: 1 },
+    expected: { type: "string" },
     scopeMatch: { type: "string", enum: ["APPLICABLE", "NOT_APPLICABLE", "UNVERIFIED"] },
-    observed: { type: "string", minLength: 1 },
+    observed: { type: "string" },
     verdict: { type: "string", enum: ["PASS", "FAIL", "UNVERIFIED", "NOT_APPLICABLE"] },
   });
   return strictObject({
@@ -693,9 +693,6 @@ export function visualSchema(candidateId = null, expectedCheckCount = null) {
     }),
     checks: {
       type: "array",
-      ...(expectedCheckCount === null
-        ? {}
-        : { minItems: expectedCheckCount, maxItems: expectedCheckCount }),
       items: check,
     },
     visibleAppearanceOverall: { type: "string", enum: ["PASS", "FAIL", "UNVERIFIED"] },
@@ -1259,7 +1256,7 @@ export async function runDesignVisualM2B1({
         session: activeSession,
         root: visualRoot.root,
         input: buildVisualInput(preflight, candidate, designRaw, visualRoot.root),
-        outputSchema: visualSchema(candidate.id, flattenDesign(design).length),
+        outputSchema: visualSchema(candidate.id),
         dynamicTools,
         dynamicToolController: async ({ tool, arguments: argumentsValue }) => {
           if (

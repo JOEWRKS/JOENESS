@@ -289,6 +289,13 @@ test("M2B1 response schemas are recursively strict and match the runtime validat
   assert.equal(typeof subject?.visualSchema, "function");
 
   function assertStrict(schema, label = "root") {
+    for (const unsupportedKeyword of ["minLength", "minItems", "maxItems"]) {
+      assert.equal(
+        Object.hasOwn(schema, unsupportedKeyword),
+        false,
+        `${label} uses unnecessary ${unsupportedKeyword}`,
+      );
+    }
     if (schema.type === "object") {
       assert.equal(schema.additionalProperties, false, `${label} allows extra properties`);
       assert.deepEqual(
@@ -342,7 +349,7 @@ test("M2B1 response schemas are recursively strict and match the runtime validat
   const design = subject.designSchema();
   const designFixture = designOutput();
   const visualFixture = visualOutput(designFixture, "sample-b", false);
-  const visual = subject.visualSchema("sample-b", visualFixture.checks.length);
+  const visual = subject.visualSchema("sample-b");
   assertStrict(design, "design");
   assertStrict(visual, "visual");
   assertAccepts(design, designFixture, "designFixture");
