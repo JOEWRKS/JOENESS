@@ -1,0 +1,193 @@
+{
+  "schemaVersion": 12,
+  "id": "design-visual-m2-attempt-index-v12",
+  "date": "2026-08-14",
+  "recordType": "method-changed-live-attempt",
+  "predecessor": {
+    "path": "evals/skill-contracts/design-visual-m2-attempt-index-v11.json",
+    "bytes": 8395,
+    "sha256": "d8434fa1ea6524e018c793be93b0ea7913e0613e6f763dc639f4220663d60ff3",
+    "disposition": "preserved-ninth-attempt-record"
+  },
+  "attempt": {
+    "id": "design-visual-m2-b1-v10",
+    "attemptCountIncludingV1": 10,
+    "methodChangedFromV9": "canonically coalesce agent-message delta fragments and retain bounded aggregate event evidence; Task 1 caps, evaluator inputs, prompts, acceptance contract, and retry policy were unchanged",
+    "command": "node evals/support/run-design-visual-m2-b1.mjs evals/skill-contracts/design-visual-m2-b1-smoke-plan-v10.json",
+    "invocationExitCode": 1,
+    "invocationDurationSeconds": 72.603,
+    "invocationObservationBasis": "DIRECT-invocation-bound-shell-result",
+    "retryCount": 0,
+    "automaticRetry": false,
+    "completedSessions": ["design", "sample-a"],
+    "failedSession": 2,
+    "design": "completed-session-recorded; output-validation-passed-INFERRED-from-pinned-control-flow",
+    "sample-a": "completed-session-recorded; output-rejected-by-validator-DIRECT-error-and-INFERRED-location",
+    "sample-b": "not-started-INFERRED-from-pinned-control-flow"
+  },
+  "plan": {
+    "path": "evals/skill-contracts/design-visual-m2-b1-smoke-plan-v10.json",
+    "bytes": 5674,
+    "sha256": "9f3df46fd0e9ca2544d3ec29cab1251fa0b7c697214c693a2c94a498848bfbe0"
+  },
+  "blockedArtifact": {
+    "path": "evals/skill-contracts/design-visual-m2-b1-v10-blocked.json",
+    "bytes": 2504,
+    "sha256": "34a1cb1c5fdf7655aeab9f5f6df899c40ae8752cd93edd57061f95c29dcbfcd0",
+    "status": "blocked"
+  },
+  "executionSource": {
+    "head": "4b640795246e8ef71388c64a92e5d242a2327a11",
+    "implementationCommit": "4364d3c45323766ad81bc9fe0cf5af9fc2c3614c",
+    "runner": {
+      "path": "evals/support/run-design-visual-m2-b1.mjs",
+      "bytes": 123217,
+      "sha256": "6a7f4c68cf52ab36fa0863ede38e44063654c3ea61d765a3d147a37f0e8edaab"
+    },
+    "freshTurnAdapter": {
+      "path": "evals/support/run-fresh-evaluator-turn.mjs",
+      "bytes": 55477,
+      "sha256": "f2c7e2e9457b0ef7d6b819425619dcde8054db530f8b920829376f39a13fd087"
+    },
+    "collector": {
+      "path": "evals/support/collect-codex-app-server.mjs",
+      "bytes": 297632,
+      "sha256": "8b81ddb28be2a803500839a2de61f9bb397aa96711d039bdb7a3a86cfad8d687"
+    }
+  },
+  "observedFailure": {
+    "artifactDirect": {
+      "message": {
+        "text": "M2B1 sample-a lacks the bounded defect outcome",
+        "byteLength": 46,
+        "sha256": "dfba04e86081222a868a6717551598ea3794c3fc2ab6a8f90bac67d93b2789d3",
+        "truncated": false,
+        "redacted": false,
+        "unsupported": false
+      },
+      "completedSessions": ["design", "sample-a"],
+      "failedSession": 2,
+      "partialEvidence": {},
+      "eventCompaction": "NOT-PRESENT",
+      "task1Prevalidation": "NOT-PRESENT",
+      "retryCount": 0,
+      "evaluatorIdentityCount": 2,
+      "evaluatorIdentities": [
+        {
+          "phase": "design",
+          "runId": "design-d69177f7-25fe-48fb-bf6c-54ac83c6f93b",
+          "sessionId": "43404",
+          "threadId": "019ffc6c-c422-73c2-bffa-1779f6dae91e",
+          "turnId": "019ffc6c-c462-7a41-8062-8be6c1576af6"
+        },
+        {
+          "phase": "sample-a",
+          "runId": "sample-a-102be3ba-bbc9-473f-99fb-d2239b602041",
+          "sessionId": "34472",
+          "threadId": "019ffc6d-2f7b-7f20-afa2-412ca2e59df7",
+          "turnId": "019ffc6d-2fb7-7862-b633-a3c5b903a917"
+        }
+      ]
+    },
+    "pinnedControlFlowInference": {
+      "basis": "INFERRED-from-the-exact-pinned-runner-control-flow-not-a-direct-blocked-artifact-field",
+      "designOutputValidated": true,
+      "sampleATurnReturned": true,
+      "sampleATurnShutdownAssertionPassed": true,
+      "sampleAHandoffIntegrityPassed": true,
+      "failureLocation": "the final sample-a bounded-defect predicate gate inside validateVisualM2B1Output, before sample-a retainTask1Evidence and before sample-b started",
+      "failedPredicate": "UNVERIFIED-at-least-one-of-applicable-visible-acceptance-fail-visible-overall-fail-or-complete-overall-fail"
+    },
+    "boundedConclusion": "The Design output passed its validator. The sample-a turn completed, but its output failed at least one of the three required bounded-defect predicates. The retained artifact does not identify which predicate failed."
+  },
+  "outputPresence": {
+    "designRaw": { "path": "evals/skill-contracts/design-visual-m2-b1-v10-design-raw.json", "status": "absent" },
+    "designHandoff": { "path": "evals/skill-contracts/design-visual-m2-b1-v10-design-handoff.json", "status": "absent" },
+    "sampleARaw": { "path": "evals/skill-contracts/design-visual-m2-b1-v10-sample-a-raw.json", "status": "absent" },
+    "sampleAEnvelope": { "path": "evals/skill-contracts/design-visual-m2-b1-v10-sample-a-envelope.json", "status": "absent" },
+    "sampleBRaw": { "path": "evals/skill-contracts/design-visual-m2-b1-v10-sample-b-raw.json", "status": "absent" },
+    "sampleBEnvelope": { "path": "evals/skill-contracts/design-visual-m2-b1-v10-sample-b-envelope.json", "status": "absent" },
+    "summary": { "path": "evals/skill-contracts/design-visual-m2-b1-v10-summary.json", "status": "absent" },
+    "blocked": { "path": "evals/skill-contracts/design-visual-m2-b1-v10-blocked.json", "status": "present" }
+  },
+  "evidenceRetention": {
+    "blockedArtifactAndExecutionSource": "DIRECT",
+    "invocationExitAndDuration": "DIRECT-invocation-bound-shell-result",
+    "completedSessionsAndEvaluatorIdentities": "DIRECT",
+    "cleanupEvidence": "DIRECT",
+    "externalCleanupBaselines": "DIRECT-read-only-external-observation",
+    "designValidationSampleAReturnShutdownHandoffAndFailureLocation": "INFERRED-from-pinned-control-flow",
+    "sampleAOutput": "NOT-RETAINED",
+    "eventCompaction": "NOT-RETAINED",
+    "exactFailedPredicate": "UNVERIFIED"
+  },
+  "cleanup": {
+    "blockedArtifactEvidence": {
+      "phase": "post-evaluator-cleanup",
+      "finishAttempts": 1,
+      "safeShutdownRequested": true,
+      "runtimeStatus": "completed",
+      "stagedRoots": [
+        { "phase": "design", "runId": "design-d69177f7-25fe-48fb-bf6c-54ac83c6f93b", "readback": "removed" },
+        { "phase": "sample-a", "runId": "sample-a-102be3ba-bbc9-473f-99fb-d2239b602041", "readback": "removed" }
+      ]
+    },
+    "independentlyObservedBaseline": {
+      "basis": "DIRECT-read-only-external-observation",
+      "algorithm": "ordinal-sorted basenames joined as UTF-8 with LF separators and no terminal LF",
+      "observedAt": {
+        "preRunKst": "2026-08-14T03:39:02.560+09:00",
+        "postRunKst": "2026-08-14T03:45:31.3488786+09:00"
+      },
+      "preRun": {
+        "broadStagingBaselineCount": 673,
+        "broadStagingBaselineSha256": "17a8764352cdfdf8a4f47123edec5790b1124b56379702e7e53702ef8a61ed92",
+        "broadRunRootBaselineCount": 38,
+        "broadRunRootBaselineSha256": "56dffbde6864a4184208b1366a88506d12289f0f9f32af472d6cc6e79d03b15d",
+        "broadIsolatedHomeBaselineCount": 0,
+        "broadIsolatedHomeBaselineSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "postRun": {
+        "broadStagingBaselineCount": 673,
+        "broadStagingBaselineSha256": "17a8764352cdfdf8a4f47123edec5790b1124b56379702e7e53702ef8a61ed92",
+        "broadRunRootBaselineCount": 38,
+        "broadRunRootBaselineSha256": "56dffbde6864a4184208b1366a88506d12289f0f9f32af472d6cc6e79d03b15d",
+        "broadIsolatedHomeBaselineCount": 0,
+        "broadIsolatedHomeBaselineSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "prePostExactEqual": true,
+      "currentReadback": {
+        "matchingTaskProcessCount": 0,
+        "matchingTaskRuntimeRootCount": 0,
+        "matchingTaskIsolatedHomeCount": 0
+      }
+    },
+    "boundary": "The broad directory sets are baseline-only, were not attributed to this attempt, were not claimed task-owned, and were not deleted."
+  },
+  "limitations": {
+    "sampleAOutput": "NOT-RETAINED",
+    "eventCompaction": "NOT-RETAINED",
+    "exactFailedPredicate": "UNVERIFIED",
+    "designArtifact": "not-produced-success-writes-were-deferred",
+    "sample-a-verdict": "REJECTED-not-valid-evidence",
+    "sample-b-verdict": "UNVERIFIED-not-run",
+    "attachmentConversion": "UNVERIFIED",
+    "providerInclusion": "UNVERIFIED",
+    "modelPixelUse": "UNVERIFIED",
+    "originalDetail": "UNVERIFIED",
+    "userAcceptance": "UNVERIFIED",
+    "m2Completion": "UNVERIFIED"
+  },
+  "disposition": {
+    "m2b1": "blocked-at-sample-a-bounded-defect-validator",
+    "eventCompactionRetentionMethod": "UNVERIFIED-in-this-blocked-artifact",
+    "promotionPass": false
+  },
+  "nextAuthorizedMethod": {
+    "sameV10CommandRetryAuthorized": false,
+    "automaticRetryAuthorized": false,
+    "limitChangeAuthorized": false,
+    "nextLiveAttemptAuthorized": false,
+    "scope": "Implement and verify a bounded post-turn semantic-failure retention method only. Do not run another live evaluator attempt without a new pinned plan and independent authorization."
+  }
+}
