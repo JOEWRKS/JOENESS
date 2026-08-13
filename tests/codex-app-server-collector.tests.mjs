@@ -546,6 +546,142 @@ test("diagnostic sanitizer redacts forward-slash Windows paths and file URLs", (
   assert.equal(serialized.includes("file:///C:/Users"), false);
 });
 
+test("diagnostic sanitizer preserves the cause after a backtick-quoted Windows path", () => {
+  const evidence = sanitizeDiagnosticEvidence(
+    "unable to locate image at `C:\\Users\\Alice\\Temp\\approved.png`: fs sandbox helper failed: apply deny-read ACLs",
+    4096,
+  );
+
+  assert.equal(
+    evidence.text,
+    "unable to locate image at [REDACTED_PATH]: fs sandbox helper failed: apply deny-read ACLs",
+  );
+  assert.equal(evidence.redacted, true);
+  assert.equal(JSON.stringify(evidence).includes("Alice"), false);
+});
+
+test("diagnostic sanitizer preserves a normal cause before terminal line endings", () => {
+  for (const lineEnding of ["\n", "\r\n"]) {
+    const evidence = sanitizeDiagnosticEvidence(
+      `unable to locate image at \`C:\\Users\\Alice\\Temp\\approved.png\`: fs sandbox helper failed${lineEnding}`,
+      4096,
+    );
+
+    assert.equal(
+      evidence.text,
+      `unable to locate image at [REDACTED_PATH]: fs sandbox helper failed${lineEnding}`,
+    );
+    assert.equal(evidence.redacted, true);
+    assert.equal(JSON.stringify(evidence).includes("Alice"), false);
+  }
+});
+
+test("diagnostic sanitizer keeps the final cause when backtick delimiters are ambiguous", () => {
+  const evidence = sanitizeDiagnosticEvidence(
+    "unable to locate image at `C:\\Users\\Alice\\Temp\\approved.png`: helper `apply_acl`: access denied",
+    4096,
+  );
+
+  assert.equal(
+    evidence.text,
+    "unable to locate image at [REDACTED_PATH]: access denied",
+  );
+  assert.equal(evidence.redacted, true);
+  assert.equal(JSON.stringify(evidence).includes("Alice"), false);
+});
+
+test("diagnostic sanitizer does not expose a Windows path containing a backtick", () => {
+  const evidence = sanitizeDiagnosticEvidence(
+    "unable to locate image at `C:\\Users\\`Alice\\Private\\approved.png`: fs sandbox helper failed",
+    4096,
+  );
+
+  assert.equal(
+    evidence.text,
+    "unable to locate image at [REDACTED_PATH]: fs sandbox helper failed",
+  );
+  assert.equal(evidence.redacted, true);
+  assert.equal(JSON.stringify(evidence).includes("Alice"), false);
+  assert.equal(JSON.stringify(evidence).includes("Private"), false);
+});
+
+test("diagnostic sanitizer uses the final backtick path delimiter before preserving a cause", () => {
+  const evidence = sanitizeDiagnosticEvidence(
+    "unable to locate image at `C:\\Users\\`:$DATA\\Alice\\Private\\approved.png`: fs sandbox helper failed",
+    4096,
+  );
+
+  assert.equal(
+    evidence.text,
+    "unable to locate image at [REDACTED_PATH]: fs sandbox helper failed",
+  );
+  assert.equal(JSON.stringify(evidence).includes("Alice"), false);
+  assert.equal(JSON.stringify(evidence).includes("Private"), false);
+});
+
+test("diagnostic sanitizer does not expose path text after an inner backtick-colon", () => {
+  for (const diagnostic of [
+    "unable to locate image at `C:\\Users\\Alice`: Private\\approved.png`: denied",
+    "unable to locate image at `/Users/Alice`: Private/approved.png`: denied",
+    "unable to locate image at `file:///C:/Users/Alice`: Private/approved.png`: denied",
+  ]) {
+    const evidence = sanitizeDiagnosticEvidence(diagnostic, 4096);
+    assert.equal(
+      evidence.text,
+      "unable to locate image at [REDACTED_PATH]: denied",
+    );
+    assert.equal(evidence.redacted, true);
+    assert.equal(JSON.stringify(evidence).includes("Alice"), false);
+    assert.equal(JSON.stringify(evidence).includes("Private"), false);
+    assert.equal(JSON.stringify(evidence).includes("approved.png"), false);
+  }
+});
+
+test("diagnostic sanitizer preserves causes after backtick POSIX paths and file URLs", () => {
+  for (const diagnostic of [
+    "unable to locate image at `/Users/Alice/Private/approved.png`: sandbox denied",
+    "unable to locate image at `file:///C:/Users/Alice/Private/approved.png`: sandbox denied",
+  ]) {
+    const evidence = sanitizeDiagnosticEvidence(diagnostic, 4096);
+    assert.equal(
+      evidence.text,
+      "unable to locate image at [REDACTED_PATH]: sandbox denied",
+    );
+    assert.equal(JSON.stringify(evidence).includes("Alice"), false);
+    assert.equal(JSON.stringify(evidence).includes("Private"), false);
+  }
+});
+
+test("diagnostic sanitizer fails closed for unterminated backtick paths across lines", () => {
+  for (const diagnostic of [
+    "unable to locate image at `C:\\Users\\Alice\nPrivate\\approved.png: denied",
+    "unable to locate image at `/Users/Alice\nPrivate/approved.png: denied",
+    "unable to locate image at `file:///C:/Users/Alice\nPrivate/approved.png: denied",
+  ]) {
+    const evidence = sanitizeDiagnosticEvidence(diagnostic, 4096);
+    assert.equal(evidence.text, "unable to locate image at [REDACTED_PATH]");
+    assert.equal(evidence.redacted, true);
+    assert.equal(JSON.stringify(evidence).includes("Alice"), false);
+    assert.equal(JSON.stringify(evidence).includes("Private"), false);
+    assert.equal(JSON.stringify(evidence).includes("approved.png"), false);
+  }
+});
+
+test("diagnostic sanitizer fails closed when an inner delimiter precedes a multiline path tail", () => {
+  for (const diagnostic of [
+    "unable to locate image at `C:\\Users\\Alice`: \nPrivate\\approved.png`: denied",
+    "unable to locate image at `/Users/Alice`: \nPrivate/approved.png`: denied",
+    "unable to locate image at `file:///C:/Users/Alice`: \nPrivate/approved.png`: denied",
+  ]) {
+    const evidence = sanitizeDiagnosticEvidence(diagnostic, 4096);
+    assert.equal(evidence.text, "unable to locate image at [REDACTED_PATH]");
+    assert.equal(evidence.redacted, true);
+    assert.equal(JSON.stringify(evidence).includes("Alice"), false);
+    assert.equal(JSON.stringify(evidence).includes("Private"), false);
+    assert.equal(JSON.stringify(evidence).includes("approved.png"), false);
+  }
+});
+
 test("runtime version pins are explicit and fail closed", () => {
   assert.equal(EXPECTED_CODEX_VERSION, "codex-cli 0.145.0");
   assert.equal(

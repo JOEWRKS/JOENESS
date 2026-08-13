@@ -335,15 +335,33 @@ const DIAGNOSTIC_DOUBLE_QUOTED_FILE_URL =
   /"file:\/\/\/[^"<>|\r\n]+"/giu;
 const DIAGNOSTIC_SINGLE_QUOTED_FILE_URL =
   /'file:\/\/\/[^'<>|\r\n]+'/giu;
+const DIAGNOSTIC_BACKTICK_FILE_URL_MULTILINE =
+  /`file:\/\/\/[^\r\n]*(?:\r\n|\r|\n)(?=[\s\S]*\S)[\s\S]*/giu;
+const DIAGNOSTIC_BACKTICK_QUOTED_FILE_URL =
+  /`file:\/\/\/[^\r\n]*`(?=:\s)/giu;
+const DIAGNOSTIC_BACKTICK_FILE_URL_REMAINDER =
+  /`file:\/\/\/[\s\S]*/giu;
 const DIAGNOSTIC_FILE_URL = /file:\/\/\/[^"<>|\r\n]*/giu;
 const DIAGNOSTIC_DOUBLE_QUOTED_WINDOWS_PATH =
   /"(?:[A-Za-z]:[\\/]|\\\\)[^"<>|\r\n]+"/gu;
 const DIAGNOSTIC_SINGLE_QUOTED_WINDOWS_PATH =
   /'(?:[A-Za-z]:[\\/]|\\\\)[^'<>|\r\n]+'/gu;
+const DIAGNOSTIC_BACKTICK_WINDOWS_PATH_MULTILINE =
+  /`(?:[A-Za-z]:[\\/]|\\\\)[^\r\n]*(?:\r\n|\r|\n)(?=[\s\S]*\S)[\s\S]*/gu;
+const DIAGNOSTIC_BACKTICK_QUOTED_WINDOWS_PATH =
+  /`(?:[A-Za-z]:[\\/]|\\\\)[^\r\n]*`(?=:\s)/gu;
+const DIAGNOSTIC_BACKTICK_WINDOWS_PATH_REMAINDER =
+  /`(?:[A-Za-z]:[\\/]|\\\\)[\s\S]*/gu;
 const DIAGNOSTIC_DOUBLE_QUOTED_POSIX_PATH =
   /"\/(?:[^"<>|\r\n]+)"/gu;
 const DIAGNOSTIC_SINGLE_QUOTED_POSIX_PATH =
   /'\/(?:[^'<>|\r\n]+)'/gu;
+const DIAGNOSTIC_BACKTICK_POSIX_PATH_MULTILINE =
+  /`\/[^\r\n]*(?:\r\n|\r|\n)(?=[\s\S]*\S)[\s\S]*/gu;
+const DIAGNOSTIC_BACKTICK_QUOTED_POSIX_PATH =
+  /`\/(?:[^\r\n]*)`(?=:\s)/gu;
+const DIAGNOSTIC_BACKTICK_POSIX_PATH_REMAINDER =
+  /`\/[\s\S]*/gu;
 const DIAGNOSTIC_WINDOWS_PATH =
   /(?:(?<![\p{L}\p{N}_])[A-Za-z]:[\\/]|\\\\)[^"<>|\r\n]*/gu;
 const DIAGNOSTIC_POSIX_PATH =
@@ -355,11 +373,20 @@ function redactDiagnosticString(value) {
   text = text.replace(CREDENTIAL_TOKEN_PATTERN_GLOBAL, "[REDACTED]");
   text = text.replace(DIAGNOSTIC_DOUBLE_QUOTED_FILE_URL, "[REDACTED_PATH]");
   text = text.replace(DIAGNOSTIC_SINGLE_QUOTED_FILE_URL, "[REDACTED_PATH]");
+  text = text.replace(DIAGNOSTIC_BACKTICK_FILE_URL_MULTILINE, "[REDACTED_PATH]");
+  text = text.replace(DIAGNOSTIC_BACKTICK_QUOTED_FILE_URL, "[REDACTED_PATH]");
+  text = text.replace(DIAGNOSTIC_BACKTICK_FILE_URL_REMAINDER, "[REDACTED_PATH]");
   text = text.replace(DIAGNOSTIC_FILE_URL, "[REDACTED_PATH]");
   text = text.replace(DIAGNOSTIC_DOUBLE_QUOTED_WINDOWS_PATH, "[REDACTED_PATH]");
   text = text.replace(DIAGNOSTIC_SINGLE_QUOTED_WINDOWS_PATH, "[REDACTED_PATH]");
+  text = text.replace(DIAGNOSTIC_BACKTICK_WINDOWS_PATH_MULTILINE, "[REDACTED_PATH]");
+  text = text.replace(DIAGNOSTIC_BACKTICK_QUOTED_WINDOWS_PATH, "[REDACTED_PATH]");
+  text = text.replace(DIAGNOSTIC_BACKTICK_WINDOWS_PATH_REMAINDER, "[REDACTED_PATH]");
   text = text.replace(DIAGNOSTIC_DOUBLE_QUOTED_POSIX_PATH, "[REDACTED_PATH]");
   text = text.replace(DIAGNOSTIC_SINGLE_QUOTED_POSIX_PATH, "[REDACTED_PATH]");
+  text = text.replace(DIAGNOSTIC_BACKTICK_POSIX_PATH_MULTILINE, "[REDACTED_PATH]");
+  text = text.replace(DIAGNOSTIC_BACKTICK_QUOTED_POSIX_PATH, "[REDACTED_PATH]");
+  text = text.replace(DIAGNOSTIC_BACKTICK_POSIX_PATH_REMAINDER, "[REDACTED_PATH]");
   text = text.replace(DIAGNOSTIC_WINDOWS_PATH, "[REDACTED_PATH]");
   text = text.replace(DIAGNOSTIC_POSIX_PATH, "[REDACTED_PATH]");
   return { text, redacted: text !== value };
