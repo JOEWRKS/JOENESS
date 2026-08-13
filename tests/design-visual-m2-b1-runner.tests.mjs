@@ -298,6 +298,9 @@ test("M2B1 successor plan preserves v1 evidence and uses disjoint v2 outputs", a
   const changed = structuredClone(plan);
   changed.predecessor.latestReceipt.sha256 = "0".repeat(64);
   assert.throws(() => subject.validateDesignVisualM2B1Plan(changed), /predecessor|pin/iu);
+  const changedSource = structuredClone(plan);
+  changedSource.source.collector.path = "evals/support/not-the-collector.mjs";
+  assert.throws(() => subject.validateDesignVisualM2B1Plan(changedSource), /source|path/iu);
 });
 
 test("M2B1 successor run emits v2 summary and blocked identities", async (t) => {
@@ -311,24 +314,44 @@ test("M2B1 successor run emits v2 summary and blocked identities", async (t) => 
     plan.predecessor.plan,
     plan.predecessor.blockedAttempt,
     plan.predecessor.latestReceipt,
+    plan.source.runner,
+    plan.source.freshTurnAdapter,
+    plan.source.collector,
   ]) {
     const destination = path.join(root, ...pin.path.split("/"));
     await mkdir(path.dirname(destination), { recursive: true });
-    await cp(path.join(ROOT, ...pin.path.split("/")), destination);
+    if (pin === plan.source.runner) {
+      const source = await execFile(
+        "git",
+        ["show", `${plan.source.repositoryCommit}:${pin.path}`],
+        { cwd: ROOT, encoding: "buffer", maxBuffer: 1024 * 1024 },
+      );
+      await writeFile(destination, source.stdout);
+    } else {
+      await cp(path.join(ROOT, ...pin.path.split("/")), destination);
+    }
   }
   const planPath = path.join(root, ...path.relative(ROOT, SUCCESSOR_PLAN_PATH).split(path.sep));
   await mkdir(path.dirname(planPath), { recursive: true });
   await writeFile(planPath, JSON.stringify(plan, null, 2) + "\n");
 
   const success = successfulDependencies();
+  success.gitIdentity = async (_root, implementationCommit) => {
+    assert.equal(implementationCommit, plan.source.repositoryCommit);
+    return "f".repeat(40);
+  };
   const result = await subject.runDesignVisualM2B1({
     repositoryRoot: root,
     planPath,
     ...success,
   });
   assert.equal(result.summary.id, "design-visual-m2-b1-v2-summary");
+  assert.equal(result.summary.executionSource.head, "f".repeat(40));
+  assert.equal(result.summary.executionSource.implementation.repositoryCommit, plan.source.repositoryCommit);
+  assert.equal(result.summary.executionSource.plan.path.endsWith("smoke-plan-v2.json"), true);
 
   const failure = successfulDependencies();
+  failure.gitIdentity = success.gitIdentity;
   failure.runTurn = async (options) => {
     options.session.closed = true;
     options.session.processExitCode = 0;
@@ -343,6 +366,7 @@ test("M2B1 successor run emits v2 summary and blocked identities", async (t) => 
   }), /successor evaluator failed/);
   const blocked = failure.writes.find(({ file }) => file.endsWith("blocked.json"));
   assert.equal(blocked.value.id, "design-visual-m2-b1-v2-blocked");
+  assert.equal(blocked.value.executionSource.head, "f".repeat(40));
 });
 
 test("M2B1 evaluator-root staging rolls back and reads back absence after copy failure", async (t) => {

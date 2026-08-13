@@ -148,7 +148,7 @@ export function validateDesignVisualM2B1Plan(value) {
   const isSuccessor = value?.schemaVersion === 2;
   const expectedKeys = [
     "schemaVersion", "id", "date",
-    ...(isSuccessor ? ["predecessor"] : []),
+    ...(isSuccessor ? ["predecessor", "source"] : []),
     "runtime", "inputs", "candidates", "claimScope", "originalDetail",
     "outputs", "boundaries",
   ];
@@ -184,6 +184,23 @@ export function validateDesignVisualM2B1Plan(value) {
       assertPin(pin, `M2B1 predecessor ${key}`);
       if (stableStringify(pin) !== stableStringify(M2B1_V2_PREDECESSOR[key])) {
         throw new Error(`M2B1 predecessor ${key} pin differs`);
+      }
+    }
+    if (
+      !exactKeys(value.source, ["repositoryCommit", "runner", "freshTurnAdapter", "collector"]) ||
+      !/^[a-f0-9]{40}$/u.test(value.source.repositoryCommit)
+    ) {
+      throw new Error("M2B1 source contract is malformed");
+    }
+    const expectedSourcePaths = {
+      runner: "evals/support/run-design-visual-m2-b1.mjs",
+      freshTurnAdapter: "evals/support/run-fresh-evaluator-turn.mjs",
+      collector: "evals/support/collect-codex-app-server.mjs",
+    };
+    for (const [key, expectedPath] of Object.entries(expectedSourcePaths)) {
+      assertPin(value.source[key], `M2B1 source ${key}`);
+      if (value.source[key].path !== expectedPath) {
+        throw new Error(`M2B1 source ${key} path differs`);
       }
     }
   }
@@ -464,10 +481,37 @@ async function defaultGitStatus(root) {
   return result.stdout;
 }
 
+async function defaultGitIdentity(root, implementationCommit) {
+  const headResult = await runBuffered("git", ["rev-parse", "HEAD"], { cwd: root });
+  if (headResult.processExitCode !== 0 || headResult.stderr !== "") {
+    throw new Error("M2B1 Git HEAD readback failed");
+  }
+  const head = headResult.stdout.trim();
+  if (!/^[a-f0-9]{40}$/u.test(head)) throw new Error("M2B1 Git HEAD is malformed");
+  const commitResult = await runBuffered(
+    "git",
+    ["cat-file", "-e", `${implementationCommit}^{commit}`],
+    { cwd: root },
+  );
+  if (commitResult.processExitCode !== 0 || commitResult.stderr !== "") {
+    throw new Error("M2B1 implementation commit is unavailable");
+  }
+  const ancestorResult = await runBuffered(
+    "git",
+    ["merge-base", "--is-ancestor", implementationCommit, head],
+    { cwd: root },
+  );
+  if (ancestorResult.processExitCode !== 0 || ancestorResult.stderr !== "") {
+    throw new Error("M2B1 implementation commit is not an ancestor of HEAD");
+  }
+  return head;
+}
+
 export async function preflightDesignVisualM2B1({
   repositoryRoot,
   planPath,
   gitStatus = defaultGitStatus,
+  gitIdentity = defaultGitIdentity,
 } = {}) {
   if (typeof repositoryRoot !== "string" || !path.isAbsolute(repositoryRoot)) {
     throw new TypeError("M2B1 repository root must be absolute");
@@ -482,9 +526,21 @@ export async function preflightDesignVisualM2B1({
   }
   const plan = validateDesignVisualM2B1Plan(JSON.parse(await readFile(resolvedPlan, "utf8")));
   if (await gitStatus(root) !== "") throw new Error("M2B1 requires a clean repository");
+  const executionHead = plan.source
+    ? await gitIdentity(root, plan.source.repositoryCommit)
+    : null;
   const pins = {};
   for (const [key, pin] of Object.entries(plan.inputs)) {
     pins[key] = await verifyPinnedFile(root, pin, `M2B1 ${key}`);
+  }
+  if (plan.source) {
+    for (const [key, pin] of Object.entries({
+      runner: plan.source.runner,
+      freshTurnAdapter: plan.source.freshTurnAdapter,
+      collector: plan.source.collector,
+    })) {
+      await verifyPinnedFile(root, pin, `M2B1 source ${key}`);
+    }
   }
   if (plan.predecessor) {
     for (const [key, pin] of Object.entries({
@@ -510,7 +566,24 @@ export async function preflightDesignVisualM2B1({
     const parent = await realpath(path.dirname(file));
     if (!parent.startsWith(`${root}${path.sep}`)) throw new Error("M2B1 output parent escapes repository");
   }
-  return { root, planPath: resolvedPlan, plan, pins };
+  const planBytes = await readFile(resolvedPlan);
+  return {
+    root,
+    planPath: resolvedPlan,
+    plan,
+    pins,
+    executionSource: plan.source
+      ? {
+          head: executionHead,
+          plan: {
+            path: path.relative(root, resolvedPlan).replaceAll(path.sep, "/"),
+            bytes: planBytes.length,
+            sha256: sha256(planBytes),
+          },
+          implementation: clone(plan.source),
+        }
+      : null,
+  };
 }
 
 function designSchema() {
@@ -610,6 +683,15 @@ async function verifyPreflightPins(preflight) {
       latestReceipt: preflight.plan.predecessor.latestReceipt,
     })) {
       await verifyPinnedFile(preflight.root, pin, `M2B1 predecessor ${key}`);
+    }
+  }
+  if (preflight.plan.source) {
+    for (const [key, pin] of Object.entries({
+      runner: preflight.plan.source.runner,
+      freshTurnAdapter: preflight.plan.source.freshTurnAdapter,
+      collector: preflight.plan.source.collector,
+    })) {
+      await verifyPinnedFile(preflight.root, pin, `M2B1 source ${key}`);
     }
   }
 }
@@ -934,12 +1016,18 @@ export async function runDesignVisualM2B1({
   repositoryRoot,
   planPath,
   gitStatus = defaultGitStatus,
+  gitIdentity = defaultGitIdentity,
   createSession,
   finishRuntime,
   runTurn = runFreshEvaluatorTurn,
   writeArtifact = writeExclusive,
 } = {}) {
-  const preflight = await preflightDesignVisualM2B1({ repositoryRoot, planPath, gitStatus });
+  const preflight = await preflightDesignVisualM2B1({
+    repositoryRoot,
+    planPath,
+    gitStatus,
+    gitIdentity,
+  });
   let runtimeFactory = null;
   if (typeof createSession !== "function") {
     runtimeFactory = await defaultRuntimeFactory(preflight.plan);
@@ -1117,6 +1205,9 @@ export async function runDesignVisualM2B1({
       sessionOrder: [...completed],
       originalDetail: "UNVERIFIED",
       claimScope: clone(preflight.plan.claimScope),
+      ...(preflight.executionSource
+        ? { executionSource: clone(preflight.executionSource) }
+        : {}),
       designRaw: handoff.designRaw,
       evaluatorIdentities,
       outcomes: visuals.map(({ candidateId, output }) => ({
@@ -1161,6 +1252,9 @@ export async function runDesignVisualM2B1({
         completedSessions: [...completed],
         failedSession: sessions.length,
         error: sanitizedCause(error),
+        ...(preflight.executionSource
+          ? { executionSource: clone(preflight.executionSource) }
+          : {}),
         partialEvidence: retainPartialEvidence(error?.freshEvaluatorEvidence),
         cleanupEvidence: clone(cleanupEvidence ?? {
           phase: "post-evaluator-cleanup",
