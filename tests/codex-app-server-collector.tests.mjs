@@ -265,6 +265,28 @@ test("diagnostic dense arrays stop at the exact small array cap", () => {
   assert.equal(evidence.text.length, 29);
 });
 
+test("diagnostic symbol keys are rejected before description conversion", () => {
+  const firstDescription = `first-${"a".repeat(100_000)}`;
+  const secondDescription = `second-${"b".repeat(100_000)}`;
+  const value = {
+    [Symbol(firstDescription)]: 1,
+    [Symbol(secondDescription)]: 2,
+  };
+
+  const evidence = sanitizeDiagnosticEvidence(value);
+
+  assert.deepEqual(evidence, {
+    text: "[UNSUPPORTED:symbol-key]",
+    byteLength: 24,
+    sha256: "85dd194c18d8483c7c8938dac6c1ca821509a390a21f392b56679f9321921ce7",
+    truncated: false,
+    redacted: false,
+    unsupported: true,
+  });
+  assert.equal(JSON.stringify(evidence).includes(firstDescription), false);
+  assert.equal(JSON.stringify(evidence).includes(secondDescription), false);
+});
+
 test("runtime diagnostic fields use descriptors without invoking getters", () => {
   let reads = 0;
   const error = { codexErrorInfo: null, additionalDetails: null };

@@ -423,6 +423,13 @@ function normalizeDiagnosticValue(
     budget.exceeded = true;
     return null;
   }
+  if (keys.some((key) => typeof key !== "string")) {
+    return {
+      safe: "[UNSUPPORTED:symbol-key]",
+      redacted: false,
+      unsupported: true,
+    };
+  }
   if (isArray) {
     const expectedKeys = Array.from(
       { length: arrayLength },
