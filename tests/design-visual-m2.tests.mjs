@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
-import { lstatSync, readFileSync, readdirSync } from 'node:fs';
+import { existsSync, lstatSync, readFileSync, readdirSync } from 'node:fs';
 import path from 'node:path';
 import test from 'node:test';
 
@@ -78,6 +78,40 @@ function listFiles(directory, prefix = '') {
     return entry.isDirectory() ? listFiles(absolute, relative) : [relative];
   });
 }
+
+test('M2 Design prompt v6 changes only the attached-image operating paragraph', () => {
+  const previousPath = resolveRepositoryPath('evals/skill-contracts/design-visual-m2-design-prompt-v5.md');
+  const nextPath = resolveRepositoryPath('evals/skill-contracts/design-visual-m2-design-prompt-v6.md');
+  assert.equal(existsSync(nextPath), true, 'missing Design prompt v6');
+
+  const previous = readFileSync(previousPath, 'utf8');
+  const actual = readFileSync(nextPath, 'utf8');
+  const previousParagraph = 'Read the pinned current Design skill completely. Treat the pinned frozen-facts JSON as the controller-supplied project contract. Open only the pinned approved PNG at original detail. Do not inspect external project files, candidate screenshots, candidate coordinates, prior Design outputs, Visual verdicts, other fixtures, incident reports, pressure artifacts, or expected verdicts. Do not claim the external originals were reread.';
+  const nextParagraph = 'Read the pinned current Design skill completely. Treat the pinned frozen-facts JSON as the controller-supplied project contract. Use only the approved PNG already attached to this turn; do not call `view_image`; do not open, resolve, or follow an image path; original-detail delivery is UNVERIFIED. Do not inspect external project files, candidate screenshots, candidate coordinates, prior Design outputs, Visual verdicts, other fixtures, incident reports, pressure artifacts, or expected verdicts. Do not claim the external originals were reread.';
+
+  assert.equal(previous.length, 2731);
+  assert.equal(createHash('sha256').update(previous).digest('hex'), '57a37439e12dccfb96ac3ecd26d96d8150acc5e9a5435f0203b17c41b64a2aef');
+  assert.equal(previous.split(previousParagraph).length, 2, 'Design v5 operating paragraph must occur exactly once');
+  assert.equal(actual, previous.replace(previousParagraph, nextParagraph));
+  assert.equal(actual.includes('Open only the pinned approved PNG at original detail.'), false);
+});
+
+test('M2 Visual prompt v10 changes only the attached-image operating paragraph', () => {
+  const previousPath = resolveRepositoryPath('evals/skill-contracts/design-visual-m2-visual-prompt-v9.md');
+  const nextPath = resolveRepositoryPath('evals/skill-contracts/design-visual-m2-visual-prompt-v10.md');
+  assert.equal(existsSync(nextPath), true, 'missing Visual prompt v10');
+
+  const previous = readFileSync(previousPath, 'utf8');
+  const actual = readFileSync(nextPath, 'utf8');
+  const previousParagraph = "Read the pinned current Visual Check skill and its pinned durable-evidence, concrete-defect, and approved-reference contracts completely. Open the pinned approved source and this turn's single opaque candidate. Original-detail delivery is UNVERIFIED. Do not inspect any other candidate, fixture manifest, hidden evaluation source, task ledger, repository history, external project, or incident report.";
+  const nextParagraph = "Read the pinned current Visual Check skill and its pinned durable-evidence, concrete-defect, and approved-reference contracts completely. Use only the approved source and single opaque candidate already attached to this turn; do not call `view_image`; do not open, resolve, or follow an image path; original-detail delivery is UNVERIFIED. Do not inspect any other candidate, fixture manifest, hidden evaluation source, task ledger, repository history, external project, or incident report.";
+
+  assert.equal(previous.length, 2963);
+  assert.equal(createHash('sha256').update(previous).digest('hex'), '7a59b9263fcbeb768c131e114b277167f5358e63bba2c3d6b5acadcd5a605ac9');
+  assert.equal(previous.split(previousParagraph).length, 2, 'Visual v9 operating paragraph must occur exactly once');
+  assert.equal(actual, previous.replace(previousParagraph, nextParagraph));
+  assert.equal(actual.includes("Open the pinned approved source and this turn's single opaque candidate."), false);
+});
 
 test('M2 visual fixtures are portable content-addressed evidence with hidden ground truth', () => {
   const v1 = readPinnedJson(PINS.fixturesV1);
