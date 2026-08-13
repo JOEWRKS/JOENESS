@@ -284,12 +284,7 @@ function summarizeThreadStart(response) {
   };
 }
 
-function finalAgentText(events) {
-  const message = events.findLast(
-    (event) =>
-      event.method === "item/completed" &&
-      event.item?.type === "agentMessage",
-  );
+function finalAgentText(message) {
   const value = message?.item?.text;
   if (
     !value ||
@@ -344,9 +339,12 @@ export async function runFreshEvaluatorTurn({
   let turnId = null;
   let toolTurnId = null;
   let terminalEvent = null;
+  let latestPreTerminalAgentMessage = null;
+  let terminalAgentMessage = null;
   let terminalCount = 0;
   let primaryError = null;
   let closeError = null;
+  const cleanupErrors = [];
   let unsubscribe = null;
   let releaseTool = null;
   let resolveTerminal;
@@ -387,6 +385,18 @@ export async function runFreshEvaluatorTurn({
     if (FORBIDDEN_ITEM_TYPES.has(event.item?.type)) {
       event.blockers.push("uncontrolled-tool-surface");
     }
+    const postTerminal = terminalEvent !== null;
+    if (postTerminal) {
+      event.postTerminal = true;
+      if (/^item\//u.test(String(event.method))) {
+        event.blockers.push("post-terminal-event");
+      }
+    } else if (
+      event.method === "item/completed" &&
+      event.item?.type === "agentMessage"
+    ) {
+      latestPreTerminalAgentMessage = event;
+    }
     event.blockers = unique(event.blockers);
     event.complete = event.blockers.length === 0;
     blockers.push(...event.blockers);
@@ -399,6 +409,7 @@ export async function runFreshEvaluatorTurn({
       terminalCount += 1;
       if (terminalCount === 1) {
         terminalEvent = event;
+        terminalAgentMessage = latestPreTerminalAgentMessage;
         resolveTerminal(event);
       } else {
         blockers.push("duplicate-terminal-event");
@@ -436,7 +447,8 @@ export async function runFreshEvaluatorTurn({
       byteLength: Buffer.byteLength(stableStringify(schemaValue)),
       sha256: sha256(stableStringify(schemaValue)),
     };
-    evidence.input = await describeInput(root, input);
+    const requestInput = cloneJson(input, "fresh evaluator turn input");
+    evidence.input = await describeInput(root, requestInput);
     evidence.threadStart.request = buildFreshEvaluatorThreadStartRequest(
       root,
       dynamicTools,
@@ -540,9 +552,14 @@ export async function runFreshEvaluatorTurn({
       });
     }
 
+    const currentInput = await describeInput(root, requestInput);
+    if (stableStringify(currentInput) !== stableStringify(evidence.input)) {
+      blockers.push("input-provenance-changed");
+      throw new Error("fresh evaluator input provenance changed before turn start");
+    }
     evidence.turn.request = {
       threadId,
-      input: cloneJson(input, "fresh evaluator turn input"),
+      input: requestInput,
       approvalPolicy: "never",
       permissions: EVALUATION_PERMISSION_PROFILE,
       outputSchema: schemaValue,
@@ -588,12 +605,40 @@ export async function runFreshEvaluatorTurn({
       closeError = error;
       blockers.push("app-server-close-failed");
     }
-    releaseTool?.();
-    unsubscribe?.();
+    try {
+      await releaseTool?.();
+    } catch (error) {
+      cleanupErrors.push(error);
+      blockers.push("cleanup-dynamic-tool-release-failed");
+    }
+    try {
+      await unsubscribe?.();
+    } catch (error) {
+      cleanupErrors.push(error);
+      blockers.push("cleanup-unsubscribe-failed");
+    }
+    let processExitCode = null;
+    let stderr = null;
+    let remoteControl = null;
+    for (const [label, snapshot] of [
+      ["process-exit", () => session?.processExitCode ?? null],
+      ["stderr", () => session?.stderr ?? null],
+      ["remote-control", () => session?.remoteControlSnapshot ?? null],
+    ]) {
+      try {
+        const value = snapshot();
+        if (label === "process-exit") processExitCode = value;
+        if (label === "stderr") stderr = value;
+        if (label === "remote-control") remoteControl = value;
+      } catch (error) {
+        cleanupErrors.push(error);
+        blockers.push(`cleanup-${label}-snapshot-failed`);
+      }
+    }
     evidence.appServer = {
-      processExitCode: session?.processExitCode ?? null,
-      stderr: session?.stderr ?? null,
-      remoteControl: session?.remoteControlSnapshot ?? null,
+      processExitCode,
+      stderr,
+      remoteControl,
     };
   }
 
@@ -628,10 +673,18 @@ export async function runFreshEvaluatorTurn({
   if (
     primaryError !== null ||
     closeError !== null ||
+    cleanupErrors.length > 0 ||
     evidence.blockers.length > 0
   ) {
+    const failures = [primaryError, closeError, ...cleanupErrors].filter(Boolean);
+    const cause =
+      failures.length < 2
+        ? failures[0] ?? new Error("fresh evaluator evidence is unsafe")
+        : new AggregateError(failures, "fresh evaluator cleanup or turn failed", {
+            cause: failures[0],
+          });
     throw attachEvidence(
-      primaryError ?? closeError ?? new Error("fresh evaluator evidence is unsafe"),
+      cause,
       evidence,
     );
   }
@@ -639,7 +692,7 @@ export async function runFreshEvaluatorTurn({
   let outputText;
   let output;
   try {
-    outputText = finalAgentText(events);
+    outputText = finalAgentText(terminalAgentMessage);
     output = JSON.parse(outputText);
   } catch (error) {
     throw attachEvidence(error, evidence);

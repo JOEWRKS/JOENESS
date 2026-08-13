@@ -54,6 +54,7 @@ function createSession({
   instructionSources = [],
   foreignEvent = false,
   lateForbiddenEvent = false,
+  lateAgentMessage = null,
   dynamicLifecycleMismatch = false,
   duplicateTerminal = false,
   omitTerminal = false,
@@ -66,12 +67,17 @@ function createSession({
     environmentAttached: false,
   },
   runDynamicTool = false,
+  onThreadStart = null,
+  releaseToolThrows = false,
+  unsubscribeThrows = false,
+  remoteSnapshotThrowsOnRead = null,
 } = {}) {
   const listeners = new Set();
   const requests = [];
   let toolHandler = null;
   let processExitCode = null;
   let closed = false;
+  let remoteSnapshotReadCount = 0;
 
   function emit(notification) {
     for (const listener of listeners) listener(notification);
@@ -80,8 +86,14 @@ function createSession({
   const session = {
     requests,
     notificationCursor: 0,
-    remoteControlSnapshot,
     mcpInventory: [],
+    get remoteControlSnapshot() {
+      remoteSnapshotReadCount += 1;
+      if (remoteSnapshotReadCount === remoteSnapshotThrowsOnRead) {
+        throw new Error("fixture remote-control snapshot failed");
+      }
+      return remoteControlSnapshot;
+    },
     get processExitCode() {
       return processExitCode;
     },
@@ -97,6 +109,7 @@ function createSession({
       async request(method, params) {
         requests.push({ method, params: structuredClone(params) });
         if (method === "thread/start") {
+          await onThreadStart?.(params);
           emit({
             method: "thread/started",
             params: { thread: { id: "fresh-thread" } },
@@ -220,13 +233,21 @@ function createSession({
     },
     subscribe(listener) {
       listeners.add(listener);
-      return () => listeners.delete(listener);
+      return () => {
+        listeners.delete(listener);
+        if (unsubscribeThrows) {
+          throw new Error("fixture unsubscribe failed");
+        }
+      };
     },
     setDynamicToolHandler(handler) {
       assert.equal(toolHandler, null);
       toolHandler = handler;
       return () => {
         toolHandler = null;
+        if (releaseToolThrows) {
+          throw new Error("fixture dynamic-tool release failed");
+        }
       };
     },
     async close() {
@@ -240,6 +261,20 @@ function createSession({
               id: "late-file-change",
               type: "fileChange",
               status: "completed",
+            },
+          },
+        });
+      }
+      if (lateAgentMessage !== null) {
+        emit({
+          method: "item/completed",
+          params: {
+            threadId: "fresh-thread",
+            turnId: "fresh-turn",
+            item: {
+              id: "late-agent-message",
+              type: "agentMessage",
+              text: lateAgentMessage,
             },
           },
         });
@@ -325,6 +360,83 @@ test("fresh evaluator preserves exact local-image descriptors and hashes without
   assert.equal(session.closed, true);
 });
 
+test("fresh evaluator freezes caller-owned text before awaited thread start", async (t) => {
+  const subject = await loadSubject();
+  assert.equal(typeof subject?.runFreshEvaluatorTurn, "function");
+  const root = await createRoot(t);
+  const input = [{ type: "text", text: "original prompt" }];
+  const session = createSession({
+    onThreadStart() {
+      input[0].text = "mutated prompt";
+      input.push({ type: "text", text: "injected prompt" });
+    },
+  });
+
+  const result = await subject.runFreshEvaluatorTurn({
+    session,
+    root,
+    input,
+    outputSchema: outputSchema(),
+    turnTimeoutMs: 100,
+  });
+
+  const turnStart = session.requests.find(({ method }) => method === "turn/start");
+  assert.deepEqual(turnStart.params.input, [
+    { type: "text", text: "original prompt" },
+  ]);
+  assert.deepEqual(result.input.descriptors, [
+    {
+      index: 0,
+      type: "text",
+      text: "original prompt",
+      byteLength: 15,
+      sha256: digest("original prompt"),
+    },
+  ]);
+});
+
+test("fresh evaluator fails closed when image bytes change during thread start", async (t) => {
+  const subject = await loadSubject();
+  assert.equal(typeof subject?.runFreshEvaluatorTurn, "function");
+  const root = await createRoot(t);
+  const imagePath = path.join(root, "candidate.png");
+  const before = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x01]);
+  const after = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x02]);
+  await writeFile(imagePath, before);
+  const session = createSession({
+    async onThreadStart() {
+      await writeFile(imagePath, after);
+    },
+  });
+
+  const evidence = await rejectedEvidence(
+    subject.runFreshEvaluatorTurn({
+      session,
+      root,
+      input: [
+        { type: "text", text: "Inspect the image." },
+        { type: "localImage", path: imagePath },
+      ],
+      outputSchema: outputSchema(),
+      turnTimeoutMs: 100,
+    }),
+  );
+
+  assert.equal(evidence.blockers.includes("input-provenance-changed"), true);
+  assert.equal(
+    session.requests.some(({ method }) => method === "turn/start"),
+    false,
+  );
+  assert.deepEqual(evidence.input.descriptors[1], {
+    index: 1,
+    type: "localImage",
+    path: imagePath,
+    byteLength: before.length,
+    sha256: digest(before),
+    originalDetail: "unverified",
+  });
+});
+
 test("fresh evaluator rejects inherited turns and instruction sources", async (t) => {
   const subject = await loadSubject();
   assert.equal(typeof subject?.runFreshEvaluatorTurn, "function");
@@ -380,6 +492,30 @@ test("fresh evaluator drains and rejects a late forbidden event", async (t) => {
   assert.equal(evidence.blockers.includes("uncontrolled-tool-surface"), true);
   assert.equal(
     evidence.events.some(({ item }) => item?.id === "late-file-change"),
+    true,
+  );
+});
+
+test("fresh evaluator rejects a valid-looking agent message after the terminal", async (t) => {
+  const subject = await loadSubject();
+  assert.equal(typeof subject?.runFreshEvaluatorTurn, "function");
+  const root = await createRoot(t);
+  const evidence = await rejectedEvidence(
+    subject.runFreshEvaluatorTurn({
+      session: createSession({
+        finalText: '{"verdict":"PASS"}',
+        lateAgentMessage: '{"verdict":"FAIL"}',
+      }),
+      root,
+      input: [{ type: "text", text: "Return JSON." }],
+      outputSchema: outputSchema(),
+      turnTimeoutMs: 100,
+    }),
+  );
+  assert.equal(evidence.blockers.includes("post-terminal-event"), true);
+  assert.equal(
+    evidence.events.find(({ item }) => item?.id === "late-agent-message")
+      ?.postTerminal,
     true,
   );
 });
@@ -495,6 +631,46 @@ test("fresh evaluator rejects missing or duplicate terminals, stderr, nonzero ex
       );
       assert.equal(evidence.blockers.includes(blocker), true);
       assert.equal(session.closed, true);
+    });
+  }
+});
+
+test("fresh evaluator attaches partial evidence when cleanup callbacks or snapshot getters throw", async (t) => {
+  const subject = await loadSubject();
+  assert.equal(typeof subject?.runFreshEvaluatorTurn, "function");
+  const root = await createRoot(t);
+  const scenarios = [
+    ["dynamic-tool release", { runDynamicTool: true, releaseToolThrows: true }],
+    ["unsubscribe", { unsubscribeThrows: true }],
+    ["snapshot getter", { remoteSnapshotThrowsOnRead: 2 }],
+  ];
+  for (const [name, options] of scenarios) {
+    await t.test(name, async () => {
+      const session = createSession(options);
+      const runOptions = {
+        session,
+        root,
+        input: [{ type: "text", text: "Return JSON." }],
+        outputSchema: outputSchema(),
+        turnTimeoutMs: 100,
+      };
+      if (options.runDynamicTool) {
+        runOptions.dynamicTools = [dynamicTool()];
+        runOptions.dynamicToolController = async () => ({
+          success: true,
+          contentItems: [{ type: "inputText", text: '{"value":7}' }],
+        });
+      }
+      const evidence = await rejectedEvidence(
+        subject.runFreshEvaluatorTurn(runOptions),
+      );
+      assert.equal(evidence.thread.id, "fresh-thread");
+      assert.equal(evidence.turn.id, "fresh-turn");
+      assert.equal(evidence.events.length > 0, true);
+      assert.equal(
+        evidence.blockers.some((blocker) => blocker.includes("cleanup")),
+        true,
+      );
     });
   }
 });
