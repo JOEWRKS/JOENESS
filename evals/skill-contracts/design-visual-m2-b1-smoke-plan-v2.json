@@ -22,11 +22,11 @@
     "attemptPolicy": "one-method-changed-attempt-no-automatic-retry"
   },
   "source": {
-    "repositoryCommit": "6aca179bb63c745eeea646581a11160e4dcd344c",
+    "repositoryCommit": "9f6719dbe81c1b058e2e0fb6e1663b0c2ec6728b",
     "runner": {
       "path": "evals/support/run-design-visual-m2-b1.mjs",
-      "bytes": 43084,
-      "sha256": "8cfcc6d7ef50ae33383cd2e5eaed969a3aad986fead47f158c2448c582c333fc"
+      "bytes": 46290,
+      "sha256": "b16863f40987686bac11389adcae5121753c4760265c2c25c6a68a9804a7c7d3"
     },
     "freshTurnAdapter": {
       "path": "evals/support/run-fresh-evaluator-turn.mjs",
