@@ -5,6 +5,7 @@ import {
   buildThreadStartRequest,
   classifyEventScope,
   containsCredentialText,
+  diagnosticOwnData,
   listMcpServerStatus,
   normalizeEvent,
   parseThreadStartResponse,
@@ -301,14 +302,9 @@ function finalAgentText(message) {
 function attachEvidence(error, evidence) {
   const primaryCause = {};
   for (const key of ["name", "code", "message", "details"]) {
-    let value;
-    try {
-      value = error?.[key];
-    } catch {
-      value = "[UNSUPPORTED:accessor]";
-    }
-    if (value !== undefined) {
-      primaryCause[key] = sanitizeDiagnosticEvidence(value);
+    const property = diagnosticOwnData(error, key);
+    if (property.found) {
+      primaryCause[key] = sanitizeDiagnosticEvidence(property.value);
     }
   }
   if (Object.keys(primaryCause).length > 0) {

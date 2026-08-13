@@ -74,17 +74,18 @@ import {
   EXPECTED_CODEX_VERSION,
 } from "../evals/support/collect-codex-app-server.mjs";
 
-test("runtime error notifications retain correlated bounded diagnostics without changing the blocker", () => {
+test("runtime error notifications map the pinned TurnError payload without changing the blocker", () => {
   const event = normalizeEvent({
     method: "error",
     params: {
       threadId: "thread-17",
       turnId: "turn-23",
       error: {
-        code: "backend_unavailable",
-        message: "backend unavailable",
-        details: { retryable: false, status: 503 },
+        message: "turn failed",
+        codexErrorInfo: "serverOverloaded",
+        additionalDetails: "retry later",
       },
+      willRetry: false,
     },
   });
 
@@ -96,30 +97,128 @@ test("runtime error notifications retain correlated bounded diagnostics without 
     blockers: ["runtime-error"],
     runtimeError: {
       code: {
-        text: "backend_unavailable",
-        byteLength: 19,
-        sha256: "1193dc739c09548fe6c9eb2ceb8f032b8c06c22482a15242f4783042be3ae620",
+        text: "serverOverloaded",
+        byteLength: 16,
+        sha256: "50a4cf7be77e422ddd1be39b5c304270b598d0f8127dacf0db2d41229cc5aaa0",
         truncated: false,
         redacted: false,
         unsupported: false,
       },
       message: {
-        text: "backend unavailable",
-        byteLength: 19,
-        sha256: "0d737f043c65afca5d1c7c58a66ebfa8be80fa857b22904fb8354f1caf44dc10",
+        text: "turn failed",
+        byteLength: 11,
+        sha256: "316ae0128c6956e626297341b7b6ee3642f74bb4761711df70604d9b8e95b9c2",
         truncated: false,
         redacted: false,
         unsupported: false,
       },
       details: {
-        text: '{"retryable":false,"status":503}',
-        byteLength: 32,
-        sha256: "73ea2c27a016b463cc8bf67733cc69e413d1ffd5a44c56c2017039d8e62610bb",
+        text: "retry later",
+        byteLength: 11,
+        sha256: "4412f71b5dca9d4ab0fe4fb93f3f7efdd59ab69aaa73436aa6b99ad02517d359",
         truncated: false,
         redacted: false,
         unsupported: false,
       },
     },
+  });
+});
+
+test("redacted diagnostic hashes bind only the common sanitized representation", () => {
+  const first = sanitizeDiagnosticEvidence({ password: "000000" });
+  const second = sanitizeDiagnosticEvidence({ password: "999999" });
+
+  assert.deepEqual(first, {
+    text: '{"password":"[REDACTED]"}',
+    byteLength: 25,
+    sha256: "d5320ea324bbee6d8aa35a4b73954bc088e51773579a3676561589facc3933c1",
+    truncated: false,
+    redacted: true,
+    unsupported: false,
+  });
+  assert.equal(second.sha256, "d5320ea324bbee6d8aa35a4b73954bc088e51773579a3676561589facc3933c1");
+  assert.notEqual(first.sha256, "b34f4a6e621f4f86e8aa8d762087b96b5a29e6a2c12f7070b41d8163f7f827ec");
+  assert.notEqual(second.sha256, "b5f9868994b980d93aafcfad9d99fab4baa39b101f88a5a28a7e111df314a26f");
+});
+
+test("free-form cookie and set-cookie headers redact every value and attribute", () => {
+  const cookie = sanitizeDiagnosticEvidence(
+    "request failed Cookie: sid=abc; refresh=supersecretvalue",
+  );
+  const setCookie = sanitizeDiagnosticEvidence(
+    "response Set-Cookie: sid=abc; HttpOnly; Path=/private; SameSite=Lax",
+  );
+
+  assert.equal(cookie.text, "request failed [REDACTED]");
+  assert.equal(cookie.sha256, "34c9f966ddffe3bbec5c3d63ab78f4a50bb6707b51343c21f596888fc416eaee");
+  assert.equal(setCookie.text, "response [REDACTED]");
+  assert.equal(setCookie.sha256, "531fe578524eb837144d239e5d1fd737b14cdf752154ae51d402ee794792a867");
+  assert.equal(JSON.stringify(cookie).includes("supersecretvalue"), false);
+  assert.equal(JSON.stringify(setCookie).includes("/private"), false);
+});
+
+test("diagnostic traversal shares one global budget across broad and deep inputs", () => {
+  const broad = Object.fromEntries(
+    Array.from({ length: 200 }, (_, index) => [`field${index}`, index]),
+  );
+  const deep = {};
+  let cursor = deep;
+  for (let index = 0; index < 20; index += 1) {
+    cursor.next = {};
+    cursor = cursor.next;
+  }
+  const expected = {
+    text: "[TRUNCATED:diagnostic-budget]",
+    byteLength: null,
+    sha256: "85785a1113252d59dfbcd0c040ff651c891191a1b1b8736315cde0ca435520fd",
+    truncated: true,
+    redacted: true,
+    unsupported: true,
+    budgetExceeded: true,
+  };
+
+  assert.deepEqual(sanitizeDiagnosticEvidence(broad), expected);
+  assert.deepEqual(sanitizeDiagnosticEvidence(deep), expected);
+});
+
+test("multi-megabyte diagnostic strings retain only the global budget marker", () => {
+  const evidence = sanitizeDiagnosticEvidence("x".repeat(2 * 1024 * 1024));
+
+  assert.deepEqual(evidence, {
+    text: "[TRUNCATED:diagnostic-budget]",
+    byteLength: 2097152,
+    sha256: "85785a1113252d59dfbcd0c040ff651c891191a1b1b8736315cde0ca435520fd",
+    truncated: true,
+    redacted: true,
+    unsupported: true,
+    budgetExceeded: true,
+  });
+});
+
+test("runtime diagnostic fields use descriptors without invoking getters", () => {
+  let reads = 0;
+  const error = { codexErrorInfo: null, additionalDetails: null };
+  Object.defineProperty(error, "message", {
+    enumerable: true,
+    get() {
+      reads += 1;
+      return "must not execute";
+    },
+  });
+
+  const event = normalizeEvent({
+    method: "error",
+    params: { threadId: "thread-17", turnId: "turn-23", error },
+  });
+
+  assert.equal(reads, 0);
+  assert.deepEqual(event.runtimeError.message, {
+    text: "[UNSUPPORTED:accessor]",
+    byteLength: 22,
+    sha256: "66edbdac07d683412d1df6e962f509f69fd5f423df819b523ec066abd4bf30a3",
+    truncated: false,
+    redacted: false,
+    unsupported: true,
   });
 });
 
@@ -144,8 +243,8 @@ test("diagnostic sanitizer redacts credential keys, inline auth, paths, and cycl
   assert.equal(evidence.redacted, true);
   assert.equal(evidence.unsupported, true);
   assert.equal(evidence.truncated, false);
-  assert.equal(evidence.byteLength, 202);
-  assert.equal(evidence.sha256, "a450eb6d8a5cc1ea7e223195dbba4d537b532a5517e3378f97cc6956577210d0");
+  assert.equal(evidence.byteLength, 136);
+  assert.equal(evidence.sha256, "1e6350704ec1833d33ea6ede89c667dee23d552273f766be54a8d9c0a8d5bfb3");
   assert.equal(JSON.stringify(evidence).includes("top-secret-token-value"), false);
   assert.equal(JSON.stringify(evidence).includes("private-cookie-value"), false);
   assert.equal(JSON.stringify(evidence).includes("private-token-value"), false);

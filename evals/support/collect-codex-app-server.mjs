@@ -293,13 +293,15 @@ export function boundUtf8(value, limitBytes = OUTPUT_LIMIT_BYTES) {
 }
 
 const DIAGNOSTIC_LIMIT_BYTES = 1024;
+const DIAGNOSTIC_INPUT_LIMIT_BYTES = 4096;
 const DIAGNOSTIC_MAX_DEPTH = 8;
 const DIAGNOSTIC_MAX_ENTRIES = 64;
+const DIAGNOSTIC_BUDGET_MARKER = "[TRUNCATED:diagnostic-budget]";
 const DIAGNOSTIC_SENSITIVE_KEY =
   /(?:api[-_]?key|auth|cookie|credential|password|secret|session|token)/iu;
 const DIAGNOSTIC_INLINE_SECRET = new RegExp(
   [
-    "(?:authorization|proxy-authorization|cookie|set-cookie)\\s*[:=]\\s*[^\\r\\n,;]+",
+    "(?:authorization|proxy-authorization|cookie|set-cookie)\\s*[:=]\\s*[^\\r\\n,]+",
     "bearer\\s+[A-Za-z0-9._~+/=-]{8,}",
     "(?:api[-_]?key|password|secret|token)\\s*[:=]\\s*['\\x22]?[^\\s,;'\\x22]{8,}",
     "(?:sk|ghp|github_pat)_[A-Za-z0-9_-]{12,}",
@@ -320,14 +322,42 @@ function redactDiagnosticString(value) {
   return { text, redacted: text !== value };
 }
 
-function normalizeDiagnosticValue(value, ancestors = new Set(), depth = 0) {
+function diagnosticBudgetResult(byteLength = null) {
+  return {
+    text: DIAGNOSTIC_BUDGET_MARKER,
+    byteLength,
+    sha256: sha256(DIAGNOSTIC_BUDGET_MARKER),
+    truncated: true,
+    redacted: true,
+    unsupported: true,
+    budgetExceeded: true,
+  };
+}
+
+function normalizeDiagnosticValue(
+  value,
+  budget,
+  ancestors = new Set(),
+  depth = 0,
+) {
+  budget.nodes += 1;
+  if (budget.nodes > DIAGNOSTIC_MAX_ENTRIES || depth >= DIAGNOSTIC_MAX_DEPTH) {
+    budget.exceeded = true;
+    return null;
+  }
   if (typeof value === "string") {
+    const byteLength = Buffer.byteLength(value);
+    budget.inputBytes += byteLength;
+    if (budget.inputBytes > DIAGNOSTIC_INPUT_LIMIT_BYTES) {
+      budget.exceeded = true;
+      budget.rootStringByteLength ??= depth === 0 ? byteLength : null;
+      return null;
+    }
     const safe = redactDiagnosticString(value);
     return {
-      original: value,
       safe: safe.text,
       redacted: safe.redacted,
-      unsupported: false,
+      unsupported: /^\[UNSUPPORTED:[^\]]+\]$/u.test(value),
     };
   }
   if (
@@ -335,26 +365,17 @@ function normalizeDiagnosticValue(value, ancestors = new Set(), depth = 0) {
     typeof value === "boolean" ||
     (typeof value === "number" && Number.isFinite(value))
   ) {
-    return { original: value, safe: value, redacted: false, unsupported: false };
-  }
-  if (depth >= DIAGNOSTIC_MAX_DEPTH) {
-    return {
-      original: "[UNSUPPORTED:depth]",
-      safe: "[UNSUPPORTED:depth]",
-      redacted: false,
-      unsupported: true,
-    };
+    return { safe: value, redacted: false, unsupported: false };
   }
   if (
     typeof value !== "object" ||
     (!Array.isArray(value) && Object.getPrototypeOf(value) !== Object.prototype)
   ) {
     const marker = `[UNSUPPORTED:${value === null ? "null" : typeof value}]`;
-    return { original: marker, safe: marker, redacted: false, unsupported: true };
+    return { safe: marker, redacted: false, unsupported: true };
   }
   if (ancestors.has(value)) {
     return {
-      original: "[CIRCULAR]",
       safe: "[CIRCULAR]",
       redacted: false,
       unsupported: true,
@@ -363,39 +384,53 @@ function normalizeDiagnosticValue(value, ancestors = new Set(), depth = 0) {
 
   const nextAncestors = new Set(ancestors);
   nextAncestors.add(value);
-  let descriptors;
+  let keys;
   try {
-    descriptors = Object.getOwnPropertyDescriptors(value);
+    keys = Reflect.ownKeys(value)
+      .filter((key) => !Array.isArray(value) || key !== "length")
+      .sort((left, right) => String(left).localeCompare(String(right)));
   } catch {
     return {
-      original: "[UNSUPPORTED:object]",
       safe: "[UNSUPPORTED:object]",
       redacted: false,
       unsupported: true,
     };
   }
-  const original = Array.isArray(value) ? [] : {};
+  budget.entries += keys.length;
+  if (budget.entries > DIAGNOSTIC_MAX_ENTRIES) {
+    budget.exceeded = true;
+    return null;
+  }
   const safe = Array.isArray(value) ? [] : {};
   let redacted = false;
   let unsupported = false;
-  const allKeys = Object.keys(descriptors)
-    .filter((key) => !Array.isArray(value) || key !== "length")
-    .sort();
-  const keys = allKeys.slice(0, DIAGNOSTIC_MAX_ENTRIES);
   for (const key of keys) {
-    const descriptor = descriptors[key];
+    if (typeof key === "symbol") {
+      unsupported = true;
+      continue;
+    }
+    let descriptor;
+    try {
+      descriptor = Object.getOwnPropertyDescriptor(value, key);
+    } catch {
+      return {
+        safe: "[UNSUPPORTED:object]",
+        redacted: false,
+        unsupported: true,
+      };
+    }
     if (!Object.hasOwn(descriptor, "value")) {
-      original[key] = "[UNSUPPORTED:accessor]";
       safe[key] = "[UNSUPPORTED:accessor]";
       unsupported = true;
       continue;
     }
     const normalized = normalizeDiagnosticValue(
       descriptor.value,
+      budget,
       nextAncestors,
       depth + 1,
     );
-    original[key] = normalized.original;
+    if (budget.exceeded) return null;
     unsupported ||= normalized.unsupported;
     if (DIAGNOSTIC_SENSITIVE_KEY.test(key)) {
       safe[key] = "[REDACTED]";
@@ -405,23 +440,25 @@ function normalizeDiagnosticValue(value, ancestors = new Set(), depth = 0) {
       redacted ||= normalized.redacted;
     }
   }
-  if (allKeys.length > keys.length) {
-    const markerKey = Array.isArray(value) ? keys.length : "[TRUNCATED_KEYS]";
-    original[markerKey] = `[TRUNCATED:${allKeys.length - keys.length}]`;
-    safe[markerKey] = `[TRUNCATED:${allKeys.length - keys.length}]`;
-    unsupported = true;
-  }
-  if (Reflect.ownKeys(descriptors).some((key) => typeof key === "symbol")) {
-    unsupported = true;
-  }
-  return { original, safe, redacted, unsupported };
+  return { safe, redacted, unsupported };
 }
 
-function diagnosticProperty(value, key) {
+export function diagnosticOwnData(value, key) {
   try {
-    return value?.[key];
+    if (
+      value === null ||
+      (typeof value !== "object" && typeof value !== "function")
+    ) {
+      return { found: false, value: undefined };
+    }
+    const descriptor = Object.getOwnPropertyDescriptor(value, key);
+    if (descriptor === undefined) return { found: false, value: undefined };
+    if (!Object.hasOwn(descriptor, "value")) {
+      return { found: true, value: "[UNSUPPORTED:accessor]" };
+    }
+    return { found: true, value: descriptor.value };
   } catch {
-    return undefined;
+    return { found: true, value: "[UNSUPPORTED:object]" };
   }
 }
 
@@ -433,20 +470,25 @@ export function sanitizeDiagnosticEvidence(
     throw new RangeError("diagnostic limitBytes must be a positive safe integer");
   }
   let normalized;
+  const budget = {
+    nodes: 0,
+    entries: 0,
+    inputBytes: 0,
+    exceeded: false,
+    rootStringByteLength: null,
+  };
   try {
-    normalized = normalizeDiagnosticValue(value);
+    normalized = normalizeDiagnosticValue(value, budget);
   } catch {
     normalized = {
-      original: "[UNSUPPORTED:object]",
       safe: "[UNSUPPORTED:object]",
       redacted: false,
       unsupported: true,
     };
   }
-  const originalText =
-    typeof normalized.original === "string"
-      ? normalized.original
-      : stableStringify(normalized.original);
+  if (budget.exceeded) {
+    return diagnosticBudgetResult(budget.rootStringByteLength);
+  }
   const safeText =
     typeof normalized.safe === "string"
       ? normalized.safe
@@ -456,8 +498,8 @@ export function sanitizeDiagnosticEvidence(
     ...(bounded.truncated
       ? { head: bounded.head, tail: bounded.tail }
       : { text: bounded.text }),
-    byteLength: Buffer.byteLength(originalText),
-    sha256: sha256(originalText),
+    byteLength: Buffer.byteLength(safeText),
+    sha256: sha256(safeText),
     truncated: bounded.truncated,
     redacted: normalized.redacted,
     unsupported: normalized.unsupported,
@@ -2583,25 +2625,24 @@ export function normalizeEvent(
         : "uncontrolled-tool-surface",
     );
   } else if (method === "error") {
+    const errorField = diagnosticOwnData(params, "error");
     const source =
-      params.error !== null && typeof params.error === "object"
-        ? params.error
+      errorField.found && errorField.value !== null &&
+      typeof errorField.value === "object"
+        ? errorField.value
         : params;
-    const codexErrorInfo = diagnosticProperty(source, "codexErrorInfo");
-    const code =
-      diagnosticProperty(source, "code") ??
-      diagnosticProperty(codexErrorInfo, "code");
-    const message = diagnosticProperty(source, "message");
-    const details = diagnosticProperty(source, "details") ?? codexErrorInfo;
+    const code = diagnosticOwnData(source, "codexErrorInfo");
+    const message = diagnosticOwnData(source, "message");
+    const details = diagnosticOwnData(source, "additionalDetails");
     const runtimeError = {};
-    if (code !== undefined) {
-      runtimeError.code = sanitizeDiagnosticEvidence(code);
+    if (code.found && code.value !== null) {
+      runtimeError.code = sanitizeDiagnosticEvidence(code.value);
     }
-    if (message !== undefined) {
-      runtimeError.message = sanitizeDiagnosticEvidence(message);
+    if (message.found) {
+      runtimeError.message = sanitizeDiagnosticEvidence(message.value);
     }
-    if (details !== undefined) {
-      runtimeError.details = sanitizeDiagnosticEvidence(details);
+    if (details.found && details.value !== null) {
+      runtimeError.details = sanitizeDiagnosticEvidence(details.value);
     }
     if (Object.keys(runtimeError).length > 0) {
       event.runtimeError = runtimeError;

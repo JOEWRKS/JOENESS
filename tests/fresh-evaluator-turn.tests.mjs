@@ -618,9 +618,9 @@ test("fresh evaluator partial evidence includes the runtime diagnostic and wrapp
     subject.runFreshEvaluatorTurn({
       session: createSession({
         runtimeError: {
-          code: "backend_failure",
           message: "backend rejected request",
-          details: { cookie: "session=hidden-runtime-secret", status: 503 },
+          codexErrorInfo: "backend_failure",
+          additionalDetails: "Cookie: session=hidden-runtime-secret",
         },
         mcpAfterError: primary,
       }),
@@ -641,19 +641,8 @@ test("fresh evaluator partial evidence includes the runtime diagnostic and wrapp
   assert.equal(evidence.events[2].threadId, "fresh-thread");
   assert.equal(evidence.events[2].turnId, "fresh-turn");
   assert.equal(evidence.events[2].runtimeError.code.text, "backend_failure");
-  assert.deepEqual(JSON.parse(evidence.events[2].runtimeError.details.text), {
-    cookie: "[REDACTED]",
-    status: 503,
-  });
+  assert.equal(evidence.events[2].runtimeError.details.text, "[REDACTED]");
   assert.deepEqual(evidence.primaryCause, {
-    name: {
-      text: "Error",
-      byteLength: 5,
-      sha256: "54a0e8c17ebb21a11f8a25b8042786ef7efe52441e6cc87e92c67e0c4c0c6e78",
-      truncated: false,
-      redacted: false,
-      unsupported: false,
-    },
     code: {
       text: "adapter_failure",
       byteLength: 15,
@@ -672,8 +661,8 @@ test("fresh evaluator partial evidence includes the runtime diagnostic and wrapp
     },
     details: {
       text: '{"authorization":"[REDACTED]"}',
-      byteLength: 48,
-      sha256: "ba7d5f9dbc48cf87b728aad5366401a1a806b1276a4c6fe4567558c7baca54ed",
+      byteLength: 30,
+      sha256: "35dc6144ff36675ee40d1a531281b43d54e93aefcc2377cef1ad85678fdaa0f8",
       truncated: false,
       redacted: true,
       unsupported: false,
@@ -681,6 +670,41 @@ test("fresh evaluator partial evidence includes the runtime diagnostic and wrapp
   });
   assert.equal(JSON.stringify(evidence).includes("hidden-runtime-secret"), false);
   assert.equal(JSON.stringify(evidence).includes("hidden-adapter-secret"), false);
+});
+
+test("fresh evaluator primary-cause capture never invokes accessors", async (t) => {
+  const subject = await loadSubject();
+  assert.equal(typeof subject?.runFreshEvaluatorTurn, "function");
+  const root = await createRoot(t);
+  let reads = 0;
+  const primary = new Error("adapter backend failed");
+  Object.defineProperty(primary, "details", {
+    enumerable: true,
+    get() {
+      reads += 1;
+      return "must not execute";
+    },
+  });
+
+  const evidence = await rejectedEvidence(
+    subject.runFreshEvaluatorTurn({
+      session: createSession({ mcpAfterError: primary }),
+      root,
+      input: [{ type: "text", text: "Return JSON." }],
+      outputSchema: outputSchema(),
+      turnTimeoutMs: 100,
+    }),
+  );
+
+  assert.equal(reads, 0);
+  assert.deepEqual(evidence.primaryCause.details, {
+    text: "[UNSUPPORTED:accessor]",
+    byteLength: 22,
+    sha256: "66edbdac07d683412d1df6e962f509f69fd5f423df819b523ec066abd4bf30a3",
+    truncated: false,
+    redacted: false,
+    unsupported: true,
+  });
 });
 
 test("fresh evaluator rejects missing or duplicate terminals, stderr, nonzero exit, and unsafe remote control", async (t) => {
