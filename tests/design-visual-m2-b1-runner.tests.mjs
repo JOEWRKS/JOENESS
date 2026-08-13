@@ -51,6 +51,10 @@ const TASK1_PREVALIDATION_PLAN_PATH = path.join(
   ROOT,
   "evals/skill-contracts/design-visual-m2-b1-smoke-plan-v9.json",
 );
+const EVENT_COMPACTION_PLAN_PATH = path.join(
+  ROOT,
+  "evals/skill-contracts/design-visual-m2-b1-smoke-plan-v10.json",
+);
 const ATTACHED_IMAGE_DESIGN_PROMPT = Object.freeze({
   path: "evals/skill-contracts/design-visual-m2-design-prompt-v6.md",
   bytes: 2847,
@@ -4543,4 +4547,93 @@ test("M2B1 schema 10 rejects unchanged method source, identical blobs, and rollb
     planPath,
     gitStatus: async () => "",
   }), /predecessor.*ancestor|descendant.*predecessor|method.*rollback/iu);
+});
+
+test("M2B1 actual v10 plan pins compacted event evidence and preserves the complete v9 evaluator contract", async () => {
+  const subject = await loadSubject();
+  const v9 = JSON.parse(await readFile(TASK1_PREVALIDATION_PLAN_PATH, "utf8"));
+  const v10Bytes = await readFile(EVENT_COMPACTION_PLAN_PATH);
+  const v10 = JSON.parse(v10Bytes.toString("utf8"));
+  const validated = subject.validateDesignVisualM2B1Plan(v10);
+
+  assert.equal(validated.schemaVersion, 10);
+  assert.equal(validated.id, "design-visual-m2-b1-smoke-plan-v10");
+  assert.equal(validated.date, "2026-08-14");
+  assert.deepEqual(validated.predecessor, {
+    plan: {
+      path: "evals/skill-contracts/design-visual-m2-b1-smoke-plan-v9.json",
+      bytes: 5648,
+      sha256: "fd1aed546ff6d92121435d6de2806a5ec99fb3f7b3f6a866d5c1a9d87707e39a",
+    },
+    blockedAttempt: {
+      path: "evals/skill-contracts/design-visual-m2-b1-v9-blocked.json",
+      bytes: 2317,
+      sha256: "e91beb6dad95163cbbdc31b8ba326c222b72bbbc0c71ef02ccde4fd1e7605887",
+    },
+    latestReceipt: {
+      path: "evals/skill-contracts/design-visual-m2-attempt-index-v11.json",
+      bytes: 8395,
+      sha256: "d8434fa1ea6524e018c793be93b0ea7913e0613e6f763dc639f4220663d60ff3",
+    },
+    methodChange: "canonical-agent-message-delta-compaction-and-bounded-event-aggregate-retention-no-task1-cap-or-evaluator-contract-change",
+    attemptPolicy: "one-method-changed-attempt-no-automatic-retry",
+  });
+  assert.deepEqual(validated.source, {
+    repositoryCommit: "4364d3c45323766ad81bc9fe0cf5af9fc2c3614c",
+    runner: {
+      path: "evals/support/run-design-visual-m2-b1.mjs",
+      bytes: 123217,
+      sha256: "6a7f4c68cf52ab36fa0863ede38e44063654c3ea61d765a3d147a37f0e8edaab",
+    },
+    freshTurnAdapter: {
+      path: "evals/support/run-fresh-evaluator-turn.mjs",
+      bytes: 55477,
+      sha256: "f2c7e2e9457b0ef7d6b819425619dcde8054db530f8b920829376f39a13fd087",
+    },
+    collector: {
+      path: "evals/support/collect-codex-app-server.mjs",
+      bytes: 297632,
+      sha256: "8b81ddb28be2a803500839a2de61f9bb397aa96711d039bdb7a3a86cfad8d687",
+    },
+  });
+  for (const key of [
+    "runtime", "inputs", "candidates", "claimScope", "originalDetail", "boundaries",
+  ]) {
+    assert.deepEqual(validated[key], v9[key], key);
+  }
+  assert.deepEqual(validated.outputs, {
+    designRaw: "evals/skill-contracts/design-visual-m2-b1-v10-design-raw.json",
+    designHandoff: "evals/skill-contracts/design-visual-m2-b1-v10-design-handoff.json",
+    sampleARaw: "evals/skill-contracts/design-visual-m2-b1-v10-sample-a-raw.json",
+    sampleAEnvelope: "evals/skill-contracts/design-visual-m2-b1-v10-sample-a-envelope.json",
+    sampleBRaw: "evals/skill-contracts/design-visual-m2-b1-v10-sample-b-raw.json",
+    sampleBEnvelope: "evals/skill-contracts/design-visual-m2-b1-v10-sample-b-envelope.json",
+    summary: "evals/skill-contracts/design-visual-m2-b1-v10-summary.json",
+    blocked: "evals/skill-contracts/design-visual-m2-b1-v10-blocked.json",
+  });
+  for (const output of Object.values(validated.outputs)) {
+    await assertPathMissing(path.join(ROOT, ...output.split("/")));
+  }
+  for (const pin of [
+    validated.source.runner,
+    validated.source.freshTurnAdapter,
+    validated.source.collector,
+  ]) {
+    const committed = await execFile(
+      "git",
+      ["show", `${validated.source.repositoryCommit}:${pin.path}`],
+      { cwd: ROOT, encoding: "buffer", maxBuffer: 1024 * 1024 },
+    );
+    assert.equal(committed.stdout.byteLength, pin.bytes);
+    assert.equal(digest(committed.stdout), pin.sha256);
+  }
+  assert.equal(v9.source.repositoryCommit, "3b868d03519ef12f0fb17546999bc8a1a6bb7359");
+  assert.notEqual(validated.source.repositoryCommit, v9.source.repositoryCommit);
+  await execFile(
+    "git",
+    ["merge-base", "--is-ancestor", v9.source.repositoryCommit, validated.source.repositoryCommit],
+    { cwd: ROOT },
+  );
+  assert.equal(v10Bytes.at(-1), 0x0a);
+  assert.equal(v10Bytes.includes(0x0d), false);
 });
