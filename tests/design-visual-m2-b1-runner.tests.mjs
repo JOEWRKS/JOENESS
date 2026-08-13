@@ -58,6 +58,45 @@ const ATTACHED_IMAGE_VISUAL_PROMPT = Object.freeze({
   sha256: "46285875db42fdf6f89ed7792f40dcc6b5ad64400923184aa0e946e784015eb0",
 });
 
+function schema9Plan(v8) {
+  const plan = structuredClone(v8);
+  plan.schemaVersion = 9;
+  plan.id = "design-visual-m2-b1-smoke-plan-v9";
+  plan.predecessor = {
+    plan: {
+      path: "evals/skill-contracts/design-visual-m2-b1-smoke-plan-v8.json",
+      bytes: 5661,
+      sha256: "04b1eb9fab67fa61d40363d4eb2ba7f5ddbd050a08926d9b5f80040e43056163",
+    },
+    blockedAttempt: {
+      path: "evals/skill-contracts/design-visual-m2-b1-v8-blocked.json",
+      bytes: 2094,
+      sha256: "9c0f132c7ed96234b320526a163bdc3dfa5b45383dff4f648183cfc1dfd14cec",
+    },
+    latestReceipt: {
+      path: "evals/skill-contracts/design-visual-m2-attempt-index-v10.json",
+      bytes: 8652,
+      sha256: "4da913372536261cfc6b82298d99c408683c4fc92fde421b540a893f202e0e86",
+    },
+    methodChange: "bounded-path-private-task1-prevalidation-count-and-exceeded-limit-retention-no-evaluator-contract-change",
+    attemptPolicy: "one-method-changed-attempt-no-automatic-retry",
+  };
+  plan.source = {
+    repositoryCommit: "1049f0a2ce17767578245a398b6712fd81b4fd87",
+    runner: {
+      path: "evals/support/run-design-visual-m2-b1.mjs",
+      bytes: 110694,
+      sha256: "84490f074a173bf8e93c61cd15cf1f4cd0421196d6e11105ab36a2fadc1003ea",
+    },
+    freshTurnAdapter: structuredClone(v8.source.freshTurnAdapter),
+    collector: structuredClone(v8.source.collector),
+  };
+  plan.outputs = Object.fromEntries(
+    Object.entries(v8.outputs).map(([key, value]) => [key, value.replace("-v8-", "-v9-")]),
+  );
+  return plan;
+}
+
 async function loadSubject() {
   try {
     return await import(MODULE_URL.href);
@@ -3786,4 +3825,119 @@ test("M2B1 actual v8 plan pins the attached-image support commit and collision-f
   assert.equal(blocked.byteLength, 2094);
   assert.equal(digest(blocked), "9c0f132c7ed96234b320526a163bdc3dfa5b45383dff4f648183cfc1dfd14cec");
   assert.equal(v8Bytes.at(-1), 0x0a);
+});
+
+test("M2B1 schema 9 preserves the complete v8 evaluator contract and uses only v9 outputs", async (t) => {
+  const subject = await loadSubject();
+  const v8 = JSON.parse(await readFile(ATTACHED_IMAGE_PLAN_PATH, "utf8"));
+  const v9 = schema9Plan(v8);
+  const validated = subject.validateDesignVisualM2B1Plan(v9);
+
+  assert.equal(validated.schemaVersion, 9);
+  assert.equal(validated.id, "design-visual-m2-b1-smoke-plan-v9");
+  assert.deepEqual(validated.predecessor, v9.predecessor);
+  assert.deepEqual(validated.inputs.designPrompt, ATTACHED_IMAGE_DESIGN_PROMPT);
+  assert.deepEqual(validated.inputs.visualPrompt, ATTACHED_IMAGE_VISUAL_PROMPT);
+  for (const key of [
+    "runtime", "inputs", "candidates", "claimScope", "originalDetail", "boundaries",
+  ]) {
+    assert.deepEqual(validated[key], v8[key], key);
+  }
+  assert.equal(Object.values(validated.outputs).every((file) => file.includes("-v9-")), true);
+  assert.equal(Object.values(validated.outputs).some((file) => file.includes("-v8-")), false);
+
+  const fixture = await successorFixtureRoot(t, v9);
+  const preflight = await subject.preflightDesignVisualM2B1({
+    repositoryRoot: fixture.root,
+    planPath: fixture.planPath,
+    gitStatus: async () => "",
+    gitIdentity: async (_root, sourceCommit, predecessorSourceCommit) => {
+      assert.equal(sourceCommit, v9.source.repositoryCommit);
+      assert.equal(predecessorSourceCommit, v8.source.repositoryCommit);
+      return sourceCommit;
+    },
+    gitReadBlob: copiedFixtureGitReadBlob(v9),
+  });
+  assert.equal(preflight.plan.schemaVersion, 9);
+
+  for (const [label, mutation] of [
+    ["Design prompt drift", (plan) => { plan.inputs.designPrompt = structuredClone(v8.predecessor.plan); }],
+    ["Visual prompt drift", (plan) => { plan.inputs.visualPrompt = structuredClone(v8.predecessor.plan); }],
+    ["runtime drift", (plan) => { plan.runtime.retryCount = 1; }],
+    ["candidate drift", (plan) => { plan.candidates.reverse(); }],
+    ["claim-scope drift", (plan) => { plan.claimScope.variant = "Pixel"; }],
+    ["original-detail drift", (plan) => { plan.originalDetail = "VERIFIED"; }],
+    ["boundary drift", (plan) => { plan.boundaries.target = "VERIFIED"; }],
+    ["predecessor drift", (plan) => { plan.predecessor.latestReceipt.sha256 = "0".repeat(64); }],
+    ["method drift", (plan) => { plan.predecessor.methodChange = "count-retention"; }],
+    ["output reuse", (plan) => { plan.outputs.summary = v8.outputs.summary; }],
+  ]) {
+    const changed = structuredClone(v9);
+    mutation(changed);
+    assert.throws(
+      () => subject.validateDesignVisualM2B1Plan(changed),
+      /prompt|runtime|candidate|scope|detail|boundar|predecessor|method|output|generation|malformed|differs/iu,
+      label,
+    );
+  }
+
+  const inputDrift = structuredClone(v9);
+  inputDrift.inputs.designSkill = structuredClone(v9.inputs.visualSkill);
+  const inputFixture = await successorFixtureRoot(t, inputDrift);
+  await assert.rejects(subject.preflightDesignVisualM2B1({
+    repositoryRoot: inputFixture.root,
+    planPath: inputFixture.planPath,
+    gitStatus: async () => "",
+    gitIdentity: async (_root, sourceCommit, predecessorSourceCommit) => {
+      assert.equal(sourceCommit, inputDrift.source.repositoryCommit);
+      assert.equal(predecessorSourceCommit, v8.source.repositoryCommit);
+      return sourceCommit;
+    },
+    gitReadBlob: copiedFixtureGitReadBlob(inputDrift),
+  }), /contract.*input|input.*contract|evaluator contract/iu);
+});
+
+test("M2B1 schema 9 rejects unchanged method source and rollback ancestry", async (t) => {
+  const subject = await loadSubject();
+  const v8 = JSON.parse(await readFile(ATTACHED_IMAGE_PLAN_PATH, "utf8"));
+  const v9 = schema9Plan(v8);
+
+  const sameCommit = structuredClone(v9);
+  sameCommit.source.repositoryCommit = v8.source.repositoryCommit;
+  const sameCommitFixture = await successorFixtureRoot(t, sameCommit);
+  await assert.rejects(subject.preflightDesignVisualM2B1({
+    repositoryRoot: sameCommitFixture.root,
+    planPath: sameCommitFixture.planPath,
+    gitStatus: async () => "",
+    gitIdentity: async (_root, sourceCommit) => sourceCommit,
+    gitReadBlob: copiedFixtureGitReadBlob(sameCommit),
+  }), /source.*unchanged|method.*source/iu);
+
+  const distinctCommitSameBlobs = structuredClone(v9);
+  distinctCommitSameBlobs.source = {
+    ...structuredClone(v8.source),
+    repositoryCommit: v9.source.repositoryCommit,
+  };
+  const sameBlobFixture = await successorFixtureRoot(t, distinctCommitSameBlobs);
+  await assert.rejects(subject.preflightDesignVisualM2B1({
+    repositoryRoot: sameBlobFixture.root,
+    planPath: sameBlobFixture.planPath,
+    gitStatus: async () => "",
+    gitIdentity: async (_root, sourceCommit) => sourceCommit,
+    gitReadBlob: copiedFixtureGitReadBlob(distinctCommitSameBlobs),
+  }), /source.*unchanged|method.*source/iu);
+
+  const rollback = structuredClone(v9);
+  rollback.source = structuredClone(
+    JSON.parse(await readFile(ATTACHMENT_SEMANTICS_PLAN_PATH, "utf8")).source,
+  );
+  const planRoot = await mkdtemp(path.join(ROOT, ".m2b1-schema9-rollback-"));
+  t.after(() => rm(planRoot, { recursive: true, force: true }));
+  const planPath = path.join(planRoot, "plan.json");
+  await writeFile(planPath, JSON.stringify(rollback, null, 2) + "\n");
+  await assert.rejects(subject.preflightDesignVisualM2B1({
+    repositoryRoot: ROOT,
+    planPath,
+    gitStatus: async () => "",
+  }), /predecessor.*ancestor|descendant.*predecessor|method.*rollback/iu);
 });
