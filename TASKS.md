@@ -8,7 +8,7 @@
   - [x] **M1 Ticket E2E:** M1A 승인 + M1B 재작업·중단 + M1C 평가 입력 비오염 증거
   - [ ] **M2 Design→Visual:** M2A 정적 회귀, M2B1 fresh 인계, M2B2 exact 런타임을 모두 통과해야 완료
     - [ ] **M2A 큐레이션 정적 회귀:** skill-contract 전체 suite 12/12(그중 v14 신규 사례 4건); fresh 후보 평가는 미완료
-    - [ ] **M2B1 fresh 인계:** v7 오판을 역사 보존하고 v5 Design 계약을 새 평가 방법으로 다시 산출·Visual에 전달
+    - [ ] **M2B1 fresh 인계:** 차단 — 첫 Design turn이 `systemError`/`failed`로 종료됐고 sample-a·sample-b는 미실행; 근본 원인은 미검증
     - [ ] **M2B2 exact 런타임:** MergeDrop 폰·태블릿과 RVR 수정본을 exact commit/build/install/state/capture로 결박
   - [ ] **M3 Core V6:** clean·partial·blocked·workaround·반복 오류·복구 상황의 한국어 결과 우선 보고, 과거 누락·실패 인정 전 원본 작업 증거 대조, 조건부 다음 행동, 중단 규칙
   - [ ] **M4 암묵 라우팅·충돌:** Project·Ticket·Design·Visual Check·Spec·Handoff의 양성/음성 사례와 외부 플러그인 계약 충돌
@@ -23,7 +23,7 @@
   | M1B | 실패·변경 후보·재작업 상한 | 판정 무효, 1회 재작업, 반복 실패·무변경 중단, 증거 누락 분리 | 행동 경로 완료 — 증거 `f614c75`; 당시 provenance 한계는 M1C에서 보완 |
   | M1C | 평가 입력·상태 증거 | prompt manifest·allowlist·hash와 전후 generated/ignored snapshot | 완료 — [index](evals/experiments/joeness-ticket-m1c-e2e-v3-index.json), [summary](evals/experiments/joeness-ticket-m1c-e2e-v3.json), [raw](evals/experiments/joeness-ticket-m1c-e2e-v3-raw.json), 증거 `115cc52` |
   | M2A | 큐레이션 정적 회귀 | blind fixture·숨긴 ground truth·출처 우선 기준·변형/상태 구분·부분/전체 판정, 실패 이력 보존 | 부분 통과 — [skill-contract suite 12/12](evals/skill-contracts/design-visual-m2-v14-contract-test-v1.json), 그중 v14 신규 사례 4건; [전체 회귀 영수증](evals/skill-contracts/design-visual-m2-v14-partial-validation-v1.json). v7은 [semantic review](evals/skill-contracts/design-visual-m2-visual-v7-semantic-review.json)에서 오판이 확인돼 거절 |
-  | M2B1 | fresh Design→Visual 인계 | Design 입력·출력과 Visual 입력을 hash로 고정, 후보별 독립 fresh 평가자, 실제 관찰 | 재개 승인 — 기존 v5 경로는 폐기하고 전용 실행기로 Design 1회 후 결함·정상 대조군을 서로 다른 Visual 세션에서 각각 검증; prompt·tool event·raw output·인계 hash 보존 |
+  | M2B1 | fresh Design→Visual 인계 | Design 입력·출력과 Visual 입력을 hash로 고정, 후보별 독립 fresh 평가자, 실제 관찰 | 차단 — [attempt index v2](evals/skill-contracts/design-visual-m2-attempt-index-v2.json), [blocked artifact](evals/skill-contracts/design-visual-m2-b1-v1-blocked.json). 현재 adapter/runner 테스트는 통과했지만 live 첫 Design turn은 `systemError`/`failed`; sample-a·sample-b는 미실행이고 근본 원인은 미검증 |
   | M2B2 | exact 런타임 | 정확한 소스·빌드·설치본·대상 상태·직접 화면을 하나의 증거로 결박, 사용자 수락은 별도 판정 | 미검증 — MergeDrop은 수정본 미커밋/캡처 미결박, RVR은 수정 후 런타임 프레임 미보존 |
   | M3 | 증거 결박 결과 보고 | 이전 응답·도구 결과를 먼저 대조하고 근거 없는 누락·실패 인정은 거부; 필수 작업·차단·사용자 결정이 있을 때만 이유를 붙인 다음 행동 하나를 제시 | 계획 — RVR 허위 누락 인정을 transcript-bound 회귀로 추가하고, 완전 완료·단순 선택 사항에는 다음 행동을 생략하는 양성/음성 사례 필요 |
 
@@ -33,7 +33,7 @@
   - 사용자 홈은 V7·스킬 5개이며 `$ticket`과 최신 Design/Visual 규칙이 아직 적용되지 않았다. M1~M3의 격리 검증 후 M4 직전에 exact `Check → Apply → Check`로 갱신하고 새 Codex 작업에서 라우팅을 검증한다.
   - M1은 Ticket 기능만 통과했다. `promotionPass=false`이므로 JOENESS 전체는 계속 `candidate/unvalidated`이며 다음 활성 단계는 M2다.
   - M2A의 정적 계약 통과는 새 fresh 판정이나 M2 전체를 승격하지 않는다. v7 오판은 삭제·재분류하지 않고 거절 이력으로 보존한다.
-  - M2B1은 같은 evaluator 경로를 다시 호출하지 않는다. 새 전용 실행기는 무이력 Design 1회 → exact 출력 hash 결박 → 동일한 Design hash를 받는 무이력 Visual 2회(결함·정상 대조군을 서로 다른 세션에서 후보별 독립 판정)만 수행한다. 두 후보를 한 평가 문맥에 넣지 않으며, 작은 게이트가 실패하면 반복하지 않고 증거를 보존해 판정한다.
+  - M2B1의 다음 결정은 bounded sanitized error code·message·details와 primary cause를 보존한 뒤 독립 검토하는 것이다. 같은 경로 재시도는 하지 않는다.
   - M2B2가 끝날 때까지 M2는 부분 완료다. 정적 비교본, 미추적 캡처, 사용자 서술은 exact corrected runtime 직접 화면을 대체하지 않는다.
   - M3 신규 회귀는 RVR 원본 세션의 기존 결정 요약과 이후의 상반된 누락 주장을 함께 고정한다. 기대 동작은 기존 전달 증거를 우선해 허위 누락을 거부하고, 결정 요약에 검증·커밋 정보를 섞은 범위 이탈만 별도로 판정하는 것이다. 일반 승인·전환 문구는 관찰상 `$spec`에 어긋나지만 Superpowers brainstorming 승인 게이트와 충돌하므로 M4에서 원인과 우선순위를 별도 판정한다. 현재 `$spec` 계약 자체를 실패 원인으로 재분류하지 않는다.
   - M3의 `다음 행동`은 고정 보고 항목이 아니다. 필수 작업·구체적 재개 조건·결과를 바꾸는 사용자 결정이 있을 때만 가장 합리적인 범위 내 행동 하나와 이유를 제시하고, 완전 완료나 단순 선택 사항이면 생략한다.
