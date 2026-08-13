@@ -18,6 +18,10 @@ const PLAN_PATH = path.join(
   ROOT,
   "evals/skill-contracts/design-visual-m2-b1-smoke-plan-v1.json",
 );
+const SUCCESSOR_PLAN_PATH = path.join(
+  ROOT,
+  "evals/skill-contracts/design-visual-m2-b1-smoke-plan-v2.json",
+);
 
 async function loadSubject() {
   try {
@@ -277,6 +281,68 @@ test("M2B1 plan pins the successor prompt and opaque approved/defect/control inp
   assert.equal(JSON.stringify(plan).match(/ground.?truth|known.?failure|positive.?control|TASKS/iu), null);
   assert.deepEqual(plan.claimScope, { variant: "Default", surface: "Collection modal" });
   assert.equal(plan.originalDetail, "UNVERIFIED");
+});
+
+test("M2B1 successor plan preserves v1 evidence and uses disjoint v2 outputs", async () => {
+  const subject = await loadSubject();
+  const plan = JSON.parse(await readFile(SUCCESSOR_PLAN_PATH, "utf8"));
+  const validated = subject.validateDesignVisualM2B1Plan(plan);
+
+  assert.equal(validated.schemaVersion, 2);
+  assert.equal(validated.id, "design-visual-m2-b1-smoke-plan-v2");
+  assert.equal(validated.predecessor.methodChange, "bounded-sanitized-runtime-error-and-primary-cause-capture");
+  assert.equal(validated.predecessor.attemptPolicy, "one-method-changed-attempt-no-automatic-retry");
+  assert.equal(Object.values(validated.outputs).every((file) => file.includes("-v2-")), true);
+  assert.equal(Object.values(validated.outputs).some((file) => file.includes("-v1-")), false);
+
+  const changed = structuredClone(plan);
+  changed.predecessor.latestReceipt.sha256 = "0".repeat(64);
+  assert.throws(() => subject.validateDesignVisualM2B1Plan(changed), /predecessor|pin/iu);
+});
+
+test("M2B1 successor run emits v2 summary and blocked identities", async (t) => {
+  const subject = await loadSubject();
+  const root = await mkdtemp(path.join(tmpdir(), "joeness-m2-b1-v2-"));
+  t.after(() => rm(root, { recursive: true, force: true }));
+  const plan = JSON.parse(await readFile(SUCCESSOR_PLAN_PATH, "utf8"));
+  for (const pin of [
+    ...Object.values(plan.inputs),
+    ...plan.candidates.map(({ image }) => image),
+    plan.predecessor.plan,
+    plan.predecessor.blockedAttempt,
+    plan.predecessor.latestReceipt,
+  ]) {
+    const destination = path.join(root, ...pin.path.split("/"));
+    await mkdir(path.dirname(destination), { recursive: true });
+    await cp(path.join(ROOT, ...pin.path.split("/")), destination);
+  }
+  const planPath = path.join(root, ...path.relative(ROOT, SUCCESSOR_PLAN_PATH).split(path.sep));
+  await mkdir(path.dirname(planPath), { recursive: true });
+  await writeFile(planPath, JSON.stringify(plan, null, 2) + "\n");
+
+  const success = successfulDependencies();
+  const result = await subject.runDesignVisualM2B1({
+    repositoryRoot: root,
+    planPath,
+    ...success,
+  });
+  assert.equal(result.summary.id, "design-visual-m2-b1-v2-summary");
+
+  const failure = successfulDependencies();
+  failure.runTurn = async (options) => {
+    options.session.closed = true;
+    options.session.processExitCode = 0;
+    const error = new Error("successor evaluator failed");
+    error.freshEvaluatorEvidence = { appServer: { processExitCode: 0 } };
+    throw error;
+  };
+  await assert.rejects(subject.runDesignVisualM2B1({
+    repositoryRoot: root,
+    planPath,
+    ...failure,
+  }), /successor evaluator failed/);
+  const blocked = failure.writes.find(({ file }) => file.endsWith("blocked.json"));
+  assert.equal(blocked.value.id, "design-visual-m2-b1-v2-blocked");
 });
 
 test("M2B1 evaluator-root staging rolls back and reads back absence after copy failure", async (t) => {

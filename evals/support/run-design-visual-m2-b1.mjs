@@ -83,6 +83,23 @@ const REQUIRED_OUTCOMES = Object.freeze({
   "sample-a": "applicable-visible-fail-and-aggregate-fail",
   "sample-b": "zero-fails-with-unsupported-layers-unverified",
 });
+const M2B1_V2_PREDECESSOR = Object.freeze({
+  plan: Object.freeze({
+    path: "evals/skill-contracts/design-visual-m2-b1-smoke-plan-v1.json",
+    bytes: 4136,
+    sha256: "817566dbadd085f4b4b5e13200ccccbdc8c0c536c7b4e7f9d3c0b2db9ecc6a82",
+  }),
+  blockedAttempt: Object.freeze({
+    path: "evals/skill-contracts/design-visual-m2-b1-v1-blocked.json",
+    bytes: 41149,
+    sha256: "cfdd9d78b40d60809b481fa02b4118b38837326ae202cf52e8c9751d2c89472e",
+  }),
+  latestReceipt: Object.freeze({
+    path: "evals/skill-contracts/design-visual-m2-attempt-index-v3.json",
+    bytes: 3469,
+    sha256: "c15029f52e9988fc670170b6ebc00029ce0a8d5a078aa0c128f612d257411fdf",
+  }),
+});
 
 function isObject(value) {
   return value !== null && typeof value === "object" && !Array.isArray(value);
@@ -128,15 +145,19 @@ function assertOutputPath(value, label) {
 }
 
 export function validateDesignVisualM2B1Plan(value) {
-  if (!exactKeys(value, [
-    "schemaVersion", "id", "date", "runtime", "inputs", "candidates",
-    "claimScope", "originalDetail", "outputs", "boundaries",
-  ])) {
+  const isSuccessor = value?.schemaVersion === 2;
+  const expectedKeys = [
+    "schemaVersion", "id", "date",
+    ...(isSuccessor ? ["predecessor"] : []),
+    "runtime", "inputs", "candidates", "claimScope", "originalDetail",
+    "outputs", "boundaries",
+  ];
+  if (!exactKeys(value, expectedKeys)) {
     throw new Error("M2B1 plan is malformed");
   }
   if (
-    value.schemaVersion !== 1 ||
-    value.id !== "design-visual-m2-b1-smoke-plan-v1" ||
+    ![1, 2].includes(value.schemaVersion) ||
+    value.id !== `design-visual-m2-b1-smoke-plan-v${value.schemaVersion}` ||
     typeof value.date !== "string" ||
     !exactKeys(value.runtime, ["codexVersion", "sessionOrder", "retryCount"]) ||
     value.runtime.codexVersion !== "codex-cli 0.146.0" ||
@@ -144,6 +165,27 @@ export function validateDesignVisualM2B1Plan(value) {
     value.runtime.retryCount !== 0
   ) {
     throw new Error("M2B1 plan identity or runtime is malformed");
+  }
+  if (isSuccessor) {
+    if (
+      !exactKeys(value.predecessor, [
+        "plan", "blockedAttempt", "latestReceipt", "methodChange", "attemptPolicy",
+      ]) ||
+      value.predecessor.methodChange !== "bounded-sanitized-runtime-error-and-primary-cause-capture" ||
+      value.predecessor.attemptPolicy !== "one-method-changed-attempt-no-automatic-retry"
+    ) {
+      throw new Error("M2B1 predecessor contract is malformed");
+    }
+    for (const [key, pin] of Object.entries({
+      plan: value.predecessor.plan,
+      blockedAttempt: value.predecessor.blockedAttempt,
+      latestReceipt: value.predecessor.latestReceipt,
+    })) {
+      assertPin(pin, `M2B1 predecessor ${key}`);
+      if (stableStringify(pin) !== stableStringify(M2B1_V2_PREDECESSOR[key])) {
+        throw new Error(`M2B1 predecessor ${key} pin differs`);
+      }
+    }
   }
   if (!exactKeys(value.inputs, PLAN_INPUT_KEYS)) {
     throw new Error("M2B1 plan inputs are malformed");
@@ -192,6 +234,10 @@ export function validateDesignVisualM2B1Plan(value) {
   });
   if (new Set(outputPaths).size !== outputPaths.length) {
     throw new Error("M2B1 output paths collide");
+  }
+  const generation = `-v${value.schemaVersion}-`;
+  if (outputPaths.some((output) => !output.includes(generation))) {
+    throw new Error("M2B1 output generation is malformed");
   }
   if (
     !exactKeys(value.boundaries, ["acceptanceSurface", "states", "target", "originalDetail", "manifestUpdate"]) ||
@@ -440,6 +486,15 @@ export async function preflightDesignVisualM2B1({
   for (const [key, pin] of Object.entries(plan.inputs)) {
     pins[key] = await verifyPinnedFile(root, pin, `M2B1 ${key}`);
   }
+  if (plan.predecessor) {
+    for (const [key, pin] of Object.entries({
+      plan: plan.predecessor.plan,
+      blockedAttempt: plan.predecessor.blockedAttempt,
+      latestReceipt: plan.predecessor.latestReceipt,
+    })) {
+      await verifyPinnedFile(root, pin, `M2B1 predecessor ${key}`);
+    }
+  }
   pins.candidates = [];
   for (const candidate of plan.candidates) {
     pins.candidates.push(await verifyPinnedFile(root, candidate.image, `M2B1 ${candidate.id}`));
@@ -547,6 +602,15 @@ async function verifyPreflightPins(preflight) {
   }
   for (const candidate of preflight.plan.candidates) {
     await verifyPinnedFile(preflight.root, candidate.image, `M2B1 ${candidate.id}`);
+  }
+  if (preflight.plan.predecessor) {
+    for (const [key, pin] of Object.entries({
+      plan: preflight.plan.predecessor.plan,
+      blockedAttempt: preflight.plan.predecessor.blockedAttempt,
+      latestReceipt: preflight.plan.predecessor.latestReceipt,
+    })) {
+      await verifyPinnedFile(preflight.root, pin, `M2B1 predecessor ${key}`);
+    }
   }
 }
 
@@ -1046,7 +1110,7 @@ export async function runDesignVisualM2B1({
     };
     const summary = {
       schemaVersion: 1,
-      id: "design-visual-m2-b1-v1-summary",
+      id: `design-visual-m2-b1-v${preflight.plan.schemaVersion}-summary`,
       executionStatus: "completed",
       m2b1Status: "partial-unvalidated",
       promotionPass: false,
@@ -1092,7 +1156,7 @@ export async function runDesignVisualM2B1({
     if (safeShutdown) {
       const blocked = {
         schemaVersion: 1,
-        id: "design-visual-m2-b1-v1-blocked",
+        id: `design-visual-m2-b1-v${preflight.plan.schemaVersion}-blocked`,
         status: "blocked",
         completedSessions: [...completed],
         failedSession: sessions.length,
