@@ -32,6 +32,7 @@ import {
   buildSubjectInput,
   buildThreadStartRequest,
   collectRuntimeInventory,
+  containsCredentialText,
   createExclusiveRunRoot,
   createJsonlClient,
   createV2RunRoot,
@@ -73,6 +74,16 @@ import {
   writeResultExclusive,
   EXPECTED_CODEX_VERSION,
 } from "../evals/support/collect-codex-app-server.mjs";
+
+const SYNTHETIC_TOKEN_SHAPES = Object.freeze([
+  "sk-SYNTHETIC_TEST_ONLY_abcdefghijklmnop",
+  "sk-proj-SYNTHETIC_TEST_ONLY_abcdefghijklmnop",
+  "sk-svcacct-SYNTHETIC_TEST_ONLY_abcdefghijklmnop",
+  "ghp_SYNTHETIC_TEST_ONLY_abcdefghijklmnop",
+  "github_pat_SYNTHETIC_TEST_ONLY_abcdefghijklmnop",
+  "AKIASYNTHETICTEST000",
+  "eyJSYNTHETIC0.eyJSYNTHETIC1.SYNTHETICSIGNATURE",
+]);
 
 test("runtime error notifications map the pinned TurnError payload without changing the blocker", () => {
   const event = normalizeEvent({
@@ -139,6 +150,16 @@ test("redacted diagnostic hashes bind only the common sanitized representation",
   assert.equal(second.sha256, "d5320ea324bbee6d8aa35a4b73954bc088e51773579a3676561589facc3933c1");
   assert.notEqual(first.sha256, "b34f4a6e621f4f86e8aa8d762087b96b5a29e6a2c12f7070b41d8163f7f827ec");
   assert.notEqual(second.sha256, "b5f9868994b980d93aafcfad9d99fab4baa39b101f88a5a28a7e111df314a26f");
+});
+
+test("diagnostic and runtime credential classifiers share current provider token shapes", () => {
+  for (const token of SYNTHETIC_TOKEN_SHAPES) {
+    const message = `synthetic provider failure ${token}`;
+    const evidence = sanitizeDiagnosticEvidence(message);
+    assert.equal(containsCredentialText(message), true, token);
+    assert.equal(evidence.redacted, true, token);
+    assert.equal(JSON.stringify(evidence).includes(token), false, token);
+  }
 });
 
 test("free-form cookie and set-cookie headers redact every value and attribute", () => {

@@ -300,13 +300,17 @@ const DIAGNOSTIC_MAX_ARRAY_LENGTH = 32;
 const DIAGNOSTIC_BUDGET_MARKER = "[TRUNCATED:diagnostic-budget]";
 const DIAGNOSTIC_SENSITIVE_KEY =
   /(?:api[-_]?key|auth|cookie|credential|password|secret|session|token)/iu;
+const CREDENTIAL_TOKEN_SHAPE_SOURCE = [
+  "(?:sk(?:-proj|-svcacct)?-|sk_|ghp_|github_pat_)[A-Za-z0-9_-]{12,}",
+  "(?:AKIA|ASIA)[A-Z0-9]{16}",
+  "eyJ[A-Za-z0-9_-]{10,}\\.[A-Za-z0-9_-]{10,}\\.[A-Za-z0-9_-]{10,}",
+].join("|");
 const DIAGNOSTIC_INLINE_SECRET = new RegExp(
   [
     "(?:authorization|proxy-authorization|cookie|set-cookie)\\s*[:=]\\s*[^\\r\\n,]+",
     "bearer\\s+[A-Za-z0-9._~+/=-]{8,}",
     "(?:api[-_]?key|password|secret|token)\\s*[:=]\\s*['\\x22]?[^\\s,;'\\x22]{8,}",
-    "(?:sk|ghp|github_pat)_[A-Za-z0-9_-]{12,}",
-    "eyJ[A-Za-z0-9_-]{10,}\\.[A-Za-z0-9_-]{10,}\\.[A-Za-z0-9_-]{10,}",
+    CREDENTIAL_TOKEN_SHAPE_SOURCE,
   ].join("|"),
   "giu",
 );
@@ -2483,8 +2487,18 @@ const UNCONTROLLED_ITEM_TYPES = new Set([
   "fileChange",
 ]);
 const PUBLIC_MESSAGE_TYPES = new Set(["agentMessage", "userMessage"]);
-const SECRET_PATTERN =
-  /(?:-----BEGIN [A-Z0-9 ]*PRIVATE KEY-----|authorization\s*:|bearer\s+[A-Za-z0-9._~+/=-]{12,}|(?:api[-_]?key|token|password|secret|cookie)\s*[:=]\s*["']?[A-Za-z0-9._~+/=-]{8,}|--(?:api[-_]?key|token|password|secret|cookie)(?:\s+|=)\s*["']?[A-Za-z0-9._~+/=-]{8,}|(?:AKIA|ASIA)[A-Z0-9]{16}|(?:sk|ghp|github_pat)_[A-Za-z0-9_-]{12,}|eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}|ssh-(?:rsa|ed25519)\s+[A-Za-z0-9+/=]{20,})/iu;
+const SECRET_PATTERN = new RegExp(
+  [
+    "-----BEGIN [A-Z0-9 ]*PRIVATE KEY-----",
+    "authorization\\s*:",
+    "bearer\\s+[A-Za-z0-9._~+/=-]{12,}",
+    "(?:api[-_]?key|token|password|secret|cookie)\\s*[:=]\\s*[\"']?[A-Za-z0-9._~+/=-]{8,}",
+    "--(?:api[-_]?key|token|password|secret|cookie)(?:\\s+|=)\\s*[\"']?[A-Za-z0-9._~+/=-]{8,}",
+    CREDENTIAL_TOKEN_SHAPE_SOURCE,
+    "ssh-(?:rsa|ed25519)\\s+[A-Za-z0-9+/=]{20,}",
+  ].join("|"),
+  "iu",
+);
 const PASSIVE_NOTIFICATION_METHODS = new Set([
   "account/rateLimits/updated",
   "item/agentMessage/delta",

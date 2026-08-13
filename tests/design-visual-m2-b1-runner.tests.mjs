@@ -217,12 +217,41 @@ function successfulDependencies(design = designOutput()) {
       options.session.closed = true;
       options.session.processExitCode = 0;
       const text = JSON.stringify(output);
+      const threadId = `thread-${index + 1}`;
+      const turnId = `turn-${index + 1}`;
+      const lifecycleEvents = index === 0
+        ? [
+            { method: "turn/started", threadId, turnId, complete: true, blockers: [] },
+            { method: "turn/completed", threadId, turnId, turn: { id: turnId, status: "completed" }, complete: true, blockers: [] },
+          ]
+        : [
+            { method: "turn/started", threadId, turnId, complete: true, blockers: [] },
+            { method: "item/started", threadId, turnId, item: { id: `call-${index}`, type: "dynamicToolCall", tool: "design-contract", status: "inProgress", secretPayload: "sk-proj-SYNTHETIC_TEST_ONLY_abcdefghijklmnop" }, complete: true, blockers: [] },
+            { method: "item/completed", threadId, turnId, item: { id: `call-${index}`, type: "dynamicToolCall", tool: "design-contract", status: "completed", success: true }, complete: true, blockers: [] },
+            { method: "turn/completed", threadId, turnId, turn: { id: turnId, status: "completed" }, complete: true, blockers: [] },
+          ];
       return {
         output,
         outputText: { text, byteLength: Buffer.byteLength(text), sha256: digest(text) },
-        thread: { id: `thread-${index + 1}` },
-        turn: { id: `turn-${index + 1}` },
+        threadStart: { request: { cwd: options.root }, response: { threadId } },
+        thread: { id: threadId },
+        turn: { id: turnId, request: { input: options.input } },
+        input: {
+          requestSha256: digest(`request-${index}`),
+          descriptors: [
+            { index: 0, type: "text", text: "prompt sk-proj-SYNTHETIC_TEST_ONLY_abcdefghijklmnop", byteLength: 6, sha256: digest(`prompt-${index}`) },
+            { index: 1, type: "localImage", path: path.join(options.root, "approved.png"), byteLength: 4, sha256: digest(`image-${index}`), originalDetail: "unverified", embeddedBytes: "SYNTHETIC_IMAGE_BYTES_MUST_NOT_PERSIST" },
+          ],
+        },
+        outputSchema: {
+          value: { syntheticSecret: "sk-proj-SYNTHETIC_TEST_ONLY_abcdefghijklmnop" },
+          byteLength: 31,
+          sha256: digest(`schema-${index}`),
+        },
+        events: lifecycleEvents,
         toolEvidence,
+        mcpAfter: [],
+        blockers: [],
         appServer: { processExitCode: 0, stderr: { byteLength: 0 } },
       };
     },
@@ -367,7 +396,14 @@ test("M2B1 orchestrator uses three sessions, one raw Design tuple, and candidate
     ...dependencies,
   });
 
-  assert.equal(result.status, "complete");
+  assert.equal(Object.hasOwn(result, "status"), false);
+  assert.equal(result.executionStatus, "completed");
+  assert.equal(result.m2b1Status, "partial-unvalidated");
+  assert.equal(result.promotionPass, false);
+  assert.equal(Object.hasOwn(result.summary, "status"), false);
+  assert.equal(result.summary.executionStatus, "completed");
+  assert.equal(result.summary.m2b1Status, "partial-unvalidated");
+  assert.equal(result.summary.promotionPass, false);
   assert.equal(dependencies.sessions.length, 3);
   assert.equal(new Set(dependencies.sessions.map(({ id }) => id)).size, 3);
   assert.equal(dependencies.calls.length, 3);
@@ -405,6 +441,22 @@ test("M2B1 orchestrator uses three sessions, one raw Design tuple, and candidate
   ]);
   assert.equal(result.visuals[0].evidence.thread.id, "thread-2");
   assert.equal(result.visuals[0].evidence.turn.id, "turn-2");
+  assert.deepEqual(Object.keys(result.visuals[0].evidence).sort(), [
+    "appServer", "blockers", "events", "input", "mcpAfter", "outputSchema",
+    "thread", "threadStart", "toolEvidence", "turn",
+  ]);
+  assert.deepEqual(result.visuals[0].evidence.events.records.map(({ method }) => method), [
+    "turn/started", "item/started", "item/completed", "turn/completed",
+  ]);
+  assert.equal(result.visuals[0].evidence.events.records.at(-1).turn.status, "completed");
+  assert.deepEqual(result.visuals[0].evidence.blockers, []);
+  assert.equal(result.visuals[0].evidence.outputSchema.sha256, digest("schema-1"));
+  assert.equal(Object.hasOwn(result.visuals[0].evidence.outputSchema, "value"), false);
+  assert.deepEqual(result.visuals[0].evidence.mcpAfter.records, []);
+  assert.equal(result.visuals[0].evidence.mcpAfter.sha256, digest("[]"));
+  const retainedEvidence = JSON.stringify(result.visuals[0].evidence);
+  assert.equal(retainedEvidence.includes("SYNTHETIC_IMAGE_BYTES_MUST_NOT_PERSIST"), false);
+  assert.equal(retainedEvidence.includes("SYNTHETIC_TEST_ONLY"), false);
 });
 
 test("M2B1 validators reject altered pins, escaping paths, reordered transfer, and broad PASS", async (t) => {
@@ -468,8 +520,11 @@ test("M2B1 runtime cleanup runs once before success writes and cleanup failure l
   let finishCalls = 0;
   const finishRuntime = async () => {
     finishCalls += 1;
-    const error = new Error("runtime cleanup failed");
-    error.runtimeCleanupEvidence = { processTerminationConfirmed: true };
+    const error = new Error("runtime cleanup failed sk-proj-SYNTHETIC_TEST_ONLY_abcdefghijklmnop");
+    error.runtimeCleanupEvidence = {
+      processTerminationConfirmed: true,
+      isolatedHome: { readback: "removed" },
+    };
     throw error;
   };
   await assert.rejects(
@@ -484,6 +539,18 @@ test("M2B1 runtime cleanup runs once before success writes and cleanup failure l
   assert.equal(finishCalls, 1);
   assert.equal(dependencies.writes.filter(({ file }) => !file.endsWith("blocked.json")).length, 0);
   assert.equal(dependencies.writes.filter(({ file }) => file.endsWith("blocked.json")).length, 1);
+  const blocked = dependencies.writes.find(({ file }) => file.endsWith("blocked.json")).value;
+  assert.equal(blocked.cleanupEvidence.phase, "post-evaluator-cleanup");
+  assert.equal(blocked.cleanupEvidence.finishAttempts, 1);
+  assert.equal(blocked.cleanupEvidence.stagedRoots.length, 3);
+  assert.equal(blocked.cleanupEvidence.stagedRoots.every(({ readback }) => readback === "removed"), true);
+  assert.equal(blocked.cleanupEvidence.runtime.status, "failed");
+  assert.deepEqual(JSON.parse(blocked.cleanupEvidence.runtime.available.text), {
+    isolatedHome: { readback: "removed" },
+    processTerminationConfirmed: true,
+  });
+  assert.equal(blocked.cleanupEvidence.cause.message.redacted, true);
+  assert.equal(JSON.stringify(blocked).includes("SYNTHETIC_TEST_ONLY"), false);
 });
 
 test("M2B1 preflight rejects dirty repositories and every output collision before sessions start", async (t) => {

@@ -5,11 +5,14 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 import {
+  containsCredentialText,
   createExclusiveRunRoot,
+  diagnosticOwnData,
   openAppServer,
   prepareRuntime,
   removeIsolatedCodexHome,
   runBuffered,
+  sanitizeDiagnosticEvidence,
   sha256,
   stableStringify,
 } from "./collect-codex-app-server.mjs";
@@ -618,18 +621,70 @@ export async function stageEvaluatorRoot(preflight, phase, operations = {}) {
   }
 }
 
+async function rootReadback(staged) {
+  try {
+    await lstat(staged.root);
+    return { phase: staged.phase, runId: staged.runId, root: staged.root, readback: "retained" };
+  } catch (error) {
+    return {
+      phase: staged.phase,
+      runId: staged.runId,
+      root: staged.root,
+      readback: error?.code === "ENOENT" ? "removed" : "unknown",
+    };
+  }
+}
+
+async function inspectEvaluatorRoots(stagedRoots) {
+  return Promise.all(stagedRoots.map(rootReadback));
+}
+
 async function removeEvaluatorRoots(stagedRoots) {
   const errors = [];
+  const evidence = [];
   for (const staged of stagedRoots) {
     try {
       await chmod(staged.root, 0o755);
+    } catch (error) {
+      errors.push(error);
+    }
+    try {
       await rm(staged.root, { recursive: true, force: false });
     } catch (error) {
       errors.push(error);
     }
+    const readback = await rootReadback(staged);
+    evidence.push(readback);
+    if (readback.readback !== "removed") {
+      errors.push(new Error(`M2B1 evaluator root was ${readback.readback}: ${staged.root}`));
+    }
   }
-  if (errors.length === 1) throw errors[0];
-  if (errors.length > 1) throw new AggregateError(errors, "M2B1 evaluator root cleanup failed");
+  if (errors.length > 0) {
+    const error = errors.length === 1
+      ? errors[0]
+      : new AggregateError(errors, "M2B1 evaluator root cleanup failed", { cause: errors[0] });
+    error.stagedRootEvidence = evidence;
+    throw error;
+  }
+  return evidence;
+}
+
+function sanitizedCause(error) {
+  const cause = {};
+  for (const key of ["name", "code", "message", "details"]) {
+    const property = diagnosticOwnData(error, key);
+    if (property.found) cause[key] = sanitizeDiagnosticEvidence(property.value);
+  }
+  return cause;
+}
+
+function retainPartialEvidence(value) {
+  if (!isObject(value)) return {};
+  try {
+    return safeBoundedClone(value, "partial", 128 * 1024);
+  } catch {
+    return { sanitized: sanitizeDiagnosticEvidence(value, 64 * 1024) };
+  }
 }
 
 function scalarIdentity(value, label) {
@@ -666,15 +721,132 @@ function validateEvaluatorIdentities(identities) {
   return clone(identities);
 }
 
+function safeBoundedClone(value, label, limitBytes = 64 * 1024) {
+  const serialized = stableStringify(value);
+  if (
+    serialized === undefined ||
+    Buffer.byteLength(serialized) > limitBytes ||
+    containsCredentialText(value)
+  ) {
+    throw new Error(`M2B1 ${label} evidence is unsafe or unbounded`);
+  }
+  return JSON.parse(serialized);
+}
+
+function retainInputEvidence(input) {
+  if (!isObject(input) || !Array.isArray(input.descriptors)) {
+    throw new Error("M2B1 Task 1 input evidence is malformed");
+  }
+  const descriptors = input.descriptors.map((descriptor) => {
+    if (!isObject(descriptor)) throw new Error("M2B1 Task 1 input descriptor is malformed");
+    const retained = {
+      index: descriptor.index,
+      type: descriptor.type,
+      byteLength: descriptor.byteLength,
+      sha256: descriptor.sha256,
+    };
+    if (descriptor.type === "localImage") {
+      retained.path = descriptor.path;
+      retained.originalDetail = descriptor.originalDetail;
+    }
+    return retained;
+  });
+  return safeBoundedClone({
+    descriptors,
+    requestSha256: input.requestSha256,
+  }, "input", 32 * 1024);
+}
+
+function retainLifecycleEvent(event) {
+  if (!isObject(event)) throw new Error("M2B1 Task 1 lifecycle event is malformed");
+  const retained = {
+    method: event.method,
+    threadId: event.threadId,
+    turnId: event.turnId,
+    complete: event.complete,
+    blockers: Array.isArray(event.blockers) ? event.blockers : [],
+  };
+  if (event.postTerminal === true) retained.postTerminal = true;
+  if (isObject(event.turn)) {
+    retained.turn = { id: event.turn.id, status: event.turn.status };
+  }
+  if (isObject(event.item)) {
+    retained.item = {
+      id: event.item.id,
+      type: event.item.type,
+      tool: event.item.tool,
+      status: event.item.status,
+    };
+    if (typeof event.item.success === "boolean") retained.item.success = event.item.success;
+    if (typeof event.item.argumentsSha256 === "string") {
+      retained.item.argumentsSha256 = event.item.argumentsSha256;
+    }
+    if (isObject(event.item.response)) {
+      retained.item.response = {
+        byteLength: event.item.response.byteLength,
+        sha256: event.item.response.sha256,
+      };
+    }
+  }
+  if (isObject(event.runtimeError)) {
+    retained.runtimeError = safeBoundedClone(event.runtimeError, "runtime error", 8 * 1024);
+  }
+  return retained;
+}
+
+function retainToolEvidence(toolEvidence) {
+  if (!Array.isArray(toolEvidence) || toolEvidence.length > 16) {
+    throw new Error("M2B1 Task 1 tool evidence is malformed or unbounded");
+  }
+  return safeBoundedClone(toolEvidence.map((entry) => ({
+    callId: entry.callId,
+    tool: entry.tool,
+    arguments: entry.arguments,
+    argumentsSha256: entry.argumentsSha256,
+    status: entry.status,
+    response: isObject(entry.response)
+      ? { byteLength: entry.response.byteLength, sha256: entry.response.sha256 }
+      : null,
+  })), "tool", 32 * 1024);
+}
+
 function retainTask1Evidence(result) {
-  return clone({
+  if (
+    !Array.isArray(result.events) ||
+    result.events.length > 512 ||
+    !Array.isArray(result.mcpAfter) ||
+    result.mcpAfter.length > 128 ||
+    !Array.isArray(result.blockers) ||
+    result.blockers.length !== 0 ||
+    !isObject(result.outputSchema)
+  ) {
+    throw new Error("M2B1 Task 1 evidence is incomplete, blocked, or unbounded");
+  }
+  const eventRecords = result.events.map(retainLifecycleEvent);
+  const mcpRecords = safeBoundedClone(result.mcpAfter, "MCP after", 32 * 1024);
+  return safeBoundedClone({
     threadStart: result.threadStart ?? null,
     thread: result.thread ?? null,
-    turn: result.turn ?? null,
-    input: result.input ?? null,
-    toolEvidence: result.toolEvidence ?? [],
+    turn: isObject(result.turn) ? { id: result.turn.id } : null,
+    input: retainInputEvidence(result.input),
+    outputSchema: {
+      byteLength: result.outputSchema.byteLength,
+      sha256: result.outputSchema.sha256,
+    },
+    events: {
+      records: eventRecords,
+      count: eventRecords.length,
+      sha256: sha256(stableStringify(eventRecords)),
+    },
+    toolEvidence: retainToolEvidence(result.toolEvidence),
+    mcpAfter: {
+      records: mcpRecords,
+      count: mcpRecords.length,
+      sha256: sha256(stableStringify(mcpRecords)),
+    },
+    blockers: [],
     appServer: result.appServer ?? null,
-  });
+  }, "Task 1", 256 * 1024);
 }
 
 async function defaultRuntimeFactory(plan) {
@@ -725,25 +897,60 @@ export async function runDesignVisualM2B1({
   let activeSession = null;
   let safeShutdown = true;
   let finishAttempted = false;
+  let cleanupEvidence = null;
 
   async function finishOnce(safe) {
-    if (finishAttempted) return;
+    if (finishAttempted) return cleanupEvidence;
     finishAttempted = true;
     const errors = [];
+    let runtime;
     try {
-      await finishRuntime(safe);
+      const available = await finishRuntime(safe);
+      runtime = {
+        status: "completed",
+        ...(available === undefined
+          ? {}
+          : { available: sanitizeDiagnosticEvidence(available, 16 * 1024) }),
+      };
     } catch (error) {
       errors.push(error);
+      const available = diagnosticOwnData(error, "runtimeCleanupEvidence");
+      runtime = {
+        status: "failed",
+        ...(available.found
+          ? { available: sanitizeDiagnosticEvidence(available.value, 16 * 1024) }
+          : {}),
+      };
     }
+    let stagedRootEvidence;
     if (safe) {
       try {
-        await removeEvaluatorRoots(stagedRoots);
+        stagedRootEvidence = await removeEvaluatorRoots(stagedRoots);
       } catch (error) {
         errors.push(error);
+        stagedRootEvidence = Array.isArray(error?.stagedRootEvidence)
+          ? clone(error.stagedRootEvidence)
+          : await inspectEvaluatorRoots(stagedRoots);
       }
+    } else {
+      stagedRootEvidence = await inspectEvaluatorRoots(stagedRoots);
     }
-    if (errors.length === 1) throw errors[0];
-    if (errors.length > 1) throw new AggregateError(errors, "M2B1 runtime cleanup failed", { cause: errors[0] });
+    cleanupEvidence = {
+      phase: "post-evaluator-cleanup",
+      finishAttempts: 1,
+      safeShutdownRequested: safe,
+      runtime,
+      stagedRoots: stagedRootEvidence,
+      ...(errors.length > 0 ? { cause: sanitizedCause(errors[0]) } : {}),
+    };
+    if (errors.length > 0) {
+      const failure = errors.length === 1
+        ? errors[0]
+        : new AggregateError(errors, "M2B1 runtime cleanup failed", { cause: errors[0] });
+      failure.cleanupEvidence = cleanupEvidence;
+      throw failure;
+    }
+    return cleanupEvidence;
   }
 
   function registerSession(session) {
@@ -840,7 +1047,9 @@ export async function runDesignVisualM2B1({
     const summary = {
       schemaVersion: 1,
       id: "design-visual-m2-b1-v1-summary",
-      status: "complete",
+      executionStatus: "completed",
+      m2b1Status: "partial-unvalidated",
+      promotionPass: false,
       sessionOrder: [...completed],
       originalDetail: "UNVERIFIED",
       claimScope: clone(preflight.plan.claimScope),
@@ -864,7 +1073,9 @@ export async function runDesignVisualM2B1({
     await finishOnce(true);
     for (const [key, value] of writes) await writeArtifact(outputFile(preflight, key), value);
     return {
-      status: "complete",
+      executionStatus: "completed",
+      m2b1Status: "partial-unvalidated",
+      promotionPass: false,
       design: { raw: handoff.designRaw, output: design, identity: designIdentity, evidence: designEvidence },
       visuals,
       summary,
@@ -876,7 +1087,7 @@ export async function runDesignVisualM2B1({
     try {
       await finishOnce(safeShutdown);
     } catch (cleanupError) {
-      if (cleanupError !== error) error.runtimeCleanupError = cleanupError;
+      cleanupEvidence = cleanupError?.cleanupEvidence ?? cleanupEvidence;
     }
     if (safeShutdown) {
       const blocked = {
@@ -885,8 +1096,15 @@ export async function runDesignVisualM2B1({
         status: "blocked",
         completedSessions: [...completed],
         failedSession: sessions.length,
-        error: String(error?.message ?? error),
-        partialEvidence: clone(error?.freshEvaluatorEvidence ?? {}),
+        error: sanitizedCause(error),
+        partialEvidence: retainPartialEvidence(error?.freshEvaluatorEvidence),
+        cleanupEvidence: clone(cleanupEvidence ?? {
+          phase: "post-evaluator-cleanup",
+          finishAttempts: finishAttempted ? 1 : 0,
+          safeShutdownRequested: safeShutdown,
+          runtime: { status: "not-attempted" },
+          stagedRoots: await inspectEvaluatorRoots(stagedRoots),
+        }),
         retryCount: 0,
         evaluatorIdentities: clone(identities),
       };

@@ -10,6 +10,16 @@ const MODULE_URL = new URL(
   import.meta.url,
 );
 
+const SYNTHETIC_TOKEN_SHAPES = Object.freeze([
+  "sk-SYNTHETIC_TEST_ONLY_abcdefghijklmnop",
+  "sk-proj-SYNTHETIC_TEST_ONLY_abcdefghijklmnop",
+  "sk-svcacct-SYNTHETIC_TEST_ONLY_abcdefghijklmnop",
+  "ghp_SYNTHETIC_TEST_ONLY_abcdefghijklmnop",
+  "github_pat_SYNTHETIC_TEST_ONLY_abcdefghijklmnop",
+  "AKIASYNTHETICTEST000",
+  "eyJSYNTHETIC0.eyJSYNTHETIC1.SYNTHETICSIGNATURE",
+]);
+
 async function loadSubject() {
   try {
     return await import(MODULE_URL.href);
@@ -705,6 +715,39 @@ test("fresh evaluator primary-cause capture never invokes accessors", async (t) 
     redacted: false,
     unsupported: true,
   });
+});
+
+test("fresh evaluator sanitizes provider token shapes in runtime and primary-cause evidence", async (t) => {
+  const subject = await loadSubject();
+  assert.equal(typeof subject?.runFreshEvaluatorTurn, "function");
+  const root = await createRoot(t);
+  const diagnostic = SYNTHETIC_TOKEN_SHAPES.join(" ");
+  const primary = new Error(`adapter failed ${diagnostic}`);
+  primary.details = `primary details ${diagnostic}`;
+  const evidence = await rejectedEvidence(
+    subject.runFreshEvaluatorTurn({
+      session: createSession({
+        runtimeError: {
+          message: `runtime failed ${diagnostic}`,
+          codexErrorInfo: "backend_failure",
+          additionalDetails: `runtime details ${diagnostic}`,
+        },
+        mcpAfterError: primary,
+      }),
+      root,
+      input: [{ type: "text", text: "Return JSON." }],
+      outputSchema: outputSchema(),
+      turnTimeoutMs: 100,
+    }),
+  );
+  const serialized = JSON.stringify(evidence);
+  for (const token of SYNTHETIC_TOKEN_SHAPES) {
+    assert.equal(serialized.includes(token), false, token);
+  }
+  assert.equal(evidence.events.find(({ method }) => method === "error").runtimeError.message.redacted, true);
+  assert.equal(evidence.events.find(({ method }) => method === "error").runtimeError.details.redacted, true);
+  assert.equal(evidence.primaryCause.message.redacted, true);
+  assert.equal(evidence.primaryCause.details.redacted, true);
 });
 
 test("fresh evaluator rejects missing or duplicate terminals, stderr, nonzero exit, and unsafe remote control", async (t) => {
