@@ -30,6 +30,10 @@ const BOUNDED_DIAGNOSTIC_PLAN_PATH = path.join(
   ROOT,
   "evals/skill-contracts/design-visual-m2-b1-smoke-plan-v4.json",
 );
+const STDERR_DIAGNOSTIC_PLAN_PATH = path.join(
+  ROOT,
+  "evals/skill-contracts/design-visual-m2-b1-smoke-plan-v5.json",
+);
 
 async function loadSubject() {
   try {
@@ -196,35 +200,6 @@ async function successorFixtureRoot(t, plan) {
   await mkdir(path.dirname(planPath), { recursive: true });
   await writeFile(planPath, JSON.stringify(plan, null, 2) + "\n");
   return { root, planPath };
-}
-
-function stderrDiagnosticPlanFromV4(plan) {
-  const successor = structuredClone(plan);
-  successor.schemaVersion = 5;
-  successor.id = "design-visual-m2-b1-smoke-plan-v5";
-  successor.predecessor = {
-    plan: {
-      path: "evals/skill-contracts/design-visual-m2-b1-smoke-plan-v4.json",
-      bytes: 5616,
-      sha256: "6a2c1a3408d7d10c9044a86db336653772365f57a0cd01b130b4c4658c740737",
-    },
-    blockedAttempt: {
-      path: "evals/skill-contracts/design-visual-m2-b1-v4-blocked.json",
-      bytes: 10898,
-      sha256: "da48853672e3b10b26dd7c083a29c50c7d2e2f8e663c38422cbaab44930c021b",
-    },
-    latestReceipt: {
-      path: "evals/skill-contracts/design-visual-m2-attempt-index-v6.json",
-      bytes: 4948,
-      sha256: "bdfcb2ebd064e01632a5251f7c7b1603d8ffb8ab5f5d8fa58eb52da0ba413840",
-    },
-    methodChange: "bounded-sanitized-app-server-stderr-diagnostic-retention-no-evaluator-contract-change",
-    attemptPolicy: "one-method-changed-attempt-no-automatic-retry",
-  };
-  successor.outputs = Object.fromEntries(
-    Object.entries(successor.outputs).map(([key, value]) => [key, value.replace("-v4-", "-v5-")]),
-  );
-  return successor;
 }
 
 async function listRelativeFiles(root, current = root) {
@@ -557,7 +532,7 @@ test("M2B1 v4 preflight rejects input and candidate drift from the pinned v3 con
 test("M2B1 stderr-diagnostic generation preserves v4 evidence and uses only v5 outputs", async () => {
   const subject = await loadSubject();
   const predecessor = JSON.parse(await readFile(BOUNDED_DIAGNOSTIC_PLAN_PATH, "utf8"));
-  const plan = stderrDiagnosticPlanFromV4(predecessor);
+  const plan = JSON.parse(await readFile(STDERR_DIAGNOSTIC_PLAN_PATH, "utf8"));
 
   const validated = subject.validateDesignVisualM2B1Plan(plan);
   assert.equal(validated.schemaVersion, 5);
@@ -574,6 +549,10 @@ test("M2B1 stderr-diagnostic generation preserves v4 evidence and uses only v5 o
     false,
   );
   assert.equal(new Set(Object.values(validated.outputs)).size, 8);
+  for (const key of ["runtime", "inputs", "candidates", "claimScope", "originalDetail", "boundaries"]) {
+    assert.deepEqual(validated[key], predecessor[key]);
+  }
+  assert.equal(validated.source.repositoryCommit, "9c38529dbba8ae9fb566d57746092f7a8fb06bd0");
 
   for (const predecessorKey of ["plan", "blockedAttempt", "latestReceipt"]) {
     const changed = structuredClone(plan);
@@ -584,9 +563,7 @@ test("M2B1 stderr-diagnostic generation preserves v4 evidence and uses only v5 o
 
 test("M2B1 v5 preflight accepts the unchanged v4 evaluator contract and rejects drift", async (t) => {
   const subject = await loadSubject();
-  const predecessor = JSON.parse(await readFile(BOUNDED_DIAGNOSTIC_PLAN_PATH, "utf8"));
-
-  const acceptedPlan = stderrDiagnosticPlanFromV4(predecessor);
+  const acceptedPlan = JSON.parse(await readFile(STDERR_DIAGNOSTIC_PLAN_PATH, "utf8"));
   const acceptedFixture = await successorFixtureRoot(t, acceptedPlan);
   const accepted = await subject.preflightDesignVisualM2B1({
     repositoryRoot: acceptedFixture.root,
@@ -597,7 +574,7 @@ test("M2B1 v5 preflight accepts the unchanged v4 evaluator contract and rejects 
   assert.equal(accepted.plan.schemaVersion, 5);
 
   for (const target of ["input", "candidate"]) {
-    const changedPlan = stderrDiagnosticPlanFromV4(predecessor);
+    const changedPlan = structuredClone(acceptedPlan);
     const changedBytes = Buffer.from(`changed-v5-${target}\n`, "utf8");
     const pin = target === "input"
       ? changedPlan.inputs.designSkill
