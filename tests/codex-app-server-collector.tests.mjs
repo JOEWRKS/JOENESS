@@ -195,6 +195,76 @@ test("multi-megabyte diagnostic strings retain only the global budget marker", (
   });
 });
 
+test("diagnostic property-name bytes are charged before retaining a long key", () => {
+  const evidence = sanitizeDiagnosticEvidence({ ["k".repeat(100_000)]: 1 });
+
+  assert.deepEqual(evidence, {
+    text: "[TRUNCATED:diagnostic-budget]",
+    byteLength: null,
+    sha256: "85785a1113252d59dfbcd0c040ff651c891191a1b1b8736315cde0ca435520fd",
+    truncated: true,
+    redacted: true,
+    unsupported: true,
+    budgetExceeded: true,
+  });
+  assert.equal(evidence.text.length, 29);
+});
+
+test("diagnostic sparse arrays cannot amplify one item into a million holes", () => {
+  const sparse = [];
+  sparse[1_000_000] = "x";
+  const evidence = sanitizeDiagnosticEvidence(sparse);
+
+  assert.deepEqual(evidence, {
+    text: "[TRUNCATED:diagnostic-budget]",
+    byteLength: null,
+    sha256: "85785a1113252d59dfbcd0c040ff651c891191a1b1b8736315cde0ca435520fd",
+    truncated: true,
+    redacted: true,
+    unsupported: true,
+    budgetExceeded: true,
+  });
+  assert.equal(evidence.text.length, 29);
+});
+
+test("diagnostic key count stops before sorting or traversing excess values", () => {
+  let reads = 0;
+  const broad = {};
+  for (let index = 0; index < 65; index += 1) {
+    Object.defineProperty(broad, `field${index}`, {
+      enumerable: true,
+      get() {
+        reads += 1;
+        return index;
+      },
+    });
+  }
+  const evidence = sanitizeDiagnosticEvidence(broad);
+
+  assert.equal(reads, 0);
+  assert.equal(evidence.text, "[TRUNCATED:diagnostic-budget]");
+  assert.equal(evidence.byteLength, null);
+  assert.equal(evidence.budgetExceeded, true);
+  assert.equal(evidence.text.length, 29);
+});
+
+test("diagnostic dense arrays stop at the exact small array cap", () => {
+  const evidence = sanitizeDiagnosticEvidence(
+    Array.from({ length: 33 }, (_, index) => index),
+  );
+
+  assert.deepEqual(evidence, {
+    text: "[TRUNCATED:diagnostic-budget]",
+    byteLength: null,
+    sha256: "85785a1113252d59dfbcd0c040ff651c891191a1b1b8736315cde0ca435520fd",
+    truncated: true,
+    redacted: true,
+    unsupported: true,
+    budgetExceeded: true,
+  });
+  assert.equal(evidence.text.length, 29);
+});
+
 test("runtime diagnostic fields use descriptors without invoking getters", () => {
   let reads = 0;
   const error = { codexErrorInfo: null, additionalDetails: null };

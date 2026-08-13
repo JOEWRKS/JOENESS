@@ -296,6 +296,7 @@ const DIAGNOSTIC_LIMIT_BYTES = 1024;
 const DIAGNOSTIC_INPUT_LIMIT_BYTES = 4096;
 const DIAGNOSTIC_MAX_DEPTH = 8;
 const DIAGNOSTIC_MAX_ENTRIES = 64;
+const DIAGNOSTIC_MAX_ARRAY_LENGTH = 32;
 const DIAGNOSTIC_BUDGET_MARKER = "[TRUNCATED:diagnostic-budget]";
 const DIAGNOSTIC_SENSITIVE_KEY =
   /(?:api[-_]?key|auth|cookie|credential|password|secret|session|token)/iu;
@@ -384,11 +385,33 @@ function normalizeDiagnosticValue(
 
   const nextAncestors = new Set(ancestors);
   nextAncestors.add(value);
+  const isArray = Array.isArray(value);
+  let arrayLength = null;
+  if (isArray) {
+    let lengthDescriptor;
+    try {
+      lengthDescriptor = Object.getOwnPropertyDescriptor(value, "length");
+    } catch {
+      return {
+        safe: "[UNSUPPORTED:object]",
+        redacted: false,
+        unsupported: true,
+      };
+    }
+    if (
+      !Object.hasOwn(lengthDescriptor, "value") ||
+      !Number.isSafeInteger(lengthDescriptor.value) ||
+      lengthDescriptor.value < 0 ||
+      lengthDescriptor.value > DIAGNOSTIC_MAX_ARRAY_LENGTH
+    ) {
+      budget.exceeded = true;
+      return null;
+    }
+    arrayLength = lengthDescriptor.value;
+  }
   let keys;
   try {
-    keys = Reflect.ownKeys(value)
-      .filter((key) => !Array.isArray(value) || key !== "length")
-      .sort((left, right) => String(left).localeCompare(String(right)));
+    keys = Reflect.ownKeys(value);
   } catch {
     return {
       safe: "[UNSUPPORTED:object]",
@@ -396,12 +419,43 @@ function normalizeDiagnosticValue(
       unsupported: true,
     };
   }
+  if (keys.length > DIAGNOSTIC_MAX_ENTRIES + (isArray ? 1 : 0)) {
+    budget.exceeded = true;
+    return null;
+  }
+  if (isArray) {
+    const expectedKeys = Array.from(
+      { length: arrayLength },
+      (_, index) => String(index),
+    );
+    if (
+      keys.length !== expectedKeys.length + 1 ||
+      keys[keys.length - 1] !== "length" ||
+      expectedKeys.some((key, index) => keys[index] !== key)
+    ) {
+      budget.exceeded = true;
+      return null;
+    }
+    keys = expectedKeys;
+  }
+  for (const key of keys) {
+    if (typeof key === "string") {
+      budget.inputBytes += Buffer.byteLength(key);
+      if (budget.inputBytes > DIAGNOSTIC_INPUT_LIMIT_BYTES) {
+        budget.exceeded = true;
+        return null;
+      }
+    }
+  }
+  if (!isArray) {
+    keys.sort((left, right) => String(left).localeCompare(String(right)));
+  }
   budget.entries += keys.length;
   if (budget.entries > DIAGNOSTIC_MAX_ENTRIES) {
     budget.exceeded = true;
     return null;
   }
-  const safe = Array.isArray(value) ? [] : {};
+  const safe = isArray ? [] : {};
   let redacted = false;
   let unsupported = false;
   for (const key of keys) {
