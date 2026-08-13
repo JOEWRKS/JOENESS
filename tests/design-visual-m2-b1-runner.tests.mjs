@@ -43,6 +43,10 @@ const ATTACHMENT_SEMANTICS_PLAN_PATH = path.join(
   ROOT,
   "evals/skill-contracts/design-visual-m2-b1-smoke-plan-v7.json",
 );
+const ATTACHED_IMAGE_PLAN_PATH = path.join(
+  ROOT,
+  "evals/skill-contracts/design-visual-m2-b1-smoke-plan-v8.json",
+);
 const ATTACHED_IMAGE_DESIGN_PROMPT = Object.freeze({
   path: "evals/skill-contracts/design-visual-m2-design-prompt-v6.md",
   bytes: 2847,
@@ -3144,4 +3148,83 @@ test("M2B1 schema 8 default Git identity rejects a method-source rollback", asyn
     planPath,
     gitStatus: async () => "",
   }), /predecessor.*ancestor|descendant.*predecessor|method.*rollback/iu);
+});
+
+test("M2B1 actual v8 plan pins the attached-image support commit and collision-free outputs", async () => {
+  const subject = await loadSubject();
+  const v7 = JSON.parse(await readFile(ATTACHMENT_SEMANTICS_PLAN_PATH, "utf8"));
+  const v8Bytes = await readFile(ATTACHED_IMAGE_PLAN_PATH);
+  const v8 = JSON.parse(v8Bytes.toString("utf8"));
+  const validated = subject.validateDesignVisualM2B1Plan(v8);
+
+  assert.equal(validated.schemaVersion, 8);
+  assert.equal(validated.id, "design-visual-m2-b1-smoke-plan-v8");
+  assert.equal(validated.date, "2026-08-14");
+  assert.equal(
+    validated.source.repositoryCommit,
+    "e8dd4831a8f33b1f8af9e635cb806d04df0225b4",
+  );
+  assert.deepEqual(validated.predecessor, {
+    plan: {
+      path: "evals/skill-contracts/design-visual-m2-b1-smoke-plan-v7.json",
+      bytes: 5703,
+      sha256: "5be462158df803197ec2d5be1d2ae7c255591a5db52ffe01aebe60d5b2a6964e",
+    },
+    blockedAttempt: {
+      path: "evals/skill-contracts/design-visual-m2-b1-v7-blocked.json",
+      bytes: 13819,
+      sha256: "98342a6bc909960d4c934af2488a285514cccfe32510730d2fe6181e7269ddb9",
+    },
+    latestReceipt: {
+      path: "evals/skill-contracts/design-visual-m2-attempt-index-v9.json",
+      bytes: 9042,
+      sha256: "b11f75296eb5a6f53993bae7cc2ab776f00c07b27a0700e2d6c17fc177384933",
+    },
+    methodChange: "attached-image-only-design-and-visual-evaluator-instructions-no-path-open-or-view-image-no-acceptance-criteria-change",
+    attemptPolicy: "one-method-changed-attempt-no-automatic-retry",
+  });
+  assert.deepEqual(validated.inputs.designPrompt, ATTACHED_IMAGE_DESIGN_PROMPT);
+  assert.deepEqual(validated.inputs.visualPrompt, ATTACHED_IMAGE_VISUAL_PROMPT);
+  for (const key of [
+    "authority", "frozenFacts", "designSkill", "visualSkill", "durableEvidence",
+    "concreteDefect", "approvedReference", "approvedSource",
+  ]) {
+    assert.deepEqual(validated.inputs[key], v7.inputs[key], key);
+  }
+  for (const key of ["runtime", "candidates", "claimScope", "originalDetail", "boundaries"]) {
+    assert.deepEqual(validated[key], v7[key], key);
+  }
+  assert.deepEqual(validated.outputs, {
+    designRaw: "evals/skill-contracts/design-visual-m2-b1-v8-design-raw.json",
+    designHandoff: "evals/skill-contracts/design-visual-m2-b1-v8-design-handoff.json",
+    sampleARaw: "evals/skill-contracts/design-visual-m2-b1-v8-sample-a-raw.json",
+    sampleAEnvelope: "evals/skill-contracts/design-visual-m2-b1-v8-sample-a-envelope.json",
+    sampleBRaw: "evals/skill-contracts/design-visual-m2-b1-v8-sample-b-raw.json",
+    sampleBEnvelope: "evals/skill-contracts/design-visual-m2-b1-v8-sample-b-envelope.json",
+    summary: "evals/skill-contracts/design-visual-m2-b1-v8-summary.json",
+    blocked: "evals/skill-contracts/design-visual-m2-b1-v8-blocked.json",
+  });
+  for (const pin of [
+    validated.source.runner,
+    validated.source.freshTurnAdapter,
+    validated.source.collector,
+  ]) {
+    const committed = await execFile(
+      "git",
+      ["show", `${validated.source.repositoryCommit}:${pin.path}`],
+      { cwd: ROOT, encoding: "buffer", maxBuffer: 1024 * 1024 },
+    );
+    assert.equal(committed.stdout.byteLength, pin.bytes);
+    assert.equal(digest(committed.stdout), pin.sha256);
+  }
+  assert.notEqual(validated.source.repositoryCommit, v7.source.repositoryCommit);
+  await execFile(
+    "git",
+    ["merge-base", "--is-ancestor", v7.source.repositoryCommit, validated.source.repositoryCommit],
+    { cwd: ROOT },
+  );
+  for (const output of Object.values(validated.outputs)) {
+    await assertPathMissing(path.join(ROOT, ...output.split("/")));
+  }
+  assert.equal(v8Bytes.at(-1), 0x0a);
 });
