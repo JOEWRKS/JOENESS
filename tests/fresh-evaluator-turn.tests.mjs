@@ -70,6 +70,7 @@ function createSession({
   omitTerminal = false,
   closeExitCode = 0,
   stderrByteLength = 0,
+  stderrDiagnostic = null,
   remoteControlSnapshot = {
     seen: true,
     complete: true,
@@ -111,10 +112,11 @@ function createSession({
     },
     get stderr() {
       return {
-        redacted: true,
         truncated: false,
         byteLength: stderrByteLength,
         sha256: stderrByteLength === 0 ? digest("") : digest("fixture-stderr"),
+        captureTruncated: false,
+        ...(stderrDiagnostic === null ? {} : { diagnostic: stderrDiagnostic }),
       };
     },
     client: {
@@ -757,7 +759,22 @@ test("fresh evaluator rejects missing or duplicate terminals, stderr, nonzero ex
   const scenarios = [
     ["missing terminal", { omitTerminal: true }, "missing-terminal-event", 15],
     ["duplicate terminal", { duplicateTerminal: true }, "duplicate-terminal-event", 100],
-    ["stderr", { stderrByteLength: 3 }, "app-server-stderr", 100],
+    [
+      "stderr",
+      {
+        stderrByteLength: 3,
+        stderrDiagnostic: {
+          text: "err",
+          byteLength: 3,
+          sha256: digest("err"),
+          truncated: false,
+          redacted: false,
+          unsupported: false,
+        },
+      },
+      "app-server-stderr",
+      100,
+    ],
     ["nonzero exit", { closeExitCode: 7 }, "app-server-nonzero-exit", 100],
     [
       "unsafe remote control",
@@ -786,6 +803,9 @@ test("fresh evaluator rejects missing or duplicate terminals, stderr, nonzero ex
         }),
       );
       assert.equal(evidence.blockers.includes(blocker), true);
+      if (name === "stderr") {
+        assert.equal(evidence.appServer.stderr.diagnostic.text, "err");
+      }
       assert.equal(session.closed, true);
     });
   }

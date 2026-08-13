@@ -65,6 +65,8 @@ const ALLOWED_EXPECTED_CODEX_VERSIONS = new Set([
 ]);
 export const OUTPUT_LIMIT_BYTES = 64 * 1024;
 export const EVENT_LIMIT = 256;
+const STDERR_CAPTURE_SIDE_BYTES = 1536;
+const STDERR_CAPTURE_BYTES = STDERR_CAPTURE_SIDE_BYTES * 2;
 const MESSAGE_DELTA_COUNT_LIMIT = EVENT_LIMIT * 16;
 const MESSAGE_DELTA_BYTES_LIMIT = OUTPUT_LIMIT_BYTES * 16;
 export const TURN_TIMEOUT_MS = 180_000;
@@ -319,6 +321,9 @@ const CREDENTIAL_TOKEN_PATTERN_GLOBAL = new RegExp(
 );
 const DIAGNOSTIC_INLINE_SECRET = new RegExp(
   [
+    "-----BEGIN [A-Z0-9 ]*PRIVATE KEY-----[\\s\\S]*?-----END [A-Z0-9 ]*PRIVATE KEY-----",
+    "ssh-(?:rsa|ed25519)\\s+[A-Za-z0-9+/=]{20,}",
+    "(?<![^\\r\\n])[\\t ]*[A-Za-z0-9+/]{40,}={0,2}[\\t ]*(?![^\\r\\n])",
     "(?:authorization|proxy-authorization|cookie|set-cookie)\\s*[:=]\\s*[^\\r\\n,]+",
     "bearer\\s+[A-Za-z0-9._~+/=-]{8,}",
     "(?:api[-_]?key|password|secret|token)\\s*[:=]\\s*['\\x22]?[^\\s,;'\\x22]{8,}",
@@ -326,15 +331,35 @@ const DIAGNOSTIC_INLINE_SECRET = new RegExp(
   ].join("|"),
   "giu",
 );
+const DIAGNOSTIC_DOUBLE_QUOTED_FILE_URL =
+  /"file:\/\/\/[^"<>|\r\n]+"/giu;
+const DIAGNOSTIC_SINGLE_QUOTED_FILE_URL =
+  /'file:\/\/\/[^'<>|\r\n]+'/giu;
+const DIAGNOSTIC_FILE_URL = /file:\/\/\/[^"<>|\r\n]*/giu;
+const DIAGNOSTIC_DOUBLE_QUOTED_WINDOWS_PATH =
+  /"(?:[A-Za-z]:[\\/]|\\\\)[^"<>|\r\n]+"/gu;
+const DIAGNOSTIC_SINGLE_QUOTED_WINDOWS_PATH =
+  /'(?:[A-Za-z]:[\\/]|\\\\)[^'<>|\r\n]+'/gu;
+const DIAGNOSTIC_DOUBLE_QUOTED_POSIX_PATH =
+  /"\/(?:[^"<>|\r\n]+)"/gu;
+const DIAGNOSTIC_SINGLE_QUOTED_POSIX_PATH =
+  /'\/(?:[^'<>|\r\n]+)'/gu;
 const DIAGNOSTIC_WINDOWS_PATH =
-  /(?:[A-Za-z]:\\|\\\\)[^\s"'<>|\r\n]+/gu;
+  /(?:(?<![\p{L}\p{N}_])[A-Za-z]:[\\/]|\\\\)[^"<>|\r\n]*/gu;
 const DIAGNOSTIC_POSIX_PATH =
-  /(?<![:/])\/(?:[^/\s"'<>|\r\n]+\/)+[^/\s"'<>|\r\n]+/gu;
+  /(?<![\p{L}\p{N}_:/])\/(?:[^"<>|\r\n]*)/gu;
 
 function redactDiagnosticString(value) {
   let text = value;
   text = text.replace(DIAGNOSTIC_INLINE_SECRET, "[REDACTED]");
   text = text.replace(CREDENTIAL_TOKEN_PATTERN_GLOBAL, "[REDACTED]");
+  text = text.replace(DIAGNOSTIC_DOUBLE_QUOTED_FILE_URL, "[REDACTED_PATH]");
+  text = text.replace(DIAGNOSTIC_SINGLE_QUOTED_FILE_URL, "[REDACTED_PATH]");
+  text = text.replace(DIAGNOSTIC_FILE_URL, "[REDACTED_PATH]");
+  text = text.replace(DIAGNOSTIC_DOUBLE_QUOTED_WINDOWS_PATH, "[REDACTED_PATH]");
+  text = text.replace(DIAGNOSTIC_SINGLE_QUOTED_WINDOWS_PATH, "[REDACTED_PATH]");
+  text = text.replace(DIAGNOSTIC_DOUBLE_QUOTED_POSIX_PATH, "[REDACTED_PATH]");
+  text = text.replace(DIAGNOSTIC_SINGLE_QUOTED_POSIX_PATH, "[REDACTED_PATH]");
   text = text.replace(DIAGNOSTIC_WINDOWS_PATH, "[REDACTED_PATH]");
   text = text.replace(DIAGNOSTIC_POSIX_PATH, "[REDACTED_PATH]");
   return { text, redacted: text !== value };
@@ -2273,6 +2298,8 @@ export async function openAppServer(
   );
   let stderrBytes = 0;
   const stderrHash = createHash("sha256");
+  let stderrPrefix = Buffer.alloc(0);
+  let stderrTail = Buffer.alloc(0);
   let stderrDigest = null;
   let processExitCode = null;
   let processCloseConfirmed = false;
@@ -2298,8 +2325,20 @@ export async function openAppServer(
     return error;
   };
   child.stderr.on("data", (chunk) => {
-    stderrBytes += chunk.length;
-    stderrHash.update(chunk);
+    const bytes = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
+    stderrBytes += bytes.length;
+    stderrHash.update(bytes);
+    if (stderrPrefix.length < STDERR_CAPTURE_BYTES) {
+      const remaining = STDERR_CAPTURE_BYTES - stderrPrefix.length;
+      stderrPrefix = Buffer.concat([stderrPrefix, bytes.subarray(0, remaining)]);
+    }
+    const tailInput = bytes.length > STDERR_CAPTURE_SIDE_BYTES
+      ? bytes.subarray(bytes.length - STDERR_CAPTURE_SIDE_BYTES)
+      : bytes;
+    stderrTail = Buffer.concat([stderrTail, tailInput]);
+    if (stderrTail.length > STDERR_CAPTURE_SIDE_BYTES) {
+      stderrTail = stderrTail.subarray(stderrTail.length - STDERR_CAPTURE_SIDE_BYTES);
+    }
   });
   child.once("close", (code) => {
     processCloseConfirmed = true;
@@ -2421,11 +2460,27 @@ export async function openAppServer(
         };
       },
       get stderr() {
+        const captureTruncated = stderrBytes > STDERR_CAPTURE_BYTES;
+        const prefixSide = stderrPrefix.subarray(0, STDERR_CAPTURE_SIDE_BYTES);
+        const prefixLineEnd = prefixSide.lastIndexOf(0x0a);
+        const tailLineStart = stderrTail.indexOf(0x0a);
+        const diagnosticSource = captureTruncated
+          ? Buffer.concat([
+              prefixLineEnd < 0
+                ? Buffer.alloc(0)
+                : prefixSide.subarray(0, prefixLineEnd + 1),
+              Buffer.from("\n[TRUNCATED:stderr-middle]\n", "utf8"),
+              tailLineStart < 0
+                ? Buffer.alloc(0)
+                : stderrTail.subarray(tailLineStart + 1),
+            ]).toString("utf8")
+          : stderrPrefix.toString("utf8");
         return {
-          redacted: true,
           truncated: stderrBytes > OUTPUT_LIMIT_BYTES,
           byteLength: stderrBytes,
           sha256: stderrDigest ?? stderrHash.copy().digest("hex"),
+          captureTruncated,
+          diagnostic: sanitizeDiagnosticEvidence(diagnosticSource, OUTPUT_LIMIT_BYTES),
         };
       },
       async close() {

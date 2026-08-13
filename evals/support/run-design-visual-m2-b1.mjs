@@ -1240,6 +1240,42 @@ function retainFailureObjectFields(value, fields, label) {
   return retained;
 }
 
+function retainAppServerStderr(value) {
+  if (diagnosticProxy(value) || !diagnosticContainer(value)) {
+    return { diagnostic: sanitizeDiagnosticEvidence("[UNSUPPORTED:stderr]") };
+  }
+  const retained = {};
+  const byteLength = safeDiagnosticOwnData(value, "byteLength");
+  retained.byteLength = Number.isSafeInteger(byteLength.value) && byteLength.value >= 0
+    ? byteLength.value
+    : "UNVERIFIED";
+  const digest = safeDiagnosticOwnData(value, "sha256");
+  retained.sha256 = typeof digest.value === "string" && /^[a-f0-9]{64}$/u.test(digest.value)
+    ? digest.value
+    : "UNVERIFIED";
+  for (const key of ["truncated", "captureTruncated"]) {
+    const property = safeDiagnosticOwnData(value, key);
+    retained[key] = typeof property.value === "boolean" ? property.value : "UNVERIFIED";
+  }
+  const diagnostic = safeDiagnosticOwnData(value, "diagnostic");
+  if (diagnostic.found) {
+    retained.diagnostic = preserveSanitizedDiagnostic(diagnostic.value, 16 * 1024) ??
+      sanitizeDiagnosticEvidence("[UNSUPPORTED:stderr-diagnostic]");
+  }
+  return retained;
+}
+
+function retainAppServer(value) {
+  const retained = retainFailureObjectFields(
+    value,
+    ["processExitCode", "remoteControl"],
+    "App Server",
+  );
+  const stderr = safeDiagnosticOwnData(value, "stderr");
+  if (stderr.found) retained.stderr = retainAppServerStderr(stderr.value);
+  return retained;
+}
+
 function minimalPartialEvidence(value, projectionError = null) {
   const primaryCauseProperty = safeDiagnosticOwnData(value, "primaryCause");
   const blockersProperty = safeDiagnosticOwnData(value, "blockers");
@@ -1256,11 +1292,7 @@ function minimalPartialEvidence(value, projectionError = null) {
       retainDiagnosticValue(item, "failure blocker", 256)),
     blockerArrayLength: blockers.count ?? "UNVERIFIED",
     appServer: appServerProperty.found
-      ? retainFailureObjectFields(
-          appServerProperty.value,
-          ["processExitCode", "stderr", "remoteControl"],
-          "App Server",
-        )
+      ? retainAppServer(appServerProperty.value)
       : {},
     events: { arrayLength: eventCount ?? "UNVERIFIED" },
     projectionError: projectionError === null
@@ -1306,11 +1338,7 @@ function prioritizedPartialEvidence(value) {
       retainDiagnosticValue(item, "failure blocker", 512)),
     blockerArrayLength: blockers.count ?? "UNVERIFIED",
     appServer: appServerProperty.found
-      ? retainFailureObjectFields(
-          appServerProperty.value,
-          ["processExitCode", "stderr", "remoteControl"],
-          "App Server",
-        )
+      ? retainAppServer(appServerProperty.value)
       : {},
     thread: threadProperty.found
       ? retainFailureObjectFields(threadProperty.value, ["id"], "thread")

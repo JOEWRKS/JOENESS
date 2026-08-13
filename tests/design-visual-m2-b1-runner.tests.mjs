@@ -1239,6 +1239,56 @@ test("M2B1 prioritized diagnostics preserve trusted sanitizer flags", async (t) 
   assert.equal(blocked.partialEvidence.primaryCause.details.budgetExceeded, true);
 });
 
+test("M2B1 prioritized diagnostics preserve structured App Server stderr", async (t) => {
+  const subject = await loadSubject();
+  const { root, planPath } = await fixtureRoot(t);
+  const dependencies = successfulDependencies();
+  const diagnostic = {
+    text: "warning [REDACTED]",
+    byteLength: 18,
+    sha256: digest("warning [REDACTED]"),
+    truncated: false,
+    redacted: true,
+    unsupported: false,
+  };
+  dependencies.runTurn = async (options) => {
+    options.session.closed = true;
+    options.session.processExitCode = 0;
+    const error = new Error("fresh evaluator turn validation failed", {
+      cause: new Error("fresh evaluator evidence is unsafe"),
+    });
+    error.freshEvaluatorEvidence = {
+      primaryCause: { message: "fresh evaluator evidence is unsafe" },
+      blockers: ["app-server-stderr"],
+      events: Array.from({ length: 40 }, (_, index) => ({
+        method: index === 39 ? "turn/completed" : "item/completed",
+        padding: "x".repeat(4096),
+      })),
+      appServer: {
+        processExitCode: 0,
+        stderr: {
+          byteLength: 383,
+          sha256: "a".repeat(64),
+          truncated: false,
+          captureTruncated: false,
+          diagnostic,
+        },
+      },
+    };
+    throw error;
+  };
+
+  await assert.rejects(
+    subject.runDesignVisualM2B1({ repositoryRoot: root, planPath, ...dependencies }),
+    /fresh evaluator turn validation failed/,
+  );
+  const blocked = dependencies.writes.find(({ file }) => file.endsWith("blocked.json")).value;
+  assert.equal(blocked.partialEvidence.appServer.stderr.byteLength, 383);
+  assert.equal(blocked.partialEvidence.appServer.stderr.sha256, "a".repeat(64));
+  assert.equal(blocked.partialEvidence.appServer.stderr.captureTruncated, false);
+  assert.deepEqual(blocked.partialEvidence.appServer.stderr.diagnostic, diagnostic);
+});
+
 test("M2B1 prioritized diagnostics reject live proxy traps without invoking them", async (t) => {
   const subject = await loadSubject();
   const { root, planPath } = await fixtureRoot(t);

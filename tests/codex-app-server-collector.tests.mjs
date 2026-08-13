@@ -501,6 +501,51 @@ test("diagnostic sanitizer catches camel-case credential keys and generic absolu
   assert.equal(evidence.redacted, true);
 });
 
+test("diagnostic sanitizer redacts private-key material and paths with spaces", () => {
+  const privateKey = "-----BEGIN PRIVATE KEY-----\nSYNTHETIC_PRIVATE_KEY_BODY\n-----END PRIVATE KEY-----";
+  const sshKey = `ssh-ed25519 ${"A".repeat(48)}`;
+  const evidence = sanitizeDiagnosticEvidence(
+    `failed at \"C:\\Users\\O'Brien\\비밀 폴더\\app.log\" and \"/Users/O'Brien/비밀 폴더/app.log\"\n${privateKey}\n${sshKey}`,
+    4096,
+  );
+  const serialized = JSON.stringify(evidence);
+  assert.equal(evidence.redacted, true);
+  assert.equal(serialized.includes("O'Brien"), false);
+  assert.equal(serialized.includes("비밀 폴더"), false);
+  assert.equal(serialized.includes("SYNTHETIC_PRIVATE_KEY_BODY"), false);
+  assert.equal(serialized.includes("ssh-ed25519"), false);
+  assert.equal(serialized.includes("A".repeat(24)), false);
+});
+
+test("diagnostic sanitizer preserves slash-separated technical names", () => {
+  const diagnostic = [
+    "design/visual schema rejected",
+    "text/plain parse failed",
+    "module foo/bar: invalid export",
+    "https://example.com/docs/error remains available",
+  ].join("\n");
+  const evidence = sanitizeDiagnosticEvidence(diagnostic, 4096);
+  assert.equal(evidence.text, diagnostic);
+  assert.equal(evidence.redacted, false);
+});
+
+test("diagnostic sanitizer redacts forward-slash Windows paths and file URLs", () => {
+  const evidence = sanitizeDiagnosticEvidence(
+    [
+      `at \"C:/Users/O'Brien/비밀 폴더/app.log\"`,
+      `at file:///C:/Users/O'Brien/비밀%20폴더/app.mjs:2`,
+      `at file:///Users/홍 길동/비밀 폴더/app.mjs:3`,
+      `source=C:/Users/O'Brien/private/app.ts`,
+    ].join("\n"),
+    4096,
+  );
+  const serialized = JSON.stringify(evidence);
+  assert.equal(evidence.redacted, true);
+  assert.equal(serialized.includes("O'Brien"), false);
+  assert.equal(serialized.includes("비밀"), false);
+  assert.equal(serialized.includes("file:///C:/Users"), false);
+});
+
 test("runtime version pins are explicit and fail closed", () => {
   assert.equal(EXPECTED_CODEX_VERSION, "codex-cli 0.145.0");
   assert.equal(
@@ -1871,6 +1916,134 @@ function fakeAppServerRuntime(runRoot) {
     mcpInventory: [],
   };
 }
+
+test("App Server stderr keeps a sanitized short diagnostic with the exact full hash", async (t) => {
+  const runRoot = await createTestRoot(t);
+  const child = createFakeAppServerChild({
+    initializeResult: {
+      userAgent: "test-agent",
+      codexHome: runRoot,
+      platformFamily: "windows",
+      platformOs: "windows",
+    },
+  });
+  const session = await openAppServer(
+    fakeAppServerRuntime(runRoot),
+    {},
+    { spawnProcess: () => child },
+  );
+  const secret = "sk-SYNTHETIC_TEST_ONLY_abcdefghijklmnop";
+  const raw = `warning apiKey=${secret} at C:\\Users\\private\\app.log`;
+  child.stderr.write(raw);
+
+  const snapshot = session.stderr;
+  assert.equal(snapshot.byteLength, Buffer.byteLength(raw));
+  assert.equal(snapshot.sha256, sha256(raw));
+  assert.equal(snapshot.captureTruncated, false);
+  assert.equal(snapshot.diagnostic.redacted, true);
+  assert.equal(JSON.stringify(snapshot).includes(secret), false);
+  assert.equal(JSON.stringify(snapshot).includes("C:\\Users\\private"), false);
+
+  child.confirmClose(0, null);
+  await session.close();
+});
+
+test("App Server stderr bounds its diagnostic while hashing the complete stream", async (t) => {
+  const runRoot = await createTestRoot(t);
+  const child = createFakeAppServerChild({
+    initializeResult: {
+      userAgent: "test-agent",
+      codexHome: runRoot,
+      platformFamily: "windows",
+      platformOs: "windows",
+    },
+  });
+  const session = await openAppServer(
+    fakeAppServerRuntime(runRoot),
+    {},
+    { spawnProcess: () => child },
+  );
+  const raw = `head-marker\n${"x".repeat(24 * 1024)}\ntail-marker`;
+  child.stderr.write(raw);
+
+  const snapshot = session.stderr;
+  assert.equal(snapshot.byteLength, Buffer.byteLength(raw));
+  assert.equal(snapshot.sha256, sha256(raw));
+  assert.equal(snapshot.captureTruncated, true);
+  assert.equal(JSON.stringify(snapshot.diagnostic).includes("head-marker"), true);
+  assert.equal(JSON.stringify(snapshot.diagnostic).includes("tail-marker"), true);
+  assert.equal(Buffer.byteLength(JSON.stringify(snapshot.diagnostic)) < 16 * 1024, true);
+
+  child.confirmClose(0, null);
+  await session.close();
+});
+
+test("App Server stderr head and tail windows do not overlap", async (t) => {
+  const runRoot = await createTestRoot(t);
+  const child = createFakeAppServerChild({
+    initializeResult: {
+      userAgent: "test-agent",
+      codexHome: runRoot,
+      platformFamily: "windows",
+      platformOs: "windows",
+    },
+  });
+  const session = await openAppServer(
+    fakeAppServerRuntime(runRoot),
+    {},
+    { spawnProcess: () => child },
+  );
+  const lines = Array.from({ length: 400 }, (_, index) => `line-${index.toString().padStart(3, "0")}`);
+  const raw = lines.join("\n");
+  assert.equal(Buffer.byteLength(raw) > 3072, true);
+  assert.equal(Buffer.byteLength(raw) < 4608, true);
+  child.stderr.write(raw);
+
+  const snapshot = session.stderr;
+  const retained = snapshot.diagnostic.text ??
+    `${snapshot.diagnostic.head ?? ""}${snapshot.diagnostic.tail ?? ""}`;
+  assert.equal(snapshot.captureTruncated, true);
+  assert.equal(snapshot.diagnostic.budgetExceeded, undefined);
+  assert.equal((retained.match(/line-250/gu) ?? []).length <= 1, true);
+
+  child.confirmClose(0, null);
+  await session.close();
+});
+
+test("App Server stderr drops partial lines at both capture boundaries", async (t) => {
+  const runRoot = await createTestRoot(t);
+  const child = createFakeAppServerChild({
+    initializeResult: {
+      userAgent: "test-agent",
+      codexHome: runRoot,
+      platformFamily: "windows",
+      platformOs: "windows",
+    },
+  });
+  const session = await openAppServer(
+    fakeAppServerRuntime(runRoot),
+    {},
+    { spawnProcess: () => child },
+  );
+  const secret = "sk-SYNTHETIC_TEST_ONLY_abcdefghijklmnop";
+  const head = `safe-head\n${"h".repeat(1522)}${secret}`;
+  const remainingSecret = secret.slice(5);
+  const safeTail = "safe-tail";
+  const tail = `${remainingSecret}${"t".repeat(1536 - remainingSecret.length - 1 - safeTail.length)}\n${safeTail}`;
+  const raw = `${head}${"m".repeat(8 * 1024)}${secret.slice(0, 5)}${tail}`;
+  child.stderr.write(raw);
+
+  const snapshot = session.stderr;
+  const serialized = JSON.stringify(snapshot.diagnostic);
+  assert.equal(snapshot.captureTruncated, true);
+  assert.equal(serialized.includes("safe-head"), true);
+  assert.equal(serialized.includes("safe-tail"), true);
+  assert.equal(serialized.includes("sk-S"), false);
+  assert.equal(serialized.includes("SYNTHETIC_TEST_ONLY"), false);
+
+  child.confirmClose(0, null);
+  await session.close();
+});
 
 test("App Server close rejects within a bound when kill is not confirmed", async (t) => {
   const runRoot = await createTestRoot(t);
