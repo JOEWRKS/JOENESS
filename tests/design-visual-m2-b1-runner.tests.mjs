@@ -43,6 +43,16 @@ const ATTACHMENT_SEMANTICS_PLAN_PATH = path.join(
   ROOT,
   "evals/skill-contracts/design-visual-m2-b1-smoke-plan-v7.json",
 );
+const ATTACHED_IMAGE_DESIGN_PROMPT = Object.freeze({
+  path: "evals/skill-contracts/design-visual-m2-design-prompt-v6.md",
+  bytes: 2847,
+  sha256: "fcf9baad94269d11e4f744a65b47b4989872cdc030d7aa017405efdc34db55f5",
+});
+const ATTACHED_IMAGE_VISUAL_PROMPT = Object.freeze({
+  path: "evals/skill-contracts/design-visual-m2-visual-prompt-v10.md",
+  bytes: 3051,
+  sha256: "46285875db42fdf6f89ed7792f40dcc6b5ad64400923184aa0e946e784015eb0",
+});
 
 async function loadSubject() {
   try {
@@ -2911,8 +2921,227 @@ test("M2B1 actual v7 plan pins the support commit without pinning current worktr
     assert.equal(committed.stdout.byteLength, pin.bytes);
     assert.equal(digest(committed.stdout), pin.sha256);
   }
-  for (const output of Object.values(validated.outputs)) {
+  for (const [key, output] of Object.entries(validated.outputs)) {
+    if (key === "blocked") continue;
     await assertPathMissing(path.join(ROOT, ...output.split("/")));
   }
+  const blocked = await readFile(path.join(ROOT, ...validated.outputs.blocked.split("/")));
+  assert.equal(blocked.byteLength, 13819);
+  assert.equal(digest(blocked), "98342a6bc909960d4c934af2488a285514cccfe32510730d2fe6181e7269ddb9");
   assert.equal(v7Bytes.at(-1), 0x0a);
+});
+
+test("M2B1 schema 8 permits only the two attached-image prompt pins to change", async (t) => {
+  const subject = await loadSubject();
+  const v7 = JSON.parse(await readFile(ATTACHMENT_SEMANTICS_PLAN_PATH, "utf8"));
+  const v8 = structuredClone(v7);
+  v8.schemaVersion = 8;
+  v8.id = "design-visual-m2-b1-smoke-plan-v8";
+  v8.predecessor = {
+    plan: {
+      path: "evals/skill-contracts/design-visual-m2-b1-smoke-plan-v7.json",
+      bytes: 5703,
+      sha256: "5be462158df803197ec2d5be1d2ae7c255591a5db52ffe01aebe60d5b2a6964e",
+    },
+    blockedAttempt: {
+      path: "evals/skill-contracts/design-visual-m2-b1-v7-blocked.json",
+      bytes: 13819,
+      sha256: "98342a6bc909960d4c934af2488a285514cccfe32510730d2fe6181e7269ddb9",
+    },
+    latestReceipt: {
+      path: "evals/skill-contracts/design-visual-m2-attempt-index-v9.json",
+      bytes: 9042,
+      sha256: "b11f75296eb5a6f53993bae7cc2ab776f00c07b27a0700e2d6c17fc177384933",
+    },
+    methodChange: "attached-image-only-design-and-visual-evaluator-instructions-no-path-open-or-view-image-no-acceptance-criteria-change",
+    attemptPolicy: "one-method-changed-attempt-no-automatic-retry",
+  };
+  v8.inputs.designPrompt = structuredClone(ATTACHED_IMAGE_DESIGN_PROMPT);
+  v8.inputs.visualPrompt = structuredClone(ATTACHED_IMAGE_VISUAL_PROMPT);
+  v8.outputs = Object.fromEntries(
+    Object.entries(v7.outputs).map(([key, value]) => [key, value.replace("-v7-", "-v8-")]),
+  );
+  const validated = subject.validateDesignVisualM2B1Plan(v8);
+  assert.equal(validated.schemaVersion, 8);
+  assert.equal(validated.id, "design-visual-m2-b1-smoke-plan-v8");
+  assert.deepEqual(validated.predecessor, v8.predecessor);
+  assert.deepEqual(validated.inputs.designPrompt, ATTACHED_IMAGE_DESIGN_PROMPT);
+  assert.deepEqual(validated.inputs.visualPrompt, ATTACHED_IMAGE_VISUAL_PROMPT);
+  assert.equal(Object.values(validated.outputs).every((file) => file.includes("-v8-")), true);
+  assert.equal(Object.values(validated.outputs).some((file) => file.includes("-v7-")), false);
+  for (const key of ["runtime", "candidates", "claimScope", "originalDetail", "boundaries"]) {
+    assert.deepEqual(validated[key], v7[key]);
+  }
+  for (const key of [
+    "authority", "frozenFacts", "designSkill", "visualSkill", "durableEvidence",
+    "concreteDefect", "approvedReference", "approvedSource",
+  ]) {
+    assert.deepEqual(validated.inputs[key], v7.inputs[key], key);
+  }
+  assert.equal(digest(JSON.stringify(subject.designSchema())), "83057a2d2746c3be1741dadb4a39a7fb8375c988d3bbc6fb120f8ff03d7f002b");
+  assert.equal(digest(JSON.stringify(subject.visualSchema("sample-a"))), "64682110930af7251454f45e7b4963de5f5bb16891c5a77c34b0b07b9ade5652");
+  assert.equal(digest(JSON.stringify(subject.visualSchema("sample-b"))), "a71384d54076fa83b8bcce9f033947ec6a5417fe72cf9e8d47df23fe9b7847df");
+
+  for (const [label, mutation] of [
+    ["old Design prompt", (plan) => { plan.inputs.designPrompt = structuredClone(v7.inputs.designPrompt); }],
+    ["old Visual prompt", (plan) => { plan.inputs.visualPrompt = structuredClone(v7.inputs.visualPrompt); }],
+    ["non-prompt input drift", (plan) => { plan.inputs.designSkill = structuredClone(plan.inputs.visualSkill); }],
+    ["runtime drift", (plan) => { plan.runtime.retryCount = 1; }],
+    ["candidate drift", (plan) => { plan.candidates.reverse(); }],
+    ["claim-scope drift", (plan) => { plan.claimScope.variant = "Pixel"; }],
+    ["original-detail drift", (plan) => { plan.originalDetail = "VERIFIED"; }],
+    ["boundary drift", (plan) => { plan.boundaries.states = "VERIFIED"; }],
+    ["predecessor drift", (plan) => { plan.predecessor.plan.sha256 = "0".repeat(64); }],
+    ["method drift", (plan) => { plan.predecessor.methodChange = "prompt-change"; }],
+    ["output reuse", (plan) => { plan.outputs.summary = v7.outputs.summary; }],
+  ]) {
+    const changed = structuredClone(v8);
+    mutation(changed);
+    if (label === "non-prompt input drift") {
+      changed.source = {
+        repositoryCommit: "af1c76c1113e6190f16dc9f9c5640d1377900e94",
+        runner: {
+          path: "evals/support/run-design-visual-m2-b1.mjs",
+          bytes: 101591,
+          sha256: "52123e599efea2d4d8354c9690e006514df79a621509de778dce329628961c98",
+        },
+        freshTurnAdapter: structuredClone(v7.source.freshTurnAdapter),
+        collector: structuredClone(v7.source.collector),
+      };
+      const fixture = await successorFixtureRoot(t, changed);
+      await assert.rejects(subject.preflightDesignVisualM2B1({
+        repositoryRoot: fixture.root,
+        planPath: fixture.planPath,
+        gitStatus: async () => "",
+        gitIdentity: async (_root, sourceCommit, predecessorSourceCommit) => {
+          assert.equal(sourceCommit, changed.source.repositoryCommit);
+          assert.equal(predecessorSourceCommit, v7.source.repositoryCommit);
+          return sourceCommit;
+        },
+        gitReadBlob: copiedFixtureGitReadBlob(changed),
+      }), /contract.*input|input.*contract|evaluator contract/iu, label);
+    } else {
+      assert.throws(
+        () => subject.validateDesignVisualM2B1Plan(changed),
+        /prompt|runtime|candidate|scope|detail|boundar|predecessor|method|output|generation|malformed|differs/iu,
+        label,
+      );
+    }
+  }
+});
+
+test("M2B1 schema 8 rejects an unchanged method source commit or unchanged source blobs", async (t) => {
+  const subject = await loadSubject();
+  const v7 = JSON.parse(await readFile(ATTACHMENT_SEMANTICS_PLAN_PATH, "utf8"));
+  const unchanged = structuredClone(v7);
+  unchanged.schemaVersion = 8;
+  unchanged.id = "design-visual-m2-b1-smoke-plan-v8";
+  unchanged.predecessor = {
+    plan: {
+      path: "evals/skill-contracts/design-visual-m2-b1-smoke-plan-v7.json",
+      bytes: 5703,
+      sha256: "5be462158df803197ec2d5be1d2ae7c255591a5db52ffe01aebe60d5b2a6964e",
+    },
+    blockedAttempt: {
+      path: "evals/skill-contracts/design-visual-m2-b1-v7-blocked.json",
+      bytes: 13819,
+      sha256: "98342a6bc909960d4c934af2488a285514cccfe32510730d2fe6181e7269ddb9",
+    },
+    latestReceipt: {
+      path: "evals/skill-contracts/design-visual-m2-attempt-index-v9.json",
+      bytes: 9042,
+      sha256: "b11f75296eb5a6f53993bae7cc2ab776f00c07b27a0700e2d6c17fc177384933",
+    },
+    methodChange: "attached-image-only-design-and-visual-evaluator-instructions-no-path-open-or-view-image-no-acceptance-criteria-change",
+    attemptPolicy: "one-method-changed-attempt-no-automatic-retry",
+  };
+  unchanged.inputs.designPrompt = structuredClone(ATTACHED_IMAGE_DESIGN_PROMPT);
+  unchanged.inputs.visualPrompt = structuredClone(ATTACHED_IMAGE_VISUAL_PROMPT);
+  unchanged.outputs = Object.fromEntries(
+    Object.entries(v7.outputs).map(([key, value]) => [key, value.replace("-v7-", "-v8-")]),
+  );
+
+  const sameCommitFixture = await successorFixtureRoot(t, unchanged);
+  await assert.rejects(subject.preflightDesignVisualM2B1({
+    repositoryRoot: sameCommitFixture.root,
+    planPath: sameCommitFixture.planPath,
+    gitStatus: async () => "",
+    gitIdentity: async (_root, sourceCommit) => sourceCommit,
+    gitReadBlob: copiedFixtureGitReadBlob(unchanged),
+  }), /source.*unchanged|method.*source/iu);
+
+  const distinctCommitSameBlobs = structuredClone(unchanged);
+  distinctCommitSameBlobs.source.repositoryCommit = "ded8dba1a6bec29ef1810be9a102b8553b542f8a";
+  const sameBlobFixture = await successorFixtureRoot(t, unchanged);
+  await writeFile(
+    sameBlobFixture.planPath,
+    JSON.stringify(distinctCommitSameBlobs, null, 2) + "\n",
+  );
+  await assert.rejects(subject.preflightDesignVisualM2B1({
+    repositoryRoot: sameBlobFixture.root,
+    planPath: sameBlobFixture.planPath,
+    gitStatus: async () => "",
+    gitIdentity: async (_root, sourceCommit) => sourceCommit,
+    gitReadBlob: async (_root, implementationCommit, sourcePath) => {
+      assert.equal(implementationCommit, distinctCommitSameBlobs.source.repositoryCommit);
+      const bytes = await execFile(
+        "git",
+        ["show", `${v7.source.repositoryCommit}:${sourcePath}`],
+        { cwd: ROOT, encoding: "buffer", maxBuffer: 1024 * 1024 },
+      );
+      return bytes.stdout;
+    },
+  }), /source.*unchanged|method.*source/iu);
+});
+
+test("M2B1 schema 8 default Git identity rejects a method-source rollback", async (t) => {
+  const subject = await loadSubject();
+  const v7 = JSON.parse(await readFile(ATTACHMENT_SEMANTICS_PLAN_PATH, "utf8"));
+  const rollback = structuredClone(v7);
+  rollback.schemaVersion = 8;
+  rollback.id = "design-visual-m2-b1-smoke-plan-v8";
+  rollback.predecessor = {
+    plan: {
+      path: "evals/skill-contracts/design-visual-m2-b1-smoke-plan-v7.json",
+      bytes: 5703,
+      sha256: "5be462158df803197ec2d5be1d2ae7c255591a5db52ffe01aebe60d5b2a6964e",
+    },
+    blockedAttempt: {
+      path: "evals/skill-contracts/design-visual-m2-b1-v7-blocked.json",
+      bytes: 13819,
+      sha256: "98342a6bc909960d4c934af2488a285514cccfe32510730d2fe6181e7269ddb9",
+    },
+    latestReceipt: {
+      path: "evals/skill-contracts/design-visual-m2-attempt-index-v9.json",
+      bytes: 9042,
+      sha256: "b11f75296eb5a6f53993bae7cc2ab776f00c07b27a0700e2d6c17fc177384933",
+    },
+    methodChange: "attached-image-only-design-and-visual-evaluator-instructions-no-path-open-or-view-image-no-acceptance-criteria-change",
+    attemptPolicy: "one-method-changed-attempt-no-automatic-retry",
+  };
+  rollback.inputs.designPrompt = structuredClone(ATTACHED_IMAGE_DESIGN_PROMPT);
+  rollback.inputs.visualPrompt = structuredClone(ATTACHED_IMAGE_VISUAL_PROMPT);
+  rollback.outputs = Object.fromEntries(
+    Object.entries(v7.outputs).map(([key, value]) => [key, value.replace("-v7-", "-v8-")]),
+  );
+  rollback.source = {
+    repositoryCommit: "af1c76c1113e6190f16dc9f9c5640d1377900e94",
+    runner: {
+      path: "evals/support/run-design-visual-m2-b1.mjs",
+      bytes: 101591,
+      sha256: "52123e599efea2d4d8354c9690e006514df79a621509de778dce329628961c98",
+    },
+    freshTurnAdapter: structuredClone(v7.source.freshTurnAdapter),
+    collector: structuredClone(v7.source.collector),
+  };
+  const planRoot = await mkdtemp(path.join(ROOT, ".m2b1-rollback-"));
+  t.after(() => rm(planRoot, { recursive: true, force: true }));
+  const planPath = path.join(planRoot, "plan.json");
+  await writeFile(planPath, JSON.stringify(rollback, null, 2) + "\n");
+
+  await assert.rejects(subject.preflightDesignVisualM2B1({
+    repositoryRoot: ROOT,
+    planPath,
+    gitStatus: async () => "",
+  }), /predecessor.*ancestor|descendant.*predecessor|method.*rollback/iu);
 });

@@ -187,6 +187,23 @@ const M2B1_PREDECESSORS = Object.freeze({
       sha256: "c43e90ffb5f85ed0d2fb917beb2be0405337a338377c0fa42023f9b3a3c51dfb",
     }),
   }),
+  8: Object.freeze({
+    plan: Object.freeze({
+      path: "evals/skill-contracts/design-visual-m2-b1-smoke-plan-v7.json",
+      bytes: 5703,
+      sha256: "5be462158df803197ec2d5be1d2ae7c255591a5db52ffe01aebe60d5b2a6964e",
+    }),
+    blockedAttempt: Object.freeze({
+      path: "evals/skill-contracts/design-visual-m2-b1-v7-blocked.json",
+      bytes: 13819,
+      sha256: "98342a6bc909960d4c934af2488a285514cccfe32510730d2fe6181e7269ddb9",
+    }),
+    latestReceipt: Object.freeze({
+      path: "evals/skill-contracts/design-visual-m2-attempt-index-v9.json",
+      bytes: 9042,
+      sha256: "b11f75296eb5a6f53993bae7cc2ab776f00c07b27a0700e2d6c17fc177384933",
+    }),
+  }),
 });
 const M2B1_METHOD_CHANGES = Object.freeze({
   2: "bounded-sanitized-runtime-error-and-primary-cause-capture",
@@ -195,6 +212,33 @@ const M2B1_METHOD_CHANGES = Object.freeze({
   5: "bounded-sanitized-app-server-stderr-diagnostic-retention-no-evaluator-contract-change",
   6: "path-private-controller-image-readback-and-resolved-view-image-error-correlation-no-evaluator-contract-change",
   7: "bounded-path-private-post-validation-image-evidence-retention-and-local-image-attachment-vs-optional-image-view-telemetry-separation-no-evaluator-contract-change",
+  8: "attached-image-only-design-and-visual-evaluator-instructions-no-path-open-or-view-image-no-acceptance-criteria-change",
+});
+const M2B1_PROMPT_PINS = Object.freeze({
+  legacy: Object.freeze({
+    designPrompt: Object.freeze({
+      path: "evals/skill-contracts/design-visual-m2-design-prompt-v5.md",
+      bytes: 2731,
+      sha256: "57a37439e12dccfb96ac3ecd26d96d8150acc5e9a5435f0203b17c41b64a2aef",
+    }),
+    visualPrompt: Object.freeze({
+      path: "evals/skill-contracts/design-visual-m2-visual-prompt-v9.md",
+      bytes: 2963,
+      sha256: "7a59b9263fcbeb768c131e114b277167f5358e63bba2c3d6b5acadcd5a605ac9",
+    }),
+  }),
+  8: Object.freeze({
+    designPrompt: Object.freeze({
+      path: "evals/skill-contracts/design-visual-m2-design-prompt-v6.md",
+      bytes: 2847,
+      sha256: "fcf9baad94269d11e4f744a65b47b4989872cdc030d7aa017405efdc34db55f5",
+    }),
+    visualPrompt: Object.freeze({
+      path: "evals/skill-contracts/design-visual-m2-visual-prompt-v10.md",
+      bytes: 3051,
+      sha256: "46285875db42fdf6f89ed7792f40dcc6b5ad64400923184aa0e946e784015eb0",
+    }),
+  }),
 });
 const M2B1_UNCHANGED_EVALUATOR_CONTRACT_KEYS = Object.freeze([
   "runtime",
@@ -249,7 +293,7 @@ function assertOutputPath(value, label) {
 }
 
 export function validateDesignVisualM2B1Plan(value) {
-  const isSuccessor = [2, 3, 4, 5, 6, 7].includes(value?.schemaVersion);
+  const isSuccessor = [2, 3, 4, 5, 6, 7, 8].includes(value?.schemaVersion);
   const expectedKeys = [
     "schemaVersion", "id", "date",
     ...(isSuccessor ? ["predecessor", "source"] : []),
@@ -260,7 +304,7 @@ export function validateDesignVisualM2B1Plan(value) {
     throw new Error("M2B1 plan is malformed");
   }
   if (
-    ![1, 2, 3, 4, 5, 6, 7].includes(value.schemaVersion) ||
+    ![1, 2, 3, 4, 5, 6, 7, 8].includes(value.schemaVersion) ||
     value.id !== `design-visual-m2-b1-smoke-plan-v${value.schemaVersion}` ||
     typeof value.date !== "string" ||
     !exactKeys(value.runtime, ["codexVersion", "sessionOrder", "retryCount"]) ||
@@ -312,14 +356,17 @@ export function validateDesignVisualM2B1Plan(value) {
     throw new Error("M2B1 plan inputs are malformed");
   }
   for (const key of PLAN_INPUT_KEYS) assertPin(value.inputs[key], `M2B1 ${key}`);
+  const expectedPromptPins = value.schemaVersion === 8
+    ? M2B1_PROMPT_PINS[8]
+    : M2B1_PROMPT_PINS.legacy;
   if (
     value.inputs.authority.path !== "evals/skill-contracts/design-visual-m2-authority-v5.json" ||
     value.inputs.frozenFacts.path !== "evals/skill-contracts/design-visual-m2-authority-v1.json" ||
-    value.inputs.designPrompt.path !== "evals/skill-contracts/design-visual-m2-design-prompt-v5.md" ||
-    value.inputs.visualPrompt.path !== "evals/skill-contracts/design-visual-m2-visual-prompt-v9.md" ||
+    stableStringify(value.inputs.designPrompt) !== stableStringify(expectedPromptPins.designPrompt) ||
+    stableStringify(value.inputs.visualPrompt) !== stableStringify(expectedPromptPins.visualPrompt) ||
     value.inputs.approvedSource.path !== EXPECTED_IMAGE_PATHS.approvedSource
   ) {
-    throw new Error("M2B1 plan exact input path pin is invalid");
+    throw new Error("M2B1 plan exact input path or prompt pin is invalid");
   }
   if (!Array.isArray(value.candidates) || value.candidates.length !== 2) {
     throw new Error("M2B1 plan candidates are malformed");
@@ -377,7 +424,7 @@ export function validateDesignVisualM2B1Plan(value) {
 }
 
 function assertUnchangedM2B1EvaluatorContract(plan, predecessorBytes) {
-  if (![4, 5, 6, 7].includes(plan.schemaVersion)) return;
+  if (![4, 5, 6, 7, 8].includes(plan.schemaVersion)) return;
   let predecessor;
   try {
     predecessor = validateDesignVisualM2B1Plan(
@@ -386,9 +433,23 @@ function assertUnchangedM2B1EvaluatorContract(plan, predecessorBytes) {
   } catch (error) {
     throw new Error("M2B1 predecessor plan contract is unreadable", { cause: error });
   }
-  for (const key of M2B1_UNCHANGED_EVALUATOR_CONTRACT_KEYS) {
+  const unchangedKeys = plan.schemaVersion === 8
+    ? M2B1_UNCHANGED_EVALUATOR_CONTRACT_KEYS.filter((key) => key !== "inputs")
+    : M2B1_UNCHANGED_EVALUATOR_CONTRACT_KEYS;
+  for (const key of unchangedKeys) {
     if (stableStringify(plan[key]) !== stableStringify(predecessor[key])) {
       throw new Error(`M2B1 evaluator contract changed at ${key}`);
+    }
+  }
+  if (plan.schemaVersion === 8) {
+    for (const key of PLAN_INPUT_KEYS) {
+      if (["designPrompt", "visualPrompt"].includes(key)) {
+        if (stableStringify(plan.inputs[key]) === stableStringify(predecessor.inputs[key])) {
+          throw new Error(`M2B1 evaluator prompt did not change at inputs.${key}`);
+        }
+      } else if (stableStringify(plan.inputs[key]) !== stableStringify(predecessor.inputs[key])) {
+        throw new Error(`M2B1 evaluator contract changed at inputs.${key}`);
+      }
     }
   }
 }
@@ -602,7 +663,7 @@ async function defaultGitStatus(root) {
   return result.stdout;
 }
 
-async function defaultGitIdentity(root, implementationCommit) {
+async function defaultGitIdentity(root, implementationCommit, predecessorImplementationCommit) {
   const headResult = await runBuffered("git", ["rev-parse", "HEAD"], { cwd: root });
   if (headResult.processExitCode !== 0 || headResult.stderr !== "") {
     throw new Error("M2B1 Git HEAD readback failed");
@@ -624,6 +685,24 @@ async function defaultGitIdentity(root, implementationCommit) {
   );
   if (ancestorResult.processExitCode !== 0 || ancestorResult.stderr !== "") {
     throw new Error("M2B1 implementation commit is not an ancestor of HEAD");
+  }
+  if (predecessorImplementationCommit !== undefined) {
+    const predecessorResult = await runBuffered(
+      "git",
+      ["cat-file", "-e", `${predecessorImplementationCommit}^{commit}`],
+      { cwd: root },
+    );
+    if (predecessorResult.processExitCode !== 0 || predecessorResult.stderr !== "") {
+      throw new Error("M2B1 predecessor implementation commit is unavailable");
+    }
+    const methodAncestryResult = await runBuffered(
+      "git",
+      ["merge-base", "--is-ancestor", predecessorImplementationCommit, implementationCommit],
+      { cwd: root },
+    );
+    if (methodAncestryResult.processExitCode !== 0 || methodAncestryResult.stderr !== "") {
+      throw new Error("M2B1 method source is not a descendant of predecessor implementation");
+    }
   }
   return head;
 }
@@ -660,28 +739,42 @@ export async function preflightDesignVisualM2B1({
   }
   const plan = validateDesignVisualM2B1Plan(JSON.parse(await readFile(resolvedPlan, "utf8")));
   if (await gitStatus(root) !== "") throw new Error("M2B1 requires a clean repository");
+  let predecessorPlan = null;
+  let predecessorPlanBytes = null;
+  if (plan.predecessor) {
+    const verified = await verifyPinnedFile(root, plan.predecessor.plan, "M2B1 predecessor plan");
+    predecessorPlanBytes = verified.content;
+    try {
+      predecessorPlan = JSON.parse(predecessorPlanBytes.toString("utf8"));
+    } catch (error) {
+      throw new Error("M2B1 predecessor plan contract is unreadable", { cause: error });
+    }
+  }
+  const requiresMethodAncestry = [6, 7, 8].includes(plan.schemaVersion);
+  let predecessorImplementationCommit;
+  if (requiresMethodAncestry) {
+    predecessorImplementationCommit = predecessorPlan?.source?.repositoryCommit;
+    if (!/^[a-f0-9]{40}$/u.test(predecessorImplementationCommit ?? "")) {
+      throw new Error("M2B1 predecessor implementation commit is malformed");
+    }
+    const sourceKeys = ["runner", "freshTurnAdapter", "collector"];
+    const sourcePinsUnchanged = sourceKeys.every((key) =>
+      stableStringify(plan.source[key]) === stableStringify(predecessorPlan.source?.[key]));
+    if (
+      plan.source.repositoryCommit === predecessorImplementationCommit ||
+      sourcePinsUnchanged
+    ) {
+      throw new Error("M2B1 method source is unchanged from predecessor");
+    }
+  }
   const executionHead = plan.source
-    ? await gitIdentity(root, plan.source.repositoryCommit)
+    ? await gitIdentity(root, plan.source.repositoryCommit, predecessorImplementationCommit)
     : null;
   const pins = {};
   for (const [key, pin] of Object.entries(plan.inputs)) {
     pins[key] = await verifyPinnedFile(root, pin, `M2B1 ${key}`);
   }
   if (plan.source) {
-    if ([6, 7].includes(plan.schemaVersion)) {
-      const predecessor = JSON.parse(
-        (await readFile(resolveInside(root, plan.predecessor.plan.path))).toString("utf8"),
-      );
-      const sourceKeys = ["runner", "freshTurnAdapter", "collector"];
-      const sourcePinsUnchanged = sourceKeys.every((key) =>
-        stableStringify(plan.source[key]) === stableStringify(predecessor.source?.[key]));
-      if (
-        plan.source.repositoryCommit === predecessor.source.repositoryCommit ||
-        sourcePinsUnchanged
-      ) {
-        throw new Error("M2B1 method source is unchanged from predecessor");
-      }
-    }
     for (const [key, pin] of Object.entries({
       runner: plan.source.runner,
       freshTurnAdapter: plan.source.freshTurnAdapter,
@@ -699,14 +792,11 @@ export async function preflightDesignVisualM2B1({
     }
   }
   if (plan.predecessor) {
-    let predecessorPlanBytes = null;
     for (const [key, pin] of Object.entries({
-      plan: plan.predecessor.plan,
       blockedAttempt: plan.predecessor.blockedAttempt,
       latestReceipt: plan.predecessor.latestReceipt,
     })) {
-      const verified = await verifyPinnedFile(root, pin, `M2B1 predecessor ${key}`);
-      if (key === "plan") predecessorPlanBytes = verified.content;
+      await verifyPinnedFile(root, pin, `M2B1 predecessor ${key}`);
     }
     assertUnchangedM2B1EvaluatorContract(plan, predecessorPlanBytes);
   }
