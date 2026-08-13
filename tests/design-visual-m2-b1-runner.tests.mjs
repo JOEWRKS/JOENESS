@@ -35,6 +35,10 @@ const STDERR_DIAGNOSTIC_PLAN_PATH = path.join(
   ROOT,
   "evals/skill-contracts/design-visual-m2-b1-smoke-plan-v5.json",
 );
+const PATH_PRIVATE_IMAGE_PLAN_PATH = path.join(
+  ROOT,
+  "evals/skill-contracts/design-visual-m2-b1-smoke-plan-v6.json",
+);
 
 async function loadSubject() {
   try {
@@ -2395,4 +2399,63 @@ test("M2B1 schema 6 support pins v5 history and rejects unchanged source", async
       return bytes.stdout;
     },
   }), /source.*unchanged|method.*source/iu);
+});
+
+test("M2B1 v6 plan pins the path-private support commit and preserves the evaluator contract", async () => {
+  const subject = await loadSubject();
+  const v5 = JSON.parse(await readFile(STDERR_DIAGNOSTIC_PLAN_PATH, "utf8"));
+  const v6Bytes = await readFile(PATH_PRIVATE_IMAGE_PLAN_PATH);
+  const v6 = JSON.parse(v6Bytes.toString("utf8"));
+  const validated = subject.validateDesignVisualM2B1Plan(v6);
+
+  assert.equal(validated.schemaVersion, 6);
+  assert.equal(validated.id, "design-visual-m2-b1-smoke-plan-v6");
+  assert.equal(validated.source.repositoryCommit, "63fb26273bf1b37820dcf5fc1fcc82b8c1373ec3");
+  assert.deepEqual(validated.predecessor, {
+    plan: {
+      path: "evals/skill-contracts/design-visual-m2-b1-smoke-plan-v5.json",
+      bytes: 5627,
+      sha256: "80cf2d288d494bce456c18031935a8bd5ff2ef53f90053fc799845ad739223a5",
+    },
+    blockedAttempt: {
+      path: "evals/skill-contracts/design-visual-m2-b1-v5-blocked.json",
+      bytes: 11093,
+      sha256: "c3b5ad2e6e64c53299bcb87d662d0f4a3a316ecb27c487033fc6aa0c44cd40c3",
+    },
+    latestReceipt: {
+      path: "evals/skill-contracts/design-visual-m2-attempt-index-v7.json",
+      bytes: 5686,
+      sha256: "c11a4c5366c44563bd6118ed45cfdf4c46986083aaaf847103475eea287537e8",
+    },
+    methodChange: "path-private-controller-image-readback-and-resolved-view-image-error-correlation-no-evaluator-contract-change",
+    attemptPolicy: "one-method-changed-attempt-no-automatic-retry",
+  });
+  for (const key of ["runtime", "inputs", "candidates", "claimScope", "originalDetail", "boundaries"]) {
+    assert.deepEqual(validated[key], v5[key]);
+  }
+  assert.deepEqual(validated.outputs, {
+    designRaw: "evals/skill-contracts/design-visual-m2-b1-v6-design-raw.json",
+    designHandoff: "evals/skill-contracts/design-visual-m2-b1-v6-design-handoff.json",
+    sampleARaw: "evals/skill-contracts/design-visual-m2-b1-v6-sample-a-raw.json",
+    sampleAEnvelope: "evals/skill-contracts/design-visual-m2-b1-v6-sample-a-envelope.json",
+    sampleBRaw: "evals/skill-contracts/design-visual-m2-b1-v6-sample-b-raw.json",
+    sampleBEnvelope: "evals/skill-contracts/design-visual-m2-b1-v6-sample-b-envelope.json",
+    summary: "evals/skill-contracts/design-visual-m2-b1-v6-summary.json",
+    blocked: "evals/skill-contracts/design-visual-m2-b1-v6-blocked.json",
+  });
+
+  for (const pin of [
+    validated.source.runner,
+    validated.source.freshTurnAdapter,
+    validated.source.collector,
+  ]) {
+    const committed = await execFile(
+      "git",
+      ["show", `${validated.source.repositoryCommit}:${pin.path}`],
+      { cwd: ROOT, encoding: "buffer", maxBuffer: 1024 * 1024 },
+    );
+    assert.equal(committed.stdout.byteLength, pin.bytes);
+    assert.equal(digest(committed.stdout), pin.sha256);
+  }
+  assert.equal(v6Bytes.at(-1), 0x0a);
 });
