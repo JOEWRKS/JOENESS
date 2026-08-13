@@ -2749,3 +2749,101 @@ test("M2B1 v6 plan pins the path-private support commit and preserves the evalua
   }
   assert.equal(v6Bytes.at(-1), 0x0a);
 });
+
+test("M2B1 schema 7 support pins v6 history, separates outputs, and rejects unchanged source", async (t) => {
+  const subject = await loadSubject();
+  const v6 = JSON.parse(await readFile(PATH_PRIVATE_IMAGE_PLAN_PATH, "utf8"));
+  const v7 = structuredClone(v6);
+  v7.schemaVersion = 7;
+  v7.id = "design-visual-m2-b1-smoke-plan-v7";
+  v7.predecessor = {
+    plan: {
+      path: "evals/skill-contracts/design-visual-m2-b1-smoke-plan-v6.json",
+      bytes: 5651,
+      sha256: "79d951ac146d4c4c2e4f9128f7eefde8fbaaa80a91f070e2c1a08a3f74566aa8",
+    },
+    blockedAttempt: {
+      path: "evals/skill-contracts/design-visual-m2-b1-v6-blocked.json",
+      bytes: 2089,
+      sha256: "d832aba9e6b2b2ab8b979a0149a62ad59f40c6888950b97efbc6ef8b3340a20c",
+    },
+    latestReceipt: {
+      path: "evals/skill-contracts/design-visual-m2-attempt-index-v8.json",
+      bytes: 6329,
+      sha256: "c43e90ffb5f85ed0d2fb917beb2be0405337a338377c0fa42023f9b3a3c51dfb",
+    },
+    methodChange: "bounded-path-private-post-validation-image-evidence-retention-and-local-image-attachment-vs-optional-image-view-telemetry-separation-no-evaluator-contract-change",
+    attemptPolicy: "one-method-changed-attempt-no-automatic-retry",
+  };
+  v7.outputs = Object.fromEntries(
+    Object.entries(v6.outputs).map(([key, value]) => [key, value.replace("-v6-", "-v7-")]),
+  );
+
+  const validated = subject.validateDesignVisualM2B1Plan(v7);
+  assert.equal(validated.schemaVersion, 7);
+  assert.equal(validated.id, "design-visual-m2-b1-smoke-plan-v7");
+  assert.deepEqual(validated.predecessor, v7.predecessor);
+  assert.equal(Object.values(validated.outputs).every((file) => file.includes("-v7-")), true);
+  assert.equal(Object.values(validated.outputs).some((file) => file.includes("-v6-")), false);
+  assert.deepEqual(validated.outputs, {
+    designRaw: "evals/skill-contracts/design-visual-m2-b1-v7-design-raw.json",
+    designHandoff: "evals/skill-contracts/design-visual-m2-b1-v7-design-handoff.json",
+    sampleARaw: "evals/skill-contracts/design-visual-m2-b1-v7-sample-a-raw.json",
+    sampleAEnvelope: "evals/skill-contracts/design-visual-m2-b1-v7-sample-a-envelope.json",
+    sampleBRaw: "evals/skill-contracts/design-visual-m2-b1-v7-sample-b-raw.json",
+    sampleBEnvelope: "evals/skill-contracts/design-visual-m2-b1-v7-sample-b-envelope.json",
+    summary: "evals/skill-contracts/design-visual-m2-b1-v7-summary.json",
+    blocked: "evals/skill-contracts/design-visual-m2-b1-v7-blocked.json",
+  });
+  for (const key of ["runtime", "inputs", "candidates", "claimScope", "originalDetail", "boundaries"]) {
+    assert.deepEqual(validated[key], v6[key]);
+  }
+  assert.equal(digest(JSON.stringify(subject.designSchema())), "83057a2d2746c3be1741dadb4a39a7fb8375c988d3bbc6fb120f8ff03d7f002b");
+  assert.equal(digest(JSON.stringify(subject.visualSchema("sample-a"))), "64682110930af7251454f45e7b4963de5f5bb16891c5a77c34b0b07b9ade5652");
+  assert.equal(digest(JSON.stringify(subject.visualSchema("sample-b"))), "a71384d54076fa83b8bcce9f033947ec6a5417fe72cf9e8d47df23fe9b7847df");
+
+  const unchangedSourceFixture = await successorFixtureRoot(t, v7);
+  await assert.rejects(subject.preflightDesignVisualM2B1({
+    repositoryRoot: unchangedSourceFixture.root,
+    planPath: unchangedSourceFixture.planPath,
+    gitStatus: async () => "",
+    gitIdentity: async () => "f".repeat(40),
+    gitReadBlob: copiedFixtureGitReadBlob(v7),
+  }), /source.*unchanged|method.*source/iu);
+
+  const distinctCommitSameBlobs = structuredClone(v7);
+  distinctCommitSameBlobs.source.repositoryCommit = "e".repeat(40);
+  const sameBlobFixture = await successorFixtureRoot(t, v7);
+  await writeFile(
+    sameBlobFixture.planPath,
+    JSON.stringify(distinctCommitSameBlobs, null, 2) + "\n",
+  );
+  await assert.rejects(subject.preflightDesignVisualM2B1({
+    repositoryRoot: sameBlobFixture.root,
+    planPath: sameBlobFixture.planPath,
+    gitStatus: async () => "",
+    gitIdentity: async () => "f".repeat(40),
+    gitReadBlob: async (_root, implementationCommit, sourcePath) => {
+      assert.equal(implementationCommit, distinctCommitSameBlobs.source.repositoryCommit);
+      const bytes = await execFile(
+        "git",
+        ["show", `${v7.source.repositoryCommit}:${sourcePath}`],
+        { cwd: ROOT, encoding: "buffer", maxBuffer: 1024 * 1024 },
+      );
+      return bytes.stdout;
+    },
+  }), /source.*unchanged|method.*source/iu);
+
+  for (const mutation of [
+    (plan) => { plan.predecessor.plan.sha256 = "0".repeat(64); },
+    (plan) => { plan.predecessor.methodChange = "evidence-retention-only"; },
+    (plan) => { plan.outputs.summary = "evals/skill-contracts/design-visual-m2-b1-v6-summary.json"; },
+  ]) {
+    const changed = structuredClone(v7);
+    mutation(changed);
+    assert.throws(
+      () => subject.validateDesignVisualM2B1Plan(changed),
+      /predecessor|method|output|generation|malformed|differs/iu,
+    );
+  }
+});
