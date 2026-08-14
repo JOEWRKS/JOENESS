@@ -124,6 +124,32 @@ const M4_FRESH_BLOCKER_CODES = Object.freeze([
   "unresolved-notification",
   "unsafe-remote-control",
 ]);
+const M4_FRESH_NORMALIZER_BLOCKER_CLASSIFICATIONS = Object.freeze([
+  "approval-requested",
+  "hook-executed",
+  "image-view-target-mismatch",
+  "image-view-target-unverified",
+  "message-delta-limit-exceeded",
+  "required-command-missing",
+  "required-cwd-missing",
+  "required-exit-code-missing",
+  "required-output-missing",
+  "required-output-truncated",
+  "required-status-missing",
+  "runtime-drift",
+  "runtime-error",
+  "runtime-warning",
+  "sandbox-setup-failed",
+  "secret-shaped-output",
+  "uncontrolled-control-plane",
+  "uncontrolled-tool-surface",
+  "unknown-item-type",
+  "unknown-notification",
+  "user-input-requested",
+  "none",
+  "multiple",
+  "unmapped",
+]);
 function sha256(value) {
   return createHash("sha256").update(value).digest("hex");
 }
@@ -221,6 +247,22 @@ function diagnosticObject(value, keys) {
   return result;
 }
 
+function diagnosticExactObject(value, keys) {
+  const result = diagnosticObject(value, keys);
+  if (result === null) return null;
+  let actual;
+  try {
+    actual = Reflect.ownKeys(value);
+  } catch {
+    return null;
+  }
+  if (
+    actual.length !== keys.length ||
+    actual.some((key) => typeof key !== "string" || !keys.includes(key))
+  ) return null;
+  return result;
+}
+
 function diagnosticArray(value, maximumLength) {
   if (value === null || typeof value !== "object" || utilTypes.isProxy(value)) return null;
   let isArray;
@@ -286,9 +328,15 @@ export function projectJoenessM4FreshFailure(error) {
   ]);
   const compaction = diagnosticObject(evidenceData.eventCompaction, [
     "observedEventCount", "retainedEventCount", "retainedEventLimit", "retainedEventsOverLimit",
-    "methodHistogram", "itemTypeHistogram", "agentMessageDelta", "rawPayloadRetained",
+    "methodHistogram", "itemTypeHistogram", "agentMessageDelta", "normalizerBlocker", "rawPayloadRetained",
   ]);
   if (threadStart === null || turn === null || appServer === null || compaction === null) return null;
+  const normalizerBlocker = diagnosticExactObject(compaction.normalizerBlocker, ["provenance", "classification"]);
+  if (
+    normalizerBlocker === null ||
+    normalizerBlocker.provenance !== "adapter-normalization-fixed-enum" ||
+    !M4_FRESH_NORMALIZER_BLOCKER_CLASSIFICATIONS.includes(normalizerBlocker.classification)
+  ) return null;
 
   let threadStartState;
   if (threadStart.response === null) {
@@ -418,6 +466,10 @@ export function projectJoenessM4FreshFailure(error) {
       observed: compaction.observedEventCount,
       retained: compaction.retainedEventCount,
       retainedOverLimit: compaction.retainedEventsOverLimit,
+    },
+    normalizerBlocker: {
+      provenance: normalizerBlocker.provenance,
+      classification: normalizerBlocker.classification,
     },
     blockers: {
       count: blockerValues.length,
@@ -1085,7 +1137,7 @@ export async function runJoenessM4SuperpowersEval({
         const projected = projectJoenessM4FreshFailure(error);
         if (projected !== null) {
           const retained = {
-            schemaVersion: 1,
+            schemaVersion: 2,
             provenance: "runner-observed-default-fresh-adapter-rejection",
             runnerStage: "fresh-turn-rejected",
             ...projected,

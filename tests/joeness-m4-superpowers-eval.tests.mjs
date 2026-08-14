@@ -4,7 +4,7 @@ import { createHash } from "node:crypto";
 import { cp, link, lstat, mkdir, mkdtemp, readFile, readdir, rm, symlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
-import test from "node:test";
+import test, { after } from "node:test";
 import { promisify } from "node:util";
 
 const execFile = promisify(execFileCallback);
@@ -31,6 +31,32 @@ const ACTION_KEYS = [
   "rawTokenOrQuotaWarning",
   "skillAnnouncement",
   "pluginConfigWrite",
+];
+const NORMALIZER_BLOCKER_CLASSIFICATIONS = [
+  "approval-requested",
+  "hook-executed",
+  "image-view-target-mismatch",
+  "image-view-target-unverified",
+  "message-delta-limit-exceeded",
+  "required-command-missing",
+  "required-cwd-missing",
+  "required-exit-code-missing",
+  "required-output-missing",
+  "required-output-truncated",
+  "required-status-missing",
+  "runtime-drift",
+  "runtime-error",
+  "runtime-warning",
+  "sandbox-setup-failed",
+  "secret-shaped-output",
+  "uncontrolled-control-plane",
+  "uncontrolled-tool-surface",
+  "unknown-item-type",
+  "unknown-notification",
+  "user-input-requested",
+  "none",
+  "multiple",
+  "unmapped",
 ];
 
 function digest(value) {
@@ -100,6 +126,46 @@ async function copiedFixture(t) {
   return { root, target };
 }
 
+async function createCurrentAdapterFixtureRepository() {
+  const root = await mkdtemp(path.join(tmpdir(), "joeness-m4-current-adapter-"));
+  const target = path.join(root, ...FIXTURE_RELATIVE.split("/"));
+  await cp(FIXTURE_ROOT, target, { recursive: true });
+  await mkdir(path.join(root, "evals/support"), { recursive: true });
+  await mkdir(path.join(root, "evals/experiments"), { recursive: true });
+  const sourcePaths = [
+    "evals/support/run-fresh-evaluator-turn.mjs",
+    "evals/support/collect-codex-app-server.mjs",
+  ];
+  for (const relativePath of [...sourcePaths, "evals/support/run-joeness-m4-superpowers-eval.mjs"]) {
+    await cp(path.join(ROOT, ...relativePath.split("/")), path.join(root, ...relativePath.split("/")));
+  }
+  await execFile("git", ["init", "-q"], { cwd: root });
+  await execFile("git", ["config", "user.email", "fixture@example.invalid"], { cwd: root });
+  await execFile("git", ["config", "user.name", "M4 Fixture"], { cwd: root });
+  await execFile("git", ["add", "--", ...sourcePaths], { cwd: root });
+  await execFile("git", ["commit", "-q", "-m", "pin current adapter sources"], { cwd: root });
+  const { stdout } = await execFile("git", ["rev-parse", "HEAD"], { cwd: root });
+  const manifestPath = path.join(target, "manifest.json");
+  const manifest = JSON.parse(await readFile(manifestPath, "utf8"));
+  manifest.sources.repositoryCommit = stdout.trim();
+  for (const [key, relativePath] of [
+    ["freshTurnAdapter", sourcePaths[0]],
+    ["collector", sourcePaths[1]],
+  ]) {
+    const content = await readFile(path.join(root, ...relativePath.split("/")));
+    manifest.sources[key] = {
+      path: relativePath,
+      bytes: content.length,
+      sha256: digest(content),
+    };
+  }
+  await writeFile(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`);
+  return root;
+}
+
+const CURRENT_ADAPTER_FIXTURE_ROOT = await createCurrentAdapterFixtureRepository();
+after(() => rm(CURRENT_ADAPTER_FIXTURE_ROOT, { recursive: true, force: true }));
+
 async function rewriteManifest(root, transform) {
   const file = path.join(root, ...FIXTURE_RELATIVE.split("/"), "manifest.json");
   const value = JSON.parse(await readFile(file, "utf8"));
@@ -130,6 +196,7 @@ function freshFailureFixture({
   terminalNotCompleted = false,
   blockers = [],
   processExitCode = 0,
+  normalizerBlockerClassification = "none",
   cause = new SyntaxError("private JSON parse detail"),
 } = {}) {
   const methods = [
@@ -170,6 +237,10 @@ function freshFailureFixture({
         fragmentLimitExceeded: false,
         byteLimitExceeded: false,
         rawTextRetained: false,
+      },
+      normalizerBlocker: {
+        provenance: "adapter-normalization-fixed-enum",
+        classification: normalizerBlockerClassification,
       },
       rawPayloadRetained: false,
     },
@@ -271,14 +342,14 @@ function liveDependencies({ result = safeFreshResult(), status = "", exists = fa
   return {
     calls,
     options: {
-      repositoryRoot: ROOT,
+      repositoryRoot: CURRENT_ADAPTER_FIXTURE_ROOT,
       executionPlan: executionPlan(),
       sourcePin: sourcePin(),
       gitStatus: async () => status,
       gitIdentity: async () => "a".repeat(40),
       gitReadBlob: async (_root, commit, relativePath) => commit === "a".repeat(40)
         ? Buffer.from("pin")
-        : readFile(path.join(ROOT, ...relativePath.split("/"))),
+        : readFile(path.join(CURRENT_ADAPTER_FIXTURE_ROOT, ...relativePath.split("/"))),
       artifactExists: async () => exists,
       runtimeFactory: async () => {
         calls.runtime += 1;
@@ -328,9 +399,14 @@ test("exports the deterministic M4 contract surface", async () => {
   ]) assert.equal(typeof api[name], "function", name);
 });
 
-test("preflight verifies the four fixture pins and historical adapter/collector pins", async () => {
+test("preflight verifies the four fixture pins and test-local current adapter/collector pins", async () => {
   const api = await subject();
-  const result = await api.preflightJoenessM4SuperpowersEval({ repositoryRoot: ROOT });
+  const result = await api.preflightJoenessM4SuperpowersEval({ repositoryRoot: CURRENT_ADAPTER_FIXTURE_ROOT });
+  const manifest = JSON.parse(await readFile(path.join(
+    CURRENT_ADAPTER_FIXTURE_ROOT,
+    ...FIXTURE_RELATIVE.split("/"),
+    "manifest.json",
+  ), "utf8"));
   assert.equal(result.manifestBytes <= 8192, true);
   assert.deepEqual(result.inputs.map(({ id, bytes, sha256 }) => ({ id, bytes, sha256 })), [
     { id: "evaluator-instruction", bytes: 1538, sha256: "4918dc6eede5dff6b44394a8c249d3622eac3f02bbe1804d6f18a937b05119b1" },
@@ -339,8 +415,8 @@ test("preflight verifies the four fixture pins and historical adapter/collector 
     { id: "superpowers-brainstorming", bytes: 10047, sha256: "4a54a4858b99807f3155ed1614b2f116e35ea5c1b788e793f565dd837fd3891f" },
   ]);
   assert.deepEqual(result.sources, {
-    repositoryCommit: "4364d3c45323766ad81bc9fe0cf5af9fc2c3614c",
-    freshTurnAdapter: { path: "evals/support/run-fresh-evaluator-turn.mjs", bytes: 55477, sha256: "f2c7e2e9457b0ef7d6b819425619dcde8054db530f8b920829376f39a13fd087" },
+    repositoryCommit: manifest.sources.repositoryCommit,
+    freshTurnAdapter: { path: "evals/support/run-fresh-evaluator-turn.mjs", bytes: 56845, sha256: "4884154dd1884b6fa899eef854307edec2a9897cb39b1f45c9c03479cab34247" },
     collector: { path: "evals/support/collect-codex-app-server.mjs", bytes: 297632, sha256: "8b81ddb28be2a803500839a2de61f9bb397aa96711d039bdb7a3a86cfad8d687" },
   });
 });
@@ -348,9 +424,11 @@ test("preflight verifies the four fixture pins and historical adapter/collector 
 test("default CLI mode is validate-only and performs no write or runtime operation", async () => {
   const api = await subject();
   assert.deepEqual(api.parseJoenessM4Cli([]), { mode: "validate-only" });
-  const before = await execFile("git", ["status", "--porcelain"], { cwd: ROOT });
-  const result = await execFile(process.execPath, [MODULE_PATH], { cwd: ROOT });
-  const after = await execFile("git", ["status", "--porcelain"], { cwd: ROOT });
+  const before = await execFile("git", ["status", "--porcelain"], { cwd: CURRENT_ADAPTER_FIXTURE_ROOT });
+  const result = await execFile(process.execPath, [
+    path.join(CURRENT_ADAPTER_FIXTURE_ROOT, "evals/support/run-joeness-m4-superpowers-eval.mjs"),
+  ], { cwd: CURRENT_ADAPTER_FIXTURE_ROOT });
+  const after = await execFile("git", ["status", "--porcelain"], { cwd: CURRENT_ADAPTER_FIXTURE_ROOT });
   assert.equal(result.stderr, "");
   assert.equal(JSON.parse(result.stdout).mode, "validate-only");
   assert.equal(after.stdout, before.stdout);
@@ -516,7 +594,7 @@ test("exact recommendation rejects every durable raw privacy canary and writes n
 
 test("input builder emits four ordinary text inputs in source order with project docs disabled", async () => {
   const api = await subject();
-  const preflight = await api.preflightJoenessM4SuperpowersEval({ repositoryRoot: ROOT });
+  const preflight = await api.preflightJoenessM4SuperpowersEval({ repositoryRoot: CURRENT_ADAPTER_FIXTURE_ROOT });
   const input = api.buildJoenessM4Input(preflight);
   assert.equal(input.length, 4);
   assert.deepEqual(input.map(({ type }) => type), ["text", "text", "text", "text"]);
@@ -527,7 +605,7 @@ test("input builder emits four ordinary text inputs in source order with project
 
 test("input/evidence validation rejects proxies, accessors, revoked values, and hidden extras trap-zero", async () => {
   const api = await subject();
-  const preflight = await api.preflightJoenessM4SuperpowersEval({ repositoryRoot: ROOT });
+  const preflight = await api.preflightJoenessM4SuperpowersEval({ repositoryRoot: CURRENT_ADAPTER_FIXTURE_ROOT });
   const input = api.buildJoenessM4Input(preflight);
   const schema = api.joenessM4OutputSchema();
   const hostile = [];
@@ -665,7 +743,7 @@ test("collector lifecycle failures and hostile results publish neither success n
 
 test("stderr accepts only safe summary or exact collector zero-byte shape and retains no raw field", async () => {
   const api = await subject();
-  const preflight = await api.preflightJoenessM4SuperpowersEval({ repositoryRoot: ROOT });
+  const preflight = await api.preflightJoenessM4SuperpowersEval({ repositoryRoot: CURRENT_ADAPTER_FIXTURE_ROOT });
   const input = api.buildJoenessM4Input(preflight);
   const outputSchema = api.joenessM4OutputSchema();
   for (const stderr of [
@@ -693,7 +771,7 @@ test("stderr accepts only safe summary or exact collector zero-byte shape and re
 
 test("retained evidence binds raw/schema/input tuples without raw stderr, PID, paths, or config", async () => {
   const api = await subject();
-  const preflight = await api.preflightJoenessM4SuperpowersEval({ repositoryRoot: ROOT });
+  const preflight = await api.preflightJoenessM4SuperpowersEval({ repositoryRoot: CURRENT_ADAPTER_FIXTURE_ROOT });
   const input = api.buildJoenessM4Input(preflight);
   const evidence = api.retainJoenessM4FreshEvidence(safeFreshResult(), { input, outputSchema: api.joenessM4OutputSchema() });
   const text = JSON.stringify(evidence);
@@ -837,6 +915,10 @@ test("fresh failure projection retains only bounded primitive lifecycle evidence
       retained: 3,
       retainedOverLimit: false,
     },
+    normalizerBlocker: {
+      provenance: "adapter-normalization-fixed-enum",
+      classification: "none",
+    },
     blockers: {
       count: 0,
       codes: [],
@@ -861,6 +943,44 @@ test("fresh failure projection retains only bounded primitive lifecycle evidence
   assert.equal(Buffer.byteLength(text) <= 2048, true);
 });
 
+test("fresh failure projection retains only fixed normalizer blocker classifications", async () => {
+  const api = await subject();
+  for (const classification of NORMALIZER_BLOCKER_CLASSIFICATIONS) {
+    const projected = api.projectJoenessM4FreshFailure(freshFailureFixture({
+      normalizerBlockerClassification: classification,
+    }));
+    assert.deepEqual(projected?.normalizerBlocker, {
+      provenance: "adapter-normalization-fixed-enum",
+      classification,
+    }, classification);
+  }
+});
+
+test("fresh failure projection exposes the hidden v2 runtime-error without changing coarse blockers", async () => {
+  const api = await subject();
+  const projected = api.projectJoenessM4FreshFailure(freshFailureFixture({
+    terminalNotCompleted: true,
+    blockers: ["runtime-error", "runtime-control-blocker"],
+    normalizerBlockerClassification: "runtime-error",
+  }));
+  assert.deepEqual(projected?.normalizerBlocker, {
+    provenance: "adapter-normalization-fixed-enum",
+    classification: "runtime-error",
+  });
+  assert.deepEqual(projected?.lifecycle, {
+    threadStart: "observed",
+    turnStart: "observed",
+    terminal: "non-completed",
+    terminalCountState: "one",
+  });
+  assert.equal(projected?.appServerExit, "zero");
+  assert.deepEqual(projected?.blockers, {
+    count: 3,
+    codes: ["runtime-control-blocker", "turn-not-completed"],
+    unclassifiedCount: 1,
+  });
+});
+
 test("only the imported default fresh adapter rejection authorizes a blocked freshFailure", async () => {
   const api = await subject();
   const blocked = "evals/experiments/joeness-m4-injected-blocked.json";
@@ -883,8 +1003,9 @@ test("only the imported default fresh adapter rejection authorizes a blocked fre
   });
   await assert.rejects(api.runJoenessM4SuperpowersEval(authentic.options), /fresh evaluator turn validation failed/);
   assert.equal(authentic.calls.writes.length, 1);
+  assert.equal(authentic.calls.writes[0].value.schemaVersion, 1);
   assert.deepEqual(authentic.calls.writes[0].value.freshFailure, {
-    schemaVersion: 1,
+    schemaVersion: 2,
     provenance: "runner-observed-default-fresh-adapter-rejection",
     runnerStage: "fresh-turn-rejected",
     evidenceState: "retained",
@@ -895,6 +1016,10 @@ test("only the imported default fresh adapter rejection authorizes a blocked fre
       terminalCountState: "zero",
     },
     eventCounts: { observed: 0, retained: 0, retainedOverLimit: false },
+    normalizerBlocker: {
+      provenance: "adapter-normalization-fixed-enum",
+      classification: "none",
+    },
     blockers: { count: 1, codes: ["missing-terminal-event"], unclassifiedCount: 0 },
     appServerExit: "zero",
     primaryCauseKind: "error",
@@ -930,6 +1055,7 @@ test("only the imported default fresh adapter rejection authorizes a blocked fre
 test("fresh failure projection fails closed on malformed selected fields and never invokes traps", async () => {
   const api = await subject();
   const malformed = [];
+  let traps = 0;
 
   const badThreadSummary = freshFailureFixture();
   badThreadSummary.freshEvaluatorEvidence.threadStart.response.priorTurnCount = {};
@@ -954,6 +1080,54 @@ test("fresh failure projection fails closed on malformed selected fields and nev
   inconsistentCompaction.freshEvaluatorEvidence.eventCompaction.retainedEventsOverLimit = false;
   malformed.push(inconsistentCompaction);
 
+  const missingNormalizerBlocker = freshFailureFixture();
+  delete missingNormalizerBlocker.freshEvaluatorEvidence.eventCompaction.normalizerBlocker;
+  malformed.push(missingNormalizerBlocker);
+
+  const missingNormalizerClassification = freshFailureFixture();
+  delete missingNormalizerClassification.freshEvaluatorEvidence.eventCompaction.normalizerBlocker.classification;
+  malformed.push(missingNormalizerClassification);
+
+  const extraNormalizerBlocker = freshFailureFixture();
+  extraNormalizerBlocker.freshEvaluatorEvidence.eventCompaction.normalizerBlocker.rawMessage = "RAW-NORMALIZER-EXTRA-CANARY";
+  malformed.push(extraNormalizerBlocker);
+
+  const symbolNormalizerBlocker = freshFailureFixture();
+  symbolNormalizerBlocker.freshEvaluatorEvidence.eventCompaction.normalizerBlocker[Symbol("RAW-NORMALIZER-SYMBOL-CANARY")] = true;
+  malformed.push(symbolNormalizerBlocker);
+
+  const accessorNormalizerBlocker = freshFailureFixture();
+  Object.defineProperty(
+    accessorNormalizerBlocker.freshEvaluatorEvidence.eventCompaction.normalizerBlocker,
+    "classification",
+    {
+      get() { traps += 1; throw new Error("normalizer accessor trap"); },
+    },
+  );
+  malformed.push(accessorNormalizerBlocker);
+
+  const liveNormalizerProxy = freshFailureFixture();
+  liveNormalizerProxy.freshEvaluatorEvidence.eventCompaction.normalizerBlocker = new Proxy({}, {
+    get() { traps += 1; throw new Error("normalizer proxy get trap"); },
+    getPrototypeOf() { traps += 1; throw new Error("normalizer proxy prototype trap"); },
+    ownKeys() { traps += 1; throw new Error("normalizer proxy ownKeys trap"); },
+  });
+  malformed.push(liveNormalizerProxy);
+
+  const revokedNormalizerProxy = freshFailureFixture();
+  const revokedNormalizer = Proxy.revocable({}, {});
+  revokedNormalizer.revoke();
+  revokedNormalizerProxy.freshEvaluatorEvidence.eventCompaction.normalizerBlocker = revokedNormalizer.proxy;
+  malformed.push(revokedNormalizerProxy);
+
+  const invalidNormalizerProvenance = freshFailureFixture();
+  invalidNormalizerProvenance.freshEvaluatorEvidence.eventCompaction.normalizerBlocker.provenance = "RAW-FORGED-PROVENANCE-CANARY";
+  malformed.push(invalidNormalizerProvenance);
+
+  const invalidNormalizerClassification = freshFailureFixture();
+  invalidNormalizerClassification.freshEvaluatorEvidence.eventCompaction.normalizerBlocker.classification = "RAW-PRIVATE-RUNTIME-DETAIL-CANARY";
+  malformed.push(invalidNormalizerClassification);
+
   malformed.push(freshFailureFixture({ blockers: ["x".repeat(129)] }));
   malformed.push(freshFailureFixture({ blockers: ["한".repeat(43)] }));
   malformed.push(freshFailureFixture({ processExitCode: null }));
@@ -964,7 +1138,6 @@ test("fresh failure projection fails closed on malformed selected fields and nev
     blockers: ["app-server-exit-unverified", "app-server-nonzero-exit"],
   }));
 
-  let traps = 0;
   malformed.push(new Proxy({}, { get() { traps += 1; throw new Error("proxy trap"); } }));
   const accessor = new Error("accessor");
   Object.defineProperty(accessor, "freshEvaluatorEvidence", {
@@ -992,10 +1165,12 @@ test("fresh failure projection fails closed on malformed selected fields and nev
   for (let index = 0; index < 4096; index += 1) {
     ignoredExtras.freshEvaluatorEvidence[`ignored-${index}`] = `RAW-EXTRA-CANARY-${index}`;
   }
+  ignoredExtras.freshEvaluatorEvidence.privateCredential = "sk-SYNTHETIC_TEST_ONLY_abcdefghijklmnop";
   const projected = api.projectJoenessM4FreshFailure(ignoredExtras);
   assert.equal(projected?.lifecycle.terminal, "completed");
   assert.equal(projected?.lifecycle.terminalCountState, "one");
   assert.equal(JSON.stringify(projected).includes("RAW-EXTRA-CANARY"), false);
+  assert.equal(JSON.stringify(projected).includes("sk-SYNTHETIC_TEST_ONLY"), false);
 
   assert.equal(api.projectJoenessM4FreshFailure(freshFailureFixture({
     processExitCode: null,
@@ -1107,6 +1282,31 @@ test("historical M4 v1 plan, blocked receipt, and attempt index remain byte exac
       path: "evals/skill-contracts/joeness-m4-superpowers-attempt-index-v1.json",
       bytes: 6230,
       sha256: "5a00e7e526075dedb066107229f80beb61e94d5cd6fc125952693d27ccd66455",
+    },
+  ];
+  for (const tuple of tuples) {
+    const content = await readFile(path.join(ROOT, ...tuple.path.split("/")));
+    assert.equal(content.length, tuple.bytes, tuple.path);
+    assert.equal(digest(content), tuple.sha256, tuple.path);
+  }
+});
+
+test("historical M4 v2 plan, blocked receipt, and attempt index remain byte exact", async () => {
+  const tuples = [
+    {
+      path: "evals/skill-contracts/joeness-m4-superpowers-live-plan-v2.json",
+      bytes: 2952,
+      sha256: "85be6e07cef1d3165fd0cb504de929dbafc74e227d1b2a403777035d198c449c",
+    },
+    {
+      path: "evals/skill-contracts/joeness-m4-superpowers-live-v2-blocked.json",
+      bytes: 3540,
+      sha256: "ba29d79c3955f4bfce5059b1e05fbae8744e50eeaf235dd60d331ef3c7f1e4a0",
+    },
+    {
+      path: "evals/skill-contracts/joeness-m4-superpowers-attempt-index-v2.json",
+      bytes: 9264,
+      sha256: "147eead383f1b5e696dd5d7fcc57a9c86915adb8d8448189f4eb59bb95f73156",
     },
   ];
   for (const tuple of tuples) {
