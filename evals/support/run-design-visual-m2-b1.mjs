@@ -672,6 +672,40 @@ function aggregate(checks, layer = null) {
   return "PASS";
 }
 
+function attachSemanticFailureEvidence(error, evidence) {
+  Object.defineProperty(error, "semanticFailureEvidence", {
+    configurable: true,
+    enumerable: false,
+    writable: true,
+    value: evidence,
+  });
+  return error;
+}
+
+function sampleASemanticFailureEvidence(applicableFail, visible, complete) {
+  const applicableMatched = applicableFail === true;
+  const visibleMatched = visible === "FAIL";
+  const completeMatched = complete === "FAIL";
+  return {
+    schemaVersion: 1,
+    kind: "visual-bounded-outcome",
+    candidateId: "sample-a",
+    requiredOutcome: "applicable-visible-fail-and-aggregate-fail",
+    predicates: {
+      applicableVisibleAcceptanceFail: {
+        expected: true,
+        actual: applicableFail,
+        matched: applicableMatched,
+      },
+      visibleAppearanceOverall: { expected: "FAIL", actual: visible, matched: visibleMatched },
+      completeContractOverall: { expected: "FAIL", actual: complete, matched: completeMatched },
+    },
+    failedPredicateCount: [applicableMatched, visibleMatched, completeMatched]
+      .filter((matched) => !matched).length,
+    rawOutputRetained: false,
+  };
+}
+
 export function validateVisualM2B1Output(value, designValue, candidateId) {
   const design = validateDesignM2B1Output(designValue);
   if (
@@ -732,12 +766,15 @@ export function validateVisualM2B1Output(value, designValue, candidateId) {
   }
   const acceptance = value.checks.filter(({ semantics }) => semantics === "acceptance");
   if (candidateId === "sample-a") {
-    if (
-      !acceptance.some((check) => check.evidenceLayer === "visible-appearance" && check.scopeMatch === "APPLICABLE" && check.verdict === "FAIL") ||
-      visible !== "FAIL" ||
-      complete !== "FAIL"
-    ) {
-      throw new Error("M2B1 sample-a lacks the bounded defect outcome");
+    const applicableVisibleAcceptanceFail = acceptance.some((check) =>
+      check.evidenceLayer === "visible-appearance" &&
+      check.scopeMatch === "APPLICABLE" &&
+      check.verdict === "FAIL");
+    if (!applicableVisibleAcceptanceFail || visible !== "FAIL" || complete !== "FAIL") {
+      throw attachSemanticFailureEvidence(
+        new Error("M2B1 sample-a lacks the bounded defect outcome"),
+        sampleASemanticFailureEvidence(applicableVisibleAcceptanceFail, visible, complete),
+      );
     }
   } else if (candidateId === "sample-b") {
     if (

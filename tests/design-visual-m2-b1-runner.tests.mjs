@@ -679,6 +679,64 @@ test("M2B1 response schemas are recursively strict and match the runtime validat
   ));
 });
 
+function expectedSemanticFailure({ complete = "UNVERIFIED" } = {}) {
+  return {
+    schemaVersion: 1,
+    kind: "visual-bounded-outcome",
+    candidateId: "sample-a",
+    requiredOutcome: "applicable-visible-fail-and-aggregate-fail",
+    predicates: {
+      applicableVisibleAcceptanceFail: { expected: true, actual: false, matched: false },
+      visibleAppearanceOverall: { expected: "FAIL", actual: "UNVERIFIED", matched: false },
+      completeContractOverall: {
+        expected: "FAIL",
+        actual: complete,
+        matched: complete === "FAIL",
+      },
+    },
+    failedPredicateCount: complete === "FAIL" ? 2 : 3,
+    rawOutputRetained: false,
+  };
+}
+
+test("semantic failure evidence at the validator boundary", async () => {
+  const subject = await loadSubject();
+  const design = designOutput();
+  const assertSemanticFailure = (output, expected) => {
+    let error;
+    try {
+      subject.validateVisualM2B1Output(output, design, "sample-a");
+    } catch (caught) {
+      error = caught;
+    }
+    assert.equal(error instanceof Error, true);
+    assert.equal(error.message, "M2B1 sample-a lacks the bounded defect outcome");
+    assert.deepEqual(Object.getOwnPropertyDescriptor(error, "semanticFailureEvidence"), {
+      configurable: true,
+      enumerable: false,
+      writable: true,
+      value: expected,
+    });
+    assert.equal(Object.keys(error).includes("semanticFailureEvidence"), false);
+  };
+
+  assertSemanticFailure(
+    visualOutput(design, "sample-a", false),
+    expectedSemanticFailure(),
+  );
+
+  const completeOnlyFailure = visualOutput(design, "sample-a", false);
+  completeOnlyFailure.checks.find(({ id }) => id === "artifact-id").verdict = "FAIL";
+  completeOnlyFailure.completeContractOverall = "FAIL";
+  assertSemanticFailure(completeOnlyFailure, expectedSemanticFailure({ complete: "FAIL" }));
+
+  assert.doesNotThrow(() => subject.validateVisualM2B1Output(
+    visualOutput(design, "sample-a", true),
+    design,
+    "sample-a",
+  ));
+});
+
 test("M2B1 successor plan preserves v1 evidence and uses disjoint v2 outputs", async () => {
   const subject = await loadSubject();
   const plan = JSON.parse(await readFile(SUCCESSOR_PLAN_PATH, "utf8"));
