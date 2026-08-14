@@ -81,6 +81,29 @@ const ITEM_TYPE_BUCKETS = Object.freeze([
   "other",
 ]);
 const ITEM_TYPE_BUCKET_SET = new Set(ITEM_TYPE_BUCKETS.slice(0, -1));
+const NORMALIZER_BLOCKER_CODES = new Set([
+  "approval-requested",
+  "hook-executed",
+  "image-view-target-mismatch",
+  "image-view-target-unverified",
+  "message-delta-limit-exceeded",
+  "required-command-missing",
+  "required-cwd-missing",
+  "required-exit-code-missing",
+  "required-output-missing",
+  "required-output-truncated",
+  "required-status-missing",
+  "runtime-drift",
+  "runtime-error",
+  "runtime-warning",
+  "sandbox-setup-failed",
+  "secret-shaped-output",
+  "uncontrolled-control-plane",
+  "uncontrolled-tool-surface",
+  "unknown-item-type",
+  "unknown-notification",
+  "user-input-requested",
+]);
 
 function unique(values) {
   return [...new Set(values)];
@@ -972,6 +995,8 @@ export async function runFreshEvaluatorTurn({
   let observedEventCount = 0;
   const methodCounts = new Map();
   const itemTypeCounts = new Map();
+  const normalizerBlockerCodes = new Set();
+  let normalizerBlockerUnmapped = false;
   const deltaGroupKeys = new Set();
   const deltaStates = new Map();
   const deltaObservations = new WeakMap();
@@ -1037,6 +1062,16 @@ export async function runFreshEvaluatorTurn({
     }
   }
 
+  function observeNormalizerBlockers(event) {
+    for (const blocker of event.blockers) {
+      if (NORMALIZER_BLOCKER_CODES.has(blocker)) {
+        normalizerBlockerCodes.add(blocker);
+      } else {
+        normalizerBlockerUnmapped = true;
+      }
+    }
+  }
+
   function buildEventCompactionEvidence() {
     const methodHistogram = fixedHistogram(
       methodCounts,
@@ -1051,6 +1086,16 @@ export async function runFreshEvaluatorTurn({
     if (methodHistogram.eventCount !== observedEventCount) {
       throw new Error("fresh evaluator method histogram is inconsistent");
     }
+    const normalizerBlocker = {
+      provenance: "adapter-normalization-fixed-enum",
+      classification: normalizerBlockerUnmapped
+        ? "unmapped"
+        : normalizerBlockerCodes.size === 0
+          ? "none"
+          : normalizerBlockerCodes.size === 1
+            ? [...normalizerBlockerCodes][0]
+            : "multiple",
+    };
     return {
       observedEventCount,
       retainedEventCount: events.length,
@@ -1068,6 +1113,7 @@ export async function runFreshEvaluatorTurn({
         byteLimitExceeded: deltaByteLimitExceeded,
         rawTextRetained: false,
       },
+      normalizerBlocker,
       rawPayloadRetained: false,
     };
   }
@@ -1296,6 +1342,7 @@ export async function runFreshEvaluatorTurn({
         blockers: ["runtime-drift"],
       };
     }
+    observeNormalizerBlockers(event);
     countObservedEvent(event);
     const delta = observeDelta(event);
     if (delta !== null) {

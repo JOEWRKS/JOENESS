@@ -527,9 +527,99 @@ test("fresh evaluator compacts 1952 safe agent-message fragments into one retain
       byteLimitExceeded: false,
       rawTextRetained: false,
     },
+    normalizerBlocker: {
+      provenance: "adapter-normalization-fixed-enum",
+      classification: "none",
+    },
     rawPayloadRetained: false,
   });
   assert.equal(JSON.stringify(result.eventCompaction).includes(finalText), false);
+});
+
+test("fresh evaluator normalizer blocker compaction records none for a normal turn", async (t) => {
+  const subject = await loadSubject();
+  const root = await createRoot(t);
+  const result = await subject.runFreshEvaluatorTurn({
+    session: createSession(),
+    root,
+    input: [{ type: "text", text: "Return the JSON verdict." }],
+    outputSchema: outputSchema(),
+  });
+
+  assert.deepEqual(result.eventCompaction.normalizerBlocker, {
+    provenance: "adapter-normalization-fixed-enum",
+    classification: "none",
+  });
+});
+
+test("fresh evaluator normalizer blocker compaction classifies an error notification", async (t) => {
+  const subject = await loadSubject();
+  const root = await createRoot(t);
+  const evidence = await rejectedEvidence(subject.runFreshEvaluatorTurn({
+    session: createSession({
+      runtimeError: { message: "fixture runtime failure" },
+    }),
+    root,
+    input: [{ type: "text", text: "Return the JSON verdict." }],
+    outputSchema: outputSchema(),
+  }));
+
+  assert.deepEqual(evidence.eventCompaction.normalizerBlocker, {
+    provenance: "adapter-normalization-fixed-enum",
+    classification: "runtime-error",
+  });
+});
+
+test("fresh evaluator normalizer blocker compaction classifies distinct fixed codes as multiple", async (t) => {
+  const subject = await loadSubject();
+  const root = await createRoot(t);
+  const evidence = await rejectedEvidence(subject.runFreshEvaluatorTurn({
+    session: createSession({
+      runtimeError: { message: "fixture runtime failure" },
+      onBeforeAgentMessage: ({ emit, params, turnId }) => {
+        emit({
+          method: "warning",
+          params: { threadId: params.threadId, turnId },
+        });
+      },
+    }),
+    root,
+    input: [{ type: "text", text: "Return the JSON verdict." }],
+    outputSchema: outputSchema(),
+  }));
+
+  assert.deepEqual(evidence.eventCompaction.normalizerBlocker, {
+    provenance: "adapter-normalization-fixed-enum",
+    classification: "multiple",
+  });
+});
+
+test("fresh evaluator normalizer blocker compaction never serializes raw notification details", async (t) => {
+  const subject = await loadSubject();
+  const root = await createRoot(t);
+  const rawMessage = "NORMALIZER_RAW_MESSAGE_CANARY";
+  const rawPath = "C:\\NORMALIZER_RAW_PATH_CANARY\\input.json";
+  const credential = "sk-SYNTHETIC_TEST_ONLY_abcdefghijklmnop";
+  const evidence = await rejectedEvidence(subject.runFreshEvaluatorTurn({
+    session: createSession({
+      runtimeError: {
+        message: rawMessage,
+        additionalDetails: `${rawPath} Bearer ${credential}`,
+      },
+    }),
+    root,
+    input: [{ type: "text", text: "Return the JSON verdict." }],
+    outputSchema: outputSchema(),
+  }));
+
+  assert.deepEqual(evidence.eventCompaction.normalizerBlocker, {
+    provenance: "adapter-normalization-fixed-enum",
+    classification: "runtime-error",
+  });
+  const serialized = JSON.stringify(evidence.eventCompaction);
+  for (const canary of [rawMessage, rawPath, credential]) {
+    assert.equal(serialized.includes(canary), false, canary);
+  }
 });
 
 test("fresh evaluator counts queued notifications once and retains compaction on failure", async (t) => {
