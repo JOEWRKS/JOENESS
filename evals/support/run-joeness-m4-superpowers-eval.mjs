@@ -10,6 +10,8 @@ const execFile = promisify(execFileCallback);
 
 export const JOENESS_M4_FIXTURE_RELATIVE_PATH =
   "evals/skill-contracts/fixtures/joeness-m4-superpowers-v1";
+export const JOENESS_M4_FIXTURE_MANIFEST_FILENAME = "manifest-v2.json";
+export const JOENESS_M4_FIXTURE_ID = "joeness-m4-superpowers-v2";
 
 const SOURCE_IDS = Object.freeze([
   "evaluator-instruction",
@@ -522,7 +524,7 @@ function validatePortableRelativePath(value, label = "path") {
 
 export function validateJoenessM4Manifest(value) {
   exactKeys(value, ["schemaVersion", "id", "inputs", "sources", "runtime", "limits"], "manifest");
-  if (value.schemaVersion !== 1 || value.id !== "joeness-m4-superpowers-v1") fail("manifest identity is invalid");
+  if (value.schemaVersion !== 2 || value.id !== JOENESS_M4_FIXTURE_ID) fail("manifest identity is invalid");
   if (!Array.isArray(value.inputs) || value.inputs.length !== SOURCE_IDS.length) fail("manifest inputs are invalid");
   const paths = new Set();
   value.inputs.forEach((input, index) => {
@@ -622,7 +624,7 @@ export async function preflightJoenessM4SuperpowersEval({
   }
   if (typeof readPinnedFile !== "function") throw new TypeError("M4 pinned reader is malformed");
   const fixtureRoot = path.join(repositoryRoot, ...JOENESS_M4_FIXTURE_RELATIVE_PATH.split("/"));
-  const manifestRelativePath = `${JOENESS_M4_FIXTURE_RELATIVE_PATH}/manifest.json`;
+  const manifestRelativePath = `${JOENESS_M4_FIXTURE_RELATIVE_PATH}/${JOENESS_M4_FIXTURE_MANIFEST_FILENAME}`;
   const manifestPath = await assertNoSymlinkSegments(repositoryRoot, manifestRelativePath, "M4 fixture manifest");
   const manifestStat = await lstat(manifestPath);
   if (!manifestStat.isFile() || manifestStat.isSymbolicLink()) throw new Error("M4 manifest must be a regular file");
@@ -777,7 +779,7 @@ export function retainJoenessM4FreshEvidence(result, { input, outputSchema } = {
   validateSafeStderrSummary(result.appServer?.stderr);
   const evidence = {
     schemaVersion: 1,
-    fixture: "joeness-m4-superpowers-v1",
+    fixture: JOENESS_M4_FIXTURE_ID,
     input: {
       sourceIds: [...SOURCE_IDS],
       descriptorCount: input.length,

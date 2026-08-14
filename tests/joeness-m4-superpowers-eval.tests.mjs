@@ -4,7 +4,7 @@ import { createHash } from "node:crypto";
 import { cp, link, lstat, mkdir, mkdtemp, readFile, readdir, rm, symlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
-import test, { after } from "node:test";
+import test from "node:test";
 import { promisify } from "node:util";
 
 const execFile = promisify(execFileCallback);
@@ -12,6 +12,9 @@ const ROOT = path.resolve(import.meta.dirname, "..");
 const MODULE_PATH = path.join(ROOT, "evals/support/run-joeness-m4-superpowers-eval.mjs");
 const FIXTURE_RELATIVE = "evals/skill-contracts/fixtures/joeness-m4-superpowers-v1";
 const FIXTURE_ROOT = path.join(ROOT, ...FIXTURE_RELATIVE.split("/"));
+const FIXTURE_MANIFEST_FILENAME = "manifest-v2.json";
+const FIXTURE_ID = "joeness-m4-superpowers-v2";
+const FIXTURE_SUPPORT_COMMIT = "d6b844018674ac3f85a82d5fe7b2fc16d725f858";
 const SOURCE_IDS = [
   "evaluator-instruction",
   "project-task",
@@ -126,48 +129,8 @@ async function copiedFixture(t) {
   return { root, target };
 }
 
-async function createCurrentAdapterFixtureRepository() {
-  const root = await mkdtemp(path.join(tmpdir(), "joeness-m4-current-adapter-"));
-  const target = path.join(root, ...FIXTURE_RELATIVE.split("/"));
-  await cp(FIXTURE_ROOT, target, { recursive: true });
-  await mkdir(path.join(root, "evals/support"), { recursive: true });
-  await mkdir(path.join(root, "evals/experiments"), { recursive: true });
-  const sourcePaths = [
-    "evals/support/run-fresh-evaluator-turn.mjs",
-    "evals/support/collect-codex-app-server.mjs",
-  ];
-  for (const relativePath of [...sourcePaths, "evals/support/run-joeness-m4-superpowers-eval.mjs"]) {
-    await cp(path.join(ROOT, ...relativePath.split("/")), path.join(root, ...relativePath.split("/")));
-  }
-  await execFile("git", ["init", "-q"], { cwd: root });
-  await execFile("git", ["config", "user.email", "fixture@example.invalid"], { cwd: root });
-  await execFile("git", ["config", "user.name", "M4 Fixture"], { cwd: root });
-  await execFile("git", ["add", "--", ...sourcePaths], { cwd: root });
-  await execFile("git", ["commit", "-q", "-m", "pin current adapter sources"], { cwd: root });
-  const { stdout } = await execFile("git", ["rev-parse", "HEAD"], { cwd: root });
-  const manifestPath = path.join(target, "manifest.json");
-  const manifest = JSON.parse(await readFile(manifestPath, "utf8"));
-  manifest.sources.repositoryCommit = stdout.trim();
-  for (const [key, relativePath] of [
-    ["freshTurnAdapter", sourcePaths[0]],
-    ["collector", sourcePaths[1]],
-  ]) {
-    const content = await readFile(path.join(root, ...relativePath.split("/")));
-    manifest.sources[key] = {
-      path: relativePath,
-      bytes: content.length,
-      sha256: digest(content),
-    };
-  }
-  await writeFile(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`);
-  return root;
-}
-
-const CURRENT_ADAPTER_FIXTURE_ROOT = await createCurrentAdapterFixtureRepository();
-after(() => rm(CURRENT_ADAPTER_FIXTURE_ROOT, { recursive: true, force: true }));
-
 async function rewriteManifest(root, transform) {
-  const file = path.join(root, ...FIXTURE_RELATIVE.split("/"), "manifest.json");
+  const file = path.join(root, ...FIXTURE_RELATIVE.split("/"), FIXTURE_MANIFEST_FILENAME);
   const value = JSON.parse(await readFile(file, "utf8"));
   transform(value);
   await writeFile(file, `${JSON.stringify(value, null, 2)}\n`);
@@ -342,14 +305,14 @@ function liveDependencies({ result = safeFreshResult(), status = "", exists = fa
   return {
     calls,
     options: {
-      repositoryRoot: CURRENT_ADAPTER_FIXTURE_ROOT,
+      repositoryRoot: ROOT,
       executionPlan: executionPlan(),
       sourcePin: sourcePin(),
       gitStatus: async () => status,
       gitIdentity: async () => "a".repeat(40),
       gitReadBlob: async (_root, commit, relativePath) => commit === "a".repeat(40)
         ? Buffer.from("pin")
-        : readFile(path.join(CURRENT_ADAPTER_FIXTURE_ROOT, ...relativePath.split("/"))),
+        : readFile(path.join(ROOT, ...relativePath.split("/"))),
       artifactExists: async () => exists,
       runtimeFactory: async () => {
         calls.runtime += 1;
@@ -386,6 +349,8 @@ function liveDependencies({ result = safeFreshResult(), status = "", exists = fa
 test("exports the deterministic M4 contract surface", async () => {
   const api = await subject();
   assert.equal(api.JOENESS_M4_FIXTURE_RELATIVE_PATH, FIXTURE_RELATIVE);
+  assert.equal(api.JOENESS_M4_FIXTURE_MANIFEST_FILENAME, FIXTURE_MANIFEST_FILENAME);
+  assert.equal(api.JOENESS_M4_FIXTURE_ID, FIXTURE_ID);
   for (const name of [
     "validateJoenessM4Manifest",
     "preflightJoenessM4SuperpowersEval",
@@ -399,15 +364,78 @@ test("exports the deterministic M4 contract surface", async () => {
   ]) assert.equal(typeof api[name], "function", name);
 });
 
-test("preflight verifies the four fixture pins and test-local current adapter/collector pins", async () => {
+test("historical v1 manifest stays byte-exact while v2 reuses inputs and pins immutable support blobs", async () => {
+  const v1Content = await readFile(path.join(FIXTURE_ROOT, "manifest.json"));
+  const v2Content = await readFile(path.join(FIXTURE_ROOT, FIXTURE_MANIFEST_FILENAME));
+  assert.deepEqual(
+    { bytes: v1Content.length, sha256: digest(v1Content) },
+    { bytes: 1738, sha256: "fdda654ba170e151913c43eb8f59fdef4cf1de47a20da7e461c69389b4377ca4" },
+  );
+  assert.deepEqual(
+    { bytes: v2Content.length, sha256: digest(v2Content) },
+    { bytes: 1738, sha256: "3708a7c3ea677926cd4f85093e83788ff6250aa0b7fd012529ff88a45ddc77f0" },
+  );
+  const v1 = JSON.parse(v1Content);
+  const v2 = JSON.parse(v2Content);
+  assert.deepEqual({ schemaVersion: v1.schemaVersion, id: v1.id }, {
+    schemaVersion: 1,
+    id: "joeness-m4-superpowers-v1",
+  });
+  assert.deepEqual(v1.sources, {
+    repositoryCommit: "4364d3c45323766ad81bc9fe0cf5af9fc2c3614c",
+    freshTurnAdapter: {
+      path: "evals/support/run-fresh-evaluator-turn.mjs",
+      bytes: 55477,
+      sha256: "f2c7e2e9457b0ef7d6b819425619dcde8054db530f8b920829376f39a13fd087",
+    },
+    collector: {
+      path: "evals/support/collect-codex-app-server.mjs",
+      bytes: 297632,
+      sha256: "8b81ddb28be2a803500839a2de61f9bb397aa96711d039bdb7a3a86cfad8d687",
+    },
+  });
+  assert.deepEqual({ schemaVersion: v2.schemaVersion, id: v2.id }, { schemaVersion: 2, id: FIXTURE_ID });
+  assert.deepEqual(v2.inputs, v1.inputs);
+  assert.deepEqual(v2.runtime, v1.runtime);
+  assert.deepEqual(v2.limits, v1.limits);
+  assert.deepEqual(v2.sources, {
+    repositoryCommit: FIXTURE_SUPPORT_COMMIT,
+    freshTurnAdapter: {
+      path: "evals/support/run-fresh-evaluator-turn.mjs",
+      bytes: 56845,
+      sha256: "4884154dd1884b6fa899eef854307edec2a9897cb39b1f45c9c03479cab34247",
+    },
+    collector: {
+      path: "evals/support/collect-codex-app-server.mjs",
+      bytes: 297632,
+      sha256: "8b81ddb28be2a803500839a2de61f9bb397aa96711d039bdb7a3a86cfad8d687",
+    },
+  });
+  for (const source of Object.values(v2.sources).filter((value) => typeof value === "object")) {
+    const { stdout } = await execFile("git", ["cat-file", "blob", `${FIXTURE_SUPPORT_COMMIT}:${source.path}`], {
+      cwd: ROOT,
+      encoding: "buffer",
+    });
+    const blob = Buffer.from(stdout);
+    assert.deepEqual({ bytes: blob.length, sha256: digest(blob) }, {
+      bytes: source.bytes,
+      sha256: source.sha256,
+    });
+  }
+  const currentAdapter = await readFile(path.join(ROOT, v2.sources.freshTurnAdapter.path));
+  assert.deepEqual({ bytes: currentAdapter.length, sha256: digest(currentAdapter) }, {
+    bytes: v2.sources.freshTurnAdapter.bytes,
+    sha256: v2.sources.freshTurnAdapter.sha256,
+  });
+  assert.notEqual(v1.sources.freshTurnAdapter.sha256, digest(currentAdapter));
+});
+
+test("root preflight verifies the four immutable v2 input and source pins", async () => {
   const api = await subject();
-  const result = await api.preflightJoenessM4SuperpowersEval({ repositoryRoot: CURRENT_ADAPTER_FIXTURE_ROOT });
-  const manifest = JSON.parse(await readFile(path.join(
-    CURRENT_ADAPTER_FIXTURE_ROOT,
-    ...FIXTURE_RELATIVE.split("/"),
-    "manifest.json",
-  ), "utf8"));
+  const result = await api.preflightJoenessM4SuperpowersEval({ repositoryRoot: ROOT });
   assert.equal(result.manifestBytes <= 8192, true);
+  assert.equal(result.manifest.id, FIXTURE_ID);
+  assert.equal(result.manifest.schemaVersion, 2);
   assert.deepEqual(result.inputs.map(({ id, bytes, sha256 }) => ({ id, bytes, sha256 })), [
     { id: "evaluator-instruction", bytes: 1538, sha256: "4918dc6eede5dff6b44394a8c249d3622eac3f02bbe1804d6f18a937b05119b1" },
     { id: "project-task", bytes: 2171, sha256: "f193b03f5a3d410ab50484640dced02dafe54efa254f76fd15459fb53b6ffee3" },
@@ -415,7 +443,7 @@ test("preflight verifies the four fixture pins and test-local current adapter/co
     { id: "superpowers-brainstorming", bytes: 10047, sha256: "4a54a4858b99807f3155ed1614b2f116e35ea5c1b788e793f565dd837fd3891f" },
   ]);
   assert.deepEqual(result.sources, {
-    repositoryCommit: manifest.sources.repositoryCommit,
+    repositoryCommit: FIXTURE_SUPPORT_COMMIT,
     freshTurnAdapter: { path: "evals/support/run-fresh-evaluator-turn.mjs", bytes: 56845, sha256: "4884154dd1884b6fa899eef854307edec2a9897cb39b1f45c9c03479cab34247" },
     collector: { path: "evals/support/collect-codex-app-server.mjs", bytes: 297632, sha256: "8b81ddb28be2a803500839a2de61f9bb397aa96711d039bdb7a3a86cfad8d687" },
   });
@@ -424,19 +452,20 @@ test("preflight verifies the four fixture pins and test-local current adapter/co
 test("default CLI mode is validate-only and performs no write or runtime operation", async () => {
   const api = await subject();
   assert.deepEqual(api.parseJoenessM4Cli([]), { mode: "validate-only" });
-  const before = await execFile("git", ["status", "--porcelain"], { cwd: CURRENT_ADAPTER_FIXTURE_ROOT });
-  const result = await execFile(process.execPath, [
-    path.join(CURRENT_ADAPTER_FIXTURE_ROOT, "evals/support/run-joeness-m4-superpowers-eval.mjs"),
-  ], { cwd: CURRENT_ADAPTER_FIXTURE_ROOT });
-  const after = await execFile("git", ["status", "--porcelain"], { cwd: CURRENT_ADAPTER_FIXTURE_ROOT });
+  const before = await execFile("git", ["status", "--porcelain"], { cwd: ROOT });
+  const result = await execFile(process.execPath, [MODULE_PATH], { cwd: ROOT });
+  const after = await execFile("git", ["status", "--porcelain"], { cwd: ROOT });
   assert.equal(result.stderr, "");
-  assert.equal(JSON.parse(result.stdout).mode, "validate-only");
+  assert.deepEqual({ mode: JSON.parse(result.stdout).mode, fixture: JSON.parse(result.stdout).fixture }, {
+    mode: "validate-only",
+    fixture: FIXTURE_ID,
+  });
   assert.equal(after.stdout, before.stdout);
 });
 
 test("manifest validator rejects accessors, proxies, symbols, extras, missing keys, and sparse inputs", async () => {
   const api = await subject();
-  const manifest = JSON.parse(await readFile(path.join(FIXTURE_ROOT, "manifest.json"), "utf8"));
+  const manifest = JSON.parse(await readFile(path.join(FIXTURE_ROOT, FIXTURE_MANIFEST_FILENAME), "utf8"));
   const hostile = [];
   const accessor = structuredClone(manifest);
   Object.defineProperty(accessor, "id", { enumerable: true, get() { throw new Error("trap"); } });
@@ -503,7 +532,7 @@ test("preflight rejects a symlinked input and an oversized manifest", async (t) 
   await assert.rejects(api.preflightJoenessM4SuperpowersEval({ repositoryRoot: copy.root }), /symlink|regular/i);
 
   const second = await copiedFixture(t);
-  const manifestPath = path.join(second.target, "manifest.json");
+  const manifestPath = path.join(second.target, FIXTURE_MANIFEST_FILENAME);
   await writeFile(manifestPath, `${await readFile(manifestPath, "utf8")}${" ".repeat(8192)}`);
   assert.equal((await lstat(manifestPath)).size > 8192, true);
   await assert.rejects(api.preflightJoenessM4SuperpowersEval({ repositoryRoot: second.root }), /manifest.*size/i);
@@ -594,7 +623,7 @@ test("exact recommendation rejects every durable raw privacy canary and writes n
 
 test("input builder emits four ordinary text inputs in source order with project docs disabled", async () => {
   const api = await subject();
-  const preflight = await api.preflightJoenessM4SuperpowersEval({ repositoryRoot: CURRENT_ADAPTER_FIXTURE_ROOT });
+  const preflight = await api.preflightJoenessM4SuperpowersEval({ repositoryRoot: ROOT });
   const input = api.buildJoenessM4Input(preflight);
   assert.equal(input.length, 4);
   assert.deepEqual(input.map(({ type }) => type), ["text", "text", "text", "text"]);
@@ -605,7 +634,7 @@ test("input builder emits four ordinary text inputs in source order with project
 
 test("input/evidence validation rejects proxies, accessors, revoked values, and hidden extras trap-zero", async () => {
   const api = await subject();
-  const preflight = await api.preflightJoenessM4SuperpowersEval({ repositoryRoot: CURRENT_ADAPTER_FIXTURE_ROOT });
+  const preflight = await api.preflightJoenessM4SuperpowersEval({ repositoryRoot: ROOT });
   const input = api.buildJoenessM4Input(preflight);
   const schema = api.joenessM4OutputSchema();
   const hostile = [];
@@ -743,7 +772,7 @@ test("collector lifecycle failures and hostile results publish neither success n
 
 test("stderr accepts only safe summary or exact collector zero-byte shape and retains no raw field", async () => {
   const api = await subject();
-  const preflight = await api.preflightJoenessM4SuperpowersEval({ repositoryRoot: CURRENT_ADAPTER_FIXTURE_ROOT });
+  const preflight = await api.preflightJoenessM4SuperpowersEval({ repositoryRoot: ROOT });
   const input = api.buildJoenessM4Input(preflight);
   const outputSchema = api.joenessM4OutputSchema();
   for (const stderr of [
@@ -771,13 +800,14 @@ test("stderr accepts only safe summary or exact collector zero-byte shape and re
 
 test("retained evidence binds raw/schema/input tuples without raw stderr, PID, paths, or config", async () => {
   const api = await subject();
-  const preflight = await api.preflightJoenessM4SuperpowersEval({ repositoryRoot: CURRENT_ADAPTER_FIXTURE_ROOT });
+  const preflight = await api.preflightJoenessM4SuperpowersEval({ repositoryRoot: ROOT });
   const input = api.buildJoenessM4Input(preflight);
   const evidence = api.retainJoenessM4FreshEvidence(safeFreshResult(), { input, outputSchema: api.joenessM4OutputSchema() });
   const text = JSON.stringify(evidence);
   assert.equal(evidence.rawResponse.byteLength > 0, true);
   assert.equal(evidence.rawResponse.sha256.length, 64);
   assert.equal(evidence.input.sourceIds.join(","), SOURCE_IDS.join(","));
+  assert.equal(evidence.fixture, FIXTURE_ID);
   assert.equal(evidence.toolEvidenceCount, 0);
   for (const forbidden of ["stderr", "pid", ROOT, "config.toml", "Authorization: Bearer"]) assert.equal(text.includes(forbidden), false);
   assert.equal(Buffer.byteLength(text) <= 65536, true);

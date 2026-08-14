@@ -1,0 +1,58 @@
+{
+  "schemaVersion": 2,
+  "id": "joeness-m4-superpowers-v2",
+  "inputs": [
+    {
+      "id": "evaluator-instruction",
+      "path": "evaluator-instruction.md",
+      "bytes": 1538,
+      "sha256": "4918dc6eede5dff6b44394a8c249d3622eac3f02bbe1804d6f18a937b05119b1"
+    },
+    {
+      "id": "project-task",
+      "path": "project/TASK.md",
+      "bytes": 2171,
+      "sha256": "f193b03f5a3d410ab50484640dced02dafe54efa254f76fd15459fb53b6ffee3"
+    },
+    {
+      "id": "superpowers-using",
+      "path": "superpowers-6.2.0/using-superpowers/SKILL.md",
+      "bytes": 3063,
+      "sha256": "55379fe7c1c473a02c61961c822996bff30e1320d6921d9062509bc508482c05"
+    },
+    {
+      "id": "superpowers-brainstorming",
+      "path": "superpowers-6.2.0/brainstorming/SKILL.md",
+      "bytes": 10047,
+      "sha256": "4a54a4858b99807f3155ed1614b2f116e35ea5c1b788e793f565dd837fd3891f"
+    }
+  ],
+  "sources": {
+    "repositoryCommit": "d6b844018674ac3f85a82d5fe7b2fc16d725f858",
+    "freshTurnAdapter": {
+      "path": "evals/support/run-fresh-evaluator-turn.mjs",
+      "bytes": 56845,
+      "sha256": "4884154dd1884b6fa899eef854307edec2a9897cb39b1f45c9c03479cab34247"
+    },
+    "collector": {
+      "path": "evals/support/collect-codex-app-server.mjs",
+      "bytes": 297632,
+      "sha256": "8b81ddb28be2a803500839a2de61f9bb397aa96711d039bdb7a3a86cfad8d687"
+    }
+  },
+  "runtime": {
+    "projectDocs": "disabled",
+    "installedPluginActivation": "UNVERIFIED",
+    "dynamicTools": []
+  },
+  "limits": {
+    "manifestBytes": 8192,
+    "individualInputBytes": 16384,
+    "combinedInputBytes": 32768,
+    "rawResponseBytes": 16384,
+    "evidenceBytes": 65536,
+    "relativePathCharacters": 160,
+    "maxQuestions": 1,
+    "fixtureQuestions": 0
+  }
+}
