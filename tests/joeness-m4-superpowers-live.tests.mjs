@@ -16,6 +16,7 @@ const MODULE_PATH = path.join(
   "evals/support/run-joeness-m4-superpowers-live.mjs",
 );
 const PLAN_PATH = "evals/skill-contracts/joeness-m4-superpowers-live-plan-v3.json";
+const V3_ATTEMPT_INDEX_PATH = "evals/skill-contracts/joeness-m4-superpowers-attempt-index-v3.json";
 const V1_PLAN_PATH = "evals/skill-contracts/joeness-m4-superpowers-live-plan-v1.json";
 const V1_BLOCKED_PATH = "evals/skill-contracts/joeness-m4-superpowers-live-v1-blocked.json";
 const V1_ATTEMPT_INDEX_PATH = "evals/skill-contracts/joeness-m4-superpowers-attempt-index-v1.json";
@@ -205,6 +206,19 @@ async function git(root, args) {
   return stdout.trim();
 }
 
+async function gitPathExists(root, revision, relativePath) {
+  try {
+    await execFile("git", ["cat-file", "-e", `${revision}:${relativePath}`], {
+      cwd: root,
+      encoding: "utf8",
+    });
+    return true;
+  } catch (error) {
+    if (error?.code === 128) return false;
+    throw error;
+  }
+}
+
 async function committedPlanRepo(t, { orphanSupport = false } = {}) {
   const parent = await mkdtemp(path.join(tmpdir(), "joeness-m4-live-"));
   const root = path.join(parent, "repo");
@@ -213,9 +227,16 @@ async function committedPlanRepo(t, { orphanSupport = false } = {}) {
   await git(root, ["config", "user.name", "M4 Test"]);
   await git(root, ["config", "user.email", "m4@example.invalid"]);
   if (orphanSupport) {
-    const baseline = await git(root, ["rev-parse", "HEAD"]);
     await git(root, ["switch", "--quiet", "--orphan", "isolated-v3-support"]);
-    await git(root, ["checkout", baseline, "--", "."]);
+    await git(root, ["checkout", V2_PERSISTENCE_COMMIT, "--", "."]);
+  } else {
+    await git(root, [
+      "switch",
+      "--quiet",
+      "--create",
+      "synthetic-v3-support",
+      V2_PERSISTENCE_COMMIT,
+    ]);
   }
   const sourceTuples = {};
   const draft = planFixture();
@@ -235,6 +256,46 @@ async function committedPlanRepo(t, { orphanSupport = false } = {}) {
   const executionHead = await git(root, ["rev-parse", "HEAD"]);
   return { root, plan, implementationCommit, executionHead };
 }
+
+test("committedPlanRepo builds v3 support from immutable v2 history and adds only the v3 plan", async (t) => {
+  const fixture = await committedPlanRepo(t);
+  assert.equal(
+    await git(fixture.root, [
+      "rev-list",
+      "--parents",
+      "-n",
+      "1",
+      fixture.implementationCommit,
+    ]),
+    `${fixture.implementationCommit} ${V2_PERSISTENCE_COMMIT}`,
+  );
+  for (const relativePath of [
+    PLAN_PATH,
+    fixture.plan.outputs.raw,
+    fixture.plan.outputs.evidence,
+    fixture.plan.outputs.blocked,
+    V3_ATTEMPT_INDEX_PATH,
+  ]) {
+    assert.equal(
+      await gitPathExists(fixture.root, fixture.implementationCommit, relativePath),
+      false,
+      relativePath,
+    );
+  }
+  assert.equal(
+    await git(fixture.root, ["rev-list", "--parents", "-n", "1", fixture.executionHead]),
+    `${fixture.executionHead} ${fixture.implementationCommit}`,
+  );
+  assert.equal(
+    await git(fixture.root, [
+      "diff",
+      "--name-status",
+      fixture.implementationCommit,
+      fixture.executionHead,
+    ]),
+    `A\t${PLAN_PATH}`,
+  );
+});
 
 test("exports the committed-plan live wrapper boundary", async () => {
   const api = await subject();
