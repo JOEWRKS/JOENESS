@@ -86,6 +86,30 @@ const TASK1_PREVALIDATION_KEYS = Object.freeze([
   "mcpAfterOverLimit",
   "rawPayloadRetained",
 ]);
+const SEMANTIC_FAILURE_KEYS = Object.freeze([
+  "schemaVersion",
+  "kind",
+  "candidateId",
+  "requiredOutcome",
+  "predicates",
+  "failedPredicateCount",
+  "rawOutputRetained",
+]);
+const SEMANTIC_FAILURE_PREDICATE_KEYS = Object.freeze([
+  "applicableVisibleAcceptanceFail",
+  "visibleAppearanceOverall",
+  "completeContractOverall",
+]);
+const SEMANTIC_FAILURE_PREDICATE_ENTRY_KEYS = Object.freeze([
+  "expected",
+  "actual",
+  "matched",
+]);
+const SEMANTIC_FAILURE_AGGREGATE_VALUES = Object.freeze([
+  "PASS",
+  "FAIL",
+  "UNVERIFIED",
+]);
 const EVENT_COMPACTION_KEYS = Object.freeze([
   "observedEventCount",
   "retainedEventCount",
@@ -1537,6 +1561,103 @@ function safeExactOwnDataRecord(value, keys) {
     record[key] = property.value;
   }
   return record;
+}
+
+function retainSemanticFailureEvidence(value) {
+  if (diagnosticProxy(value) || !isObject(value)) return null;
+  let ownKeys;
+  try {
+    ownKeys = Reflect.ownKeys(value);
+  } catch {
+    return null;
+  }
+  if (
+    ownKeys.length !== SEMANTIC_FAILURE_KEYS.length ||
+    ownKeys.some((key) => typeof key !== "string" || !SEMANTIC_FAILURE_KEYS.includes(key))
+  ) {
+    return null;
+  }
+  const record = {};
+  for (const key of SEMANTIC_FAILURE_KEYS) {
+    const property = safeDiagnosticOwnData(value, key);
+    if (!property.found) return null;
+    record[key] = property.value;
+  }
+  const predicates = safeExactOwnDataRecord(
+    record.predicates,
+    SEMANTIC_FAILURE_PREDICATE_KEYS,
+  );
+  if (predicates === null) return null;
+  const applicable = safeExactOwnDataRecord(
+    predicates.applicableVisibleAcceptanceFail,
+    SEMANTIC_FAILURE_PREDICATE_ENTRY_KEYS,
+  );
+  const visible = safeExactOwnDataRecord(
+    predicates.visibleAppearanceOverall,
+    SEMANTIC_FAILURE_PREDICATE_ENTRY_KEYS,
+  );
+  const complete = safeExactOwnDataRecord(
+    predicates.completeContractOverall,
+    SEMANTIC_FAILURE_PREDICATE_ENTRY_KEYS,
+  );
+  if (
+    applicable === null ||
+    visible === null ||
+    complete === null ||
+    record.schemaVersion !== 1 ||
+    record.kind !== "visual-bounded-outcome" ||
+    record.candidateId !== "sample-a" ||
+    record.requiredOutcome !== "applicable-visible-fail-and-aggregate-fail" ||
+    applicable.expected !== true ||
+    typeof applicable.actual !== "boolean" ||
+    typeof applicable.matched !== "boolean" ||
+    applicable.matched !== (applicable.actual === true) ||
+    visible.expected !== "FAIL" ||
+    !SEMANTIC_FAILURE_AGGREGATE_VALUES.includes(visible.actual) ||
+    typeof visible.matched !== "boolean" ||
+    visible.matched !== (visible.actual === "FAIL") ||
+    complete.expected !== "FAIL" ||
+    !SEMANTIC_FAILURE_AGGREGATE_VALUES.includes(complete.actual) ||
+    typeof complete.matched !== "boolean" ||
+    complete.matched !== (complete.actual === "FAIL") ||
+    !Number.isSafeInteger(record.failedPredicateCount) ||
+    record.failedPredicateCount < 0 ||
+    record.failedPredicateCount !== [applicable, visible, complete]
+      .filter(({ matched }) => !matched).length ||
+    record.rawOutputRetained !== false
+  ) {
+    return null;
+  }
+  const retained = {
+    schemaVersion: 1,
+    kind: "visual-bounded-outcome",
+    candidateId: "sample-a",
+    requiredOutcome: "applicable-visible-fail-and-aggregate-fail",
+    predicates: {
+      applicableVisibleAcceptanceFail: {
+        expected: true,
+        actual: applicable.actual,
+        matched: applicable.matched,
+      },
+      visibleAppearanceOverall: {
+        expected: "FAIL",
+        actual: visible.actual,
+        matched: visible.matched,
+      },
+      completeContractOverall: {
+        expected: "FAIL",
+        actual: complete.actual,
+        matched: complete.matched,
+      },
+    },
+    failedPredicateCount: record.failedPredicateCount,
+    rawOutputRetained: false,
+  };
+  try {
+    return safeBoundedClone(retained, "semantic failure", 2 * 1024);
+  } catch {
+    return null;
+  }
 }
 
 function retainEventHistogram(value, labelKey, bucketOrder) {
@@ -3250,7 +3371,14 @@ export async function runDesignVisualM2B1({
         throw new Error("M2B1 Visual Design handoff hash differs");
       }
       const parsed = JSON.parse(visualResult.outputText.text);
-      const output = validateVisualM2B1Output(parsed, design, candidate.id);
+      let output;
+      try {
+        output = validateVisualM2B1Output(parsed, design, candidate.id);
+      } catch (error) {
+        const semantic = safeDiagnosticOwnData(error, "semanticFailureEvidence");
+        if (!semantic.found) throw error;
+        throw attachPostValidationFreshEvidence(error, visualResult, visualInput);
+      }
       visuals.push({
         candidateId: candidate.id,
         designRaw: { byteLength: designRaw.byteLength, sha256: designRaw.sha256 },
@@ -3340,6 +3468,10 @@ export async function runDesignVisualM2B1({
         ? retainTask1Prevalidation(task1PrevalidationProperty.value)
         : null;
       const eventCompaction = retainFailureEventCompaction(error, freshEvaluatorEvidence);
+      const semanticFailureProperty = safeDiagnosticOwnData(error, "semanticFailureEvidence");
+      const semanticFailureEvidence = semanticFailureProperty.found
+        ? retainSemanticFailureEvidence(semanticFailureProperty.value)
+        : null;
       const blocked = {
         schemaVersion: 1,
         id: `design-visual-m2-b1-v${preflight.plan.schemaVersion}-blocked`,
@@ -3351,6 +3483,7 @@ export async function runDesignVisualM2B1({
           ? { executionSource: clone(preflight.executionSource) }
           : {}),
         partialEvidence: retainPartialEvidence(freshEvaluatorEvidence),
+        ...(semanticFailureEvidence === null ? {} : { semanticFailureEvidence }),
         ...(task1Prevalidation === null ? {} : { task1Prevalidation }),
         ...(eventCompaction === null ? {} : { eventCompaction }),
         cleanupEvidence: clone(cleanupEvidence ?? {

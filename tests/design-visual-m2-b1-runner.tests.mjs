@@ -737,6 +737,168 @@ test("semantic failure evidence at the validator boundary", async () => {
   ));
 });
 
+test("M2B1 blocked semantic failure evidence preserves bounded independent projections", async (t) => {
+  const subject = await loadSubject();
+  const { root, planPath } = await fixtureRoot(t);
+  const design = designOutput();
+  const dependencies = successfulDependencies(design);
+  const originalRunTurn = dependencies.runTurn;
+  const credentialCanary = "sk-proj-SYNTHETIC_TEST_ONLY_abcdefghijklmnop";
+  let sampleAResult;
+  let sampleAStagedRoot;
+  let rawVisualOutput;
+  dependencies.runTurn = async (options) => {
+    const result = await originalRunTurn(options);
+    if (dependencies.calls.length === 2) {
+      result.output = visualOutput(design, "sample-a", false);
+      const text = JSON.stringify(result.output);
+      result.outputText = {
+        text,
+        byteLength: Buffer.byteLength(text),
+        sha256: digest(text),
+      };
+      sampleAResult = result;
+      sampleAStagedRoot = options.root;
+      rawVisualOutput = text;
+    }
+    return result;
+  };
+
+  await assert.rejects(
+    subject.runDesignVisualM2B1({ repositoryRoot: root, planPath, ...dependencies }),
+    /M2B1 sample-a lacks the bounded defect outcome/,
+  );
+
+  const blocked = dependencies.writes.find(({ file }) => file.endsWith("blocked.json")).value;
+  assert.deepEqual(blocked.semanticFailureEvidence, expectedSemanticFailure());
+  assert.deepEqual(blocked.eventCompaction, sampleAResult.eventCompaction);
+  assert.equal(Object.hasOwn(blocked, "task1Prevalidation"), false);
+  assert.deepEqual(blocked.completedSessions, ["design", "sample-a"]);
+  assert.equal(blocked.failedSession, 2);
+  assert.equal(dependencies.calls.length, 2);
+  assert.equal(dependencies.writes.filter(({ file }) => !file.endsWith("blocked.json")).length, 0);
+
+  const partial = blocked.partialEvidence;
+  assert.equal(partial.retention, "prioritized");
+  assert.deepEqual(Object.keys(partial).sort(), [
+    "appServer",
+    "blockerArrayLength",
+    "blockers",
+    "events",
+    "input",
+    "outputSchema",
+    "primaryCause",
+    "retention",
+    "runtimeErrors",
+    "thread",
+    "turn",
+  ].sort());
+  assert.deepEqual(partial.primaryCause, {});
+  assert.deepEqual(partial.blockers, []);
+  assert.equal(partial.blockerArrayLength, 0);
+  assert.deepEqual(partial.thread, {});
+  assert.deepEqual(partial.turn, {});
+  assert.deepEqual(partial.outputSchema, {});
+  assert.deepEqual(partial.runtimeErrors, {
+    records: [],
+    observedCount: 0,
+    omittedObservedCount: 0,
+    scanIndexCount: 0,
+    observedEventCount: 0,
+    unscannedIndexCount: 0,
+    totalCount: "UNVERIFIED",
+  });
+  const { windowSha256, ...eventScaffolding } = partial.events;
+  assert.deepEqual(eventScaffolding, {
+    arrayLength: 0,
+    scanIndexCount: 0,
+    observedEventCount: 0,
+    window: { head: [], headIndices: [], tail: [], tailIndices: [] },
+    windowOmittedIndexCount: 0,
+  });
+  assert.match(windowSha256, /^[a-f0-9]{64}$/u);
+  assert.deepEqual(partial.input.expectedLocalImageInputIndexes, [1, 2]);
+  assert.deepEqual(
+    partial.input.controllerLocalImages,
+    controllerImageEvidence([digest("image-1-1"), digest("image-1-2")], 1),
+  );
+  assert.deepEqual(partial.appServer, {
+    processExitCode: 0,
+    stderr: { byteLength: 0, truncated: false, captureTruncated: false },
+    imageDiagnostics: safeImageDiagnostics({
+      status: "NO_ROUTER_IMAGE_ERROR",
+      observationCount: 0,
+      expectedTargetCount: 2,
+      effectivePathMatch: "UNVERIFIED",
+      matchedInputIndex: null,
+      effectivePathAbsolute: "UNVERIFIED",
+      effectivePathWithinRoot: "UNVERIFIED",
+      outerCategory: "UNVERIFIED",
+      reportedCategory: "UNVERIFIED",
+    }),
+    successfulImageViews: safeSuccessfulImageViews(),
+  });
+  assert.equal(Object.hasOwn(partial, "eventCompaction"), false);
+
+  const serialized = JSON.stringify(blocked);
+  assert.equal((serialized.match(/"eventCompaction"/gu) ?? []).length, 1);
+  assert.equal(serialized.includes('"outputText"'), false);
+  assert.equal(serialized.includes('"checks"'), false);
+  assert.equal(serialized.includes('"observed":'), false);
+  assert.equal(serialized.includes(rawVisualOutput), false);
+  for (const forbidden of [
+    credentialCanary,
+    "The named visible relation is present in the Collection modal.",
+    sampleAStagedRoot,
+    sampleAStagedRoot.replaceAll("\\", "/"),
+    digest(sampleAStagedRoot),
+  ]) {
+    assert.equal(serialized.includes(forbidden), false, forbidden);
+  }
+});
+
+test("M2B1 non-target visual validator error gains no semantic or post-validation event evidence", async (t) => {
+  const subject = await loadSubject();
+  const { root, planPath } = await fixtureRoot(t);
+  const design = designOutput();
+  const dependencies = successfulDependencies(design);
+  const originalRunTurn = dependencies.runTurn;
+  dependencies.runTurn = async (options) => {
+    const result = await originalRunTurn(options);
+    if (dependencies.calls.length === 2) {
+      result.output = visualOutput(design, "sample-a", false);
+      delete result.output.claimScope;
+      const text = JSON.stringify(result.output);
+      result.outputText = {
+        text,
+        byteLength: Buffer.byteLength(text),
+        sha256: digest(text),
+      };
+    }
+    return result;
+  };
+
+  let failure;
+  await assert.rejects(
+    subject.runDesignVisualM2B1({ repositoryRoot: root, planPath, ...dependencies }),
+    (error) => {
+      failure = error;
+      assert.equal(error.message, "M2B1 Visual output shape or opaque candidate id is malformed");
+      return true;
+    },
+  );
+  assert.equal(Object.hasOwn(failure, "semanticFailureEvidence"), false);
+  assert.equal(Object.hasOwn(failure, "eventCompaction"), false);
+  assert.equal(Object.hasOwn(failure, "freshEvaluatorEvidence"), false);
+  const blocked = dependencies.writes.find(({ file }) => file.endsWith("blocked.json")).value;
+  assert.equal(Object.hasOwn(blocked, "semanticFailureEvidence"), false);
+  assert.equal(Object.hasOwn(blocked, "eventCompaction"), false);
+  assert.equal(Object.hasOwn(blocked, "task1Prevalidation"), false);
+  assert.deepEqual(blocked.completedSessions, ["design", "sample-a"]);
+  assert.equal(dependencies.calls.length, 2);
+  assert.equal(dependencies.writes.filter(({ file }) => !file.endsWith("blocked.json")).length, 0);
+});
+
 test("M2B1 successor plan preserves v1 evidence and uses disjoint v2 outputs", async () => {
   const subject = await loadSubject();
   const plan = JSON.parse(await readFile(SUCCESSOR_PLAN_PATH, "utf8"));
@@ -1849,6 +2011,241 @@ test("M2B1 blocked writer projects only exact path-private event compaction", as
     const serialized = JSON.stringify(blocked);
     assert.equal(canaries.some((canary) => serialized.includes(canary)), false, label);
   }
+  assert.equal(trapCalls, 0);
+});
+
+test("M2B1 semantic failure writer projection retains only exact path-private evidence", async (t) => {
+  const subject = await loadSubject();
+  const { root, planPath } = await fixtureRoot(t);
+  const exactSemantic = expectedSemanticFailure();
+  const exactEventCompaction = eventCompactionFixture();
+  const forbiddenPath = "C:\\Users\\Private\\semantic-output.json";
+  const credentialCanary = "sk-proj-SYNTHETIC_TEST_ONLY_abcdefghijklmnop";
+  const oversizedCanary = "semantic-oversized-canary-must-not-persist";
+  const serializedCanaries = [forbiddenPath, credentialCanary, oversizedCanary];
+  let trapCalls = 0;
+  const proxyHandler = (label) => ({
+    get() {
+      trapCalls += 1;
+      throw new Error(`${label} get trap must not run`);
+    },
+    ownKeys() {
+      trapCalls += 1;
+      throw new Error(`${label} ownKeys trap must not run`);
+    },
+    getOwnPropertyDescriptor() {
+      trapCalls += 1;
+      throw new Error(`${label} descriptor trap must not run`);
+    },
+  });
+  const cases = [
+    ["exact", (value) => value, true],
+    ["extra", (value) => ({ ...value, rawPath: forbiddenPath }), false],
+    ["missing top key", (value) => { delete value.kind; return value; }, false],
+    ["missing predicates key", (value) => { delete value.predicates.visibleAppearanceOverall; return value; }, false],
+    ["missing entry key", (value) => { delete value.predicates.completeContractOverall.matched; return value; }, false],
+    ["wrong schema", (value) => { value.schemaVersion = 2; return value; }, false],
+    ["wrong literal", (value) => { value.kind = "other"; return value; }, false],
+    ["wrong expected boolean", (value) => { value.predicates.applicableVisibleAcceptanceFail.expected = false; return value; }, false],
+    ["wrong expected enum", (value) => { value.predicates.visibleAppearanceOverall.expected = "PASS"; return value; }, false],
+    ["wrong boolean", (value) => { value.predicates.applicableVisibleAcceptanceFail.actual = 1; return value; }, false],
+    ["wrong enum", (value) => { value.predicates.visibleAppearanceOverall.actual = "NOT_APPLICABLE"; return value; }, false],
+    ["wrong matched", (value) => { value.predicates.completeContractOverall.matched = true; return value; }, false],
+    ["wrong count", (value) => { value.failedPredicateCount = 1; return value; }, false],
+    ["fractional count", (value) => { value.failedPredicateCount = 2.5; return value; }, false],
+    ["negative count", (value) => { value.failedPredicateCount = -1; return value; }, false],
+    ["unsafe count", (value) => { value.failedPredicateCount = Number.MAX_SAFE_INTEGER + 1; return value; }, false],
+    ["raw retained", (value) => { value.rawOutputRetained = true; return value; }, false],
+    ["credential", (value) => { value.requiredOutcome = credentialCanary; return value; }, false],
+    ["path", (value) => { value.candidateId = forbiddenPath; return value; }, false],
+  ];
+
+  const boundaries = [
+    {
+      label: "top-level semantic",
+      field: "kind",
+      select: (value) => value,
+      replace: (_value, replacement) => replacement,
+    },
+    {
+      label: "predicates",
+      field: "visibleAppearanceOverall",
+      select: (value) => value.predicates,
+      replace: (value, replacement) => { value.predicates = replacement; return value; },
+    },
+    ...[
+      "applicableVisibleAcceptanceFail",
+      "visibleAppearanceOverall",
+      "completeContractOverall",
+    ].map((predicate) => ({
+      label: `${predicate} entry`,
+      field: "expected",
+      select: (value) => value.predicates[predicate],
+      replace: (value, replacement) => {
+        value.predicates[predicate] = replacement;
+        return value;
+      },
+    })),
+  ];
+  for (const boundary of boundaries) {
+    cases.push(
+      [`${boundary.label} null`, (value) => boundary.replace(value, null), false],
+      [`${boundary.label} array`, (value) => boundary.replace(
+        value,
+        [forbiddenPath, credentialCanary],
+      ), false],
+      [`${boundary.label} function`, (value) => {
+        const replacement = function semanticContainer() {};
+        replacement.rawPath = forbiddenPath;
+        replacement.credentialCanary = credentialCanary;
+        return boundary.replace(value, replacement);
+      }, false],
+      [`${boundary.label} accessor`, (value) => {
+        Object.defineProperty(boundary.select(value), boundary.field, {
+          configurable: true,
+          enumerable: true,
+          get() {
+            trapCalls += 1;
+            return credentialCanary;
+          },
+        });
+        return value;
+      }, false],
+      [`${boundary.label} live proxy`, (value) => boundary.replace(
+        value,
+        new Proxy({
+          ...boundary.select(value),
+          rawPath: forbiddenPath,
+          credentialCanary,
+        }, proxyHandler(`${boundary.label} live proxy`)),
+      ), false],
+      [`${boundary.label} revoked proxy`, (value) => {
+        const revocable = Proxy.revocable({
+          ...boundary.select(value),
+          rawPath: forbiddenPath,
+          credentialCanary,
+        }, proxyHandler(`${boundary.label} revoked proxy`));
+        revocable.revoke();
+        return boundary.replace(value, revocable.proxy);
+      }, false],
+      [`${boundary.label} symbol key`, (value) => {
+        boundary.select(value)[Symbol(`${boundary.label} ${credentialCanary}`)] = forbiddenPath;
+        return value;
+      }, false],
+      [`${boundary.label} oversized extra field`, (value) => {
+        boundary.select(value).oversizedExtra = `${oversizedCanary}${"x".repeat(3 * 1024)}`;
+        return value;
+      }, false],
+      [`${boundary.label} missing nested key`, (value) => {
+        delete boundary.select(value)[boundary.field];
+        return value;
+      }, false],
+    );
+  }
+
+  async function runWriterCase({
+    label,
+    semantic,
+    retained,
+    freshEvaluatorEvidence = { appServer: { processExitCode: 0 }, events: [] },
+    eventCompaction,
+    expectedEventCompaction = null,
+  }) {
+    const trapCountBefore = trapCalls;
+    const dependencies = successfulDependencies();
+    dependencies.runTurn = async (options) => {
+      options.session.closed = true;
+      options.session.processExitCode = 0;
+      const failure = new Error(`semantic projection ${label}`);
+      Object.defineProperty(failure, "semanticFailureEvidence", {
+        enumerable: false,
+        configurable: true,
+        writable: true,
+        value: semantic,
+      });
+      Object.defineProperty(failure, "freshEvaluatorEvidence", {
+        enumerable: false,
+        configurable: true,
+        writable: true,
+        value: freshEvaluatorEvidence,
+      });
+      if (eventCompaction !== undefined) {
+        Object.defineProperty(failure, "eventCompaction", {
+          enumerable: false,
+          configurable: true,
+          writable: true,
+          value: eventCompaction,
+        });
+      }
+      throw failure;
+    };
+
+    await assert.rejects(
+      subject.runDesignVisualM2B1({ repositoryRoot: root, planPath, ...dependencies }),
+      (error) => error.message === `semantic projection ${label}`,
+      label,
+    );
+    const blocked = dependencies.writes.find(({ file }) => file.endsWith("blocked.json")).value;
+    assert.equal(Object.hasOwn(blocked, "semanticFailureEvidence"), retained, label);
+    if (retained) assert.deepEqual(blocked.semanticFailureEvidence, exactSemantic, label);
+    if (expectedEventCompaction === null) {
+      assert.equal(Object.hasOwn(blocked, "eventCompaction"), false, label);
+    } else {
+      assert.deepEqual(blocked.eventCompaction, expectedEventCompaction, label);
+    }
+    assert.equal(Object.hasOwn(blocked, "task1Prevalidation"), false, label);
+    assert.equal(trapCalls, trapCountBefore, label);
+    const serialized = JSON.stringify(blocked);
+    for (const canary of serializedCanaries) {
+      assert.equal(serialized.includes(canary), false, `${label}: ${canary}`);
+    }
+    return blocked;
+  }
+
+  for (const [label, mutate, retained] of cases) {
+    await runWriterCase({
+      label,
+      semantic: mutate(structuredClone(exactSemantic)),
+      retained,
+    });
+  }
+
+  const hostileFreshEvaluatorEvidence = new Proxy({
+    appServer: { processExitCode: 0 },
+    rawPath: forbiddenPath,
+    credentialCanary,
+  }, proxyHandler("hostile fresh evaluator evidence"));
+  const independentSemantic = await runWriterCase({
+    label: "valid semantic with hostile fresh evaluator evidence",
+    semantic: structuredClone(exactSemantic),
+    retained: true,
+    freshEvaluatorEvidence: hostileFreshEvaluatorEvidence,
+  });
+  assert.deepEqual(independentSemantic.semanticFailureEvidence, exactSemantic);
+
+  const invalidSemantic = { ...structuredClone(exactSemantic), rawPath: forbiddenPath };
+  const semanticIndependentEvent = await runWriterCase({
+    label: "invalid semantic with valid event summary",
+    semantic: invalidSemantic,
+    retained: false,
+    eventCompaction: structuredClone(exactEventCompaction),
+    expectedEventCompaction: exactEventCompaction,
+  });
+  assert.equal(Object.hasOwn(semanticIndependentEvent, "semanticFailureEvidence"), false);
+  assert.deepEqual(semanticIndependentEvent.eventCompaction, exactEventCompaction);
+
+  const invalidEventCompaction = {
+    ...structuredClone(exactEventCompaction),
+    rawPath: forbiddenPath,
+  };
+  const eventIndependentSemantic = await runWriterCase({
+    label: "valid semantic with invalid event summary",
+    semantic: structuredClone(exactSemantic),
+    retained: true,
+    eventCompaction: invalidEventCompaction,
+  });
+  assert.deepEqual(eventIndependentSemantic.semanticFailureEvidence, exactSemantic);
+  assert.equal(Object.hasOwn(eventIndependentSemantic, "eventCompaction"), false);
   assert.equal(trapCalls, 0);
 });
 
