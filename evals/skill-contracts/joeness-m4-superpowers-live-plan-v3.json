@@ -1,0 +1,79 @@
+{
+  "schemaVersion": 3,
+  "id": "joeness-m4-superpowers-live-v3",
+  "date": "2026-08-14",
+  "method": "bounded-path-private-fixed-enum-normalized-event-blocker-projection-no-evaluator-contract-change",
+  "predecessor": {
+    "id": "joeness-m4-superpowers-live-v2",
+    "implementationCommit": "c3c1f482ec3f0a0174d30d8838baa3798cfaeca6",
+    "executionHead": "dd675a0dce342514b7eb0aa791afa62adf48983a",
+    "persistenceCommit": "04bad279da7c5eded32a97aa8918fbab28192bef",
+    "plan": {
+      "path": "evals/skill-contracts/joeness-m4-superpowers-live-plan-v2.json",
+      "bytes": 2952,
+      "sha256": "85be6e07cef1d3165fd0cb504de929dbafc74e227d1b2a403777035d198c449c"
+    },
+    "blockedArtifact": {
+      "path": "evals/skill-contracts/joeness-m4-superpowers-live-v2-blocked.json",
+      "bytes": 3540,
+      "sha256": "ba29d79c3955f4bfce5059b1e05fbae8744e50eeaf235dd60d331ef3c7f1e4a0"
+    },
+    "attemptIndex": {
+      "path": "evals/skill-contracts/joeness-m4-superpowers-attempt-index-v2.json",
+      "bytes": 9264,
+      "sha256": "147eead383f1b5e696dd5d7fcc57a9c86915adb8d8448189f4eb59bb95f73156"
+    },
+    "sameCommandRetryAuthorized": false
+  },
+  "attempt": {
+    "freshTurnCount": 1,
+    "retryCount": 0,
+    "automaticRetry": false
+  },
+  "source": {
+    "planImplementationCommit": "39387f9ce0708ed56ef7be8e34831690eae31021",
+    "runner": {
+      "path": "evals/support/run-joeness-m4-superpowers-eval.mjs",
+      "bytes": 53515,
+      "sha256": "b144d15d1601f7de8356fa95819566d47ef6447e9a5195329692d1b83533c9bc"
+    },
+    "liveWrapper": {
+      "path": "evals/support/run-joeness-m4-superpowers-live.mjs",
+      "bytes": 54784,
+      "sha256": "8f99f6a2a790dd0bd82b886a303355fc15808f02738ad755c5c3171f9e1faa0e"
+    },
+    "freshTurnAdapter": {
+      "path": "evals/support/run-fresh-evaluator-turn.mjs",
+      "bytes": 56845,
+      "sha256": "4884154dd1884b6fa899eef854307edec2a9897cb39b1f45c9c03479cab34247"
+    },
+    "collector": {
+      "path": "evals/support/collect-codex-app-server.mjs",
+      "bytes": 297632,
+      "sha256": "8b81ddb28be2a803500839a2de61f9bb397aa96711d039bdb7a3a86cfad8d687"
+    },
+    "fixtureManifest": {
+      "path": "evals/skill-contracts/fixtures/joeness-m4-superpowers-v1/manifest-v2.json",
+      "bytes": 1738,
+      "sha256": "3708a7c3ea677926cd4f85093e83788ff6250aa0b7fd012529ff88a45ddc77f0"
+    }
+  },
+  "runtime": {
+    "codexVersion": "codex-cli 0.146.0",
+    "projectDocs": "disabled",
+    "installedPluginActivation": "UNVERIFIED",
+    "dynamicTools": []
+  },
+  "outputs": {
+    "raw": "evals/skill-contracts/joeness-m4-superpowers-live-v3-raw.json",
+    "evidence": "evals/skill-contracts/joeness-m4-superpowers-live-v3-evidence.json",
+    "blocked": "evals/skill-contracts/joeness-m4-superpowers-live-v3-blocked.json"
+  },
+  "resultBoundary": {
+    "state": "candidate",
+    "validation": "unvalidated",
+    "promotionPass": false,
+    "corePromotion": false,
+    "manifestPromotion": false
+  }
+}
