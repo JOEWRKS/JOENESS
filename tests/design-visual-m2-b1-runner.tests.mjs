@@ -4611,9 +4611,18 @@ test("M2B1 actual v10 plan pins compacted event evidence and preserves the compl
     summary: "evals/skill-contracts/design-visual-m2-b1-v10-summary.json",
     blocked: "evals/skill-contracts/design-visual-m2-b1-v10-blocked.json",
   });
-  for (const output of Object.values(validated.outputs)) {
-    await assertPathMissing(path.join(ROOT, ...output.split("/")));
+  for (const key of [
+    "designRaw", "designHandoff", "sampleARaw", "sampleAEnvelope",
+    "sampleBRaw", "sampleBEnvelope", "summary",
+  ]) {
+    await assertPathMissing(path.join(ROOT, ...validated.outputs[key].split("/")));
   }
+  const blockedBytes = await readFile(path.join(ROOT, ...validated.outputs.blocked.split("/")));
+  assert.equal(blockedBytes.byteLength, 2504);
+  assert.equal(
+    digest(blockedBytes),
+    "34a1cb1c5fdf7655aeab9f5f6df899c40ae8752cd93edd57061f95c29dcbfcd0",
+  );
   for (const pin of [
     validated.source.runner,
     validated.source.freshTurnAdapter,
