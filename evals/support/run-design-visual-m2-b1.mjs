@@ -1621,7 +1621,8 @@ function retainSemanticFailureEvidence(value) {
     typeof complete.matched !== "boolean" ||
     complete.matched !== (complete.actual === "FAIL") ||
     !Number.isSafeInteger(record.failedPredicateCount) ||
-    record.failedPredicateCount < 0 ||
+    record.failedPredicateCount < 1 ||
+    record.failedPredicateCount > 3 ||
     record.failedPredicateCount !== [applicable, visible, complete]
       .filter(({ matched }) => !matched).length ||
     record.rawOutputRetained !== false

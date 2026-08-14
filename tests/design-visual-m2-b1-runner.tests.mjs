@@ -2052,6 +2052,16 @@ test("M2B1 semantic failure writer projection retains only exact path-private ev
     ["wrong enum", (value) => { value.predicates.visibleAppearanceOverall.actual = "NOT_APPLICABLE"; return value; }, false],
     ["wrong matched", (value) => { value.predicates.completeContractOverall.matched = true; return value; }, false],
     ["wrong count", (value) => { value.failedPredicateCount = 1; return value; }, false],
+    ["zero count with all predicates matched", (value) => {
+      value.predicates.applicableVisibleAcceptanceFail.actual = true;
+      value.predicates.applicableVisibleAcceptanceFail.matched = true;
+      value.predicates.visibleAppearanceOverall.actual = "FAIL";
+      value.predicates.visibleAppearanceOverall.matched = true;
+      value.predicates.completeContractOverall.actual = "FAIL";
+      value.predicates.completeContractOverall.matched = true;
+      value.failedPredicateCount = 0;
+      return value;
+    }, false],
     ["fractional count", (value) => { value.failedPredicateCount = 2.5; return value; }, false],
     ["negative count", (value) => { value.failedPredicateCount = -1; return value; }, false],
     ["unsafe count", (value) => { value.failedPredicateCount = Number.MAX_SAFE_INTEGER + 1; return value; }, false],
