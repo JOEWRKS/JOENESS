@@ -1,0 +1,284 @@
+{
+  "schemaVersion": 4,
+  "id": "joeness-m4-transport-control-attempt-index-v4",
+  "date": "2026-08-15",
+  "recordType": "neutral-transport-control-live-attempt",
+  "predecessor": {
+    "attemptIndex": {
+      "path": "evals/skill-contracts/joeness-m4-superpowers-attempt-index-v3.json",
+      "bytes": 10146,
+      "sha256": "6f6dec9b5556b19247c218a9940a7dc30dd29b60d374dd51438b865d9aa1867a"
+    },
+    "disposition": "fixed-enum-diagnostic-achieved-m4-blocked-unverified",
+    "sameV3RetryAuthorized": false
+  },
+  "attempt": {
+    "id": "joeness-m4-transport-control-live-v4",
+    "method": "neutral-tiny-json-transport-control-with-fixed-runtime-error-origin-no-plugin-activation-or-policy-assessment",
+    "command": "node evals/support/run-joeness-m4-transport-control-live.mjs --mode live --plan evals/skill-contracts/joeness-m4-transport-control-live-plan-v4.json",
+    "startedAtKst": "2026-08-15T01:24:22.4225377+09:00",
+    "endedAtKst": "2026-08-15T01:24:55.6873374+09:00",
+    "durationSeconds": 33.261,
+    "invocationExitCode": 0,
+    "invocationObservationBasis": "DIRECT-invocation-bound-shell-result",
+    "freshTurnCount": 1,
+    "retryCount": 0,
+    "automaticRetry": false
+  },
+  "plan": {
+    "path": "evals/skill-contracts/joeness-m4-transport-control-live-plan-v4.json",
+    "bytes": 2938,
+    "sha256": "27bca3f7abe9c5cee4e36ef67f7d82d019902b7952e10e2a5a1dba8924425971"
+  },
+  "rawArtifact": {
+    "path": "evals/skill-contracts/joeness-m4-transport-control-live-v4-raw.json",
+    "bytes": 36,
+    "sha256": "b270bf58038d3d0c99216e11735eeadd9ef29d2dbfa3b14e99bfe8900c36a6ea",
+    "status": "present"
+  },
+  "evidenceArtifact": {
+    "path": "evals/skill-contracts/joeness-m4-transport-control-live-v4-evidence.json",
+    "bytes": 3575,
+    "sha256": "bf578f38ab86705b2a45e3fd73bd6f00b06b2fd0f2fd91c95cbfd8ae97ed8658",
+    "status": "present"
+  },
+  "executionSource": {
+    "planImplementationCommit": "f19f9013be5122867b36b4acc3b6a356f0f5e084",
+    "executionHead": "0431a8ae13ced91811b335cca97bb23a7eca39df",
+    "executionHeadParent": "f19f9013be5122867b36b4acc3b6a356f0f5e084",
+    "implementationSourcesMatchSupportPlanAndWorking": true,
+    "sourcePins": {
+      "controlRunner": {
+        "path": "evals/support/run-joeness-m4-transport-control-eval.mjs",
+        "bytes": 49611,
+        "sha256": "547077688884d8d0c94558fc84322bcf31b61b0a6d6583359423f2c161029cfa"
+      },
+      "controlWrapper": {
+        "path": "evals/support/run-joeness-m4-transport-control-live.mjs",
+        "bytes": 70602,
+        "sha256": "4321af54ea619d5402cae711a47c41cbfcff75ae9d7e96dab76dfccf8b2ecb26"
+      },
+      "freshTurnAdapter": {
+        "path": "evals/support/run-fresh-evaluator-turn.mjs",
+        "bytes": 56845,
+        "sha256": "4884154dd1884b6fa899eef854307edec2a9897cb39b1f45c9c03479cab34247"
+      },
+      "collector": {
+        "path": "evals/support/collect-codex-app-server.mjs",
+        "bytes": 297632,
+        "sha256": "8b81ddb28be2a803500839a2de61f9bb397aa96711d039bdb7a3a86cfad8d687"
+      }
+    }
+  },
+  "observedResult": {
+    "artifactDirect": {
+      "schemaVersion": 1,
+      "id": "joeness-m4-transport-control-v1",
+      "assessment": {
+        "status": "PASS",
+        "scope": "transport-only",
+        "m4Behavior": "NOT-ASSESSED",
+        "joenessPolicy": "UNVERIFIED",
+        "superpowersCompatibility": "UNVERIFIED",
+        "promotionPass": false
+      },
+      "input": {
+        "descriptorCount": 1,
+        "byteLength": 70,
+        "sha256": "76b05839f5bf74d9374b15bec72cf9b5d4d5024f7ff472b026e223e86c4bfc21"
+      },
+      "output": {
+        "schemaVersion": 1,
+        "transport": "ok",
+        "byteLength": 36,
+        "sha256": "b270bf58038d3d0c99216e11735eeadd9ef29d2dbfa3b14e99bfe8900c36a6ea",
+        "schemaSha256": "874e782d9de6862f9718199125fcebfcf47f7990da06dce54d2d32f8c12db423"
+      },
+      "runtime": {
+        "codexVersion": "codex-cli 0.146.0",
+        "freshTurnCount": 1,
+        "retryCount": 0,
+        "dynamicToolCount": 0,
+        "sourceConfigBefore": {
+          "bytes": 8590,
+          "sha256": "3a7b848f3024260adf2d3e93ea4440703b4b253047163b3f95cb374ad9bdba10"
+        },
+        "sourceConfigAfter": {
+          "bytes": 8590,
+          "sha256": "3a7b848f3024260adf2d3e93ea4440703b4b253047163b3f95cb374ad9bdba10"
+        },
+        "sourceConfigReadback": "UNCHANGED",
+        "cleanup": {
+          "appServerLaunchCount": 1,
+          "appServerCloseConfirmedCount": 1,
+          "remainingOwnedProcessCount": 0,
+          "isolatedCodexHomeReadback": "absent",
+          "runRootReadback": "absent"
+        }
+      },
+      "sourceConfigReadback": "UNCHANGED",
+      "runtimeCleanup": "SAFE",
+      "executionSource": {
+        "planImplementationCommit": "f19f9013be5122867b36b4acc3b6a356f0f5e084",
+        "executionHead": "0431a8ae13ced91811b335cca97bb23a7eca39df",
+        "executionHeadParent": "f19f9013be5122867b36b4acc3b6a356f0f5e084",
+        "plan": {
+          "path": "evals/skill-contracts/joeness-m4-transport-control-live-plan-v4.json",
+          "bytes": 2938,
+          "sha256": "27bca3f7abe9c5cee4e36ef67f7d82d019902b7952e10e2a5a1dba8924425971"
+        },
+        "predecessor": {
+          "id": "joeness-m4-superpowers-live-v3",
+          "implementationCommit": "39387f9ce0708ed56ef7be8e34831690eae31021",
+          "executionHead": "e36175da3fa67e3b8aedddef6c12156dfd04a438",
+          "persistenceCommit": "8f5b8dcfd12fccabb1b25cbc813aec48340b7287",
+          "plan": {
+            "path": "evals/skill-contracts/joeness-m4-superpowers-live-plan-v3.json",
+            "bytes": 2958,
+            "sha256": "2d98638e45b65fa2c1dc98fd11d7eeb86d57d9c6d69ce0a56752315aa83fb855"
+          },
+          "blockedArtifact": {
+            "path": "evals/skill-contracts/joeness-m4-superpowers-live-v3-blocked.json",
+            "bytes": 3670,
+            "sha256": "41aeafdb4a5b4b2bb468510846cb889050681e844f40d21669dbaf4c5175978a"
+          },
+          "attemptIndex": {
+            "path": "evals/skill-contracts/joeness-m4-superpowers-attempt-index-v3.json",
+            "bytes": 10146,
+            "sha256": "6f6dec9b5556b19247c218a9940a7dc30dd29b60d374dd51438b865d9aa1867a"
+          },
+          "sameCommandRetryAuthorized": false,
+          "artifactsMatchSupportPlanAndWorking": true,
+          "executionHeadIsAncestorOfSupport": true,
+          "persistenceCommitIsAncestorOfSupport": true
+        },
+        "implementationSourcesMatchSupportPlanAndWorking": true
+      },
+      "resultBoundary": {
+        "state": "candidate",
+        "validation": "unvalidated",
+        "transportScopeOnly": true,
+        "m4Behavior": "NOT-ASSESSED",
+        "joenessPolicy": "UNVERIFIED",
+        "superpowersCompatibility": "UNVERIFIED",
+        "promotionPass": false,
+        "corePromotion": false,
+        "manifestPromotion": false
+      },
+      "privacy": {
+        "configContentsPersisted": false,
+        "processIdentifiersPersisted": false,
+        "absolutePathsPersisted": false,
+        "rawStderrPersisted": false
+      }
+    },
+    "boundedConclusion": "The fresh neutral control returned and parsed the exact tiny JSON transport response. This establishes the bounded transport path only; it does not assess M4 behavior, JOENESS policy, Superpowers compatibility, installed-plugin activation, or the root cause of the v3 runtime error."
+  },
+  "transportControlResult": {
+    "neutralTransport": "PASS",
+    "scope": "transport-only",
+    "m4Behavior": "NOT-ASSESSED",
+    "joenessPolicy": "UNVERIFIED",
+    "superpowersCompatibility": "UNVERIFIED",
+    "installedPluginActivation": "UNVERIFIED",
+    "candidateState": "candidate/unvalidated",
+    "promotionPass": false
+  },
+  "outputPresence": {
+    "raw": {
+      "path": "evals/skill-contracts/joeness-m4-transport-control-live-v4-raw.json",
+      "status": "present"
+    },
+    "evidence": {
+      "path": "evals/skill-contracts/joeness-m4-transport-control-live-v4-evidence.json",
+      "status": "present"
+    },
+    "blocked": {
+      "path": "evals/skill-contracts/joeness-m4-transport-control-live-v4-blocked.json",
+      "status": "absent"
+    }
+  },
+  "cleanup": {
+    "artifactDirect": {
+      "runtimeCleanup": "SAFE",
+      "sourceConfigReadback": "UNCHANGED",
+      "appServerLaunchCount": 1,
+      "appServerCloseConfirmedCount": 1,
+      "remainingOwnedProcessCount": 0,
+      "isolatedCodexHomeReadback": "absent",
+      "runRootReadback": "absent"
+    },
+    "independentReadback": {
+      "basis": "DIRECT-read-only-pre-and-post-run-observation",
+      "basenameHashAlgorithm": "SHA-256 of ordinal-sorted basenames joined as UTF-8 with LF separators and no terminal LF",
+      "preRun": {
+        "matchingTaskProcessCount": 0,
+        "matchingTaskRunRootReadback": "absent",
+        "matchingTaskIsolatedHomeReadback": "absent",
+        "broadAppServerProcessCount": 3,
+        "broadRunRootBaseline": {
+          "count": 38,
+          "bytes": 1654,
+          "sha256": "56dffbde6864a4184208b1366a88506d12289f0f9f32af472d6cc6e79d03b15d"
+        },
+        "broadIsolatedHomeBaseline": {
+          "count": 0,
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "sourceConfig": {
+          "bytes": 8590,
+          "sha256": "3a7b848f3024260adf2d3e93ea4440703b4b253047163b3f95cb374ad9bdba10"
+        }
+      },
+      "postRun": {
+        "matchingTaskProcessCount": 0,
+        "matchingTaskRunRootReadback": "absent",
+        "matchingTaskIsolatedHomeReadback": "absent",
+        "broadAppServerProcessCount": 3,
+        "broadRunRootBaseline": {
+          "count": 38,
+          "bytes": 1654,
+          "sha256": "56dffbde6864a4184208b1366a88506d12289f0f9f32af472d6cc6e79d03b15d"
+        },
+        "broadIsolatedHomeBaseline": {
+          "count": 0,
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "sourceConfig": {
+          "bytes": 8590,
+          "sha256": "3a7b848f3024260adf2d3e93ea4440703b4b253047163b3f95cb374ad9bdba10"
+        }
+      },
+      "prePostExactEqual": true,
+      "boundary": "Broad run-root, isolated-home, and App Server process observations were baseline-only, were not attributed as task-owned, and were not modified or deleted. Process identifiers, directory basenames, absolute paths, and source-configuration contents were intentionally not retained."
+    }
+  },
+  "limitations": {
+    "m4Behavior": "NOT-ASSESSED",
+    "joenessPolicy": "UNVERIFIED",
+    "superpowersCompatibility": "UNVERIFIED",
+    "installedPluginActivation": "UNVERIFIED",
+    "v3RuntimeErrorRootCause": "UNVERIFIED-not-established-or-resolved-by-this-neutral-control",
+    "pluginConfigurationChange": "NOT-PERFORMED",
+    "userAcceptance": "UNVERIFIED"
+  },
+  "disposition": {
+    "neutralTransportControl": "PASS",
+    "m4": "NOT-ASSESSED",
+    "candidateState": "candidate/unvalidated",
+    "promotionPass": false,
+    "sameV4RetryAuthorized": false,
+    "additionalLiveAttemptAuthorized": false
+  },
+  "stopBoundary": {
+    "automaticRetryAuthorized": false,
+    "additionalLiveAttemptAuthorized": false,
+    "coreChangeAuthorized": false,
+    "manifestChangeAuthorized": false,
+    "pluginConfigurationChangeAuthorized": false,
+    "promotionAuthorized": false,
+    "resumeOnlyAfter": "new user decision and a separately reviewed immutable plan for a materially different authorized method"
+  }
+}

@@ -70,6 +70,16 @@ The exact pinned adapter and runner invariants support the bounded inference tha
 
 The fixed-enum diagnostic goal is achieved, but M4 remains `BLOCKED/UNVERIFIED` and `candidate/unvalidated`. The same v3 command is not retried, no additional live attempt is authorized, and no promotion or Core, manifest, or plugin-configuration change follows from this evidence. Cleanup readback matched the pre-run configuration and broad directory baselines; historical PID values, configuration contents, and directory basenames were not retained.
 
+## 2026-08-15 M4 중립 전송 확인 v4
+
+v4는 충돌 문구나 플러그인 정책 문구를 넣지 않고 아주 작은 고정 JSON만 요구하는 중립 전송 확인이다. 고정 계획 `evals/skill-contracts/joeness-m4-transport-control-live-plan-v4.json`은 2,938바이트, SHA-256 `27bca3f7abe9c5cee4e36ef67f7d82d019902b7952e10e2a5a1dba8924425971`이다. 새 응답 차례를 한 번 실행하고 재시도하지 않았으며 종료 코드 0으로 끝났다. 36바이트 raw 산출물의 SHA-256은 `b270bf58038d3d0c99216e11735eeadd9ef29d2dbfa3b14e99bfe8900c36a6ea`, 3,575바이트 evidence 산출물의 SHA-256은 `bf578f38ab86705b2a45e3fd73bd6f00b06b2fd0f2fd91c95cbfd8ae97ed8658`이다. 차단 산출물은 생기지 않았다.
+
+이 결과는 새 응답 차례가 완료되고 정해진 작은 JSON을 읽어 증거로 저장하는 전송 경로만 `PASS`로 확인한다. M4 행동은 평가하지 않았다. JOENESS 정책, Superpowers 호환성, 설치된 플러그인의 실제 활성화 여부는 모두 `UNVERIFIED`다. 따라서 v4는 v3의 `runtime-error` 근본 원인을 밝히거나 해결됐음을 증명하지 않는다. 상태는 계속 `candidate/unvalidated`이고 모든 승격 값은 false다.
+
+직접 산출물에는 App Server 실행 1회와 종료 확인 1회, 남은 소유 프로세스 0개, 격리 홈과 실행 폴더 없음, 원본 설정이 바뀌지 않았음이 기록됐다. 독립 확인에서도 해당 작업 프로세스는 실행 전후 0개였고 해당 실행 폴더와 격리 홈은 없었다. 넓은 실행 폴더 기준은 실행 전후 38개·1,654바이트·같은 SHA-256, 넓은 격리 홈 기준은 0개·0바이트·같은 SHA-256이었으며, 전체 App Server 프로세스 수는 실행 전후 3개였다. 넓은 기준은 작업 소유라고 보지 않았고 수정하거나 삭제하지 않았다. 프로세스 식별자, 폴더 이름, 절대 경로, 설정 내용은 보존하지 않았다.
+
+[v4 시도 기록](../../../evals/skill-contracts/joeness-m4-transport-control-attempt-index-v4.json)은 계획·raw·evidence의 정확한 튜플과 독립 사전·사후 확인을 함께 고정한다. 같은 v4를 다시 실행하지 않고 추가 live 실행도 승인하지 않는다. 이 기록으로 Core, vendor 설치 manifest, 플러그인 설정 또는 승격 상태를 바꾸지 않는다.
+
 ## Visual Check structure
 
 The public body selects exactly one or more applicable modes:
