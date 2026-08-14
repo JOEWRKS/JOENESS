@@ -116,7 +116,37 @@ function safeFreshResult(output = outputFixture()) {
     toolEvidence: [],
     threadStart: { response: { priorTurnCount: 0, instructionSourceCount: 0 } },
     turn: { id: "turn-1", request: { inputDescriptorCount: 4 } },
-    appServer: { processExitCode: 0, stderr: null },
+    appServer: {
+      processExitCode: 0,
+      stderr: { byteLength: 0, truncated: false, captureTruncated: false },
+    },
+  };
+}
+
+function shutdownSession() {
+  const session = {};
+  Object.defineProperty(session, "processExitCode", {
+    enumerable: true,
+    get() { return 0; },
+  });
+  return session;
+}
+
+function collectorStderr() {
+  const emptyDigest = digest("");
+  return {
+    truncated: false,
+    byteLength: 0,
+    sha256: emptyDigest,
+    captureTruncated: false,
+    diagnostic: {
+      text: "",
+      byteLength: 0,
+      sha256: emptyDigest,
+      truncated: false,
+      redacted: false,
+      unsupported: false,
+    },
   };
 }
 
@@ -138,7 +168,7 @@ function liveDependencies({ result = safeFreshResult(), status = "", exists = fa
       runtimeFactory: async () => {
         calls.runtime += 1;
         return {
-          session: { closed: true },
+          session: shutdownSession(),
           sourceConfigBefore: config,
           readSourceConfig: async () => {
             calls.configReads += 1;
@@ -421,6 +451,80 @@ test("injected live seam runs exactly once without tools or retry and writes onl
   assert.equal(result.promotionPass, false);
 });
 
+test("collector-shaped session getter and zero-byte stderr prove shutdown without synthetic closed", async () => {
+  const api = await subject();
+  const result = safeFreshResult();
+  result.appServer.stderr = collectorStderr();
+  const deps = liveDependencies({ result });
+  let exitReads = 0;
+  deps.options.runtimeFactory = async () => {
+    const session = {};
+    Object.defineProperty(session, "processExitCode", {
+      enumerable: true,
+      get() { exitReads += 1; return 0; },
+    });
+    return {
+      session,
+      sourceConfigBefore: { bytes: 6, sha256: digest("config") },
+      readSourceConfig: async () => {
+        deps.calls.configReads += 1;
+        return { bytes: 6, sha256: digest("config") };
+      },
+      finish: async () => { deps.calls.finish += 1; },
+    };
+  };
+  await api.runJoenessM4SuperpowersEval(deps.options);
+  assert.equal(exitReads, 1);
+  assert.equal(deps.calls.publish, 1);
+
+  const trapped = liveDependencies({ result });
+  let trapReads = 0;
+  trapped.options.runtimeFactory = async () => {
+    const session = {};
+    Object.defineProperty(session, "processExitCode", {
+      enumerable: true,
+      get() { trapReads += 1; throw new Error("exit trap"); },
+    });
+    return {
+      session,
+      sourceConfigBefore: { bytes: 6, sha256: digest("config") },
+      readSourceConfig: async () => ({ bytes: 6, sha256: digest("config") }),
+      finish: async () => {},
+    };
+  };
+  await assert.rejects(api.runJoenessM4SuperpowersEval(trapped.options), /shutdown getter/i);
+  assert.equal(trapReads, 1);
+  assert.equal(trapped.calls.publish, 0);
+});
+
+test("stderr accepts only safe summary or exact collector zero-byte shape and retains no raw field", async () => {
+  const api = await subject();
+  const preflight = await api.preflightJoenessM4SuperpowersEval({ repositoryRoot: ROOT });
+  const input = api.buildJoenessM4Input(preflight);
+  const outputSchema = api.joenessM4OutputSchema();
+  for (const stderr of [
+    { byteLength: 0, truncated: false, captureTruncated: false },
+    collectorStderr(),
+  ]) {
+    const result = safeFreshResult(); result.appServer.stderr = stderr;
+    const evidence = api.retainJoenessM4FreshEvidence(result, { input, outputSchema });
+    assert.equal(JSON.stringify(evidence).includes("stderr"), false);
+  }
+  const invalid = [
+    { byteLength: 1, truncated: false, captureTruncated: false },
+    { byteLength: 0, truncated: false, captureTruncated: false, extra: true },
+  ];
+  let accessorReads = 0;
+  const accessor = { truncated: false, captureTruncated: false };
+  Object.defineProperty(accessor, "byteLength", { enumerable: true, get() { accessorReads += 1; throw new Error("trap"); } });
+  invalid.push(accessor, new Proxy({ byteLength: 0, truncated: false, captureTruncated: false }, {}));
+  for (const stderr of invalid) {
+    const result = safeFreshResult(); result.appServer.stderr = stderr;
+    assert.throws(() => api.retainJoenessM4FreshEvidence(result, { input, outputSchema }), /stderr|unsafe|keys/i);
+  }
+  assert.equal(accessorReads, 0);
+});
+
 test("retained evidence binds raw/schema/input tuples without raw stderr, PID, paths, or config", async () => {
   const api = await subject();
   const preflight = await api.preflightJoenessM4SuperpowersEval({ repositoryRoot: ROOT });
@@ -498,7 +602,7 @@ test("cleanup, config readback, and semantic failures never write success artifa
   ];
   const cleanup = liveDependencies();
   cleanup.options.runtimeFactory = async () => ({
-    session: { closed: true }, sourceConfigBefore: { bytes: 1, sha256: digest("x") },
+    session: shutdownSession(), sourceConfigBefore: { bytes: 1, sha256: digest("x") },
     readSourceConfig: async () => ({ bytes: 1, sha256: digest("x") }),
     finish: async () => { throw new Error("cleanup failed"); },
   });
@@ -507,6 +611,25 @@ test("cleanup, config readback, and semantic failures never write success artifa
     await assert.rejects(api.runJoenessM4SuperpowersEval(deps.options));
     assert.equal(deps.calls.writes.filter(({ relativePath }) => relativePath.includes("raw") || relativePath.includes("evidence")).length, 0);
   }
+});
+
+test("config readback is attempted once even when runtime finish throws", async () => {
+  const api = await subject();
+  const deps = liveDependencies();
+  let readbacks = 0;
+  deps.options.runtimeFactory = async () => ({
+    session: shutdownSession(),
+    sourceConfigBefore: { bytes: 6, sha256: digest("config") },
+    finish: async () => { throw new Error("finish failed"); },
+    readSourceConfig: async () => {
+      readbacks += 1;
+      return { bytes: 6, sha256: digest("config") };
+    },
+  });
+  await assert.rejects(api.runJoenessM4SuperpowersEval(deps.options), /finish|cleanup/i);
+  assert.equal(readbacks, 1);
+  assert.equal(deps.calls.publish, 0);
+  assert.deepEqual(deps.calls.writes, []);
 });
 
 test("a bounded blocked artifact is allowed only after safe cleanup and an explicit target", async () => {

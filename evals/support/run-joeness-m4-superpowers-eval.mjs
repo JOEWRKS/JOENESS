@@ -392,7 +392,8 @@ export function retainJoenessM4FreshEvidence(result, { input, outputSchema } = {
   if (!Array.isArray(result.toolEvidence) || result.toolEvidence.length !== 0) fail("M4 fresh result contains tool evidence");
   if (result.threadStart?.response?.priorTurnCount !== 0 || result.threadStart?.response?.instructionSourceCount !== 0) fail("M4 fresh result inherited context");
   if (result.turn?.request?.inputDescriptorCount !== SOURCE_IDS.length) fail("M4 fresh input descriptor count is unbound");
-  if (result.appServer?.processExitCode !== 0 || result.appServer?.stderr !== null) fail("M4 fresh shutdown evidence is unsafe");
+  if (result.appServer?.processExitCode !== 0) fail("M4 fresh shutdown evidence is unsafe");
+  validateSafeStderrSummary(result.appServer?.stderr);
   const evidence = {
     schemaVersion: 1,
     fixture: "joeness-m4-superpowers-v1",
@@ -414,6 +415,69 @@ export function retainJoenessM4FreshEvidence(result, { input, outputSchema } = {
   };
   if (Buffer.byteLength(stableStringify(evidence)) > LIMITS.evidenceBytes) fail("M4 retained evidence exceeds size limit");
   return evidence;
+}
+
+function validateSafeStderrSummary(stderr) {
+  assertSafeData(stderr, "M4 fresh stderr");
+  if (stderr === null || Array.isArray(stderr) || typeof stderr !== "object") fail("M4 fresh stderr summary is malformed");
+  const keys = Object.getOwnPropertyNames(stderr).sort();
+  const summaryKeys = ["byteLength", "captureTruncated", "truncated"].sort();
+  const adapterKeys = ["byteLength", "captureTruncated", "sha256", "truncated"].sort();
+  const collectorKeys = ["byteLength", "captureTruncated", "diagnostic", "sha256", "truncated"].sort();
+  const matches = (expected) => keys.length === expected.length && keys.every((key, index) => key === expected[index]);
+  if (!matches(summaryKeys) && !matches(adapterKeys) && !matches(collectorKeys)) fail("M4 fresh stderr has missing or extra keys");
+  if (stderr.byteLength !== 0 || stderr.truncated !== false || stderr.captureTruncated !== false) {
+    fail("M4 fresh stderr is not an exact zero-byte summary");
+  }
+  const emptyDigest = sha256("");
+  if ((matches(adapterKeys) || matches(collectorKeys)) && stderr.sha256 !== emptyDigest) {
+    fail("M4 fresh stderr digest is invalid");
+  }
+  if (matches(collectorKeys)) {
+    exactKeys(stderr.diagnostic, ["text", "byteLength", "sha256", "truncated", "redacted", "unsupported"], "M4 fresh stderr diagnostic");
+    if (
+      stderr.diagnostic.text !== "" ||
+      stderr.diagnostic.byteLength !== 0 ||
+      stderr.diagnostic.sha256 !== emptyDigest ||
+      stderr.diagnostic.truncated !== false ||
+      stderr.diagnostic.redacted !== false ||
+      stderr.diagnostic.unsupported !== false
+    ) fail("M4 fresh stderr diagnostic is not an exact empty summary");
+  }
+}
+
+function assertCollectorShutdown(result, session) {
+  if (session === null || typeof session !== "object" || utilTypes.isProxy(session)) {
+    fail("M4 evaluator session shutdown is unverified");
+  }
+  let descriptor;
+  try {
+    descriptor = Object.getOwnPropertyDescriptor(session, "processExitCode");
+  } catch {
+    fail("M4 evaluator session shutdown is unverified");
+  }
+  if (!descriptor || typeof descriptor.get !== "function" || descriptor.set !== undefined) {
+    fail("M4 evaluator session shutdown getter is untrusted");
+  }
+  let sessionExitCode;
+  try {
+    sessionExitCode = descriptor.get.call(session);
+  } catch {
+    fail("M4 evaluator session shutdown getter failed");
+  }
+  const appServer = result?.appServer;
+  if (appServer === null || typeof appServer !== "object" || utilTypes.isProxy(appServer)) {
+    fail("M4 evaluator App Server shutdown is unverified");
+  }
+  let appServerExit;
+  try {
+    appServerExit = Object.getOwnPropertyDescriptor(appServer, "processExitCode");
+  } catch {
+    fail("M4 evaluator App Server shutdown is unverified");
+  }
+  if (!appServerExit || !("value" in appServerExit) || appServerExit.get || appServerExit.set || appServerExit.value !== 0 || sessionExitCode !== 0) {
+    fail("M4 evaluator session shutdown is unverified");
+  }
 }
 
 function validateExecutionPlan(value) {
@@ -664,7 +728,7 @@ export async function runJoenessM4SuperpowersEval({
       outputSchema,
       dynamicTools: [],
     });
-    if (runtime.session?.closed !== true) throw new Error("M4 evaluator session did not prove safe shutdown");
+    assertCollectorShutdown(result, runtime.session);
     validateJoenessM4Output(result.output);
     evidence = retainJoenessM4FreshEvidence(result, { input, outputSchema });
   } catch (error) {
@@ -672,15 +736,22 @@ export async function runJoenessM4SuperpowersEval({
   }
 
   if (runtime) {
+    const cleanupErrors = [];
+    try { await runtime.finish(true); } catch (error) { cleanupErrors.push(error); }
     try {
-      await runtime.finish(true);
       const after = safeConfigTuple(await runtime.readSourceConfig(), "M4 source config readback");
       if (after.bytes !== runtime.sourceConfigBefore.bytes || after.sha256 !== runtime.sourceConfigBefore.sha256) {
         throw new Error("M4 source plugin config changed");
       }
-      cleanupSafe = true;
     } catch (error) {
-      primaryError = primaryError === null ? error : new AggregateError([primaryError, error], "M4 live validation and cleanup failed", { cause: primaryError });
+      cleanupErrors.push(error);
+    }
+    cleanupSafe = cleanupErrors.length === 0;
+    if (cleanupErrors.length > 0) {
+      const causes = [primaryError, ...cleanupErrors].filter(Boolean);
+      primaryError = causes.length === 1
+        ? causes[0]
+        : new AggregateError(causes, "M4 live validation and cleanup failed", { cause: causes[0] });
     }
   }
 
