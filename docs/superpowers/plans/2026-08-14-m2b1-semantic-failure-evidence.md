@@ -4,7 +4,7 @@
 
 **Goal:** Preserve exact bounded sample-a semantic failure predicates and the existing path-private process summary in a blocked artifact without retaining raw evaluator output or changing evaluator behavior.
 
-**Architecture:** The visual validator creates one fixed primitive-only `semanticFailureEvidence` object and attaches it non-enumerably to the targeted sample-a error. The visual orchestration adds the existing post-validation process projection only for that marked error, and the blocked writer independently rebuilds and bounds the semantic projection before persistence. Existing Task 1, event compaction, cleanup, path privacy, retry, and success paths remain unchanged.
+**Architecture:** The visual validator creates one fixed primitive-only `semanticFailureEvidence` object and attaches it non-enumerably to the targeted sample-a error. The visual orchestration validates that marker inside the actual sample-a validator catch, records the exact error identity in an invocation-local `WeakSet`, and adds the existing post-validation process projection only to that proven error. The blocked writer first requires that exact provenance, then independently revalidates, rebuilds, and bounds the semantic projection before persistence. Existing Task 1, event compaction, cleanup, path privacy, retry, and success paths remain unchanged.
 
 **Tech Stack:** Node.js ESM, `node:test`, `node:assert/strict`, PowerShell, Git, existing JOENESS M2B1 runner helpers.
 
@@ -217,7 +217,7 @@ $ErrorActionPreference='Stop'; Set-Location -LiteralPath 'D:\JOEWRKS\작업하�
 
 **Interfaces:**
 - Consumes: Task 2's non-enumerable `error.semanticFailureEvidence` and the existing `attachPostValidationFreshEvidence`, `safeDiagnosticOwnData`, `diagnosticProxy`, `safeBoundedClone`, and `retainEventCompaction` helpers.
-- Produces: `retainSemanticFailureEvidence(value): object | null`, targeted post-validation process evidence, and optional blocked top-level `semanticFailureEvidence` independent of `partialEvidence`, `task1Prevalidation`, and `eventCompaction`.
+- Produces: `retainSemanticFailureEvidence(value): object | null`, invocation-local exact-error provenance for the targeted validator failure, targeted post-validation process evidence, and optional blocked top-level `semanticFailureEvidence` independent of `partialEvidence`, `task1Prevalidation`, and `eventCompaction`.
 
 - [ ] **Step 1: Add a RED full-run semantic failure test**
 
@@ -235,11 +235,11 @@ assert.equal(dependencies.writes.filter(({ file }) => !file.endsWith("blocked.js
 
 Assert the existing bounded post-validation projection preserves `input.expectedLocalImageInputIndexes` as `[1, 2]`, the approved controller-image summary, App Server exit/stderr/image summaries, and its existing fixed retention/scaffolding fields. Assert it contains no raw events, output text, checks, or `observed` values; assert `eventCompaction` appears only at blocked top-level; and assert serialized blocked JSON omits the raw visual output and synthetic credential/path canaries.
 
-- [ ] **Step 2: Add RED targeted-catch and hostile writer projection tables**
+- [ ] **Step 2: Add RED target-provenance and hostile retainer coverage**
 
 Add a non-target malformed visual output case and assert it retains the existing error but gains neither `semanticFailureEvidence` nor post-validation `eventCompaction`.
 
-For writer projection, inject an error from `runTurn` with a non-enumerable semantic property and table-drive these cases:
+Exercise `retainSemanticFailureEvidence` directly and table-drive these cases. Keep exact valid rebuilt records covering aggregate `actual` enums `PASS`, `FAIL`, and `UNVERIFIED` and consistent `failedPredicateCount` values `1`, `2`, and `3` as positive controls:
 
 ```js
 const cases = [
@@ -265,41 +265,19 @@ const cases = [
 ];
 ```
 
-Add `null`, array, and function container cases plus own-field accessor, live proxy, revoked proxy, symbol-key, and oversized-extra-field cases at every untrusted object boundary: the top-level semantic object, `predicates`, and each of the three predicate entries. Include nested missing-key and extra-symbol cases as well as nested live/revoked proxies and accessors. Keep one exact-valid table case as the RED driver; the hostile cases are regression guards and may already omit safely. Every hostile case must assert trap count `0`, semantic field absent, and canaries absent from serialized blocked JSON. Add one case with valid semantic evidence plus hostile `freshEvaluatorEvidence` and assert the valid semantic projection survives independently.
+Add `null`, array, and function container cases plus own-field accessor, live proxy, revoked proxy, symbol-key, and oversized-extra-field cases at every untrusted object boundary: the top-level semantic object, `predicates`, and each of the three predicate entries. Include nested missing-key and extra-symbol cases as well as nested live/revoked proxies and accessors. Every hostile case must return `null` with trap count `0`; every valid result must be a newly rebuilt object; and every serialized result must omit all canaries.
 
-Add these two cross-projection independence cases using non-enumerable error properties:
+Add a writer integration in which arbitrary `runTurn` code throws an error carrying an exact non-enumerable `semanticFailureEvidence` marker plus an independently valid `eventCompaction`. Assert the blocked artifact omits semantic evidence, preserves the valid event projection, omits `task1Prevalidation`, and contains no canary. This arbitrary-error case is the provenance RED driver: structural validity alone must never authorize persistence.
 
-```js
-// Invalid semantic projection must not discard an independently valid event summary.
-Object.defineProperty(invalidSemanticError, "semanticFailureEvidence", {
-  enumerable: false, configurable: true, writable: true, value: invalidSemantic,
-});
-Object.defineProperty(invalidSemanticError, "eventCompaction", {
-  enumerable: false, configurable: true, writable: true, value: exactEventCompaction,
-});
-assert.equal(Object.hasOwn(blocked, "semanticFailureEvidence"), false);
-assert.deepEqual(blocked.eventCompaction, exactEventCompaction);
-
-// Invalid event summary must not discard independently valid semantic evidence.
-Object.defineProperty(invalidEventError, "semanticFailureEvidence", {
-  enumerable: false, configurable: true, writable: true, value: exactSemantic,
-});
-Object.defineProperty(invalidEventError, "eventCompaction", {
-  enumerable: false, configurable: true, writable: true, value: invalidEventCompaction,
-});
-assert.deepEqual(blocked.semanticFailureEvidence, exactSemantic);
-assert.equal(Object.hasOwn(blocked, "eventCompaction"), false);
-```
-
-For both cases, require `task1Prevalidation` absent, require trap count `0`, and require every path/credential canary absent from serialized blocked JSON.
+Add real target-validator blocked integrations for the reachable count-3 and count-2 sample-a outcomes. In the count-3 case, inject a credential canary into a valid `observed` field before rebuilding `outputText` and prove the raw test output contains it while blocked serialization does not. In the count-2 case, make `eventCompaction` invalid and prove the provenance-bound semantic projection survives independently while the event projection is omitted.
 
 - [ ] **Step 3: Run the new integration/projection tests and verify RED**
 
 ```powershell
-$ErrorActionPreference='Stop'; Set-Location -LiteralPath 'D:\JOEWRKS\작업하네스\.worktrees\joeness-interface'; node --test --test-name-pattern='blocked semantic failure evidence|semantic failure writer projection|non-target visual validator error' tests/design-visual-m2-b1-runner.tests.mjs
+$ErrorActionPreference='Stop'; Set-Location -LiteralPath 'D:\JOEWRKS\작업하네스\.worktrees\joeness-interface'; node --test --test-name-pattern='blocked semantic failure evidence|semantic failure retainer|non-target visual validator' tests/design-visual-m2-b1-runner.tests.mjs
 ```
 
-Expected: FAIL because the runner does not attach post-validation evidence at the semantic gate and the blocked writer does not project `semanticFailureEvidence`.
+Expected: FAIL because the writer accepts an arbitrary `runTurn` marker without target-validator provenance and the direct retainer test seam is not yet exported.
 
 - [ ] **Step 4: Add exact-key constants and a fail-closed retainer**
 
@@ -311,7 +289,7 @@ if (diagnosticProxy(value) || !isObject(value)) return null;
 // Read each field only through safeDiagnosticOwnData.
 // Repeat proxy/exact-key/own-data checks for predicates and each predicate entry.
 // Require fixed literals, strict booleans, fixed aggregate enum, matched consistency,
-// a safe-integer failedPredicateCount equal to the false-matched count, and raw false.
+// a safe-integer failedPredicateCount in 1..3 equal to the false-matched count, and raw false.
 const retained = { /* rebuild only fixed primitives */ };
 try {
   return safeBoundedClone(retained, "semantic failure", 2 * 1024);
@@ -322,29 +300,35 @@ try {
 
 Do not spread, clone, enumerate, stringify, or hash untrusted semantic input before proxy and own-data validation. Return a newly built literal, never the source object.
 
-- [ ] **Step 5: Bridge only the marked validator error to existing post-validation evidence**
+- [ ] **Step 5: Bind only a valid target-validator marker to invocation-local provenance**
 
 Wrap only the `validateVisualM2B1Output(parsed, design, candidate.id)` call:
 
 ```js
+const validatedSemanticFailures = new WeakSet();
+
 let output;
 try {
   output = validateVisualM2B1Output(parsed, design, candidate.id);
 } catch (error) {
   const semantic = safeDiagnosticOwnData(error, "semanticFailureEvidence");
-  if (!semantic.found) throw error;
-  throw attachPostValidationFreshEvidence(error, visualResult, visualInput);
+  if (!semantic.found || retainSemanticFailureEvidence(semantic.value) === null) throw error;
+  const validatedError = attachPostValidationFreshEvidence(error, visualResult, visualInput);
+  validatedSemanticFailures.add(validatedError);
+  throw validatedError;
 }
 ```
 
-This preserves current propagation for JSON parse, handoff, shape, transfer, aggregate-consistency, and sample-b errors. Do not call `retainTask1Evidence` earlier and do not synthesize `task1Prevalidation`.
+Create the `WeakSet` inside each `runDesignVisualM2B1` invocation. Record only the exact error object thrown by the actual sample-a validator, and only after its own-data marker passes the fail-closed retainer. This preserves current propagation for JSON parse, handoff, shape, transfer, aggregate-consistency, sample-b, and arbitrary `runTurn` errors. Do not call `retainTask1Evidence` earlier and do not synthesize `task1Prevalidation`.
 
-- [ ] **Step 6: Project the semantic field independently in the blocked writer**
+- [ ] **Step 6: Project only provenance-bound semantic evidence independently**
 
-Immediately before building `blocked`, safely read and retain the error property:
+Immediately before building `blocked`, require the exact error identity in the invocation-local provenance set before reading its marker, then independently revalidate and rebuild it:
 
 ```js
-const semanticFailureProperty = safeDiagnosticOwnData(error, "semanticFailureEvidence");
+const semanticFailureProperty = validatedSemanticFailures.has(error)
+  ? safeDiagnosticOwnData(error, "semanticFailureEvidence")
+  : { found: false, value: undefined };
 const semanticFailureEvidence = semanticFailureProperty.found
   ? retainSemanticFailureEvidence(semanticFailureProperty.value)
   : null;
@@ -356,7 +340,7 @@ Add it at blocked top-level independently:
 ...(semanticFailureEvidence === null ? {} : { semanticFailureEvidence }),
 ```
 
-Keep `partialEvidence`, `task1Prevalidation`, `eventCompaction`, cleanup, artifact privacy checking, and write order unchanged.
+Arbitrary earlier or `runTurn` errors must omit semantic evidence even when they carry an exact-looking non-enumerable marker. Keep `partialEvidence`, `task1Prevalidation`, `eventCompaction`, cleanup, artifact privacy checking, and write order unchanged.
 
 - [ ] **Step 7: Verify the new tests and the complete focused runner suite**
 

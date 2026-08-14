@@ -1563,7 +1563,7 @@ function safeExactOwnDataRecord(value, keys) {
   return record;
 }
 
-function retainSemanticFailureEvidence(value) {
+export function retainSemanticFailureEvidence(value) {
   if (diagnosticProxy(value) || !isObject(value)) return null;
   let ownKeys;
   try {
@@ -3225,6 +3225,7 @@ export async function runDesignVisualM2B1({
   const completed = [];
   const stagedRoots = [];
   const identities = [];
+  const validatedSemanticFailures = new WeakSet();
   let activeSession = null;
   let safeShutdown = true;
   let finishAttempted = false;
@@ -3377,8 +3378,10 @@ export async function runDesignVisualM2B1({
         output = validateVisualM2B1Output(parsed, design, candidate.id);
       } catch (error) {
         const semantic = safeDiagnosticOwnData(error, "semanticFailureEvidence");
-        if (!semantic.found) throw error;
-        throw attachPostValidationFreshEvidence(error, visualResult, visualInput);
+        if (!semantic.found || retainSemanticFailureEvidence(semantic.value) === null) throw error;
+        const validatedError = attachPostValidationFreshEvidence(error, visualResult, visualInput);
+        validatedSemanticFailures.add(validatedError);
+        throw validatedError;
       }
       visuals.push({
         candidateId: candidate.id,
@@ -3469,7 +3472,9 @@ export async function runDesignVisualM2B1({
         ? retainTask1Prevalidation(task1PrevalidationProperty.value)
         : null;
       const eventCompaction = retainFailureEventCompaction(error, freshEvaluatorEvidence);
-      const semanticFailureProperty = safeDiagnosticOwnData(error, "semanticFailureEvidence");
+      const semanticFailureProperty = validatedSemanticFailures.has(error)
+        ? safeDiagnosticOwnData(error, "semanticFailureEvidence")
+        : { found: false, value: undefined };
       const semanticFailureEvidence = semanticFailureProperty.found
         ? retainSemanticFailureEvidence(semanticFailureProperty.value)
         : null;

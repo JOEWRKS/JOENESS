@@ -751,6 +751,7 @@ test("M2B1 blocked semantic failure evidence preserves bounded independent proje
     const result = await originalRunTurn(options);
     if (dependencies.calls.length === 2) {
       result.output = visualOutput(design, "sample-a", false);
+      result.output.checks[0].observed = credentialCanary;
       const text = JSON.stringify(result.output);
       result.outputText = {
         text,
@@ -841,6 +842,7 @@ test("M2B1 blocked semantic failure evidence preserves bounded independent proje
   assert.equal(Object.hasOwn(partial, "eventCompaction"), false);
 
   const serialized = JSON.stringify(blocked);
+  assert.equal(rawVisualOutput.includes(credentialCanary), true);
   assert.equal((serialized.match(/"eventCompaction"/gu) ?? []).length, 1);
   assert.equal(serialized.includes('"outputText"'), false);
   assert.equal(serialized.includes('"checks"'), false);
@@ -855,6 +857,50 @@ test("M2B1 blocked semantic failure evidence preserves bounded independent proje
   ]) {
     assert.equal(serialized.includes(forbidden), false, forbidden);
   }
+});
+
+test("M2B1 blocked semantic failure evidence retains reachable count two independently of invalid events", async (t) => {
+  const subject = await loadSubject();
+  const { root, planPath } = await fixtureRoot(t);
+  const design = designOutput();
+  const dependencies = successfulDependencies(design);
+  const originalRunTurn = dependencies.runTurn;
+  const forbiddenPath = "C:\\Users\\Private\\invalid-event-summary.json";
+  dependencies.runTurn = async (options) => {
+    const result = await originalRunTurn(options);
+    if (dependencies.calls.length === 2) {
+      result.output = visualOutput(design, "sample-a", false);
+      result.output.checks.find(({ id }) => id === "artifact-id").verdict = "FAIL";
+      result.output.completeContractOverall = "FAIL";
+      const text = JSON.stringify(result.output);
+      result.outputText = {
+        text,
+        byteLength: Buffer.byteLength(text),
+        sha256: digest(text),
+      };
+      result.eventCompaction = {
+        ...result.eventCompaction,
+        rawPath: forbiddenPath,
+      };
+    }
+    return result;
+  };
+
+  await assert.rejects(
+    subject.runDesignVisualM2B1({ repositoryRoot: root, planPath, ...dependencies }),
+    /M2B1 sample-a lacks the bounded defect outcome/,
+  );
+  const blocked = dependencies.writes.find(({ file }) => file.endsWith("blocked.json")).value;
+  assert.deepEqual(
+    blocked.semanticFailureEvidence,
+    expectedSemanticFailure({ complete: "FAIL" }),
+  );
+  assert.equal(blocked.semanticFailureEvidence.failedPredicateCount, 2);
+  assert.equal(Object.hasOwn(blocked, "eventCompaction"), false);
+  assert.equal(Object.hasOwn(blocked, "task1Prevalidation"), false);
+  assert.deepEqual(blocked.completedSessions, ["design", "sample-a"]);
+  assert.equal(dependencies.calls.length, 2);
+  assert.equal(JSON.stringify(blocked).includes(forbiddenPath), false);
 });
 
 test("M2B1 non-target visual validator error gains no semantic or post-validation event evidence", async (t) => {
@@ -896,6 +942,44 @@ test("M2B1 non-target visual validator error gains no semantic or post-validatio
   assert.equal(Object.hasOwn(blocked, "task1Prevalidation"), false);
   assert.deepEqual(blocked.completedSessions, ["design", "sample-a"]);
   assert.equal(dependencies.calls.length, 2);
+  assert.equal(dependencies.writes.filter(({ file }) => !file.endsWith("blocked.json")).length, 0);
+});
+
+test("M2B1 blocked semantic failure evidence requires target-validator provenance", async (t) => {
+  const subject = await loadSubject();
+  const { root, planPath } = await fixtureRoot(t);
+  const dependencies = successfulDependencies();
+  const exactSemantic = expectedSemanticFailure();
+  const exactEventCompaction = eventCompactionFixture();
+  dependencies.runTurn = async (options) => {
+    options.session.closed = true;
+    options.session.processExitCode = 0;
+    const failure = new Error("arbitrary runTurn semantic marker");
+    Object.defineProperty(failure, "semanticFailureEvidence", {
+      enumerable: false,
+      configurable: true,
+      writable: true,
+      value: exactSemantic,
+    });
+    Object.defineProperty(failure, "eventCompaction", {
+      enumerable: false,
+      configurable: true,
+      writable: true,
+      value: exactEventCompaction,
+    });
+    throw failure;
+  };
+
+  await assert.rejects(
+    subject.runDesignVisualM2B1({ repositoryRoot: root, planPath, ...dependencies }),
+    /arbitrary runTurn semantic marker/,
+  );
+  const blocked = dependencies.writes.find(({ file }) => file.endsWith("blocked.json")).value;
+  assert.equal(Object.hasOwn(blocked, "semanticFailureEvidence"), false);
+  assert.deepEqual(blocked.eventCompaction, exactEventCompaction);
+  assert.equal(Object.hasOwn(blocked, "task1Prevalidation"), false);
+  assert.deepEqual(blocked.completedSessions, []);
+  assert.equal(blocked.failedSession, 1);
   assert.equal(dependencies.writes.filter(({ file }) => !file.endsWith("blocked.json")).length, 0);
 });
 
@@ -2014,11 +2098,57 @@ test("M2B1 blocked writer projects only exact path-private event compaction", as
   assert.equal(trapCalls, 0);
 });
 
-test("M2B1 semantic failure writer projection retains only exact path-private evidence", async (t) => {
+test("M2B1 semantic failure retainer accepts exact enum-count positives and rejects hostile shapes", async () => {
   const subject = await loadSubject();
-  const { root, planPath } = await fixtureRoot(t);
+  assert.equal(typeof subject?.retainSemanticFailureEvidence, "function");
+  const validSemantics = [
+    {
+      schemaVersion: 1,
+      kind: "visual-bounded-outcome",
+      candidateId: "sample-a",
+      requiredOutcome: "applicable-visible-fail-and-aggregate-fail",
+      predicates: {
+        applicableVisibleAcceptanceFail: { expected: true, actual: true, matched: true },
+        visibleAppearanceOverall: { expected: "FAIL", actual: "PASS", matched: false },
+        completeContractOverall: { expected: "FAIL", actual: "FAIL", matched: true },
+      },
+      failedPredicateCount: 1,
+      rawOutputRetained: false,
+    },
+    {
+      schemaVersion: 1,
+      kind: "visual-bounded-outcome",
+      candidateId: "sample-a",
+      requiredOutcome: "applicable-visible-fail-and-aggregate-fail",
+      predicates: {
+        applicableVisibleAcceptanceFail: { expected: true, actual: false, matched: false },
+        visibleAppearanceOverall: { expected: "FAIL", actual: "FAIL", matched: true },
+        completeContractOverall: { expected: "FAIL", actual: "UNVERIFIED", matched: false },
+      },
+      failedPredicateCount: 2,
+      rawOutputRetained: false,
+    },
+    {
+      schemaVersion: 1,
+      kind: "visual-bounded-outcome",
+      candidateId: "sample-a",
+      requiredOutcome: "applicable-visible-fail-and-aggregate-fail",
+      predicates: {
+        applicableVisibleAcceptanceFail: { expected: true, actual: false, matched: false },
+        visibleAppearanceOverall: { expected: "FAIL", actual: "PASS", matched: false },
+        completeContractOverall: { expected: "FAIL", actual: "UNVERIFIED", matched: false },
+      },
+      failedPredicateCount: 3,
+      rawOutputRetained: false,
+    },
+  ];
+  for (const semantic of validSemantics) {
+    const retained = subject.retainSemanticFailureEvidence(semantic);
+    assert.deepEqual(retained, semantic);
+    assert.notEqual(retained, semantic);
+    assert.notEqual(retained.predicates, semantic.predicates);
+  }
   const exactSemantic = expectedSemanticFailure();
-  const exactEventCompaction = eventCompactionFixture();
   const forbiddenPath = "C:\\Users\\Private\\semantic-output.json";
   const credentialCanary = "sk-proj-SYNTHETIC_TEST_ONLY_abcdefghijklmnop";
   const oversizedCanary = "semantic-oversized-canary-must-not-persist";
@@ -2153,109 +2283,28 @@ test("M2B1 semantic failure writer projection retains only exact path-private ev
     );
   }
 
-  async function runWriterCase({
-    label,
-    semantic,
-    retained,
-    freshEvaluatorEvidence = { appServer: { processExitCode: 0 }, events: [] },
-    eventCompaction,
-    expectedEventCompaction = null,
-  }) {
+  function assertRetainerCase({ label, semantic, retained }) {
     const trapCountBefore = trapCalls;
-    const dependencies = successfulDependencies();
-    dependencies.runTurn = async (options) => {
-      options.session.closed = true;
-      options.session.processExitCode = 0;
-      const failure = new Error(`semantic projection ${label}`);
-      Object.defineProperty(failure, "semanticFailureEvidence", {
-        enumerable: false,
-        configurable: true,
-        writable: true,
-        value: semantic,
-      });
-      Object.defineProperty(failure, "freshEvaluatorEvidence", {
-        enumerable: false,
-        configurable: true,
-        writable: true,
-        value: freshEvaluatorEvidence,
-      });
-      if (eventCompaction !== undefined) {
-        Object.defineProperty(failure, "eventCompaction", {
-          enumerable: false,
-          configurable: true,
-          writable: true,
-          value: eventCompaction,
-        });
-      }
-      throw failure;
-    };
-
-    await assert.rejects(
-      subject.runDesignVisualM2B1({ repositoryRoot: root, planPath, ...dependencies }),
-      (error) => error.message === `semantic projection ${label}`,
-      label,
-    );
-    const blocked = dependencies.writes.find(({ file }) => file.endsWith("blocked.json")).value;
-    assert.equal(Object.hasOwn(blocked, "semanticFailureEvidence"), retained, label);
-    if (retained) assert.deepEqual(blocked.semanticFailureEvidence, exactSemantic, label);
-    if (expectedEventCompaction === null) {
-      assert.equal(Object.hasOwn(blocked, "eventCompaction"), false, label);
-    } else {
-      assert.deepEqual(blocked.eventCompaction, expectedEventCompaction, label);
+    const projection = subject.retainSemanticFailureEvidence(semantic);
+    assert.equal(projection !== null, retained, label);
+    if (retained) {
+      assert.deepEqual(projection, exactSemantic, label);
+      assert.notEqual(projection, semantic, label);
     }
-    assert.equal(Object.hasOwn(blocked, "task1Prevalidation"), false, label);
     assert.equal(trapCalls, trapCountBefore, label);
-    const serialized = JSON.stringify(blocked);
+    const serialized = JSON.stringify(projection);
     for (const canary of serializedCanaries) {
       assert.equal(serialized.includes(canary), false, `${label}: ${canary}`);
     }
-    return blocked;
   }
 
   for (const [label, mutate, retained] of cases) {
-    await runWriterCase({
+    assertRetainerCase({
       label,
       semantic: mutate(structuredClone(exactSemantic)),
       retained,
     });
   }
-
-  const hostileFreshEvaluatorEvidence = new Proxy({
-    appServer: { processExitCode: 0 },
-    rawPath: forbiddenPath,
-    credentialCanary,
-  }, proxyHandler("hostile fresh evaluator evidence"));
-  const independentSemantic = await runWriterCase({
-    label: "valid semantic with hostile fresh evaluator evidence",
-    semantic: structuredClone(exactSemantic),
-    retained: true,
-    freshEvaluatorEvidence: hostileFreshEvaluatorEvidence,
-  });
-  assert.deepEqual(independentSemantic.semanticFailureEvidence, exactSemantic);
-
-  const invalidSemantic = { ...structuredClone(exactSemantic), rawPath: forbiddenPath };
-  const semanticIndependentEvent = await runWriterCase({
-    label: "invalid semantic with valid event summary",
-    semantic: invalidSemantic,
-    retained: false,
-    eventCompaction: structuredClone(exactEventCompaction),
-    expectedEventCompaction: exactEventCompaction,
-  });
-  assert.equal(Object.hasOwn(semanticIndependentEvent, "semanticFailureEvidence"), false);
-  assert.deepEqual(semanticIndependentEvent.eventCompaction, exactEventCompaction);
-
-  const invalidEventCompaction = {
-    ...structuredClone(exactEventCompaction),
-    rawPath: forbiddenPath,
-  };
-  const eventIndependentSemantic = await runWriterCase({
-    label: "valid semantic with invalid event summary",
-    semantic: structuredClone(exactSemantic),
-    retained: true,
-    eventCompaction: invalidEventCompaction,
-  });
-  assert.deepEqual(eventIndependentSemantic.semanticFailureEvidence, exactSemantic);
-  assert.equal(Object.hasOwn(eventIndependentSemantic, "eventCompaction"), false);
   assert.equal(trapCalls, 0);
 });
 
