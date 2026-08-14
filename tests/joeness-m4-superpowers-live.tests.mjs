@@ -1013,11 +1013,11 @@ test("CLI admits only the fixed preflight or explicit one-live plan", async () =
   ]) assert.throws(() => api.parseJoenessM4LiveCli(argv), /CLI|plan|invalid/i);
 });
 
-test("CLI failure emits one fixed bounded category without the raw error message", async () => {
-  const planPath = "evals/skill-contracts/joeness-m4-superpowers-live-plan-v1.json";
+test("CLI invalid arguments emit one fixed bounded category without their raw canary", async () => {
+  const rawCanary = "C:\\private\\RAW_CLI_ERROR_CANARY.json";
   let caught;
   try {
-    await execFile(process.execPath, [MODULE_PATH, "--mode", "preflight", "--plan", planPath], {
+    await execFile(process.execPath, [MODULE_PATH, "--mode", "preflight", "--plan", rawCanary], {
       cwd: ROOT,
       encoding: "utf8",
     });
@@ -1025,7 +1025,9 @@ test("CLI failure emits one fixed bounded category without the raw error message
     caught = error;
   }
   assert.equal(caught?.code, 1);
+  assert.equal(caught?.stdout, "");
   assert.equal(caught?.stderr, "m4-live-wrapper-failed\n");
+  assert.equal(caught.stderr.includes(rawCanary), false);
   assert.equal(caught.stderr.includes(ROOT), false);
 });
 
