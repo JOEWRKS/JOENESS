@@ -80,6 +80,16 @@ v4는 충돌 문구나 플러그인 정책 문구를 넣지 않고 아주 작은
 
 [v4 시도 기록](../../../evals/skill-contracts/joeness-m4-transport-control-attempt-index-v4.json)은 계획·raw·evidence의 정확한 튜플과 독립 사전·사후 확인을 함께 고정한다. 같은 v4를 다시 실행하지 않고 추가 live 실행도 승인하지 않는다. 이 기록으로 Core, vendor 설치 manifest, 플러그인 설정 또는 승격 상태를 바꾸지 않는다.
 
+## 2026-08-15 M4 고정 입력 전송 확인 v5
+
+v5는 v3에서 사용한 고정 문서 네 개를 바이트와 순서까지 그대로 불러오되, 복잡한 M4 응답 계약 대신 아주 작은 고정 JSON만 요구하는 진단 대조군이다. 계획 `evals/skill-contracts/joeness-m4-pinned-load-control-live-plan-v5.json`은 4,399바이트, SHA-256 `62cb3c6fa1ab2a52c7fb0f8bc63168bcc51e2ad28889cfca3ea727b27f346748`이다. 입력 네 개의 합은 16,819바이트이고 정규 요청은 17,295바이트, SHA-256 `edb9ffd151a5ecb405002d487fe28c1e10285d63676aee849bd991158fd89f5a`이며 추가 프롬프트는 없다. 응답 스키마는 192바이트, SHA-256 `874e782d9de6862f9718199125fcebfcf47f7990da06dce54d2d32f8c12db423`이다.
+
+새 응답 차례를 한 번 실행하고 재시도하지 않았으며 종료 코드 0으로 끝났다. 36바이트 raw 산출물의 SHA-256은 `b270bf58038d3d0c99216e11735eeadd9ef29d2dbfa3b14e99bfe8900c36a6ea`, 7,267바이트 evidence 산출물의 SHA-256은 `f23d40b7f0dfc4070a2dacb3bdf252df08495d63573f1c64ff23c39a6de00da0`이고 차단 산출물은 없다. 직접 확인된 결과는 정확한 v3 입력 묶음을 불러오고 정해진 작은 JSON을 반환·저장하는 경로의 `PASS`뿐이다. 같은 입력 바이트만으로는 이번 v5에서 v3의 `runtime-error`가 재현되지 않았다는 제한된 추론은 가능하지만, 서로 다른 시도 사이의 인과관계, 의미 응답 생성, 스키마 처리, 제공자 상태, 플러그인 활성화 또는 v3 오류의 근본 원인은 판정하지 않는다.
+
+산출물은 App Server 실행 1회와 종료 확인 1회, 남은 소유 프로세스 0개, 격리 홈과 실행 폴더 없음, 원본 설정 비변경을 직접 기록한다. 독립 확인에서도 해당 작업 프로세스·실행 폴더·격리 홈은 실행 전후 없었고, 넓은 실행 폴더 기준은 38개·1,654바이트·같은 ordinal SHA-256, 넓은 격리 홈 기준은 0개·0바이트·같은 SHA-256, 전체 App Server 프로세스 수는 실행 전후 2개로 일치했다. 입력 문서 원문, raw 이벤트, 프로세스·thread·turn 식별자, 절대 경로, stderr, 설정 내용은 보존하지 않았다.
+
+실제 실행 직전 PowerShell 보호문이 빈 `git status --porcelain=v1` 결과를 문자열로 바꾸면서 잘못 dirty로 분류한 일이 있었다. 이 보호문은 `LIVE_START`와 Node·모델 실행 전에 멈췄고 저장소 상태를 바꾸지 않았으므로 라이브 시도나 재시도가 아니다. 직접 재확인 뒤 상태 항목 개수를 세는 방식으로 고쳤고, 위 v5 실행만 실제 라이브 시도 한 번으로 기록했다. [v5 시도 기록](../../../evals/skill-contracts/joeness-m4-pinned-load-control-attempt-index-v5.json)은 이 경계와 계획·소스·산출물·정리 기준을 함께 고정한다. M4 행동은 `NOT-ASSESSED`, JOENESS 정책·Superpowers 호환성·설치된 플러그인 활성화는 `UNVERIFIED`, 상태는 `candidate/unvalidated`로 유지한다. 같은 v5를 다시 실행하지 않고 추가 live 실행도 승인하지 않으며, Core, vendor 설치 manifest, 플러그인 설정 또는 승격 상태를 바꾸지 않는다.
+
 ## Visual Check structure
 
 The public body selects exactly one or more applicable modes:
