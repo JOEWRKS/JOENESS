@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "id": "joeness-m4-superpowers-live-v1",
+  "date": "2026-08-14",
+  "attempt": {
+    "freshTurnCount": 1,
+    "retryCount": 0,
+    "automaticRetry": false
+  },
+  "source": {
+    "planImplementationCommit": "6a08c764283bbf2babd9f29765b097de561c9c4e",
+    "runner": {
+      "path": "evals/support/run-joeness-m4-superpowers-eval.mjs",
+      "bytes": 38883,
+      "sha256": "7add2b1e5ea4ec9559620451f8cef99b2c2dbbd88db7c621f678ffc04f87e856"
+    },
+    "liveWrapper": {
+      "path": "evals/support/run-joeness-m4-superpowers-live.mjs",
+      "bytes": 37220,
+      "sha256": "ba7df5768f144abe861e84e558f360452b756c14864a10bfc333d5a8e0c097b3"
+    },
+    "freshTurnAdapter": {
+      "path": "evals/support/run-fresh-evaluator-turn.mjs",
+      "bytes": 55477,
+      "sha256": "f2c7e2e9457b0ef7d6b819425619dcde8054db530f8b920829376f39a13fd087"
+    },
+    "collector": {
+      "path": "evals/support/collect-codex-app-server.mjs",
+      "bytes": 297632,
+      "sha256": "8b81ddb28be2a803500839a2de61f9bb397aa96711d039bdb7a3a86cfad8d687"
+    },
+    "fixtureManifest": {
+      "path": "evals/skill-contracts/fixtures/joeness-m4-superpowers-v1/manifest.json",
+      "bytes": 1738,
+      "sha256": "fdda654ba170e151913c43eb8f59fdef4cf1de47a20da7e461c69389b4377ca4"
+    }
+  },
+  "runtime": {
+    "codexVersion": "codex-cli 0.146.0",
+    "projectDocs": "disabled",
+    "installedPluginActivation": "UNVERIFIED",
+    "dynamicTools": []
+  },
+  "outputs": {
+    "raw": "evals/skill-contracts/joeness-m4-superpowers-live-v1-raw.json",
+    "evidence": "evals/skill-contracts/joeness-m4-superpowers-live-v1-evidence.json",
+    "blocked": "evals/skill-contracts/joeness-m4-superpowers-live-v1-blocked.json"
+  },
+  "resultBoundary": {
+    "state": "candidate",
+    "validation": "unvalidated",
+    "promotionPass": false,
+    "corePromotion": false,
+    "manifestPromotion": false
+  }
+}
