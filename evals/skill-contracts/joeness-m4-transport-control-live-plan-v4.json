@@ -1,0 +1,78 @@
+{
+  "schemaVersion": 4,
+  "id": "joeness-m4-transport-control-live-v4",
+  "date": "2026-08-14",
+  "method": "neutral-tiny-json-transport-control-with-fixed-runtime-error-origin-no-plugin-activation-or-policy-assessment",
+  "predecessor": {
+    "id": "joeness-m4-superpowers-live-v3",
+    "implementationCommit": "39387f9ce0708ed56ef7be8e34831690eae31021",
+    "executionHead": "e36175da3fa67e3b8aedddef6c12156dfd04a438",
+    "persistenceCommit": "8f5b8dcfd12fccabb1b25cbc813aec48340b7287",
+    "plan": {
+      "path": "evals/skill-contracts/joeness-m4-superpowers-live-plan-v3.json",
+      "bytes": 2958,
+      "sha256": "2d98638e45b65fa2c1dc98fd11d7eeb86d57d9c6d69ce0a56752315aa83fb855"
+    },
+    "blockedArtifact": {
+      "path": "evals/skill-contracts/joeness-m4-superpowers-live-v3-blocked.json",
+      "bytes": 3670,
+      "sha256": "41aeafdb4a5b4b2bb468510846cb889050681e844f40d21669dbaf4c5175978a"
+    },
+    "attemptIndex": {
+      "path": "evals/skill-contracts/joeness-m4-superpowers-attempt-index-v3.json",
+      "bytes": 10146,
+      "sha256": "6f6dec9b5556b19247c218a9940a7dc30dd29b60d374dd51438b865d9aa1867a"
+    },
+    "sameCommandRetryAuthorized": false
+  },
+  "attempt": {
+    "freshTurnCount": 1,
+    "retryCount": 0,
+    "automaticRetry": false
+  },
+  "source": {
+    "planImplementationCommit": "f19f9013be5122867b36b4acc3b6a356f0f5e084",
+    "controlRunner": {
+      "path": "evals/support/run-joeness-m4-transport-control-eval.mjs",
+      "bytes": 49611,
+      "sha256": "547077688884d8d0c94558fc84322bcf31b61b0a6d6583359423f2c161029cfa"
+    },
+    "controlWrapper": {
+      "path": "evals/support/run-joeness-m4-transport-control-live.mjs",
+      "bytes": 70602,
+      "sha256": "4321af54ea619d5402cae711a47c41cbfcff75ae9d7e96dab76dfccf8b2ecb26"
+    },
+    "freshTurnAdapter": {
+      "path": "evals/support/run-fresh-evaluator-turn.mjs",
+      "bytes": 56845,
+      "sha256": "4884154dd1884b6fa899eef854307edec2a9897cb39b1f45c9c03479cab34247"
+    },
+    "collector": {
+      "path": "evals/support/collect-codex-app-server.mjs",
+      "bytes": 297632,
+      "sha256": "8b81ddb28be2a803500839a2de61f9bb397aa96711d039bdb7a3a86cfad8d687"
+    }
+  },
+  "runtime": {
+    "codexVersion": "codex-cli 0.146.0",
+    "projectDocs": "disabled",
+    "installedPluginActivation": "UNVERIFIED",
+    "dynamicTools": []
+  },
+  "outputs": {
+    "raw": "evals/skill-contracts/joeness-m4-transport-control-live-v4-raw.json",
+    "evidence": "evals/skill-contracts/joeness-m4-transport-control-live-v4-evidence.json",
+    "blocked": "evals/skill-contracts/joeness-m4-transport-control-live-v4-blocked.json"
+  },
+  "resultBoundary": {
+    "state": "candidate",
+    "validation": "unvalidated",
+    "transportScopeOnly": true,
+    "m4Behavior": "NOT-ASSESSED",
+    "joenessPolicy": "UNVERIFIED",
+    "superpowersCompatibility": "UNVERIFIED",
+    "promotionPass": false,
+    "corePromotion": false,
+    "manifestPromotion": false
+  }
+}
