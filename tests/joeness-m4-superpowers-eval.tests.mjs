@@ -123,11 +123,27 @@ function safeFreshResult(output = outputFixture()) {
   };
 }
 
-function shutdownSession() {
+function shutdownSession({
+  processExitCode = 0,
+  processCloseConfirmed = true,
+  stderr = { byteLength: 0, truncated: false, captureTruncated: false },
+  reads,
+} = {}) {
   const session = {};
   Object.defineProperty(session, "processExitCode", {
     enumerable: true,
-    get() { return 0; },
+    configurable: true,
+    get() { if (reads) reads.exit += 1; return processExitCode; },
+  });
+  Object.defineProperty(session, "processCloseConfirmed", {
+    enumerable: true,
+    configurable: true,
+    get() { if (reads) reads.close += 1; return processCloseConfirmed; },
+  });
+  Object.defineProperty(session, "stderr", {
+    enumerable: true,
+    configurable: true,
+    get() { if (reads) reads.stderr += 1; return stderr; },
   });
   return session;
 }
@@ -456,15 +472,10 @@ test("collector-shaped session getter and zero-byte stderr prove shutdown withou
   const result = safeFreshResult();
   result.appServer.stderr = collectorStderr();
   const deps = liveDependencies({ result });
-  let exitReads = 0;
+  const reads = { exit: 0, close: 0, stderr: 0 };
   deps.options.runtimeFactory = async () => {
-    const session = {};
-    Object.defineProperty(session, "processExitCode", {
-      enumerable: true,
-      get() { exitReads += 1; return 0; },
-    });
     return {
-      session,
+      session: shutdownSession({ stderr: collectorStderr(), reads }),
       sourceConfigBefore: { bytes: 6, sha256: digest("config") },
       readSourceConfig: async () => {
         deps.calls.configReads += 1;
@@ -474,27 +485,83 @@ test("collector-shaped session getter and zero-byte stderr prove shutdown withou
     };
   };
   await api.runJoenessM4SuperpowersEval(deps.options);
-  assert.equal(exitReads, 1);
+  assert.deepEqual(reads, { exit: 1, close: 1, stderr: 1 });
   assert.equal(deps.calls.publish, 1);
+});
 
-  const trapped = liveDependencies({ result });
-  let trapReads = 0;
-  trapped.options.runtimeFactory = async () => {
-    const session = {};
-    Object.defineProperty(session, "processExitCode", {
-      enumerable: true,
-      get() { trapReads += 1; throw new Error("exit trap"); },
-    });
-    return {
-      session,
+test("collector lifecycle failures and hostile results publish neither success nor blocked artifacts", async () => {
+  const api = await subject();
+  const blocked = "evals/experiments/joeness-m4-lifecycle-blocked.json";
+  const cases = [];
+
+  for (const session of [
+    shutdownSession({ processCloseConfirmed: false }),
+    shutdownSession({ processExitCode: 7 }),
+    shutdownSession({ stderr: { byteLength: 1, truncated: false, captureTruncated: false } }),
+  ]) cases.push({ result: safeFreshResult(), session });
+
+  const mismatchResult = safeFreshResult();
+  mismatchResult.appServer.stderr = collectorStderr();
+  cases.push({ result: mismatchResult, session: shutdownSession() });
+
+  let stderrThrowReads = 0;
+  const throwingSession = shutdownSession();
+  Object.defineProperty(throwingSession, "stderr", {
+    enumerable: true,
+    get() { stderrThrowReads += 1; throw new Error("stderr trap"); },
+  });
+  cases.push({ result: safeFreshResult(), session: throwingSession });
+
+  let resultTrapReads = 0;
+  cases.push({
+    result: new Proxy(safeFreshResult(), {
+      get(target, key, receiver) {
+        if (key === "then") return undefined;
+        resultTrapReads += 1;
+        throw new Error("result trap");
+      },
+    }),
+    session: shutdownSession(),
+  });
+  const accessorResult = safeFreshResult();
+  Object.defineProperty(accessorResult, "appServer", {
+    enumerable: true,
+    get() { resultTrapReads += 1; throw new Error("result accessor trap"); },
+  });
+  cases.push({ result: accessorResult, session: shutdownSession() });
+  const outputAccessor = safeFreshResult();
+  Object.defineProperty(outputAccessor, "output", {
+    enumerable: true,
+    get() { resultTrapReads += 1; throw new Error("output accessor trap"); },
+  });
+  cases.push({ result: outputAccessor, session: shutdownSession() });
+  const nestedProxy = safeFreshResult();
+  nestedProxy.appServer.stderr = new Proxy(
+    { byteLength: 0, truncated: false, captureTruncated: false },
+    { get() { resultTrapReads += 1; throw new Error("nested trap"); } },
+  );
+  cases.push({ result: nestedProxy, session: shutdownSession() });
+
+  for (const [caseIndex, entry] of cases.entries()) {
+    const deps = liveDependencies({ result: entry.result });
+    deps.options.executionPlan = executionPlan({ blocked });
+    deps.options.runtimeFactory = async () => ({
+      session: entry.session,
       sourceConfigBefore: { bytes: 6, sha256: digest("config") },
-      readSourceConfig: async () => ({ bytes: 6, sha256: digest("config") }),
-      finish: async () => {},
-    };
-  };
-  await assert.rejects(api.runJoenessM4SuperpowersEval(trapped.options), /shutdown getter/i);
-  assert.equal(trapReads, 1);
-  assert.equal(trapped.calls.publish, 0);
+      readSourceConfig: async () => {
+        deps.calls.configReads += 1;
+        return { bytes: 6, sha256: digest("config") };
+      },
+      finish: async () => { deps.calls.finish += 1; },
+    });
+    await assert.rejects(api.runJoenessM4SuperpowersEval(deps.options), /session|shutdown|stderr|unsafe|result|lifecycle/i);
+    assert.equal(deps.calls.publish, 0);
+    assert.deepEqual(deps.calls.writes, [], `lifecycle case ${caseIndex}`);
+    assert.equal(deps.calls.finish, 1, `finish lifecycle case ${caseIndex}`);
+    assert.equal(deps.calls.configReads, 1, `readback lifecycle case ${caseIndex}`);
+  }
+  assert.equal(stderrThrowReads, 1);
+  assert.equal(resultTrapReads, 0);
 });
 
 test("stderr accepts only safe summary or exact collector zero-byte shape and retains no raw field", async () => {

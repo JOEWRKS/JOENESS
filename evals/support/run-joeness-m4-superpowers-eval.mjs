@@ -446,25 +446,31 @@ function validateSafeStderrSummary(stderr) {
   }
 }
 
+function readCollectorGetter(session, key, label) {
+  let descriptor;
+  try {
+    descriptor = Object.getOwnPropertyDescriptor(session, key);
+  } catch {
+    fail(`M4 evaluator ${label} getter is unverified`);
+  }
+  if (!descriptor || typeof descriptor.get !== "function" || descriptor.set !== undefined) {
+    fail(`M4 evaluator ${label} getter is untrusted`);
+  }
+  try {
+    return descriptor.get.call(session);
+  } catch {
+    fail(`M4 evaluator ${label} getter failed`);
+  }
+}
+
 function assertCollectorShutdown(result, session) {
   if (session === null || typeof session !== "object" || utilTypes.isProxy(session)) {
     fail("M4 evaluator session shutdown is unverified");
   }
-  let descriptor;
-  try {
-    descriptor = Object.getOwnPropertyDescriptor(session, "processExitCode");
-  } catch {
-    fail("M4 evaluator session shutdown is unverified");
-  }
-  if (!descriptor || typeof descriptor.get !== "function" || descriptor.set !== undefined) {
-    fail("M4 evaluator session shutdown getter is untrusted");
-  }
-  let sessionExitCode;
-  try {
-    sessionExitCode = descriptor.get.call(session);
-  } catch {
-    fail("M4 evaluator session shutdown getter failed");
-  }
+  const sessionExitCode = readCollectorGetter(session, "processExitCode", "shutdown");
+  const processCloseConfirmed = readCollectorGetter(session, "processCloseConfirmed", "close confirmation");
+  const sessionStderr = readCollectorGetter(session, "stderr", "stderr");
+  validateSafeStderrSummary(sessionStderr);
   const appServer = result?.appServer;
   if (appServer === null || typeof appServer !== "object" || utilTypes.isProxy(appServer)) {
     fail("M4 evaluator App Server shutdown is unverified");
@@ -475,8 +481,20 @@ function assertCollectorShutdown(result, session) {
   } catch {
     fail("M4 evaluator App Server shutdown is unverified");
   }
-  if (!appServerExit || !("value" in appServerExit) || appServerExit.get || appServerExit.set || appServerExit.value !== 0 || sessionExitCode !== 0) {
+  if (
+    !appServerExit ||
+    !("value" in appServerExit) ||
+    appServerExit.get ||
+    appServerExit.set ||
+    appServerExit.value !== 0 ||
+    sessionExitCode !== 0 ||
+    processCloseConfirmed !== true
+  ) {
     fail("M4 evaluator session shutdown is unverified");
+  }
+  validateSafeStderrSummary(appServer.stderr);
+  if (stableStringify(sessionStderr) !== stableStringify(appServer.stderr)) {
+    fail("M4 evaluator stderr snapshot differs from retained result");
   }
 }
 
@@ -714,6 +732,7 @@ export async function runJoenessM4SuperpowersEval({
   let result;
   let evidence;
   let primaryError = null;
+  let suppressFailureArtifacts = false;
   let cleanupSafe = false;
   try {
     runtime = await runtimeFactory({ repositoryRoot, executionPlan, sourcePin });
@@ -728,7 +747,13 @@ export async function runJoenessM4SuperpowersEval({
       outputSchema,
       dynamicTools: [],
     });
-    assertCollectorShutdown(result, runtime.session);
+    try {
+      assertSafeData(result, "M4 fresh result");
+      assertCollectorShutdown(result, runtime.session);
+    } catch (error) {
+      suppressFailureArtifacts = true;
+      throw error;
+    }
     validateJoenessM4Output(result.output);
     evidence = retainJoenessM4FreshEvidence(result, { input, outputSchema });
   } catch (error) {
@@ -764,7 +789,7 @@ export async function runJoenessM4SuperpowersEval({
   }
 
   if (primaryError !== null) {
-    if (cleanupSafe && executionPlan.outputs.blocked !== null) {
+    if (cleanupSafe && !suppressFailureArtifacts && executionPlan.outputs.blocked !== null) {
       const blocked = blockedReceipt(primaryError);
       if (Buffer.byteLength(stableStringify(blocked)) > 4096) throw new Error("M4 blocked receipt exceeds bound", { cause: primaryError });
       await verifyOutputTarget(repositoryRoot, executionPlan.outputs.blocked);
