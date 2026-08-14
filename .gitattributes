@@ -70,4 +70,5 @@
 /evals/skill-contracts/ticket-delivery-pressure-v*-raw.md text eol=lf
 /evals/skill-contracts/ticket-delivery-pressure-v*-raw.md whitespace=-blank-at-eol
 /evals/skill-contracts/fixtures/** binary
+/evals/skill-contracts/fixtures/joeness-m4-superpowers-v1/** text eol=lf
 vendor/** -text
