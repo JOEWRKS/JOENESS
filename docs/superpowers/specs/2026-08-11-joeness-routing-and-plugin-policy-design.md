@@ -90,6 +90,18 @@ v5는 v3에서 사용한 고정 문서 네 개를 바이트와 순서까지 그�
 
 실제 실행 직전 PowerShell 보호문이 빈 `git status --porcelain=v1` 결과를 문자열로 바꾸면서 잘못 dirty로 분류한 일이 있었다. 이 보호문은 `LIVE_START`와 Node·모델 실행 전에 멈췄고 저장소 상태를 바꾸지 않았으므로 라이브 시도나 재시도가 아니다. 직접 재확인 뒤 상태 항목 개수를 세는 방식으로 고쳤고, 위 v5 실행만 실제 라이브 시도 한 번으로 기록했다. [v5 시도 기록](../../../evals/skill-contracts/joeness-m4-pinned-load-control-attempt-index-v5.json)은 이 경계와 계획·소스·산출물·정리 기준을 함께 고정한다. M4 행동은 `NOT-ASSESSED`, JOENESS 정책·Superpowers 호환성·설치된 플러그인 활성화는 `UNVERIFIED`, 상태는 `candidate/unvalidated`로 유지한다. 같은 v5를 다시 실행하지 않고 추가 live 실행도 승인하지 않으며, Core, vendor 설치 manifest, 플러그인 설정 또는 승격 상태를 바꾸지 않는다.
 
+## 2026-08-15 M4 최소 권한 행동 판정 v6
+
+v6은 v3에서 사용한 고정 문서 네 개를 바이트와 순서까지 그대로 불러오고, 프로젝트 지시와 외부 스킬 절차의 권한 관계를 제한된 선택지로 답하게 하는 최소 M4 행동 진단이다. 계획 `evals/skill-contracts/joeness-m4-authority-behavior-live-plan-v6.json`은 5,234바이트, SHA-256 `fcd71e60cd3c042a5bfabf7708a657b1c461e0893d2a4c7cb448dfac798bdc51`이다. 입력 네 개의 합은 16,819바이트이고 정규 요청은 17,295바이트, SHA-256 `edb9ffd151a5ecb405002d487fe28c1e10285d63676aee849bd991158fd89f5a`이며 추가 프롬프트는 없다. 응답 스키마는 1,212바이트, SHA-256 `600f57895d1ac47195207e05e6fb1a10418de47e5415989301dbd6d6a7ed05de`, 기대 PASS raw는 376바이트, SHA-256 `c880baaaaf1bca06aeb576fabacccb837dbc7c1a65158d96eda382f2fe8606cf`다. 금지 행동 범주는 14개이며 정규 표현은 321바이트, SHA-256 `412b94784afb8ba873b4044561cd86d4195f6c738734db39f9350236e1d5f69d`다.
+
+`node evals/support/run-joeness-m4-authority-behavior-live.mjs --mode live --plan evals/skill-contracts/joeness-m4-authority-behavior-live-plan-v6.json`을 2026-08-15 06:07:31.4840195 KST부터 06:08:03.5063672 KST까지 32.022348초 동안 한 번 실행했고 재시도하지 않았다. 종료 코드는 1, stdout은 비어 있었으며 stderr에는 고정 wrapper 표식 `m4-authority-behavior-live-wrapper-failed`만 있었다. 이 표식은 원래 출력 계약 세부값이나 모델 원문이 아니다. raw와 evidence 산출물은 없고, 6,353바이트 차단 산출물의 SHA-256은 `f1e09464f3f3c83b227a10d860fe9a7aa805613de78efe68005bfb2051a0dd96`다.
+
+차단 산출물이 직접 보존한 판정은 `output-contract`의 `BLOCKED_OUTPUT_CONTRACT`뿐이다. 정확히 어느 출력 계약 하위 검사가 실패했는지, raw 또는 모델 원문이 있었는지, 의미 결과가 PASS인지 FAIL인지는 모두 `UNVERIFIED`다. 따라서 M4 fixture 행동과 M4 전체 결과, 프로젝트 지시가 외부 스킬 절차보다 우선했는지, JOENESS 정책, Superpowers 호환성, 설치된 플러그인의 실제 활성화 여부도 모두 `UNVERIFIED`다. 직접 사용자 지시와 프로젝트 권한의 관계는 별도로 시험하지 않았다. 상태는 계속 `candidate/unvalidated`이고 모든 승격 값은 false다.
+
+차단 산출물은 App Server 실행 1회와 종료 확인 1회, 남은 소유 프로세스 0개, 격리 홈과 실행 폴더 없음, 원본 설정 비변경을 직접 기록한다. 독립 확인에서도 해당 작업 프로세스·실행 폴더·격리 홈은 실행 전후 없었다. 넓은 실행 폴더 기준은 실행 전후 38개·1,654바이트·같은 ordinal SHA-256 `56dffbde6864a4184208b1366a88506d12289f0f9f32af472d6cc6e79d03b15d`, 넓은 격리 홈 기준은 0개·0바이트·SHA-256 `e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855`, 전체 App Server 프로세스 수는 실행 전후 2개였다. 설정은 실행 전후 8,590바이트, SHA-256 `3a7b848f3024260adf2d3e93ea4440703b4b253047163b3f95cb374ad9bdba10`으로 같았다. 넓은 기준은 작업 소유라고 보지 않았고 수정하거나 삭제하지 않았다. 고정 입력 원문, raw 이벤트, 프로세스·thread·turn 식별자, 절대 경로, 원래 runtime stderr, 설정 내용, raw 또는 모델 원문은 보존하지 않았다.
+
+[v6 시도 기록](../../../evals/skill-contracts/joeness-m4-authority-behavior-attempt-index-v6.json)은 원래 cell 601의 실행 시각·종료 결과와 계획·소스·차단 산출물·정리 기준을 함께 고정한다. [v6 차단 산출물](../../../evals/skill-contracts/joeness-m4-authority-behavior-live-v6-blocked.json)은 바이트 그대로 보존한다. 같은 v6를 다시 실행하지 않고 추가 live 실행도 승인하지 않는다. 이 결과로 Core, vendor 설치 manifest, 플러그인 설정 또는 승격 상태를 바꾸지 않으며 v7을 시작하지 않는다.
+
 ## Visual Check structure
 
 The public body selects exactly one or more applicable modes:
