@@ -160,6 +160,117 @@ test("execution boundary binds clean C to its direct B parent and identical B/C/
   assert.equal(result.outputsAbsent, true);
 });
 
+test("Git tree presence distinguishes a missing path from an invalid commit", async (t) => {
+  const api = await subject();
+  const fixture = await committedPlanRepo(t);
+  assert.equal(await api.gitBlobExists(
+    fixture.root,
+    fixture.executionHead,
+    "evals/skill-contracts/not-present.json",
+  ), false);
+  assert.equal(await api.gitBlobExists(
+    fixture.root,
+    fixture.executionHead,
+    fixture.plan.source.runner.path,
+  ), true);
+  await assert.rejects(
+    api.gitBlobExists(
+      fixture.root,
+      "f".repeat(40),
+      fixture.plan.source.runner.path,
+    ),
+    /git|tree|object|revision|commit/i,
+  );
+});
+
+test("execution boundary rejects an intermediate commit after plan C", async (t) => {
+  const api = await subject();
+  const fixture = await committedPlanRepo(t);
+  await git(fixture.root, ["commit", "--quiet", "--allow-empty", "-m", "intermediate"]);
+  await assert.rejects(
+    api.verifyJoenessM4ExecutionBoundary({
+      repositoryRoot: fixture.root,
+      planPath: "evals/skill-contracts/joeness-m4-superpowers-live-plan-v1.json",
+    }),
+    /direct single-parent child/i,
+  );
+});
+
+test("execution boundary rejects a merge execution head", async (t) => {
+  const api = await subject();
+  const fixture = await committedPlanRepo(t);
+  const mainBranch = await git(fixture.root, ["branch", "--show-current"]);
+  await git(fixture.root, ["branch", "side", fixture.implementationCommit]);
+  await git(fixture.root, ["switch", "--quiet", "side"]);
+  await git(fixture.root, ["commit", "--quiet", "--allow-empty", "-m", "side"]);
+  await git(fixture.root, ["switch", "--quiet", mainBranch]);
+  await git(fixture.root, ["merge", "--quiet", "--no-ff", "side", "-m", "merge"]);
+  await assert.rejects(
+    api.verifyJoenessM4ExecutionBoundary({
+      repositoryRoot: fixture.root,
+      planPath: "evals/skill-contracts/joeness-m4-superpowers-live-plan-v1.json",
+    }),
+    /direct single-parent child/i,
+  );
+});
+
+test("execution boundary rejects a non-plan file in C", async (t) => {
+  const api = await subject();
+  const fixture = await committedPlanRepo(t);
+  await writeRelative(fixture.root, "unexpected.txt", "extra");
+  await git(fixture.root, ["add", "unexpected.txt"]);
+  await git(fixture.root, ["commit", "--quiet", "--amend", "--no-edit"]);
+  await assert.rejects(
+    api.verifyJoenessM4ExecutionBoundary({
+      repositoryRoot: fixture.root,
+      planPath: "evals/skill-contracts/joeness-m4-superpowers-live-plan-v1.json",
+    }),
+    /plan-only/i,
+  );
+});
+
+test("execution boundary rejects a source tuple drift in the plan", async (t) => {
+  const api = await subject();
+  const fixture = await committedPlanRepo(t);
+  fixture.plan.source.runner.sha256 = digest("not-the-runner");
+  await writeRelative(
+    fixture.root,
+    "evals/skill-contracts/joeness-m4-superpowers-live-plan-v1.json",
+    `${JSON.stringify(fixture.plan, null, 2)}\n`,
+  );
+  await git(fixture.root, ["add", "evals/skill-contracts/joeness-m4-superpowers-live-plan-v1.json"]);
+  await git(fixture.root, ["commit", "--quiet", "--amend", "--no-edit"]);
+  await assert.rejects(
+    api.verifyJoenessM4ExecutionBoundary({
+      repositoryRoot: fixture.root,
+      planPath: "evals/skill-contracts/joeness-m4-superpowers-live-plan-v1.json",
+    }),
+    /source runner pin drift/i,
+  );
+});
+
+test("execution boundary rejects an ignored output symlink", async (t) => {
+  const api = await subject();
+  const fixture = await committedPlanRepo(t);
+  const outside = path.join(fixture.root, "outside-output.json");
+  await writeFile(outside, "outside", "utf8");
+  await writeFile(
+    path.join(fixture.root, ".git", "info", "exclude"),
+    `${fixture.plan.outputs.raw}\noutside-output.json\n`,
+    "utf8",
+  );
+  const target = path.join(fixture.root, ...fixture.plan.outputs.raw.split("/"));
+  await symlink(outside, target, "file");
+  assert.equal(await git(fixture.root, ["status", "--porcelain"]), "");
+  await assert.rejects(
+    api.verifyJoenessM4ExecutionBoundary({
+      repositoryRoot: fixture.root,
+      planPath: "evals/skill-contracts/joeness-m4-superpowers-live-plan-v1.json",
+    }),
+    /output.*collision|symlink/i,
+  );
+});
+
 test("source config snapshot retains only byte length and digest and rejects a symlink", async (t) => {
   const api = await subject();
   const root = await mkdtemp(path.join(tmpdir(), "joeness-m4-config-"));
@@ -177,6 +288,39 @@ test("source config snapshot retains only byte length and digest and rejects a s
     api.snapshotJoenessM4SourceConfig({ sourceCodexHome: root }),
     /config|symlink|regular/i,
   );
+});
+
+test("default collector runtime rejects a different source Codex home before create or prepare", async (t) => {
+  const api = await subject();
+  const root = await mkdtemp(path.join(tmpdir(), "joeness-m4-home-mismatch-"));
+  t.after(() => rm(root, { recursive: true, force: true }));
+  const sourceCodexHome = path.join(root, "different-codex-home");
+  const runParent = path.join(root, "runs");
+  await mkdir(sourceCodexHome);
+  await mkdir(runParent);
+  await writeFile(path.join(sourceCodexHome, "config.toml"), "plugins = false\n", "utf8");
+  let createCount = 0;
+  await assert.rejects(
+    api.createJoenessM4DefaultRuntime({
+      plan: planFixture(),
+      repositoryRoot: root,
+      sourceCodexHome,
+      runParent,
+      cleanupState: {},
+      operations: {
+        createExclusiveRunRoot: async () => {
+          createCount += 1;
+          throw new Error("create must not run");
+        },
+        prepareRuntime: undefined,
+        openAppServer: async () => {},
+        removeIsolatedCodexHome: async () => {},
+        removeRunRoot: async () => {},
+      },
+    }),
+    /source Codex home.*collector/i,
+  );
+  assert.equal(createCount, 0);
 });
 
 test("default runtime uses Codex 0.146 once and proves process, isolated home, and run-root cleanup", async (t) => {
@@ -305,6 +449,68 @@ test("default runtime cleans a partial factory only after launch close is confir
     runRootReadback: "absent",
   });
   assert.deepEqual(cleanupState.sourceConfigAfter, cleanupState.sourceConfigBefore);
+});
+
+test("hostile ticket evidence accessors and proxies are trap-zero and treated as unconfirmed", async (t) => {
+  const api = await subject();
+  for (const kind of ["accessor", "proxy"]) {
+    const root = await mkdtemp(path.join(tmpdir(), `joeness-m4-ticket-${kind}-`));
+    t.after(() => rm(root, { recursive: true, force: true }));
+    const sourceCodexHome = path.join(root, "codex-home");
+    const runParent = path.join(root, "runs");
+    await mkdir(sourceCodexHome, { recursive: true });
+    await mkdir(runParent, { recursive: true });
+    await writeFile(path.join(sourceCodexHome, "config.toml"), "plugins = false\n", "utf8");
+    let trapCount = 0;
+    let removeCount = 0;
+    const cleanupState = {};
+    await assert.rejects(
+      api.createJoenessM4DefaultRuntime({
+        plan: planFixture(),
+        repositoryRoot: root,
+        sourceCodexHome,
+        runParent,
+        cleanupState,
+        operations: {
+          createExclusiveRunRoot: async () => {
+            const runRoot = path.join(runParent, "joewrks-eval-joeness-m4-superpowers-live-v1");
+            await mkdir(runRoot);
+            return runRoot;
+          },
+          prepareRuntime: async (runRoot) => {
+            const isolatedCodexHome = path.join(sourceCodexHome, ".eval-runtime", `${kind}-controller-codex-home`);
+            await mkdir(isolatedCodexHome, { recursive: true });
+            return { runRoot, isolatedCodexHome, version: "codex-cli 0.146.0" };
+          },
+          openAppServer: async () => {
+            const error = new Error(`hostile ${kind}`);
+            if (kind === "accessor") {
+              Object.defineProperty(error, "ticketEvidence", {
+                get() {
+                  trapCount += 1;
+                  return { appServer: { processCloseConfirmed: true } };
+                },
+              });
+            } else {
+              error.ticketEvidence = new Proxy({}, {
+                get() {
+                  trapCount += 1;
+                  return { processCloseConfirmed: true };
+                },
+              });
+            }
+            throw error;
+          },
+          removeIsolatedCodexHome: async () => { removeCount += 1; },
+          removeRunRoot: async () => { removeCount += 1; },
+        },
+      }),
+      new RegExp(`hostile ${kind}`),
+    );
+    assert.equal(trapCount, 0, kind);
+    assert.equal(removeCount, 0, kind);
+    assert.equal(cleanupState.receipt, undefined, kind);
+  }
 });
 
 test("default runtime cleans the deterministic isolated home after prepare fails before return", async (t) => {
@@ -457,6 +663,69 @@ test("default runtime still cleans owned state when close reports an error after
   assert.deepEqual(cleanupState.sourceConfigAfter, cleanupState.sourceConfigBefore);
 });
 
+test("cleanup attempts both owned roots and config readback independently and aggregates every failure", async (t) => {
+  const api = await subject();
+  const root = await mkdtemp(path.join(tmpdir(), "joeness-m4-cleanup-errors-"));
+  t.after(() => rm(root, { recursive: true, force: true }));
+  const sourceCodexHome = path.join(root, "codex-home");
+  const runParent = path.join(root, "runs");
+  await mkdir(sourceCodexHome, { recursive: true });
+  await mkdir(runParent, { recursive: true });
+  await writeFile(path.join(sourceCodexHome, "config.toml"), "plugins = false\n", "utf8");
+  let runRoot;
+  let isolatedCodexHome;
+  let removeHomeCount = 0;
+  let removeRootCount = 0;
+  const cleanupState = {};
+  const runtime = await api.createJoenessM4DefaultRuntime({
+    plan: planFixture(),
+    repositoryRoot: root,
+    sourceCodexHome,
+    runParent,
+    cleanupState,
+    operations: {
+      createExclusiveRunRoot: async () => {
+        runRoot = path.join(runParent, "joewrks-eval-joeness-m4-superpowers-live-v1");
+        await mkdir(runRoot);
+        return runRoot;
+      },
+      prepareRuntime: async () => {
+        isolatedCodexHome = path.join(sourceCodexHome, ".eval-runtime", "cleanup-errors-controller-codex-home");
+        await mkdir(isolatedCodexHome, { recursive: true });
+        return { runRoot, isolatedCodexHome, version: "codex-cli 0.146.0" };
+      },
+      openAppServer: async () => ({
+        processCloseConfirmed: true,
+        processExitCode: 0,
+        close: async () => {},
+      }),
+      removeIsolatedCodexHome: async () => {
+        removeHomeCount += 1;
+        throw new Error("isolated removal failed");
+      },
+      removeRunRoot: async () => {
+        removeRootCount += 1;
+        throw new Error("run-root removal failed");
+      },
+    },
+  });
+  await rm(path.join(sourceCodexHome, "config.toml"));
+  let caught;
+  try { await runtime.finish(true); } catch (error) { caught = error; }
+  assert.equal(caught instanceof AggregateError, true);
+  assert.equal(caught.errors.length, 5);
+  assert.deepEqual(caught.errors.slice(0, 4).map((error) => error.message), [
+    "isolated removal failed",
+    "M4 isolated Codex home cleanup readback failed",
+    "run-root removal failed",
+    "M4 run-root cleanup readback failed",
+  ]);
+  assert.match(caught.errors[4].message, /config|ENOENT|no such/i);
+  assert.equal(removeHomeCount, 1);
+  assert.equal(removeRootCount, 1);
+  assert.equal(cleanupState.receipt, undefined);
+});
+
 test("live wrapper revalidates C before success publication and separates B/C provenance", async (t) => {
   const api = await subject();
   const fixture = await committedPlanRepo(t);
@@ -553,6 +822,37 @@ test("live wrapper revalidates C before success publication and separates B/C pr
     rawStderrPersisted: false,
   });
   assert.equal(JSON.stringify(publication).includes(fixture.root), false);
+});
+
+test("runtime factory rejects a second call before creating another runtime", async (t) => {
+  const api = await subject();
+  const fixture = await committedPlanRepo(t);
+  let createRuntimeCount = 0;
+  await assert.rejects(
+    api.runJoenessM4Live({
+      repositoryRoot: fixture.root,
+      planPath: "evals/skill-contracts/joeness-m4-superpowers-live-plan-v1.json",
+      sourceCodexHome: path.join(tmpdir(), "unused-codex-home"),
+      runParent: tmpdir(),
+      operations: {
+        verifyExecutionBoundary: api.verifyJoenessM4ExecutionBoundary,
+        preflightEvaluator: async () => ({}),
+        createRuntime: async () => {
+          createRuntimeCount += 1;
+          return {};
+        },
+        runEvaluator: async (options) => {
+          await options.runtimeFactory({});
+          await options.runtimeFactory({});
+        },
+        runTurn: async () => {},
+        publishSuccess: async () => {},
+        writeBlocked: async () => {},
+      },
+    }),
+    /runtime factory.*once|second runtime/i,
+  );
+  assert.equal(createRuntimeCount, 1);
 });
 
 test("blocked publication is enriched only after outer boundary revalidation", async (t) => {
@@ -711,6 +1011,22 @@ test("CLI admits only the fixed preflight or explicit one-live plan", async () =
     ["--mode", "live", "--plan", "elsewhere.json"],
     ["--mode", "live", "--plan", planPath, "--retry"],
   ]) assert.throws(() => api.parseJoenessM4LiveCli(argv), /CLI|plan|invalid/i);
+});
+
+test("CLI failure emits one fixed bounded category without the raw error message", async () => {
+  const planPath = "evals/skill-contracts/joeness-m4-superpowers-live-plan-v1.json";
+  let caught;
+  try {
+    await execFile(process.execPath, [MODULE_PATH, "--mode", "preflight", "--plan", planPath], {
+      cwd: ROOT,
+      encoding: "utf8",
+    });
+  } catch (error) {
+    caught = error;
+  }
+  assert.equal(caught?.code, 1);
+  assert.equal(caught?.stderr, "m4-live-wrapper-failed\n");
+  assert.equal(caught.stderr.includes(ROOT), false);
 });
 
 test("default blocked writer publishes exclusively with readback", async (t) => {

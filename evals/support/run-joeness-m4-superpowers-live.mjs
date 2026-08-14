@@ -278,14 +278,28 @@ async function gitBlob(root, commit, relativePath) {
   return Buffer.from(stdout);
 }
 
-async function gitBlobExists(root, commit, relativePath) {
-  try {
-    await execFile("git", ["cat-file", "-e", `${commit}:${relativePath}`], { cwd: root, windowsHide: true });
-    return true;
-  } catch (error) {
-    if (Number.isInteger(error?.code)) return false;
-    throw error;
+export async function gitBlobExists(root, commit, relativePath) {
+  if (typeof root !== "string" || !path.isAbsolute(root)) fail("M4 Git tree root must be absolute");
+  if (typeof commit !== "string" || !/^[0-9a-f]{40}$/u.test(commit)) fail("M4 Git tree commit is invalid");
+  portableRelative(relativePath, "M4 Git tree path");
+  const { stdout } = await execFile(
+    "git",
+    ["ls-tree", "-z", "--full-tree", commit, "--", relativePath],
+    { cwd: root, encoding: "buffer", maxBuffer: 1024 * 1024, windowsHide: true },
+  );
+  const output = Buffer.from(stdout);
+  if (output.length === 0) return false;
+  if (output[output.length - 1] !== 0) throw new Error("M4 Git tree output is not NUL terminated");
+  const records = output.subarray(0, -1).toString("utf8").split("\0");
+  if (records.length !== 1) throw new Error("M4 Git tree output is ambiguous");
+  const separator = records[0].indexOf("\t");
+  if (separator < 1) throw new Error("M4 Git tree output is malformed");
+  const metadata = records[0].slice(0, separator);
+  const returnedPath = records[0].slice(separator + 1);
+  if (!/^\d{6} (?:blob|tree|commit) [0-9a-f]{40}$/u.test(metadata) || returnedPath !== relativePath) {
+    throw new Error("M4 Git tree output does not match the exact path");
   }
+  return true;
 }
 
 async function confinedRegularFile(root, relativePath, label) {
@@ -400,6 +414,20 @@ export async function createJoenessM4DefaultRuntime(options) {
     if (typeof operation !== "function") fail(`M4 default runtime operation ${name} must be a function`);
   }
 
+  if (operations.prepareRuntime === prepareRuntime) {
+    const collectorSourceCodexHome = process.env.CODEX_HOME ?? path.join(homedir(), ".codex");
+    if (typeof collectorSourceCodexHome !== "string" || !path.isAbsolute(collectorSourceCodexHome)) {
+      fail("M4 collector-selected source Codex home is invalid");
+    }
+    const [resolvedSourceCodexHome, resolvedCollectorSourceCodexHome] = await Promise.all([
+      realpath(sourceCodexHome),
+      realpath(collectorSourceCodexHome),
+    ]);
+    if (resolvedSourceCodexHome !== resolvedCollectorSourceCodexHome) {
+      throw new Error("M4 source Codex home must exactly match the collector-selected home");
+    }
+  }
+
   const sourceConfigBefore = await snapshotJoenessM4SourceConfig({ sourceCodexHome });
   cleanupState.sourceConfigBefore = sourceConfigBefore;
   let runRoot;
@@ -413,17 +441,44 @@ export async function createJoenessM4DefaultRuntime(options) {
       isolatedParent,
       `${path.basename(runRoot)}-controller-codex-home`,
     );
-    await operations.removeIsolatedCodexHome(runRoot, isolatedCodexHome, isolatedParent);
-    if (!(await pathIsAbsent(isolatedCodexHome))) {
-      throw new Error("M4 isolated Codex home cleanup readback failed");
+    const cleanupErrors = [];
+    try {
+      await operations.removeIsolatedCodexHome(runRoot, isolatedCodexHome, isolatedParent);
+    } catch (error) {
+      cleanupErrors.push(error);
     }
-    await operations.removeRunRoot(runRoot, runParent);
-    if (!(await pathIsAbsent(runRoot))) throw new Error("M4 run-root cleanup readback failed");
-    const sourceConfigAfter = await readSourceConfig();
-    if (
-      sourceConfigAfter.bytes !== sourceConfigBefore.bytes ||
-      sourceConfigAfter.sha256 !== sourceConfigBefore.sha256
-    ) throw new Error("M4 source config changed during runtime");
+    try {
+      if (!(await pathIsAbsent(isolatedCodexHome))) {
+        throw new Error("M4 isolated Codex home cleanup readback failed");
+      }
+    } catch (error) {
+      cleanupErrors.push(error);
+    }
+    try {
+      await operations.removeRunRoot(runRoot, runParent);
+    } catch (error) {
+      cleanupErrors.push(error);
+    }
+    try {
+      if (!(await pathIsAbsent(runRoot))) throw new Error("M4 run-root cleanup readback failed");
+    } catch (error) {
+      cleanupErrors.push(error);
+    }
+    let sourceConfigAfter;
+    try {
+      sourceConfigAfter = await readSourceConfig();
+      if (
+        sourceConfigAfter.bytes !== sourceConfigBefore.bytes ||
+        sourceConfigAfter.sha256 !== sourceConfigBefore.sha256
+      ) throw new Error("M4 source config changed during runtime");
+    } catch (error) {
+      cleanupErrors.push(error);
+    }
+    if (cleanupErrors.length > 0) {
+      throw new AggregateError(cleanupErrors, "M4 owned runtime cleanup was not fully safe", {
+        cause: cleanupErrors[0],
+      });
+    }
     cleanupState.sourceConfigAfter = sourceConfigAfter;
     cleanupState.receipt = {
       appServerLaunchCount: launchCount,
@@ -441,7 +496,7 @@ export async function createJoenessM4DefaultRuntime(options) {
     openAttempted = true;
     session = await operations.openAppServer(runtime);
   } catch (error) {
-    const closeConfirmed = error?.ticketEvidence?.appServer?.processCloseConfirmed === true;
+    const closeConfirmed = confirmedAppServerCloseFromError(error);
     if (runRoot && (!openAttempted || closeConfirmed)) {
       try {
         await cleanupOwnedRuntime({
@@ -474,6 +529,23 @@ export async function createJoenessM4DefaultRuntime(options) {
       return finishPromise;
     },
   };
+}
+
+function confirmedAppServerCloseFromError(error) {
+  if (error === null || typeof error !== "object" || utilTypes.isProxy(error)) return false;
+  let ticketDescriptor;
+  try { ticketDescriptor = Object.getOwnPropertyDescriptor(error, "ticketEvidence"); } catch { return false; }
+  if (!ticketDescriptor || !("value" in ticketDescriptor)) return false;
+  const ticket = ticketDescriptor.value;
+  if (ticket === null || typeof ticket !== "object" || utilTypes.isProxy(ticket)) return false;
+  let appServerDescriptor;
+  try { appServerDescriptor = Object.getOwnPropertyDescriptor(ticket, "appServer"); } catch { return false; }
+  if (!appServerDescriptor || !("value" in appServerDescriptor)) return false;
+  const appServer = appServerDescriptor.value;
+  if (appServer === null || typeof appServer !== "object" || utilTypes.isProxy(appServer)) return false;
+  let closeDescriptor;
+  try { closeDescriptor = Object.getOwnPropertyDescriptor(appServer, "processCloseConfirmed"); } catch { return false; }
+  return Boolean(closeDescriptor && "value" in closeDescriptor && closeDescriptor.value === true);
 }
 
 async function pathIsAbsent(target) {
@@ -539,6 +611,7 @@ export async function runJoenessM4Live(options) {
   let runtimeFactoryCompleted = false;
   let blockedPublished = false;
   const runtimeFactory = async () => {
+    if (runtimeFactoryStarted) throw new Error("M4 runtime factory may be called exactly once");
     runtimeFactoryStarted = true;
     const runtime = await operations.createRuntime({
       plan,
@@ -778,8 +851,8 @@ async function main() {
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href) {
-  main().catch((error) => {
-    process.stderr.write(`${error instanceof Error ? error.message : "M4 live wrapper failed"}\n`);
+  main().catch(() => {
+    process.stderr.write("m4-live-wrapper-failed\n");
     process.exitCode = 1;
   });
 }
