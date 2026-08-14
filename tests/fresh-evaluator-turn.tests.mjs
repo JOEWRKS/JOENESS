@@ -570,6 +570,42 @@ test("fresh evaluator normalizer blocker compaction classifies an error notifica
   });
 });
 
+test("fresh evaluator normalizer blocker compaction classifies a hook notification", async (t) => {
+  const subject = await loadSubject();
+  const root = await createRoot(t);
+  const rawMessage = "NORMALIZER_HOOK_MESSAGE_CANARY";
+  const rawPath = "C:\\NORMALIZER_HOOK_PATH_CANARY\\hook.json";
+  const credential = "sk-SYNTHETIC_TEST_ONLY_abcdefghijklmnop";
+  const evidence = await rejectedEvidence(subject.runFreshEvaluatorTurn({
+    session: createSession({
+      onBeforeAgentMessage: ({ emit, params, turnId }) => {
+        emit({
+          method: "hook/started",
+          params: {
+            threadId: params.threadId,
+            turnId,
+            message: rawMessage,
+            path: rawPath,
+            credential,
+          },
+        });
+      },
+    }),
+    root,
+    input: [{ type: "text", text: "Return the JSON verdict." }],
+    outputSchema: outputSchema(),
+  }));
+
+  assert.deepEqual(evidence.eventCompaction.normalizerBlocker, {
+    provenance: "adapter-normalization-fixed-enum",
+    classification: "hook-executed",
+  });
+  const serialized = JSON.stringify(evidence.eventCompaction);
+  for (const canary of [rawMessage, rawPath, credential]) {
+    assert.equal(serialized.includes(canary), false, canary);
+  }
+});
+
 test("fresh evaluator normalizer blocker compaction classifies distinct fixed codes as multiple", async (t) => {
   const subject = await loadSubject();
   const root = await createRoot(t);
