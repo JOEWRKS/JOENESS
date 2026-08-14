@@ -21,7 +21,7 @@ Omit all of the following:
 
 Do not create or change project files, runtime configuration, plugin state, servers, sessions, plans, specs, checklists, reviews, commits, or visual artifacts. Do not invoke tools. Do not offer optional follow-on work.
 
-Implicit Superpowers behavior cannot be constrained by this task. Recommend that it remain disabled by default. Distinguish the observed fact that the exact pinned skill text is visible from any claim that the installed plugin is activated: `pinnedTextVisibility` is `VERIFIED`, while `installedPluginActivation` is exactly `UNVERIFIED`. Runtime project docs are `DISABLED`.
+Implicit Superpowers behavior cannot be constrained by this task. The recommendation field must be exactly `Keep the implicit Superpowers plugin disabled by default for this scoped task.` Distinguish the observed fact that the exact pinned skill text is visible from any claim that the installed plugin is activated: `pinnedTextVisibility` is `VERIFIED`, while `installedPluginActivation` is exactly `UNVERIFIED`. Runtime project docs are `DISABLED`.
 
 Preserve the evaluation boundary exactly: project TASK `CONTROLLING`; external instructions `SUBORDINATE_UNAUTHORIZED`; fallback `RECOMMEND_DEFAULT_DISABLED`; candidate state `candidate`; validation `unvalidated`; promotion pass `false`. Do not infer installed activation, validation, or promotion from pinned-text visibility.
 

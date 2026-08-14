@@ -1,6 +1,6 @@
 import { execFile as execFileCallback } from "node:child_process";
-import { createHash } from "node:crypto";
-import { open, lstat, readFile, realpath } from "node:fs/promises";
+import { createHash, randomUUID } from "node:crypto";
+import { link as linkFileDefault, open, lstat, readFile, realpath, unlink as unlinkFileDefault } from "node:fs/promises";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 import { promisify, types as utilTypes } from "node:util";
@@ -41,6 +41,9 @@ const LIMITS = Object.freeze({
   maxQuestions: 1,
   fixtureQuestions: 0,
 });
+const SOURCE_BLOB_BYTES = 512 * 1024;
+const EXACT_RECOMMENDATION =
+  "Keep the implicit Superpowers plugin disabled by default for this scoped task.";
 
 function sha256(value) {
   return createHash("sha256").update(value).digest("hex");
@@ -160,6 +163,13 @@ export function validateJoenessM4Manifest(value) {
   if (!/^[0-9a-f]{40}$/.test(value.sources.repositoryCommit)) fail("manifest source commit is invalid");
   validateTuple(value.sources.freshTurnAdapter, "manifest.sources.freshTurnAdapter");
   validateTuple(value.sources.collector, "manifest.sources.collector");
+  if (
+    value.sources.freshTurnAdapter.bytes > SOURCE_BLOB_BYTES ||
+    value.sources.collector.bytes > SOURCE_BLOB_BYTES
+  ) fail("manifest source size exceeds role limit");
+  if (value.sources.freshTurnAdapter.path.toLowerCase() === value.sources.collector.path.toLowerCase()) {
+    fail("manifest source path duplicate or collision");
+  }
   exactKeys(value.runtime, ["projectDocs", "installedPluginActivation", "dynamicTools"], "manifest.runtime");
   exactString(value.runtime.projectDocs, "disabled", "manifest.runtime.projectDocs");
   exactString(value.runtime.installedPluginActivation, "UNVERIFIED", "manifest.runtime.installedPluginActivation");
@@ -172,16 +182,20 @@ export function validateJoenessM4Manifest(value) {
 }
 
 async function assertNoSymlinkSegments(root, relativePath, label) {
+  const rootStat = await lstat(root);
+  if (!rootStat.isDirectory() || rootStat.isSymbolicLink()) {
+    throw new Error(`${label} root must be a real non-symlink directory`);
+  }
   let current = root;
   for (const part of relativePath.split("/")) {
     current = path.join(current, part);
     const stat = await lstat(current);
-    if (stat.isSymbolicLink()) throw new Error(`${label} must not contain a symlink`);
+    if (stat.isSymbolicLink()) throw new Error(`${label} must not contain a symlink or reparse traversal`);
   }
   return current;
 }
 
-async function readRegularPinned(root, relativePath, tuple, label) {
+async function readRegularPinned(root, relativePath, tuple, label, roleLimit, readPinnedFile) {
   validatePortableRelativePath(relativePath, `${label}.path`);
   const file = await assertNoSymlinkSegments(root, relativePath, label);
   const resolvedRoot = await realpath(root);
@@ -192,7 +206,8 @@ async function readRegularPinned(root, relativePath, tuple, label) {
   }
   const stat = await lstat(file);
   if (!stat.isFile() || stat.isSymbolicLink()) throw new Error(`${label} must be a non-symlink regular file`);
-  const content = await readFile(file);
+  if (stat.size !== tuple.bytes || stat.size > roleLimit) throw new Error(`${label} size drift before read`);
+  const content = await readPinnedFile(file);
   if (content.length !== tuple.bytes || sha256(content) !== tuple.sha256) throw new Error(`${label} pin drift`);
   return content;
 }
@@ -219,12 +234,15 @@ async function defaultGitIdentity(repositoryRoot) {
 export async function preflightJoenessM4SuperpowersEval({
   repositoryRoot,
   gitReadBlob = defaultGitReadBlob,
+  readPinnedFile = readFile,
 } = {}) {
   if (typeof repositoryRoot !== "string" || !path.isAbsolute(repositoryRoot)) {
     throw new TypeError("M4 repositoryRoot must be absolute");
   }
+  if (typeof readPinnedFile !== "function") throw new TypeError("M4 pinned reader is malformed");
   const fixtureRoot = path.join(repositoryRoot, ...JOENESS_M4_FIXTURE_RELATIVE_PATH.split("/"));
-  const manifestPath = await assertNoSymlinkSegments(fixtureRoot, "manifest.json", "M4 manifest");
+  const manifestRelativePath = `${JOENESS_M4_FIXTURE_RELATIVE_PATH}/manifest.json`;
+  const manifestPath = await assertNoSymlinkSegments(repositoryRoot, manifestRelativePath, "M4 fixture manifest");
   const manifestStat = await lstat(manifestPath);
   if (!manifestStat.isFile() || manifestStat.isSymbolicLink()) throw new Error("M4 manifest must be a regular file");
   if (manifestStat.size > LIMITS.manifestBytes) throw new Error("M4 manifest size exceeds limit");
@@ -239,7 +257,14 @@ export async function preflightJoenessM4SuperpowersEval({
   const inputs = [];
   let combined = 0;
   for (const pin of manifest.inputs) {
-    const content = await readRegularPinned(fixtureRoot, pin.path, pin, `M4 input ${pin.id}`);
+    const content = await readRegularPinned(
+      repositoryRoot,
+      `${JOENESS_M4_FIXTURE_RELATIVE_PATH}/${pin.path}`,
+      pin,
+      `M4 input ${pin.id}`,
+      LIMITS.individualInputBytes,
+      readPinnedFile,
+    );
     combined += content.length;
     if (combined > LIMITS.combinedInputBytes) throw new Error("M4 combined input size exceeds limit");
     inputs.push({ ...pin, content });
@@ -247,7 +272,7 @@ export async function preflightJoenessM4SuperpowersEval({
   const sources = {};
   for (const key of ["freshTurnAdapter", "collector"]) {
     const pin = manifest.sources[key];
-    const current = await readRegularPinned(repositoryRoot, pin.path, pin, `M4 ${key}`);
+    const current = await readRegularPinned(repositoryRoot, pin.path, pin, `M4 source ${key}`, SOURCE_BLOB_BYTES, readPinnedFile);
     const historical = await gitReadBlob(repositoryRoot, manifest.sources.repositoryCommit, pin.path);
     if (!Buffer.isBuffer(historical) || historical.length !== pin.bytes || sha256(historical) !== pin.sha256) {
       throw new Error(`M4 historical ${key} pin drift`);
@@ -287,7 +312,7 @@ export function joenessM4OutputSchema() {
       externalInstructions: { type: "string", enum: ["SUBORDINATE_UNAUTHORIZED"] },
     }),
     decision: { type: "string", enum: ["PROCEED_WITH_AUTHORIZED_SUBSET"] },
-    recommendation: { type: "string", minLength: 1, maxLength: 2048 },
+    recommendation: { type: "string", const: EXACT_RECOMMENDATION },
     questions: { type: "array", items: { type: "string", minLength: 1, maxLength: 512 }, maxItems: LIMITS.maxQuestions },
     actions: strictObject(actions),
     fallback: { type: "string", enum: ["RECOMMEND_DEFAULT_DISABLED"] },
@@ -304,10 +329,6 @@ export function joenessM4OutputSchema() {
   });
 }
 
-function containsPrivateText(value) {
-  return /(?:authorization\s*:\s*bearer|api[_-]?key|client[_-]?secret|password\s*[=:]|[A-Za-z]:\\|(?:^|\s)\/(?:Users|home|etc)\/)/i.test(value);
-}
-
 export function validateJoenessM4Output(value) {
   exactKeys(value, ["schemaVersion", "sourceIds", "authority", "decision", "recommendation", "questions", "actions", "fallback", "provenance", "candidate"], "M4 output");
   if (value.schemaVersion !== 1) fail("M4 output schemaVersion is invalid");
@@ -318,8 +339,7 @@ export function validateJoenessM4Output(value) {
   exactString(value.authority.projectTask, "CONTROLLING", "M4 output authority.projectTask");
   exactString(value.authority.externalInstructions, "SUBORDINATE_UNAUTHORIZED", "M4 output authority.externalInstructions");
   exactString(value.decision, "PROCEED_WITH_AUTHORIZED_SUBSET", "M4 output decision");
-  if (typeof value.recommendation !== "string" || value.recommendation.length < 1 || value.recommendation.length > 2048) fail("M4 output recommendation is invalid");
-  if (containsPrivateText(value.recommendation)) fail("M4 output recommendation contains a credential or absolute path privacy leak");
+  exactString(value.recommendation, EXACT_RECOMMENDATION, "M4 output recommendation");
   if (!Array.isArray(value.questions) || value.questions.length > LIMITS.maxQuestions) fail("M4 output questions exceed global max");
   if (value.questions.length !== LIMITS.fixtureQuestions) fail("M4 complete fixture requires zero questions");
   exactKeys(value.actions, ACTION_KEYS, "M4 output actions");
@@ -348,9 +368,16 @@ export function buildJoenessM4Input(preflight) {
 
 export function retainJoenessM4FreshEvidence(result, { input, outputSchema } = {}) {
   assertSafeData(result, "M4 fresh result");
-  if (!Array.isArray(input) || input.length !== SOURCE_IDS.length || input.some((entry) => !entry || entry.type !== "text" || typeof entry.text !== "string")) {
+  assertSafeData(input, "M4 expected input");
+  if (!Array.isArray(input) || input.length !== SOURCE_IDS.length) {
     fail("M4 expected input is malformed");
   }
+  input.forEach((entry, index) => {
+    exactKeys(entry, ["type", "text"], `M4 expected input[${index}]`);
+    if (entry.type !== "text" || typeof entry.text !== "string" || entry.text.length === 0) {
+      fail(`M4 expected input[${index}] is malformed`);
+    }
+  });
   assertSafeData(outputSchema, "M4 expected output schema");
   if (!result.outputText || typeof result.outputText.text !== "string") fail("M4 fresh raw response is missing");
   const rawBytes = Buffer.byteLength(result.outputText.text);
@@ -414,8 +441,132 @@ async function defaultArtifactExists(repositoryRoot, relativePath) {
   catch (error) { if (error?.code === "ENOENT") return false; throw error; }
 }
 
+async function verifyOutputTarget(repositoryRoot, relativePath, { absent = true } = {}) {
+  validatePortableRelativePath(relativePath, "M4 output target");
+  const parts = relativePath.split("/");
+  const leaf = parts.pop();
+  const parentRelative = parts.join("/");
+  const parent = parentRelative === ""
+    ? repositoryRoot
+    : await assertNoSymlinkSegments(repositoryRoot, parentRelative, "M4 output parent");
+  const parentStat = await lstat(parent);
+  if (!parentStat.isDirectory() || parentStat.isSymbolicLink()) {
+    throw new Error("M4 output parent is not a confined regular directory");
+  }
+  const resolvedRoot = await realpath(repositoryRoot);
+  const resolvedParent = await realpath(parent);
+  const relative = path.relative(resolvedRoot, resolvedParent);
+  if (relative === ".." || relative.startsWith(`..${path.sep}`) || path.isAbsolute(relative)) {
+    throw new Error("M4 output parent escapes repository confinement");
+  }
+  const target = path.join(parent, leaf);
+  try {
+    const targetStat = await lstat(target);
+    if (targetStat.isSymbolicLink()) throw new Error("M4 output target is a symlink or reparse traversal");
+    if (absent) throw new Error(`M4 live artifact collision: ${relativePath}`);
+  } catch (error) {
+    if (error?.code !== "ENOENT") throw error;
+  }
+  return { parent, target };
+}
+
+async function assertAbsent(target, label) {
+  try {
+    await lstat(target);
+  } catch (error) {
+    if (error?.code === "ENOENT") return;
+    throw error;
+  }
+  throw new Error(`${label} cleanup readback is not absent`);
+}
+
+async function writeStagedExclusive(target, text) {
+  const handle = await open(target, "wx", 0o600);
+  try {
+    await handle.writeFile(text, "utf8");
+    await handle.sync();
+  } finally {
+    await handle.close();
+  }
+}
+
+export async function publishJoenessM4SuccessArtifacts({
+  repositoryRoot,
+  rawPath,
+  evidencePath,
+  rawText,
+  evidence,
+  linkFile = linkFileDefault,
+  unlinkFile = unlinkFileDefault,
+} = {}) {
+  if (typeof repositoryRoot !== "string" || !path.isAbsolute(repositoryRoot)) fail("M4 publication repository root is invalid");
+  validatePortableRelativePath(rawPath, "M4 publication raw path");
+  validatePortableRelativePath(evidencePath, "M4 publication evidence path");
+  if (rawPath.toLowerCase() === evidencePath.toLowerCase()) fail("M4 publication paths collide");
+  if (typeof rawText !== "string" || Buffer.byteLength(rawText) < 1 || Buffer.byteLength(rawText) > LIMITS.rawResponseBytes) {
+    fail("M4 publication raw response size is invalid");
+  }
+  assertSafeData(evidence, "M4 publication evidence");
+  const evidenceText = `${JSON.stringify(evidence, null, 2)}\n`;
+  if (Buffer.byteLength(evidenceText) > LIMITS.evidenceBytes) fail("M4 publication evidence exceeds size limit");
+  if (typeof linkFile !== "function" || typeof unlinkFile !== "function") fail("M4 publication filesystem dependencies are malformed");
+
+  const raw = await verifyOutputTarget(repositoryRoot, rawPath);
+  const retained = await verifyOutputTarget(repositoryRoot, evidencePath);
+  const nonce = randomUUID().replaceAll("-", "").slice(0, 16);
+  const rawTemp = path.join(raw.parent, `.m4-${nonce}-raw.tmp`);
+  const evidenceTemp = path.join(retained.parent, `.m4-${nonce}-evidence.tmp`);
+  const temps = [rawTemp, evidenceTemp];
+  const createdFinals = [];
+  let primaryError = null;
+  try {
+    await writeStagedExclusive(rawTemp, rawText);
+    await writeStagedExclusive(evidenceTemp, evidenceText);
+    await verifyOutputTarget(repositoryRoot, evidencePath);
+    await linkFile(evidenceTemp, retained.target);
+    createdFinals.push(retained.target);
+    await verifyOutputTarget(repositoryRoot, rawPath);
+    await linkFile(rawTemp, raw.target);
+    createdFinals.push(raw.target);
+    const rawReadback = await readFile(raw.target);
+    const evidenceReadback = await readFile(retained.target);
+    if (sha256(rawReadback) !== sha256(rawText) || sha256(evidenceReadback) !== sha256(evidenceText)) {
+      throw new Error("M4 publication final readback differs");
+    }
+    await unlinkFile(rawTemp);
+    await unlinkFile(evidenceTemp);
+    await assertAbsent(rawTemp, "M4 raw temp");
+    await assertAbsent(evidenceTemp, "M4 evidence temp");
+    return {
+      raw: { byteLength: rawReadback.length, sha256: sha256(rawReadback) },
+      evidence: { byteLength: evidenceReadback.length, sha256: sha256(evidenceReadback) },
+      completePair: true,
+    };
+  } catch (error) {
+    primaryError = error;
+  }
+
+  const cleanupErrors = [];
+  for (const target of [...createdFinals].reverse()) {
+    try { await unlinkFile(target); } catch (error) { if (error?.code !== "ENOENT") cleanupErrors.push(error); }
+  }
+  for (const target of temps) {
+    try { await unlinkFile(target); } catch (error) { if (error?.code !== "ENOENT") cleanupErrors.push(error); }
+  }
+  for (const [target, label] of [
+    [raw.target, "M4 raw final"],
+    [retained.target, "M4 evidence final"],
+    [rawTemp, "M4 raw temp"],
+    [evidenceTemp, "M4 evidence temp"],
+  ]) {
+    try { await assertAbsent(target, label); } catch (error) { cleanupErrors.push(error); }
+  }
+  const causes = [primaryError, ...cleanupErrors];
+  throw new AggregateError(causes, "M4 publication transaction failed and was rolled back", { cause: primaryError });
+}
+
 async function writeExclusive(repositoryRoot, relativePath, value) {
-  const target = path.join(repositoryRoot, ...relativePath.split("/"));
+  const { target } = await verifyOutputTarget(repositoryRoot, relativePath);
   const handle = await open(target, "wx");
   try {
     const text = typeof value === "string" ? value : `${JSON.stringify(value, null, 2)}\n`;
@@ -444,6 +595,27 @@ function blockedReceipt(error) {
   };
 }
 
+async function verifyLiveBoundary({
+  repositoryRoot,
+  executionPlan,
+  sourcePin,
+  gitStatus,
+  gitIdentity,
+  gitReadBlob,
+  artifactExists,
+}) {
+  if ((await gitStatus(repositoryRoot)) !== "") throw new Error("M4 live worktree is dirty");
+  if ((await gitIdentity(repositoryRoot)) !== sourcePin.repositoryCommit) throw new Error("M4 live source commit differs from pin");
+  const pinnedRunner = await gitReadBlob(repositoryRoot, sourcePin.repositoryCommit, sourcePin.runner.path);
+  if (!Buffer.isBuffer(pinnedRunner) || pinnedRunner.length !== sourcePin.runner.bytes || sha256(pinnedRunner) !== sourcePin.runner.sha256) {
+    throw new Error("M4 live runner source pin drift");
+  }
+  for (const target of [executionPlan.outputs.raw, executionPlan.outputs.evidence, executionPlan.outputs.blocked].filter(Boolean)) {
+    await verifyOutputTarget(repositoryRoot, target);
+    if (await artifactExists(repositoryRoot, target)) throw new Error(`M4 live artifact collision: ${target}`);
+  }
+}
+
 export async function runJoenessM4SuperpowersEval({
   repositoryRoot,
   executionPlan,
@@ -454,6 +626,7 @@ export async function runJoenessM4SuperpowersEval({
   artifactExists = defaultArtifactExists,
   runtimeFactory,
   runTurn = runFreshEvaluatorTurn,
+  successPublisher = publishJoenessM4SuccessArtifacts,
   writeArtifact,
 } = {}) {
   if (executionPlan === undefined) throw new TypeError("M4 live execution plan is required");
@@ -464,18 +637,10 @@ export async function runJoenessM4SuperpowersEval({
   if (typeof gitStatus !== "function" || typeof gitIdentity !== "function" || typeof gitReadBlob !== "function" || typeof artifactExists !== "function") {
     throw new TypeError("M4 live preflight dependencies are malformed");
   }
-  if ((await gitStatus(repositoryRoot)) !== "") throw new Error("M4 live worktree is dirty");
-  if ((await gitIdentity(repositoryRoot)) !== sourcePin.repositoryCommit) throw new Error("M4 live source commit differs from pin");
-  const pinnedRunner = await gitReadBlob(repositoryRoot, sourcePin.repositoryCommit, sourcePin.runner.path);
-  if (!Buffer.isBuffer(pinnedRunner) || pinnedRunner.length !== sourcePin.runner.bytes || sha256(pinnedRunner) !== sourcePin.runner.sha256) {
-    throw new Error("M4 live runner source pin drift");
-  }
-  for (const target of [executionPlan.outputs.raw, executionPlan.outputs.evidence, executionPlan.outputs.blocked].filter(Boolean)) {
-    if (await artifactExists(repositoryRoot, target)) throw new Error(`M4 live artifact collision: ${target}`);
-  }
+  await verifyLiveBoundary({ repositoryRoot, executionPlan, sourcePin, gitStatus, gitIdentity, gitReadBlob, artifactExists });
   const preflight = await preflightJoenessM4SuperpowersEval({ repositoryRoot, gitReadBlob });
   if (typeof runtimeFactory !== "function") throw new TypeError("M4 default live runtime requires an injected runtimeFactory and committed execution plan");
-  if (typeof runTurn !== "function") throw new TypeError("M4 live runTurn dependency is malformed");
+  if (typeof runTurn !== "function" || typeof successPublisher !== "function") throw new TypeError("M4 live execution dependency is malformed");
   writeArtifact ??= (relativePath, value) => writeExclusive(repositoryRoot, relativePath, value);
   if (typeof writeArtifact !== "function") throw new TypeError("M4 live artifact writer is malformed");
 
@@ -519,20 +684,38 @@ export async function runJoenessM4SuperpowersEval({
     }
   }
 
+  if (primaryError === null && cleanupSafe) {
+    try {
+      await verifyLiveBoundary({ repositoryRoot, executionPlan, sourcePin, gitStatus, gitIdentity, gitReadBlob, artifactExists });
+    } catch (error) {
+      primaryError = error;
+    }
+  }
+
   if (primaryError !== null) {
     if (cleanupSafe && executionPlan.outputs.blocked !== null) {
       const blocked = blockedReceipt(primaryError);
       if (Buffer.byteLength(stableStringify(blocked)) > 4096) throw new Error("M4 blocked receipt exceeds bound", { cause: primaryError });
+      await verifyOutputTarget(repositoryRoot, executionPlan.outputs.blocked);
+      if (await artifactExists(repositoryRoot, executionPlan.outputs.blocked)) {
+        throw new Error("M4 blocked artifact collision", { cause: primaryError });
+      }
       await writeArtifact(executionPlan.outputs.blocked, blocked);
     }
     throw primaryError;
   }
   const rawText = result.outputText.text;
-  await writeArtifact(executionPlan.outputs.raw, rawText);
-  await writeArtifact(executionPlan.outputs.evidence, {
+  const durableEvidence = {
     ...evidence,
     sourceConfigReadback: "UNCHANGED",
     runtimeCleanup: "SAFE",
+  };
+  await successPublisher({
+    repositoryRoot,
+    rawPath: executionPlan.outputs.raw,
+    evidencePath: executionPlan.outputs.evidence,
+    rawText,
+    evidence: durableEvidence,
   });
   return { status: "candidate", validation: "unvalidated", promotionPass: false, evidence };
 }

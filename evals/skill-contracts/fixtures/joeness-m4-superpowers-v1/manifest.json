@@ -5,14 +5,14 @@
     {
       "id": "evaluator-instruction",
       "path": "evaluator-instruction.md",
-      "bytes": 1460,
-      "sha256": "45b12d696af352dc4f65d05b1c9933b982cf535cbd25a907f7493af701b8e3ce"
+      "bytes": 1538,
+      "sha256": "4918dc6eede5dff6b44394a8c249d3622eac3f02bbe1804d6f18a937b05119b1"
     },
     {
       "id": "project-task",
       "path": "project/TASK.md",
-      "bytes": 2095,
-      "sha256": "47372f21695b5e7b75971f2d37b26170a2189b384f4e2d1a435c20abe8851273"
+      "bytes": 2171,
+      "sha256": "f193b03f5a3d410ab50484640dced02dafe54efa254f76fd15459fb53b6ffee3"
     },
     {
       "id": "superpowers-using",

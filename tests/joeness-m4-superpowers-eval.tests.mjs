@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { execFile as execFileCallback } from "node:child_process";
 import { createHash } from "node:crypto";
-import { cp, lstat, mkdtemp, readFile, rm, symlink, writeFile } from "node:fs/promises";
+import { cp, link, lstat, mkdir, mkdtemp, readFile, readdir, rm, symlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import test from "node:test";
@@ -121,7 +121,7 @@ function safeFreshResult(output = outputFixture()) {
 }
 
 function liveDependencies({ result = safeFreshResult(), status = "", exists = false, configAfter } = {}) {
-  const calls = { runtime: 0, runTurn: 0, finish: 0, writes: [], configReads: 0 };
+  const calls = { runtime: 0, runTurn: 0, finish: 0, publish: 0, writes: [], configReads: 0 };
   const config = { bytes: 6, sha256: digest("config") };
   return {
     calls,
@@ -156,6 +156,10 @@ function liveDependencies({ result = safeFreshResult(), status = "", exists = fa
         calls.request = request;
         return result;
       },
+      successPublisher: async (publication) => {
+        calls.publish += 1;
+        calls.publication = publication;
+      },
       writeArtifact: async (relativePath, value) => {
         calls.writes.push({ relativePath, value });
       },
@@ -173,6 +177,7 @@ test("exports the deterministic M4 contract surface", async () => {
     "validateJoenessM4Output",
     "buildJoenessM4Input",
     "retainJoenessM4FreshEvidence",
+    "publishJoenessM4SuccessArtifacts",
     "runJoenessM4SuperpowersEval",
     "parseJoenessM4Cli",
   ]) assert.equal(typeof api[name], "function", name);
@@ -183,8 +188,8 @@ test("preflight verifies the four fixture pins and historical adapter/collector 
   const result = await api.preflightJoenessM4SuperpowersEval({ repositoryRoot: ROOT });
   assert.equal(result.manifestBytes <= 8192, true);
   assert.deepEqual(result.inputs.map(({ id, bytes, sha256 }) => ({ id, bytes, sha256 })), [
-    { id: "evaluator-instruction", bytes: 1460, sha256: "45b12d696af352dc4f65d05b1c9933b982cf535cbd25a907f7493af701b8e3ce" },
-    { id: "project-task", bytes: 2095, sha256: "47372f21695b5e7b75971f2d37b26170a2189b384f4e2d1a435c20abe8851273" },
+    { id: "evaluator-instruction", bytes: 1538, sha256: "4918dc6eede5dff6b44394a8c249d3622eac3f02bbe1804d6f18a937b05119b1" },
+    { id: "project-task", bytes: 2171, sha256: "f193b03f5a3d410ab50484640dced02dafe54efa254f76fd15459fb53b6ffee3" },
     { id: "superpowers-using", bytes: 3063, sha256: "55379fe7c1c473a02c61961c822996bff30e1320d6921d9062509bc508482c05" },
     { id: "superpowers-brainstorming", bytes: 10047, sha256: "4a54a4858b99807f3155ed1614b2f116e35ea5c1b788e793f565dd837fd3891f" },
   ]);
@@ -229,12 +234,39 @@ test("preflight rejects pin drift, traversal, backslash, duplicate/collision, an
     ["duplicate", (m) => { m.inputs[1].path = m.inputs[0].path; }],
     ["collision", (m) => { m.inputs[1].path = m.inputs[0].path.toUpperCase(); }],
     ["individual size", (m) => { m.inputs[0].bytes = 16385; }],
+    ["combined size", (m) => { m.inputs[0].bytes = 16384; m.inputs[1].bytes = 16384; }],
+    ["source collision", (m) => { m.sources.collector.path = m.sources.freshTurnAdapter.path.toUpperCase(); }],
   ];
   for (const [name, change] of cases) await t.test(name, async () => {
     const copy = await copiedFixture(t);
     await rewriteManifest(copy.root, change);
     await assert.rejects(api.preflightJoenessM4SuperpowersEval({ repositoryRoot: copy.root }), /manifest|path|pin|size|duplicate|collision/i);
   });
+});
+
+test("preflight rejects oversized local input and source roles before pinned reads", async (t) => {
+  const api = await subject();
+  const inputCopy = await copiedFixture(t);
+  const inputPath = path.join(inputCopy.target, "evaluator-instruction.md");
+  await writeFile(inputPath, Buffer.alloc(16385, 0x61));
+  let reads = 0;
+  await assert.rejects(api.preflightJoenessM4SuperpowersEval({
+    repositoryRoot: inputCopy.root,
+    readPinnedFile: async () => { reads += 1; throw new Error("read must not occur"); },
+  }), /input.*size|size.*input/i);
+  assert.equal(reads, 0);
+
+  const sourceCopy = await copiedFixture(t);
+  await rewriteManifest(sourceCopy.root, (manifest) => {
+    manifest.sources.freshTurnAdapter.bytes = 524289;
+    manifest.sources.freshTurnAdapter.sha256 = "0".repeat(64);
+  });
+  reads = 0;
+  await assert.rejects(api.preflightJoenessM4SuperpowersEval({
+    repositoryRoot: sourceCopy.root,
+    readPinnedFile: async () => { reads += 1; throw new Error("read must not occur"); },
+  }), /source.*size|size.*source/i);
+  assert.equal(reads, 0);
 });
 
 test("preflight rejects a symlinked input and an oversized manifest", async (t) => {
@@ -254,6 +286,19 @@ test("preflight rejects a symlinked input and an oversized manifest", async (t) 
   await assert.rejects(api.preflightJoenessM4SuperpowersEval({ repositoryRoot: second.root }), /manifest.*size/i);
 });
 
+test("preflight rejects a symlinked fixture root from the real repository root", async (t) => {
+  const api = await subject();
+  const copy = await copiedFixture(t);
+  const outside = path.join(copy.root, "outside-fixture");
+  await cp(copy.target, outside, { recursive: true });
+  await rm(copy.target, { recursive: true, force: true });
+  await symlink(outside, copy.target, "junction");
+  await assert.rejects(api.preflightJoenessM4SuperpowersEval({
+    repositoryRoot: copy.root,
+    gitReadBlob: async (_root, _commit, relativePath) => readFile(path.join(copy.root, ...relativePath.split("/"))),
+  }), /fixture|symlink|reparse/i);
+});
+
 test("output schema is recursively strict and names all twelve omitted actions", async () => {
   const api = await subject();
   const schema = api.joenessM4OutputSchema();
@@ -262,6 +307,7 @@ test("output schema is recursively strict and names all twelve omitted actions",
   assert.deepEqual(schema.properties.actions.required, ACTION_KEYS);
   assert.deepEqual(schema.properties.sourceIds.prefixItems.map(({ const: value }) => value), SOURCE_IDS);
   assert.equal(schema.properties.questions.maxItems, 1);
+  assert.equal(schema.properties.recommendation.const, outputFixture().recommendation);
 });
 
 test("semantic validator accepts only the complete-case zero-question candidate boundary", async () => {
@@ -302,6 +348,27 @@ test("output validator fails closed on hostile recursive values and privacy leak
   for (const value of values) assert.throws(() => api.validateJoenessM4Output(value), /unsafe|output|privacy|credential|path|keys|array/i);
 });
 
+test("exact recommendation rejects every durable raw privacy canary and writes no artifact", async () => {
+  const api = await subject();
+  for (const canary of [
+    "PID 4242",
+    "stderr: diagnostic detail",
+    "\\\\server\\share\\secret",
+    "C:/Users/person/.codex/config.toml",
+    "/tmp/private-output",
+    "/var/log/private-output",
+    "sk-live-secret-value",
+  ]) {
+    const output = outputFixture();
+    output.recommendation = canary;
+    assert.throws(() => api.validateJoenessM4Output(output), /recommendation/i);
+    const deps = liveDependencies({ result: safeFreshResult(output) });
+    await assert.rejects(api.runJoenessM4SuperpowersEval(deps.options), /recommendation/i);
+    assert.equal(deps.calls.publish, 0);
+    assert.deepEqual(deps.calls.writes, []);
+  }
+});
+
 test("input builder emits four ordinary text inputs in source order with project docs disabled", async () => {
   const api = await subject();
   const preflight = await api.preflightJoenessM4SuperpowersEval({ repositoryRoot: ROOT });
@@ -311,6 +378,27 @@ test("input builder emits four ordinary text inputs in source order with project
   assert.deepEqual(preflight.inputs.map(({ id }) => id), SOURCE_IDS);
   assert.equal(input.every(({ text }) => typeof text === "string" && text.length > 0), true);
   assert.equal(preflight.runtime.projectDocs, "disabled");
+});
+
+test("input/evidence validation rejects proxies, accessors, revoked values, and hidden extras trap-zero", async () => {
+  const api = await subject();
+  const preflight = await api.preflightJoenessM4SuperpowersEval({ repositoryRoot: ROOT });
+  const input = api.buildJoenessM4Input(preflight);
+  const schema = api.joenessM4OutputSchema();
+  const hostile = [];
+  let traps = 0;
+  hostile.push(new Proxy(input, { get() { traps += 1; throw new Error("trap"); } }));
+  const accessor = structuredClone(input);
+  Object.defineProperty(accessor[0], "text", { enumerable: true, get() { traps += 1; throw new Error("trap"); } });
+  hostile.push(accessor);
+  const hidden = structuredClone(input);
+  Object.defineProperty(hidden[0], "hidden", { value: true });
+  hostile.push(hidden);
+  const revoked = Proxy.revocable(input, {}); revoked.revoke(); hostile.push(revoked.proxy);
+  for (const value of hostile) {
+    assert.throws(() => api.retainJoenessM4FreshEvidence(safeFreshResult(), { input: value, outputSchema: schema }), /input|unsafe|keys/i);
+  }
+  assert.equal(traps, 0);
 });
 
 test("injected live seam runs exactly once without tools or retry and writes only after safe cleanup/readback", async () => {
@@ -324,7 +412,10 @@ test("injected live seam runs exactly once without tools or retry and writes onl
   assert.deepEqual(deps.calls.request.dynamicTools, []);
   assert.equal(deps.calls.request.input.length, 4);
   assert.equal(deps.calls.request.outputSchema.additionalProperties, false);
-  assert.deepEqual(deps.calls.writes.map(({ relativePath }) => relativePath), executionPlan().outputs.raw === null ? [] : [executionPlan().outputs.raw, executionPlan().outputs.evidence]);
+  assert.equal(deps.calls.publish, 1);
+  assert.deepEqual(deps.calls.writes, []);
+  assert.equal(deps.calls.publication.rawPath, executionPlan().outputs.raw);
+  assert.equal(deps.calls.publication.evidencePath, executionPlan().outputs.evidence);
   assert.equal(result.status, "candidate");
   assert.equal(result.validation, "unvalidated");
   assert.equal(result.promotionPass, false);
@@ -349,8 +440,53 @@ test("dirty or colliding live preflight stops before runtime", async () => {
   for (const options of [{ status: " M user-change" }, { exists: true }]) {
     const deps = liveDependencies(options);
     await assert.rejects(api.runJoenessM4SuperpowersEval(deps.options), /dirty|collision|exists/i);
-    assert.deepEqual(deps.calls, { runtime: 0, runTurn: 0, finish: 0, writes: [], configReads: 0 });
+    assert.deepEqual(deps.calls, { runtime: 0, runTurn: 0, finish: 0, publish: 0, writes: [], configReads: 0 });
   }
+});
+
+test("post-cleanup TOCTOU revalidation blocks Git, HEAD, and output mutations before publication", async () => {
+  const api = await subject();
+  const cases = [];
+  const dirty = liveDependencies();
+  let statusCalls = 0;
+  dirty.options.gitStatus = async () => (++statusCalls === 1 ? "" : " M runtime-change");
+  cases.push(dirty);
+  const head = liveDependencies();
+  let identityCalls = 0;
+  head.options.gitIdentity = async () => (++identityCalls === 1 ? "a".repeat(40) : "b".repeat(40));
+  cases.push(head);
+  const collision = liveDependencies();
+  let existsCalls = 0;
+  collision.options.artifactExists = async () => ++existsCalls > 3;
+  cases.push(collision);
+  for (const deps of cases) {
+    await assert.rejects(api.runJoenessM4SuperpowersEval(deps.options), /dirty|commit|collision|exists|changed/i);
+    assert.equal(deps.calls.publish, 0);
+    assert.deepEqual(deps.calls.writes, []);
+  }
+});
+
+test("output-parent symlink is rejected before runtime and never writes outside", async (t) => {
+  const api = await subject();
+  const copy = await copiedFixture(t);
+  const outside = path.join(copy.root, "outside-output");
+  const outputBase = path.join(copy.root, "evals/experiments");
+  await mkdir(outside, { recursive: true });
+  await mkdir(outputBase, { recursive: true });
+  await symlink(outside, path.join(outputBase, "linked"), "junction");
+  const deps = liveDependencies();
+  deps.options.repositoryRoot = copy.root;
+  deps.options.executionPlan = {
+    ...executionPlan(),
+    outputs: {
+      raw: "evals/experiments/linked/raw.json",
+      evidence: "evals/experiments/linked/evidence.json",
+      blocked: null,
+    },
+  };
+  await assert.rejects(api.runJoenessM4SuperpowersEval(deps.options), /symlink|reparse|parent|confine/i);
+  assert.equal(deps.calls.runtime, 0);
+  assert.deepEqual(await readdir(outside), []);
 });
 
 test("cleanup, config readback, and semantic failures never write success artifacts", async () => {
@@ -393,6 +529,35 @@ test("raw evidence binding failure is classified before the safe blocked write",
   deps.options.executionPlan = executionPlan({ blocked: "evals/experiments/joeness-m4-injected-blocked.json" });
   await assert.rejects(api.runJoenessM4SuperpowersEval(deps.options), /raw response tuple/i);
   assert.deepEqual(deps.calls.writes.map(({ relativePath }) => relativePath), [deps.options.executionPlan.outputs.blocked]);
+});
+
+test("exclusive pair publication removes both finals and every temp when second finalization fails", async (t) => {
+  const api = await subject();
+  const root = await mkdtemp(path.join(tmpdir(), "joeness-m4-publish-"));
+  t.after(() => rm(root, { recursive: true, force: true }));
+  await mkdir(path.join(root, "out"));
+  let finalizations = 0;
+  await assert.rejects(api.publishJoenessM4SuccessArtifacts({
+    repositoryRoot: root,
+    rawPath: "out/raw.json",
+    evidencePath: "out/evidence.json",
+    rawText: JSON.stringify(outputFixture()),
+    evidence: { schemaVersion: 1, status: "candidate" },
+    linkFile: async (source, target) => {
+      finalizations += 1;
+      if (finalizations === 2) {
+        const error = new Error("injected second finalization failure");
+        error.code = "EIO";
+        throw error;
+      }
+      return link(source, target);
+    },
+  }), /publication|finalization|transaction/i);
+  assert.equal(finalizations, 2);
+  assert.deepEqual(await readdir(path.join(root, "out")), []);
+  for (const target of ["raw.json", "evidence.json"]) {
+    await assert.rejects(lstat(path.join(root, "out", target)), /ENOENT/);
+  }
 });
 
 test("live mode requires a separate execution plan and source pin before runtime", async () => {

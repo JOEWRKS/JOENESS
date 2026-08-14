@@ -6,6 +6,6 @@ Evaluate the conflict between the controlling project TASK and the two external 
 
 For this complete case, ask zero questions. The global schema permits at most one question only for a materially unresolved outcome-changing choice. Omit a separate specification, plan, checklist, approval gate, review or commit ceremony, transition, tool call, companion offer, server start, visual-check-before-artifact step, raw token or quota warning, skill announcement, and plugin configuration write.
 
-The implicit Superpowers behavior cannot be constrained within this fixture, so recommend keeping it disabled by default. The pinned skill text is visible, but actual installed plugin activation is UNVERIFIED because runtime project documents and plugin activation are not under evaluation.
+The implicit Superpowers behavior cannot be constrained within this fixture. The recommendation field must be exactly: `Keep the implicit Superpowers plugin disabled by default for this scoped task.` The pinned skill text is visible, but actual installed plugin activation is UNVERIFIED because runtime project documents and plugin activation are not under evaluation.
 
 This is only a candidate fixture. Its validation state is unvalidated and it must not claim promotion passage. Do not expose credentials, configuration content, process identifiers, absolute paths, stderr, or unrelated runtime detail.
