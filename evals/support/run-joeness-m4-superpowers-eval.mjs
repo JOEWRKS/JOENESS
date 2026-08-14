@@ -45,6 +45,85 @@ const SOURCE_BLOB_BYTES = 512 * 1024;
 const EXACT_RECOMMENDATION =
   "Keep the implicit Superpowers plugin disabled by default for this scoped task.";
 
+const M4_FRESH_EVENT_METHODS = Object.freeze([
+  "account/rateLimits/updated",
+  "item/agentMessage/delta",
+  "item/commandExecution/outputDelta",
+  "item/completed",
+  "item/plan/delta",
+  "item/reasoning/summaryPartAdded",
+  "item/reasoning/summaryTextDelta",
+  "item/reasoning/textDelta",
+  "item/started",
+  "remoteControl/status/changed",
+  "serverRequest/resolved",
+  "thread/started",
+  "thread/status/changed",
+  "thread/tokenUsage/updated",
+  "turn/completed",
+  "turn/plan/updated",
+  "turn/started",
+  "windowsSandbox/setupCompleted",
+  "configWarning",
+  "error",
+  "guardianWarning",
+  "hook/completed",
+  "hook/started",
+  "item/autoApprovalReview/completed",
+  "item/autoApprovalReview/started",
+  "item/fileChange/outputDelta",
+  "item/fileChange/patchUpdated",
+  "item/mcpToolCall/progress",
+  "mcpServer/oauthLogin/completed",
+  "mcpServer/startupStatus/updated",
+  "model/rerouted",
+  "thread/settings/updated",
+  "turn/diff/updated",
+  "warning",
+  "windows/worldWritableWarning",
+  "collector/serverRequest",
+  "other",
+]);
+const M4_FRESH_BLOCKER_CODES = Object.freeze([
+  "app-server-close-failed",
+  "app-server-exit-unverified",
+  "app-server-nonzero-exit",
+  "app-server-stderr",
+  "app-server-stderr-truncated",
+  "cleanup-dynamic-tool-release-failed",
+  "cleanup-image-diagnostics-snapshot-failed",
+  "cleanup-process-exit-snapshot-failed",
+  "cleanup-remote-control-snapshot-failed",
+  "cleanup-stderr-snapshot-failed",
+  "cleanup-successful-image-views-snapshot-failed",
+  "cleanup-turn-interrupt-failed",
+  "cleanup-unsubscribe-failed",
+  "duplicate-terminal-event",
+  "dynamic-tool-lifecycle-mismatch",
+  "event-compaction-unverified",
+  "foreign-event",
+  "image-diagnostics-unverified",
+  "inherited-context",
+  "input-post-turn-readback-failed",
+  "input-provenance-changed",
+  "input-provenance-changed-after-turn",
+  "input-provenance-readback-failed",
+  "local-image-diagnostics-bind-failed",
+  "local-image-diagnostics-unavailable",
+  "message-delta-lifecycle-mismatch",
+  "message-delta-limit-exceeded",
+  "missing-terminal-event",
+  "post-terminal-event",
+  "required-status-missing",
+  "runtime-control-blocker",
+  "runtime-drift",
+  "secret-shaped-output",
+  "successful-image-view-unverified",
+  "turn-not-completed",
+  "uncontrolled-tool-surface",
+  "unresolved-notification",
+  "unsafe-remote-control",
+]);
 function sha256(value) {
   return createHash("sha256").update(value).digest("hex");
 }
@@ -108,6 +187,256 @@ function exactKeys(value, keys, label) {
   if (actual.length !== expected.length || actual.some((key, index) => key !== expected[index])) {
     fail(`${label} has missing or extra keys`);
   }
+}
+
+function diagnosticOwnData(value, key) {
+  if (
+    value === null ||
+    (typeof value !== "object" && typeof value !== "function") ||
+    utilTypes.isProxy(value)
+  ) return { state: "unsafe" };
+  let descriptor;
+  try { descriptor = Object.getOwnPropertyDescriptor(value, key); } catch { return { state: "unsafe" }; }
+  if (descriptor === undefined) return { state: "missing" };
+  if (!("value" in descriptor) || descriptor.get || descriptor.set) return { state: "unsafe" };
+  return { state: "data", value: descriptor.value };
+}
+
+function diagnosticObject(value, keys) {
+  if (value === null || typeof value !== "object" || utilTypes.isProxy(value)) return null;
+  let prototype;
+  try {
+    if (Array.isArray(value)) return null;
+    prototype = Object.getPrototypeOf(value);
+  } catch {
+    return null;
+  }
+  if (prototype !== Object.prototype && prototype !== null) return null;
+  const result = Object.create(null);
+  for (const key of keys) {
+    const property = diagnosticOwnData(value, key);
+    if (property.state !== "data") return null;
+    result[key] = property.value;
+  }
+  return result;
+}
+
+function diagnosticArray(value, maximumLength) {
+  if (value === null || typeof value !== "object" || utilTypes.isProxy(value)) return null;
+  let isArray;
+  let lengthDescriptor;
+  try {
+    isArray = Array.isArray(value);
+    lengthDescriptor = Object.getOwnPropertyDescriptor(value, "length");
+  } catch {
+    return null;
+  }
+  if (
+    !isArray ||
+    !lengthDescriptor ||
+    !("value" in lengthDescriptor) ||
+    !Number.isSafeInteger(lengthDescriptor.value) ||
+    lengthDescriptor.value < 0 ||
+    lengthDescriptor.value > maximumLength
+  ) return null;
+  const length = lengthDescriptor.value;
+  const result = [];
+  for (let index = 0; index < length; index += 1) {
+    const property = diagnosticOwnData(value, String(index));
+    if (property.state !== "data") return null;
+    result.push(property.value);
+  }
+  return result;
+}
+
+function fixedPrimaryCauseKind(error) {
+  const property = diagnosticOwnData(error, "cause");
+  if (property.state !== "data") return "unverified";
+  const cause = property.value;
+  if (cause === null || typeof cause !== "object" || utilTypes.isProxy(cause)) return "unverified";
+  let prototype;
+  try { prototype = Object.getPrototypeOf(cause); } catch { return "unverified"; }
+  if (prototype === SyntaxError.prototype) return "syntax-error";
+  if (prototype === TypeError.prototype) return "type-error";
+  if (prototype === AggregateError.prototype) return "aggregate-error";
+  if (prototype === Error.prototype) return "error";
+  return "unverified";
+}
+
+function isExactTypeError(value) {
+  if (value === null || typeof value !== "object" || utilTypes.isProxy(value)) return false;
+  try { return Object.getPrototypeOf(value) === TypeError.prototype; } catch { return false; }
+}
+
+export function projectJoenessM4FreshFailure(error) {
+  const evidenceProperty = diagnosticOwnData(error, "freshEvaluatorEvidence");
+  if (evidenceProperty.state !== "data") return null;
+  const evidence = evidenceProperty.value;
+  const baseKeys = [
+    "threadStart", "thread", "turn", "input", "outputSchema", "events",
+    "eventCompaction", "toolEvidence", "mcpAfter", "blockers", "appServer",
+  ];
+  const evidenceData = diagnosticObject(evidence, baseKeys);
+  if (evidenceData === null) return null;
+
+  const threadStart = diagnosticObject(evidenceData.threadStart, ["request", "response"]);
+  const turn = diagnosticObject(evidenceData.turn, ["id", "request"]);
+  const appServer = diagnosticObject(evidenceData.appServer, [
+    "processExitCode", "stderr", "remoteControl", "imageDiagnostics", "successfulImageViews",
+  ]);
+  const compaction = diagnosticObject(evidenceData.eventCompaction, [
+    "observedEventCount", "retainedEventCount", "retainedEventLimit", "retainedEventsOverLimit",
+    "methodHistogram", "itemTypeHistogram", "agentMessageDelta", "rawPayloadRetained",
+  ]);
+  if (threadStart === null || turn === null || appServer === null || compaction === null) return null;
+
+  let threadStartState;
+  if (threadStart.response === null) {
+    threadStartState = "not-observed";
+  } else {
+    const response = diagnosticObject(threadStart.response, [
+      "threadId", "ephemeral", "priorTurnCount", "instructionSourceCount",
+    ]);
+    if (
+      response === null ||
+      typeof response.threadId !== "string" ||
+      response.threadId.length < 1 ||
+      response.threadId.length > 256 ||
+      Buffer.byteLength(response.threadId, "utf8") > 256 ||
+      typeof response.ephemeral !== "boolean" ||
+      !Number.isSafeInteger(response.priorTurnCount) ||
+      response.priorTurnCount < 0 ||
+      !Number.isSafeInteger(response.instructionSourceCount) ||
+      response.instructionSourceCount < 0
+    ) return null;
+    threadStartState = "observed";
+  }
+  const turnStartState = turn.id === null
+    ? "not-observed"
+    : typeof turn.id === "string" &&
+        turn.id.length > 0 &&
+        turn.id.length <= 256 &&
+        Buffer.byteLength(turn.id, "utf8") <= 256
+      ? "observed"
+      : null;
+  if (turnStartState === null || (threadStartState === "not-observed" && turnStartState === "observed")) return null;
+
+  if (
+    !Number.isSafeInteger(compaction.observedEventCount) ||
+    compaction.observedEventCount < 0 ||
+    !Number.isSafeInteger(compaction.retainedEventCount) ||
+    compaction.retainedEventCount < 0 ||
+    compaction.retainedEventLimit !== 512 ||
+    typeof compaction.retainedEventsOverLimit !== "boolean" ||
+    compaction.retainedEventCount > compaction.observedEventCount ||
+    compaction.retainedEventsOverLimit !== (compaction.retainedEventCount > compaction.retainedEventLimit) ||
+    compaction.rawPayloadRetained !== false
+  ) return null;
+  const histogram = diagnosticObject(compaction.methodHistogram, ["eventCount", "entries"]);
+  const entries = histogram === null ? null : diagnosticArray(histogram.entries, M4_FRESH_EVENT_METHODS.length);
+  if (entries === null || histogram.eventCount !== compaction.observedEventCount) return null;
+  let histogramTotal = 0;
+  let previousMethodIndex = -1;
+  let terminalCount = 0;
+  for (const entryValue of entries) {
+    const entry = diagnosticObject(entryValue, ["method", "count"]);
+    const methodIndex = entry === null || typeof entry.method !== "string" || entry.method.length > 64
+      ? -1
+      : M4_FRESH_EVENT_METHODS.indexOf(entry.method);
+    if (
+      entry === null ||
+      methodIndex <= previousMethodIndex ||
+      !Number.isSafeInteger(entry.count) ||
+      entry.count < 1
+    ) return null;
+    previousMethodIndex = methodIndex;
+    histogramTotal += entry.count;
+    if (!Number.isSafeInteger(histogramTotal)) return null;
+    if (entry.method === "turn/completed") terminalCount = entry.count;
+  }
+  if (histogramTotal !== histogram.eventCount) return null;
+
+  const blockerValues = diagnosticArray(evidenceData.blockers, 64);
+  if (
+    blockerValues === null ||
+    blockerValues.some((value) => (
+      typeof value !== "string" ||
+      value.length < 1 ||
+      value.length > 128 ||
+      Buffer.byteLength(value, "utf8") > 128
+    ))
+  ) return null;
+  if (new Set(blockerValues).size !== blockerValues.length) return null;
+  const blockerCodes = M4_FRESH_BLOCKER_CODES.filter((code) => blockerValues.includes(code));
+  const unclassifiedCount = blockerValues.length - blockerCodes.length;
+  const missingTerminal = blockerValues.includes("missing-terminal-event");
+  const duplicateTerminal = blockerValues.includes("duplicate-terminal-event");
+  const nonCompletedTerminal = blockerValues.includes("turn-not-completed");
+  if (missingTerminal && (duplicateTerminal || nonCompletedTerminal)) return null;
+  let terminalState;
+  let terminalCountState;
+  if (duplicateTerminal) {
+    if (terminalCount < 2) return null;
+    terminalState = "ambiguous";
+    terminalCountState = "multiple";
+  } else if (missingTerminal) {
+    terminalState = "missing";
+    terminalCountState = "zero";
+  } else if (nonCompletedTerminal) {
+    if (terminalCount < 1) return null;
+    terminalState = "non-completed";
+    terminalCountState = "one";
+  } else {
+    if (terminalCount < 1) return null;
+    terminalState = "completed";
+    terminalCountState = "one";
+  }
+  if (terminalState !== "missing" && turnStartState !== "observed") return null;
+
+  const appServerExit = appServer.processExitCode === null
+    ? "unverified"
+    : Number.isSafeInteger(appServer.processExitCode)
+      ? appServer.processExitCode === 0 ? "zero" : "nonzero"
+      : null;
+  if (appServerExit === null) return null;
+  const exitUnverified = blockerValues.includes("app-server-exit-unverified");
+  const exitNonzero = blockerValues.includes("app-server-nonzero-exit");
+  if (
+    (appServerExit === "unverified") !== exitUnverified ||
+    (appServerExit === "nonzero") !== exitNonzero ||
+    (appServerExit === "zero") !== (!exitUnverified && !exitNonzero)
+  ) return null;
+  const projected = {
+    evidenceState: "retained",
+    lifecycle: {
+      threadStart: threadStartState,
+      turnStart: turnStartState,
+      terminal: terminalState,
+      terminalCountState,
+    },
+    eventCounts: {
+      observed: compaction.observedEventCount,
+      retained: compaction.retainedEventCount,
+      retainedOverLimit: compaction.retainedEventsOverLimit,
+    },
+    blockers: {
+      count: blockerValues.length,
+      codes: blockerCodes,
+      unclassifiedCount,
+    },
+    appServerExit,
+    primaryCauseKind: fixedPrimaryCauseKind(error),
+    retention: {
+      rawOutputPersisted: false,
+      rawEventsPersisted: false,
+      threadTurnProcessIdentifiersPersisted: false,
+      absolutePathsPersisted: false,
+      rawEventOrOutputDigestsPersisted: false,
+      rawStderrPersisted: false,
+      configContentsPersisted: false,
+    },
+  };
+  return Buffer.byteLength(stableStringify(projected)) <= 1792 ? projected : null;
 }
 
 function exactString(value, expected, label) {
@@ -665,15 +994,16 @@ function safeConfigTuple(value, label) {
   return value;
 }
 
-function blockedReceipt(error) {
+function blockedReceipt(error, freshFailure = null) {
   return {
     schemaVersion: 1,
     status: "blocked",
     phase: "post-runtime-validation",
     safeCleanup: true,
     cause: {
-      category: error instanceof TypeError ? "contract-validation" : "evaluation-failed",
+      category: isExactTypeError(error) ? "contract-validation" : "evaluation-failed",
     },
+    ...(freshFailure === null ? {} : { freshFailure }),
   };
 }
 
@@ -732,6 +1062,7 @@ export async function runJoenessM4SuperpowersEval({
   let result;
   let evidence;
   let primaryError = null;
+  let freshFailure = null;
   let suppressFailureArtifacts = false;
   let cleanupSafe = false;
   try {
@@ -740,13 +1071,30 @@ export async function runJoenessM4SuperpowersEval({
       throw new TypeError("M4 runtime factory result is malformed");
     }
     safeConfigTuple(runtime.sourceConfigBefore, "M4 source config before");
-    result = await runTurn({
+    const freshTurnRequest = {
       session: runtime.session,
       root: repositoryRoot,
       input,
       outputSchema,
       dynamicTools: [],
-    });
+    };
+    try {
+      result = await runTurn(freshTurnRequest);
+    } catch (error) {
+      if (runTurn === runFreshEvaluatorTurn) {
+        const projected = projectJoenessM4FreshFailure(error);
+        if (projected !== null) {
+          const retained = {
+            schemaVersion: 1,
+            provenance: "runner-observed-default-fresh-adapter-rejection",
+            runnerStage: "fresh-turn-rejected",
+            ...projected,
+          };
+          if (Buffer.byteLength(stableStringify(retained)) <= 2048) freshFailure = retained;
+        }
+      }
+      throw error;
+    }
     try {
       assertSafeData(result, "M4 fresh result");
       assertCollectorShutdown(result, runtime.session);
@@ -790,7 +1138,7 @@ export async function runJoenessM4SuperpowersEval({
 
   if (primaryError !== null) {
     if (cleanupSafe && !suppressFailureArtifacts && executionPlan.outputs.blocked !== null) {
-      const blocked = blockedReceipt(primaryError);
+      const blocked = blockedReceipt(primaryError, freshFailure);
       if (Buffer.byteLength(stableStringify(blocked)) > 4096) throw new Error("M4 blocked receipt exceeds bound", { cause: primaryError });
       await verifyOutputTarget(repositoryRoot, executionPlan.outputs.blocked);
       if (await artifactExists(repositoryRoot, executionPlan.outputs.blocked)) {

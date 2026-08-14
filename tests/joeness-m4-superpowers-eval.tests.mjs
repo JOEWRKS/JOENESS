@@ -123,6 +123,105 @@ function safeFreshResult(output = outputFixture()) {
   };
 }
 
+function freshFailureFixture({
+  threadStarted = true,
+  turnStarted = true,
+  terminalCount = 1,
+  terminalNotCompleted = false,
+  blockers = [],
+  processExitCode = 0,
+  cause = new SyntaxError("private JSON parse detail"),
+} = {}) {
+  const methods = [
+    ...(threadStarted ? [{ method: "thread/started", count: 1 }] : []),
+    ...(terminalCount > 0 ? [{ method: "turn/completed", count: terminalCount }] : []),
+    ...(turnStarted ? [{ method: "turn/started", count: 1 }] : []),
+  ];
+  const observedEventCount = methods.reduce((sum, entry) => sum + entry.count, 0);
+  const error = new Error("fresh evaluator turn validation failed", { cause });
+  error.freshEvaluatorEvidence = {
+    threadStart: {
+      request: { privatePath: "C:\\private\\thread-request" },
+      response: threadStarted
+        ? { threadId: "private-thread-id", ephemeral: true, priorTurnCount: 0, instructionSourceCount: 0 }
+        : null,
+    },
+    thread: threadStarted ? { id: "private-thread-id" } : null,
+    turn: {
+      id: turnStarted ? "private-turn-id" : null,
+      request: turnStarted ? { privateDigest: "f".repeat(64) } : null,
+    },
+    input: { rawText: "RAW-MODEL-INPUT-CANARY" },
+    outputSchema: { sha256: "e".repeat(64) },
+    events: [{ method: "turn/completed", rawText: "RAW-EVENT-CANARY", threadId: "private-thread-id" }],
+    eventCompaction: {
+      observedEventCount,
+      retainedEventCount: observedEventCount,
+      retainedEventLimit: 512,
+      retainedEventsOverLimit: false,
+      methodHistogram: { eventCount: observedEventCount, entries: methods },
+      itemTypeHistogram: { eventCount: 0, entries: [] },
+      agentMessageDelta: {
+        groupCount: 0,
+        fragmentCount: 0,
+        byteLength: 0,
+        fragmentLimit: 4096,
+        byteLimit: 1048576,
+        fragmentLimitExceeded: false,
+        byteLimitExceeded: false,
+        rawTextRetained: false,
+      },
+      rawPayloadRetained: false,
+    },
+    toolEvidence: [],
+    mcpAfter: [],
+    blockers: [
+      ...blockers,
+      ...(terminalNotCompleted ? ["turn-not-completed"] : []),
+    ],
+    appServer: {
+      processExitCode,
+      stderr: { text: "RAW-STDERR-CANARY", sha256: "d".repeat(64) },
+      remoteControl: null,
+      imageDiagnostics: null,
+      successfulImageViews: null,
+    },
+    primaryCause: {
+      message: { text: "RAW-CAUSE-CANARY", sha256: "c".repeat(64) },
+    },
+  };
+  return error;
+}
+
+function earlyDefaultAdapterFailureSession() {
+  let processExitCode = null;
+  return {
+    notificationCursor: 0,
+    mcpInventory: [],
+    remoteControlSnapshot: {
+      seen: true,
+      complete: true,
+      status: "disabled",
+      environmentAttached: false,
+    },
+    client: {
+      async request(method) {
+        if (method === "thread/start") throw new Error("private thread-start failure");
+        throw new Error("unexpected request");
+      },
+    },
+    subscribe() { return () => {}; },
+    async close() { processExitCode = 0; },
+    get processExitCode() { return processExitCode; },
+    get processCloseConfirmed() { return processExitCode === 0; },
+    get stderr() {
+      return { byteLength: 0, sha256: digest(""), truncated: false, captureTruncated: false };
+    },
+    get imageDiagnostics() { return null; },
+    get successfulImageViews() { return null; },
+  };
+}
+
 function shutdownSession({
   processExitCode = 0,
   processCloseConfirmed = true,
@@ -719,6 +818,302 @@ test("raw evidence binding failure is classified before the safe blocked write",
   deps.options.executionPlan = executionPlan({ blocked: "evals/experiments/joeness-m4-injected-blocked.json" });
   await assert.rejects(api.runJoenessM4SuperpowersEval(deps.options), /raw response tuple/i);
   assert.deepEqual(deps.calls.writes.map(({ relativePath }) => relativePath), [deps.options.executionPlan.outputs.blocked]);
+});
+
+test("fresh failure projection retains only bounded primitive lifecycle evidence", async () => {
+  const api = await subject();
+  assert.equal(typeof api.projectJoenessM4FreshFailure, "function");
+  const projected = api.projectJoenessM4FreshFailure(freshFailureFixture());
+  assert.deepEqual(projected, {
+    evidenceState: "retained",
+    lifecycle: {
+      threadStart: "observed",
+      turnStart: "observed",
+      terminal: "completed",
+      terminalCountState: "one",
+    },
+    eventCounts: {
+      observed: 3,
+      retained: 3,
+      retainedOverLimit: false,
+    },
+    blockers: {
+      count: 0,
+      codes: [],
+      unclassifiedCount: 0,
+    },
+    appServerExit: "zero",
+    primaryCauseKind: "syntax-error",
+    retention: {
+      rawOutputPersisted: false,
+      rawEventsPersisted: false,
+      threadTurnProcessIdentifiersPersisted: false,
+      absolutePathsPersisted: false,
+      rawEventOrOutputDigestsPersisted: false,
+      rawStderrPersisted: false,
+      configContentsPersisted: false,
+    },
+  });
+  const text = JSON.stringify(projected);
+  for (const forbidden of [
+    "RAW-", "private-thread", "private-turn", "C:\\private", "sha256", "stderr",
+  ]) assert.equal(text.includes(forbidden), false, forbidden);
+  assert.equal(Buffer.byteLength(text) <= 2048, true);
+});
+
+test("only the imported default fresh adapter rejection authorizes a blocked freshFailure", async () => {
+  const api = await subject();
+  const blocked = "evals/experiments/joeness-m4-injected-blocked.json";
+
+  const spoofed = liveDependencies();
+  spoofed.options.executionPlan = executionPlan({ blocked });
+  spoofed.options.runTurn = async () => { throw freshFailureFixture(); };
+  await assert.rejects(api.runJoenessM4SuperpowersEval(spoofed.options), /fresh evaluator turn validation failed/);
+  assert.equal(spoofed.calls.writes.length, 1);
+  assert.equal(Object.hasOwn(spoofed.calls.writes[0].value, "freshFailure"), false);
+
+  const authentic = liveDependencies();
+  authentic.options.executionPlan = executionPlan({ blocked });
+  delete authentic.options.runTurn;
+  authentic.options.runtimeFactory = async () => ({
+    session: earlyDefaultAdapterFailureSession(),
+    sourceConfigBefore: { bytes: 6, sha256: digest("config") },
+    readSourceConfig: async () => ({ bytes: 6, sha256: digest("config") }),
+    finish: async () => {},
+  });
+  await assert.rejects(api.runJoenessM4SuperpowersEval(authentic.options), /fresh evaluator turn validation failed/);
+  assert.equal(authentic.calls.writes.length, 1);
+  assert.deepEqual(authentic.calls.writes[0].value.freshFailure, {
+    schemaVersion: 1,
+    provenance: "runner-observed-default-fresh-adapter-rejection",
+    runnerStage: "fresh-turn-rejected",
+    evidenceState: "retained",
+    lifecycle: {
+      threadStart: "not-observed",
+      turnStart: "not-observed",
+      terminal: "missing",
+      terminalCountState: "zero",
+    },
+    eventCounts: { observed: 0, retained: 0, retainedOverLimit: false },
+    blockers: { count: 1, codes: ["missing-terminal-event"], unclassifiedCount: 0 },
+    appServerExit: "zero",
+    primaryCauseKind: "error",
+    retention: {
+      rawOutputPersisted: false,
+      rawEventsPersisted: false,
+      threadTurnProcessIdentifiersPersisted: false,
+      absolutePathsPersisted: false,
+      rawEventOrOutputDigestsPersisted: false,
+      rawStderrPersisted: false,
+      configContentsPersisted: false,
+    },
+  });
+
+  const argumentSpoof = liveDependencies();
+  argumentSpoof.options.executionPlan = executionPlan({ blocked });
+  delete argumentSpoof.options.runTurn;
+  const spoofedArgumentError = freshFailureFixture();
+  argumentSpoof.options.runtimeFactory = async () => ({
+    get session() { throw spoofedArgumentError; },
+    sourceConfigBefore: { bytes: 6, sha256: digest("config") },
+    readSourceConfig: async () => ({ bytes: 6, sha256: digest("config") }),
+    finish: async () => {},
+  });
+  await assert.rejects(
+    api.runJoenessM4SuperpowersEval(argumentSpoof.options),
+    (error) => error === spoofedArgumentError,
+  );
+  assert.equal(argumentSpoof.calls.writes.length, 1);
+  assert.equal(Object.hasOwn(argumentSpoof.calls.writes[0].value, "freshFailure"), false);
+});
+
+test("fresh failure projection fails closed on malformed selected fields and never invokes traps", async () => {
+  const api = await subject();
+  const malformed = [];
+
+  const badThreadSummary = freshFailureFixture();
+  badThreadSummary.freshEvaluatorEvidence.threadStart.response.priorTurnCount = {};
+  malformed.push(badThreadSummary);
+
+  const oversizedThreadId = freshFailureFixture();
+  oversizedThreadId.freshEvaluatorEvidence.threadStart.response.threadId = "t".repeat(257);
+  malformed.push(oversizedThreadId);
+
+  const oversizedThreadIdBytes = freshFailureFixture();
+  oversizedThreadIdBytes.freshEvaluatorEvidence.threadStart.response.threadId = "한".repeat(86);
+  malformed.push(oversizedThreadIdBytes);
+
+  const oversizedTurnId = freshFailureFixture();
+  oversizedTurnId.freshEvaluatorEvidence.turn.id = "u".repeat(257);
+  malformed.push(oversizedTurnId);
+
+  malformed.push(freshFailureFixture({ threadStarted: false, turnStarted: true }));
+
+  const inconsistentCompaction = freshFailureFixture();
+  inconsistentCompaction.freshEvaluatorEvidence.eventCompaction.retainedEventCount = 513;
+  inconsistentCompaction.freshEvaluatorEvidence.eventCompaction.retainedEventsOverLimit = false;
+  malformed.push(inconsistentCompaction);
+
+  malformed.push(freshFailureFixture({ blockers: ["x".repeat(129)] }));
+  malformed.push(freshFailureFixture({ blockers: ["한".repeat(43)] }));
+  malformed.push(freshFailureFixture({ processExitCode: null }));
+  malformed.push(freshFailureFixture({ blockers: ["app-server-exit-unverified"] }));
+  malformed.push(freshFailureFixture({ processExitCode: 9 }));
+  malformed.push(freshFailureFixture({
+    processExitCode: 9,
+    blockers: ["app-server-exit-unverified", "app-server-nonzero-exit"],
+  }));
+
+  let traps = 0;
+  malformed.push(new Proxy({}, { get() { traps += 1; throw new Error("proxy trap"); } }));
+  const accessor = new Error("accessor");
+  Object.defineProperty(accessor, "freshEvaluatorEvidence", {
+    get() { traps += 1; throw new Error("accessor trap"); },
+  });
+  malformed.push(accessor);
+  const revoked = Proxy.revocable({}, {});
+  revoked.revoke();
+  malformed.push(revoked.proxy);
+  const nestedProxy = freshFailureFixture();
+  nestedProxy.freshEvaluatorEvidence.threadStart = new Proxy({}, {
+    get() { traps += 1; throw new Error("nested proxy trap"); },
+  });
+  malformed.push(nestedProxy);
+  const nestedRevoked = freshFailureFixture();
+  const revokedThreadStart = Proxy.revocable({}, {});
+  revokedThreadStart.revoke();
+  nestedRevoked.freshEvaluatorEvidence.threadStart = revokedThreadStart.proxy;
+  malformed.push(nestedRevoked);
+
+  for (const value of malformed) assert.equal(api.projectJoenessM4FreshFailure(value), null);
+  assert.equal(traps, 0);
+
+  const ignoredExtras = freshFailureFixture();
+  for (let index = 0; index < 4096; index += 1) {
+    ignoredExtras.freshEvaluatorEvidence[`ignored-${index}`] = `RAW-EXTRA-CANARY-${index}`;
+  }
+  const projected = api.projectJoenessM4FreshFailure(ignoredExtras);
+  assert.equal(projected?.lifecycle.terminal, "completed");
+  assert.equal(projected?.lifecycle.terminalCountState, "one");
+  assert.equal(JSON.stringify(projected).includes("RAW-EXTRA-CANARY"), false);
+
+  assert.equal(api.projectJoenessM4FreshFailure(freshFailureFixture({
+    processExitCode: null,
+    blockers: ["app-server-exit-unverified"],
+  }))?.appServerExit, "unverified");
+  assert.equal(api.projectJoenessM4FreshFailure(freshFailureFixture({
+    processExitCode: 9,
+    blockers: ["app-server-nonzero-exit"],
+  }))?.appServerExit, "nonzero");
+});
+
+test("fresh failure projection reports adapter over-limit counts without reading raw events", async () => {
+  const api = await subject();
+  const error = freshFailureFixture();
+  const compaction = error.freshEvaluatorEvidence.eventCompaction;
+  compaction.observedEventCount = 513;
+  compaction.retainedEventCount = 513;
+  compaction.retainedEventsOverLimit = true;
+  compaction.methodHistogram.eventCount = 513;
+  compaction.methodHistogram.entries = [
+    { method: "thread/started", count: 1 },
+    { method: "thread/status/changed", count: 510 },
+    { method: "turn/completed", count: 1 },
+    { method: "turn/started", count: 1 },
+  ];
+  let traps = 0;
+  error.freshEvaluatorEvidence.events = new Proxy([], {
+    get() { traps += 1; throw new Error("raw event trap"); },
+    ownKeys() { traps += 1; throw new Error("raw event ownKeys trap"); },
+  });
+  const projected = api.projectJoenessM4FreshFailure(error);
+  assert.deepEqual(projected?.eventCounts, {
+    observed: 513,
+    retained: 513,
+    retainedOverLimit: true,
+  });
+  assert.equal(projected?.lifecycle.terminal, "completed");
+  assert.equal(traps, 0);
+});
+
+test("terminal state and count state follow correlated adapter blockers, not the global histogram", async () => {
+  const api = await subject();
+  const oneCurrentOneForeign = api.projectJoenessM4FreshFailure(freshFailureFixture({ terminalCount: 2 }));
+  assert.deepEqual(oneCurrentOneForeign?.lifecycle, {
+    threadStart: "observed",
+    turnStart: "observed",
+    terminal: "completed",
+    terminalCountState: "one",
+  });
+
+  const duplicateCurrent = api.projectJoenessM4FreshFailure(freshFailureFixture({
+    terminalCount: 2,
+    blockers: ["duplicate-terminal-event"],
+  }));
+  assert.equal(duplicateCurrent?.lifecycle.terminal, "ambiguous");
+  assert.equal(duplicateCurrent?.lifecycle.terminalCountState, "multiple");
+
+  const foreignOnly = api.projectJoenessM4FreshFailure(freshFailureFixture({
+    terminalCount: 1,
+    blockers: ["missing-terminal-event", "foreign-event"],
+  }));
+  assert.equal(foreignOnly?.lifecycle.terminal, "missing");
+  assert.equal(foreignOnly?.lifecycle.terminalCountState, "zero");
+});
+
+test("proxy rejection reasons cannot trap blocked classification or mint fresh provenance", async () => {
+  const api = await subject();
+  let traps = 0;
+  const liveProxy = new Proxy({}, {
+    get() { traps += 1; throw new Error("get trap"); },
+    getPrototypeOf() { traps += 1; throw new Error("prototype trap"); },
+  });
+  const revoked = Proxy.revocable({}, {});
+  revoked.revoke();
+
+  for (const rejection of [liveProxy, revoked.proxy]) {
+    const deps = liveDependencies();
+    deps.options.executionPlan = executionPlan({
+      blocked: "evals/experiments/joeness-m4-injected-blocked.json",
+    });
+    deps.options.runTurn = async () => { throw rejection; };
+    let observed;
+    try {
+      await api.runJoenessM4SuperpowersEval(deps.options);
+    } catch (error) {
+      observed = error;
+    }
+    assert.equal(observed, rejection);
+    assert.equal(deps.calls.writes.length, 1);
+    assert.deepEqual(deps.calls.writes[0].value.cause, { category: "evaluation-failed" });
+    assert.equal(Object.hasOwn(deps.calls.writes[0].value, "freshFailure"), false);
+  }
+  assert.equal(traps, 0);
+});
+
+test("historical M4 v1 plan, blocked receipt, and attempt index remain byte exact", async () => {
+  const tuples = [
+    {
+      path: "evals/skill-contracts/joeness-m4-superpowers-live-plan-v1.json",
+      bytes: 1888,
+      sha256: "34d59ba0fd3dfa24973b9ab6e55205ecd3a22da32daf2fa15daaa156273f428c",
+    },
+    {
+      path: "evals/skill-contracts/joeness-m4-superpowers-live-v1-blocked.json",
+      bytes: 1384,
+      sha256: "590c1a44cf7e9660ee2c6df8a32c63cadfcab881154c16aadefcd8315fdcbec4",
+    },
+    {
+      path: "evals/skill-contracts/joeness-m4-superpowers-attempt-index-v1.json",
+      bytes: 6230,
+      sha256: "5a00e7e526075dedb066107229f80beb61e94d5cd6fc125952693d27ccd66455",
+    },
+  ];
+  for (const tuple of tuples) {
+    const content = await readFile(path.join(ROOT, ...tuple.path.split("/")));
+    assert.equal(content.length, tuple.bytes, tuple.path);
+    assert.equal(digest(content), tuple.sha256, tuple.path);
+  }
 });
 
 test("exclusive pair publication removes both finals and every temp when second finalization fails", async (t) => {

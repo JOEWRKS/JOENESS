@@ -21,10 +21,11 @@ import {
 
 const execFile = promisify(execFileCallback);
 
-export const JOENESS_M4_LIVE_RUN_ID = "joeness-m4-superpowers-live-v1";
+export const JOENESS_M4_LIVE_RUN_ID = "joeness-m4-superpowers-live-v2";
 export const JOENESS_M4_CODEX_VERSION = "codex-cli 0.146.0";
 
-const PLAN_PATH = "evals/skill-contracts/joeness-m4-superpowers-live-plan-v1.json";
+const PLAN_PATH = "evals/skill-contracts/joeness-m4-superpowers-live-plan-v2.json";
+const LIVE_METHOD = "bounded-path-private-fresh-failure-stage-and-lifecycle-retention-no-evaluator-contract-change";
 const SOURCE_PATHS = Object.freeze({
   runner: "evals/support/run-joeness-m4-superpowers-eval.mjs",
   liveWrapper: "evals/support/run-joeness-m4-superpowers-live.mjs",
@@ -33,10 +34,75 @@ const SOURCE_PATHS = Object.freeze({
   fixtureManifest: "evals/skill-contracts/fixtures/joeness-m4-superpowers-v1/manifest.json",
 });
 const OUTPUT_PATHS = Object.freeze({
-  raw: "evals/skill-contracts/joeness-m4-superpowers-live-v1-raw.json",
-  evidence: "evals/skill-contracts/joeness-m4-superpowers-live-v1-evidence.json",
-  blocked: "evals/skill-contracts/joeness-m4-superpowers-live-v1-blocked.json",
+  raw: "evals/skill-contracts/joeness-m4-superpowers-live-v2-raw.json",
+  evidence: "evals/skill-contracts/joeness-m4-superpowers-live-v2-evidence.json",
+  blocked: "evals/skill-contracts/joeness-m4-superpowers-live-v2-blocked.json",
 });
+const PREDECESSOR = Object.freeze({
+  id: "joeness-m4-superpowers-live-v1",
+  implementationCommit: "6a08c764283bbf2babd9f29765b097de561c9c4e",
+  executionHead: "d66b091a05e0724108304456bbff7c7b0ad252e0",
+  persistenceCommit: "2a41df1d9fe55ecb4ffe7fd1fc5da5c8bd20cbd4",
+  plan: Object.freeze({
+    path: "evals/skill-contracts/joeness-m4-superpowers-live-plan-v1.json",
+    bytes: 1888,
+    sha256: "34d59ba0fd3dfa24973b9ab6e55205ecd3a22da32daf2fa15daaa156273f428c",
+  }),
+  blockedArtifact: Object.freeze({
+    path: "evals/skill-contracts/joeness-m4-superpowers-live-v1-blocked.json",
+    bytes: 1384,
+    sha256: "590c1a44cf7e9660ee2c6df8a32c63cadfcab881154c16aadefcd8315fdcbec4",
+  }),
+  attemptIndex: Object.freeze({
+    path: "evals/skill-contracts/joeness-m4-superpowers-attempt-index-v1.json",
+    bytes: 6230,
+    sha256: "5a00e7e526075dedb066107229f80beb61e94d5cd6fc125952693d27ccd66455",
+  }),
+  sameCommandRetryAuthorized: false,
+});
+const FRESH_BLOCKER_CODES = Object.freeze([
+  "app-server-close-failed",
+  "app-server-exit-unverified",
+  "app-server-nonzero-exit",
+  "app-server-stderr",
+  "app-server-stderr-truncated",
+  "cleanup-dynamic-tool-release-failed",
+  "cleanup-image-diagnostics-snapshot-failed",
+  "cleanup-process-exit-snapshot-failed",
+  "cleanup-remote-control-snapshot-failed",
+  "cleanup-stderr-snapshot-failed",
+  "cleanup-successful-image-views-snapshot-failed",
+  "cleanup-turn-interrupt-failed",
+  "cleanup-unsubscribe-failed",
+  "duplicate-terminal-event",
+  "dynamic-tool-lifecycle-mismatch",
+  "event-compaction-unverified",
+  "foreign-event",
+  "image-diagnostics-unverified",
+  "inherited-context",
+  "input-post-turn-readback-failed",
+  "input-provenance-changed",
+  "input-provenance-changed-after-turn",
+  "input-provenance-readback-failed",
+  "local-image-diagnostics-bind-failed",
+  "local-image-diagnostics-unavailable",
+  "message-delta-lifecycle-mismatch",
+  "message-delta-limit-exceeded",
+  "missing-terminal-event",
+  "post-terminal-event",
+  "required-status-missing",
+  "runtime-control-blocker",
+  "runtime-drift",
+  "secret-shaped-output",
+  "successful-image-view-unverified",
+  "turn-not-completed",
+  "uncontrolled-tool-surface",
+  "unresolved-notification",
+  "unsafe-remote-control",
+]);
+const FRESH_BLOCKER_CODE_INDEX = new Map(
+  FRESH_BLOCKER_CODES.map((code, index) => [code, index]),
+);
 
 function fail(message) {
   throw new TypeError(message);
@@ -127,9 +193,33 @@ function validateTuple(value, expectedPath, label) {
   if (typeof value.sha256 !== "string" || !/^[0-9a-f]{64}$/u.test(value.sha256)) fail(`${label} digest is invalid`);
 }
 
+function validatePredecessor(value) {
+  exactKeys(
+    value,
+    ["id", "implementationCommit", "executionHead", "persistenceCommit", "plan", "blockedArtifact", "attemptIndex", "sameCommandRetryAuthorized"],
+    "M4 live plan predecessor",
+  );
+  for (const key of ["id", "implementationCommit", "executionHead", "persistenceCommit", "sameCommandRetryAuthorized"]) {
+    if (value[key] !== PREDECESSOR[key]) fail(`M4 live plan predecessor ${key} is invalid`);
+  }
+  for (const role of ["plan", "blockedArtifact", "attemptIndex"]) {
+    const expected = PREDECESSOR[role];
+    validateTuple(value[role], expected.path, `M4 live plan predecessor.${role}`);
+    if (value[role].bytes !== expected.bytes || value[role].sha256 !== expected.sha256) {
+      fail(`M4 live plan predecessor ${role} tuple is invalid`);
+    }
+  }
+}
+
 export function validateJoenessM4LivePlan(value) {
-  exactKeys(value, ["schemaVersion", "id", "date", "attempt", "source", "runtime", "outputs", "resultBoundary"], "M4 live plan");
-  if (value.schemaVersion !== 1 || value.id !== JOENESS_M4_LIVE_RUN_ID || value.date !== "2026-08-14") fail("M4 live plan identity is invalid");
+  exactKeys(value, ["schemaVersion", "id", "date", "method", "predecessor", "attempt", "source", "runtime", "outputs", "resultBoundary"], "M4 live plan");
+  if (
+    value.schemaVersion !== 2 ||
+    value.id !== JOENESS_M4_LIVE_RUN_ID ||
+    value.date !== "2026-08-14" ||
+    value.method !== LIVE_METHOD
+  ) fail("M4 live plan identity or method is invalid");
+  validatePredecessor(value.predecessor);
   exactKeys(value.attempt, ["freshTurnCount", "retryCount", "automaticRetry"], "M4 live plan attempt");
   if (value.attempt.freshTurnCount !== 1 || value.attempt.retryCount !== 0 || value.attempt.automaticRetry !== false) fail("M4 live plan attempt policy is invalid");
   exactKeys(value.source, ["planImplementationCommit", ...Object.keys(SOURCE_PATHS)], "M4 live plan source");
@@ -224,6 +314,45 @@ export async function verifyJoenessM4ExecutionBoundary(options) {
   if (!committedPlan.equals(planBytes)) throw new Error("M4 working plan differs from execution HEAD");
   if (await gitBlobExists(resolvedRoot, implementationCommit, PLAN_PATH)) throw new Error("M4 plan already exists in the implementation commit");
 
+  const predecessorExecutionLine = await gitText(
+    resolvedRoot,
+    ["rev-list", "--parents", "-n", "1", PREDECESSOR.executionHead],
+  );
+  if (predecessorExecutionLine !== `${PREDECESSOR.executionHead} ${PREDECESSOR.implementationCommit}`) {
+    throw new Error("M4 predecessor execution lineage is invalid");
+  }
+  const predecessorPersistenceLine = await gitText(
+    resolvedRoot,
+    ["rev-list", "--parents", "-n", "1", PREDECESSOR.persistenceCommit],
+  );
+  if (predecessorPersistenceLine !== `${PREDECESSOR.persistenceCommit} ${PREDECESSOR.executionHead}`) {
+    throw new Error("M4 predecessor persistence lineage is invalid");
+  }
+  if (!(await gitIsAncestor(resolvedRoot, PREDECESSOR.executionHead, implementationCommit))) {
+    throw new Error("M4 predecessor execution head is not an ancestor of generation-v2 support");
+  }
+  if (!(await gitIsAncestor(resolvedRoot, PREDECESSOR.persistenceCommit, implementationCommit))) {
+    throw new Error("M4 predecessor persistence commit is not an ancestor of generation-v2 support");
+  }
+
+  for (const [role, pin, commits] of [
+    ["plan", PREDECESSOR.plan, [PREDECESSOR.executionHead, PREDECESSOR.persistenceCommit, implementationCommit, executionHead]],
+    ["blockedArtifact", PREDECESSOR.blockedArtifact, [PREDECESSOR.persistenceCommit, implementationCommit, executionHead]],
+    ["attemptIndex", PREDECESSOR.attemptIndex, [PREDECESSOR.persistenceCommit, implementationCommit, executionHead]],
+  ]) {
+    for (const commit of commits) {
+      const candidate = await gitBlob(resolvedRoot, commit, pin.path);
+      if (candidate.length !== pin.bytes || sha256(candidate) !== pin.sha256) {
+        throw new Error(`M4 predecessor ${role} pin drift`);
+      }
+    }
+    const workingFile = await confinedRegularFile(resolvedRoot, pin.path, `M4 predecessor ${role}`);
+    const working = await readFile(workingFile);
+    if (working.length !== pin.bytes || sha256(working) !== pin.sha256) {
+      throw new Error(`M4 predecessor ${role} pin drift`);
+    }
+  }
+
   for (const [role, expectedPath] of Object.entries(SOURCE_PATHS)) {
     const pin = plan.source[role];
     const [fromB, fromC] = await Promise.all([
@@ -258,7 +387,13 @@ export async function verifyJoenessM4ExecutionBoundary(options) {
       executionHead,
       executionHeadParent: implementationCommit,
       plan: { path: PLAN_PATH, bytes: planBytes.length, sha256: sha256(planBytes) },
-      implementationSourcesMatchBAndC: true,
+      predecessor: {
+        ...PREDECESSOR,
+        artifactsMatchSupportPlanAndWorking: true,
+        executionHeadIsAncestorOfSupport: true,
+        persistenceCommitIsAncestorOfSupport: true,
+      },
+      implementationSourcesMatchSupportPlanAndWorking: true,
     },
     outputsAbsent: true,
   };
@@ -267,6 +402,21 @@ export async function verifyJoenessM4ExecutionBoundary(options) {
 async function gitText(root, args) {
   const { stdout } = await execFile("git", args, { cwd: root, encoding: "utf8", maxBuffer: 1024 * 1024 });
   return stdout.trim();
+}
+
+async function gitIsAncestor(root, ancestor, descendant) {
+  try {
+    await execFile("git", ["merge-base", "--is-ancestor", ancestor, descendant], {
+      cwd: root,
+      encoding: "utf8",
+      maxBuffer: 1024 * 1024,
+      windowsHide: true,
+    });
+    return true;
+  } catch (error) {
+    if (error?.code === 1) return false;
+    throw error;
+  }
 }
 
 async function gitBlob(root, commit, relativePath) {
@@ -455,7 +605,7 @@ export async function createJoenessM4DefaultRuntime(options) {
       cleanupErrors.push(error);
     }
     try {
-      await operations.removeRunRoot(runRoot, runParent);
+      await operations.removeRunRoot(runRoot, runParent, plan.id);
     } catch (error) {
       cleanupErrors.push(error);
     }
@@ -558,8 +708,11 @@ async function pathIsAbsent(target) {
   }
 }
 
-async function removeOwnedRunRoot(runRoot, runParent) {
-  const expected = path.join(path.resolve(runParent), `joewrks-eval-${JOENESS_M4_LIVE_RUN_ID}`);
+async function removeOwnedRunRoot(runRoot, runParent, runId) {
+  if (typeof runId !== "string" || !/^[a-z0-9-]{1,80}$/u.test(runId)) {
+    throw new Error("M4 run-root cleanup identity is invalid");
+  }
+  const expected = path.join(path.resolve(runParent), `joewrks-eval-${runId}`);
   const actual = path.resolve(runRoot);
   if (actual !== expected) throw new Error("M4 run-root cleanup path is invalid");
   const stat = await lstat(actual);
@@ -602,6 +755,7 @@ export async function runJoenessM4Live(options) {
   for (const [name, operation] of Object.entries(operations)) {
     if (typeof operation !== "function") fail(`M4 live operation ${name} must be a function`);
   }
+  const retainDelegatedFreshFailure = operations.runEvaluator === runJoenessM4SuperpowersEval;
   const boundaryOptions = { repositoryRoot, planPath };
   const initial = await operations.verifyExecutionBoundary(boundaryOptions);
   await operations.preflightEvaluator({ repositoryRoot });
@@ -647,7 +801,13 @@ export async function runJoenessM4Live(options) {
   };
   const writeArtifact = async (relativePath, value) => {
     await revalidate();
-    const blocked = joenessM4BlockedEvidence(value, plan, initial.executionSource, cleanupState);
+    const blocked = joenessM4BlockedEvidence(
+      value,
+      plan,
+      initial.executionSource,
+      cleanupState,
+      retainDelegatedFreshFailure,
+    );
     assertJoenessM4ArtifactPrivacy(blocked, "M4 blocked artifact");
     const result = await operations.writeBlocked(repositoryRoot, relativePath, blocked);
     blockedPublished = true;
@@ -680,7 +840,7 @@ export async function runJoenessM4Live(options) {
         phase: "runtime-factory",
         safeCleanup: true,
         cause: { category: "runtime-factory-failed" },
-      }, plan, current.executionSource, cleanupState);
+      }, plan, current.executionSource, cleanupState, false);
       assertJoenessM4ArtifactPrivacy(blocked, "M4 partial-factory blocked artifact");
       await operations.writeBlocked(repositoryRoot, plan.outputs.blocked, blocked);
       blockedPublished = true;
@@ -738,10 +898,240 @@ function joenessM4DurableEvidence(base, plan, executionSource, cleanupState) {
   };
 }
 
-function joenessM4BlockedEvidence(base, plan, executionSource, cleanupState) {
-  assertSafeData(base, "M4 delegated blocked receipt");
+function hasSelectedDataProperties(value, keys) {
+  if (
+    value === null ||
+    typeof value !== "object" ||
+    utilTypes.isProxy(value) ||
+    Array.isArray(value)
+  ) return false;
+  let prototype;
+  try { prototype = Object.getPrototypeOf(value); } catch { return false; }
+  if (prototype !== Object.prototype && prototype !== null) return false;
+  for (const key of keys) {
+    let descriptor;
+    try { descriptor = Object.getOwnPropertyDescriptor(value, key); } catch { return false; }
+    if (!descriptor || !("value" in descriptor) || descriptor.get || descriptor.set) return false;
+  }
+  return true;
+}
+
+function boundedFreshBlockerCodes(value) {
+  if (value === null || typeof value !== "object" || utilTypes.isProxy(value)) return null;
+  let prototype;
+  let lengthDescriptor;
+  try {
+    prototype = Object.getPrototypeOf(value);
+    lengthDescriptor = Object.getOwnPropertyDescriptor(value, "length");
+  } catch {
+    return null;
+  }
+  if (
+    !Array.isArray(value) ||
+    prototype !== Array.prototype ||
+    !lengthDescriptor ||
+    !("value" in lengthDescriptor) ||
+    !Number.isSafeInteger(lengthDescriptor.value) ||
+    lengthDescriptor.value < 0 ||
+    lengthDescriptor.value > FRESH_BLOCKER_CODES.length
+  ) return null;
+  const length = lengthDescriptor.value;
+  const result = [];
+  let previousIndex = -1;
+  for (let index = 0; index < length; index += 1) {
+    let descriptor;
+    try { descriptor = Object.getOwnPropertyDescriptor(value, String(index)); } catch { return null; }
+    if (!descriptor || !("value" in descriptor) || descriptor.get || descriptor.set) return null;
+    const codeIndex = FRESH_BLOCKER_CODE_INDEX.get(descriptor.value);
+    if (codeIndex === undefined || codeIndex <= previousIndex) return null;
+    previousIndex = codeIndex;
+    result.push(descriptor.value);
+  }
+  return result;
+}
+
+function rebuildFreshFailure(value) {
+  const keys = [
+    "schemaVersion", "provenance", "runnerStage", "evidenceState", "lifecycle",
+    "eventCounts", "blockers", "appServerExit", "primaryCauseKind", "retention",
+  ];
+  if (!hasSelectedDataProperties(value, keys)) return null;
+  if (
+    value.schemaVersion !== 1 ||
+    value.provenance !== "runner-observed-default-fresh-adapter-rejection" ||
+    value.runnerStage !== "fresh-turn-rejected" ||
+    value.evidenceState !== "retained"
+  ) return null;
+
+  if (!hasSelectedDataProperties(
+    value.lifecycle,
+    ["threadStart", "turnStart", "terminal", "terminalCountState"],
+  )) return null;
+  const lifecycle = {
+    threadStart: value.lifecycle.threadStart,
+    turnStart: value.lifecycle.turnStart,
+    terminal: value.lifecycle.terminal,
+    terminalCountState: value.lifecycle.terminalCountState,
+  };
+  if (
+    !["observed", "not-observed"].includes(lifecycle.threadStart) ||
+    !["observed", "not-observed"].includes(lifecycle.turnStart) ||
+    !["completed", "missing", "non-completed", "ambiguous"].includes(lifecycle.terminal) ||
+    !["zero", "one", "multiple"].includes(lifecycle.terminalCountState) ||
+    (lifecycle.turnStart === "observed" && lifecycle.threadStart !== "observed") ||
+    (lifecycle.terminal !== "missing" && lifecycle.turnStart !== "observed") ||
+    (lifecycle.terminal === "missing" && lifecycle.terminalCountState !== "zero") ||
+    (["completed", "non-completed"].includes(lifecycle.terminal) && lifecycle.terminalCountState !== "one") ||
+    (lifecycle.terminal === "ambiguous" && lifecycle.terminalCountState !== "multiple")
+  ) return null;
+
+  if (!hasSelectedDataProperties(
+    value.eventCounts,
+    ["observed", "retained", "retainedOverLimit"],
+  )) return null;
+  const eventCounts = {
+    observed: value.eventCounts.observed,
+    retained: value.eventCounts.retained,
+    retainedOverLimit: value.eventCounts.retainedOverLimit,
+  };
+  if (
+    !Number.isSafeInteger(eventCounts.observed) ||
+    eventCounts.observed < 0 ||
+    !Number.isSafeInteger(eventCounts.retained) ||
+    eventCounts.retained < 0 ||
+    eventCounts.retained > eventCounts.observed ||
+    typeof eventCounts.retainedOverLimit !== "boolean" ||
+    eventCounts.retainedOverLimit !== (eventCounts.retained > 512) ||
+    (lifecycle.terminal !== "missing" && eventCounts.observed < 1)
+  ) return null;
+
+  if (!hasSelectedDataProperties(
+    value.blockers,
+    ["count", "codes", "unclassifiedCount"],
+  )) return null;
+  const blockerCodes = boundedFreshBlockerCodes(value.blockers.codes);
+  const blockerCount = value.blockers.count;
+  const unclassifiedCount = value.blockers.unclassifiedCount;
+  if (blockerCodes === null) return null;
+  const hasDuplicateTerminal = blockerCodes.includes("duplicate-terminal-event");
+  const hasMissingTerminal = blockerCodes.includes("missing-terminal-event");
+  const hasTurnNotCompleted = blockerCodes.includes("turn-not-completed");
+  const hasUnverifiedAppServerExit = blockerCodes.includes("app-server-exit-unverified");
+  const hasNonzeroAppServerExit = blockerCodes.includes("app-server-nonzero-exit");
+  if (
+    (hasMissingTerminal && (hasDuplicateTerminal || hasTurnNotCompleted)) ||
+    (hasUnverifiedAppServerExit && hasNonzeroAppServerExit)
+  ) return null;
+  const expectedTerminal = hasDuplicateTerminal
+    ? "ambiguous"
+    : hasMissingTerminal
+      ? "missing"
+      : hasTurnNotCompleted
+        ? "non-completed"
+        : "completed";
+  const expectedAppServerExit = hasUnverifiedAppServerExit
+    ? "unverified"
+    : hasNonzeroAppServerExit
+      ? "nonzero"
+      : "zero";
+  if (
+    !Number.isSafeInteger(blockerCount) ||
+    blockerCount < 0 ||
+    blockerCount > 64 ||
+    !Number.isSafeInteger(unclassifiedCount) ||
+    unclassifiedCount < 0 ||
+    blockerCount !== blockerCodes.length + unclassifiedCount ||
+    lifecycle.terminal !== expectedTerminal
+  ) return null;
+
+  if (
+    value.appServerExit !== expectedAppServerExit ||
+    !["syntax-error", "type-error", "aggregate-error", "error", "unverified"].includes(value.primaryCauseKind)
+  ) return null;
+  const retentionKeys = [
+    "rawOutputPersisted", "rawEventsPersisted", "threadTurnProcessIdentifiersPersisted",
+    "absolutePathsPersisted", "rawEventOrOutputDigestsPersisted", "rawStderrPersisted",
+    "configContentsPersisted",
+  ];
+  if (!hasSelectedDataProperties(value.retention, retentionKeys)) return null;
+  if (retentionKeys.some((key) => value.retention[key] !== false)) return null;
+
+  const rebuilt = {
+    schemaVersion: 1,
+    provenance: "runner-observed-default-fresh-adapter-rejection",
+    runnerStage: "fresh-turn-rejected",
+    evidenceState: "retained",
+    lifecycle,
+    eventCounts,
+    blockers: {
+      count: blockerCount,
+      codes: blockerCodes,
+      unclassifiedCount,
+    },
+    appServerExit: value.appServerExit,
+    primaryCauseKind: value.primaryCauseKind,
+    retention: Object.fromEntries(retentionKeys.map((key) => [key, false])),
+  };
+  return Buffer.byteLength(JSON.stringify(rebuilt)) <= 2048 ? rebuilt : null;
+}
+
+export function rebuildJoenessM4DelegatedBlockedReceipt(value) {
+  if (value === null || typeof value !== "object" || utilTypes.isProxy(value) || Array.isArray(value)) {
+    fail("M4 delegated blocked receipt must be a plain object");
+  }
+  let prototype;
+  try {
+    prototype = Object.getPrototypeOf(value);
+  } catch {
+    fail("M4 delegated blocked receipt is unsafe");
+  }
+  if (prototype !== Object.prototype && prototype !== null) fail("M4 delegated blocked receipt must be a plain object");
+  const requiredKeys = ["schemaVersion", "status", "phase", "safeCleanup", "cause"];
+  const data = Object.create(null);
+  for (const key of requiredKeys) {
+    let descriptor;
+    try { descriptor = Object.getOwnPropertyDescriptor(value, key); } catch { fail("M4 delegated blocked receipt is unsafe"); }
+    if (!descriptor || !("value" in descriptor) || descriptor.get || descriptor.set) {
+      fail("M4 delegated blocked receipt is unsafe");
+    }
+    data[key] = descriptor.value;
+  }
+  if (
+    data.schemaVersion !== 1 ||
+    data.status !== "blocked" ||
+    data.safeCleanup !== true ||
+    !["post-runtime-validation", "runtime-factory"].includes(data.phase) ||
+    !hasSelectedDataProperties(data.cause, ["category"])
+  ) fail("M4 delegated blocked receipt contract is invalid");
+  const category = data.cause.category;
+  if (
+    (data.phase === "runtime-factory" && category !== "runtime-factory-failed") ||
+    (data.phase === "post-runtime-validation" && !["contract-validation", "evaluation-failed"].includes(category))
+  ) fail("M4 delegated blocked receipt cause is invalid");
+  const rebuilt = {
+    schemaVersion: 1,
+    status: "blocked",
+    phase: data.phase,
+    safeCleanup: true,
+    cause: { category },
+  };
+  if (data.phase === "post-runtime-validation") {
+    let descriptor;
+    try { descriptor = Object.getOwnPropertyDescriptor(value, "freshFailure"); } catch { descriptor = null; }
+    const freshFailure = descriptor && "value" in descriptor && !descriptor.get && !descriptor.set
+      ? rebuildFreshFailure(descriptor.value)
+      : null;
+    if (freshFailure !== null) rebuilt.freshFailure = freshFailure;
+  }
+  return rebuilt;
+}
+
+function joenessM4BlockedEvidence(base, plan, executionSource, cleanupState, retainFreshFailure = false) {
+  const blocked = rebuildJoenessM4DelegatedBlockedReceipt(base);
+  const { freshFailure, ...genericBlocked } = blocked;
   return {
-    ...base,
+    ...genericBlocked,
+    ...(retainFreshFailure && freshFailure ? { freshFailure } : {}),
     executionSource,
     runtime: {
       codexVersion: plan.runtime.codexVersion,
