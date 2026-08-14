@@ -22,6 +22,9 @@ const FRESH_ADAPTER_PATH = path.join(
 const RUN_ID = "joeness-m4-transport-control-live-v4";
 const PLAN_PATH =
   "evals/skill-contracts/joeness-m4-transport-control-live-plan-v4.json";
+const V3_PERSISTENCE_COMMIT = "8f5b8dcfd12fccabb1b25cbc813aec48340b7287";
+const V4_ATTEMPT_INDEX_PATH =
+  "evals/skill-contracts/joeness-m4-transport-control-attempt-index-v4.json";
 const METHOD =
   "neutral-tiny-json-transport-control-with-fixed-runtime-error-origin-no-plugin-activation-or-policy-assessment";
 const OUTPUTS = Object.freeze({
@@ -36,6 +39,15 @@ function digest(value) {
 
 async function subject() {
   return import(`${pathToFileURL(MODULE_PATH).href}?t=${Date.now()}-${Math.random()}`);
+}
+
+async function cleanEvaluatorRoot(t) {
+  const root = await mkdtemp(path.join(tmpdir(), "joeness-m4-transport-control-eval-"));
+  t.after(async () => {
+    await rm(root, { recursive: true, force: true });
+  });
+  await mkdir(path.join(root, "evals", "skill-contracts"), { recursive: true });
+  return root;
 }
 
 function tuple(pathname, text = pathname) {
@@ -411,7 +423,7 @@ function liveOperations({
 
 function createBoundEvaluatorRuntime(options) {
   return options.runtimeFactory({
-    repositoryRoot: ROOT,
+    repositoryRoot: options.repositoryRoot,
     executionPlan: options.executionPlan,
     sourcePin: options.sourcePin,
   });
@@ -425,6 +437,21 @@ async function git(root, args) {
     windowsHide: true,
   });
   return stdout.trim();
+}
+
+async function gitPathExists(root, revision, relativePath) {
+  try {
+    await execFile("git", ["cat-file", "-e", `${revision}:${relativePath}`], {
+      cwd: root,
+      encoding: "utf8",
+      maxBuffer: 4 * 1024 * 1024,
+      windowsHide: true,
+    });
+    return true;
+  } catch (error) {
+    if (error?.code === 128) return false;
+    throw error;
+  }
 }
 
 async function sourceTuple(root, relativePath) {
@@ -447,9 +474,24 @@ async function executionFixture(t, {
   });
   await git(root, ["config", "user.email", "fixture@example.invalid"]);
   await git(root, ["config", "user.name", "fixture"]);
-  const wrapperPath = "evals/support/run-joeness-m4-transport-control-live.mjs";
-  await copyFile(MODULE_PATH, path.join(root, ...wrapperPath.split("/")));
-  await git(root, ["add", "--", wrapperPath]);
+  await git(root, [
+    "switch",
+    "--quiet",
+    "--create",
+    "synthetic-v4-support",
+    V3_PERSISTENCE_COMMIT,
+  ]);
+  const sourcePaths = [];
+  const draft = plan();
+  for (const role of ["controlRunner", "controlWrapper", "freshTurnAdapter", "collector"]) {
+    const relativePath = draft.source[role].path;
+    sourcePaths.push(relativePath);
+    await copyFile(
+      path.join(ROOT, ...relativePath.split("/")),
+      path.join(root, ...relativePath.split("/")),
+    );
+  }
+  await git(root, ["add", "--", ...sourcePaths]);
   await git(root, ["commit", "--quiet", "-m", "support transport wrapper"]);
   const support = await git(root, ["rev-parse", "HEAD"]);
 
@@ -474,6 +516,40 @@ async function executionFixture(t, {
   const execution = await git(root, ["rev-parse", "HEAD"]);
   return { root, support, execution, plan: value };
 }
+
+test("executionFixture builds v4 support from immutable v3 history and adds only the v4 plan", async (t) => {
+  const fixture = await executionFixture(t);
+  assert.equal(
+    await git(fixture.root, ["rev-list", "--parents", "-n", "1", fixture.support]),
+    `${fixture.support} ${V3_PERSISTENCE_COMMIT}`,
+  );
+  for (const relativePath of [
+    PLAN_PATH,
+    OUTPUTS.raw,
+    OUTPUTS.evidence,
+    OUTPUTS.blocked,
+    V4_ATTEMPT_INDEX_PATH,
+  ]) {
+    assert.equal(
+      await gitPathExists(fixture.root, fixture.support, relativePath),
+      false,
+      relativePath,
+    );
+  }
+  assert.equal(
+    await git(fixture.root, ["rev-list", "--parents", "-n", "1", fixture.execution]),
+    `${fixture.execution} ${fixture.support}`,
+  );
+  assert.equal(
+    await git(fixture.root, [
+      "diff",
+      "--name-status",
+      fixture.support,
+      fixture.execution,
+    ]),
+    `A\t${PLAN_PATH}`,
+  );
+});
 
 test("exports only the generation-v4 transport-control live contract", async () => {
   const api = await subject();
@@ -1076,13 +1152,14 @@ test("same-byte source-home replacement during cleanup cannot mint a safe receip
   assert.equal(Object.hasOwn(cleanupState, "receipt"), false);
 });
 
-test("authentic imported runner and adapter publish transport-only success after final revalidation", async () => {
+test("authentic imported runner and adapter publish transport-only success after final revalidation", async (t) => {
   const api = await subject();
+  const repositoryRoot = await cleanEvaluatorRoot(t);
   const fixture = liveOperations();
   const result = await api.runJoenessM4TransportControlLive({
-    repositoryRoot: ROOT,
+    repositoryRoot,
     planPath: PLAN_PATH,
-    sourceCodexHome: path.join(ROOT, ".test-source-home"),
+    sourceCodexHome: path.join(repositoryRoot, ".test-source-home"),
     runParent: tmpdir(),
     operations: fixture.operations,
   });
@@ -1121,15 +1198,16 @@ test("authentic imported runner and adapter publish transport-only success after
   }
 });
 
-test("authentic default adapter rejection retains detailed origin but injected runner is generic", async () => {
+test("authentic default adapter rejection retains detailed origin but injected runner is generic", async (t) => {
   const api = await subject();
+  const repositoryRoot = await cleanEvaluatorRoot(t);
   const authentic = liveOperations({
     session: freshSession({ threadStartError: new Error("PRIVATE-THREAD-START-CANARY") }),
   });
   await assert.rejects(() => api.runJoenessM4TransportControlLive({
-    repositoryRoot: ROOT,
+    repositoryRoot,
     planPath: PLAN_PATH,
-    sourceCodexHome: path.join(ROOT, ".test-source-home"),
+    sourceCodexHome: path.join(repositoryRoot, ".test-source-home"),
     runParent: tmpdir(),
     operations: authentic.operations,
   }), /fresh evaluator turn validation failed/u);
@@ -1149,9 +1227,9 @@ test("authentic default adapter rejection retains detailed origin but injected r
     },
   });
   await assert.rejects(() => api.runJoenessM4TransportControlLive({
-    repositoryRoot: ROOT,
+    repositoryRoot,
     planPath: PLAN_PATH,
-    sourceCodexHome: path.join(ROOT, ".test-source-home"),
+    sourceCodexHome: path.join(repositoryRoot, ".test-source-home"),
     runParent: tmpdir(),
     operations: injected.operations,
   }), /injected evaluator failure/u);
@@ -1160,8 +1238,9 @@ test("authentic default adapter rejection retains detailed origin but injected r
   assert.equal(Object.hasOwn(injected.calls.blocked[0].value, "freshFailure"), false);
 });
 
-test("authentic runner with an injected adapter cannot mint PASS or detailed fresh failure", async () => {
+test("authentic runner with an injected adapter cannot mint PASS or detailed fresh failure", async (t) => {
   const api = await subject();
+  const repositoryRoot = await cleanEvaluatorRoot(t);
   const adapter = await import(pathToFileURL(FRESH_ADAPTER_PATH).href);
 
   const successSpoof = liveOperations({
@@ -1170,9 +1249,9 @@ test("authentic runner with an injected adapter cannot mint PASS or detailed fre
     },
   });
   await assert.rejects(() => api.runJoenessM4TransportControlLive({
-    repositoryRoot: ROOT,
+    repositoryRoot,
     planPath: PLAN_PATH,
-    sourceCodexHome: path.join(ROOT, ".test-source-home"),
+    sourceCodexHome: path.join(repositoryRoot, ".test-source-home"),
     runParent: tmpdir(),
     operations: successSpoof.operations,
   }), /identity|provenance|authentic/iu);
@@ -1186,9 +1265,9 @@ test("authentic runner with an injected adapter cannot mint PASS or detailed fre
     },
   });
   await assert.rejects(() => api.runJoenessM4TransportControlLive({
-    repositoryRoot: ROOT,
+    repositoryRoot,
     planPath: PLAN_PATH,
-    sourceCodexHome: path.join(ROOT, ".test-source-home"),
+    sourceCodexHome: path.join(repositoryRoot, ".test-source-home"),
     runParent: tmpdir(),
     operations: failureSpoof.operations,
   }), /fresh evaluator turn validation failed/u);
@@ -1198,13 +1277,14 @@ test("authentic runner with an injected adapter cannot mint PASS or detailed fre
   assert.equal(JSON.stringify(failureSpoof.calls.blocked[0]).includes("PRIVATE-SPOOF-CANARY"), false);
 });
 
-test("success and blocked publication both stop on final boundary drift", async () => {
+test("success and blocked publication both stop on final boundary drift", async (t) => {
   const api = await subject();
+  const repositoryRoot = await cleanEvaluatorRoot(t);
   const success = liveOperations({ boundaryFailureAt: 2 });
   await assert.rejects(() => api.runJoenessM4TransportControlLive({
-    repositoryRoot: ROOT,
+    repositoryRoot,
     planPath: PLAN_PATH,
-    sourceCodexHome: path.join(ROOT, ".test-source-home"),
+    sourceCodexHome: path.join(repositoryRoot, ".test-source-home"),
     runParent: tmpdir(),
     operations: success.operations,
   }), /boundary changed/u);
@@ -1221,9 +1301,9 @@ test("success and blocked publication both stop on final boundary drift", async 
     },
   });
   await assert.rejects(() => api.runJoenessM4TransportControlLive({
-    repositoryRoot: ROOT,
+    repositoryRoot,
     planPath: PLAN_PATH,
-    sourceCodexHome: path.join(ROOT, ".test-source-home"),
+    sourceCodexHome: path.join(repositoryRoot, ".test-source-home"),
     runParent: tmpdir(),
     operations: blocked.operations,
   }), /boundary changed/u);
@@ -1270,8 +1350,9 @@ test("runtime factory is exactly once and caller-owned boundary mutation cannot 
   assert.equal(observedSourcePin.runner.sha256, digest("control-runner"));
 });
 
-test("partial runtime-factory failure publishes only after safe cleanup and config readback", async () => {
+test("partial runtime-factory failure publishes only after safe cleanup and config readback", async (t) => {
   const api = await subject();
+  const repositoryRoot = await cleanEvaluatorRoot(t);
   const safe = liveOperations();
   safe.operations.createRuntime = async ({ cleanupState }) => {
     const tupleValue = { bytes: 17, sha256: digest("source-config") };
@@ -1287,9 +1368,9 @@ test("partial runtime-factory failure publishes only after safe cleanup and conf
     throw new Error("safe partial factory failure");
   };
   await assert.rejects(() => api.runJoenessM4TransportControlLive({
-    repositoryRoot: ROOT,
+    repositoryRoot,
     planPath: PLAN_PATH,
-    sourceCodexHome: path.join(ROOT, ".test-source-home"),
+    sourceCodexHome: path.join(repositoryRoot, ".test-source-home"),
     runParent: tmpdir(),
     operations: safe.operations,
   }), /safe partial factory failure/u);
@@ -1311,9 +1392,9 @@ test("partial runtime-factory failure publishes only after safe cleanup and conf
     throw new Error("unsafe partial factory failure");
   };
   await assert.rejects(() => api.runJoenessM4TransportControlLive({
-    repositoryRoot: ROOT,
+    repositoryRoot,
     planPath: PLAN_PATH,
-    sourceCodexHome: path.join(ROOT, ".test-source-home"),
+    sourceCodexHome: path.join(repositoryRoot, ".test-source-home"),
     runParent: tmpdir(),
     operations: unsafe.operations,
   }), /unsafe partial factory failure/u);
