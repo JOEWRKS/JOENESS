@@ -60,6 +60,16 @@ This evidence locates the stop before output extraction, JSON parsing, and seman
 
 The primary v1 method and the materially different v2 fallback are now exhausted. Neither command is retried, M4 remains `candidate/unvalidated`, and every promotion flag stays false. Another live method requires a new user decision or materially new evidence; this record itself authorizes no Core, manifest, plugin-configuration, or promotion change.
 
+## 2026-08-14 M4 fixed-enum diagnostic v3
+
+The v3 diagnostic added only a fixed-enum normalized blocker projection and changed no evaluator contract, active Core, vendor install manifest, plugin setting, or promotion boundary. It selected the additive immutable evaluation fixture `evals/skill-contracts/fixtures/joeness-m4-superpowers-v1/manifest-v2.json` while preserving the v1 fixture and manifest. Its committed plan `evals/skill-contracts/joeness-m4-superpowers-live-plan-v3.json` is 2,958 bytes with SHA-256 `2d98638e45b65fa2c1dc98fd11d7eeb86d57d9c6d69ce0a56752315aa83fb855`. The single invocation exited 1 with no retry and published only `evals/skill-contracts/joeness-m4-superpowers-live-v3-blocked.json`, 3,670 bytes with SHA-256 `41aeafdb4a5b4b2bb468510846cb889050681e844f40d21669dbaf4c5175978a`. No raw or success-evidence artifact was published.
+
+The blocked artifact directly records observed thread and turn starts, one non-completed terminal, nine observed and retained normalized events, a total blocker count of three with coarse codes `runtime-control-blocker` and `turn-not-completed` plus one coarse unclassified count, zero App Server exit, and `runtime-error` from the adapter's fixed normalized classification. It also directly preserves safe cleanup, one launch and one confirmed close, no remaining owned process, absent isolated home and run root, unchanged source configuration, `candidate/unvalidated`, and all promotion flags false. Its retention flags specifically say that raw output, raw events, thread/turn/process identifiers, absolute paths, raw event/output digests, stderr, and configuration contents were not persisted.
+
+The exact pinned adapter and runner invariants support the bounded inference that `runtime-error` is the third unique blocker category alongside `runtime-control-blocker` and `turn-not-completed`. They do not reveal the original runtime message, provider, subtype, repetition count, or root cause. Output extraction, JSON parsing, and semantic validation were not reached. Installed-plugin activation, JOENESS behavior and policy, and Superpowers compatibility therefore remain `UNVERIFIED`; this result does not establish a plugin-activation or policy failure.
+
+The fixed-enum diagnostic goal is achieved, but M4 remains `BLOCKED/UNVERIFIED` and `candidate/unvalidated`. The same v3 command is not retried, no additional live attempt is authorized, and no promotion or Core, manifest, or plugin-configuration change follows from this evidence. Cleanup readback matched the pre-run configuration and broad directory baselines; historical PID values, configuration contents, and directory basenames were not retained.
+
 ## Visual Check structure
 
 The public body selects exactly one or more applicable modes:

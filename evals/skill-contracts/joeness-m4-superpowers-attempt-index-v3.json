@@ -1,0 +1,252 @@
+{
+  "schemaVersion": 3,
+  "id": "joeness-m4-superpowers-attempt-index-v3",
+  "date": "2026-08-14",
+  "recordType": "fixed-enum-normalized-blocker-live-attempt",
+  "predecessor": {
+    "attemptIndex": {
+      "path": "evals/skill-contracts/joeness-m4-superpowers-attempt-index-v2.json",
+      "bytes": 9264,
+      "sha256": "147eead383f1b5e696dd5d7fcc57a9c86915adb8d8448189f4eb59bb95f73156"
+    },
+    "disposition": "blocked-at-noncompleted-fresh-turn-runtime-control",
+    "sameV2RetryAuthorized": false
+  },
+  "attempt": {
+    "id": "joeness-m4-superpowers-live-v3",
+    "method": "bounded-path-private-fixed-enum-normalized-event-blocker-projection-no-evaluator-contract-change",
+    "command": "node evals/support/run-joeness-m4-superpowers-live.mjs --mode live --plan evals/skill-contracts/joeness-m4-superpowers-live-plan-v3.json",
+    "startedAtKst": "2026-08-14T22:08:52.5026061+09:00",
+    "endedAtKst": "2026-08-14T22:09:16.9094204+09:00",
+    "durationSeconds": 24.407,
+    "invocationExitCode": 1,
+    "fixedWrapperStderr": "m4-live-wrapper-failed",
+    "fixedWrapperStderrBasis": "DIRECT-fixed-wrapper-message-not-original-runtime-error-or-stderr",
+    "invocationObservationBasis": "DIRECT-invocation-bound-shell-result",
+    "freshTurnPolicyCount": 1,
+    "retryCount": 0,
+    "automaticRetry": false
+  },
+  "plan": {
+    "path": "evals/skill-contracts/joeness-m4-superpowers-live-plan-v3.json",
+    "bytes": 2958,
+    "sha256": "2d98638e45b65fa2c1dc98fd11d7eeb86d57d9c6d69ce0a56752315aa83fb855"
+  },
+  "blockedArtifact": {
+    "path": "evals/skill-contracts/joeness-m4-superpowers-live-v3-blocked.json",
+    "bytes": 3670,
+    "sha256": "41aeafdb4a5b4b2bb468510846cb889050681e844f40d21669dbaf4c5175978a",
+    "status": "blocked"
+  },
+  "executionSource": {
+    "planImplementationCommit": "39387f9ce0708ed56ef7be8e34831690eae31021",
+    "executionHead": "e36175da3fa67e3b8aedddef6c12156dfd04a438",
+    "executionHeadParent": "39387f9ce0708ed56ef7be8e34831690eae31021",
+    "implementationSourcesMatchSupportPlanAndWorking": true,
+    "sourcePins": {
+      "runner": {
+        "path": "evals/support/run-joeness-m4-superpowers-eval.mjs",
+        "bytes": 53515,
+        "sha256": "b144d15d1601f7de8356fa95819566d47ef6447e9a5195329692d1b83533c9bc"
+      },
+      "liveWrapper": {
+        "path": "evals/support/run-joeness-m4-superpowers-live.mjs",
+        "bytes": 54784,
+        "sha256": "8f99f6a2a790dd0bd82b886a303355fc15808f02738ad755c5c3171f9e1faa0e"
+      },
+      "freshTurnAdapter": {
+        "path": "evals/support/run-fresh-evaluator-turn.mjs",
+        "bytes": 56845,
+        "sha256": "4884154dd1884b6fa899eef854307edec2a9897cb39b1f45c9c03479cab34247"
+      },
+      "collector": {
+        "path": "evals/support/collect-codex-app-server.mjs",
+        "bytes": 297632,
+        "sha256": "8b81ddb28be2a803500839a2de61f9bb397aa96711d039bdb7a3a86cfad8d687"
+      },
+      "fixtureManifest": {
+        "path": "evals/skill-contracts/fixtures/joeness-m4-superpowers-v1/manifest-v2.json",
+        "bytes": 1738,
+        "sha256": "3708a7c3ea677926cd4f85093e83788ff6250aa0b7fd012529ff88a45ddc77f0"
+      }
+    }
+  },
+  "observedFailure": {
+    "artifactDirect": {
+      "phase": "post-runtime-validation",
+      "safeCleanup": true,
+      "causeCategory": "evaluation-failed",
+      "freshFailure": {
+        "schemaVersion": 2,
+        "provenance": "runner-observed-default-fresh-adapter-rejection",
+        "runnerStage": "fresh-turn-rejected",
+        "evidenceState": "retained",
+        "lifecycle": {
+          "threadStart": "observed",
+          "turnStart": "observed",
+          "terminal": "non-completed",
+          "terminalCountState": "one"
+        },
+        "eventCounts": {
+          "observed": 9,
+          "retained": 9,
+          "retainedOverLimit": false
+        },
+        "normalizerBlocker": {
+          "provenance": "adapter-normalization-fixed-enum",
+          "classification": "runtime-error"
+        },
+        "blockers": {
+          "count": 3,
+          "codes": [
+            "runtime-control-blocker",
+            "turn-not-completed"
+          ],
+          "unclassifiedCount": 1
+        },
+        "appServerExit": "zero",
+        "primaryCauseKind": "error",
+        "retention": {
+          "rawOutputPersisted": false,
+          "rawEventsPersisted": false,
+          "threadTurnProcessIdentifiersPersisted": false,
+          "absolutePathsPersisted": false,
+          "rawEventOrOutputDigestsPersisted": false,
+          "rawStderrPersisted": false,
+          "configContentsPersisted": false
+        }
+      },
+      "runtime": {
+        "codexVersion": "codex-cli 0.146.0",
+        "freshTurnCount": 1,
+        "retryCount": 0,
+        "dynamicToolCount": 0,
+        "sourceConfigReadback": "UNCHANGED",
+        "appServerLaunchCount": 1,
+        "appServerCloseConfirmedCount": 1,
+        "remainingOwnedProcessCount": 0,
+        "isolatedCodexHomeReadback": "absent",
+        "runRootReadback": "absent"
+      },
+      "resultBoundary": {
+        "state": "candidate",
+        "validation": "unvalidated",
+        "promotionPass": false,
+        "corePromotion": false,
+        "manifestPromotion": false
+      }
+    },
+    "pinnedControlFlowInference": {
+      "basis": "INFERRED-from-exact-pinned-runner-wrapper-default-adapter-and-fixed-enum-invariants-not-raw-runtime-payload",
+      "defaultFreshAdapterRejectionAuthenticated": true,
+      "normalizedBlockerProjectionAuthenticated": true,
+      "exactThirdUniqueBlockerCategory": "runtime-error",
+      "exactThirdUniqueBlockerCategoryBasis": "INFERRED-from-fixed-adapter-normalization-and-runner-identity-invariants-not-raw-runtime-payload",
+      "outputExtractionReached": false,
+      "jsonParsingReached": false,
+      "semanticValidationReached": false,
+      "cleanupCompletedBeforeBlockedPublication": true
+    },
+    "boundedConclusion": "The authenticated default adapter observed thread and turn starts, one non-completed terminal, and nine retained normalized events. The fixed enum exposes runtime-error as the third unique blocker category while retaining no raw runtime payload or root-cause evidence."
+  },
+  "diagnosticMethodResult": {
+    "fixedEnumNormalizedBlockerProjectionGoal": "ACHIEVED",
+    "m4BehaviorValidation": "BLOCKED/UNVERIFIED",
+    "outputExtraction": "NOT-REACHED",
+    "jsonParsing": "NOT-REACHED",
+    "semanticValidation": "NOT-REACHED",
+    "installedPluginActivation": "UNVERIFIED",
+    "joenessBehavior": "UNVERIFIED",
+    "joenessPolicyFailure": "UNVERIFIED-not-established",
+    "superpowersCompatibility": "UNVERIFIED"
+  },
+  "outputPresence": {
+    "raw": {
+      "path": "evals/skill-contracts/joeness-m4-superpowers-live-v3-raw.json",
+      "status": "absent"
+    },
+    "evidence": {
+      "path": "evals/skill-contracts/joeness-m4-superpowers-live-v3-evidence.json",
+      "status": "absent"
+    },
+    "blocked": {
+      "path": "evals/skill-contracts/joeness-m4-superpowers-live-v3-blocked.json",
+      "status": "present"
+    }
+  },
+  "cleanup": {
+    "artifactDirect": {
+      "safeCleanup": true,
+      "appServerLaunchCount": 1,
+      "appServerCloseConfirmedCount": 1,
+      "remainingOwnedProcessCount": 0,
+      "isolatedCodexHomeReadback": "absent",
+      "runRootReadback": "absent",
+      "sourceConfigReadback": "UNCHANGED"
+    },
+    "independentReadback": {
+      "basis": "DIRECT-read-only-post-run-observation",
+      "matchingTaskProcessCount": 0,
+      "matchingTaskRunRootCount": 0,
+      "matchingTaskIsolatedHomeCount": 0,
+      "sourceConfig": {
+        "bytes": 8590,
+        "sha256": "3a7b848f3024260adf2d3e93ea4440703b4b253047163b3f95cb374ad9bdba10",
+        "currentReadbackMatchesPinnedPreRunTuple": true,
+        "prePostExactEqualFromArtifact": true
+      },
+      "broadRunRootBaseline": {
+        "algorithm": "SHA-256 of ordinal-sorted basenames joined as UTF-8 with LF separators and no terminal LF",
+        "preCount": 38,
+        "postCount": 38,
+        "sha256": "56dffbde6864a4184208b1366a88506d12289f0f9f32af472d6cc6e79d03b15d",
+        "prePostExactEqual": true
+      },
+      "broadIsolatedHomeBaseline": {
+        "algorithm": "SHA-256 of ordinal-sorted basenames joined as UTF-8 with LF separators and no terminal LF",
+        "preCount": 0,
+        "postCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "prePostExactEqual": true
+      },
+      "boundary": "Broad directory sets were baseline-only, were not attributed as task-owned, and were not modified or deleted. Historical PID values, directory basenames, and source-config contents were intentionally not retained."
+    }
+  },
+  "limitations": {
+    "installedPluginActivation": "UNVERIFIED-pinned-plugin-texts-were-ordinary-inputs",
+    "modelGenerationStarted": "UNVERIFIED",
+    "exactTerminalStatusAndReason": "NOT-RETAINED",
+    "originalRuntimeMessage": "NOT-RETAINED",
+    "runtimeErrorProvider": "NOT-RETAINED",
+    "runtimeErrorSubtype": "NOT-RETAINED",
+    "runtimeErrorRepetitionCount": "NOT-RETAINED",
+    "rootCause": "UNVERIFIED",
+    "originalRuntimeStderr": "NOT-RETAINED",
+    "rawModelOutput": "NOT-RETAINED-production-unverified",
+    "rawEvents": "NOT-RETAINED",
+    "joenessBehavior": "UNVERIFIED",
+    "joenessPolicyFailure": "UNVERIFIED-not-established",
+    "superpowersCompatibility": "UNVERIFIED",
+    "outputExtraction": "NOT-REACHED",
+    "jsonParsing": "NOT-REACHED",
+    "semanticValidation": "NOT-REACHED",
+    "userAcceptance": "UNVERIFIED"
+  },
+  "disposition": {
+    "diagnosticFixedEnumGoal": "ACHIEVED",
+    "m4": "BLOCKED/UNVERIFIED",
+    "candidateState": "candidate/unvalidated",
+    "promotionPass": false,
+    "sameV3RetryAuthorized": false,
+    "additionalLiveAttemptAuthorized": false
+  },
+  "stopBoundary": {
+    "automaticRetryAuthorized": false,
+    "additionalLiveAttemptAuthorized": false,
+    "coreChangeAuthorized": false,
+    "manifestChangeAuthorized": false,
+    "pluginConfigurationChangeAuthorized": false,
+    "promotionAuthorized": false,
+    "resumeOnlyAfter": "new user decision or materially new evidence supporting a new generation and method"
+  }
+}
