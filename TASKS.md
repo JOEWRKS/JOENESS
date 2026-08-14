@@ -39,6 +39,7 @@
   - M3의 `다음 행동`은 고정 보고 항목이 아니다. 필수 작업·구체적 재개 조건·결과를 바꾸는 사용자 결정이 있을 때만 가장 합리적인 범위 내 행동 하나와 이유를 제시하고, 완전 완료나 단순 선택 사항이면 생략한다.
   - M3 사용자용 문장은 비전공자 기준의 쉬운 말을 기본으로 한다. 꼭 필요한 전문용어는 처음 쓸 때 바로 설명하고, 내부 작업 이름·은어·어색한 직역은 일상적인 표현으로 바꾼다. 에이전트끼리의 내부 대화는 제외하며, 사용자가 기술 수준이나 형식을 직접 지정하면 그 요청을 따른다.
   - Core 크기 상한은 명확한 사용자 설명을 억지로 축약하지 않기 위해 2,048바이트에서 3,072바이트로 변경했다. 범위와 이전 결정과의 관계는 [사용자 설명과 Core 크기 결정](docs/superpowers/specs/2026-08-13-joeness-user-language-and-core-size-decision.md)에 기록했다.
+  - M4 첫 실행은 충돌하는 Superpowers 문구를 고정 입력으로 제공한 fresh 평가 1회를 시도했지만, 일반화된 `post-runtime-validation` 차단 기록만 남기고 종료 코드 1로 끝나 계속 차단 상태다. 프로세스 종료·격리 폴더 제거·설정 원상복구는 확인했다. 기존 차단 기록에는 정확한 실패 단계가 남지 않아 실제 턴 시작·JSON 파싱·계약 판정 여부는 아직 모른다. [첫 시도 기록](evals/skill-contracts/joeness-m4-superpowers-attempt-index-v1.json)과 [차단 산출물](evals/skill-contracts/joeness-m4-superpowers-live-v1-blocked.json)을 보존하고 같은 v1은 다시 실행하지 않는다. M4는 아직 미검증이며 승격하지 않는다.
   - fresh 실행은 exact prompt·허용 입력·raw final output·run identity를 보존한다. transport-level 실행 이력이 없으면 그 한계를 명시하고 완전한 격리 증거로 주장하지 않는다.
   - 사용자 수락은 에이전트 화면 판정과 분리해 `UNVERIFIED`로 유지한다.
   - 공식 상태와 증거 포인터: [`vendor/source-manifest.json`](vendor/source-manifest.json)

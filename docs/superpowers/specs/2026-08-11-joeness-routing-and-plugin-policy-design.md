@@ -38,7 +38,17 @@ M4 is satisfied only when a constrained external-skill path gives a direct recom
 
 When the external workflow cannot meet that rubric, the fallback is to stop using its unauthorized portions, continue with the independently authorized task where possible, and recommend that an unconstrainable implicit plugin remain disabled by default. JOENESS does not enforce that recommendation through configuration.
 
-Exact installed-plugin activation remains unverified until separate live evidence is collected. M4 changes no installation, does not apply JOENESS, and runs no live model or plugin evaluation.
+Exact installed-plugin activation remains unverified until separate activation evidence is collected. The contract implementation changed no installation, did not apply JOENESS, and ran no live model or plugin evaluation; the later bounded attempt is recorded separately below.
+
+## 2026-08-14 M4 live attempt v1
+
+The first bounded live attempt used the committed plan `evals/skill-contracts/joeness-m4-superpowers-live-plan-v1.json` (1,888 bytes, SHA-256 `34d59ba0fd3dfa24973b9ab6e55205ecd3a22da32daf2fa15daaa156273f428c`) and exactly one fresh-turn policy with no retry. The invocation exited 1 and published only the immutable blocked artifact `evals/skill-contracts/joeness-m4-superpowers-live-v1-blocked.json` (1,384 bytes, SHA-256 `590c1a44cf7e9660ee2c6df8a32c63cadfcab881154c16aadefcd8315fdcbec4`). No raw or success-evidence artifact was published.
+
+The blocked artifact directly records `post-runtime-validation`, `evaluation-failed`, safe cleanup, one App Server launch with one confirmed close, zero remaining owned processes, absent isolated home and run root, and unchanged source configuration. The execution remained `candidate/unvalidated` with every promotion flag false. The external readback also found the exact task roots absent, no matching task process, and the source configuration unchanged.
+
+The artifact does not retain the original runtime error, original runtime stderr, raw model output, event stream, thread/turn lifecycle, JSON parsing result, blocker set, or semantic validator state. Therefore it does not establish that a model turn started or completed, nor whether parsing or contract validation was reached. The installed Superpowers activation remains `UNVERIFIED`: the evaluation supplied exact pinned plugin texts as ordinary inputs while runtime project documents were disabled and dynamic tools were empty.
+
+The v1 command is not retried. A materially different fallback may first add a fixed-size, path-private failure-stage and lifecycle projection, with no evaluator-contract, Core, manifest, plugin-setting, or promotion change. Any new live attempt requires a new immutable implementation commit, plan, output generation, clean preflight, and independent review.
 
 ## Visual Check structure
 

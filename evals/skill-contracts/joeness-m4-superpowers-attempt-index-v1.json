@@ -1,0 +1,150 @@
+{
+  "schemaVersion": 1,
+  "id": "joeness-m4-superpowers-attempt-index-v1",
+  "date": "2026-08-14",
+  "recordType": "bounded-live-attempt",
+  "attempt": {
+    "id": "joeness-m4-superpowers-live-v1",
+    "method": "pinned-conflicting-superpowers-texts-as-ordinary-fresh-turn-input-with-project-docs-disabled-and-no-dynamic-tools",
+    "command": "node evals/support/run-joeness-m4-superpowers-live.mjs --mode live --plan evals/skill-contracts/joeness-m4-superpowers-live-plan-v1.json",
+    "startedAtKst": "2026-08-14T19:39:25.3008943+09:00",
+    "endedAtKst": "2026-08-14T19:39:45.9365217+09:00",
+    "wallClockDurationSeconds": 20.6356274,
+    "stopwatchDurationSeconds": 20.631,
+    "invocationExitCode": 1,
+    "fixedWrapperStderr": "m4-live-wrapper-failed",
+    "fixedWrapperStderrBasis": "DIRECT-fixed-wrapper-message-not-original-runtime-error-or-stderr",
+    "invocationObservationBasis": "DIRECT-invocation-bound-shell-result",
+    "freshTurnPolicyCount": 1,
+    "retryCount": 0,
+    "automaticRetry": false
+  },
+  "plan": {
+    "path": "evals/skill-contracts/joeness-m4-superpowers-live-plan-v1.json",
+    "bytes": 1888,
+    "sha256": "34d59ba0fd3dfa24973b9ab6e55205ecd3a22da32daf2fa15daaa156273f428c"
+  },
+  "blockedArtifact": {
+    "path": "evals/skill-contracts/joeness-m4-superpowers-live-v1-blocked.json",
+    "bytes": 1384,
+    "sha256": "590c1a44cf7e9660ee2c6df8a32c63cadfcab881154c16aadefcd8315fdcbec4",
+    "status": "blocked"
+  },
+  "executionSource": {
+    "implementationCommit": "6a08c764283bbf2babd9f29765b097de561c9c4e",
+    "executionHead": "d66b091a05e0724108304456bbff7c7b0ad252e0",
+    "executionHeadParent": "6a08c764283bbf2babd9f29765b097de561c9c4e",
+    "implementationSourcesMatchBAndC": true
+  },
+  "observedFailure": {
+    "artifactDirect": {
+      "phase": "post-runtime-validation",
+      "safeCleanup": true,
+      "causeCategory": "evaluation-failed",
+      "codexVersion": "codex-cli 0.146.0",
+      "freshTurnPolicyCount": 1,
+      "retryCount": 0,
+      "dynamicToolCount": 0,
+      "sourceConfigReadback": "UNCHANGED",
+      "appServerLaunchCount": 1,
+      "appServerCloseConfirmedCount": 1,
+      "remainingOwnedProcessCount": 0,
+      "isolatedCodexHomeReadback": "absent",
+      "runRootReadback": "absent",
+      "state": "candidate",
+      "validation": "unvalidated",
+      "promotionPass": false,
+      "corePromotion": false,
+      "manifestPromotion": false
+    },
+    "pinnedControlFlowInference": {
+      "basis": "INFERRED-from-exact-pinned-runner-and-wrapper-control-flow-not-a-direct-blocked-artifact-field",
+      "runtimeFactoryCompleted": true,
+      "runTurnPathEntered": true,
+      "cleanupCompletedBeforeBlockedPublication": true,
+      "exactFailureLocation": "UNVERIFIED-because-original-error-and-fresh-evaluator-evidence-were-not-retained"
+    },
+    "boundedConclusion": "The bounded operation reached the evaluation path, failed before a valid M4 result was published, completed safe cleanup, and preserved no diagnostic that identifies the exact fresh-turn or validation stage."
+  },
+  "outputPresence": {
+    "raw": {
+      "path": "evals/skill-contracts/joeness-m4-superpowers-live-v1-raw.json",
+      "status": "absent"
+    },
+    "evidence": {
+      "path": "evals/skill-contracts/joeness-m4-superpowers-live-v1-evidence.json",
+      "status": "absent"
+    },
+    "blocked": {
+      "path": "evals/skill-contracts/joeness-m4-superpowers-live-v1-blocked.json",
+      "status": "present"
+    }
+  },
+  "cleanup": {
+    "artifactDirect": {
+      "safeCleanup": true,
+      "appServerLaunchCount": 1,
+      "appServerCloseConfirmedCount": 1,
+      "remainingOwnedProcessCount": 0,
+      "isolatedCodexHomeReadback": "absent",
+      "runRootReadback": "absent",
+      "sourceConfigReadback": "UNCHANGED"
+    },
+    "independentReadback": {
+      "basis": "DIRECT-read-only-post-run-observation",
+      "matchingTaskProcessCount": 0,
+      "matchingTaskRunRootCount": 0,
+      "matchingTaskIsolatedHomeCount": 0,
+      "sourceConfig": {
+        "bytes": 8590,
+        "sha256": "3a7b848f3024260adf2d3e93ea4440703b4b253047163b3f95cb374ad9bdba10",
+        "prePostExactEqual": true
+      },
+      "broadRunRootBaseline": {
+        "algorithm": "SHA-256 of ordinal-sorted basenames joined as UTF-8 with LF separators and no terminal LF",
+        "preCount": 38,
+        "postCount": 38,
+        "sha256": "56dffbde6864a4184208b1366a88506d12289f0f9f32af472d6cc6e79d03b15d",
+        "prePostExactEqual": true
+      },
+      "broadIsolatedHomeBaseline": {
+        "algorithm": "SHA-256 of ordinal-sorted basenames joined as UTF-8 with LF separators and no terminal LF",
+        "preCount": 0,
+        "postCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "prePostExactEqual": true
+      },
+      "boundary": "Broad directory sets were baseline-only, were not attributed as task-owned, and were not modified or deleted."
+    }
+  },
+  "limitations": {
+    "installedPluginActivation": "UNVERIFIED-pinned-plugin-texts-were-ordinary-inputs",
+    "modelTurnStarted": "UNVERIFIED",
+    "modelTurnCompleted": "UNVERIFIED",
+    "originalRuntimeError": "NOT-RETAINED",
+    "originalRuntimeStderr": "NOT-RETAINED",
+    "rawModelOutput": "NOT-RETAINED-production-unverified",
+    "freshEvaluatorEvidence": "NOT-RETAINED",
+    "eventLifecycle": "NOT-RETAINED",
+    "jsonParsing": "UNVERIFIED",
+    "blockers": "UNVERIFIED",
+    "semanticValidation": "UNVERIFIED",
+    "userAcceptance": "UNVERIFIED"
+  },
+  "disposition": {
+    "m4": "blocked-at-generic-post-runtime-validation",
+    "candidateState": "candidate/unvalidated",
+    "promotionPass": false,
+    "sameV1RetryAuthorized": false
+  },
+  "nextAuthorizedMethod": {
+    "method": "bounded-path-private-fresh-failure-stage-and-lifecycle-retention-no-evaluator-contract-change",
+    "sameCommandRetryAuthorized": false,
+    "automaticRetryAuthorized": false,
+    "coreChangeAuthorized": false,
+    "manifestChangeAuthorized": false,
+    "pluginConfigurationChangeAuthorized": false,
+    "promotionAuthorized": false,
+    "liveAttemptAuthorizedOnlyAfter": "new immutable support commit, generation-isolated plan and outputs, clean preflight, and independent review"
+  }
+}
