@@ -15,22 +15,52 @@ const MODULE_PATH = path.join(
   ROOT,
   "evals/support/run-joeness-m4-superpowers-live.mjs",
 );
-const PLAN_PATH = "evals/skill-contracts/joeness-m4-superpowers-live-plan-v2.json";
+const PLAN_PATH = "evals/skill-contracts/joeness-m4-superpowers-live-plan-v3.json";
 const V1_PLAN_PATH = "evals/skill-contracts/joeness-m4-superpowers-live-plan-v1.json";
 const V1_BLOCKED_PATH = "evals/skill-contracts/joeness-m4-superpowers-live-v1-blocked.json";
 const V1_ATTEMPT_INDEX_PATH = "evals/skill-contracts/joeness-m4-superpowers-attempt-index-v1.json";
-const V1_IMPLEMENTATION_COMMIT = "6a08c764283bbf2babd9f29765b097de561c9c4e";
-const V1_EXECUTION_HEAD = "d66b091a05e0724108304456bbff7c7b0ad252e0";
-const V1_PERSISTENCE_COMMIT = "2a41df1d9fe55ecb4ffe7fd1fc5da5c8bd20cbd4";
+const V2_PLAN_PATH = "evals/skill-contracts/joeness-m4-superpowers-live-plan-v2.json";
+const V2_BLOCKED_PATH = "evals/skill-contracts/joeness-m4-superpowers-live-v2-blocked.json";
+const V2_ATTEMPT_INDEX_PATH = "evals/skill-contracts/joeness-m4-superpowers-attempt-index-v2.json";
+const V2_IMPLEMENTATION_COMMIT = "c3c1f482ec3f0a0174d30d8838baa3798cfaeca6";
+const V2_EXECUTION_HEAD = "dd675a0dce342514b7eb0aa791afa62adf48983a";
+const V2_PERSISTENCE_COMMIT = "04bad279da7c5eded32a97aa8918fbab28192bef";
 const V2_METHOD = "bounded-path-private-fresh-failure-stage-and-lifecycle-retention-no-evaluator-contract-change";
+const V3_METHOD = "bounded-path-private-fixed-enum-normalized-event-blocker-projection-no-evaluator-contract-change";
+const NORMALIZER_BLOCKER_CLASSIFICATIONS = Object.freeze([
+  "approval-requested",
+  "hook-executed",
+  "image-view-target-mismatch",
+  "image-view-target-unverified",
+  "message-delta-limit-exceeded",
+  "required-command-missing",
+  "required-cwd-missing",
+  "required-exit-code-missing",
+  "required-output-missing",
+  "required-output-truncated",
+  "required-status-missing",
+  "runtime-drift",
+  "runtime-error",
+  "runtime-warning",
+  "sandbox-setup-failed",
+  "secret-shaped-output",
+  "uncontrolled-control-plane",
+  "uncontrolled-tool-surface",
+  "unknown-item-type",
+  "unknown-notification",
+  "user-input-requested",
+  "none",
+  "multiple",
+  "unmapped",
+]);
 const PREDECESSOR = Object.freeze({
-  id: "joeness-m4-superpowers-live-v1",
-  implementationCommit: V1_IMPLEMENTATION_COMMIT,
-  executionHead: V1_EXECUTION_HEAD,
-  persistenceCommit: V1_PERSISTENCE_COMMIT,
-  plan: Object.freeze({ path: V1_PLAN_PATH, bytes: 1888, sha256: "34d59ba0fd3dfa24973b9ab6e55205ecd3a22da32daf2fa15daaa156273f428c" }),
-  blockedArtifact: Object.freeze({ path: V1_BLOCKED_PATH, bytes: 1384, sha256: "590c1a44cf7e9660ee2c6df8a32c63cadfcab881154c16aadefcd8315fdcbec4" }),
-  attemptIndex: Object.freeze({ path: V1_ATTEMPT_INDEX_PATH, bytes: 6230, sha256: "5a00e7e526075dedb066107229f80beb61e94d5cd6fc125952693d27ccd66455" }),
+  id: "joeness-m4-superpowers-live-v2",
+  implementationCommit: V2_IMPLEMENTATION_COMMIT,
+  executionHead: V2_EXECUTION_HEAD,
+  persistenceCommit: V2_PERSISTENCE_COMMIT,
+  plan: Object.freeze({ path: V2_PLAN_PATH, bytes: 2952, sha256: "85be6e07cef1d3165fd0cb504de929dbafc74e227d1b2a403777035d198c449c" }),
+  blockedArtifact: Object.freeze({ path: V2_BLOCKED_PATH, bytes: 3540, sha256: "ba29d79c3955f4bfce5059b1e05fbae8744e50eeaf235dd60d331ef3c7f1e4a0" }),
+  attemptIndex: Object.freeze({ path: V2_ATTEMPT_INDEX_PATH, bytes: 9264, sha256: "147eead383f1b5e696dd5d7fcc57a9c86915adb8d8448189f4eb59bb95f73156" }),
   sameCommandRetryAuthorized: false,
 });
 
@@ -48,10 +78,10 @@ function tuple(pathValue, text) {
 
 function planFixture(implementationCommit = "a".repeat(40), sourceTuples = {}) {
   return {
-    schemaVersion: 2,
-    id: "joeness-m4-superpowers-live-v2",
+    schemaVersion: 3,
+    id: "joeness-m4-superpowers-live-v3",
     date: "2026-08-14",
-    method: V2_METHOD,
+    method: V3_METHOD,
     predecessor: structuredClone(PREDECESSOR),
     attempt: { freshTurnCount: 1, retryCount: 0, automaticRetry: false },
     source: {
@@ -60,7 +90,7 @@ function planFixture(implementationCommit = "a".repeat(40), sourceTuples = {}) {
       liveWrapper: sourceTuples.liveWrapper ?? tuple("evals/support/run-joeness-m4-superpowers-live.mjs", "wrapper"),
       freshTurnAdapter: sourceTuples.freshTurnAdapter ?? tuple("evals/support/run-fresh-evaluator-turn.mjs", "adapter"),
       collector: sourceTuples.collector ?? tuple("evals/support/collect-codex-app-server.mjs", "collector"),
-      fixtureManifest: sourceTuples.fixtureManifest ?? tuple("evals/skill-contracts/fixtures/joeness-m4-superpowers-v1/manifest.json", "manifest"),
+      fixtureManifest: sourceTuples.fixtureManifest ?? tuple("evals/skill-contracts/fixtures/joeness-m4-superpowers-v1/manifest-v2.json", "manifest"),
     },
     runtime: {
       codexVersion: "codex-cli 0.146.0",
@@ -69,9 +99,9 @@ function planFixture(implementationCommit = "a".repeat(40), sourceTuples = {}) {
       dynamicTools: [],
     },
     outputs: {
-      raw: "evals/skill-contracts/joeness-m4-superpowers-live-v2-raw.json",
-      evidence: "evals/skill-contracts/joeness-m4-superpowers-live-v2-evidence.json",
-      blocked: "evals/skill-contracts/joeness-m4-superpowers-live-v2-blocked.json",
+      raw: "evals/skill-contracts/joeness-m4-superpowers-live-v3-raw.json",
+      evidence: "evals/skill-contracts/joeness-m4-superpowers-live-v3-evidence.json",
+      blocked: "evals/skill-contracts/joeness-m4-superpowers-live-v3-blocked.json",
     },
     resultBoundary: {
       state: "candidate",
@@ -94,9 +124,9 @@ function blockedReceipt(freshFailure) {
   };
 }
 
-function freshFailureFixture() {
+function freshFailureFixture(normalizerBlockerClassification = "none") {
   return {
-    schemaVersion: 1,
+    schemaVersion: 2,
     provenance: "runner-observed-default-fresh-adapter-rejection",
     runnerStage: "fresh-turn-rejected",
     evidenceState: "retained",
@@ -110,6 +140,10 @@ function freshFailureFixture() {
       observed: 3,
       retained: 3,
       retainedOverLimit: false,
+    },
+    normalizerBlocker: {
+      provenance: "adapter-normalization-fixed-enum",
+      classification: normalizerBlockerClassification,
     },
     blockers: {
       count: 0,
@@ -180,7 +214,7 @@ async function committedPlanRepo(t, { orphanSupport = false } = {}) {
   await git(root, ["config", "user.email", "m4@example.invalid"]);
   if (orphanSupport) {
     const baseline = await git(root, ["rev-parse", "HEAD"]);
-    await git(root, ["switch", "--quiet", "--orphan", "isolated-v2-support"]);
+    await git(root, ["switch", "--quiet", "--orphan", "isolated-v3-support"]);
     await git(root, ["checkout", baseline, "--", "."]);
   }
   const sourceTuples = {};
@@ -192,7 +226,7 @@ async function committedPlanRepo(t, { orphanSupport = false } = {}) {
     sourceTuples[role] = tuple(relativePath, content);
   }
   await git(root, ["add", "."]);
-  await git(root, ["commit", "--quiet", "--allow-empty", "-m", "D generation-v2 support"]);
+  await git(root, ["commit", "--quiet", "--allow-empty", "-m", "D generation-v3 support"]);
   const implementationCommit = await git(root, ["rev-parse", "HEAD"]);
   const plan = planFixture(implementationCommit, sourceTuples);
   await writeRelative(root, PLAN_PATH, `${JSON.stringify(plan, null, 2)}\n`);
@@ -204,7 +238,7 @@ async function committedPlanRepo(t, { orphanSupport = false } = {}) {
 
 test("exports the committed-plan live wrapper boundary", async () => {
   const api = await subject();
-  assert.equal(api.JOENESS_M4_LIVE_RUN_ID, "joeness-m4-superpowers-live-v2");
+  assert.equal(api.JOENESS_M4_LIVE_RUN_ID, "joeness-m4-superpowers-live-v3");
   assert.equal(api.JOENESS_M4_CODEX_VERSION, "codex-cli 0.146.0");
   for (const name of [
     "validateJoenessM4LivePlan",
@@ -300,6 +334,34 @@ test("wrapper independently rebuilds only selected bounded fresh-failure fields"
   const pathValue = freshFailureFixture(); pathValue.primaryCauseKind = "C:\\private\\cause"; invalid.push(pathValue);
 
   let traps = 0;
+  const oldSchema = freshFailureFixture(); oldSchema.schemaVersion = 1; invalid.push(oldSchema);
+  const missingNormalizer = freshFailureFixture(); delete missingNormalizer.normalizerBlocker; invalid.push(missingNormalizer);
+  const missingNormalizerClassification = freshFailureFixture(); delete missingNormalizerClassification.normalizerBlocker.classification; invalid.push(missingNormalizerClassification);
+  const extraNormalizer = freshFailureFixture(); extraNormalizer.normalizerBlocker.rawCanary = "RAW-NORMALIZER-EXTRA-CANARY"; invalid.push(extraNormalizer);
+  const symbolNormalizer = freshFailureFixture(); symbolNormalizer.normalizerBlocker[Symbol("raw-normalizer-symbol-canary")] = true; invalid.push(symbolNormalizer);
+  const accessorNormalizer = freshFailureFixture();
+  Object.defineProperty(accessorNormalizer.normalizerBlocker, "classification", {
+    get() { traps += 1; throw new Error("normalizer accessor trap"); },
+  });
+  invalid.push(accessorNormalizer);
+  const liveNormalizerProxy = freshFailureFixture();
+  liveNormalizerProxy.normalizerBlocker = new Proxy({}, {
+    get() { traps += 1; throw new Error("normalizer proxy get trap"); },
+    getPrototypeOf() { traps += 1; throw new Error("normalizer proxy prototype trap"); },
+    ownKeys() { traps += 1; throw new Error("normalizer proxy ownKeys trap"); },
+  });
+  invalid.push(liveNormalizerProxy);
+  const revokedNormalizerProxy = freshFailureFixture();
+  const revokedNormalizer = Proxy.revocable({}, {});
+  revokedNormalizer.revoke();
+  revokedNormalizerProxy.normalizerBlocker = revokedNormalizer.proxy;
+  invalid.push(revokedNormalizerProxy);
+  const invalidNormalizerProvenance = freshFailureFixture();
+  invalidNormalizerProvenance.normalizerBlocker.provenance = "RAW-FORGED-PROVENANCE-CANARY";
+  invalid.push(invalidNormalizerProvenance);
+  const invalidNormalizerClassification = freshFailureFixture();
+  invalidNormalizerClassification.normalizerBlocker.classification = "RAW-PRIVATE-RUNTIME-DETAIL-CANARY";
+  invalid.push(invalidNormalizerClassification);
   invalid.push(new Proxy(freshFailureFixture(), { get() { traps += 1; throw new Error("proxy trap"); } }));
   const revoked = Proxy.revocable(freshFailureFixture(), {}); revoked.revoke(); invalid.push(revoked.proxy);
   const accessorNested = freshFailureFixture();
@@ -356,7 +418,44 @@ test("wrapper independently rebuilds only selected bounded fresh-failure fields"
   );
 });
 
-test("generation-v2 plan validator freezes the new method, v1 predecessor, one turn, retry zero, and no promotion", async () => {
+test("wrapper accepts every fixed normalizer classification and retains no raw detail", async () => {
+  const api = await subject();
+  for (const classification of NORMALIZER_BLOCKER_CLASSIFICATIONS) {
+    const freshFailure = freshFailureFixture(classification);
+    const rebuilt = api.rebuildJoenessM4DelegatedBlockedReceipt(blockedReceipt(freshFailure));
+    assert.deepEqual(rebuilt.freshFailure?.normalizerBlocker, {
+      provenance: "adapter-normalization-fixed-enum",
+      classification,
+    }, classification);
+    assert.equal(JSON.stringify(rebuilt).includes("RAW-"), false, classification);
+  }
+});
+
+test("wrapper exposes the hidden v2 runtime-error without changing coarse blockers", async () => {
+  const api = await subject();
+  const freshFailure = freshFailureFixture("runtime-error");
+  freshFailure.lifecycle = {
+    threadStart: "observed",
+    turnStart: "observed",
+    terminal: "non-completed",
+    terminalCountState: "one",
+  };
+  freshFailure.blockers = {
+    count: 3,
+    codes: ["runtime-control-blocker", "turn-not-completed"],
+    unclassifiedCount: 1,
+  };
+  const rebuilt = api.rebuildJoenessM4DelegatedBlockedReceipt(blockedReceipt(freshFailure));
+  assert.deepEqual(rebuilt.freshFailure?.normalizerBlocker, {
+    provenance: "adapter-normalization-fixed-enum",
+    classification: "runtime-error",
+  });
+  assert.deepEqual(rebuilt.freshFailure?.lifecycle, freshFailure.lifecycle);
+  assert.deepEqual(rebuilt.freshFailure?.blockers, freshFailure.blockers);
+  assert.equal(rebuilt.freshFailure?.appServerExit, "zero");
+});
+
+test("generation-v3 plan validator freezes the new method, v2 predecessor, one turn, retry zero, and no promotion", async () => {
   const api = await subject();
   const valid = planFixture();
   assert.deepEqual(api.validateJoenessM4LivePlan(valid), valid);
@@ -367,21 +466,25 @@ test("generation-v2 plan validator freezes the new method, v1 predecessor, one t
     (value) => { value.runtime.codexVersion = "codex-cli 0.145.0"; },
     (value) => { value.runtime.dynamicTools = ["tool"]; },
     (value) => { value.resultBoundary.promotionPass = true; },
-    (value) => { value.schemaVersion = 1; },
-    (value) => { value.method = "same-v1-command"; },
+    (value) => { value.schemaVersion = 2; },
+    (value) => { value.id = "joeness-m4-superpowers-live-v2"; },
+    (value) => { value.method = V2_METHOD; },
+    (value) => { value.predecessor.id = "joeness-m4-superpowers-live-v1"; },
     (value) => { value.predecessor.executionHead = "f".repeat(40); },
     (value) => { value.predecessor.persistenceCommit = "e".repeat(40); },
     (value) => { value.predecessor.plan.sha256 = "0".repeat(64); },
     (value) => { value.predecessor.sameCommandRetryAuthorized = true; },
+    (value) => { value.source.fixtureManifest.path = "evals/skill-contracts/fixtures/joeness-m4-superpowers-v1/manifest.json"; },
+    (value) => { value.outputs.raw = "evals/skill-contracts/joeness-m4-superpowers-live-v2-raw.json"; },
     (value) => { value.source.extra = true; },
   ]) {
     const invalid = structuredClone(valid);
     mutate(invalid);
-    assert.throws(() => api.validateJoenessM4LivePlan(invalid), /plan|attempt|runtime|promotion|source|key/i);
+    assert.throws(() => api.validateJoenessM4LivePlan(invalid), /plan|attempt|runtime|promotion|source|output|key/i);
   }
 });
 
-test("execution boundary binds a plan-only head to v2 support, exact v1 history, and support/plan/current source pins", async (t) => {
+test("execution boundary binds a plan-only head to v3 support, exact v2 history, and support/plan/current source pins", async (t) => {
   const api = await subject();
   const fixture = await committedPlanRepo(t);
   const result = await api.verifyJoenessM4ExecutionBoundary({
@@ -406,6 +509,22 @@ test("execution boundary binds a plan-only head to v2 support, exact v1 history,
   assert.equal(result.executionSource.plan.bytes > 0, true);
   assert.match(result.executionSource.plan.sha256, /^[0-9a-f]{64}$/);
   assert.equal(result.outputsAbsent, true);
+});
+
+test("historical M4 v1 and v2 plans, blocked receipts, and attempt indexes remain byte exact", async () => {
+  const tuples = [
+    { path: V1_PLAN_PATH, bytes: 1888, sha256: "34d59ba0fd3dfa24973b9ab6e55205ecd3a22da32daf2fa15daaa156273f428c" },
+    { path: V1_BLOCKED_PATH, bytes: 1384, sha256: "590c1a44cf7e9660ee2c6df8a32c63cadfcab881154c16aadefcd8315fdcbec4" },
+    { path: V1_ATTEMPT_INDEX_PATH, bytes: 6230, sha256: "5a00e7e526075dedb066107229f80beb61e94d5cd6fc125952693d27ccd66455" },
+    { path: V2_PLAN_PATH, bytes: 2952, sha256: "85be6e07cef1d3165fd0cb504de929dbafc74e227d1b2a403777035d198c449c" },
+    { path: V2_BLOCKED_PATH, bytes: 3540, sha256: "ba29d79c3955f4bfce5059b1e05fbae8744e50eeaf235dd60d331ef3c7f1e4a0" },
+    { path: V2_ATTEMPT_INDEX_PATH, bytes: 9264, sha256: "147eead383f1b5e696dd5d7fcc57a9c86915adb8d8448189f4eb59bb95f73156" },
+  ];
+  for (const expected of tuples) {
+    const content = await readFile(path.join(ROOT, ...expected.path.split("/")));
+    assert.equal(content.length, expected.bytes, expected.path);
+    assert.equal(digest(content), expected.sha256, expected.path);
+  }
 });
 
 test("Git tree presence distinguishes a missing path from an invalid commit", async (t) => {
@@ -462,7 +581,7 @@ test("execution boundary rejects a merge execution head", async (t) => {
   );
 });
 
-test("execution boundary rejects a non-plan file in the generation-v2 plan commit", async (t) => {
+test("execution boundary rejects a non-plan file in the generation-v3 plan commit", async (t) => {
   const api = await subject();
   const fixture = await committedPlanRepo(t);
   await writeRelative(fixture.root, "unexpected.txt", "extra");
@@ -497,11 +616,34 @@ test("execution boundary rejects a source tuple drift in the plan", async (t) =>
   );
 });
 
-test("execution boundary rejects a working predecessor artifact that differs from its immutable v1 tuple", async (t) => {
+test("execution boundary rejects a dirty worktree before reading runtime state", async (t) => {
   const api = await subject();
   const fixture = await committedPlanRepo(t);
-  await git(fixture.root, ["update-index", "--assume-unchanged", V1_BLOCKED_PATH]);
-  await writeRelative(fixture.root, V1_BLOCKED_PATH, "tampered predecessor artifact\n");
+  await writeRelative(fixture.root, "untracked-dirty-canary.txt", "dirty\n");
+  await assert.rejects(
+    api.verifyJoenessM4ExecutionBoundary({ repositoryRoot: fixture.root, planPath: PLAN_PATH }),
+    /worktree.*dirty/i,
+  );
+});
+
+test("execution boundary rejects working manifest-v2 drift against support and plan pins", async (t) => {
+  const api = await subject();
+  const fixture = await committedPlanRepo(t);
+  const manifestPath = fixture.plan.source.fixtureManifest.path;
+  await git(fixture.root, ["update-index", "--assume-unchanged", manifestPath]);
+  await writeRelative(fixture.root, manifestPath, "tampered manifest-v2\n");
+  assert.equal(await git(fixture.root, ["status", "--porcelain"]), "");
+  await assert.rejects(
+    api.verifyJoenessM4ExecutionBoundary({ repositoryRoot: fixture.root, planPath: PLAN_PATH }),
+    /source fixtureManifest (?:size|pin) drift/i,
+  );
+});
+
+test("execution boundary rejects a working predecessor artifact that differs from its immutable v2 tuple", async (t) => {
+  const api = await subject();
+  const fixture = await committedPlanRepo(t);
+  await git(fixture.root, ["update-index", "--assume-unchanged", V2_BLOCKED_PATH]);
+  await writeRelative(fixture.root, V2_BLOCKED_PATH, "tampered predecessor artifact\n");
   assert.equal(await git(fixture.root, ["status", "--porcelain"]), "");
   await assert.rejects(
     api.verifyJoenessM4ExecutionBoundary({ repositoryRoot: fixture.root, planPath: PLAN_PATH }),
@@ -509,7 +651,7 @@ test("execution boundary rejects a working predecessor artifact that differs fro
   );
 });
 
-test("execution boundary rejects support that does not descend from the exact v1 execution head", async (t) => {
+test("execution boundary rejects support that does not descend from the exact v2 execution head", async (t) => {
   const api = await subject();
   const fixture = await committedPlanRepo(t, { orphanSupport: true });
   await assert.rejects(
@@ -537,6 +679,22 @@ test("execution boundary rejects an ignored output symlink", async (t) => {
       planPath: PLAN_PATH,
     }),
     /output.*collision|symlink/i,
+  );
+});
+
+test("execution boundary rejects an ignored regular output collision", async (t) => {
+  const api = await subject();
+  const fixture = await committedPlanRepo(t);
+  await writeFile(
+    path.join(fixture.root, ".git", "info", "exclude"),
+    `${fixture.plan.outputs.blocked}\n`,
+    "utf8",
+  );
+  await writeRelative(fixture.root, fixture.plan.outputs.blocked, "collision\n");
+  assert.equal(await git(fixture.root, ["status", "--porcelain"]), "");
+  await assert.rejects(
+    api.verifyJoenessM4ExecutionBoundary({ repositoryRoot: fixture.root, planPath: PLAN_PATH }),
+    /output.*collision/i,
   );
 });
 
@@ -614,7 +772,7 @@ test("default runtime uses Codex 0.146 once and proves process, isolated home, a
     operations: {
       createExclusiveRunRoot: async (runId, parent) => {
         calls.create += 1;
-        assert.equal(runId, "joeness-m4-superpowers-live-v2");
+        assert.equal(runId, "joeness-m4-superpowers-live-v3");
         const runRoot = path.join(parent, `joewrks-eval-${runId}`);
         await mkdir(runRoot);
         return runRoot;
@@ -648,7 +806,7 @@ test("default runtime uses Codex 0.146 once and proves process, isolated home, a
       removeRunRoot: async (runRoot, parent, runId) => {
         calls.removeRoot += 1;
         assert.equal(parent, runParent);
-        assert.equal(runId, "joeness-m4-superpowers-live-v2");
+        assert.equal(runId, "joeness-m4-superpowers-live-v3");
         await rm(runRoot, { recursive: true, force: false });
       },
     },
@@ -690,7 +848,7 @@ test("default runtime cleans a partial factory only after launch close is confir
       cleanupState,
       operations: {
         createExclusiveRunRoot: async () => {
-          runRoot = path.join(runParent, "joewrks-eval-joeness-m4-superpowers-live-v2");
+          runRoot = path.join(runParent, "joewrks-eval-joeness-m4-superpowers-live-v3");
           await mkdir(runRoot);
           return runRoot;
         },
@@ -744,7 +902,7 @@ test("hostile ticket evidence accessors and proxies are trap-zero and treated as
         cleanupState,
         operations: {
           createExclusiveRunRoot: async () => {
-            const runRoot = path.join(runParent, "joewrks-eval-joeness-m4-superpowers-live-v2");
+            const runRoot = path.join(runParent, "joewrks-eval-joeness-m4-superpowers-live-v3");
             await mkdir(runRoot);
             return runRoot;
           },
@@ -805,7 +963,7 @@ test("default runtime cleans the deterministic isolated home after prepare fails
       cleanupState,
       operations: {
         createExclusiveRunRoot: async () => {
-          runRoot = path.join(runParent, "joewrks-eval-joeness-m4-superpowers-live-v2");
+          runRoot = path.join(runParent, "joewrks-eval-joeness-m4-superpowers-live-v3");
           await mkdir(runRoot);
           return runRoot;
         },
@@ -857,7 +1015,7 @@ test("default runtime retains owned state when process close cannot be confirmed
     cleanupState,
     operations: {
       createExclusiveRunRoot: async () => {
-        runRoot = path.join(runParent, "joewrks-eval-joeness-m4-superpowers-live-v2");
+        runRoot = path.join(runParent, "joewrks-eval-joeness-m4-superpowers-live-v3");
         await mkdir(runRoot);
         return runRoot;
       },
@@ -903,7 +1061,7 @@ test("default runtime still cleans owned state when close reports an error after
     cleanupState,
     operations: {
       createExclusiveRunRoot: async () => {
-        runRoot = path.join(runParent, "joewrks-eval-joeness-m4-superpowers-live-v2");
+        runRoot = path.join(runParent, "joewrks-eval-joeness-m4-superpowers-live-v3");
         await mkdir(runRoot);
         return runRoot;
       },
@@ -956,7 +1114,7 @@ test("cleanup attempts both owned roots and config readback independently and ag
     cleanupState,
     operations: {
       createExclusiveRunRoot: async () => {
-        runRoot = path.join(runParent, "joewrks-eval-joeness-m4-superpowers-live-v2");
+        runRoot = path.join(runParent, "joewrks-eval-joeness-m4-superpowers-live-v3");
         await mkdir(runRoot);
         return runRoot;
       },
@@ -997,7 +1155,7 @@ test("cleanup attempts both owned roots and config readback independently and ag
   assert.equal(cleanupState.receipt, undefined);
 });
 
-test("live wrapper revalidates the plan-only head before success publication and retains v2 lineage", async (t) => {
+test("live wrapper revalidates the plan-only head before success publication and retains v3 lineage", async (t) => {
   const api = await subject();
   const fixture = await committedPlanRepo(t);
   const temp = await mkdtemp(path.join(tmpdir(), "joeness-m4-wrapper-"));
@@ -1044,7 +1202,7 @@ test("live wrapper revalidates the plan-only head before success publication and
         assert.deepEqual(options.sourcePin.runner, fixture.plan.source.runner);
         assert.deepEqual(options.executionPlan, {
           schemaVersion: 1,
-          id: "joeness-m4-superpowers-live-v2",
+          id: "joeness-m4-superpowers-live-v3",
           outputs: fixture.plan.outputs,
         });
         await options.runtimeFactory({});
@@ -1099,6 +1257,54 @@ test("live wrapper revalidates the plan-only head before success publication and
     rawStderrPersisted: false,
   });
   assert.equal(JSON.stringify(publication).includes(fixture.root), false);
+});
+
+test("live wrapper blocks success when HEAD changes after runtime but before publication", async (t) => {
+  const api = await subject();
+  const fixture = await committedPlanRepo(t);
+  const configTuple = { bytes: 16, sha256: digest("plugins = false\n") };
+  const cleanupReceipt = {
+    appServerLaunchCount: 1,
+    appServerCloseConfirmedCount: 1,
+    remainingOwnedProcessCount: 0,
+    isolatedCodexHomeReadback: "absent",
+    runRootReadback: "absent",
+  };
+  let publishCount = 0;
+  await assert.rejects(
+    api.runJoenessM4Live({
+      repositoryRoot: fixture.root,
+      planPath: PLAN_PATH,
+      sourceCodexHome: path.join(tmpdir(), "unused-codex-home"),
+      runParent: tmpdir(),
+      operations: {
+        verifyExecutionBoundary: api.verifyJoenessM4ExecutionBoundary,
+        preflightEvaluator: async () => ({}),
+        createRuntime: async (options) => {
+          options.cleanupState.sourceConfigBefore = configTuple;
+          options.cleanupState.sourceConfigAfter = configTuple;
+          options.cleanupState.receipt = cleanupReceipt;
+          return {};
+        },
+        runEvaluator: async (options) => {
+          await options.runtimeFactory({});
+          await git(fixture.root, ["commit", "--quiet", "--allow-empty", "-m", "TOCTOU after runtime"]);
+          return options.successPublisher({
+            repositoryRoot: fixture.root,
+            rawPath: fixture.plan.outputs.raw,
+            evidencePath: fixture.plan.outputs.evidence,
+            rawText: '{"status":"candidate"}',
+            evidence: { freshTurn: true },
+          });
+        },
+        runTurn: async () => {},
+        publishSuccess: async () => { publishCount += 1; },
+        writeBlocked: async () => {},
+      },
+    }),
+    /direct single-parent child|execution boundary changed/i,
+  );
+  assert.equal(publishCount, 0);
 });
 
 test("runtime factory rejects a second call before creating another runtime", async (t) => {
@@ -1241,7 +1447,7 @@ test("the imported pinned runner may retain an exact fresh-adapter rejection pro
   );
   assert.equal(blockedWrite.relativePath, fixture.plan.outputs.blocked);
   assert.deepEqual(blockedWrite.value.freshFailure, {
-    schemaVersion: 1,
+    schemaVersion: 2,
     provenance: "runner-observed-default-fresh-adapter-rejection",
     runnerStage: "fresh-turn-rejected",
     evidenceState: "retained",
@@ -1252,6 +1458,10 @@ test("the imported pinned runner may retain an exact fresh-adapter rejection pro
       terminalCountState: "zero",
     },
     eventCounts: { observed: 0, retained: 0, retainedOverLimit: false },
+    normalizerBlocker: {
+      provenance: "adapter-normalization-fixed-enum",
+      classification: "none",
+    },
     blockers: { count: 1, codes: ["missing-terminal-event"], unclassifiedCount: 0 },
     appServerExit: "zero",
     primaryCauseKind: "error",
@@ -1332,7 +1542,7 @@ test("preflight is non-live and returns bounded source, config, and absence evid
   assert.equal(fixturePreflightCount, 1);
   assert.deepEqual(receipt, {
     mode: "preflight",
-    id: "joeness-m4-superpowers-live-v2",
+    id: "joeness-m4-superpowers-live-v3",
     executionSource: receipt.executionSource,
     sourceConfig: { bytes: 16, sha256: digest("plugins = false\n") },
     outputsAbsent: true,
@@ -1359,6 +1569,7 @@ test("CLI admits only the fixed preflight or explicit one-live plan", async () =
   for (const argv of [
     ["--mode", "live"],
     ["--mode", "live", "--plan", V1_PLAN_PATH],
+    ["--mode", "live", "--plan", V2_PLAN_PATH],
     ["--mode", "live", "--plan", "elsewhere.json"],
     ["--mode", "live", "--plan", planPath, "--retry"],
   ]) assert.throws(() => api.parseJoenessM4LiveCli(argv), /CLI|plan|invalid/i);

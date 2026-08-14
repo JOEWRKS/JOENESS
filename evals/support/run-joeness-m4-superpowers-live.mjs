@@ -21,42 +21,42 @@ import {
 
 const execFile = promisify(execFileCallback);
 
-export const JOENESS_M4_LIVE_RUN_ID = "joeness-m4-superpowers-live-v2";
+export const JOENESS_M4_LIVE_RUN_ID = "joeness-m4-superpowers-live-v3";
 export const JOENESS_M4_CODEX_VERSION = "codex-cli 0.146.0";
 
-const PLAN_PATH = "evals/skill-contracts/joeness-m4-superpowers-live-plan-v2.json";
-const LIVE_METHOD = "bounded-path-private-fresh-failure-stage-and-lifecycle-retention-no-evaluator-contract-change";
+const PLAN_PATH = "evals/skill-contracts/joeness-m4-superpowers-live-plan-v3.json";
+const LIVE_METHOD = "bounded-path-private-fixed-enum-normalized-event-blocker-projection-no-evaluator-contract-change";
 const SOURCE_PATHS = Object.freeze({
   runner: "evals/support/run-joeness-m4-superpowers-eval.mjs",
   liveWrapper: "evals/support/run-joeness-m4-superpowers-live.mjs",
   freshTurnAdapter: "evals/support/run-fresh-evaluator-turn.mjs",
   collector: "evals/support/collect-codex-app-server.mjs",
-  fixtureManifest: "evals/skill-contracts/fixtures/joeness-m4-superpowers-v1/manifest.json",
+  fixtureManifest: "evals/skill-contracts/fixtures/joeness-m4-superpowers-v1/manifest-v2.json",
 });
 const OUTPUT_PATHS = Object.freeze({
-  raw: "evals/skill-contracts/joeness-m4-superpowers-live-v2-raw.json",
-  evidence: "evals/skill-contracts/joeness-m4-superpowers-live-v2-evidence.json",
-  blocked: "evals/skill-contracts/joeness-m4-superpowers-live-v2-blocked.json",
+  raw: "evals/skill-contracts/joeness-m4-superpowers-live-v3-raw.json",
+  evidence: "evals/skill-contracts/joeness-m4-superpowers-live-v3-evidence.json",
+  blocked: "evals/skill-contracts/joeness-m4-superpowers-live-v3-blocked.json",
 });
 const PREDECESSOR = Object.freeze({
-  id: "joeness-m4-superpowers-live-v1",
-  implementationCommit: "6a08c764283bbf2babd9f29765b097de561c9c4e",
-  executionHead: "d66b091a05e0724108304456bbff7c7b0ad252e0",
-  persistenceCommit: "2a41df1d9fe55ecb4ffe7fd1fc5da5c8bd20cbd4",
+  id: "joeness-m4-superpowers-live-v2",
+  implementationCommit: "c3c1f482ec3f0a0174d30d8838baa3798cfaeca6",
+  executionHead: "dd675a0dce342514b7eb0aa791afa62adf48983a",
+  persistenceCommit: "04bad279da7c5eded32a97aa8918fbab28192bef",
   plan: Object.freeze({
-    path: "evals/skill-contracts/joeness-m4-superpowers-live-plan-v1.json",
-    bytes: 1888,
-    sha256: "34d59ba0fd3dfa24973b9ab6e55205ecd3a22da32daf2fa15daaa156273f428c",
+    path: "evals/skill-contracts/joeness-m4-superpowers-live-plan-v2.json",
+    bytes: 2952,
+    sha256: "85be6e07cef1d3165fd0cb504de929dbafc74e227d1b2a403777035d198c449c",
   }),
   blockedArtifact: Object.freeze({
-    path: "evals/skill-contracts/joeness-m4-superpowers-live-v1-blocked.json",
-    bytes: 1384,
-    sha256: "590c1a44cf7e9660ee2c6df8a32c63cadfcab881154c16aadefcd8315fdcbec4",
+    path: "evals/skill-contracts/joeness-m4-superpowers-live-v2-blocked.json",
+    bytes: 3540,
+    sha256: "ba29d79c3955f4bfce5059b1e05fbae8744e50eeaf235dd60d331ef3c7f1e4a0",
   }),
   attemptIndex: Object.freeze({
-    path: "evals/skill-contracts/joeness-m4-superpowers-attempt-index-v1.json",
-    bytes: 6230,
-    sha256: "5a00e7e526075dedb066107229f80beb61e94d5cd6fc125952693d27ccd66455",
+    path: "evals/skill-contracts/joeness-m4-superpowers-attempt-index-v2.json",
+    bytes: 9264,
+    sha256: "147eead383f1b5e696dd5d7fcc57a9c86915adb8d8448189f4eb59bb95f73156",
   }),
   sameCommandRetryAuthorized: false,
 });
@@ -103,6 +103,32 @@ const FRESH_BLOCKER_CODES = Object.freeze([
 const FRESH_BLOCKER_CODE_INDEX = new Map(
   FRESH_BLOCKER_CODES.map((code, index) => [code, index]),
 );
+const FRESH_NORMALIZER_BLOCKER_CLASSIFICATIONS = Object.freeze([
+  "approval-requested",
+  "hook-executed",
+  "image-view-target-mismatch",
+  "image-view-target-unverified",
+  "message-delta-limit-exceeded",
+  "required-command-missing",
+  "required-cwd-missing",
+  "required-exit-code-missing",
+  "required-output-missing",
+  "required-output-truncated",
+  "required-status-missing",
+  "runtime-drift",
+  "runtime-error",
+  "runtime-warning",
+  "sandbox-setup-failed",
+  "secret-shaped-output",
+  "uncontrolled-control-plane",
+  "uncontrolled-tool-surface",
+  "unknown-item-type",
+  "unknown-notification",
+  "user-input-requested",
+  "none",
+  "multiple",
+  "unmapped",
+]);
 
 function fail(message) {
   throw new TypeError(message);
@@ -214,7 +240,7 @@ function validatePredecessor(value) {
 export function validateJoenessM4LivePlan(value) {
   exactKeys(value, ["schemaVersion", "id", "date", "method", "predecessor", "attempt", "source", "runtime", "outputs", "resultBoundary"], "M4 live plan");
   if (
-    value.schemaVersion !== 2 ||
+    value.schemaVersion !== 3 ||
     value.id !== JOENESS_M4_LIVE_RUN_ID ||
     value.date !== "2026-08-14" ||
     value.method !== LIVE_METHOD
@@ -329,10 +355,10 @@ export async function verifyJoenessM4ExecutionBoundary(options) {
     throw new Error("M4 predecessor persistence lineage is invalid");
   }
   if (!(await gitIsAncestor(resolvedRoot, PREDECESSOR.executionHead, implementationCommit))) {
-    throw new Error("M4 predecessor execution head is not an ancestor of generation-v2 support");
+    throw new Error("M4 predecessor execution head is not an ancestor of generation-v3 support");
   }
   if (!(await gitIsAncestor(resolvedRoot, PREDECESSOR.persistenceCommit, implementationCommit))) {
-    throw new Error("M4 predecessor persistence commit is not an ancestor of generation-v2 support");
+    throw new Error("M4 predecessor persistence commit is not an ancestor of generation-v3 support");
   }
 
   for (const [role, pin, commits] of [
@@ -950,14 +976,51 @@ function boundedFreshBlockerCodes(value) {
   return result;
 }
 
+function rebuildFreshNormalizerBlocker(value) {
+  if (
+    value === null ||
+    typeof value !== "object" ||
+    utilTypes.isProxy(value) ||
+    Array.isArray(value)
+  ) return null;
+  let prototype;
+  let keys;
+  try {
+    prototype = Object.getPrototypeOf(value);
+    keys = Reflect.ownKeys(value);
+  } catch {
+    return null;
+  }
+  if (
+    (prototype !== Object.prototype && prototype !== null) ||
+    keys.length !== 2 ||
+    keys.some((key) => typeof key !== "string" || !["provenance", "classification"].includes(key))
+  ) return null;
+  const data = Object.create(null);
+  for (const key of keys) {
+    let descriptor;
+    try { descriptor = Object.getOwnPropertyDescriptor(value, key); } catch { return null; }
+    if (!descriptor || !("value" in descriptor) || descriptor.get || descriptor.set) return null;
+    data[key] = descriptor.value;
+  }
+  if (
+    data.provenance !== "adapter-normalization-fixed-enum" ||
+    !FRESH_NORMALIZER_BLOCKER_CLASSIFICATIONS.includes(data.classification)
+  ) return null;
+  return {
+    provenance: "adapter-normalization-fixed-enum",
+    classification: data.classification,
+  };
+}
+
 function rebuildFreshFailure(value) {
   const keys = [
     "schemaVersion", "provenance", "runnerStage", "evidenceState", "lifecycle",
-    "eventCounts", "blockers", "appServerExit", "primaryCauseKind", "retention",
+    "eventCounts", "normalizerBlocker", "blockers", "appServerExit", "primaryCauseKind", "retention",
   ];
   if (!hasSelectedDataProperties(value, keys)) return null;
   if (
-    value.schemaVersion !== 1 ||
+    value.schemaVersion !== 2 ||
     value.provenance !== "runner-observed-default-fresh-adapter-rejection" ||
     value.runnerStage !== "fresh-turn-rejected" ||
     value.evidenceState !== "retained"
@@ -984,6 +1047,9 @@ function rebuildFreshFailure(value) {
     (["completed", "non-completed"].includes(lifecycle.terminal) && lifecycle.terminalCountState !== "one") ||
     (lifecycle.terminal === "ambiguous" && lifecycle.terminalCountState !== "multiple")
   ) return null;
+
+  const normalizerBlocker = rebuildFreshNormalizerBlocker(value.normalizerBlocker);
+  if (normalizerBlocker === null) return null;
 
   if (!hasSelectedDataProperties(
     value.eventCounts,
@@ -1057,12 +1123,13 @@ function rebuildFreshFailure(value) {
   if (retentionKeys.some((key) => value.retention[key] !== false)) return null;
 
   const rebuilt = {
-    schemaVersion: 1,
+    schemaVersion: 2,
     provenance: "runner-observed-default-fresh-adapter-rejection",
     runnerStage: "fresh-turn-rejected",
     evidenceState: "retained",
     lifecycle,
     eventCounts,
+    normalizerBlocker,
     blockers: {
       count: blockerCount,
       codes: blockerCodes,
