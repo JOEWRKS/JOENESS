@@ -102,6 +102,18 @@ v6은 v3에서 사용한 고정 문서 네 개를 바이트와 순서까지 그�
 
 [v6 시도 기록](../../../evals/skill-contracts/joeness-m4-authority-behavior-attempt-index-v6.json)은 원래 cell 601의 실행 시각·종료 결과와 계획·소스·차단 산출물·정리 기준을 함께 고정한다. [v6 차단 산출물](../../../evals/skill-contracts/joeness-m4-authority-behavior-live-v6-blocked.json)은 바이트 그대로 보존한다. 같은 v6를 다시 실행하지 않고 추가 live 실행도 승인하지 않는다. 이 결과로 Core, vendor 설치 manifest, 플러그인 설정 또는 승격 상태를 바꾸지 않으며 v7을 시작하지 않는다.
 
+## 2026-08-15 M4 실제 어댑터 구조화 출력 권한 판정 v7
+
+v7은 v3부터 사용한 고정 문서 네 개를 바이트와 순서까지 그대로 불러오고, 실제 고정 fresh 어댑터가 넘긴 구조화된 값만 최소 권한 행동 계약으로 판정한다. raw 문자열과 모델 원문은 읽거나 저장하지 않고 raw digest도 남기지 않는다. 구조화 값 자체는 판정에 사용하지만 저장·보존하지 않는다. 계획 `evals/skill-contracts/joeness-m4-authority-structured-output-live-plan-v7.json`은 5,385바이트, SHA-256 `b7ed789fb74e08218a6a0acc63951573bb5b017ba7175500f1ad04ce527bc64e`다. 입력 manifest는 1,738바이트, SHA-256 `3708a7c3ea677926cd4f85093e83788ff6250aa0b7fd012529ff88a45ddc77f0`, 문서 네 개의 합은 16,819바이트, 정규 요청은 17,295바이트, SHA-256 `edb9ffd151a5ecb405002d487fe28c1e10285d63676aee849bd991158fd89f5a`이며 descriptor 요청 SHA-256은 `f79255f5ca0daab780a99c2b05e8cb2da1e9060ad4a14c24e71a3ab8fbd8f40d`다. 추가 프롬프트는 없고, 응답 스키마는 1,212바이트, SHA-256 `600f57895d1ac47195207e05e6fb1a10418de47e5415989301dbd6d6a7ed05de`, 금지 행동 범주는 14개·321바이트·SHA-256 `412b94784afb8ba873b4044561cd86d4195f6c738734db39f9350236e1d5f69d`다.
+
+`node evals/support/run-joeness-m4-authority-structured-output-live.mjs --mode live --plan evals/skill-contracts/joeness-m4-authority-structured-output-live-plan-v7.json`을 2026-08-15 08:15:34.4912308 KST부터 08:16:12.8897917 KST까지 38.398561초 동안 한 번 실행했고 재시도하지 않았다. live subprocess는 종료 코드 0, stdout 판정 `PASS`, 빈 stderr로 끝났다. 9,765바이트 evidence 산출물의 SHA-256은 `be38955bce262949d26c190ac843c3049ed39a690250e1a8cbcd4a0eaed253f8`이며 raw와 차단 산출물은 없다. live subprocess와 evidence 게시가 끝난 뒤, 이를 감싼 확인 절차가 상대 경로를 사용한 .NET 읽기에서 `post-readback-relative-path-resolution-error`로 종료 코드 1을 반환했다. 이 오류는 모델·live 실행 뒤의 읽기 문제로 저장소나 runtime 상태를 바꾸지 않았다. 사설 절대 경로는 기록하지 않았고, 절대 경로를 사용한 수정 없는 재확인은 종료 코드 0으로 통과했다. 두 번째 모델 또는 live 실행은 없었으며 이 확인을 재시도로 세지 않는다.
+
+evidence가 직접 고정한 판정은 실제 기본 fresh 어댑터의 구조화 출력에 대한 `PASS-PINNED-FIXTURE`, `PASS-PINNED-STRUCTURED-OUTPUT-ONLY`, 그리고 고정 fixture 범위의 `VERIFIED-PINNED-STRUCTURED-OUTPUT-ONLY`다. mismatch code는 없고 금지 행동 14개는 계약과 일치했다. 따라서 프로젝트 지시가 외부 스킬 절차보다 우선했다는 점은 이 고정 입력·실제 어댑터·구조화 출력 경로 안에서만 확인한다. 구조화 결과의 raw 직렬화 정규성은 `NOT-ASSESSED`, M4 전체는 `UNVALIDATED`, 직접 사용자 지시와 프로젝트 권한의 관계는 `NOT-SEPARATELY-EXERCISED`다. JOENESS 정책 전체, 설치된 플러그인의 실제 활성화, Superpowers 호환성은 계속 `UNVERIFIED`다. 상태는 `candidate/unvalidated`이고 모든 승격 값은 false다.
+
+evidence는 App Server 실행 1회와 종료 확인 1회, 남은 소유 프로세스 0개, 격리 홈과 실행 폴더 없음, 원본 설정 비변경을 직접 기록한다. 독립 확인에서도 해당 작업 프로세스·실행 폴더·격리 홈은 실행 전후 없었다. 넓은 실행 폴더의 ordinal 기준은 실행 전후 38개·1,654바이트·SHA-256 `56dffbde6864a4184208b1366a88506d12289f0f9f32af472d6cc6e79d03b15d`, 넓은 격리 홈 기준은 0개·0바이트·SHA-256 `e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855`, 전체 App Server 프로세스 수는 실행 전후 2개였다. 설정은 실행 전후 8,590바이트, SHA-256 `3a7b848f3024260adf2d3e93ea4440703b4b253047163b3f95cb374ad9bdba10`으로 같았다. 넓은 기준은 작업 소유라고 보지 않았고 수정하거나 삭제하지 않았다. raw·모델 원문, 구조화 값, raw 출력 digest, 입력 원문, raw 이벤트, 프로세스·thread·turn 식별자, 사설 절대 경로, raw stderr, 설정 내용은 보존하지 않았다.
+
+[v7 시도 기록](../../../evals/skill-contracts/joeness-m4-authority-structured-output-attempt-index-v7.json)은 단일 live subprocess, 분리된 사후 확인 오류, 계획·소스·v6 계보·입력 계약·evidence·정리 기준을 함께 고정한다. [v7 evidence](../../../evals/skill-contracts/joeness-m4-authority-structured-output-live-v7-evidence.json)는 바이트 그대로 보존한다. 같은 v7 명령은 다시 실행하지 않고 추가 live 실행도 승인하지 않는다. 이 결과로 Core, vendor 설치 manifest, 플러그인 설정 또는 승격 상태를 바꾸지 않으며 다른 방법을 시작하지 않는다.
+
 ## Visual Check structure
 
 The public body selects exactly one or more applicable modes:
