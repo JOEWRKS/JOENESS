@@ -50,6 +50,16 @@ The artifact does not retain the original runtime error, original runtime stderr
 
 The v1 command is not retried. A materially different fallback may first add a fixed-size, path-private failure-stage and lifecycle projection, with no evaluator-contract, Core, manifest, plugin-setting, or promotion change. Any new live attempt requires a new immutable implementation commit, plan, output generation, clean preflight, and independent review.
 
+## 2026-08-14 M4 diagnostic fallback v2
+
+The authorized fallback added only a fixed-size, path-private fresh-failure projection and left the evaluator contract, Core, manifest, plugin settings, and promotion boundary unchanged. Its committed plan `evals/skill-contracts/joeness-m4-superpowers-live-plan-v2.json` is 2,952 bytes with SHA-256 `85be6e07cef1d3165fd0cb504de929dbafc74e227d1b2a403777035d198c449c`. The single invocation exited 1 with no retry and published only `evals/skill-contracts/joeness-m4-superpowers-live-v2-blocked.json`, 3,540 bytes with SHA-256 `ba29d79c3955f4bfce5059b1e05fbae8744e50eeaf235dd60d331ef3c7f1e4a0`. No raw or success-evidence artifact was published.
+
+The bounded diagnostic goal succeeded. Runner-owned identity gates establish that the imported default fresh adapter, rather than an injected evaluator, produced the retained failure. The adapter observed thread and turn starts, one correlated terminal whose state was not completed, nine normalized events with all nine retained below the limit, and three blockers. It safely classified `runtime-control-blocker` and `turn-not-completed`; the third blocker remains intentionally unclassified. App Server exit was zero. The flags for retaining raw output, raw events, thread/turn/process identifiers, absolute paths, raw event/output digests, stderr, and configuration contents are all false.
+
+This evidence locates the stop before output extraction, JSON parsing, and semantic validation. It therefore does not establish an M4 behavior result, a JOENESS policy failure, or a Superpowers compatibility failure. The exact non-completed terminal status, the exact third blocker, original error and stderr, raw events, model text, and installed-plugin activation remain unverified or unretained. Cleanup was safe: one App Server launch had one confirmed close, no owned process remained, the isolated home and run root were absent, the source configuration read back unchanged, and independent broad baselines matched before and after.
+
+The primary v1 method and the materially different v2 fallback are now exhausted. Neither command is retried, M4 remains `candidate/unvalidated`, and every promotion flag stays false. Another live method requires a new user decision or materially new evidence; this record itself authorizes no Core, manifest, plugin-configuration, or promotion change.
+
 ## Visual Check structure
 
 The public body selects exactly one or more applicable modes:
