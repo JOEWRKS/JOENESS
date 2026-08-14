@@ -60,6 +60,8 @@ UI UX Pro Max와 Apple Design은 JOENESS 설치 때 함께 복사되는 `$design
 
 Figma, Superpowers, Ponytail은 JOENESS와 **별도로 설치**하는 외부 플러그인입니다. JOENESS는 이 플러그인의 설치·활성화 설정을 바꾸지 않습니다.
 
+암시적 호출을 제한할 수 없는 플러그인은 JOENESS 명시적 사용 전용 정책과 호환되지 않으므로 기본 비활성화를 권장합니다. JOENESS는 경고만 제공하며 플러그인 설정을 자동으로 변경하지 않습니다.
+
 | 플러그인 | JOENESS 권장 정책 |
 |---|---|
 | Figma | **conditional**: 실제 Figma 파일·노드·결과가 작업 대상일 때만 사용 |
@@ -137,6 +139,8 @@ UI UX Pro Max and Apple Design are bundled with every JOENESS installation as in
 ### External plugins
 
 Figma, Superpowers, and Ponytail are external plugins installed **separately** from JOENESS. JOENESS does not change their installation or enablement settings.
+
+A plugin whose implicit invocation cannot be constrained is incompatible with JOENESS explicit-only policy; default disabled is recommended. JOENESS only warns and never changes plugin settings automatically.
 
 | Plugin | JOENESS policy |
 |---|---|

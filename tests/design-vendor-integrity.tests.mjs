@@ -147,13 +147,14 @@ const EXPECTED_PROJECT_SKILL = {
   sourceDependencies: [],
   intentionalDifferences: [
     'Conditional long-project planning offer with explicit writes, bounded discovery, single-ledger reuse, and snapshot-guarded AGENTS.md updates.',
+    'Explicit full-contract setup keeps external skill workflows subordinate to independently authorized user or project scope.',
   ],
   validatorSha256: '5347a0a09cfb546bba1c0d1a30dae0a233d9a05f57bd4e7877155c588bcdabf7',
   files: [
     {
       localPath: 'skills/project/SKILL.md',
-      bytes: 6747,
-      sha256: 'be0ca981423bab2cf657fd76415938491a1adfde3084526ecdb4a1d56ae7d847',
+      bytes: 6904,
+      sha256: '451b10444092b9349c42268a24962daf4bd637e1dfd7917f586997e1b4f84887',
       exactUpstreamCopy: false,
     },
     {
@@ -893,6 +894,7 @@ test('the interaction safety core is active without rewriting broader Core evide
   assert.equal(lstatSync(INTERACTION_SAFETY_CORE_V7).size, 2441);
   assert.ok(lstatSync(INTERACTION_SAFETY_CORE_V7).size <= 3072);
   assert.equal(sha256(INTERACTION_SAFETY_CORE_V7), manifest.activeCommonCore.sha256);
+  assert.equal(existsSync(path.join(ROOT, 'evals', 'candidates', 'interaction-safety-core-v8.md')), false);
   assert.equal(lstatSync(INTERACTION_SAFETY_CORE_V6).size, 2047);
   assert.equal(sha256(INTERACTION_SAFETY_CORE_V6), '897495e89128194afe695ff55e537c5e7ef52e6778bf260b10c9b6ab35857ceb');
   assert.equal(lstatSync(INTERACTION_SAFETY_CORE_V5).size, 2040);
@@ -936,6 +938,30 @@ test('the interaction safety core is active without rewriting broader Core evide
   assert.match(readFileSync(GITATTRIBUTES, 'utf8'), /^\/docs\/superpowers\/specs\/2026-08-11-joeness-routing-and-plugin-policy-design\.md text eol=lf$/m);
   assert.match(readFileSync(GITATTRIBUTES, 'utf8'), /^\/docs\/superpowers\/specs\/2026-08-13-joeness-user-language-and-core-size-decision\.md text eol=lf$/m);
   assert.match(readFileSync(GITATTRIBUTES, 'utf8'), /^\/docs\/superpowers\/plans\/2026-08-11-joeness-routing-and-plugin-policy\.md text eol=lf$/m);
+});
+
+test('M4 preserves project workflow authority without promoting or expanding Core', () => {
+  const manifest = JSON.parse(readFileSync(MANIFEST, 'utf8'));
+  const agents = readFileSync(ROOT_AGENTS, 'utf8');
+  const spec = readFileSync(path.join(ROOT, 'docs', 'superpowers', 'specs', '2026-08-11-joeness-routing-and-plugin-policy-design.md'), 'utf8');
+  const authorityRule = 'Invoking an external skill does not approve its whole workflow; use only the parts independently authorized by the current user request or project contract.';
+
+  assert.match(agents, new RegExp(`^- ${authorityRule.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'm'));
+  assert.doesNotMatch(agents, /<!-- JOEWRKS-HARNESS:(?:BEGIN|END) -->/);
+  assert.equal(manifest.activeCommonCore.path, 'evals/candidates/interaction-safety-core-v7.md');
+  assert.equal(manifest.evaluation.state, 'candidate');
+  assert.equal(manifest.evaluation.current.state, 'unvalidated');
+  assert.equal(manifest.evaluation.current.promotionPass, false);
+  assert.match(spec, /active Core.*v7.*3,072-byte decision/is);
+  assert.match(spec, /no Core v8.*behavior evidence/is);
+  assert.match(spec, /direct recommendation.*(?:at most|max) one outcome-changing question/is);
+  assert.match(spec, /no separate spec.*plan.*checklist.*approval.*commit ceremony/is);
+  assert.match(spec, /no companion.*server.*concrete A\/B.*user request/is);
+  assert.match(spec, /no visual-check.*actual visual artifact/is);
+  assert.match(spec, /no raw token-intensive.*quota warning/is);
+  assert.match(spec, /no user-facing skill ceremony/is);
+  assert.match(spec, /no plugin config(?:uration)? write/is);
+  assert.match(spec, /installed-plugin activation.*unverified.*separate live evidence/is);
 });
 
 test('candidate ledger separates the unvalidated active contract from retained hybrid evidence', async () => {

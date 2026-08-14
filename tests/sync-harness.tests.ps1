@@ -33,6 +33,8 @@ function Test-ReadmeContract {
     $koreanOutcomeFirst = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('6rKw6rO866W8IOuovOyggA=='))
     $koreanNoFixedFields = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('6rOg7KCVIO2VreuqqeydtOuCmCDspIQg7IiY'))
     $koreanNoReportFiller = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('67O06rOg66W8IOychO2VtCDrs4Trj4Qg6rKA7IKswrfrrLjshJzCt+uhnOq3uOulvCDrp4zrk6Tsp4Ag7JWK7Iq164uI64ukLg=='))
+    $koreanPluginIncompatible = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('7JWU7Iuc7KCBIO2YuOy2nOydhCDsoJztlZztlaAg7IiYIOyXhuuKlCDtlIzrn6zqt7jsnbjsnYAgSk9FTkVTUyDrqoXsi5zsoIEg7IKs7JqpIOyghOyaqSDsoJXssYXqs7wg7Zi47ZmY65CY7KeAIOyViuycvOuvgOuhnCDquLDrs7gg67mE7Zmc7ISx7ZmU66W8IOq2jOyepe2VqeuLiOuLpC4='))
+    $koreanPluginWarningOnly = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('Sk9FTkVTU+uKlCDqsr3qs6Drp4wg7KCc6rO17ZWY66mwIO2UjOufrOq3uOyduCDshKTsoJXsnYQg7J6Q64+Z7Jy866GcIOuzgOqyve2VmOyngCDslYrsirXri4jri6Qu'))
 
     function Get-ReadmeSubsection {
         param([string] $Text, [string] $Heading)
@@ -72,6 +74,13 @@ function Test-ReadmeContract {
         Assert-True ($section -match '(?is)Figma.{0,160}conditional') "$language guide makes Figma conditional"
         Assert-True ($section -match '(?is)Superpowers.{0,160}explicit-only') "$language guide makes Superpowers explicit-only"
         Assert-True ($section -match '(?is)Ponytail.{0,160}default disabled') "$language guide makes Ponytail default disabled"
+        if ($language -eq 'English') {
+            Assert-True $section.Contains('A plugin whose implicit invocation cannot be constrained is incompatible with JOENESS explicit-only policy; default disabled is recommended.') 'English guide marks unconstrained implicit invocation incompatible and recommends default disabled'
+            Assert-True $section.Contains('JOENESS only warns and never changes plugin settings automatically.') 'English guide says JOENESS warns without changing plugin settings'
+        } else {
+            Assert-True $section.Contains($koreanPluginIncompatible) 'Korean guide marks unconstrained implicit invocation incompatible and recommends default disabled'
+            Assert-True $section.Contains($koreanPluginWarningOnly) 'Korean guide says JOENESS warns without changing plugin settings'
+        }
 
         $firstUse = Get-ReadmeSubsection $section $(if ($language -eq 'English') { 'First use: five steps' } else { $koreanFirstUse })
         $steps = @([regex]::Matches($firstUse, '(?m)^([1-9][0-9]*)\. '))

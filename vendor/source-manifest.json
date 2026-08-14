@@ -274,10 +274,10 @@
       "evaluationState": "candidate",
       "activationPolicy": "hybrid-offer-explicit-write",
       "sourceDependencies": [],
-      "intentionalDifferences": ["Conditional long-project planning offer with explicit writes, bounded discovery, single-ledger reuse, and snapshot-guarded AGENTS.md updates."],
+      "intentionalDifferences": ["Conditional long-project planning offer with explicit writes, bounded discovery, single-ledger reuse, and snapshot-guarded AGENTS.md updates.", "Explicit full-contract setup keeps external skill workflows subordinate to independently authorized user or project scope."],
       "validatorSha256": "5347a0a09cfb546bba1c0d1a30dae0a233d9a05f57bd4e7877155c588bcdabf7",
       "files": [
-        {"localPath":"skills/project/SKILL.md","bytes":6747,"sha256":"be0ca981423bab2cf657fd76415938491a1adfde3084526ecdb4a1d56ae7d847","exactUpstreamCopy":false},
+        {"localPath":"skills/project/SKILL.md","bytes":6904,"sha256":"451b10444092b9349c42268a24962daf4bd637e1dfd7917f586997e1b4f84887","exactUpstreamCopy":false},
         {"localPath":"skills/project/agents/openai.yaml","bytes":318,"sha256":"d5757afbeb0e378b6356c118804cdf7989d4394ecd5218bee5365a246efba720","exactUpstreamCopy":false},
         {"localPath":"skills/project/scripts/project-setup.ps1","bytes":17495,"sha256":"4ffc548078a5c87357fd0e4e63538567ea2666f118243a0558bff29278d13105","exactUpstreamCopy":false}
       ]

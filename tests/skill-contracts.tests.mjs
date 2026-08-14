@@ -335,6 +335,16 @@ test('project binds durable planning to the real external deployment boundary', 
   assert.match(project, /recheck.*project root.*Git.*deploy.*read back.*hash/is);
 });
 
+test('project keeps external skill workflows subordinate to explicit project authority', () => {
+  const project = readRoleFile('project', 'SKILL.md');
+  const implicitApproval = project.match(/For approval of the implicit roadmap offer,[\s\S]*?(?=\n\nFor an explicit full-contract setup\/apply request)/)?.[0] ?? '';
+  const explicitFullContract = project.match(/For an explicit full-contract setup\/apply request[\s\S]*?(?=\n\nExclude both JOEWRKS markers)/)?.[0] ?? '';
+
+  assert.match(explicitFullContract, /Invoking an external skill does not approve its whole workflow; use only the parts independently authorized by the current user request or project contract\./);
+  assert.doesNotMatch(implicitApproval, /external skill|whole workflow/i);
+  assert.match(implicitApproval, /only these two facts: the selected ledger path, and the evidence-reconciliation plus event-based update rule/i);
+});
+
 test('design owns intent while visual-check owns concrete regressions', () => {
   const design = readRoleFile('design', 'SKILL.md');
   assert.match(design, /subjective.*first[- ]draft|new UI\/UX intent/is);
