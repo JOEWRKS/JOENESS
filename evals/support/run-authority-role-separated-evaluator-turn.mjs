@@ -6,10 +6,20 @@ import {
   EVALUATION_PROJECT_DOC_MAX_BYTES,
   buildThreadStartRequest,
 } from "./collect-codex-app-server.mjs";
-import { runFreshEvaluatorTurn } from "./run-fresh-evaluator-turn.mjs";
+import {
+  FRESH_EVALUATOR_FAILURE_PHASES,
+  projectFreshEvaluatorFailureDiagnostic,
+  runFreshEvaluatorTurn,
+} from "./run-fresh-evaluator-turn.mjs";
 
 export const AUTHORITY_ROLE_SEPARATED_EVALUATOR_ADAPTER_ID =
   "authority-role-separated-evaluator-turn-v1";
+export const AUTHORITY_ROLE_SEPARATED_AUXILIARY_METHODS = Object.freeze([
+  "none",
+  "turn-interrupt",
+  "mcp-server-status-list",
+  "unmapped",
+]);
 
 const OPTION_KEYS = Object.freeze([
   "session",
@@ -32,6 +42,10 @@ const PRIVACY = Object.freeze({
   eventPayloadPersisted: false,
 });
 const FORBIDDEN_JSON_KEYS = new Set(["__proto__", "constructor", "prototype"]);
+const FRESH_EVALUATOR_FAILURE_PHASE_SET = new Set(FRESH_EVALUATOR_FAILURE_PHASES);
+const AUTHORITY_ROLE_SEPARATED_AUXILIARY_METHOD_SET = new Set(
+  AUTHORITY_ROLE_SEPARATED_AUXILIARY_METHODS,
+);
 const BLOCKED_STAGES = new Set([
   "options-validation",
   "initial-project-binding",
@@ -563,14 +577,61 @@ function sanitizedThreadResponse(response, expectedPath, request) {
   return snapshot;
 }
 
-function roleSeparatedError(stage, closeCount) {
+function mappedAuxiliaryMethod(method) {
+  if (method === "turn/interrupt") return "turn-interrupt";
+  if (method === "mcpServerStatus/list") return "mcp-server-status-list";
+  return "unmapped";
+}
+
+function diagnosticCombinationIsValid(stage, failurePhase, lastAuxiliaryMethod) {
+  if (!FRESH_EVALUATOR_FAILURE_PHASE_SET.has(failurePhase)) return false;
+  if (!AUTHORITY_ROLE_SEPARATED_AUXILIARY_METHOD_SET.has(lastAuxiliaryMethod)) {
+    return false;
+  }
+  if (
+    ["before-auxiliary-request", "after-auxiliary-request"].includes(stage) &&
+    lastAuxiliaryMethod === "none"
+  ) {
+    return false;
+  }
+  if (["terminal-timeout", "agent-message-delta-overflow"].includes(failurePhase)) {
+    return lastAuxiliaryMethod === "turn-interrupt";
+  }
+  if ([
+    "mcp-status-collection",
+    "mcp-runtime-inertness",
+    "final-agent-text",
+    "structured-output-parse",
+  ].includes(failurePhase)) {
+    return lastAuxiliaryMethod === "mcp-server-status-list";
+  }
+  return AUTHORITY_ROLE_SEPARATED_AUXILIARY_METHOD_SET.has(lastAuxiliaryMethod);
+}
+
+function roleSeparatedError(stage, closeCount, failurePhase, lastAuxiliaryMethod) {
+  const normalizedStage = BLOCKED_STAGES.has(stage) ? stage : "unmapped";
+  if (
+    !diagnosticCombinationIsValid(
+      normalizedStage,
+      failurePhase,
+      lastAuxiliaryMethod,
+    )
+  ) {
+    fail("authority role-separated diagnostic combination is invalid");
+  }
   const error = new Error("authority role-separated evaluator turn failed");
   error.authorityRoleSeparatedEvidence = {
-    schemaVersion: 1,
+    schemaVersion: 2,
     adapterId: AUTHORITY_ROLE_SEPARATED_EVALUATOR_ADAPTER_ID,
     status: "blocked",
-    stage: BLOCKED_STAGES.has(stage) ? stage : "unmapped",
+    stage: normalizedStage,
     sessionCloseCount: closeCount,
+    diagnostic: {
+      schemaVersion: 1,
+      provenance: "authority-role-separated-fixed-enum-diagnostic-v1",
+      failurePhase,
+      lastAuxiliaryMethod,
+    },
     privacy: { ...PRIVACY },
   };
   return error;
@@ -592,6 +653,7 @@ export async function runAuthorityRoleSeparatedEvaluatorTurn(options) {
   let closeStarted = false;
   let actualClose = null;
   let sessionControl = null;
+  let lastAuxiliaryMethod = "none";
   const closeOnce = async () => {
     if (closeStarted || actualClose === null) return;
     closeStarted = true;
@@ -765,6 +827,7 @@ export async function runAuthorityRoleSeparatedEvaluatorTurn(options) {
               "authority role-separated turn response",
             );
           }
+          lastAuxiliaryMethod = mappedAuxiliaryMethod(method);
           requireSessionControl("before-auxiliary-request");
           const transportRequest = cloneJson(
             params,
@@ -872,7 +935,10 @@ export async function runAuthorityRoleSeparatedEvaluatorTurn(options) {
       },
       privacy: { ...PRIVACY },
     };
-  } catch {
+  } catch (error) {
+    const projected = projectFreshEvaluatorFailureDiagnostic(error);
+    const failurePhase = projected?.failurePhase ?? "unmapped";
+    const method = lastAuxiliaryMethod;
     stage = stage === "complete" ? "post-validation" : stage;
     try {
       await closeOnce();
@@ -890,6 +956,6 @@ export async function runAuthorityRoleSeparatedEvaluatorTurn(options) {
         stage = "session-cleanup";
       }
     }
-    throw roleSeparatedError(stage, closeCount);
+    throw roleSeparatedError(stage, closeCount, failurePhase, method);
   }
 }

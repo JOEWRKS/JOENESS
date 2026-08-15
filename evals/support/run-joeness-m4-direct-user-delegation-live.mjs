@@ -26,24 +26,27 @@ import {
   JOENESS_M4_DIRECT_USER_DELEGATION_ID,
   runJoenessM4DirectUserDelegationEval,
 } from "./run-joeness-m4-direct-user-delegation-eval.mjs";
-import { runAuthorityRoleSeparatedEvaluatorTurn } from
-  "./run-authority-role-separated-evaluator-turn.mjs";
+import {
+  AUTHORITY_ROLE_SEPARATED_AUXILIARY_METHODS,
+  runAuthorityRoleSeparatedEvaluatorTurn,
+} from "./run-authority-role-separated-evaluator-turn.mjs";
+import { FRESH_EVALUATOR_FAILURE_PHASES } from "./run-fresh-evaluator-turn.mjs";
 import { publishJoenessM4TransportControlBlockedArtifact } from
   "./run-joeness-m4-transport-control-eval.mjs";
 
 const execFile = promisify(execFileCallback);
 
 export const JOENESS_M4_DIRECT_USER_DELEGATION_LIVE_RUN_ID =
-  "joeness-m4-direct-user-delegation-live-v9";
+  "joeness-m4-direct-user-delegation-live-v10";
 
 export const JOENESS_M4_DIRECT_USER_DELEGATION_LIVE_PLAN_PATH =
-  "evals/skill-contracts/joeness-m4-direct-user-delegation-live-plan-v9.json";
+  "evals/skill-contracts/joeness-m4-direct-user-delegation-live-plan-v10.json";
 
 export const JOENESS_M4_DIRECT_USER_DELEGATION_LIVE_OUTPUTS = Object.freeze({
   evidence:
-    "evals/skill-contracts/joeness-m4-direct-user-delegation-live-v9-evidence.json",
+    "evals/skill-contracts/joeness-m4-direct-user-delegation-live-v10-evidence.json",
   blocked:
-    "evals/skill-contracts/joeness-m4-direct-user-delegation-live-v9-blocked.json",
+    "evals/skill-contracts/joeness-m4-direct-user-delegation-live-v10-blocked.json",
 });
 
 export const JOENESS_M4_DIRECT_USER_DELEGATION_LIVE_METHOD =
@@ -81,10 +84,10 @@ const INNER_SOURCE_PIN_KEYS = Object.freeze([
   "fixtureManifest",
 ]);
 const TASK_B_SUPPORT_COMMIT = "2140ee30c69a6159e63daf6ad2d5d0d67d699ce9";
-const V9_BASE_COMMIT = "b7d6267f78e854077745db840ffd912a77f73795";
+const V10_BASE_COMMIT = "20caa38ee61d0494b33b1678aa34a2457ed35476";
 const LIVE_TEST_PATH = "tests/joeness-m4-direct-user-delegation-live.tests.mjs";
-const V9_ATTEMPT_INDEX_PATH =
-  "evals/skill-contracts/joeness-m4-direct-user-delegation-attempt-index-v9.json";
+const V10_ATTEMPT_INDEX_PATH =
+  "evals/skill-contracts/joeness-m4-direct-user-delegation-attempt-index-v10.json";
 const SOURCE_PATHS = Object.freeze({
   directUserDelegationRunner:
     "evals/support/run-joeness-m4-direct-user-delegation-eval.mjs",
@@ -99,28 +102,39 @@ const SOURCE_PATHS = Object.freeze({
   fixtureManifest:
     "evals/skill-contracts/fixtures/joeness-m4-direct-user-delegation-v1/manifest-v1.json",
 });
+const V10_SUPPORT_PATHS = Object.freeze([
+  "evals/support/run-authority-role-separated-evaluator-turn.mjs",
+  "evals/support/run-fresh-evaluator-turn.mjs",
+  "evals/support/run-joeness-m4-direct-user-delegation-eval.mjs",
+  "evals/support/run-joeness-m4-direct-user-delegation-live.mjs",
+  "tests/authority-role-separated-evaluator-turn.tests.mjs",
+  "tests/fresh-evaluator-turn.tests.mjs",
+  "tests/joeness-m4-direct-user-delegation-eval.tests.mjs",
+  LIVE_TEST_PATH,
+]);
 const PREDECESSOR = Object.freeze({
-  id: "joeness-m4-direct-user-delegation-live-v8",
-  implementationCommit: "71cbde6584f49f6a75a7ed60f6253f474e6d7fe5",
-  executionHead: "67bf760e1668f1d04cee49100af745eb4a51ab30",
-  persistenceCommit: "b7d6267f78e854077745db840ffd912a77f73795",
+  id: "joeness-m4-direct-user-delegation-live-v9",
+  implementationCommit: "bd8285060bee5d1a3289aea7cc46a49b7ecb5649",
+  executionHead: "e2df687d33127599790dc97c809a23b668958a70",
+  persistenceCommit: "7e2451e068d9b455c0e4e5217b29dd7c752dfbb6",
   plan: Object.freeze({
-    path: "evals/skill-contracts/joeness-m4-direct-user-delegation-live-plan-v8.json",
-    bytes: 5717,
-    sha256: "23db82ec7439d70f2e0fe26d352e908ec0580eedb7cbfd17f795ae497311e545",
+    path: "evals/skill-contracts/joeness-m4-direct-user-delegation-live-plan-v9.json",
+    bytes: 5465,
+    sha256: "ee1a7d9085f154f35a322dbdb5b8b96562182d010e56ba11728ad55dedea3c52",
   }),
   evidenceArtifact: Object.freeze({
-    path: "evals/skill-contracts/joeness-m4-direct-user-delegation-live-v8-evidence.json",
+    path: "evals/skill-contracts/joeness-m4-direct-user-delegation-live-v9-evidence.json",
     status: "absent",
   }),
   blockedArtifact: Object.freeze({
-    path: "evals/skill-contracts/joeness-m4-direct-user-delegation-live-v8-blocked.json",
-    status: "absent",
+    path: "evals/skill-contracts/joeness-m4-direct-user-delegation-live-v9-blocked.json",
+    bytes: 7381,
+    sha256: "941c8aea5c04762cbb01359dcc9c5c731f5f29ee05508ca991ade44d6b4a7cd9",
   }),
   attemptIndex: Object.freeze({
-    path: "evals/skill-contracts/joeness-m4-direct-user-delegation-attempt-index-v8.json",
-    bytes: 15735,
-    sha256: "1b98bf8a787f7fdab8498cd4f8f7975d1718b08342dab0145dd01abec6715289",
+    path: "evals/skill-contracts/joeness-m4-direct-user-delegation-attempt-index-v9.json",
+    bytes: 11968,
+    sha256: "599b97effb943ab26ccc9e6d6dd1bb12d360e6977afb552a1259a85045e2f179",
   }),
   sameCommandRetryAuthorized: false,
 });
@@ -247,6 +261,10 @@ const TASK_A_BLOCKED_STAGES = Object.freeze([
   "session-cleanup",
   "unmapped",
 ]);
+const FRESH_EVALUATOR_FAILURE_PHASE_SET = new Set(FRESH_EVALUATOR_FAILURE_PHASES);
+const AUTHORITY_ROLE_SEPARATED_AUXILIARY_METHOD_SET = new Set(
+  AUTHORITY_ROLE_SEPARATED_AUXILIARY_METHODS,
+);
 
 function fail(message) {
   throw new TypeError(message);
@@ -337,7 +355,7 @@ function sourceTuple(value, expected, label, flexible = false) {
 
 export function validateJoenessM4DirectUserDelegationLivePlan(value) {
   const plan = exactObject(value, PLAN_KEYS, "direct-user delegation live plan");
-  exact(plan.schemaVersion, 9, "plan.schemaVersion");
+  exact(plan.schemaVersion, 10, "plan.schemaVersion");
   exact(plan.id, JOENESS_M4_DIRECT_USER_DELEGATION_LIVE_RUN_ID, "plan.id");
   exact(plan.date, "2026-08-15", "plan.date");
   exact(plan.method, JOENESS_M4_DIRECT_USER_DELEGATION_LIVE_METHOD, "plan.method");
@@ -355,14 +373,41 @@ export function validateJoenessM4DirectUserDelegationLivePlan(value) {
   exact(predecessorPlan.path, PREDECESSOR.plan.path, "predecessor.plan.path");
   exact(predecessorPlan.bytes, PREDECESSOR.plan.bytes, "predecessor.plan.bytes");
   exact(predecessorPlan.sha256, PREDECESSOR.plan.sha256, "predecessor.plan.sha256");
-  for (const [name, artifactPath] of [
-    ["evidenceArtifact", PREDECESSOR.evidenceArtifact.path],
-    ["blockedArtifact", PREDECESSOR.blockedArtifact.path],
-  ]) {
-    const artifact = exactObject(predecessor[name], ["path", "status"], `predecessor.${name}`);
-    exact(artifact.path, artifactPath, `predecessor.${name}.path`);
-    exact(artifact.status, "absent", `predecessor.${name}.status`);
-  }
+  const predecessorEvidence = exactObject(
+    predecessor.evidenceArtifact,
+    ["path", "status"],
+    "predecessor.evidenceArtifact",
+  );
+  exact(
+    predecessorEvidence.path,
+    PREDECESSOR.evidenceArtifact.path,
+    "predecessor.evidenceArtifact.path",
+  );
+  exact(
+    predecessorEvidence.status,
+    PREDECESSOR.evidenceArtifact.status,
+    "predecessor.evidenceArtifact.status",
+  );
+  const predecessorBlocked = exactObject(
+    predecessor.blockedArtifact,
+    ["path", "bytes", "sha256"],
+    "predecessor.blockedArtifact",
+  );
+  exact(
+    predecessorBlocked.path,
+    PREDECESSOR.blockedArtifact.path,
+    "predecessor.blockedArtifact.path",
+  );
+  exact(
+    predecessorBlocked.bytes,
+    PREDECESSOR.blockedArtifact.bytes,
+    "predecessor.blockedArtifact.bytes",
+  );
+  exact(
+    predecessorBlocked.sha256,
+    PREDECESSOR.blockedArtifact.sha256,
+    "predecessor.blockedArtifact.sha256",
+  );
   const index = exactObject(predecessor.attemptIndex, ["path", "bytes", "sha256"], "predecessor.attemptIndex");
   exact(index.path, PREDECESSOR.attemptIndex.path, "predecessor.attemptIndex.path");
   exact(index.bytes, PREDECESSOR.attemptIndex.bytes, "predecessor.attemptIndex.bytes");
@@ -377,10 +422,10 @@ export function validateJoenessM4DirectUserDelegationLivePlan(value) {
   const source = exactObject(plan.source, ["planImplementationCommit", ...SOURCE_ROLES], "plan.source");
   digest(source.planImplementationCommit, 40, "source.planImplementationCommit");
   const expectedSources = {
-    directUserDelegationRunner: { path: "evals/support/run-joeness-m4-direct-user-delegation-eval.mjs", bytes: 50725, sha256: "acabceb132117198d5035fba1f1b27e5abb4c2742e1053336897cf49b288bd55" },
+    directUserDelegationRunner: { path: "evals/support/run-joeness-m4-direct-user-delegation-eval.mjs", bytes: 52750, sha256: "66e51428ec2738df5b208f2e98a30f4f4d83664e929f45cf633857aa39637855" },
     directUserDelegationWrapper: { path: "evals/support/run-joeness-m4-direct-user-delegation-live.mjs" },
-    authorityRoleSeparatedAdapter: { path: "evals/support/run-authority-role-separated-evaluator-turn.mjs", bytes: 29334, sha256: "cae472f7d82cc603cc0d16c0234c03b5213511aed8e96178aa45aa47a8efd96f" },
-    freshTurnAdapter: { path: "evals/support/run-fresh-evaluator-turn.mjs", bytes: 56845, sha256: "4884154dd1884b6fa899eef854307edec2a9897cb39b1f45c9c03479cab34247" },
+    authorityRoleSeparatedAdapter: { path: "evals/support/run-authority-role-separated-evaluator-turn.mjs", bytes: 31554, sha256: "a5e29c9b0ccb65c4cbb519587e53f45f39a4ef116ce84a2024be16ba2808f172" },
+    freshTurnAdapter: { path: "evals/support/run-fresh-evaluator-turn.mjs", bytes: 59802, sha256: "37782e63e397350a0c252c407a8f67dfa090c5eeb60eb0b1036504822b0b28f9" },
     transportControlSupport: { path: "evals/support/run-joeness-m4-transport-control-eval.mjs", bytes: 49611, sha256: "547077688884d8d0c94558fc84322bcf31b61b0a6d6583359423f2c161029cfa" },
     collector: { path: "evals/support/collect-codex-app-server.mjs", bytes: 297632, sha256: "8b81ddb28be2a803500839a2de61f9bb397aa96711d039bdb7a3a86cfad8d687" },
     fixtureManifest: { path: "evals/skill-contracts/fixtures/joeness-m4-direct-user-delegation-v1/manifest-v1.json", bytes: 1550, sha256: "b0b6df573fb5c8d87522c0e7eb895e4ed8a13e2cfc50f523030115dfcc1397ac" },
@@ -795,7 +840,7 @@ function snapshotExecutionBoundary(value) {
       PREDECESSOR.evidenceArtifact,
       "execution predecessor.evidenceArtifact",
     ),
-    blockedArtifact: exactAbsentMatch(
+    blockedArtifact: exactTupleMatch(
       predecessor.blockedArtifact,
       PREDECESSOR.blockedArtifact,
       "execution predecessor.blockedArtifact",
@@ -1028,18 +1073,17 @@ export async function verifyJoenessM4DirectUserDelegationExecutionBoundary(optio
   const supportParent = await boundaryGitText(root, [
     "rev-list", "--parents", "-n", "1", support,
   ]);
-  if (supportParent !== `${support} ${V9_BASE_COMMIT}`) {
-    throw new Error("direct-user delegation support must be a direct persisted v8 child");
+  if (supportParent !== `${support} ${V10_BASE_COMMIT}`) {
+    throw new Error("direct-user delegation support must be a direct v10 base child");
   }
   const supportDiff = await boundaryGitText(root, [
-    "diff", "--name-status", V9_BASE_COMMIT, support,
+    "diff", "--name-status", V10_BASE_COMMIT, support,
   ]);
-  const expectedSupportDiff = [
-    `M\t${SOURCE_PATHS.directUserDelegationWrapper}`,
-    `M\t${LIVE_TEST_PATH}`,
-  ].join("\n");
+  const expectedSupportDiff = V10_SUPPORT_PATHS
+    .map((relativePath) => `M\t${relativePath}`)
+    .join("\n");
   if (supportDiff !== expectedSupportDiff) {
-    throw new Error("direct-user delegation support diff is not wrapper-and-test only");
+    throw new Error("direct-user delegation support diff is not the exact v10 support set");
   }
   const executionParent = await boundaryGitText(root, [
     "rev-list", "--parents", "-n", "1", executionHead,
@@ -1082,32 +1126,31 @@ export async function verifyJoenessM4DirectUserDelegationExecutionBoundary(optio
     throw new Error("direct-user delegation predecessor plan must be absent at implementation");
   }
   for (const revision of [PREDECESSOR.implementationCommit, PREDECESSOR.executionHead]) {
-    for (const pin of [PREDECESSOR.attemptIndex]) {
+    for (const pin of [PREDECESSOR.blockedArtifact, PREDECESSOR.attemptIndex]) {
       if (await gitBlobExists(root, revision, pin.path)) {
         throw new Error("direct-user delegation predecessor persisted artifact appeared early");
       }
     }
   }
-  for (const pin of [PREDECESSOR.evidenceArtifact, PREDECESSOR.blockedArtifact]) {
-    for (const revision of [
-      PREDECESSOR.implementationCommit,
-      PREDECESSOR.executionHead,
-      PREDECESSOR.persistenceCommit,
-      support,
-      executionHead,
-    ]) {
-      if (await gitBlobExists(root, revision, pin.path)) {
-        throw new Error("direct-user delegation predecessor absent artifact appeared");
-      }
+  for (const revision of [
+    PREDECESSOR.implementationCommit,
+    PREDECESSOR.executionHead,
+    PREDECESSOR.persistenceCommit,
+    support,
+    executionHead,
+  ]) {
+    if (await gitBlobExists(root, revision, PREDECESSOR.evidenceArtifact.path)) {
+      throw new Error("direct-user delegation predecessor absent evidence appeared");
     }
-    await requireAbsentConfinedTarget(
-      root,
-      pin.path,
-      "direct-user delegation predecessor absent artifact",
-    );
   }
+  await requireAbsentConfinedTarget(
+    root,
+    PREDECESSOR.evidenceArtifact.path,
+    "direct-user delegation predecessor absent evidence",
+  );
   for (const [label, pin, revisions] of [
     ["plan", PREDECESSOR.plan, [PREDECESSOR.executionHead, PREDECESSOR.persistenceCommit, support, executionHead]],
+    ["blocked artifact", PREDECESSOR.blockedArtifact, [PREDECESSOR.persistenceCommit, support, executionHead]],
     ["attempt index", PREDECESSOR.attemptIndex, [PREDECESSOR.persistenceCommit, support, executionHead]],
   ]) {
     for (const revision of revisions) {
@@ -1179,15 +1222,15 @@ export async function verifyJoenessM4DirectUserDelegationExecutionBoundary(optio
     sourcePins[role] = { ...pin };
   }
 
-  if (await gitBlobExists(root, support, V9_ATTEMPT_INDEX_PATH)) {
+  if (await gitBlobExists(root, support, V10_ATTEMPT_INDEX_PATH)) {
     throw new Error("direct-user delegation attempt index exists at support");
   }
-  if (await gitBlobExists(root, executionHead, V9_ATTEMPT_INDEX_PATH)) {
+  if (await gitBlobExists(root, executionHead, V10_ATTEMPT_INDEX_PATH)) {
     throw new Error("direct-user delegation attempt index exists at execution");
   }
   await requireAbsentConfinedTarget(
     root,
-    V9_ATTEMPT_INDEX_PATH,
+    V10_ATTEMPT_INDEX_PATH,
     "direct-user delegation attempt index",
   );
 
@@ -1239,8 +1282,7 @@ export async function verifyJoenessM4DirectUserDelegationExecutionBoundary(optio
   }
   for (const absentPath of [
     PREDECESSOR.evidenceArtifact.path,
-    PREDECESSOR.blockedArtifact.path,
-    V9_ATTEMPT_INDEX_PATH,
+    V10_ATTEMPT_INDEX_PATH,
     ...Object.values(JOENESS_M4_DIRECT_USER_DELEGATION_LIVE_OUTPUTS)
       .filter((outputPath) => outputPath !== data.publishedPath),
   ]) {
@@ -2952,19 +2994,38 @@ export function rebuildJoenessM4DirectUserDelegationDelegatedEvidence(value) {
   };
 }
 
-function delegatedFreshFailure(value) {
-  const data = exactObject(
-    value,
-    ["schemaVersion", "provenance", "runnerStage", "adapter", "privacy"],
-    "delegated Task-B fresh failure",
-  );
+function diagnosticCombinationIsValid(stage, failurePhase, lastAuxiliaryMethod) {
+  if (!FRESH_EVALUATOR_FAILURE_PHASE_SET.has(failurePhase)) return false;
+  if (!AUTHORITY_ROLE_SEPARATED_AUXILIARY_METHOD_SET.has(lastAuxiliaryMethod)) {
+    return false;
+  }
+  if (
+    ["before-auxiliary-request", "after-auxiliary-request"].includes(stage) &&
+    lastAuxiliaryMethod === "none"
+  ) {
+    return false;
+  }
+  if (["terminal-timeout", "agent-message-delta-overflow"].includes(failurePhase)) {
+    return lastAuxiliaryMethod === "turn-interrupt";
+  }
+  if ([
+    "mcp-status-collection",
+    "mcp-runtime-inertness",
+    "final-agent-text",
+    "structured-output-parse",
+  ].includes(failurePhase)) {
+    return lastAuxiliaryMethod === "mcp-server-status-list";
+  }
+  return AUTHORITY_ROLE_SEPARATED_AUXILIARY_METHOD_SET.has(lastAuxiliaryMethod);
+}
+
+function delegatedFreshFailureV1(data) {
   const adapter = exactObject(
     data.adapter,
     ["schemaVersion", "adapterId", "status", "stage", "sessionCloseCount"],
-    "delegated Task-B fresh failure adapter",
+    "delegated Task-B schema-1 fresh failure adapter",
   );
   if (
-    data.schemaVersion !== 1 ||
     data.provenance !==
       "direct-user-delegation-runner-observed-authentic-role-separated-adapter-rejection" ||
     data.runnerStage !== "role-separated-evaluator-rejected" ||
@@ -2975,7 +3036,7 @@ function delegatedFreshFailure(value) {
     !Number.isSafeInteger(adapter.sessionCloseCount) ||
     adapter.sessionCloseCount < 0 ||
     adapter.sessionCloseCount > 1
-  ) fail("delegated Task-B fresh failure is invalid");
+  ) fail("delegated Task-B schema-1 fresh failure is invalid");
   const privacy = exactFalseObject(
     data.privacy,
     [
@@ -2986,7 +3047,7 @@ function delegatedFreshFailure(value) {
       "rawStderrPersisted",
       "configContentsPersisted",
     ],
-    "delegated Task-B fresh failure privacy",
+    "delegated Task-B schema-1 fresh failure privacy",
   );
   return {
     schemaVersion: 1,
@@ -2996,6 +3057,88 @@ function delegatedFreshFailure(value) {
     adapter: { ...adapter },
     privacy,
   };
+}
+
+function delegatedFreshFailureV2(data) {
+  const adapter = exactObject(
+    data.adapter,
+    [
+      "schemaVersion",
+      "adapterId",
+      "status",
+      "stage",
+      "sessionCloseCount",
+      "diagnostic",
+    ],
+    "delegated Task-B schema-2 fresh failure adapter",
+  );
+  const diagnostic = exactObject(
+    adapter.diagnostic,
+    ["schemaVersion", "provenance", "failurePhase", "lastAuxiliaryMethod"],
+    "delegated Task-B schema-2 fresh failure diagnostic",
+  );
+  if (
+    data.provenance !==
+      "direct-user-delegation-runner-observed-authentic-role-separated-adapter-rejection" ||
+    data.runnerStage !== "role-separated-evaluator-rejected" ||
+    adapter.schemaVersion !== 2 ||
+    adapter.adapterId !== "authority-role-separated-evaluator-turn-v1" ||
+    adapter.status !== "blocked" ||
+    !TASK_A_BLOCKED_STAGES.includes(adapter.stage) ||
+    !Number.isSafeInteger(adapter.sessionCloseCount) ||
+    adapter.sessionCloseCount < 0 ||
+    adapter.sessionCloseCount > 1 ||
+    diagnostic.schemaVersion !== 1 ||
+    diagnostic.provenance !== "authority-role-separated-fixed-enum-diagnostic-v1" ||
+    !diagnosticCombinationIsValid(
+      adapter.stage,
+      diagnostic.failurePhase,
+      diagnostic.lastAuxiliaryMethod,
+    )
+  ) fail("delegated Task-B schema-2 fresh failure is invalid");
+  const privacy = exactFalseObject(
+    data.privacy,
+    [
+      "rawOutputPersisted",
+      "rawOutputDigestPersisted",
+      "rawEventsPersisted",
+      "absolutePathsPersisted",
+      "rawStderrPersisted",
+      "configContentsPersisted",
+    ],
+    "delegated Task-B schema-2 fresh failure privacy",
+  );
+  return {
+    schemaVersion: 2,
+    provenance:
+      "direct-user-delegation-runner-observed-authentic-role-separated-adapter-rejection",
+    runnerStage: "role-separated-evaluator-rejected",
+    adapter: {
+      schemaVersion: 2,
+      adapterId: "authority-role-separated-evaluator-turn-v1",
+      status: "blocked",
+      stage: adapter.stage,
+      sessionCloseCount: adapter.sessionCloseCount,
+      diagnostic: {
+        schemaVersion: 1,
+        provenance: "authority-role-separated-fixed-enum-diagnostic-v1",
+        failurePhase: diagnostic.failurePhase,
+        lastAuxiliaryMethod: diagnostic.lastAuxiliaryMethod,
+      },
+    },
+    privacy,
+  };
+}
+
+function delegatedFreshFailure(value) {
+  const schema = exactObject(
+    value,
+    ["schemaVersion", "provenance", "runnerStage", "adapter", "privacy"],
+    "delegated Task-B fresh failure",
+  );
+  if (schema.schemaVersion === 1) return delegatedFreshFailureV1(schema);
+  if (schema.schemaVersion === 2) return delegatedFreshFailureV2(schema);
+  fail("delegated Task-B fresh failure schema is invalid");
 }
 
 export function rebuildJoenessM4DirectUserDelegationDelegatedBlockedReceipt(value) {
@@ -3480,6 +3623,7 @@ function liveBoundFileTuples(boundary) {
     { ...PROJECT_INPUT },
     { ...USER_INPUT },
     { ...PREDECESSOR.plan },
+    { ...PREDECESSOR.blockedArtifact },
     { ...PREDECESSOR.attemptIndex },
   ];
 }
@@ -3523,8 +3667,7 @@ async function requireLiveOutputsAbsent(repositoryRoot) {
   for (const relativePath of [
     ...Object.values(JOENESS_M4_DIRECT_USER_DELEGATION_LIVE_OUTPUTS),
     PREDECESSOR.evidenceArtifact.path,
-    PREDECESSOR.blockedArtifact.path,
-    V9_ATTEMPT_INDEX_PATH,
+    V10_ATTEMPT_INDEX_PATH,
   ]) {
     await requireAbsentConfinedTarget(
       repositoryRoot,
@@ -3539,8 +3682,7 @@ async function requireLiveOtherOutputsAbsent(repositoryRoot, publishedPath) {
     ...Object.values(JOENESS_M4_DIRECT_USER_DELEGATION_LIVE_OUTPUTS)
       .filter((candidate) => candidate !== publishedPath),
     PREDECESSOR.evidenceArtifact.path,
-    PREDECESSOR.blockedArtifact.path,
-    V9_ATTEMPT_INDEX_PATH,
+    V10_ATTEMPT_INDEX_PATH,
   ]) {
     await requireAbsentConfinedTarget(
       repositoryRoot,
@@ -3569,8 +3711,7 @@ async function requireNoLiveOutputSiblings(repositoryRoot, publishedPath = null)
   const protectedNames = [
     ...Object.values(JOENESS_M4_DIRECT_USER_DELEGATION_LIVE_OUTPUTS),
     PREDECESSOR.evidenceArtifact.path,
-    PREDECESSOR.blockedArtifact.path,
-    V9_ATTEMPT_INDEX_PATH,
+    V10_ATTEMPT_INDEX_PATH,
   ].map((relativePath) => path.posix.basename(relativePath));
   for (const name of names) {
     if (name === allowed) continue;

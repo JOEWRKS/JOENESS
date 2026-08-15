@@ -95,6 +95,7 @@ function createSession({
   dynamicLifecycleMismatch = false,
   duplicateTerminal = false,
   omitTerminal = false,
+  omitAgentMessage = false,
   closeExitCode = 0,
   stderrByteLength = 0,
   stderrDiagnostic = null,
@@ -113,6 +114,9 @@ function createSession({
   remoteSnapshotThrowsOnRead = null,
   runtimeError = null,
   mcpAfterError = null,
+  mcpInventory = [],
+  mcpAfterResponse = { data: [], nextCursor: null },
+  closeError = null,
   provideImageBinder = true,
   imageDiagnostics = null,
   successfulImageViews = null,
@@ -142,7 +146,7 @@ function createSession({
     operations,
     imageBindings,
     notificationCursor: 0,
-    mcpInventory: [],
+    mcpInventory: structuredClone(mcpInventory),
     get remoteControlSnapshot() {
       remoteSnapshotReadCount += 1;
       if (remoteSnapshotReadCount === remoteSnapshotThrowsOnRead) {
@@ -309,18 +313,20 @@ function createSession({
             });
           }
           await onBeforeAgentMessage?.({ emit, params, turnId: "fresh-turn" });
-          emit({
-            method: "item/completed",
-            params: {
-              threadId: params.threadId,
-              turnId: "fresh-turn",
-              item: {
-                id: "final-message",
-                type: "agentMessage",
-                text: finalText,
+          if (!omitAgentMessage) {
+            emit({
+              method: "item/completed",
+              params: {
+                threadId: params.threadId,
+                turnId: "fresh-turn",
+                item: {
+                  id: "final-message",
+                  type: "agentMessage",
+                  text: finalText,
+                },
               },
-            },
-          });
+            });
+          }
           await onAfterAgentMessage?.({ emit, params, turnId: "fresh-turn" });
           if (!omitTerminal) {
             const terminal = {
@@ -339,7 +345,7 @@ function createSession({
         if (method === "turn/interrupt") return {};
         if (method === "mcpServerStatus/list") {
           if (mcpAfterError !== null) throw mcpAfterError;
-          return { data: [], nextCursor: null };
+          return structuredClone(mcpAfterResponse);
         }
         throw new Error(`unexpected request: ${method}`);
       },
@@ -398,6 +404,7 @@ function createSession({
         });
       }
       await onClose?.();
+      if (closeError !== null) throw closeError;
       processExitCode = closeExitCode;
       closed = true;
     },
@@ -428,6 +435,15 @@ async function rejectedEvidence(promise) {
     return error?.freshEvaluatorEvidence !== undefined;
   });
   return observed.freshEvaluatorEvidence;
+}
+
+async function rejectedFailure(promise) {
+  let observed;
+  await assert.rejects(promise, (error) => {
+    observed = error;
+    return error?.freshEvaluatorEvidence !== undefined;
+  });
+  return observed;
 }
 
 function emitAgentDelta(emit, {
@@ -1111,8 +1127,11 @@ test("fresh evaluator fails closed on malformed and hostile notifications withou
   });
   const revoked = Proxy.revocable({ canary }, {});
   revoked.revoke();
-  const evidence = await rejectedEvidence(subject.runFreshEvaluatorTurn({
+  const failure = await rejectedFailure(subject.runFreshEvaluatorTurn({
     session: createSession({
+      mcpAfterError: new Error("fixture later MCP status failure"),
+      closeError: new Error("fixture later close failure"),
+      unsubscribeThrows: true,
       onBeforeAgentMessage: ({ emit, params, turnId }) => {
         emitAgentDelta(emit, {
           threadId: params.threadId,
@@ -1129,12 +1148,73 @@ test("fresh evaluator fails closed on malformed and hostile notifications withou
     input: [{ type: "text", text: "Return the JSON verdict." }],
     outputSchema: outputSchema(),
   }));
+  const evidence = failure.freshEvaluatorEvidence;
 
   assert.equal(trapReads, 1);
+  assert.deepEqual(subject.projectFreshEvaluatorFailureDiagnostic(failure), {
+    schemaVersion: 1,
+    failurePhase: "event-compaction",
+  });
   assert.equal(evidence.blockers.includes("runtime-drift"), true);
   assert.equal(evidence.eventCompaction.observedEventCount, 7);
   assert.equal(evidence.eventCompaction.agentMessageDelta.fragmentCount, 0);
   assert.equal(JSON.stringify(evidence).includes(canary), false);
+});
+
+test("fresh evaluator preserves close and cleanup failures before hostile unsubscribe re-entry", async (t) => {
+  const subject = await loadSubject();
+  const cases = [
+    [
+      "session-close",
+      { closeError: new Error("fixture earlier close failure") },
+      false,
+    ],
+    [
+      "session-cleanup",
+      { runDynamicTool: true, releaseToolThrows: true },
+      true,
+    ],
+  ];
+
+  for (const [failurePhase, options, useDynamicTool] of cases) {
+    await t.test(failurePhase, async (scenario) => {
+      const root = await createRoot(scenario);
+      const canary = `HOSTILE_UNSUBSCRIBE_REENTRY_${failurePhase}_CANARY`;
+      let trapReads = 0;
+      const hostile = new Proxy({ canary }, {
+        get() {
+          trapReads += 1;
+          throw new Error("hostile unsubscribe re-entry trap");
+        },
+      });
+      const failure = await rejectedFailure(subject.runFreshEvaluatorTurn({
+        session: createSession({
+          ...options,
+          onUnsubscribe: ({ listener }) => listener(hostile),
+        }),
+        root,
+        input: [{ type: "text", text: "Return the JSON verdict." }],
+        outputSchema: outputSchema(),
+        ...(useDynamicTool
+          ? {
+              dynamicTools: [dynamicTool()],
+              dynamicToolController: async () => ({
+                success: true,
+                contentItems: [{ type: "inputText", text: '{"value":7}' }],
+              }),
+            }
+          : {}),
+        turnTimeoutMs: 100,
+      }));
+
+      assert.deepEqual(subject.projectFreshEvaluatorFailureDiagnostic(failure), {
+        schemaVersion: 1,
+        failurePhase,
+      });
+      assert.equal(trapReads, 1);
+      assert.equal(JSON.stringify(failure.freshEvaluatorEvidence).includes(canary), false);
+    });
+  }
 });
 
 test("fresh evaluator binds private image paths but persists only safe input and lifecycle evidence", async (t) => {
@@ -2067,7 +2147,7 @@ test("fresh evaluator fails closed when the image is deleted after the terminal 
     onTurnCompleted: () => rm(imagePath),
   });
 
-  const evidence = await rejectedEvidence(
+  const failure = await rejectedFailure(
     subject.runFreshEvaluatorTurn({
       session,
       root,
@@ -2079,8 +2159,13 @@ test("fresh evaluator fails closed when the image is deleted after the terminal 
       turnTimeoutMs: 100,
     }),
   );
+  const evidence = failure.freshEvaluatorEvidence;
 
   assert.equal(evidence.blockers.includes("input-post-turn-readback-failed"), true);
+  assert.deepEqual(subject.projectFreshEvaluatorFailureDiagnostic(failure), {
+    schemaVersion: 1,
+    failurePhase: "post-runtime-validation",
+  });
   assert.deepEqual(
     evidence.input.controllerLocalImages[0].postTurnPreCleanup,
     { readable: false, unchanged: false },
@@ -2101,7 +2186,7 @@ test("fresh evaluator fails closed when image bytes drift after the terminal eve
     onTurnCompleted: () => writeFile(imagePath, after),
   });
 
-  const evidence = await rejectedEvidence(
+  const failure = await rejectedFailure(
     subject.runFreshEvaluatorTurn({
       session,
       root,
@@ -2113,8 +2198,13 @@ test("fresh evaluator fails closed when image bytes drift after the terminal eve
       turnTimeoutMs: 100,
     }),
   );
+  const evidence = failure.freshEvaluatorEvidence;
 
   assert.equal(evidence.blockers.includes("input-provenance-changed-after-turn"), true);
+  assert.deepEqual(subject.projectFreshEvaluatorFailureDiagnostic(failure), {
+    schemaVersion: 1,
+    failurePhase: "post-runtime-validation",
+  });
   assert.deepEqual(
     evidence.input.controllerLocalImages[0].postTurnPreCleanup,
     { readable: true, unchanged: false },
@@ -2328,6 +2418,272 @@ test("fresh evaluator rejects malformed final JSON with partial evidence", async
   assert.equal(evidence.events.length > 0, true);
   assert.deepEqual(evidence.toolEvidence, []);
   assert.equal(evidence.appServer.processExitCode, 0);
+});
+
+test("fresh evaluator exposes the closed raw-free failure-phase projector", async () => {
+  const subject = await loadSubject();
+  assert.deepEqual(subject.FRESH_EVALUATOR_FAILURE_PHASES, [
+    "terminal-timeout",
+    "agent-message-delta-overflow",
+    "mcp-status-collection",
+    "mcp-runtime-inertness",
+    "session-close",
+    "session-cleanup",
+    "event-compaction",
+    "post-runtime-validation",
+    "final-agent-text",
+    "structured-output-parse",
+    "unmapped",
+  ]);
+  assert.equal(typeof subject.projectFreshEvaluatorFailureDiagnostic, "function");
+  assert.equal(subject.projectFreshEvaluatorFailureDiagnostic(new Error("forged")), null);
+});
+
+test("fresh evaluator projects deterministic failure phases without raw evidence", async (t) => {
+  const subject = await loadSubject();
+  const inertActiveMcpResponse = {
+    data: [{
+      name: "fixture-active",
+      authStatus: "notLoggedIn",
+      tools: { forbidden: {} },
+      resources: [],
+      resourceTemplates: [],
+      serverInfo: null,
+    }],
+    nextCursor: null,
+  };
+  const cases = [
+    [
+      "terminal-timeout",
+      { omitTerminal: true },
+      1,
+      (session) => assert.equal(
+        session.requests.filter(({ method }) => method === "turn/interrupt").length,
+        1,
+      ),
+    ],
+    [
+      "agent-message-delta-overflow",
+      {
+        onBeforeAgentMessage: ({ emit, params, turnId }) => {
+          for (let index = 0; index < 4097; index += 1) {
+            emitAgentDelta(emit, {
+              threadId: params.threadId,
+              turnId,
+              itemId: "overflow-message",
+              delta: "x",
+            });
+          }
+        },
+      },
+      100,
+      (session) => assert.equal(
+        session.requests.filter(({ method }) => method === "turn/interrupt").length,
+        1,
+      ),
+    ],
+    ["mcp-status-collection", { mcpAfterResponse: {} }, 100, null],
+    [
+      "mcp-runtime-inertness",
+      {
+        mcpInventory: [{ name: "fixture-active" }],
+        mcpAfterResponse: inertActiveMcpResponse,
+      },
+      100,
+      null,
+    ],
+    ["final-agent-text", { finalText: "" }, 100, null],
+    [
+      "structured-output-parse",
+      { finalText: "PRIVATE-NON-JSON-CANARY" },
+      100,
+      null,
+    ],
+  ];
+
+  for (const [failurePhase, options, turnTimeoutMs, inspect] of cases) {
+    await t.test(failurePhase, async (scenario) => {
+      const root = await createRoot(scenario);
+      const session = createSession(options);
+      const failure = await rejectedFailure(subject.runFreshEvaluatorTurn({
+        session,
+        root,
+        input: [{ type: "text", text: "Return the JSON verdict." }],
+        outputSchema: outputSchema(),
+        turnTimeoutMs,
+      }));
+      assert.deepEqual(subject.projectFreshEvaluatorFailureDiagnostic(failure), {
+        schemaVersion: 1,
+        failurePhase,
+      });
+      const serialized = JSON.stringify(
+        subject.projectFreshEvaluatorFailureDiagnostic(failure),
+      );
+      assert.equal(serialized.includes("PRIVATE-NON-JSON-CANARY"), false);
+      assert.equal(serialized.includes(root), false);
+      assert.equal(serialized.includes("primaryCause"), false);
+      inspect?.(session);
+    });
+  }
+});
+
+test("fresh evaluator preserves delta-overflow phase when interrupt transport throws synchronously", async (t) => {
+  const subject = await loadSubject();
+  const root = await createRoot(t);
+  const session = createSession({
+    onBeforeAgentMessage: ({ emit, params, turnId }) => {
+      for (let index = 0; index < 4097; index += 1) {
+        emitAgentDelta(emit, {
+          threadId: params.threadId,
+          turnId,
+          itemId: "overflow-message",
+          delta: "x",
+        });
+      }
+    },
+  });
+  const request = session.client.request;
+  session.client.request = function requestWithSynchronousInterruptFailure(
+    method,
+    ...args
+  ) {
+    if (method === "turn/interrupt") {
+      throw new Error("fixture synchronous interrupt transport failure");
+    }
+    return request.call(this, method, ...args);
+  };
+  const failure = await rejectedFailure(subject.runFreshEvaluatorTurn({
+    session,
+    root,
+    input: [{ type: "text", text: "Return the JSON verdict." }],
+    outputSchema: outputSchema(),
+    turnTimeoutMs: 100,
+  }));
+
+  assert.deepEqual(subject.projectFreshEvaluatorFailureDiagnostic(failure), {
+    schemaVersion: 1,
+    failurePhase: "agent-message-delta-overflow",
+  });
+});
+
+test("fresh evaluator retains post-runtime validation when blockers coexist with invalid final output", async (t) => {
+  const subject = await loadSubject();
+  for (const finalText of ["", "PRIVATE-NON-JSON-CANARY"]) {
+    await t.test(JSON.stringify(finalText), async (scenario) => {
+      const root = await createRoot(scenario);
+      const failure = await rejectedFailure(subject.runFreshEvaluatorTurn({
+        session: createSession({ stderrByteLength: 3, finalText }),
+        root,
+        input: [{ type: "text", text: "Return the JSON verdict." }],
+        outputSchema: outputSchema(),
+        turnTimeoutMs: 100,
+      }));
+      assert.deepEqual(subject.projectFreshEvaluatorFailureDiagnostic(failure), {
+        schemaVersion: 1,
+        failurePhase: "post-runtime-validation",
+      });
+    });
+  }
+});
+
+test("fresh evaluator retains close and cleanup phases when real event compaction fails", async (t) => {
+  const subject = await loadSubject();
+  const cases = [
+    ["session-close", { closeError: new Error("fixture close failure") }],
+    ["session-cleanup", { unsubscribeThrows: true }],
+  ];
+  for (const [failurePhase, options] of cases) {
+    await t.test(failurePhase, async (scenario) => {
+      const root = await createRoot(scenario);
+      const originalMapGet = Map.prototype.get;
+      try {
+        const failure = await rejectedFailure(subject.runFreshEvaluatorTurn({
+          session: createSession({
+            ...options,
+            onClose() {
+              Map.prototype.get = function getWithCompactionMismatch(key) {
+                const value = originalMapGet.call(this, key);
+                return key === "thread/started" && value === 1 ? 2 : value;
+              };
+            },
+          }),
+          root,
+          input: [{ type: "text", text: "Return the JSON verdict." }],
+          outputSchema: outputSchema(),
+          turnTimeoutMs: 100,
+        }));
+        assert.equal(failure.freshEvaluatorEvidence.eventCompaction, null);
+        assert.equal(
+          failure.freshEvaluatorEvidence.blockers.includes("event-compaction-unverified"),
+          true,
+        );
+        assert.deepEqual(subject.projectFreshEvaluatorFailureDiagnostic(failure), {
+          schemaVersion: 1,
+          failurePhase,
+        });
+      } finally {
+        Map.prototype.get = originalMapGet;
+      }
+    });
+  }
+});
+
+test("fresh evaluator projector only recognizes private failure identities", async (t) => {
+  const subject = await loadSubject();
+  let trapCalls = 0;
+  const accessorBearing = {};
+  Object.defineProperty(accessorBearing, "freshEvaluatorEvidence", {
+    get() {
+      trapCalls += 1;
+      return "forged";
+    },
+  });
+  const symbolBearing = { [Symbol("fresh-evaluator-canary")]: "forged" };
+  const proxy = new Proxy({}, {
+    get() {
+      trapCalls += 1;
+      return "forged";
+    },
+    getOwnPropertyDescriptor() {
+      trapCalls += 1;
+      return undefined;
+    },
+  });
+  const revoked = Proxy.revocable({}, {});
+  revoked.revoke();
+
+  for (const value of [
+    new Error("forged"),
+    proxy,
+    revoked.proxy,
+    accessorBearing,
+    symbolBearing,
+    null,
+    undefined,
+    "forged",
+    1,
+    true,
+  ]) {
+    assert.equal(subject.projectFreshEvaluatorFailureDiagnostic(value), null);
+  }
+  assert.equal(trapCalls, 0);
+
+  const root = await createRoot(t);
+  const failure = await rejectedFailure(subject.runFreshEvaluatorTurn({
+    session: createSession({ finalText: "PRIVATE-NON-JSON-CANARY" }),
+    root,
+    input: [{ type: "text", text: "Return the JSON verdict." }],
+    outputSchema: outputSchema(),
+    turnTimeoutMs: 100,
+  }));
+  const first = subject.projectFreshEvaluatorFailureDiagnostic(failure);
+  first.failurePhase = "forged";
+  const second = subject.projectFreshEvaluatorFailureDiagnostic(failure);
+  assert.notEqual(first, second);
+  assert.deepEqual(second, {
+    schemaVersion: 1,
+    failurePhase: "structured-output-parse",
+  });
 });
 
 test("fresh evaluator partial evidence includes the runtime diagnostic and wrapped primary cause", async (t) => {

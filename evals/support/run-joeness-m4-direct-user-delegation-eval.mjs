@@ -5,9 +5,11 @@ import path from "node:path";
 import { promisify, types as utilTypes } from "node:util";
 
 import {
+  AUTHORITY_ROLE_SEPARATED_AUXILIARY_METHODS,
   AUTHORITY_ROLE_SEPARATED_EVALUATOR_ADAPTER_ID,
   runAuthorityRoleSeparatedEvaluatorTurn,
 } from "./run-authority-role-separated-evaluator-turn.mjs";
+import { FRESH_EVALUATOR_FAILURE_PHASES } from "./run-fresh-evaluator-turn.mjs";
 import { publishJoenessM4TransportControlBlockedArtifact } from "./run-joeness-m4-transport-control-eval.mjs";
 
 const execFile = promisify(execFileCallback);
@@ -132,6 +134,16 @@ const TASK_A_PRIVACY_KEYS = Object.freeze([
   "rawOutputDigestPersisted",
   "eventPayloadPersisted",
 ]);
+const TASK_A_DIAGNOSTIC_KEYS = Object.freeze([
+  "schemaVersion",
+  "provenance",
+  "failurePhase",
+  "lastAuxiliaryMethod",
+]);
+const FRESH_EVALUATOR_FAILURE_PHASE_SET = new Set(FRESH_EVALUATOR_FAILURE_PHASES);
+const AUTHORITY_ROLE_SEPARATED_AUXILIARY_METHOD_SET = new Set(
+  AUTHORITY_ROLE_SEPARATED_AUXILIARY_METHODS,
+);
 const TASK_A_BLOCKED_STAGES = new Set([
   "options-validation",
   "initial-project-binding",
@@ -1185,6 +1197,31 @@ async function verifyPostPublicationBoundary({
 const AUTHENTIC_ADAPTER_ERRORS = new WeakSet();
 const STRUCTURED_OUTPUT_ERRORS = new WeakSet();
 
+function diagnosticCombinationIsValid(stage, failurePhase, lastAuxiliaryMethod) {
+  if (!FRESH_EVALUATOR_FAILURE_PHASE_SET.has(failurePhase)) return false;
+  if (!AUTHORITY_ROLE_SEPARATED_AUXILIARY_METHOD_SET.has(lastAuxiliaryMethod)) {
+    return false;
+  }
+  if (
+    ["before-auxiliary-request", "after-auxiliary-request"].includes(stage) &&
+    lastAuxiliaryMethod === "none"
+  ) {
+    return false;
+  }
+  if (["terminal-timeout", "agent-message-delta-overflow"].includes(failurePhase)) {
+    return lastAuxiliaryMethod === "turn-interrupt";
+  }
+  if ([
+    "mcp-status-collection",
+    "mcp-runtime-inertness",
+    "final-agent-text",
+    "structured-output-parse",
+  ].includes(failurePhase)) {
+    return lastAuxiliaryMethod === "mcp-server-status-list";
+  }
+  return AUTHORITY_ROLE_SEPARATED_AUXILIARY_METHOD_SET.has(lastAuxiliaryMethod);
+}
+
 export function projectJoenessM4DirectUserDelegationFreshFailure(error) {
   if (
     error === null ||
@@ -1199,36 +1236,63 @@ export function projectJoenessM4DirectUserDelegationFreshFailure(error) {
     return null;
   }
   let data;
+  let diagnostic;
   try {
     data = exactOwnDataSnapshot(
       evidence,
-      ["schemaVersion", "adapterId", "status", "stage", "sessionCloseCount", "privacy"],
+      [
+        "schemaVersion",
+        "adapterId",
+        "status",
+        "stage",
+        "sessionCloseCount",
+        "diagnostic",
+        "privacy",
+      ],
       "adapter rejection evidence",
+    );
+    diagnostic = exactOwnDataSnapshot(
+      data.diagnostic,
+      TASK_A_DIAGNOSTIC_KEYS,
+      "adapter rejection diagnostic",
     );
     assertFalseFields(data.privacy, TASK_A_PRIVACY_KEYS, "adapter rejection privacy");
   } catch {
     return null;
   }
   if (
-    data.schemaVersion !== 1 ||
+    data.schemaVersion !== 2 ||
     data.adapterId !== AUTHORITY_ROLE_SEPARATED_EVALUATOR_ADAPTER_ID ||
     data.status !== "blocked" ||
     !TASK_A_BLOCKED_STAGES.has(data.stage) ||
     !Number.isSafeInteger(data.sessionCloseCount) ||
     data.sessionCloseCount < 0 ||
-    data.sessionCloseCount > 1
+    data.sessionCloseCount > 1 ||
+    diagnostic.schemaVersion !== 1 ||
+    diagnostic.provenance !== "authority-role-separated-fixed-enum-diagnostic-v1" ||
+    !diagnosticCombinationIsValid(
+      data.stage,
+      diagnostic.failurePhase,
+      diagnostic.lastAuxiliaryMethod,
+    )
   ) return null;
   return {
-    schemaVersion: 1,
+    schemaVersion: 2,
     provenance:
       "direct-user-delegation-runner-observed-authentic-role-separated-adapter-rejection",
     runnerStage: "role-separated-evaluator-rejected",
     adapter: {
-      schemaVersion: 1,
+      schemaVersion: 2,
       adapterId: AUTHORITY_ROLE_SEPARATED_EVALUATOR_ADAPTER_ID,
       status: "blocked",
       stage: data.stage,
       sessionCloseCount: data.sessionCloseCount,
+      diagnostic: {
+        schemaVersion: 1,
+        provenance: "authority-role-separated-fixed-enum-diagnostic-v1",
+        failurePhase: diagnostic.failurePhase,
+        lastAuxiliaryMethod: diagnostic.lastAuxiliaryMethod,
+      },
     },
     privacy: {
       rawOutputPersisted: false,

@@ -104,6 +104,37 @@ const NORMALIZER_BLOCKER_CODES = new Set([
   "unknown-notification",
   "user-input-requested",
 ]);
+const FINAL_AGENT_TEXT_BLOCKER_CODES = new Set([
+  "required-output-missing",
+  "required-output-truncated",
+]);
+export const FRESH_EVALUATOR_FAILURE_PHASES = Object.freeze([
+  "terminal-timeout",
+  "agent-message-delta-overflow",
+  "mcp-status-collection",
+  "mcp-runtime-inertness",
+  "session-close",
+  "session-cleanup",
+  "event-compaction",
+  "post-runtime-validation",
+  "final-agent-text",
+  "structured-output-parse",
+  "unmapped",
+]);
+const FRESH_EVALUATOR_FAILURE_PHASE_SET = new Set(
+  FRESH_EVALUATOR_FAILURE_PHASES,
+);
+const FRESH_EVALUATOR_FAILURE_DIAGNOSTICS = new WeakMap();
+
+export function projectFreshEvaluatorFailureDiagnostic(error) {
+  if (error === null || (typeof error !== "object" && typeof error !== "function")) {
+    return null;
+  }
+  const diagnostic = FRESH_EVALUATOR_FAILURE_DIAGNOSTICS.get(error);
+  return diagnostic === undefined
+    ? null
+    : { schemaVersion: 1, failurePhase: diagnostic.failurePhase };
+}
 
 function unique(values) {
   return [...new Set(values)];
@@ -922,7 +953,7 @@ function finalAgentText(message) {
   return value.text;
 }
 
-function attachEvidence(error, evidence) {
+function attachEvidence(error, evidence, failurePhase = "unmapped") {
   const primaryCause = {};
   for (const key of ["name", "code", "message", "details"]) {
     const property = diagnosticOwnData(error, key);
@@ -937,6 +968,12 @@ function attachEvidence(error, evidence) {
     cause: error,
   });
   failure.freshEvaluatorEvidence = evidence;
+  FRESH_EVALUATOR_FAILURE_DIAGNOSTICS.set(failure, {
+    schemaVersion: 1,
+    failurePhase: FRESH_EVALUATOR_FAILURE_PHASE_SET.has(failurePhase)
+      ? failurePhase
+      : "unmapped",
+  });
   return failure;
 }
 
@@ -981,6 +1018,8 @@ export async function runFreshEvaluatorTurn({
   let terminalAgentMessage = null;
   let terminalCount = 0;
   let primaryError = null;
+  let activeFailurePhase = "unmapped";
+  let primaryFailurePhase = "unmapped";
   let closeError = null;
   const cleanupErrors = [];
   let unsubscribe = null;
@@ -1334,6 +1373,14 @@ export async function runFreshEvaluatorTurn({
         normalizeDynamicToolEvent(notification, allowedToolNames) ??
         normalizeEvent(notification);
     } catch {
+      if (
+        primaryError === null &&
+        closeError === null &&
+        cleanupErrors.length === 0
+      ) {
+        primaryError = new Error("fresh evaluator event normalization failed");
+        primaryFailurePhase = "event-compaction";
+      }
       event = {
         method: null,
         threadId: null,
@@ -1566,6 +1613,7 @@ export async function runFreshEvaluatorTurn({
     }
     flushPending();
     if (deltaCollectionStopped) {
+      activeFailurePhase = "agent-message-delta-overflow";
       await Promise.all([
         unsubscribeCompletion,
         ensureDeltaOverflowInterrupt(),
@@ -1578,9 +1626,11 @@ export async function runFreshEvaluatorTurn({
       timeout = setTimeout(() => resolve(null), turnTimeoutMs);
       timeout.unref?.();
     });
+    activeFailurePhase = "terminal-timeout";
     const terminal = await Promise.race([terminalPromise, timedOut]);
     clearTimeout(timeout);
     if (deltaCollectionStopped) {
+      activeFailurePhase = "agent-message-delta-overflow";
       await Promise.all([
         unsubscribeCompletion,
         ensureDeltaOverflowInterrupt(),
@@ -1594,6 +1644,7 @@ export async function runFreshEvaluatorTurn({
         .catch(() => {});
       throw new Error("fresh evaluator turn timed out");
     }
+    activeFailurePhase = "post-runtime-validation";
     let postTurnInputSnapshot;
     try {
       postTurnInputSnapshot = await describeInput(root, requestInput);
@@ -1628,10 +1679,16 @@ export async function runFreshEvaluatorTurn({
       blockers.push("input-provenance-changed-after-turn");
       throw new Error("fresh evaluator input provenance changed after turn completion");
     }
+    activeFailurePhase = "mcp-status-collection";
     evidence.mcpAfter = await listMcpServerStatus(session.client, threadId);
+    activeFailurePhase = "mcp-runtime-inertness";
     verifyMcpRuntimeIsInert(session.mcpInventory, evidence.mcpAfter);
+    activeFailurePhase = "unmapped";
   } catch (error) {
-    primaryError = error;
+    if (primaryError === null) {
+      primaryError = error;
+      primaryFailurePhase = activeFailurePhase;
+    }
   } finally {
     await unsubscribeCompletion;
     await (deltaInterruptPromise ?? Promise.resolve());
@@ -1728,7 +1785,14 @@ export async function runFreshEvaluatorTurn({
   try {
     evidence.eventCompaction = buildEventCompactionEvidence();
   } catch (error) {
-    primaryError ??= error;
+    if (
+      primaryError === null &&
+      closeError === null &&
+      cleanupErrors.length === 0
+    ) {
+      primaryError = error;
+      primaryFailurePhase = "event-compaction";
+    }
     blockers.push("event-compaction-unverified");
   }
   if (pending.length > 0) blockers.push("unresolved-notification");
@@ -1773,6 +1837,35 @@ export async function runFreshEvaluatorTurn({
   }
   evidence.blockers = unique(blockers);
 
+  const onlyFinalAgentTextBlockers =
+    terminalAgentMessage?.blockers.some((blocker) =>
+      FINAL_AGENT_TEXT_BLOCKER_CODES.has(blocker),
+    ) === true &&
+    evidence.blockers.every((blocker) =>
+      blocker === "runtime-control-blocker" ||
+      FINAL_AGENT_TEXT_BLOCKER_CODES.has(blocker),
+    );
+
+  let outputText;
+  let output;
+  if (
+    primaryError === null &&
+    closeError === null &&
+    cleanupErrors.length === 0 &&
+    (evidence.blockers.length === 0 || onlyFinalAgentTextBlockers)
+  ) {
+    try {
+      outputText = finalAgentText(terminalAgentMessage);
+    } catch (error) {
+      throw attachEvidence(error, evidence, "final-agent-text");
+    }
+    try {
+      output = JSON.parse(outputText);
+    } catch (error) {
+      throw attachEvidence(error, evidence, "structured-output-parse");
+    }
+  }
+
   if (
     primaryError !== null ||
     closeError !== null ||
@@ -1789,17 +1882,16 @@ export async function runFreshEvaluatorTurn({
     throw attachEvidence(
       cause,
       evidence,
+      primaryError !== null
+        ? primaryFailurePhase
+        : closeError !== null
+          ? "session-close"
+          : cleanupErrors.length > 0
+            ? "session-cleanup"
+            : "post-runtime-validation",
     );
   }
 
-  let outputText;
-  let output;
-  try {
-    outputText = finalAgentText(terminalAgentMessage);
-    output = JSON.parse(outputText);
-  } catch (error) {
-    throw attachEvidence(error, evidence);
-  }
   return {
     ...evidence,
     output,

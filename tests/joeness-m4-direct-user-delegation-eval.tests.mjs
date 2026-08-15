@@ -95,8 +95,8 @@ const HISTORICAL_TUPLES = Object.freeze([
   ["evals/skill-contracts/joeness-m4-authority-structured-output-live-plan-v7.json", 5385, "b7ed789fb74e08218a6a0acc63951573bb5b017ba7175500f1ad04ce527bc64e"],
   ["evals/skill-contracts/joeness-m4-authority-structured-output-live-v7-evidence.json", 9765, "be38955bce262949d26c190ac843c3049ed39a690250e1a8cbcd4a0eaed253f8"],
   ["evals/skill-contracts/joeness-m4-authority-structured-output-attempt-index-v7.json", 23939, "98849113bf6ce273718d24fb41fcca2e739ccf914f17d1dd4a187bf58c1ede3b"],
-  ["evals/support/run-authority-role-separated-evaluator-turn.mjs", 29334, "cae472f7d82cc603cc0d16c0234c03b5213511aed8e96178aa45aa47a8efd96f"],
-  ["tests/authority-role-separated-evaluator-turn.tests.mjs", 34866, "9f2fb56d3b8f60756e628693a75f57d0b56ed1af29c3bd80165676b5d7d6cf42"],
+  ["evals/support/run-authority-role-separated-evaluator-turn.mjs", 31554, "a5e29c9b0ccb65c4cbb519587e53f45f39a4ef116ce84a2024be16ba2808f172"],
+  ["tests/authority-role-separated-evaluator-turn.tests.mjs", 46123, "ae3a74ef7c075d89bc5190cfbc22ec02eecce0064f3060c11a2a78a6b993c2ca"],
 ]);
 
 function sha256(value) {
@@ -1095,17 +1095,10 @@ test("structured PASS is independent of raw key order, whitespace, and duplicate
   }
 });
 
-test("authentic adapter rejection publishes blocked-only with a closed stage", async (t) => {
+test("authentic adapter rejection projects the schema-2 fixed-enum diagnostic", async (t) => {
   const subject = await import(SUBJECT_URL.href);
-  const { calls, options } = await liveOptions(t);
-  const runtimeFactory = options.runtimeFactory;
-  options.runtimeFactory = async (...args) => {
-    const runtime = await runtimeFactory(...args);
-    calls.session.client.request = async () => {
-      throw new Error("PRIVATE-TRANSPORT-FAILURE");
-    };
-    return runtime;
-  };
+  const rawFinalText = "PRIVATE-MALFORMED-FINAL-TEXT-CANARY";
+  const { calls, options } = await liveOptions(t, { agentOutput: rawFinalText });
 
   await assert.rejects(
     subject.runJoenessM4DirectUserDelegationEval(options),
@@ -1114,14 +1107,235 @@ test("authentic adapter rejection publishes blocked-only with a closed stage", a
   assert.equal(calls.writes.length, 1);
   assert.equal(calls.writes[0].relativePath, options.executionPlan.outputs.blocked);
   assert.equal(calls.writes[0].value.cause.category, "role-separated-adapter-rejection");
+  assert.equal(calls.writes[0].value.freshFailure.schemaVersion, 2);
+  assert.equal(calls.writes[0].value.freshFailure.adapter.schemaVersion, 2);
   assert.equal(
     calls.writes[0].value.freshFailure.adapter.stage,
-    "before-thread-start-session",
+    "after-auxiliary-request",
   );
   assert.equal(calls.writes[0].value.freshFailure.adapter.sessionCloseCount, 1);
+  assert.deepEqual(calls.writes[0].value.freshFailure.adapter.diagnostic, {
+    schemaVersion: 1,
+    provenance: "authority-role-separated-fixed-enum-diagnostic-v1",
+    failurePhase: "structured-output-parse",
+    lastAuxiliaryMethod: "mcp-server-status-list",
+  });
+  assert.deepEqual(Object.keys(calls.writes[0].value.freshFailure), [
+    "schemaVersion",
+    "provenance",
+    "runnerStage",
+    "adapter",
+    "privacy",
+  ]);
+  assert.deepEqual(Object.keys(calls.writes[0].value.freshFailure.adapter), [
+    "schemaVersion",
+    "adapterId",
+    "status",
+    "stage",
+    "sessionCloseCount",
+    "diagnostic",
+  ]);
+  assert.deepEqual(Object.keys(calls.writes[0].value.freshFailure.adapter.diagnostic), [
+    "schemaVersion",
+    "provenance",
+    "failurePhase",
+    "lastAuxiliaryMethod",
+  ]);
   const durable = JSON.stringify(calls.writes[0].value);
-  assert.equal(durable.includes("PRIVATE-TRANSPORT-FAILURE"), false);
+  assert.equal(Buffer.byteLength(durable) <= 4096, true);
+  assert.equal(durable.includes(rawFinalText), false);
   assert.equal(durable.includes("PRIVATE-THREAD"), false);
+});
+
+test("schema-2 adapter diagnostics fail closed outside the authentic exact contract", async (t) => {
+  const subject = await import(SUBJECT_URL.href);
+  const rawCanary = "PRIVATE-FORGED-SCHEMA-2-DIAGNOSTIC";
+  const authenticError = async () => {
+    const { options } = await liveOptions(t, { agentOutput: rawCanary });
+    let observed;
+    await assert.rejects(
+      subject.runJoenessM4DirectUserDelegationEval(options),
+      (error) => {
+        observed = error;
+        return /authority role-separated evaluator turn failed/u.test(error?.message ?? "");
+      },
+    );
+    return observed;
+  };
+  const evidenceOf = (error) => error.authorityRoleSeparatedEvidence;
+  const authentic = await authenticError();
+  assert.notEqual(subject.projectJoenessM4DirectUserDelegationFreshFailure(authentic), null);
+
+  const forged = new Error(rawCanary);
+  forged.authorityRoleSeparatedEvidence = structuredClone(evidenceOf(authentic));
+  assert.equal(subject.projectJoenessM4DirectUserDelegationFreshFailure(forged), null);
+
+  let proxyTraps = 0;
+  const proxy = new Proxy(authentic, {
+    get() {
+      proxyTraps += 1;
+      throw new Error(rawCanary);
+    },
+  });
+  assert.equal(subject.projectJoenessM4DirectUserDelegationFreshFailure(proxy), null);
+  assert.equal(proxyTraps, 0);
+
+  let revokedProxyTraps = 0;
+  const revoked = Proxy.revocable(authentic, {
+    get() {
+      revokedProxyTraps += 1;
+      throw new Error(rawCanary);
+    },
+  });
+  revoked.revoke();
+  assert.equal(subject.projectJoenessM4DirectUserDelegationFreshFailure(revoked.proxy), null);
+  assert.equal(revokedProxyTraps, 0);
+
+  const accessor = await authenticError();
+  let getterCalls = 0;
+  Object.defineProperty(accessor, "authorityRoleSeparatedEvidence", {
+    enumerable: true,
+    get() {
+      getterCalls += 1;
+      return rawCanary;
+    },
+  });
+  assert.equal(subject.projectJoenessM4DirectUserDelegationFreshFailure(accessor), null);
+  assert.equal(getterCalls, 0);
+
+  const malformed = [
+    ["extra key", (evidence) => ({ ...evidence, extra: rawCanary })],
+    ["reordered key", (evidence) => ({
+      adapterId: evidence.adapterId,
+      schemaVersion: evidence.schemaVersion,
+      status: evidence.status,
+      stage: evidence.stage,
+      sessionCloseCount: evidence.sessionCloseCount,
+      diagnostic: evidence.diagnostic,
+      privacy: evidence.privacy,
+    })],
+    ["symbol", (evidence) => {
+      Object.defineProperty(evidence, Symbol(rawCanary), {
+        enumerable: true,
+        value: rawCanary,
+      });
+      return evidence;
+    }],
+    ["invalid phase", (evidence) => {
+      evidence.diagnostic.failurePhase = rawCanary;
+      return evidence;
+    }],
+    ["invalid pair", (evidence) => {
+      evidence.diagnostic.lastAuxiliaryMethod = "none";
+      return evidence;
+    }],
+    ["privacy downgrade", (evidence) => {
+      evidence.privacy.rawOutputPersisted = true;
+      return evidence;
+    }],
+  ];
+  for (const [name, mutate] of malformed) {
+    const error = await authenticError();
+    error.authorityRoleSeparatedEvidence = mutate(
+      structuredClone(evidenceOf(error)),
+    );
+    assert.equal(
+      subject.projectJoenessM4DirectUserDelegationFreshFailure(error),
+      null,
+      name,
+    );
+  }
+});
+
+test("full runner rejects malformed authenticated schema-2 details", async (t) => {
+  const originalRunner = await readFile(SUBJECT_URL, "utf8");
+  const originalRoleAdapter = await readFile(
+    new URL("../evals/support/run-authority-role-separated-evaluator-turn.mjs", import.meta.url),
+    "utf8",
+  );
+  const suffix = `task-3-schema-2-downgrade-${process.pid}-${Date.now()}`;
+  const roleReturn = "  return error;\n}\n\nexport function buildAuthorityRoleSeparatedThreadStartRequest";
+  assert.equal(originalRoleAdapter.includes(roleReturn), true);
+  const temporaryModules = [];
+  t.after(async () => {
+    await Promise.all(temporaryModules.map((url) => rm(url, { force: true })));
+    for (const url of temporaryModules) {
+      await assert.rejects(readFile(url), { code: "ENOENT" });
+    }
+  });
+
+  const cases = [
+    [
+      "missing diagnostic",
+      "delete error.authorityRoleSeparatedEvidence.diagnostic;",
+    ],
+    [
+      "invalid nested diagnostic method",
+      "error.authorityRoleSeparatedEvidence.diagnostic.lastAuxiliaryMethod = rawMethod;",
+    ],
+    [
+      "privacy downgrade",
+      "error.authorityRoleSeparatedEvidence.privacy.rawOutputPersisted = true;",
+    ],
+  ];
+  for (const [name, mutation] of cases) {
+    const rawFinalText = `PRIVATE-${name.toUpperCase().replaceAll(" ", "-")}-FINAL`;
+    const rawMethod = `PRIVATE-${name.toUpperCase().replaceAll(" ", "-")}-METHOD`;
+    const rawError = `PRIVATE-${name.toUpperCase().replaceAll(" ", "-")}-ERROR`;
+    const roleName = `run-authority-role-separated-evaluator-turn.${suffix}.${name.replaceAll(" ", "-")}.mjs`;
+    const runnerName = `run-joeness-m4-direct-user-delegation-eval.${suffix}.${name.replaceAll(" ", "-")}.mjs`;
+    const roleUrl = new URL(`../evals/support/${roleName}`, import.meta.url);
+    const runnerUrl = new URL(`../evals/support/${runnerName}`, import.meta.url);
+    temporaryModules.push(roleUrl, runnerUrl);
+    const instrumentedRoleAdapter = originalRoleAdapter.replace(
+      roleReturn,
+      [
+        `  const rawMethod = ${JSON.stringify(rawMethod)};`,
+        `  error.message = ${JSON.stringify(rawError)};`,
+        "  error.privateMethod = rawMethod;",
+        `  ${mutation}`,
+        roleReturn,
+      ].join("\n"),
+    );
+    const instrumentedRunner = originalRunner.replace(
+      '"./run-authority-role-separated-evaluator-turn.mjs"',
+      JSON.stringify(`./${roleName}`),
+    );
+    assert.notEqual(instrumentedRoleAdapter, originalRoleAdapter);
+    assert.notEqual(instrumentedRunner, originalRunner);
+    await writeFile(roleUrl, instrumentedRoleAdapter, { encoding: "utf8", flag: "wx" });
+    await writeFile(runnerUrl, instrumentedRunner, { encoding: "utf8", flag: "wx" });
+
+    const subject = await import(`${runnerUrl.href}?${suffix}-${name}`);
+    const { calls, options } = await liveOptions(t, { agentOutput: rawFinalText });
+    await assert.rejects(
+      subject.runJoenessM4DirectUserDelegationEval(options),
+      new RegExp(rawError, "u"),
+      name,
+    );
+    assert.equal(calls.runtimeFactory, 1, name);
+    assert.equal(calls.finish, 1, name);
+    assert.equal(calls.session.closeCount, 1, name);
+    assert.equal(calls.writes.length, 1, name);
+    assert.equal(calls.writes[0].relativePath, options.executionPlan.outputs.blocked, name);
+    assert.deepEqual(calls.writes[0].value.cause, { category: "evaluation-failed" }, name);
+    assert.equal(Object.hasOwn(calls.writes[0].value, "freshFailure"), false, name);
+    assert.equal(
+      calls.writes.some(({ relativePath }) => relativePath === options.executionPlan.outputs.evidence),
+      false,
+      name,
+    );
+    const fixtureRoot = calls.session.requests.find(({ method }) => method === "thread/start").params.cwd;
+    const durable = JSON.stringify(calls.writes[0].value);
+    for (const privateValue of [rawFinalText, rawMethod, rawError]) {
+      assert.equal(durable.includes(privateValue), false, `${name}:${privateValue}`);
+    }
+    assert.equal(
+      durable.includes(JSON.stringify(fixtureRoot).slice(1, -1)),
+      false,
+      `${name}:fixture root`,
+    );
+  }
 });
 
 test("malformed structured output publishes generic blocked-only evidence", async (t) => {
@@ -1611,7 +1825,7 @@ test("runner source has no raw-output selector or external skill import surface"
   assert.deepEqual(Object.keys(executionPlan().outputs), ["evidence", "blocked"]);
 });
 
-test("v1 through v7 artifacts and the Task-A adapter remain byte-identical", async () => {
+test("v1 through v7 artifacts and active Task-A adapter tuples remain pinned", async () => {
   for (const [relativePath, bytes, expectedSha256] of HISTORICAL_TUPLES) {
     const content = await readFile(path.join(ROOT, ...relativePath.split("/")));
     assert.equal(content.length, bytes, relativePath);

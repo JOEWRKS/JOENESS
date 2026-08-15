@@ -37,14 +37,16 @@ const SUBJECT_URL = new URL(
 
 const METHOD =
   "single-project-instruction-actual-direct-user-delegated-choice-authentic-adapter-structured-output-verdict";
-const V9_BASE_COMMIT = "b7d6267f78e854077745db840ffd912a77f73795";
+const V10_BASE_COMMIT = "20caa38ee61d0494b33b1678aa34a2457ed35476";
 const PLAN_PATH =
-  "evals/skill-contracts/joeness-m4-direct-user-delegation-live-plan-v9.json";
+  "evals/skill-contracts/joeness-m4-direct-user-delegation-live-plan-v10.json";
 const LIVE_WRAPPER_PATH =
   "evals/support/run-joeness-m4-direct-user-delegation-live.mjs";
 const LIVE_TEST_PATH = "tests/joeness-m4-direct-user-delegation-live.tests.mjs";
-const V9_ATTEMPT_INDEX_PATH =
-  "evals/skill-contracts/joeness-m4-direct-user-delegation-attempt-index-v9.json";
+const V10_ATTEMPT_INDEX_PATH =
+  "evals/skill-contracts/joeness-m4-direct-user-delegation-attempt-index-v10.json";
+const V9_BLOCKED_ARTIFACT_PATH =
+  "evals/skill-contracts/joeness-m4-direct-user-delegation-live-v9-blocked.json";
 
 const EXPECTED_DELEGATED_OUTPUT = Object.freeze({
   schemaVersion: 1,
@@ -160,28 +162,82 @@ function taskBDelegatedBlockedReceipt() {
   };
 }
 
+function taskBDelegatedBlockedReceiptV2() {
+  return {
+    schemaVersion: 1,
+    id: "joeness-m4-direct-user-delegation-v1",
+    status: "blocked",
+    phase: "post-runtime-validation",
+    safeCleanup: true,
+    cause: {
+      category: "role-separated-adapter-rejection",
+      result: "BLOCKED_ROLE_SEPARATED_ADAPTER",
+    },
+    freshFailure: {
+      schemaVersion: 2,
+      provenance:
+        "direct-user-delegation-runner-observed-authentic-role-separated-adapter-rejection",
+      runnerStage: "role-separated-evaluator-rejected",
+      adapter: {
+        schemaVersion: 2,
+        adapterId: "authority-role-separated-evaluator-turn-v1",
+        status: "blocked",
+        stage: "after-auxiliary-request",
+        sessionCloseCount: 1,
+        diagnostic: {
+          schemaVersion: 1,
+          provenance: "authority-role-separated-fixed-enum-diagnostic-v1",
+          failurePhase: "structured-output-parse",
+          lastAuxiliaryMethod: "mcp-server-status-list",
+        },
+      },
+      privacy: {
+        rawOutputPersisted: false,
+        rawOutputDigestPersisted: false,
+        rawEventsPersisted: false,
+        absolutePathsPersisted: false,
+        rawStderrPersisted: false,
+        configContentsPersisted: false,
+      },
+    },
+    privacy: {
+      rawOutputPersisted: false,
+      rawOutputDigestPersisted: false,
+      structuredOutputValuePersisted: false,
+      projectInstructionContentsPersisted: false,
+      directUserContentsPersisted: false,
+      rawEventsPersisted: false,
+      processIdentifiersPersisted: false,
+      absolutePathsPersisted: false,
+      rawStderrPersisted: false,
+      configContentsPersisted: false,
+    },
+  };
+}
+
 const PREDECESSOR = Object.freeze({
-  id: "joeness-m4-direct-user-delegation-live-v8",
-  implementationCommit: "71cbde6584f49f6a75a7ed60f6253f474e6d7fe5",
-  executionHead: "67bf760e1668f1d04cee49100af745eb4a51ab30",
-  persistenceCommit: "b7d6267f78e854077745db840ffd912a77f73795",
+  id: "joeness-m4-direct-user-delegation-live-v9",
+  implementationCommit: "bd8285060bee5d1a3289aea7cc46a49b7ecb5649",
+  executionHead: "e2df687d33127599790dc97c809a23b668958a70",
+  persistenceCommit: "7e2451e068d9b455c0e4e5217b29dd7c752dfbb6",
   plan: Object.freeze({
-    path: "evals/skill-contracts/joeness-m4-direct-user-delegation-live-plan-v8.json",
-    bytes: 5717,
-    sha256: "23db82ec7439d70f2e0fe26d352e908ec0580eedb7cbfd17f795ae497311e545",
+    path: "evals/skill-contracts/joeness-m4-direct-user-delegation-live-plan-v9.json",
+    bytes: 5465,
+    sha256: "ee1a7d9085f154f35a322dbdb5b8b96562182d010e56ba11728ad55dedea3c52",
   }),
   evidenceArtifact: Object.freeze({
-    path: "evals/skill-contracts/joeness-m4-direct-user-delegation-live-v8-evidence.json",
+    path: "evals/skill-contracts/joeness-m4-direct-user-delegation-live-v9-evidence.json",
     status: "absent",
   }),
   blockedArtifact: Object.freeze({
-    path: "evals/skill-contracts/joeness-m4-direct-user-delegation-live-v8-blocked.json",
-    status: "absent",
+    path: "evals/skill-contracts/joeness-m4-direct-user-delegation-live-v9-blocked.json",
+    bytes: 7381,
+    sha256: "941c8aea5c04762cbb01359dcc9c5c731f5f29ee05508ca991ade44d6b4a7cd9",
   }),
   attemptIndex: Object.freeze({
-    path: "evals/skill-contracts/joeness-m4-direct-user-delegation-attempt-index-v8.json",
-    bytes: 15735,
-    sha256: "1b98bf8a787f7fdab8498cd4f8f7975d1718b08342dab0145dd01abec6715289",
+    path: "evals/skill-contracts/joeness-m4-direct-user-delegation-attempt-index-v9.json",
+    bytes: 11968,
+    sha256: "599b97effb943ab26ccc9e6d6dd1bb12d360e6977afb552a1259a85045e2f179",
   }),
   sameCommandRetryAuthorized: false,
 });
@@ -250,11 +306,21 @@ const SOURCE_ROLES = Object.freeze([
   "collector",
   "fixtureManifest",
 ]);
+const CURRENT_SUPPORT_PATHS = Object.freeze([
+  "evals/support/run-authority-role-separated-evaluator-turn.mjs",
+  "evals/support/run-fresh-evaluator-turn.mjs",
+  "evals/support/run-joeness-m4-direct-user-delegation-eval.mjs",
+  LIVE_WRAPPER_PATH,
+  "tests/authority-role-separated-evaluator-turn.tests.mjs",
+  "tests/fresh-evaluator-turn.tests.mjs",
+  "tests/joeness-m4-direct-user-delegation-eval.tests.mjs",
+  LIVE_TEST_PATH,
+]);
 
 function plan() {
   return {
-    schemaVersion: 9,
-    id: "joeness-m4-direct-user-delegation-live-v9",
+    schemaVersion: 10,
+    id: "joeness-m4-direct-user-delegation-live-v10",
     date: "2026-08-15",
     method: METHOD,
     predecessor: structuredClone(PREDECESSOR),
@@ -267,8 +333,8 @@ function plan() {
       planImplementationCommit: "a".repeat(40),
       directUserDelegationRunner: {
         path: "evals/support/run-joeness-m4-direct-user-delegation-eval.mjs",
-        bytes: 50725,
-        sha256: "acabceb132117198d5035fba1f1b27e5abb4c2742e1053336897cf49b288bd55",
+        bytes: 52750,
+        sha256: "66e51428ec2738df5b208f2e98a30f4f4d83664e929f45cf633857aa39637855",
       },
       directUserDelegationWrapper: {
         path: "evals/support/run-joeness-m4-direct-user-delegation-live.mjs",
@@ -277,13 +343,13 @@ function plan() {
       },
       authorityRoleSeparatedAdapter: {
         path: "evals/support/run-authority-role-separated-evaluator-turn.mjs",
-        bytes: 29334,
-        sha256: "cae472f7d82cc603cc0d16c0234c03b5213511aed8e96178aa45aa47a8efd96f",
+        bytes: 31554,
+        sha256: "a5e29c9b0ccb65c4cbb519587e53f45f39a4ef116ce84a2024be16ba2808f172",
       },
       freshTurnAdapter: {
         path: "evals/support/run-fresh-evaluator-turn.mjs",
-        bytes: 56845,
-        sha256: "4884154dd1884b6fa899eef854307edec2a9897cb39b1f45c9c03479cab34247",
+        bytes: 59802,
+        sha256: "37782e63e397350a0c252c407a8f67dfa090c5eeb60eb0b1036504822b0b28f9",
       },
       transportControlSupport: {
         path: "evals/support/run-joeness-m4-transport-control-eval.mjs",
@@ -314,9 +380,9 @@ function plan() {
     },
     outputs: {
       evidence:
-        "evals/skill-contracts/joeness-m4-direct-user-delegation-live-v9-evidence.json",
+        "evals/skill-contracts/joeness-m4-direct-user-delegation-live-v10-evidence.json",
       blocked:
-        "evals/skill-contracts/joeness-m4-direct-user-delegation-live-v9-blocked.json",
+        "evals/skill-contracts/joeness-m4-direct-user-delegation-live-v10-blocked.json",
     },
     resultBoundary: structuredClone(RESULT_BOUNDARY),
   };
@@ -360,10 +426,29 @@ async function sourceTuple(root, relativePath) {
   return { path: relativePath, bytes: bytes.length, sha256: digest(bytes) };
 }
 
+async function gitBlobTuple(root, revision, relativePath) {
+  const { stdout } = await execFile(
+    "git",
+    ["show", `${revision}:${relativePath}`],
+    {
+      cwd: root,
+      maxBuffer: 4 * 1024 * 1024,
+      windowsHide: true,
+    },
+  );
+  return {
+    path: relativePath,
+    bytes: stdout.length,
+    sha256: digest(stdout),
+  };
+}
+
 async function executionFixture(t, {
   wrongSupportParent = false,
   extraSupportFile = false,
   extraExecutionFile = false,
+  supportVariant = "exact",
+  modifyV9PlanInExecution = false,
 } = {}) {
   const parent = await mkdtemp(path.join(tmpdir(), "joeness-m4-direct-user-live-"));
   t.after(() => rm(parent, { recursive: true, force: true }));
@@ -379,17 +464,22 @@ async function executionFixture(t, {
     "switch",
     "--quiet",
     "--create",
-    "synthetic-v9-support",
-    V9_BASE_COMMIT,
+    "synthetic-v10-support",
+    V10_BASE_COMMIT,
   ]);
 
-  for (const relativePath of [LIVE_WRAPPER_PATH, LIVE_TEST_PATH]) {
+  const supportPaths = supportVariant === "two-file"
+    ? [LIVE_WRAPPER_PATH, LIVE_TEST_PATH]
+    : supportVariant === "hybrid"
+      ? CURRENT_SUPPORT_PATHS.filter((relativePath) =>
+        relativePath.startsWith("evals/"))
+      : [...CURRENT_SUPPORT_PATHS];
+  for (const relativePath of supportPaths) {
     await copyFile(
       path.join(ROOT, ...relativePath.split("/")),
       path.join(root, ...relativePath.split("/")),
     );
   }
-  const supportPaths = [LIVE_WRAPPER_PATH, LIVE_TEST_PATH];
   if (extraSupportFile) {
     await writeFile(path.join(root, "extra-support.txt"), "extra support\n", "utf8");
     supportPaths.push("extra-support.txt");
@@ -412,12 +502,21 @@ async function executionFixture(t, {
 
   const value = plan();
   value.source.planImplementationCommit = support;
-  for (const role of SOURCE_ROLES) {
-    value.source[role] = await sourceTuple(root, value.source[role].path);
-  }
+  value.source.directUserDelegationWrapper = await sourceTuple(
+    root,
+    LIVE_WRAPPER_PATH,
+  );
   const absolutePlan = path.join(root, ...PLAN_PATH.split("/"));
   await writeFile(absolutePlan, `${JSON.stringify(value, null, 2)}\n`, "utf8");
   await git(root, ["add", "--", PLAN_PATH]);
+  if (modifyV9PlanInExecution) {
+    await writeFile(
+      path.join(root, ...PREDECESSOR.plan.path.split("/")),
+      `${await readFile(path.join(root, ...PREDECESSOR.plan.path.split("/")), "utf8")}\n`,
+      "utf8",
+    );
+    await git(root, ["add", "--", PREDECESSOR.plan.path]);
+  }
   if (extraExecutionFile) {
     await writeFile(path.join(root, "extra-execution.txt"), "extra execution\n", "utf8");
     await git(root, ["add", "--", "extra-execution.txt"]);
@@ -604,6 +703,7 @@ async function liveBranchFixture(t, {
     "evals/skill-contracts/fixtures/joeness-m4-direct-user-delegation-v1/project-AGENTS.md",
     "evals/skill-contracts/fixtures/joeness-m4-direct-user-delegation-v1/direct-user.md",
     PREDECESSOR.plan.path,
+    PREDECESSOR.blockedArtifact.path,
     PREDECESSOR.attemptIndex.path,
   ];
   for (const relativePath of innerPaths) {
@@ -611,10 +711,6 @@ async function liveBranchFixture(t, {
     await mkdir(path.dirname(target), { recursive: true });
     await copyFile(path.join(ROOT, ...relativePath.split("/")), target);
   }
-  await mkdir(
-    path.join(fixture.repositoryRoot, "evals", "skill-contracts"),
-    { recursive: true },
-  );
   for (const role of SOURCE_ROLES) {
     const tuple = await sourceTuple(
       fixture.repositoryRoot,
@@ -623,6 +719,10 @@ async function liveBranchFixture(t, {
     fixture.boundary.plan.source[role] = structuredClone(tuple);
     fixture.boundary.executionSource.sourcePins[role] = structuredClone(tuple);
   }
+  await mkdir(
+    path.join(fixture.repositoryRoot, "evals", "skill-contracts"),
+    { recursive: true },
+  );
   const planBytes = Buffer.from(
     `${JSON.stringify(fixture.boundary.plan, null, 2)}\n`,
     "utf8",
@@ -1064,7 +1164,7 @@ async function runtimeFixture(t, {
   };
   const operations = {
     async createExclusiveRunRoot(runId, parent) {
-      assert.equal(runId, "joeness-m4-direct-user-delegation-live-v9");
+      assert.equal(runId, "joeness-m4-direct-user-delegation-live-v10");
       assert.equal(parent, await realpath(runParent));
       runRoot = path.join(parent, `joewrks-eval-${runId}`);
       await mkdir(runRoot);
@@ -1258,17 +1358,17 @@ test("direct-user delegation live wrapper exposes the fixed additive identity", 
 
   assert.equal(
     subject.JOENESS_M4_DIRECT_USER_DELEGATION_LIVE_RUN_ID,
-    "joeness-m4-direct-user-delegation-live-v9",
+    "joeness-m4-direct-user-delegation-live-v10",
   );
   assert.equal(
     subject.JOENESS_M4_DIRECT_USER_DELEGATION_LIVE_PLAN_PATH,
-    "evals/skill-contracts/joeness-m4-direct-user-delegation-live-plan-v9.json",
+    "evals/skill-contracts/joeness-m4-direct-user-delegation-live-plan-v10.json",
   );
   assert.deepEqual(subject.JOENESS_M4_DIRECT_USER_DELEGATION_LIVE_OUTPUTS, {
     evidence:
-      "evals/skill-contracts/joeness-m4-direct-user-delegation-live-v9-evidence.json",
+      "evals/skill-contracts/joeness-m4-direct-user-delegation-live-v10-evidence.json",
     blocked:
-      "evals/skill-contracts/joeness-m4-direct-user-delegation-live-v9-blocked.json",
+      "evals/skill-contracts/joeness-m4-direct-user-delegation-live-v10-blocked.json",
   });
 });
 
@@ -1279,8 +1379,8 @@ test("direct-user delegation live plan is closed, ordered, and generation-pinned
   assert.equal(subject.validateJoenessM4DirectUserDelegationLivePlan(valid), valid);
 
   const mutations = [
-    (value) => { value.schemaVersion = 8; },
-    (value) => { value.id = "joeness-m4-direct-user-delegation-live-v8"; },
+    (value) => { value.schemaVersion = 9; },
+    (value) => { value.id = "joeness-m4-direct-user-delegation-live-v9"; },
     (value) => { value.date = "2026-08-14"; },
     (value) => { value.method = `${METHOD}-changed`; },
     (value) => { value.predecessor.executionHead = "b".repeat(40); },
@@ -1290,7 +1390,7 @@ test("direct-user delegation live plan is closed, ordered, and generation-pinned
     (value) => { value.predecessor.evidenceArtifact.path += ".changed"; },
     (value) => { value.predecessor.evidenceArtifact.status = "present"; },
     (value) => { value.predecessor.blockedArtifact.path += ".changed"; },
-    (value) => { value.predecessor.blockedArtifact.status = "present"; },
+    (value) => { value.predecessor.blockedArtifact.bytes += 1; },
     (value) => { value.predecessor.sameCommandRetryAuthorized = true; },
     (value) => { value.attempt.freshTurnCount = 2; },
     (value) => { value.attempt.retryCount = 1; },
@@ -1363,26 +1463,26 @@ test("direct-user delegation live plan is closed, ordered, and generation-pinned
   assert.deepEqual(Object.keys(plan().source).slice(1), SOURCE_ROLES);
 });
 
-test("synthetic topology is an exact two-file support child of persisted v8 followed by a sole v9 plan child", async (t) => {
+test("synthetic topology is an exact eight-file support child of the v10 base followed by a sole v10 plan child", async (t) => {
   const fixture = await executionFixture(t);
   assert.equal(
     await git(fixture.root, ["rev-list", "--parents", "-n", "1", fixture.support]),
-    `${fixture.support} ${V9_BASE_COMMIT}`,
+    `${fixture.support} ${V10_BASE_COMMIT}`,
   );
   assert.equal(
     await git(fixture.root, [
       "diff",
       "--name-status",
-      V9_BASE_COMMIT,
+      V10_BASE_COMMIT,
       fixture.support,
     ]),
-    [`M\t${LIVE_WRAPPER_PATH}`, `M\t${LIVE_TEST_PATH}`].join("\n"),
+    CURRENT_SUPPORT_PATHS.map((relativePath) => `M\t${relativePath}`).join("\n"),
   );
   for (const relativePath of [
     PLAN_PATH,
     plan().outputs.evidence,
     plan().outputs.blocked,
-    V9_ATTEMPT_INDEX_PATH,
+    V10_ATTEMPT_INDEX_PATH,
   ]) {
     assert.equal(await gitPathExists(fixture.root, fixture.support, relativePath), false);
   }
@@ -1401,7 +1501,7 @@ test("synthetic topology is an exact two-file support child of persisted v8 foll
   );
 });
 
-test("execution boundary accepts only the exact persisted-v8 support and v9 plan-only topology", async (t) => {
+test("execution boundary accepts only the exact v10 support and prospective plan-only topology", async (t) => {
   const subject = await import(SUBJECT_URL.href);
   const exact = await executionFixture(t);
   const boundary = await subject.verifyJoenessM4DirectUserDelegationExecutionBoundary({
@@ -1419,7 +1519,25 @@ test("execution boundary accepts only the exact persisted-v8 support and v9 plan
       repositoryRoot: wrongParent.root,
       planPath: PLAN_PATH,
     }),
-    /support|parent|persisted v8|topology/iu,
+    /support|parent|v10 base|topology/iu,
+  );
+
+  const hybridSupport = await executionFixture(t, { supportVariant: "hybrid" });
+  await assert.rejects(
+    () => subject.verifyJoenessM4DirectUserDelegationExecutionBoundary({
+      repositoryRoot: hybridSupport.root,
+      planPath: PLAN_PATH,
+    }),
+    /support|diff|scope|topology|exact/iu,
+  );
+
+  const twoFileSupport = await executionFixture(t, { supportVariant: "two-file" });
+  await assert.rejects(
+    () => subject.verifyJoenessM4DirectUserDelegationExecutionBoundary({
+      repositoryRoot: twoFileSupport.root,
+      planPath: PLAN_PATH,
+    }),
+    /support|diff|scope|topology|exact/iu,
   );
 
   const extraSupport = await executionFixture(t, { extraSupportFile: true });
@@ -1438,6 +1556,17 @@ test("execution boundary accepts only the exact persisted-v8 support and v9 plan
       planPath: PLAN_PATH,
     }),
     /plan.only|execution|diff|scope|topology/iu,
+  );
+
+  const v9PlanExecution = await executionFixture(t, {
+    modifyV9PlanInExecution: true,
+  });
+  await assert.rejects(
+    () => subject.verifyJoenessM4DirectUserDelegationExecutionBoundary({
+      repositoryRoot: v9PlanExecution.root,
+      planPath: PLAN_PATH,
+    }),
+    /plan.only|execution|diff|v9|topology/iu,
   );
 
   const hardlinkedInput = await executionFixture(t);
@@ -1525,6 +1654,63 @@ test("execution boundary accepts only the exact persisted-v8 support and v9 plan
   );
 });
 
+test("persisted v9 predecessor history matches the exact artifact matrix", async (t) => {
+  const fixture = await executionFixture(t);
+  const absent = async (revision, artifact) => {
+    assert.equal(
+      await gitPathExists(fixture.root, revision, artifact.path),
+      false,
+      `${revision}:${artifact.path}`,
+    );
+  };
+  const present = async (revision, artifact) => {
+    assert.deepEqual(
+      await gitBlobTuple(fixture.root, revision, artifact.path),
+      artifact,
+      `${revision}:${artifact.path}`,
+    );
+  };
+
+  await absent(PREDECESSOR.implementationCommit, PREDECESSOR.plan);
+  await present(PREDECESSOR.executionHead, PREDECESSOR.plan);
+  for (const revision of [
+    PREDECESSOR.persistenceCommit,
+    fixture.support,
+    fixture.execution,
+  ]) {
+    await present(revision, PREDECESSOR.plan);
+  }
+  assert.deepEqual(
+    await sourceTuple(fixture.root, PREDECESSOR.plan.path),
+    PREDECESSOR.plan,
+  );
+  for (const artifact of [PREDECESSOR.blockedArtifact, PREDECESSOR.attemptIndex]) {
+    await absent(PREDECESSOR.implementationCommit, artifact);
+    await absent(PREDECESSOR.executionHead, artifact);
+    for (const revision of [
+      PREDECESSOR.persistenceCommit,
+      fixture.support,
+      fixture.execution,
+    ]) {
+      await present(revision, artifact);
+    }
+    assert.deepEqual(await sourceTuple(fixture.root, artifact.path), artifact);
+  }
+  for (const revision of [
+    PREDECESSOR.implementationCommit,
+    PREDECESSOR.executionHead,
+    PREDECESSOR.persistenceCommit,
+    fixture.support,
+    fixture.execution,
+  ]) {
+    await absent(revision, PREDECESSOR.evidenceArtifact);
+  }
+  await assert.rejects(
+    () => lstat(path.join(fixture.root, ...PREDECESSOR.evidenceArtifact.path.split("/"))),
+    { code: "ENOENT" },
+  );
+});
+
 test("preflight binds a unique source config identity and rejects same-byte replacement", async (t) => {
   const subject = await import(SUBJECT_URL.href);
   const fixture = await preflightFixture(t);
@@ -1549,7 +1735,7 @@ test("preflight binds a unique source config identity and rejects same-byte repl
   });
   assert.deepEqual(receipt, {
     mode: "preflight",
-    id: "joeness-m4-direct-user-delegation-live-v9",
+    id: "joeness-m4-direct-user-delegation-live-v10",
     executionSource: fixture.boundary.executionSource,
     sourceConfig: expectedConfig,
     outputsAbsent: true,
@@ -1589,7 +1775,7 @@ test("preflight binds a unique source config identity and rejects same-byte repl
       boundary.executionSource.predecessor.blockedArtifact.path += ".changed";
     },
     (boundary) => {
-      boundary.executionSource.predecessor.blockedArtifact.status = "present";
+      boundary.executionSource.predecessor.blockedArtifact.sha256 = "0".repeat(64);
     },
     (boundary) => {
       boundary.executionSource.sourcePins.directUserDelegationRunner.bytes += 1;
@@ -2136,6 +2322,208 @@ test("schema hardlinks are never treated as task-owned cleanup entries", async (
   assert.equal(Object.hasOwn(fixture.cleanupState, "receipt"), false);
 });
 
+test("schema-1 compatibility rebuilds the committed v9 blocked receipt exactly", async () => {
+  const subject = await import(SUBJECT_URL.href);
+  const committed = JSON.parse(
+    await readFile(path.join(ROOT, ...V9_BLOCKED_ARTIFACT_PATH.split("/")), "utf8"),
+  );
+  const {
+    executionSource: _executionSource,
+    inputContract: _inputContract,
+    resultBoundary: _resultBoundary,
+    orchestration: _orchestration,
+    ...v9Blocked
+  } = committed;
+
+  assert.deepEqual(
+    subject.rebuildJoenessM4DirectUserDelegationDelegatedBlockedReceipt(v9Blocked),
+    v9Blocked,
+  );
+});
+
+test("schema-2 fresh failure rebuilds with the fixed diagnostic and exact key order", async () => {
+  const subject = await import(SUBJECT_URL.href);
+  const receipt = taskBDelegatedBlockedReceiptV2();
+  const rebuilt = subject.rebuildJoenessM4DirectUserDelegationDelegatedBlockedReceipt(
+    receipt,
+  );
+
+  assert.deepEqual(rebuilt, receipt);
+  assert.deepEqual(Object.keys(rebuilt.freshFailure), [
+    "schemaVersion",
+    "provenance",
+    "runnerStage",
+    "adapter",
+    "privacy",
+  ]);
+  assert.deepEqual(Object.keys(rebuilt.freshFailure.adapter), [
+    "schemaVersion",
+    "adapterId",
+    "status",
+    "stage",
+    "sessionCloseCount",
+    "diagnostic",
+  ]);
+  assert.deepEqual(Object.keys(rebuilt.freshFailure.adapter.diagnostic), [
+    "schemaVersion",
+    "provenance",
+    "failurePhase",
+    "lastAuxiliaryMethod",
+  ]);
+});
+
+test("schema-2 fresh failure rejects hostile reconstruction without a schema-1 downgrade", async () => {
+  const subject = await import(SUBJECT_URL.href);
+  const rawCanary = "PRIVATE-SCHEMA-2-RECONSTRUCTION-CANARY";
+  const reject = (value, name) => {
+    assert.throws(
+      () => subject.rebuildJoenessM4DirectUserDelegationDelegatedBlockedReceipt(value),
+      (error) => {
+        assert.equal(String(error?.message ?? "").includes(rawCanary), false, name);
+        return /delegated|fresh failure|blocked|exact|invalid/iu.test(
+          error?.message ?? "",
+        );
+      },
+      name,
+    );
+  };
+  const mutate = (change) => {
+    const receipt = taskBDelegatedBlockedReceiptV2();
+    change(receipt);
+    return receipt;
+  };
+  const malformed = [
+    ["extra key", () => ({ ...taskBDelegatedBlockedReceiptV2(), extra: rawCanary })],
+    ["missing diagnostic", () => mutate((receipt) => {
+      delete receipt.freshFailure.adapter.diagnostic;
+    })],
+    ["reordered diagnostic", () => mutate((receipt) => {
+      const diagnostic = receipt.freshFailure.adapter.diagnostic;
+      receipt.freshFailure.adapter.diagnostic = {
+        provenance: diagnostic.provenance,
+        schemaVersion: diagnostic.schemaVersion,
+        failurePhase: diagnostic.failurePhase,
+        lastAuxiliaryMethod: diagnostic.lastAuxiliaryMethod,
+      };
+    })],
+    ["diagnostic schema", () => mutate((receipt) => {
+      receipt.freshFailure.adapter.diagnostic.schemaVersion = 2;
+    })],
+    ["diagnostic provenance", () => mutate((receipt) => {
+      receipt.freshFailure.adapter.diagnostic.provenance = rawCanary;
+    })],
+    ["diagnostic phase", () => mutate((receipt) => {
+      receipt.freshFailure.adapter.diagnostic.failurePhase = rawCanary;
+    })],
+    ["diagnostic method", () => mutate((receipt) => {
+      receipt.freshFailure.adapter.diagnostic.lastAuxiliaryMethod = rawCanary;
+    })],
+    ["invalid stage and method pair", () => mutate((receipt) => {
+      receipt.freshFailure.adapter.diagnostic.lastAuxiliaryMethod = "none";
+    })],
+    ["privacy downgrade", () => mutate((receipt) => {
+      receipt.freshFailure.privacy.rawOutputPersisted = true;
+    })],
+    ["symbol", () => mutate((receipt) => {
+      Object.defineProperty(receipt.freshFailure.adapter.diagnostic, Symbol(rawCanary), {
+        enumerable: true,
+        value: rawCanary,
+      });
+    })],
+    ["accessor", () => mutate((receipt) => {
+      Object.defineProperty(receipt.freshFailure.adapter.diagnostic, "failurePhase", {
+        enumerable: true,
+        get() { throw new Error(rawCanary); },
+      });
+    })],
+  ];
+  for (const [name, make] of malformed) reject(make(), name);
+
+  let proxyTraps = 0;
+  const proxy = new Proxy(taskBDelegatedBlockedReceiptV2(), {
+    get() {
+      proxyTraps += 1;
+      throw new Error(rawCanary);
+    },
+  });
+  reject(proxy, "proxy");
+  assert.equal(proxyTraps, 0);
+
+  let revokedProxyTraps = 0;
+  const revoked = Proxy.revocable(taskBDelegatedBlockedReceiptV2(), {
+    get() {
+      revokedProxyTraps += 1;
+      throw new Error(rawCanary);
+    },
+  });
+  revoked.revoke();
+  reject(revoked.proxy, "revoked proxy");
+  assert.equal(revokedProxyTraps, 0);
+
+  const committed = JSON.parse(
+    await readFile(path.join(ROOT, ...V9_BLOCKED_ARTIFACT_PATH.split("/")), "utf8"),
+  );
+  const {
+    executionSource: _executionSource,
+    inputContract: _inputContract,
+    resultBoundary: _resultBoundary,
+    orchestration: _orchestration,
+    ...v9Blocked
+  } = committed;
+  assert.deepEqual(
+    subject.rebuildJoenessM4DirectUserDelegationDelegatedBlockedReceipt(v9Blocked),
+    v9Blocked,
+  );
+});
+
+test("schema-1 and schema-2 blocked receipt rebuilds are independent fresh clones", async () => {
+  const subject = await import(SUBJECT_URL.href);
+  for (const [name, input] of [
+    ["schema-1", taskBDelegatedBlockedReceipt()],
+    ["schema-2", taskBDelegatedBlockedReceiptV2()],
+  ]) {
+    const original = structuredClone(input);
+    const rebuilt = subject.rebuildJoenessM4DirectUserDelegationDelegatedBlockedReceipt(
+      input,
+    );
+    assert.notEqual(rebuilt, input, `${name} receipt`);
+    assert.notEqual(rebuilt.cause, input.cause, `${name} cause`);
+    assert.notEqual(rebuilt.privacy, input.privacy, `${name} receipt privacy`);
+    assert.notEqual(rebuilt.freshFailure, input.freshFailure, `${name} fresh failure`);
+    assert.notEqual(
+      rebuilt.freshFailure.privacy,
+      input.freshFailure.privacy,
+      `${name} fresh failure privacy`,
+    );
+    assert.notEqual(
+      rebuilt.freshFailure.adapter,
+      input.freshFailure.adapter,
+      `${name} adapter`,
+    );
+    if (input.freshFailure.schemaVersion === 2) {
+      assert.notEqual(
+        rebuilt.freshFailure.adapter.diagnostic,
+        input.freshFailure.adapter.diagnostic,
+        "schema-2 diagnostic",
+      );
+    }
+
+    rebuilt.cause.category = "evaluation-failed";
+    rebuilt.privacy.rawOutputPersisted = true;
+    rebuilt.freshFailure.privacy.rawOutputPersisted = true;
+    rebuilt.freshFailure.adapter.stage = "unmapped";
+    if (rebuilt.freshFailure.schemaVersion === 2) {
+      rebuilt.freshFailure.adapter.diagnostic.failurePhase = "unmapped";
+    }
+    assert.deepEqual(input, original, `${name} input remains unchanged`);
+    assert.deepEqual(
+      subject.rebuildJoenessM4DirectUserDelegationDelegatedBlockedReceipt(input),
+      original,
+      `${name} second rebuild`,
+    );
+  }
+});
+
 test("delegated PASS, semantic FAIL, and authentic adapter block rebuild as exclusive branches", async () => {
   const subject = await import(SUBJECT_URL.href);
   const pass = subject.rebuildJoenessM4DirectUserDelegationDelegatedEvidence(
@@ -2148,7 +2536,7 @@ test("delegated PASS, semantic FAIL, and authentic adapter block rebuild as excl
     taskBDelegatedEvidence(mismatchOutput),
   );
   const blocked = subject.rebuildJoenessM4DirectUserDelegationDelegatedBlockedReceipt(
-    taskBDelegatedBlockedReceipt(),
+    taskBDelegatedBlockedReceiptV2(),
   );
 
   assert.equal(pass.assessment.status, "PASS");
@@ -2158,13 +2546,13 @@ test("delegated PASS, semantic FAIL, and authentic adapter block rebuild as excl
     "recommendation-mismatch",
   ]);
   assert.equal(blocked.cause.category, "role-separated-adapter-rejection");
-  assert.equal(blocked.freshFailure.adapter.stage, "before-turn-start-session");
+  assert.equal(blocked.freshFailure.adapter.stage, "after-auxiliary-request");
   assert.equal(Object.hasOwn(pass, "cause"), false);
   assert.equal(Object.hasOwn(fail, "cause"), false);
   assert.equal(Object.hasOwn(blocked, "assessment"), false);
   assert.throws(
     () => subject.rebuildJoenessM4DirectUserDelegationDelegatedEvidence(
-      taskBDelegatedBlockedReceipt(),
+      taskBDelegatedBlockedReceiptV2(),
     ),
     /evidence|delegated|assessment|semantic/iu,
   );
@@ -2317,7 +2705,14 @@ test("authentic live orchestration publishes exactly one physical branch", async
     );
     assert.equal(blocked.status, "blocked");
     assert.equal(blocked.cause.category, "role-separated-adapter-rejection");
+    assert.equal(blocked.freshFailure.schemaVersion, 2);
     assert.equal(blocked.freshFailure.runnerStage, "role-separated-evaluator-rejected");
+    assert.deepEqual(blocked.freshFailure.adapter.diagnostic, {
+      schemaVersion: 1,
+      provenance: "authority-role-separated-fixed-enum-diagnostic-v1",
+      failurePhase: "structured-output-parse",
+      lastAuxiliaryMethod: "mcp-server-status-list",
+    });
     assert.deepEqual(blocked.resultBoundary, RESULT_BOUNDARY);
     assert.deepEqual(blocked.orchestration, expectedLiveOrchestration(fixture));
     assert.equal(Object.values(blocked.privacy).every((value) => value === false), true);
@@ -2903,7 +3298,7 @@ test("default CLI preflight accepts omitted operations on an exact execution fix
     operations: undefined,
   });
   assert.equal(receipt.mode, "preflight");
-  assert.equal(receipt.id, "joeness-m4-direct-user-delegation-live-v9");
+  assert.equal(receipt.id, "joeness-m4-direct-user-delegation-live-v10");
   assert.equal(receipt.outputsAbsent, true);
   assert.deepEqual(receipt.inputContract, INPUT_CONTRACT);
   assert.deepEqual(receipt.resultBoundary, RESULT_BOUNDARY);

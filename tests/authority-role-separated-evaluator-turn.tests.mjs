@@ -56,10 +56,13 @@ async function caseRoot(
 function fakeSession({
   instructionSources,
   finalText = '{\r\n  "verdict": "PASS"\r\n}',
+  mcpInventory = [],
+  mcpAfterResponse = { data: [], nextCursor: null },
   closeExitCode = 0,
   stderrByteLength = 0,
   onRequest = null,
   onSubscribe = null,
+  onBeforeAgentMessage = null,
   onBeforeTurnEvents = null,
   onAfterTurnEvents = null,
   onClose = null,
@@ -80,7 +83,7 @@ function fakeSession({
     get notificationCursor() {
       return 0;
     },
-    mcpInventory: [],
+    mcpInventory: structuredClone(mcpInventory),
     get remoteControlSnapshot() {
       return {
         seen: true,
@@ -140,6 +143,7 @@ function fakeSession({
             params: { threadId: params.threadId, turn: { id: "turn-1" } },
           });
           await onBeforeTurnEvents?.({ emit, method, params });
+          await onBeforeAgentMessage?.({ emit, params, turnId: "turn-1" });
           emit({
             method: "item/completed",
             params: {
@@ -159,7 +163,7 @@ function fakeSession({
           return { turn: { id: "turn-1", status: "inProgress" } };
         }
         if (method === "mcpServerStatus/list") {
-          return { data: [], nextCursor: null };
+          return structuredClone(mcpAfterResponse);
         }
         if (method === "turn/interrupt") return {};
         throw new Error(`unexpected request: ${method}`);
@@ -183,6 +187,13 @@ function fakeSession({
   return session;
 }
 
+function emitAgentDelta(emit, { threadId, turnId, itemId, delta }) {
+  emit({
+    method: "item/agentMessage/delta",
+    params: { threadId, turnId, itemId, delta },
+  });
+}
+
 async function blocked(promise) {
   let evidence;
   await assert.rejects(promise, (error) => {
@@ -200,6 +211,317 @@ test("role-separated evaluator exposes the fixed additive adapter API", async ()
   );
   assert.equal(typeof subject.buildAuthorityRoleSeparatedThreadStartRequest, "function");
   assert.equal(typeof subject.runAuthorityRoleSeparatedEvaluatorTurn, "function");
+  assert.deepEqual(subject.AUTHORITY_ROLE_SEPARATED_AUXILIARY_METHODS, [
+    "none",
+    "turn-interrupt",
+    "mcp-server-status-list",
+    "unmapped",
+  ]);
+});
+
+test("schema-2 diagnostic maps authentic fresh failure phases to auxiliary methods", async (t) => {
+  const subject = await import(SUBJECT_URL.href);
+  const cases = [
+    [
+      "delta-overflow",
+      "agent-message-delta-overflow",
+      "turn-interrupt",
+      {
+        onBeforeAgentMessage: ({ emit, params, turnId }) => {
+          for (let index = 0; index < 4097; index += 1) {
+            emitAgentDelta(emit, {
+              threadId: params.threadId,
+              turnId,
+              itemId: "overflow-message",
+              delta: "x",
+            });
+          }
+        },
+      },
+    ],
+    [
+      "mcp-status",
+      "mcp-status-collection",
+      "mcp-server-status-list",
+      { mcpAfterResponse: { PRIVATE_MCP_RESPONSE_CANARY: true } },
+    ],
+    [
+      "structured-output-parse",
+      "structured-output-parse",
+      "mcp-server-status-list",
+      { finalText: "PRIVATE_NON_JSON_OUTPUT_CANARY" },
+    ],
+  ];
+
+  for (const [name, failurePhase, lastAuxiliaryMethod, options] of cases) {
+    await t.test(name, async (scenario) => {
+      const fixture = await caseRoot(scenario);
+      const session = fakeSession({ instructionSources: [fixture.projectPath], ...options });
+      const evidence = await blocked(
+        subject.runAuthorityRoleSeparatedEvaluatorTurn({
+          session,
+          root: fixture.root,
+          input: [{ type: "text", text: "Choose SAFE_B." }],
+          outputSchema: outputSchema(),
+          projectInstruction: fixture.projectInstruction,
+        }),
+      );
+      assert.equal(evidence.schemaVersion, 2);
+      assert.equal(evidence.sessionCloseCount, 1);
+      assert.deepEqual(Object.keys(evidence), [
+        "schemaVersion",
+        "adapterId",
+        "status",
+        "stage",
+        "sessionCloseCount",
+        "diagnostic",
+        "privacy",
+      ]);
+      assert.deepEqual(evidence.diagnostic, {
+        schemaVersion: 1,
+        provenance: "authority-role-separated-fixed-enum-diagnostic-v1",
+        failurePhase,
+        lastAuxiliaryMethod,
+      });
+      assert.deepEqual(Object.keys(evidence.diagnostic), [
+        "schemaVersion",
+        "provenance",
+        "failurePhase",
+        "lastAuxiliaryMethod",
+      ]);
+      assert.deepEqual(evidence.privacy, {
+        absolutePathPersisted: false,
+        rawProjectInstructionPersisted: false,
+        rawUserInputPersisted: false,
+        rawOutputPersisted: false,
+        rawOutputDigestPersisted: false,
+        eventPayloadPersisted: false,
+      });
+      assert.equal(session.closeCount, 1);
+      const serialized = JSON.stringify(evidence);
+      assert.equal(serialized.includes("PRIVATE_MCP_RESPONSE_CANARY"), false);
+      assert.equal(serialized.includes("PRIVATE_NON_JSON_OUTPUT_CANARY"), false);
+      assert.equal(serialized.includes(fixture.root), false);
+    });
+  }
+});
+
+test("schema-2 diagnostics fail closed for forged and hostile pre-auxiliary failures", async (t) => {
+  const subject = await import(SUBJECT_URL.href);
+  const fixture = await caseRoot(t);
+  const rawCanary = "PRIVATE_FORGED_DIAGNOSTIC_CANARY";
+  const session = fakeSession({ instructionSources: [fixture.projectPath] });
+  const originalRequest = session.client.request;
+  session.client.request = async function forgedFailure(method, params) {
+    if (method === "thread/start") {
+      const forged = new Error(rawCanary);
+      forged.freshEvaluatorEvidence = {
+        schemaVersion: 1,
+        failurePhase: "structured-output-parse",
+      };
+      throw forged;
+    }
+    return Reflect.apply(originalRequest, session.client, [method, params]);
+  };
+  const evidence = await blocked(
+    subject.runAuthorityRoleSeparatedEvaluatorTurn({
+      session,
+      root: fixture.root,
+      input: [{ type: "text", text: "Choose SAFE_B." }],
+      outputSchema: outputSchema(),
+      projectInstruction: fixture.projectInstruction,
+    }),
+  );
+  assert.deepEqual(evidence.diagnostic, {
+    schemaVersion: 1,
+    provenance: "authority-role-separated-fixed-enum-diagnostic-v1",
+    failurePhase: "unmapped",
+    lastAuxiliaryMethod: "none",
+  });
+  assert.equal(JSON.stringify(evidence).includes(rawCanary), false);
+  assert.equal(session.closeCount, 1);
+});
+
+test("schema-2 mcp diagnostics reject accessor responses without executing them", async (t) => {
+  const subject = await import(SUBJECT_URL.href);
+  const fixture = await caseRoot(t);
+  const rawCanary = "PRIVATE_MCP_ACCESSOR_CANARY";
+  const session = fakeSession({ instructionSources: [fixture.projectPath] });
+  const originalRequest = session.client.request;
+  let getterCalls = 0;
+  session.client.request = async function accessorResponse(method, params) {
+    if (method !== "mcpServerStatus/list") {
+      return Reflect.apply(originalRequest, session.client, [method, params]);
+    }
+    const response = {};
+    Object.defineProperty(response, "data", {
+      enumerable: true,
+      get() {
+        getterCalls += 1;
+        return rawCanary;
+      },
+    });
+    Object.defineProperty(response, "nextCursor", {
+      enumerable: true,
+      value: null,
+    });
+    return response;
+  };
+  const evidence = await blocked(
+    subject.runAuthorityRoleSeparatedEvaluatorTurn({
+      session,
+      root: fixture.root,
+      input: [{ type: "text", text: "Choose SAFE_B." }],
+      outputSchema: outputSchema(),
+      projectInstruction: fixture.projectInstruction,
+    }),
+  );
+  assert.deepEqual(evidence.diagnostic, {
+    schemaVersion: 1,
+    provenance: "authority-role-separated-fixed-enum-diagnostic-v1",
+    failurePhase: "mcp-status-collection",
+    lastAuxiliaryMethod: "mcp-server-status-list",
+  });
+  assert.equal(getterCalls, 0);
+  assert.equal(JSON.stringify(evidence).includes(rawCanary), false);
+  assert.equal(session.closeCount, 1);
+});
+
+test("schema-2 mcp diagnostics reject revoked proxy responses without access", async (t) => {
+  const subject = await import(SUBJECT_URL.href);
+  const fixture = await caseRoot(t);
+  const rawCanary = "PRIVATE_REVOKED_MCP_RESPONSE_CANARY";
+  const session = fakeSession({ instructionSources: [fixture.projectPath] });
+  const originalRequest = session.client.request;
+  let traps = 0;
+  session.client.request = async function revokedProxyResponse(method, params) {
+    if (method !== "mcpServerStatus/list") {
+      return Reflect.apply(originalRequest, session.client, [method, params]);
+    }
+    const revocable = Proxy.revocable(
+      { data: [], nextCursor: null, raw: rawCanary },
+      {
+        get() {
+          traps += 1;
+          throw new Error(rawCanary);
+        },
+        ownKeys() {
+          traps += 1;
+          throw new Error(rawCanary);
+        },
+      },
+    );
+    revocable.revoke();
+    return revocable.proxy;
+  };
+  const evidence = await blocked(
+    subject.runAuthorityRoleSeparatedEvaluatorTurn({
+      session,
+      root: fixture.root,
+      input: [{ type: "text", text: "Choose SAFE_B." }],
+      outputSchema: outputSchema(),
+      projectInstruction: fixture.projectInstruction,
+    }),
+  );
+  assert.equal(evidence.schemaVersion, 2);
+  assert.equal(evidence.sessionCloseCount, 1);
+  assert.deepEqual(evidence.diagnostic, {
+    schemaVersion: 1,
+    provenance: "authority-role-separated-fixed-enum-diagnostic-v1",
+    failurePhase: "mcp-status-collection",
+    lastAuxiliaryMethod: "mcp-server-status-list",
+  });
+  assert.equal(traps, 0);
+  assert.equal(JSON.stringify(evidence).includes(rawCanary), false);
+  assert.equal(session.closeCount, 1);
+});
+
+test("schema-2 diagnostics map an instrumented unexpected auxiliary method without raw retention", async (t) => {
+  const unexpectedMethod = "PRIVATE-UNEXPECTED-AUX-METHOD";
+  const rawResponse = "PRIVATE-UNEXPECTED-AUX-RESPONSE";
+  const rawError = "PRIVATE-UNEXPECTED-AUX-ERROR";
+  const suffix = `task-2-unexpected-aux-${process.pid}-${Date.now()}`;
+  const freshName = `run-fresh-evaluator-turn.${suffix}.mjs`;
+  const roleName = `run-authority-role-separated-evaluator-turn.${suffix}.mjs`;
+  const freshUrl = new URL(`../evals/support/${freshName}`, import.meta.url);
+  const roleUrl = new URL(`../evals/support/${roleName}`, import.meta.url);
+  t.after(async () => {
+    await Promise.all([
+      rm(freshUrl, { force: true }),
+      rm(roleUrl, { force: true }),
+    ]);
+  });
+
+  const originalFresh = await readFile(
+    new URL("../evals/support/run-fresh-evaluator-turn.mjs", import.meta.url),
+    "utf8",
+  );
+  const originalRole = await readFile(SUBJECT_URL, "utf8");
+  const mcpStatusCall =
+    "evidence.mcpAfter = await listMcpServerStatus(session.client, threadId);";
+  assert.equal(originalFresh.includes(mcpStatusCall), true);
+  assert.equal(originalRole.includes('"./run-fresh-evaluator-turn.mjs"'), true);
+  await writeFile(
+    freshUrl,
+    originalFresh.replace(
+      mcpStatusCall,
+      [
+        'activeFailurePhase = "unmapped";',
+        `await session.client.request(${JSON.stringify(unexpectedMethod)}, { threadId });`,
+        `throw new Error(${JSON.stringify(rawError)});`,
+      ].join("\n    "),
+    ),
+    { encoding: "utf8", flag: "wx" },
+  );
+  await writeFile(
+    roleUrl,
+    originalRole.replace(
+      '"./run-fresh-evaluator-turn.mjs"',
+      JSON.stringify(`./${freshName}`),
+    ),
+    { encoding: "utf8", flag: "wx" },
+  );
+  const subject = await import(`${roleUrl.href}?${suffix}`);
+  const fixture = await caseRoot(t);
+  const session = fakeSession({ instructionSources: [fixture.projectPath] });
+  const originalRequest = session.client.request;
+  const observedMethods = [];
+  session.client.request = async function instrumentedRequest(method, params) {
+    observedMethods.push(method);
+    if (method === unexpectedMethod) {
+      return { response: rawResponse, error: rawError };
+    }
+    return Reflect.apply(originalRequest, session.client, [method, params]);
+  };
+  const evidence = await blocked(
+    subject.runAuthorityRoleSeparatedEvaluatorTurn({
+      session,
+      root: fixture.root,
+      input: [{ type: "text", text: "Choose SAFE_B." }],
+      outputSchema: outputSchema(),
+      projectInstruction: fixture.projectInstruction,
+    }),
+  );
+  assert.equal(observedMethods.includes(unexpectedMethod), true);
+  assert.equal(evidence.schemaVersion, 2);
+  assert.equal(evidence.sessionCloseCount, 1);
+  assert.deepEqual(evidence.diagnostic, {
+    schemaVersion: 1,
+    provenance: "authority-role-separated-fixed-enum-diagnostic-v1",
+    failurePhase: "unmapped",
+    lastAuxiliaryMethod: "unmapped",
+  });
+  const serialized = JSON.stringify(evidence);
+  for (const raw of [
+    "turn/interrupt",
+    "mcpServerStatus/list",
+    unexpectedMethod,
+    rawResponse,
+    rawError,
+  ]) {
+    assert.equal(serialized.includes(raw), false, raw);
+  }
+  assert.equal(session.closeCount, 1);
 });
 
 test("thread-start request enables only bounded project docs and no tools", async () => {
@@ -1003,17 +1325,17 @@ test("transport failure and early binding failure close the session exactly once
   }
 });
 
-test("historical fresh adapter and collector source bytes remain immutable", async () => {
+test("fresh adapter and collector source tuples remain pinned", async () => {
   const freshBytes = await readFile(
     new URL("../evals/support/run-fresh-evaluator-turn.mjs", import.meta.url),
   );
   const collectorBytes = await readFile(
     new URL("../evals/support/collect-codex-app-server.mjs", import.meta.url),
   );
-  assert.equal(freshBytes.length, 56845);
+  assert.equal(freshBytes.length, 59802);
   assert.equal(
     digest(freshBytes),
-    "4884154dd1884b6fa899eef854307edec2a9897cb39b1f45c9c03479cab34247",
+    "37782e63e397350a0c252c407a8f67dfa090c5eeb60eb0b1036504822b0b28f9",
   );
   assert.equal(collectorBytes.length, 297632);
   assert.equal(
