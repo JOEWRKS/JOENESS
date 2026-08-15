@@ -126,6 +126,14 @@ live 종료 당시 안전한 정리 영수증은 성립하지 않았다. case �
 
 [v8 시도 기록](../../../evals/skill-contracts/joeness-m4-direct-user-delegation-attempt-index-v8.json)은 계획·소스·v7 계보·역할 분리 입력 계약·pre-open 실패·미완료 live 정리·별도 복구와 최종 기준을 함께 고정한다. 같은 v8 live 명령은 다시 실행하지 않고 추가 live 실행도 승인하지 않는다. 이 결과로 Core, vendor 설치 manifest, 플러그인 설정 또는 승격 상태를 바꾸지 않는다.
 
+## 2026-08-15 M4 프로젝트 위임 안의 직접 사용자 선택 판정 v9
+
+v9 계획 `evals/skill-contracts/joeness-m4-direct-user-delegation-live-plan-v9.json`은 5,465바이트, SHA-256 `ee1a7d9085f154f35a322dbdb5b8b96562182d010e56ba11728ad55dedea3c52`다. live는 한 번 실행했고 재시도하지 않았다. 종료 코드는 1, stdout은 0바이트, stderr에는 46바이트의 고정 wrapper 표식만 있었다. evidence는 없으며 [차단 기록](../../../evals/skill-contracts/joeness-m4-direct-user-delegation-live-v9-blocked.json)은 7,381바이트, SHA-256 `941c8aea5c04762cbb01359dcc9c5c731f5f29ee05508ca991ade44d6b4a7cd9`다.
+
+차단 기록은 `role-separated-adapter-rejection`, `role-separated-evaluator-rejected`, `after-auxiliary-request`, session close 1회를 직접 보존한다. 이는 어댑터가 해당 명명 단계 뒤 차단되었음을 뜻할 뿐 근본 원인이나 직접 사용자 선택의 행동 결과를 확정하지 않는다. raw·모델 원문·구조화 값·내부 오류 원문은 관찰하거나 보존하지 않았고, 의미 PASS/FAIL과 직렬화 정규성도 판정하지 않는다. M4 전체와 프로젝트 위임 안의 직접 사용자 선택은 계속 `UNVALIDATED`다.
+
+차단 기록의 `safeCleanup=true`에 따라 App Server 실행·종료는 각 1회, 남은 소유 프로세스는 0개이며 case·격리 홈·run root는 모두 없고 설정은 `UNCHANGED`다. [v9 시도 기록](../../../evals/skill-contracts/joeness-m4-direct-user-delegation-attempt-index-v9.json)은 계획·계보·입력 계약·차단 산출물·정리 경계를 고정한다. 같은 v9 명령은 다시 실행하지 않으며 Core, manifest, 플러그인 설정 또는 승격 상태를 바꾸지 않는다.
+
 ## Visual Check structure
 
 The public body selects exactly one or more applicable modes:
