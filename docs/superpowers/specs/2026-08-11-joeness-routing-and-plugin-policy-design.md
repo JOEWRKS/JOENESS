@@ -114,6 +114,18 @@ evidence는 App Server 실행 1회와 종료 확인 1회, 남은 소유 프로�
 
 [v7 시도 기록](../../../evals/skill-contracts/joeness-m4-authority-structured-output-attempt-index-v7.json)은 단일 live subprocess, 분리된 사후 확인 오류, 계획·소스·v6 계보·입력 계약·evidence·정리 기준을 함께 고정한다. [v7 evidence](../../../evals/skill-contracts/joeness-m4-authority-structured-output-live-v7-evidence.json)는 바이트 그대로 보존한다. 같은 v7 명령은 다시 실행하지 않고 추가 live 실행도 승인하지 않는다. 이 결과로 Core, vendor 설치 manifest, 플러그인 설정 또는 승격 상태를 바꾸지 않으며 다른 방법을 시작하지 않는다.
 
+## 2026-08-15 M4 프로젝트 위임 안의 직접 사용자 선택 판정 v8
+
+v8은 실제 프로젝트 지시 하나와 직접 사용자 차례 하나를 분리하고, 프로젝트가 맡긴 두 안전한 추천 중 사용자가 고른 항목을 따르는지만 구조화 출력으로 판정하려는 시도다. 계획 `evals/skill-contracts/joeness-m4-direct-user-delegation-live-plan-v8.json`은 5,717바이트, SHA-256 `23db82ec7439d70f2e0fe26d352e908ec0580eedb7cbfd17f795ae497311e545`다. 프로젝트 지시는 833바이트, 직접 사용자 입력은 545바이트, 정규 요청은 579바이트이며 응답 스키마는 1,049바이트다. 외부 스킬·선택된 capability root·동적 도구는 계획에 포함하지 않았다.
+
+`node evals/support/run-joeness-m4-direct-user-delegation-live.mjs --mode live --plan evals/skill-contracts/joeness-m4-direct-user-delegation-live-plan-v8.json`을 2026-08-15 13:41:58.4854452 KST부터 13:42:22.6842415 KST까지 24.1987963초 동안 한 번 실행했고 재시도하지 않았다. subprocess는 종료 코드 1과 빈 stdout으로 끝났고 stderr에는 46바이트의 고정 wrapper 표식 `m4-direct-user-delegation-live-wrapper-failed`만 있었다. evidence와 차단 산출물은 생기지 않았고 내부 오류 원문은 보존하지 않았다. 고정된 collector·wrapper 소스 흐름과 정확한 잔존 상태를 대조한 한정 추론으로, collector가 검증해 반환한 전체 버전 문자열 `codex-cli 0.146.0`을 wrapper가 축약형 `0.146.0`과 비교하는 지점에서 실제 stdio App Server 세션과 모델 응답 차례 전에 멈춘 것으로 판정한다.
+
+raw·모델 원문·구조화 값은 관찰하거나 보존하지 않았고 의미 PASS 또는 FAIL도 판정하지 않는다. 프로젝트 위임 안의 직접 사용자 선택은 `UNVALIDATED`, 직접 사용자와 프로젝트 권한의 우선관계와 프로젝트 지시·외부 스킬 관계는 `NOT-EXERCISED`, 외부 스킬 채널과 Superpowers 호환성은 `NOT-EXERCISED`, 설치된 플러그인 활성화는 `UNVERIFIED`다. 직렬화 정규성은 `NOT-ASSESSED`, M4 전체는 `UNVALIDATED`이며 상태는 `candidate/unvalidated`이고 모든 승격 값은 false다. 프로젝트·직접 사용자 입력 fixture 원문은 기존 고정 소스로만 보존하고 새 시도 기록이나 실행 산출물에는 복사하지 않았다. 새 기록에는 raw 이벤트, 프로세스·thread·turn 식별자, 사설 절대 경로, 내부 오류 원문과 설정 내용을 보존하지 않았고 고정 wrapper 표식만 별도로 기록했다.
+
+live 종료 당시 안전한 정리 영수증은 성립하지 않았다. case 폴더는 제거됐지만 생성된 schema 트리와 격리 홈이 남았고, 설정은 바뀌지 않았으며 해당 작업 프로세스는 없었다. 첫 복구 실행은 파일 식별자의 문자열과 큰 정수 형식을 잘못 비교해 어떤 unlink 또는 rmdir도 수행하기 전에 종료 코드 1로 멈췄다. 잔존 상태가 그대로임을 확인한 뒤 양쪽 형식을 정규화한 29,105바이트 복구 도구(SHA-256 `1ada026b534bf5d81ae65e70dc19a2e6806af90aa9cc8409b478b1c1532e0f9e`)를 수정 없는 검증으로 먼저 확인하고 복구를 한 번 실행했다. 복구는 종료 코드 0으로 끝났고 실행 폴더와 격리 홈은 없어졌으며 기존 격리 부모는 같은 식별자로 빈 상태를 유지했다. ordinal 실행 폴더 기준은 38개·1,654바이트·SHA-256 `56dffbde6864a4184208b1366a88506d12289f0f9f32af472d6cc6e79d03b15d`, 격리 홈 기준은 0개·0바이트·SHA-256 `e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855`로 복원됐다. App Server 프로세스 수는 live 전후 2개였고, 복구 직전에 고정한 2개 process snapshot의 SHA-256 `dfe58da4c1cf501ab0a11fbdbf64bd561647e972abd4b780ee086ab22871ec49`도 복구 뒤 같았다. 설정·Git·출력 부재도 다시 확인했고 임시 복구 도구는 제거했다. 이 별도 복구는 live 재시도가 아니다.
+
+[v8 시도 기록](../../../evals/skill-contracts/joeness-m4-direct-user-delegation-attempt-index-v8.json)은 계획·소스·v7 계보·역할 분리 입력 계약·pre-open 실패·미완료 live 정리·별도 복구와 최종 기준을 함께 고정한다. 같은 v8 live 명령은 다시 실행하지 않고 추가 live 실행도 승인하지 않는다. 이 결과로 Core, vendor 설치 manifest, 플러그인 설정 또는 승격 상태를 바꾸지 않는다.
+
 ## Visual Check structure
 
 The public body selects exactly one or more applicable modes:
