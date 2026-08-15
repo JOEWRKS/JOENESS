@@ -37,15 +37,14 @@ const SUBJECT_URL = new URL(
 
 const METHOD =
   "single-project-instruction-actual-direct-user-delegated-choice-authentic-adapter-structured-output-verdict";
-const TASK_B_SUPPORT_COMMIT = "2140ee30c69a6159e63daf6ad2d5d0d67d699ce9";
-const TASK_A_SUPPORT_COMMIT = "563b01f337cf2d48a069a9f74c3009ce05987f5f";
+const V9_BASE_COMMIT = "b7d6267f78e854077745db840ffd912a77f73795";
 const PLAN_PATH =
-  "evals/skill-contracts/joeness-m4-direct-user-delegation-live-plan-v8.json";
+  "evals/skill-contracts/joeness-m4-direct-user-delegation-live-plan-v9.json";
 const LIVE_WRAPPER_PATH =
   "evals/support/run-joeness-m4-direct-user-delegation-live.mjs";
 const LIVE_TEST_PATH = "tests/joeness-m4-direct-user-delegation-live.tests.mjs";
-const V8_ATTEMPT_INDEX_PATH =
-  "evals/skill-contracts/joeness-m4-direct-user-delegation-attempt-index-v8.json";
+const V9_ATTEMPT_INDEX_PATH =
+  "evals/skill-contracts/joeness-m4-direct-user-delegation-attempt-index-v9.json";
 
 const EXPECTED_DELEGATED_OUTPUT = Object.freeze({
   schemaVersion: 1,
@@ -162,32 +161,27 @@ function taskBDelegatedBlockedReceipt() {
 }
 
 const PREDECESSOR = Object.freeze({
-  id: "joeness-m4-authority-structured-output-live-v7",
-  implementationCommit: "7d383300655bec85557dd7b5081e9c53d737ceb8",
-  executionHead: "b03ee5aaa8c8eb75f406774b48e44c4f3caa301d",
-  persistenceCommit: "d34a994edada2b98690ee6138ce44f846c9ddda6",
+  id: "joeness-m4-direct-user-delegation-live-v8",
+  implementationCommit: "71cbde6584f49f6a75a7ed60f6253f474e6d7fe5",
+  executionHead: "67bf760e1668f1d04cee49100af745eb4a51ab30",
+  persistenceCommit: "b7d6267f78e854077745db840ffd912a77f73795",
   plan: Object.freeze({
-    path: "evals/skill-contracts/joeness-m4-authority-structured-output-live-plan-v7.json",
-    bytes: 5385,
-    sha256: "b7ed789fb74e08218a6a0acc63951573bb5b017ba7175500f1ad04ce527bc64e",
-  }),
-  rawArtifact: Object.freeze({
-    path: "evals/skill-contracts/joeness-m4-authority-structured-output-live-v7-raw.json",
-    status: "absent",
+    path: "evals/skill-contracts/joeness-m4-direct-user-delegation-live-plan-v8.json",
+    bytes: 5717,
+    sha256: "23db82ec7439d70f2e0fe26d352e908ec0580eedb7cbfd17f795ae497311e545",
   }),
   evidenceArtifact: Object.freeze({
-    path: "evals/skill-contracts/joeness-m4-authority-structured-output-live-v7-evidence.json",
-    bytes: 9765,
-    sha256: "be38955bce262949d26c190ac843c3049ed39a690250e1a8cbcd4a0eaed253f8",
+    path: "evals/skill-contracts/joeness-m4-direct-user-delegation-live-v8-evidence.json",
+    status: "absent",
   }),
   blockedArtifact: Object.freeze({
-    path: "evals/skill-contracts/joeness-m4-authority-structured-output-live-v7-blocked.json",
+    path: "evals/skill-contracts/joeness-m4-direct-user-delegation-live-v8-blocked.json",
     status: "absent",
   }),
   attemptIndex: Object.freeze({
-    path: "evals/skill-contracts/joeness-m4-authority-structured-output-attempt-index-v7.json",
-    bytes: 23939,
-    sha256: "98849113bf6ce273718d24fb41fcca2e739ccf914f17d1dd4a187bf58c1ede3b",
+    path: "evals/skill-contracts/joeness-m4-direct-user-delegation-attempt-index-v8.json",
+    bytes: 15735,
+    sha256: "1b98bf8a787f7fdab8498cd4f8f7975d1718b08342dab0145dd01abec6715289",
   }),
   sameCommandRetryAuthorized: false,
 });
@@ -259,8 +253,8 @@ const SOURCE_ROLES = Object.freeze([
 
 function plan() {
   return {
-    schemaVersion: 8,
-    id: "joeness-m4-direct-user-delegation-live-v8",
+    schemaVersion: 9,
+    id: "joeness-m4-direct-user-delegation-live-v9",
     date: "2026-08-15",
     method: METHOD,
     predecessor: structuredClone(PREDECESSOR),
@@ -320,9 +314,9 @@ function plan() {
     },
     outputs: {
       evidence:
-        "evals/skill-contracts/joeness-m4-direct-user-delegation-live-v8-evidence.json",
+        "evals/skill-contracts/joeness-m4-direct-user-delegation-live-v9-evidence.json",
       blocked:
-        "evals/skill-contracts/joeness-m4-direct-user-delegation-live-v8-blocked.json",
+        "evals/skill-contracts/joeness-m4-direct-user-delegation-live-v9-blocked.json",
     },
     resultBoundary: structuredClone(RESULT_BOUNDARY),
   };
@@ -385,8 +379,8 @@ async function executionFixture(t, {
     "switch",
     "--quiet",
     "--create",
-    "synthetic-v8-support",
-    TASK_B_SUPPORT_COMMIT,
+    "synthetic-v9-support",
+    V9_BASE_COMMIT,
   ]);
 
   for (const relativePath of [LIVE_WRAPPER_PATH, LIVE_TEST_PATH]) {
@@ -409,7 +403,7 @@ async function executionFixture(t, {
       "commit-tree",
       supportTree,
       "-p",
-      TASK_A_SUPPORT_COMMIT,
+      PREDECESSOR.executionHead,
       "-m",
       "wrong-parent direct-user live support",
     ]);
@@ -610,7 +604,6 @@ async function liveBranchFixture(t, {
     "evals/skill-contracts/fixtures/joeness-m4-direct-user-delegation-v1/project-AGENTS.md",
     "evals/skill-contracts/fixtures/joeness-m4-direct-user-delegation-v1/direct-user.md",
     PREDECESSOR.plan.path,
-    PREDECESSOR.evidenceArtifact.path,
     PREDECESSOR.attemptIndex.path,
   ];
   for (const relativePath of innerPaths) {
@@ -1011,6 +1004,9 @@ async function runtimeFixture(t, {
   openThrowsForgedTicket = false,
   prepareMovesParentBeforeThrow = false,
   preparedRunRootOverride = null,
+  preparedVersion = "codex-cli 0.146.0",
+  wrongProtocolPath = false,
+  wrongProtocolSha256 = false,
   additionalSchemaFileCount = 0,
   preexistingIsolatedParent = false,
   replaceSchemaDuringRemove = false,
@@ -1068,7 +1064,7 @@ async function runtimeFixture(t, {
   };
   const operations = {
     async createExclusiveRunRoot(runId, parent) {
-      assert.equal(runId, "joeness-m4-direct-user-delegation-live-v8");
+      assert.equal(runId, "joeness-m4-direct-user-delegation-live-v9");
       assert.equal(parent, await realpath(runParent));
       runRoot = path.join(parent, `joewrks-eval-${runId}`);
       await mkdir(runRoot);
@@ -1127,15 +1123,18 @@ async function runtimeFixture(t, {
         runRoot: preparedRunRootOverride ?? await realpath(runRoot),
         isolatedCodexHome: await realpath(isolatedHome),
         executable: path.join(fixture.parent, "collector-authentic-shaped-codex.exe"),
-        version: "0.146.0",
+        version: preparedVersion,
         protocolSchema: {
-          path: await realpath(schemaPath),
-          sha256: digest(schemaBytes),
+          path: wrongProtocolPath
+            ? await realpath(path.join(schemaRoot, "v1", "ClientRequest.json"))
+            : await realpath(schemaPath),
+          sha256: wrongProtocolSha256 ? "f".repeat(64) : digest(schemaBytes),
         },
       };
     },
-    async openAppServer() {
+    async openAppServer(prepared) {
       calls.open += 1;
+      assert.equal(prepared.version, "codex-cli 0.146.0");
       if (mutationDuringOpen === "agents") await replaceAgents();
       if (mutationDuringOpen === "isolated-parent") {
         const isolatedParent = path.dirname(isolatedHome);
@@ -1180,6 +1179,7 @@ async function runtimeFixture(t, {
     },
     async removeRunRoot(target) {
       calls.removeRoot += 1;
+      assert.equal(target, await realpath(runRoot));
       await rm(target, { recursive: true, force: false });
       if (replaceRunParentDuringRemove) {
         const displaced = `${runParent}-owned`;
@@ -1221,22 +1221,54 @@ function defaultRuntimeOptions(fixture, cleanupState = fixture.cleanupState) {
   };
 }
 
+async function assertZeroLaunchSafeCleanup(fixture) {
+  assert.deepEqual(fixture.calls, {
+    prepare: 1,
+    open: 0,
+    physicalClose: 0,
+    removeHome: 1,
+    removeRoot: 1,
+  });
+  assert.deepEqual(fixture.cleanupState.receipt, {
+    appServerLaunchCount: 0,
+    appServerCloseConfirmedCount: 0,
+    remainingOwnedProcessCount: 0,
+    caseRootReadback: "absent",
+    isolatedCodexHomeReadback: "absent",
+    runRootReadback: "absent",
+    sourceConfigReadback: "UNCHANGED",
+  });
+  assert.deepEqual(await readFile(fixture.configPath), fixture.configBytes);
+  await assert.rejects(() => lstat(fixture.runRoot), { code: "ENOENT" });
+  await assert.rejects(() => lstat(fixture.isolatedHome), { code: "ENOENT" });
+  await assert.rejects(
+    () => lstat(path.join(fixture.runRoot, "schema")),
+    { code: "ENOENT" },
+  );
+  for (const relativePath of Object.values(plan().outputs)) {
+    await assert.rejects(
+      () => lstat(path.join(fixture.repositoryRoot, ...relativePath.split("/"))),
+      { code: "ENOENT" },
+    );
+  }
+}
+
 test("direct-user delegation live wrapper exposes the fixed additive identity", async () => {
   const subject = await import(SUBJECT_URL.href);
 
   assert.equal(
     subject.JOENESS_M4_DIRECT_USER_DELEGATION_LIVE_RUN_ID,
-    "joeness-m4-direct-user-delegation-live-v8",
+    "joeness-m4-direct-user-delegation-live-v9",
   );
   assert.equal(
     subject.JOENESS_M4_DIRECT_USER_DELEGATION_LIVE_PLAN_PATH,
-    "evals/skill-contracts/joeness-m4-direct-user-delegation-live-plan-v8.json",
+    "evals/skill-contracts/joeness-m4-direct-user-delegation-live-plan-v9.json",
   );
   assert.deepEqual(subject.JOENESS_M4_DIRECT_USER_DELEGATION_LIVE_OUTPUTS, {
     evidence:
-      "evals/skill-contracts/joeness-m4-direct-user-delegation-live-v8-evidence.json",
+      "evals/skill-contracts/joeness-m4-direct-user-delegation-live-v9-evidence.json",
     blocked:
-      "evals/skill-contracts/joeness-m4-direct-user-delegation-live-v8-blocked.json",
+      "evals/skill-contracts/joeness-m4-direct-user-delegation-live-v9-blocked.json",
   });
 });
 
@@ -1247,13 +1279,17 @@ test("direct-user delegation live plan is closed, ordered, and generation-pinned
   assert.equal(subject.validateJoenessM4DirectUserDelegationLivePlan(valid), valid);
 
   const mutations = [
-    (value) => { value.schemaVersion = 7; },
-    (value) => { value.id = "joeness-m4-direct-user-delegation-live-v7"; },
+    (value) => { value.schemaVersion = 8; },
+    (value) => { value.id = "joeness-m4-direct-user-delegation-live-v8"; },
     (value) => { value.date = "2026-08-14"; },
     (value) => { value.method = `${METHOD}-changed`; },
     (value) => { value.predecessor.executionHead = "b".repeat(40); },
-    (value) => { value.predecessor.evidenceArtifact.bytes += 1; },
-    (value) => { value.predecessor.rawArtifact.status = "present"; },
+    (value) => { value.predecessor.plan.bytes += 1; },
+    (value) => { value.predecessor.attemptIndex.bytes += 1; },
+    (value) => { value.predecessor.attemptIndex.sha256 = "f".repeat(64); },
+    (value) => { value.predecessor.evidenceArtifact.path += ".changed"; },
+    (value) => { value.predecessor.evidenceArtifact.status = "present"; },
+    (value) => { value.predecessor.blockedArtifact.path += ".changed"; },
     (value) => { value.predecessor.blockedArtifact.status = "present"; },
     (value) => { value.predecessor.sameCommandRetryAuthorized = true; },
     (value) => { value.attempt.freshTurnCount = 2; },
@@ -1327,26 +1363,26 @@ test("direct-user delegation live plan is closed, ordered, and generation-pinned
   assert.deepEqual(Object.keys(plan().source).slice(1), SOURCE_ROLES);
 });
 
-test("synthetic topology is an exact two-file support child of Task B followed by a sole plan child", async (t) => {
+test("synthetic topology is an exact two-file support child of persisted v8 followed by a sole v9 plan child", async (t) => {
   const fixture = await executionFixture(t);
   assert.equal(
     await git(fixture.root, ["rev-list", "--parents", "-n", "1", fixture.support]),
-    `${fixture.support} ${TASK_B_SUPPORT_COMMIT}`,
+    `${fixture.support} ${V9_BASE_COMMIT}`,
   );
   assert.equal(
     await git(fixture.root, [
       "diff",
       "--name-status",
-      TASK_B_SUPPORT_COMMIT,
+      V9_BASE_COMMIT,
       fixture.support,
     ]),
-    [`A\t${LIVE_WRAPPER_PATH}`, `A\t${LIVE_TEST_PATH}`].join("\n"),
+    [`M\t${LIVE_WRAPPER_PATH}`, `M\t${LIVE_TEST_PATH}`].join("\n"),
   );
   for (const relativePath of [
     PLAN_PATH,
     plan().outputs.evidence,
     plan().outputs.blocked,
-    V8_ATTEMPT_INDEX_PATH,
+    V9_ATTEMPT_INDEX_PATH,
   ]) {
     assert.equal(await gitPathExists(fixture.root, fixture.support, relativePath), false);
   }
@@ -1365,7 +1401,7 @@ test("synthetic topology is an exact two-file support child of Task B followed b
   );
 });
 
-test("execution boundary accepts only the exact Task-B support and plan-only topology", async (t) => {
+test("execution boundary accepts only the exact persisted-v8 support and v9 plan-only topology", async (t) => {
   const subject = await import(SUBJECT_URL.href);
   const exact = await executionFixture(t);
   const boundary = await subject.verifyJoenessM4DirectUserDelegationExecutionBoundary({
@@ -1383,7 +1419,7 @@ test("execution boundary accepts only the exact Task-B support and plan-only top
       repositoryRoot: wrongParent.root,
       planPath: PLAN_PATH,
     }),
-    /support|parent|Task B|topology/iu,
+    /support|parent|persisted v8|topology/iu,
   );
 
   const extraSupport = await executionFixture(t, { extraSupportFile: true });
@@ -1513,7 +1549,7 @@ test("preflight binds a unique source config identity and rejects same-byte repl
   });
   assert.deepEqual(receipt, {
     mode: "preflight",
-    id: "joeness-m4-direct-user-delegation-live-v8",
+    id: "joeness-m4-direct-user-delegation-live-v9",
     executionSource: fixture.boundary.executionSource,
     sourceConfig: expectedConfig,
     outputsAbsent: true,
@@ -1535,7 +1571,25 @@ test("preflight binds a unique source config identity and rejects same-byte repl
       boundary.executionSource.executionHeadParent = "e".repeat(40);
     },
     (boundary) => {
-      boundary.executionSource.predecessor.evidenceArtifact.bytes += 1;
+      boundary.executionSource.predecessor.plan.bytes += 1;
+    },
+    (boundary) => {
+      boundary.executionSource.predecessor.attemptIndex.bytes += 1;
+    },
+    (boundary) => {
+      boundary.executionSource.predecessor.attemptIndex.sha256 = "f".repeat(64);
+    },
+    (boundary) => {
+      boundary.executionSource.predecessor.evidenceArtifact.path += ".changed";
+    },
+    (boundary) => {
+      boundary.executionSource.predecessor.evidenceArtifact.status = "present";
+    },
+    (boundary) => {
+      boundary.executionSource.predecessor.blockedArtifact.path += ".changed";
+    },
+    (boundary) => {
+      boundary.executionSource.predecessor.blockedArtifact.status = "present";
     },
     (boundary) => {
       boundary.executionSource.sourcePins.directUserDelegationRunner.bytes += 1;
@@ -1612,7 +1666,7 @@ test("preflight binds a unique source config identity and rejects same-byte repl
   );
 });
 
-test("default runtime materializes one owned role-separated case and cleans one physical session", async (t) => {
+test("authentic full prepared version reaches the runtime path and cleans one physical session", async (t) => {
   const subject = await import(SUBJECT_URL.href);
   const fixture = await runtimeFixture(t);
   const runtime = await subject.createJoenessM4DirectUserDelegationDefaultRuntime({
@@ -1676,6 +1730,42 @@ test("default runtime materializes one owned role-separated case and cleans one 
   await assert.rejects(() => lstat(path.dirname(fixture.isolatedHome)), {
     code: "ENOENT",
   });
+});
+
+test("wrong prepared version is rejected after exact acquisition and completes zero-launch SAFE cleanup", async (t) => {
+  const subject = await import(SUBJECT_URL.href);
+  for (const preexistingIsolatedParent of [false, true]) {
+    const fixture = await runtimeFixture(t, {
+      preparedVersion: "codex-cli 0.145.0",
+      preexistingIsolatedParent,
+    });
+    let rejection;
+    try {
+      await subject.createJoenessM4DirectUserDelegationDefaultRuntime(
+        defaultRuntimeOptions(fixture),
+      );
+    } catch (error) {
+      rejection = error;
+    }
+    assert.ok(rejection instanceof Error);
+    assert.match(
+      String(rejection.cause?.message ?? rejection.message),
+      /prepared runtime launch binding/iu,
+    );
+    await assertZeroLaunchSafeCleanup(fixture);
+    if (preexistingIsolatedParent) {
+      const after = await lstat(fixture.preexistingParent, { bigint: true });
+      assert.equal(after.dev, fixture.preexistingParentState.dev);
+      assert.equal(after.ino, fixture.preexistingParentState.ino);
+      assert.equal(after.birthtimeNs, fixture.preexistingParentState.birthtimeNs);
+      assert.equal(await readFile(fixture.preexistingSentinel, "utf8"), "OWNER\n");
+      assert.deepEqual(await readdir(fixture.preexistingParent), ["owner-sentinel.txt"]);
+    } else {
+      await assert.rejects(() => lstat(path.dirname(fixture.isolatedHome)), {
+        code: "ENOENT",
+      });
+    }
+  }
 });
 
 test("default runtime refuses a same-byte AGENTS replacement before app-server launch", async (t) => {
@@ -1937,8 +2027,24 @@ test("prepared runtime must bind the acquired run root before app-server launch"
     ),
     /prepared runtime|run root|identity|provenance|partial runtime cleanup/iu,
   );
-  assert.equal(fixture.calls.open, 0);
-  assert.equal(Object.hasOwn(fixture.cleanupState, "receipt"), false);
+  await assertZeroLaunchSafeCleanup(fixture);
+});
+
+test("wrong prepared protocol path or hash is rejected with zero-launch SAFE cleanup", async (t) => {
+  const subject = await import(SUBJECT_URL.href);
+  for (const mutation of [
+    { wrongProtocolPath: true },
+    { wrongProtocolSha256: true },
+  ]) {
+    const fixture = await runtimeFixture(t, mutation);
+    await assert.rejects(
+      () => subject.createJoenessM4DirectUserDelegationDefaultRuntime(
+        defaultRuntimeOptions(fixture),
+      ),
+      /protocol schema|acquired protocol schema|prepared runtime/iu,
+    );
+    await assertZeroLaunchSafeCleanup(fixture);
+  }
 });
 
 test("authentic app-server open rejects a mixed injected prepare identity before launch", async () => {
@@ -2797,7 +2903,7 @@ test("default CLI preflight accepts omitted operations on an exact execution fix
     operations: undefined,
   });
   assert.equal(receipt.mode, "preflight");
-  assert.equal(receipt.id, "joeness-m4-direct-user-delegation-live-v8");
+  assert.equal(receipt.id, "joeness-m4-direct-user-delegation-live-v9");
   assert.equal(receipt.outputsAbsent, true);
   assert.deepEqual(receipt.inputContract, INPUT_CONTRACT);
   assert.deepEqual(receipt.resultBoundary, RESULT_BOUNDARY);
