@@ -84,8 +84,14 @@ const INNER_SOURCE_PIN_KEYS = Object.freeze([
   "fixtureManifest",
 ]);
 const TASK_B_SUPPORT_COMMIT = "2140ee30c69a6159e63daf6ad2d5d0d67d699ce9";
-const V10_BASE_COMMIT = "20caa38ee61d0494b33b1678aa34a2457ed35476";
+const V10_IMPLEMENTATION_BASE_COMMIT =
+  "20caa38ee61d0494b33b1678aa34a2457ed35476";
+const V10_IMPLEMENTATION_COMMIT =
+  "bb62472aa047c65463baa9a7fdfdf99d46845b46";
+const V10_ALIGNMENT_COMMIT =
+  "7c938fc48a18df0a546d9bfe49ffaee4ad20bb79";
 const LIVE_TEST_PATH = "tests/joeness-m4-direct-user-delegation-live.tests.mjs";
+const DESIGN_VENDOR_TEST_PATH = "tests/design-vendor-integrity.tests.mjs";
 const V10_ATTEMPT_INDEX_PATH =
   "evals/skill-contracts/joeness-m4-direct-user-delegation-attempt-index-v10.json";
 const SOURCE_PATHS = Object.freeze({
@@ -102,7 +108,7 @@ const SOURCE_PATHS = Object.freeze({
   fixtureManifest:
     "evals/skill-contracts/fixtures/joeness-m4-direct-user-delegation-v1/manifest-v1.json",
 });
-const V10_SUPPORT_PATHS = Object.freeze([
+const V10_IMPLEMENTATION_PATHS = Object.freeze([
   "evals/support/run-authority-role-separated-evaluator-turn.mjs",
   "evals/support/run-fresh-evaluator-turn.mjs",
   "evals/support/run-joeness-m4-direct-user-delegation-eval.mjs",
@@ -110,6 +116,11 @@ const V10_SUPPORT_PATHS = Object.freeze([
   "tests/authority-role-separated-evaluator-turn.tests.mjs",
   "tests/fresh-evaluator-turn.tests.mjs",
   "tests/joeness-m4-direct-user-delegation-eval.tests.mjs",
+  LIVE_TEST_PATH,
+]);
+const V10_ALIGNMENT_PATHS = Object.freeze([DESIGN_VENDOR_TEST_PATH]);
+const V10_TOPOLOGY_REPAIR_PATHS = Object.freeze([
+  SOURCE_PATHS.directUserDelegationWrapper,
   LIVE_TEST_PATH,
 ]);
 const PREDECESSOR = Object.freeze({
@@ -1070,20 +1081,55 @@ export async function verifyJoenessM4DirectUserDelegationExecutionBoundary(optio
   validateJoenessM4DirectUserDelegationLivePlan(plan);
   const support = plan.source.planImplementationCommit;
 
+  const implementationParent = await boundaryGitText(root, [
+    "rev-list", "--parents", "-n", "1", V10_IMPLEMENTATION_COMMIT,
+  ]);
+  if (
+    implementationParent !==
+    `${V10_IMPLEMENTATION_COMMIT} ${V10_IMPLEMENTATION_BASE_COMMIT}`
+  ) {
+    throw new Error("direct-user delegation v10 implementation lineage is invalid");
+  }
+  const implementationDiff = await boundaryGitText(root, [
+    "diff", "--name-status", V10_IMPLEMENTATION_BASE_COMMIT, V10_IMPLEMENTATION_COMMIT,
+  ]);
+  const expectedImplementationDiff = V10_IMPLEMENTATION_PATHS
+    .map((relativePath) => `M\t${relativePath}`)
+    .join("\n");
+  if (implementationDiff !== expectedImplementationDiff) {
+    throw new Error("direct-user delegation v10 implementation diff is not exact");
+  }
+
+  const alignmentParent = await boundaryGitText(root, [
+    "rev-list", "--parents", "-n", "1", V10_ALIGNMENT_COMMIT,
+  ]);
+  if (alignmentParent !== `${V10_ALIGNMENT_COMMIT} ${V10_IMPLEMENTATION_COMMIT}`) {
+    throw new Error("direct-user delegation current-contract alignment lineage is invalid");
+  }
+  const alignmentDiff = await boundaryGitText(root, [
+    "diff", "--name-status", V10_IMPLEMENTATION_COMMIT, V10_ALIGNMENT_COMMIT,
+  ]);
+  const expectedAlignmentDiff = V10_ALIGNMENT_PATHS
+    .map((relativePath) => `M\t${relativePath}`)
+    .join("\n");
+  if (alignmentDiff !== expectedAlignmentDiff) {
+    throw new Error("direct-user delegation current-contract alignment diff is not exact");
+  }
+
   const supportParent = await boundaryGitText(root, [
     "rev-list", "--parents", "-n", "1", support,
   ]);
-  if (supportParent !== `${support} ${V10_BASE_COMMIT}`) {
-    throw new Error("direct-user delegation support must be a direct v10 base child");
+  if (supportParent !== `${support} ${V10_ALIGNMENT_COMMIT}`) {
+    throw new Error("direct-user delegation topology repair must be a direct alignment child");
   }
   const supportDiff = await boundaryGitText(root, [
-    "diff", "--name-status", V10_BASE_COMMIT, support,
+    "diff", "--name-status", V10_ALIGNMENT_COMMIT, support,
   ]);
-  const expectedSupportDiff = V10_SUPPORT_PATHS
+  const expectedSupportDiff = V10_TOPOLOGY_REPAIR_PATHS
     .map((relativePath) => `M\t${relativePath}`)
     .join("\n");
   if (supportDiff !== expectedSupportDiff) {
-    throw new Error("direct-user delegation support diff is not the exact v10 support set");
+    throw new Error("direct-user delegation topology repair diff is not exact");
   }
   const executionParent = await boundaryGitText(root, [
     "rev-list", "--parents", "-n", "1", executionHead,

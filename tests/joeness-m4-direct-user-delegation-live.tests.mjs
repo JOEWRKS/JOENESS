@@ -37,12 +37,18 @@ const SUBJECT_URL = new URL(
 
 const METHOD =
   "single-project-instruction-actual-direct-user-delegated-choice-authentic-adapter-structured-output-verdict";
-const V10_BASE_COMMIT = "20caa38ee61d0494b33b1678aa34a2457ed35476";
+const V10_IMPLEMENTATION_BASE_COMMIT =
+  "20caa38ee61d0494b33b1678aa34a2457ed35476";
+const V10_IMPLEMENTATION_COMMIT =
+  "bb62472aa047c65463baa9a7fdfdf99d46845b46";
+const V10_ALIGNMENT_COMMIT =
+  "7c938fc48a18df0a546d9bfe49ffaee4ad20bb79";
 const PLAN_PATH =
   "evals/skill-contracts/joeness-m4-direct-user-delegation-live-plan-v10.json";
 const LIVE_WRAPPER_PATH =
   "evals/support/run-joeness-m4-direct-user-delegation-live.mjs";
 const LIVE_TEST_PATH = "tests/joeness-m4-direct-user-delegation-live.tests.mjs";
+const DESIGN_VENDOR_TEST_PATH = "tests/design-vendor-integrity.tests.mjs";
 const V10_ATTEMPT_INDEX_PATH =
   "evals/skill-contracts/joeness-m4-direct-user-delegation-attempt-index-v10.json";
 const V9_BLOCKED_ARTIFACT_PATH =
@@ -306,7 +312,7 @@ const SOURCE_ROLES = Object.freeze([
   "collector",
   "fixtureManifest",
 ]);
-const CURRENT_SUPPORT_PATHS = Object.freeze([
+const V10_IMPLEMENTATION_PATHS = Object.freeze([
   "evals/support/run-authority-role-separated-evaluator-turn.mjs",
   "evals/support/run-fresh-evaluator-turn.mjs",
   "evals/support/run-joeness-m4-direct-user-delegation-eval.mjs",
@@ -314,6 +320,11 @@ const CURRENT_SUPPORT_PATHS = Object.freeze([
   "tests/authority-role-separated-evaluator-turn.tests.mjs",
   "tests/fresh-evaluator-turn.tests.mjs",
   "tests/joeness-m4-direct-user-delegation-eval.tests.mjs",
+  LIVE_TEST_PATH,
+]);
+const V10_ALIGNMENT_PATHS = Object.freeze([DESIGN_VENDOR_TEST_PATH]);
+const V10_TOPOLOGY_REPAIR_PATHS = Object.freeze([
+  LIVE_WRAPPER_PATH,
   LIVE_TEST_PATH,
 ]);
 
@@ -444,10 +455,10 @@ async function gitBlobTuple(root, revision, relativePath) {
 }
 
 async function executionFixture(t, {
-  wrongSupportParent = false,
-  extraSupportFile = false,
+  wrongRepairParent = false,
+  extraRepairFile = false,
   extraExecutionFile = false,
-  supportVariant = "exact",
+  repairVariant = "exact",
   modifyV9PlanInExecution = false,
 } = {}) {
   const parent = await mkdtemp(path.join(tmpdir(), "joeness-m4-direct-user-live-"));
@@ -465,37 +476,34 @@ async function executionFixture(t, {
     "--quiet",
     "--create",
     "synthetic-v10-support",
-    V10_BASE_COMMIT,
+    V10_ALIGNMENT_COMMIT,
   ]);
 
-  const supportPaths = supportVariant === "two-file"
-    ? [LIVE_WRAPPER_PATH, LIVE_TEST_PATH]
-    : supportVariant === "hybrid"
-      ? CURRENT_SUPPORT_PATHS.filter((relativePath) =>
-        relativePath.startsWith("evals/"))
-      : [...CURRENT_SUPPORT_PATHS];
+  const supportPaths = repairVariant === "one-file"
+    ? [LIVE_WRAPPER_PATH]
+    : [...V10_TOPOLOGY_REPAIR_PATHS];
   for (const relativePath of supportPaths) {
     await copyFile(
       path.join(ROOT, ...relativePath.split("/")),
       path.join(root, ...relativePath.split("/")),
     );
   }
-  if (extraSupportFile) {
+  if (extraRepairFile) {
     await writeFile(path.join(root, "extra-support.txt"), "extra support\n", "utf8");
     supportPaths.push("extra-support.txt");
   }
   await git(root, ["add", "--", ...supportPaths]);
-  await git(root, ["commit", "--quiet", "-m", "support direct-user live wrapper"]);
+  await git(root, ["commit", "--quiet", "-m", "repair v10 topology contract"]);
   let support = await git(root, ["rev-parse", "HEAD"]);
-  if (wrongSupportParent) {
+  if (wrongRepairParent) {
     const supportTree = await git(root, ["rev-parse", `${support}^{tree}`]);
     support = await git(root, [
       "commit-tree",
       supportTree,
       "-p",
-      PREDECESSOR.executionHead,
+      V10_IMPLEMENTATION_COMMIT,
       "-m",
-      "wrong-parent direct-user live support",
+      "wrong-parent v10 topology repair",
     ]);
     await git(root, ["reset", "--hard", support]);
   }
@@ -1463,20 +1471,60 @@ test("direct-user delegation live plan is closed, ordered, and generation-pinned
   assert.deepEqual(Object.keys(plan().source).slice(1), SOURCE_ROLES);
 });
 
-test("synthetic topology is an exact eight-file support child of the v10 base followed by a sole v10 plan child", async (t) => {
+test("synthetic topology preserves the exact v10 implementation and alignment before a two-file topology repair and sole plan child", async (t) => {
   const fixture = await executionFixture(t);
   assert.equal(
-    await git(fixture.root, ["rev-list", "--parents", "-n", "1", fixture.support]),
-    `${fixture.support} ${V10_BASE_COMMIT}`,
+    await git(fixture.root, [
+      "rev-list",
+      "--parents",
+      "-n",
+      "1",
+      V10_IMPLEMENTATION_COMMIT,
+    ]),
+    `${V10_IMPLEMENTATION_COMMIT} ${V10_IMPLEMENTATION_BASE_COMMIT}`,
   );
   assert.equal(
     await git(fixture.root, [
       "diff",
       "--name-status",
-      V10_BASE_COMMIT,
+      V10_IMPLEMENTATION_BASE_COMMIT,
+      V10_IMPLEMENTATION_COMMIT,
+    ]),
+    V10_IMPLEMENTATION_PATHS.map((relativePath) => `M\t${relativePath}`).join("\n"),
+  );
+  assert.equal(
+    await git(fixture.root, [
+      "rev-list",
+      "--parents",
+      "-n",
+      "1",
+      V10_ALIGNMENT_COMMIT,
+    ]),
+    `${V10_ALIGNMENT_COMMIT} ${V10_IMPLEMENTATION_COMMIT}`,
+  );
+  assert.equal(
+    await git(fixture.root, [
+      "diff",
+      "--name-status",
+      V10_IMPLEMENTATION_COMMIT,
+      V10_ALIGNMENT_COMMIT,
+    ]),
+    V10_ALIGNMENT_PATHS.map((relativePath) => `M\t${relativePath}`).join("\n"),
+  );
+  assert.equal(
+    await git(fixture.root, ["rev-list", "--parents", "-n", "1", fixture.support]),
+    `${fixture.support} ${V10_ALIGNMENT_COMMIT}`,
+  );
+  assert.equal(
+    await git(fixture.root, [
+      "diff",
+      "--name-status",
+      V10_ALIGNMENT_COMMIT,
       fixture.support,
     ]),
-    CURRENT_SUPPORT_PATHS.map((relativePath) => `M\t${relativePath}`).join("\n"),
+    V10_TOPOLOGY_REPAIR_PATHS
+      .map((relativePath) => `M\t${relativePath}`)
+      .join("\n"),
   );
   for (const relativePath of [
     PLAN_PATH,
@@ -1501,7 +1549,7 @@ test("synthetic topology is an exact eight-file support child of the v10 base fo
   );
 });
 
-test("execution boundary accepts only the exact v10 support and prospective plan-only topology", async (t) => {
+test("execution boundary accepts only the exact v10 lineage, topology repair, and prospective plan-only commit", async (t) => {
   const subject = await import(SUBJECT_URL.href);
   const exact = await executionFixture(t);
   const boundary = await subject.verifyJoenessM4DirectUserDelegationExecutionBoundary({
@@ -1513,34 +1561,78 @@ test("execution boundary accepts only the exact v10 support and prospective plan
   assert.equal(boundary.outputsAbsent, true);
   assert.deepEqual(Object.keys(boundary.executionSource.sourcePins), SOURCE_ROLES);
 
-  const wrongParent = await executionFixture(t, { wrongSupportParent: true });
+  const injectedHistory = (expectedArgs, replacement) => ({
+    async gitText(root, args) {
+      if (JSON.stringify(args) === JSON.stringify(expectedArgs)) return replacement;
+      return git(root, args);
+    },
+  });
+  for (const [label, expectedArgs, replacement, pattern] of [
+    [
+      "implementation parent",
+      ["rev-list", "--parents", "-n", "1", V10_IMPLEMENTATION_COMMIT],
+      `${V10_IMPLEMENTATION_COMMIT} ${"0".repeat(40)}`,
+      /implementation|parent|base|lineage/iu,
+    ],
+    [
+      "implementation diff",
+      [
+        "diff",
+        "--name-status",
+        V10_IMPLEMENTATION_BASE_COMMIT,
+        V10_IMPLEMENTATION_COMMIT,
+      ],
+      `${V10_IMPLEMENTATION_PATHS.map((relativePath) => `M\t${relativePath}`).join("\n")}\nA\textra.txt`,
+      /implementation|diff|scope|exact|lineage/iu,
+    ],
+    [
+      "alignment parent",
+      ["rev-list", "--parents", "-n", "1", V10_ALIGNMENT_COMMIT],
+      `${V10_ALIGNMENT_COMMIT} ${V10_IMPLEMENTATION_BASE_COMMIT}`,
+      /alignment|parent|implementation|lineage/iu,
+    ],
+    [
+      "alignment diff",
+      [
+        "diff",
+        "--name-status",
+        V10_IMPLEMENTATION_COMMIT,
+        V10_ALIGNMENT_COMMIT,
+      ],
+      `M\t${DESIGN_VENDOR_TEST_PATH}\nA\textra.txt`,
+      /alignment|diff|scope|exact|lineage/iu,
+    ],
+  ]) {
+    await assert.rejects(
+      () => subject.verifyJoenessM4DirectUserDelegationExecutionBoundary({
+        repositoryRoot: exact.root,
+        planPath: PLAN_PATH,
+        operations: injectedHistory(expectedArgs, replacement),
+      }),
+      pattern,
+      label,
+    );
+  }
+
+  const wrongParent = await executionFixture(t, { wrongRepairParent: true });
   await assert.rejects(
     () => subject.verifyJoenessM4DirectUserDelegationExecutionBoundary({
       repositoryRoot: wrongParent.root,
       planPath: PLAN_PATH,
     }),
-    /support|parent|v10 base|topology/iu,
+    /repair|support|parent|alignment|topology/iu,
   );
 
-  const hybridSupport = await executionFixture(t, { supportVariant: "hybrid" });
+  const incompleteRepair = await executionFixture(t, { repairVariant: "one-file" });
   await assert.rejects(
     () => subject.verifyJoenessM4DirectUserDelegationExecutionBoundary({
-      repositoryRoot: hybridSupport.root,
+      repositoryRoot: incompleteRepair.root,
       planPath: PLAN_PATH,
     }),
-    /support|diff|scope|topology|exact/iu,
+    /repair|support|diff|scope|topology|exact/iu,
   );
 
-  const twoFileSupport = await executionFixture(t, { supportVariant: "two-file" });
-  await assert.rejects(
-    () => subject.verifyJoenessM4DirectUserDelegationExecutionBoundary({
-      repositoryRoot: twoFileSupport.root,
-      planPath: PLAN_PATH,
-    }),
-    /support|diff|scope|topology|exact/iu,
-  );
-
-  const extraSupport = await executionFixture(t, { extraSupportFile: true });
+  const extraSupport = await executionFixture(t, { extraRepairFile: true });
   await assert.rejects(
     () => subject.verifyJoenessM4DirectUserDelegationExecutionBoundary({
       repositoryRoot: extraSupport.root,
