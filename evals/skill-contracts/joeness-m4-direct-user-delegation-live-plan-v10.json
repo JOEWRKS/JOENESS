@@ -1,0 +1,140 @@
+{
+  "schemaVersion": 10,
+  "id": "joeness-m4-direct-user-delegation-live-v10",
+  "date": "2026-08-15",
+  "method": "single-project-instruction-actual-direct-user-delegated-choice-authentic-adapter-structured-output-verdict",
+  "predecessor": {
+    "id": "joeness-m4-direct-user-delegation-live-v9",
+    "implementationCommit": "bd8285060bee5d1a3289aea7cc46a49b7ecb5649",
+    "executionHead": "e2df687d33127599790dc97c809a23b668958a70",
+    "persistenceCommit": "7e2451e068d9b455c0e4e5217b29dd7c752dfbb6",
+    "plan": {
+      "path": "evals/skill-contracts/joeness-m4-direct-user-delegation-live-plan-v9.json",
+      "bytes": 5465,
+      "sha256": "ee1a7d9085f154f35a322dbdb5b8b96562182d010e56ba11728ad55dedea3c52"
+    },
+    "evidenceArtifact": {
+      "path": "evals/skill-contracts/joeness-m4-direct-user-delegation-live-v9-evidence.json",
+      "status": "absent"
+    },
+    "blockedArtifact": {
+      "path": "evals/skill-contracts/joeness-m4-direct-user-delegation-live-v9-blocked.json",
+      "bytes": 7381,
+      "sha256": "941c8aea5c04762cbb01359dcc9c5c731f5f29ee05508ca991ade44d6b4a7cd9"
+    },
+    "attemptIndex": {
+      "path": "evals/skill-contracts/joeness-m4-direct-user-delegation-attempt-index-v9.json",
+      "bytes": 11968,
+      "sha256": "599b97effb943ab26ccc9e6d6dd1bb12d360e6977afb552a1259a85045e2f179"
+    },
+    "sameCommandRetryAuthorized": false
+  },
+  "attempt": {
+    "freshTurnCount": 1,
+    "retryCount": 0,
+    "automaticRetry": false
+  },
+  "source": {
+    "planImplementationCommit": "b9c2ad663fc7593e770c3d34711087e73f354fa0",
+    "directUserDelegationRunner": {
+      "path": "evals/support/run-joeness-m4-direct-user-delegation-eval.mjs",
+      "bytes": 52750,
+      "sha256": "66e51428ec2738df5b208f2e98a30f4f4d83664e929f45cf633857aa39637855"
+    },
+    "directUserDelegationWrapper": {
+      "path": "evals/support/run-joeness-m4-direct-user-delegation-live.mjs",
+      "bytes": 147789,
+      "sha256": "efaa2dbdaf4373d56272707bc300585b84e31b71d7b5416fc2b60ba3d28ac373"
+    },
+    "authorityRoleSeparatedAdapter": {
+      "path": "evals/support/run-authority-role-separated-evaluator-turn.mjs",
+      "bytes": 31554,
+      "sha256": "a5e29c9b0ccb65c4cbb519587e53f45f39a4ef116ce84a2024be16ba2808f172"
+    },
+    "freshTurnAdapter": {
+      "path": "evals/support/run-fresh-evaluator-turn.mjs",
+      "bytes": 59802,
+      "sha256": "37782e63e397350a0c252c407a8f67dfa090c5eeb60eb0b1036504822b0b28f9"
+    },
+    "transportControlSupport": {
+      "path": "evals/support/run-joeness-m4-transport-control-eval.mjs",
+      "bytes": 49611,
+      "sha256": "547077688884d8d0c94558fc84322bcf31b61b0a6d6583359423f2c161029cfa"
+    },
+    "collector": {
+      "path": "evals/support/collect-codex-app-server.mjs",
+      "bytes": 297632,
+      "sha256": "8b81ddb28be2a803500839a2de61f9bb397aa96711d039bdb7a3a86cfad8d687"
+    },
+    "fixtureManifest": {
+      "path": "evals/skill-contracts/fixtures/joeness-m4-direct-user-delegation-v1/manifest-v1.json",
+      "bytes": 1550,
+      "sha256": "b0b6df573fb5c8d87522c0e7eb895e4ed8a13e2cfc50f523030115dfcc1397ac"
+    }
+  },
+  "inputContract": {
+    "fixtureId": "joeness-m4-direct-user-delegation-v1",
+    "manifest": {
+      "bytes": 1550,
+      "sha256": "b0b6df573fb5c8d87522c0e7eb895e4ed8a13e2cfc50f523030115dfcc1397ac"
+    },
+    "projectInstruction": {
+      "role": "project",
+      "fixturePath": "project-AGENTS.md",
+      "runtimeRelativePath": "AGENTS.md",
+      "bytes": 833,
+      "sha256": "c3ffe6bc3dee638ceecf8ccf5f19f76225f2c7a673d0b9bb5a90a93e420b1ab9"
+    },
+    "directUser": {
+      "role": "user",
+      "descriptorCount": 1,
+      "type": "text",
+      "bytes": 545,
+      "sha256": "dc88991fa03b9a15d3215901b19f9a424889b5a2778c5f9b4b873cd309ab666c",
+      "canonicalRequest": {
+        "bytes": 579,
+        "sha256": "4c795bf716aae59d3b86b04777f20287979a043c334a986eacaa6392f849d14f"
+      },
+      "descriptorRequestSha256": "73a23b0b54494a5a24916d75e599f5cbd75e3ac2231d6849c8cda7d79411855f"
+    },
+    "responseContract": "delegated-direct-user-choice-semantic-verdict",
+    "responseSchema": {
+      "bytes": 1049,
+      "sha256": "ceed0a7aa6240841e18f9c1f94bf6924c4798fbeddcd3f6f2cee359e7248f31a"
+    },
+    "additionalPromptCount": 0
+  },
+  "runtime": {
+    "codexVersion": "codex-cli 0.146.0",
+    "projectDocs": "enabled",
+    "projectDocMaxBytes": 32768,
+    "instructionSourceCount": 1,
+    "externalSkills": [],
+    "selectedCapabilityRoots": [],
+    "dynamicTools": [],
+    "installedPluginActivation": "UNVERIFIED"
+  },
+  "outputs": {
+    "evidence": "evals/skill-contracts/joeness-m4-direct-user-delegation-live-v10-evidence.json",
+    "blocked": "evals/skill-contracts/joeness-m4-direct-user-delegation-live-v10-blocked.json"
+  },
+  "resultBoundary": {
+    "state": "candidate",
+    "validation": "unvalidated",
+    "scope": "actual-direct-user-turn-single-project-instruction-delegated-choice-structured-output-only",
+    "structuredOutputSemantics": "UNVALIDATED",
+    "serializationCanonicality": "NOT-ASSESSED",
+    "delegatedChoiceFixture": "UNVALIDATED",
+    "m4Overall": "UNVALIDATED",
+    "directUserChoiceWithinProjectDelegation": "UNVALIDATED",
+    "directUserOverProjectAuthority": "NOT-EXERCISED",
+    "projectTaskOverExternalSkill": "NOT-EXERCISED",
+    "externalSkillChannel": "NOT-EXERCISED",
+    "installedPluginActivation": "UNVERIFIED",
+    "superpowersCompatibility": "NOT-EXERCISED",
+    "promotionPass": false,
+    "corePromotion": false,
+    "manifestPromotion": false,
+    "pluginConfigurationChange": false
+  }
+}
