@@ -961,7 +961,7 @@ test('M4 preserves project workflow authority without promoting or expanding Cor
   assert.match(spec, /no raw token-intensive.*quota warning/is);
   assert.match(spec, /no user-facing skill ceremony/is);
   assert.match(spec, /no plugin config(?:uration)? write/is);
-  assert.match(spec, /installed-plugin activation.*unverified.*separate live evidence/is);
+  assert.match(spec, /installed-plugin activation.*unverified.*separate activation evidence/is);
 });
 
 test('candidate ledger separates the unvalidated active contract from retained hybrid evidence', async () => {
