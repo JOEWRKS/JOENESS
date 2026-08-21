@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
+import { EventEmitter } from "node:events";
 import { readFileSync, readdirSync } from "node:fs";
 import {
   mkdir,
@@ -17,6 +18,7 @@ import { fileURLToPath } from "node:url";
 
 import {
   approvalDenialResponse,
+  assertExpectedCodexVersion,
   assertEvaluationSourceConfigSafe,
   boundUtf8,
   buildAppServerEnvironment,
@@ -30,6 +32,7 @@ import {
   buildSubjectInput,
   buildThreadStartRequest,
   collectRuntimeInventory,
+  containsCredentialText,
   createExclusiveRunRoot,
   createJsonlClient,
   createV2RunRoot,
@@ -48,6 +51,7 @@ import {
   liveRunModes,
   materializeIsolatedCodexHome,
   normalizeEvent,
+  openAppServer,
   parseCli,
   prepareInstructionDiscoveryReceipt,
   probeInstructionDiscovery,
@@ -60,6 +64,7 @@ import {
   runBuffered,
   runSubjectCase,
   selectCases,
+  sanitizeDiagnosticEvidence,
   sha256,
   startSyntheticWriteBroker,
   stableStringify,
@@ -67,7 +72,658 @@ import {
   verifyDisabledMcp,
   verifyMcpRuntimeIsInert,
   writeResultExclusive,
+  EXPECTED_CODEX_VERSION,
 } from "../evals/support/collect-codex-app-server.mjs";
+
+const SYNTHETIC_TOKEN_SHAPES = Object.freeze([
+  "sk-SYNTHETIC_TEST_ONLY_abcdefghijklmnop",
+  "sk-proj-SYNTHETIC_TEST_ONLY_abcdefghijklmnop",
+  "sk-svcacct-SYNTHETIC_TEST_ONLY_abcdefghijklmnop",
+  "ghp_SYNTHETIC_TEST_ONLY_abcdefghijklmnop",
+  "github_pat_SYNTHETIC_TEST_ONLY_abcdefghijklmnop",
+  "AKIASYNTHETICTEST000",
+  "eyJSYNTHETIC0.eyJSYNTHETIC1.SYNTHETICSIGNATURE",
+]);
+
+const BROKER_DIAGNOSTIC_TEXT_LIMIT = 2048;
+
+function boundedBrokerFailureDiagnostic(result) {
+  function boundedText(value) {
+    const text = typeof value === "string" ? value : "";
+    return {
+      text: text.slice(0, BROKER_DIAGNOSTIC_TEXT_LIMIT),
+      byteLength: Buffer.byteLength(text, "utf8"),
+      truncated: text.length > BROKER_DIAGNOSTIC_TEXT_LIMIT,
+    };
+  }
+
+  return JSON.stringify({
+    processExitCode: result.processExitCode ?? null,
+    signal: result.signal ?? null,
+    stdout: boundedText(result.stdout),
+    stderr: boundedText(result.stderr),
+  });
+}
+
+test("runtime error notifications map the pinned TurnError payload without changing the blocker", () => {
+  const event = normalizeEvent({
+    method: "error",
+    params: {
+      threadId: "thread-17",
+      turnId: "turn-23",
+      error: {
+        message: "turn failed",
+        codexErrorInfo: "serverOverloaded",
+        additionalDetails: "retry later",
+      },
+      willRetry: false,
+    },
+  });
+
+  assert.deepEqual(event, {
+    method: "error",
+    threadId: "thread-17",
+    turnId: "turn-23",
+    complete: false,
+    blockers: ["runtime-error"],
+    runtimeError: {
+      code: {
+        text: "serverOverloaded",
+        byteLength: 16,
+        sha256: "50a4cf7be77e422ddd1be39b5c304270b598d0f8127dacf0db2d41229cc5aaa0",
+        truncated: false,
+        redacted: false,
+        unsupported: false,
+      },
+      message: {
+        text: "turn failed",
+        byteLength: 11,
+        sha256: "316ae0128c6956e626297341b7b6ee3642f74bb4761711df70604d9b8e95b9c2",
+        truncated: false,
+        redacted: false,
+        unsupported: false,
+      },
+      details: {
+        text: "retry later",
+        byteLength: 11,
+        sha256: "4412f71b5dca9d4ab0fe4fb93f3f7efdd59ab69aaa73436aa6b99ad02517d359",
+        truncated: false,
+        redacted: false,
+        unsupported: false,
+      },
+    },
+  });
+});
+
+test("redacted diagnostic hashes bind only the common sanitized representation", () => {
+  const first = sanitizeDiagnosticEvidence({ password: "000000" });
+  const second = sanitizeDiagnosticEvidence({ password: "999999" });
+
+  assert.deepEqual(first, {
+    text: '{"password":"[REDACTED]"}',
+    byteLength: 25,
+    sha256: "d5320ea324bbee6d8aa35a4b73954bc088e51773579a3676561589facc3933c1",
+    truncated: false,
+    redacted: true,
+    unsupported: false,
+  });
+  assert.equal(second.sha256, "d5320ea324bbee6d8aa35a4b73954bc088e51773579a3676561589facc3933c1");
+  assert.notEqual(first.sha256, "b34f4a6e621f4f86e8aa8d762087b96b5a29e6a2c12f7070b41d8163f7f827ec");
+  assert.notEqual(second.sha256, "b5f9868994b980d93aafcfad9d99fab4baa39b101f88a5a28a7e111df314a26f");
+});
+
+test("diagnostic and runtime credential classifiers share current provider token shapes", () => {
+  for (const token of SYNTHETIC_TOKEN_SHAPES) {
+    const message = `synthetic provider failure ${token}`;
+    const evidence = sanitizeDiagnosticEvidence(message);
+    assert.equal(containsCredentialText(message), true, token);
+    assert.equal(evidence.redacted, true, token);
+    assert.equal(JSON.stringify(evidence).includes(token), false, token);
+  }
+});
+
+test("provider token prefixes inside ordinary UI identifiers are not credentials", () => {
+  for (const ordinaryText of [
+    "The modal-mask-background-layer remains clipped.",
+    "The modal-mask-background-layer-variant remains clipped.",
+    "The modal-mask-backgroundlayercomponent remains clipped.",
+    "The modal-mask-background-layer-v2 remains clipped.",
+    "The modal-mask_background_layer remains clipped.",
+    "The modal-mask-BackgroundLayerVariantComponent remains clipped.",
+    "The modal-mask-Background-Layer-Variant-Component remains clipped.",
+    "The task-proj-BackgroundLayerVariantComponent remains clipped.",
+    "The mask_GeneratedPanelLayerComponent remains clipped.",
+    "The modal-mask-BackgroundLayerVariantComponentV2QueueX9 remains clipped.",
+    "The modal-mask-BackgroundLayerVariantComponent-v2-dark remains clipped.",
+    "The modal-mask-BackgroundLayerXYZ123Component remains clipped.",
+    "The modal-mask-ABCDEFGHIJKLMNComponent remains clipped.",
+  ]) {
+    const diagnostic = sanitizeDiagnosticEvidence(ordinaryText);
+    const event = normalizeEvent({
+      method: "item/agentMessage/delta",
+      params: {
+        threadId: "thread-1",
+        turnId: "turn-1",
+        itemId: "item-1",
+        delta: ordinaryText,
+      },
+    });
+
+    assert.equal(containsCredentialText(ordinaryText), false, ordinaryText);
+    assert.equal(diagnostic.redacted, false, ordinaryText);
+    assert.equal(diagnostic.text, ordinaryText);
+    assert.equal(event.blockers.includes("secret-shaped-output"), false);
+  }
+});
+
+test("provider credentials remain blocked at token boundaries and in labeled values", () => {
+  for (const token of [
+    ...SYNTHETIC_TOKEN_SHAPES,
+    "sk-ABCDEFGHIJKLMNOPQRST",
+  ]) {
+    for (const text of [
+      token,
+      `value ${token}`,
+      `apiKey=x${token}`,
+      `--api-key x${token}`,
+    ]) {
+      const diagnostic = sanitizeDiagnosticEvidence(text);
+      const event = normalizeEvent({
+        method: "item/agentMessage/delta",
+        params: {
+          threadId: "thread-1",
+          turnId: "turn-1",
+          itemId: "item-1",
+          delta: text,
+        },
+      });
+
+      assert.equal(containsCredentialText(text), true, text);
+      assert.equal(diagnostic.redacted, true, text);
+      assert.equal(JSON.stringify(diagnostic).includes(token), false, text);
+      assert.equal(event.blockers.includes("secret-shaped-output"), true, text);
+    }
+  }
+});
+
+test("a repeated suffix cannot hide a labeled provider credential", () => {
+  const token = "sk-ABCDEFGHIJKLMNOPQRST";
+  const padded = `apiKey=x${token}${"A".repeat(128)}`;
+  const diagnostic = sanitizeDiagnosticEvidence(padded);
+  const event = normalizeEvent({
+    method: "item/agentMessage/delta",
+    params: {
+      threadId: "thread-1",
+      turnId: "turn-1",
+      itemId: "item-1",
+      delta: padded,
+    },
+  });
+
+  assert.equal(containsCredentialText(padded), true);
+  assert.equal(diagnostic.redacted, true);
+  assert.equal(JSON.stringify(diagnostic).includes(token), false);
+  assert.equal(event.blockers.includes("secret-shaped-output"), true);
+});
+
+test("free-form cookie and set-cookie headers redact every value and attribute", () => {
+  const cookie = sanitizeDiagnosticEvidence(
+    "request failed Cookie: sid=abc; refresh=supersecretvalue",
+  );
+  const setCookie = sanitizeDiagnosticEvidence(
+    "response Set-Cookie: sid=abc; HttpOnly; Path=/private; SameSite=Lax",
+  );
+
+  assert.equal(cookie.text, "request failed [REDACTED]");
+  assert.equal(cookie.sha256, "34c9f966ddffe3bbec5c3d63ab78f4a50bb6707b51343c21f596888fc416eaee");
+  assert.equal(setCookie.text, "response [REDACTED]");
+  assert.equal(setCookie.sha256, "531fe578524eb837144d239e5d1fd737b14cdf752154ae51d402ee794792a867");
+  assert.equal(JSON.stringify(cookie).includes("supersecretvalue"), false);
+  assert.equal(JSON.stringify(setCookie).includes("/private"), false);
+});
+
+test("diagnostic traversal shares one global budget across broad and deep inputs", () => {
+  const broad = Object.fromEntries(
+    Array.from({ length: 200 }, (_, index) => [`field${index}`, index]),
+  );
+  const deep = {};
+  let cursor = deep;
+  for (let index = 0; index < 20; index += 1) {
+    cursor.next = {};
+    cursor = cursor.next;
+  }
+  const expected = {
+    text: "[TRUNCATED:diagnostic-budget]",
+    byteLength: null,
+    sha256: "85785a1113252d59dfbcd0c040ff651c891191a1b1b8736315cde0ca435520fd",
+    truncated: true,
+    redacted: true,
+    unsupported: true,
+    budgetExceeded: true,
+  };
+
+  assert.deepEqual(sanitizeDiagnosticEvidence(broad), expected);
+  assert.deepEqual(sanitizeDiagnosticEvidence(deep), expected);
+});
+
+test("multi-megabyte diagnostic strings retain only the global budget marker", () => {
+  const evidence = sanitizeDiagnosticEvidence("x".repeat(2 * 1024 * 1024));
+
+  assert.deepEqual(evidence, {
+    text: "[TRUNCATED:diagnostic-budget]",
+    byteLength: 2097152,
+    sha256: "85785a1113252d59dfbcd0c040ff651c891191a1b1b8736315cde0ca435520fd",
+    truncated: true,
+    redacted: true,
+    unsupported: true,
+    budgetExceeded: true,
+  });
+});
+
+test("diagnostic property-name bytes are charged before retaining a long key", () => {
+  const evidence = sanitizeDiagnosticEvidence({ ["k".repeat(100_000)]: 1 });
+
+  assert.deepEqual(evidence, {
+    text: "[TRUNCATED:diagnostic-budget]",
+    byteLength: null,
+    sha256: "85785a1113252d59dfbcd0c040ff651c891191a1b1b8736315cde0ca435520fd",
+    truncated: true,
+    redacted: true,
+    unsupported: true,
+    budgetExceeded: true,
+  });
+  assert.equal(evidence.text.length, 29);
+});
+
+test("diagnostic sparse arrays cannot amplify one item into a million holes", () => {
+  const sparse = [];
+  sparse[1_000_000] = "x";
+  const evidence = sanitizeDiagnosticEvidence(sparse);
+
+  assert.deepEqual(evidence, {
+    text: "[TRUNCATED:diagnostic-budget]",
+    byteLength: null,
+    sha256: "85785a1113252d59dfbcd0c040ff651c891191a1b1b8736315cde0ca435520fd",
+    truncated: true,
+    redacted: true,
+    unsupported: true,
+    budgetExceeded: true,
+  });
+  assert.equal(evidence.text.length, 29);
+});
+
+test("diagnostic key count stops before sorting or traversing excess values", () => {
+  let reads = 0;
+  const broad = {};
+  for (let index = 0; index < 65; index += 1) {
+    Object.defineProperty(broad, `field${index}`, {
+      enumerable: true,
+      get() {
+        reads += 1;
+        return index;
+      },
+    });
+  }
+  const evidence = sanitizeDiagnosticEvidence(broad);
+
+  assert.equal(reads, 0);
+  assert.equal(evidence.text, "[TRUNCATED:diagnostic-budget]");
+  assert.equal(evidence.byteLength, null);
+  assert.equal(evidence.budgetExceeded, true);
+  assert.equal(evidence.text.length, 29);
+});
+
+test("diagnostic dense arrays stop at the exact small array cap", () => {
+  const evidence = sanitizeDiagnosticEvidence(
+    Array.from({ length: 33 }, (_, index) => index),
+  );
+
+  assert.deepEqual(evidence, {
+    text: "[TRUNCATED:diagnostic-budget]",
+    byteLength: null,
+    sha256: "85785a1113252d59dfbcd0c040ff651c891191a1b1b8736315cde0ca435520fd",
+    truncated: true,
+    redacted: true,
+    unsupported: true,
+    budgetExceeded: true,
+  });
+  assert.equal(evidence.text.length, 29);
+});
+
+test("diagnostic symbol keys are rejected before description conversion", () => {
+  const firstDescription = `first-${"a".repeat(100_000)}`;
+  const secondDescription = `second-${"b".repeat(100_000)}`;
+  const value = {
+    [Symbol(firstDescription)]: 1,
+    [Symbol(secondDescription)]: 2,
+  };
+
+  const evidence = sanitizeDiagnosticEvidence(value);
+
+  assert.deepEqual(evidence, {
+    text: "[UNSUPPORTED:symbol-key]",
+    byteLength: 24,
+    sha256: "85dd194c18d8483c7c8938dac6c1ca821509a390a21f392b56679f9321921ce7",
+    truncated: false,
+    redacted: false,
+    unsupported: true,
+  });
+  assert.equal(JSON.stringify(evidence).includes(firstDescription), false);
+  assert.equal(JSON.stringify(evidence).includes(secondDescription), false);
+});
+
+test("runtime diagnostic fields use descriptors without invoking getters", () => {
+  let reads = 0;
+  const error = { codexErrorInfo: null, additionalDetails: null };
+  Object.defineProperty(error, "message", {
+    enumerable: true,
+    get() {
+      reads += 1;
+      return "must not execute";
+    },
+  });
+
+  const event = normalizeEvent({
+    method: "error",
+    params: { threadId: "thread-17", turnId: "turn-23", error },
+  });
+
+  assert.equal(reads, 0);
+  assert.deepEqual(event.runtimeError.message, {
+    text: "[UNSUPPORTED:accessor]",
+    byteLength: 22,
+    sha256: "66edbdac07d683412d1df6e962f509f69fd5f423df819b523ec066abd4bf30a3",
+    truncated: false,
+    redacted: false,
+    unsupported: true,
+  });
+});
+
+test("diagnostic sanitizer rejects nested proxies without invoking traps", () => {
+  let trapCalls = 0;
+  const nested = new Proxy({}, {
+    getOwnPropertyDescriptor() {
+      trapCalls += 1;
+      return undefined;
+    },
+    getPrototypeOf() {
+      trapCalls += 1;
+      return Object.prototype;
+    },
+    ownKeys() {
+      trapCalls += 1;
+      return [];
+    },
+  });
+  const result = sanitizeDiagnosticEvidence({ details: { nested } });
+  assert.equal(trapCalls, 0);
+  assert.equal(result.unsupported, true);
+  assert.equal(result.text.includes("[UNSUPPORTED:proxy]"), true);
+});
+
+test("diagnostic sanitizer redacts credential keys, inline auth, paths, and cycles without leaking", () => {
+  const details = {
+    authorization: "Bearer top-secret-token-value",
+    cookie: "session=private-cookie-value",
+    safe: "backend failed at C:\\Users\\alice\\.codex\\auth.json",
+    token: "private-token-value",
+  };
+  details.self = details;
+
+  const evidence = sanitizeDiagnosticEvidence(details, 4096);
+
+  assert.deepEqual(JSON.parse(evidence.text), {
+    authorization: "[REDACTED]",
+    cookie: "[REDACTED]",
+    safe: "backend failed at [REDACTED_PATH]",
+    self: "[CIRCULAR]",
+    token: "[REDACTED]",
+  });
+  assert.equal(evidence.redacted, true);
+  assert.equal(evidence.unsupported, true);
+  assert.equal(evidence.truncated, false);
+  assert.equal(evidence.byteLength, 136);
+  assert.equal(evidence.sha256, "1e6350704ec1833d33ea6ede89c667dee23d552273f766be54a8d9c0a8d5bfb3");
+  assert.equal(JSON.stringify(evidence).includes("top-secret-token-value"), false);
+  assert.equal(JSON.stringify(evidence).includes("private-cookie-value"), false);
+  assert.equal(JSON.stringify(evidence).includes("private-token-value"), false);
+  assert.equal(JSON.stringify(evidence).includes("alice"), false);
+});
+
+test("diagnostic sanitizer truncates UTF-8 deterministically with original metadata", () => {
+  const evidence = sanitizeDiagnosticEvidence("é".repeat(700), 16);
+
+  assert.deepEqual(evidence, {
+    head: "éééé",
+    tail: "éééé",
+    byteLength: 1400,
+    sha256: "d38660012f0eb48612dc61fddd811bc17f33dc93d9008be525540d2a698d7965",
+    truncated: true,
+    redacted: false,
+    unsupported: false,
+  });
+});
+
+test("diagnostic sanitizer catches camel-case credential keys and generic absolute paths", () => {
+  const evidence = sanitizeDiagnosticEvidence({
+    accessToken: "opaque-value",
+    apiKey: "opaque-value",
+    location: "/workspace/private/auth.json",
+    setCookie: "opaque-value",
+  });
+
+  assert.deepEqual(JSON.parse(evidence.text), {
+    accessToken: "[REDACTED]",
+    apiKey: "[REDACTED]",
+    location: "[REDACTED_PATH]",
+    setCookie: "[REDACTED]",
+  });
+  assert.equal(evidence.redacted, true);
+});
+
+test("diagnostic sanitizer redacts private-key material and paths with spaces", () => {
+  const privateKey = "-----BEGIN PRIVATE KEY-----\nSYNTHETIC_PRIVATE_KEY_BODY\n-----END PRIVATE KEY-----";
+  const sshKey = `ssh-ed25519 ${"A".repeat(48)}`;
+  const evidence = sanitizeDiagnosticEvidence(
+    `failed at \"C:\\Users\\O'Brien\\비밀 폴더\\app.log\" and \"/Users/O'Brien/비밀 폴더/app.log\"\n${privateKey}\n${sshKey}`,
+    4096,
+  );
+  const serialized = JSON.stringify(evidence);
+  assert.equal(evidence.redacted, true);
+  assert.equal(serialized.includes("O'Brien"), false);
+  assert.equal(serialized.includes("비밀 폴더"), false);
+  assert.equal(serialized.includes("SYNTHETIC_PRIVATE_KEY_BODY"), false);
+  assert.equal(serialized.includes("ssh-ed25519"), false);
+  assert.equal(serialized.includes("A".repeat(24)), false);
+});
+
+test("diagnostic sanitizer preserves slash-separated technical names", () => {
+  const diagnostic = [
+    "design/visual schema rejected",
+    "text/plain parse failed",
+    "module foo/bar: invalid export",
+    "https://example.com/docs/error remains available",
+  ].join("\n");
+  const evidence = sanitizeDiagnosticEvidence(diagnostic, 4096);
+  assert.equal(evidence.text, diagnostic);
+  assert.equal(evidence.redacted, false);
+});
+
+test("diagnostic sanitizer redacts forward-slash Windows paths and file URLs", () => {
+  const evidence = sanitizeDiagnosticEvidence(
+    [
+      `at \"C:/Users/O'Brien/비밀 폴더/app.log\"`,
+      `at file:///C:/Users/O'Brien/비밀%20폴더/app.mjs:2`,
+      `at file:///Users/홍 길동/비밀 폴더/app.mjs:3`,
+      `source=C:/Users/O'Brien/private/app.ts`,
+    ].join("\n"),
+    4096,
+  );
+  const serialized = JSON.stringify(evidence);
+  assert.equal(evidence.redacted, true);
+  assert.equal(serialized.includes("O'Brien"), false);
+  assert.equal(serialized.includes("비밀"), false);
+  assert.equal(serialized.includes("file:///C:/Users"), false);
+});
+
+test("diagnostic sanitizer preserves the cause after a backtick-quoted Windows path", () => {
+  const evidence = sanitizeDiagnosticEvidence(
+    "unable to locate image at `C:\\Users\\Alice\\Temp\\approved.png`: fs sandbox helper failed: apply deny-read ACLs",
+    4096,
+  );
+
+  assert.equal(
+    evidence.text,
+    "unable to locate image at [REDACTED_PATH]: fs sandbox helper failed: apply deny-read ACLs",
+  );
+  assert.equal(evidence.redacted, true);
+  assert.equal(JSON.stringify(evidence).includes("Alice"), false);
+});
+
+test("diagnostic sanitizer preserves a normal cause before terminal line endings", () => {
+  for (const lineEnding of ["\n", "\r\n"]) {
+    const evidence = sanitizeDiagnosticEvidence(
+      `unable to locate image at \`C:\\Users\\Alice\\Temp\\approved.png\`: fs sandbox helper failed${lineEnding}`,
+      4096,
+    );
+
+    assert.equal(
+      evidence.text,
+      `unable to locate image at [REDACTED_PATH]: fs sandbox helper failed${lineEnding}`,
+    );
+    assert.equal(evidence.redacted, true);
+    assert.equal(JSON.stringify(evidence).includes("Alice"), false);
+  }
+});
+
+test("diagnostic sanitizer keeps the final cause when backtick delimiters are ambiguous", () => {
+  const evidence = sanitizeDiagnosticEvidence(
+    "unable to locate image at `C:\\Users\\Alice\\Temp\\approved.png`: helper `apply_acl`: access denied",
+    4096,
+  );
+
+  assert.equal(
+    evidence.text,
+    "unable to locate image at [REDACTED_PATH]: access denied",
+  );
+  assert.equal(evidence.redacted, true);
+  assert.equal(JSON.stringify(evidence).includes("Alice"), false);
+});
+
+test("diagnostic sanitizer does not expose a Windows path containing a backtick", () => {
+  const evidence = sanitizeDiagnosticEvidence(
+    "unable to locate image at `C:\\Users\\`Alice\\Private\\approved.png`: fs sandbox helper failed",
+    4096,
+  );
+
+  assert.equal(
+    evidence.text,
+    "unable to locate image at [REDACTED_PATH]: fs sandbox helper failed",
+  );
+  assert.equal(evidence.redacted, true);
+  assert.equal(JSON.stringify(evidence).includes("Alice"), false);
+  assert.equal(JSON.stringify(evidence).includes("Private"), false);
+});
+
+test("diagnostic sanitizer uses the final backtick path delimiter before preserving a cause", () => {
+  const evidence = sanitizeDiagnosticEvidence(
+    "unable to locate image at `C:\\Users\\`:$DATA\\Alice\\Private\\approved.png`: fs sandbox helper failed",
+    4096,
+  );
+
+  assert.equal(
+    evidence.text,
+    "unable to locate image at [REDACTED_PATH]: fs sandbox helper failed",
+  );
+  assert.equal(JSON.stringify(evidence).includes("Alice"), false);
+  assert.equal(JSON.stringify(evidence).includes("Private"), false);
+});
+
+test("diagnostic sanitizer does not expose path text after an inner backtick-colon", () => {
+  for (const diagnostic of [
+    "unable to locate image at `C:\\Users\\Alice`: Private\\approved.png`: denied",
+    "unable to locate image at `/Users/Alice`: Private/approved.png`: denied",
+    "unable to locate image at `file:///C:/Users/Alice`: Private/approved.png`: denied",
+  ]) {
+    const evidence = sanitizeDiagnosticEvidence(diagnostic, 4096);
+    assert.equal(
+      evidence.text,
+      "unable to locate image at [REDACTED_PATH]: denied",
+    );
+    assert.equal(evidence.redacted, true);
+    assert.equal(JSON.stringify(evidence).includes("Alice"), false);
+    assert.equal(JSON.stringify(evidence).includes("Private"), false);
+    assert.equal(JSON.stringify(evidence).includes("approved.png"), false);
+  }
+});
+
+test("diagnostic sanitizer preserves causes after backtick POSIX paths and file URLs", () => {
+  for (const diagnostic of [
+    "unable to locate image at `/Users/Alice/Private/approved.png`: sandbox denied",
+    "unable to locate image at `file:///C:/Users/Alice/Private/approved.png`: sandbox denied",
+  ]) {
+    const evidence = sanitizeDiagnosticEvidence(diagnostic, 4096);
+    assert.equal(
+      evidence.text,
+      "unable to locate image at [REDACTED_PATH]: sandbox denied",
+    );
+    assert.equal(JSON.stringify(evidence).includes("Alice"), false);
+    assert.equal(JSON.stringify(evidence).includes("Private"), false);
+  }
+});
+
+test("diagnostic sanitizer fails closed for unterminated backtick paths across lines", () => {
+  for (const diagnostic of [
+    "unable to locate image at `C:\\Users\\Alice\nPrivate\\approved.png: denied",
+    "unable to locate image at `/Users/Alice\nPrivate/approved.png: denied",
+    "unable to locate image at `file:///C:/Users/Alice\nPrivate/approved.png: denied",
+  ]) {
+    const evidence = sanitizeDiagnosticEvidence(diagnostic, 4096);
+    assert.equal(evidence.text, "unable to locate image at [REDACTED_PATH]");
+    assert.equal(evidence.redacted, true);
+    assert.equal(JSON.stringify(evidence).includes("Alice"), false);
+    assert.equal(JSON.stringify(evidence).includes("Private"), false);
+    assert.equal(JSON.stringify(evidence).includes("approved.png"), false);
+  }
+});
+
+test("diagnostic sanitizer fails closed when an inner delimiter precedes a multiline path tail", () => {
+  for (const diagnostic of [
+    "unable to locate image at `C:\\Users\\Alice`: \nPrivate\\approved.png`: denied",
+    "unable to locate image at `/Users/Alice`: \nPrivate/approved.png`: denied",
+    "unable to locate image at `file:///C:/Users/Alice`: \nPrivate/approved.png`: denied",
+  ]) {
+    const evidence = sanitizeDiagnosticEvidence(diagnostic, 4096);
+    assert.equal(evidence.text, "unable to locate image at [REDACTED_PATH]");
+    assert.equal(evidence.redacted, true);
+    assert.equal(JSON.stringify(evidence).includes("Alice"), false);
+    assert.equal(JSON.stringify(evidence).includes("Private"), false);
+    assert.equal(JSON.stringify(evidence).includes("approved.png"), false);
+  }
+});
+
+test("runtime version pins are explicit and fail closed", () => {
+  assert.equal(EXPECTED_CODEX_VERSION, "codex-cli 0.145.0");
+  assert.equal(
+    assertExpectedCodexVersion(
+      "codex-cli 0.146.0",
+      "codex-cli 0.146.0",
+    ),
+    true,
+  );
+  assert.throws(
+    () =>
+      assertExpectedCodexVersion(
+        "codex-cli 0.146.0",
+        "codex-cli 0.145.0",
+      ),
+    /protocol-version-drift: codex-cli 0\.146\.0/u,
+  );
+  assert.throws(
+    () => assertExpectedCodexVersion("codex-cli 0.146.0", "latest"),
+    /expected Codex version is malformed/u,
+  );
+});
 
 const SAFE_REMOTE_CONTROL_SNAPSHOT = {
   seen: true,
@@ -987,6 +1643,37 @@ test("broker close still destroys incomplete connections within a bound", async 
   assert.deepEqual(await broker.close(), snapshot);
 });
 
+test("PowerShell broker failure diagnostic is bounded to captured process fields", () => {
+  const diagnostic = JSON.parse(boundedBrokerFailureDiagnostic({
+    processExitCode: 17,
+    signal: "SIGTERM",
+    stdout: `${"o".repeat(4096)}STDOUT-TAIL`,
+    stderr: `${"e".repeat(4096)}STDERR-TAIL`,
+    ignored: "must not be copied",
+  }));
+
+  assert.deepEqual(Object.keys(diagnostic), [
+    "processExitCode",
+    "signal",
+    "stdout",
+    "stderr",
+  ]);
+  assert.equal(diagnostic.processExitCode, 17);
+  assert.equal(diagnostic.signal, "SIGTERM");
+  assert.deepEqual(Object.keys(diagnostic.stdout), [
+    "text",
+    "byteLength",
+    "truncated",
+  ]);
+  assert.equal(diagnostic.stdout.text.length, 2048);
+  assert.equal(diagnostic.stdout.byteLength, 4107);
+  assert.equal(diagnostic.stdout.truncated, true);
+  assert.equal(diagnostic.stderr.text.length, 2048);
+  assert.equal(diagnostic.stderr.byteLength, 4107);
+  assert.equal(diagnostic.stderr.truncated, true);
+  assert.doesNotMatch(JSON.stringify(diagnostic), /TAIL|ignored|must not be copied/u);
+});
+
 test("PowerShell mock is a working broker client", async (t) => {
   const broker = await startSyntheticWriteBroker();
   t.after(() => broker.close());
@@ -1017,8 +1704,9 @@ test("PowerShell mock is a working broker client", async (t) => {
     ],
     { timeoutMs: 10_000 },
   );
-  assert.equal(result.processExitCode, 0);
-  assert.equal(result.stderr, "");
+  const resultDiagnostic = boundedBrokerFailureDiagnostic(result);
+  assert.equal(result.processExitCode, 0, resultDiagnostic);
+  assert.equal(result.stderr, "", resultDiagnostic);
   assert.deepEqual(JSON.parse(result.stdout), {
     status: "ok",
     operation: "Probe",
@@ -1044,8 +1732,13 @@ test("PowerShell mock is a working broker client", async (t) => {
     ],
     { timeoutMs: 10_000 },
   );
-  assert.notEqual(lost.processExitCode, 0);
-  assert.match(lost.stderr, /synthetic response loss after committed write/);
+  const lostDiagnostic = boundedBrokerFailureDiagnostic(lost);
+  assert.notEqual(lost.processExitCode, 0, lostDiagnostic);
+  assert.match(
+    lost.stderr,
+    /synthetic response loss after committed write/,
+    lostDiagnostic,
+  );
   assert.equal(broker.snapshot().effects.length, 1);
 });
 
@@ -1357,6 +2050,1130 @@ async function createTestRoot(t) {
   t.after(() => rm(root, { recursive: true, force: true }));
   return root;
 }
+
+function createFakeAppServerChild({ initializeResult, onKill } = {}) {
+  const child = new EventEmitter();
+  child.stdin = new PassThrough();
+  child.stdout = new PassThrough();
+  child.stderr = new PassThrough();
+  child.exitCode = null;
+  child.signalCode = null;
+  child.pid = 4242;
+  child.killSignals = [];
+  child.kill = (signal = "SIGTERM") => {
+    child.killSignals.push(signal);
+    onKill?.(child, signal);
+    return true;
+  };
+  child.confirmClose = (code = null, signal = "SIGTERM") => {
+    if (child.exitCode !== null || child.signalCode !== null) {
+      return;
+    }
+    child.exitCode = code;
+    child.signalCode = signal;
+    child.stdout.end();
+    child.stderr.end();
+    child.emit("close", code, signal);
+  };
+
+  let input = "";
+  let initialized = false;
+  child.stdin.setEncoding("utf8");
+  child.stdin.on("data", (chunk) => {
+    input += chunk;
+    const lines = input.split("\n");
+    input = lines.pop();
+    for (const line of lines) {
+      if (!line.trim()) {
+        continue;
+      }
+      const message = JSON.parse(line);
+      if (message.method === "initialize" && !initialized) {
+        initialized = true;
+        child.stdout.write(
+          `${JSON.stringify({ id: message.id, result: initializeResult })}\n`,
+        );
+      }
+    }
+  });
+  return child;
+}
+
+function fakeAppServerRuntime(runRoot) {
+  return {
+    executable: "unused-in-test",
+    runtimeIsolationArgs: [],
+    permissionArgs: [],
+    runRoot,
+    appServerEnvironment: {},
+    mcpInventory: [],
+  };
+}
+
+async function createImageDiagnosticTestSession(t, callbacks = {}) {
+  const runRoot = await createTestRoot(t);
+  const child = createFakeAppServerChild({
+    initializeResult: {
+      userAgent: "test-agent",
+      codexHome: runRoot,
+      platformFamily: "windows",
+      platformOs: "windows",
+    },
+  });
+  const session = await openAppServer(
+    fakeAppServerRuntime(runRoot),
+    callbacks,
+    { spawnProcess: () => child },
+  );
+  t.after(async () => {
+    child.confirmClose(0, null);
+    await session.close().catch(() => {});
+  });
+  return { child, runRoot, session };
+}
+
+async function emitAppServerNotification(child, notification) {
+  child.stdout.write(`${JSON.stringify(notification)}\n`);
+  await new Promise((resolve) => setImmediate(resolve));
+  await new Promise((resolve) => setImmediate(resolve));
+}
+
+function expectedImageDiagnostics(expectedTargetCount, overrides = {}) {
+  return {
+    status: "UNVERIFIED",
+    observationCount: 0,
+    expectedTargetCount,
+    effectivePathMatch: "UNVERIFIED",
+    matchedInputIndex: null,
+    effectivePathAbsolute: "UNVERIFIED",
+    effectivePathWithinRoot: "UNVERIFIED",
+    modelArgumentAbsolute: "UNVERIFIED",
+    outerCategory: "UNVERIFIED",
+    reportedCategory: "UNVERIFIED",
+    privacy: {
+      rawPathPersisted: false,
+      pathDigestPersisted: false,
+      rawDiagnosticDigestPersisted: false,
+    },
+    ...overrides,
+  };
+}
+
+function expectedSuccessfulImageViews(overrides = {}) {
+  return {
+    complete: true,
+    eventCount: 0,
+    completedCount: 0,
+    items: [],
+    blockers: [],
+    privacy: {
+      rawPathPersisted: false,
+      pathDigestPersisted: false,
+      rawDiagnosticDigestPersisted: false,
+    },
+    ...overrides,
+  };
+}
+
+test("App Server stderr keeps a sanitized short diagnostic with the exact full hash", async (t) => {
+  const runRoot = await createTestRoot(t);
+  const child = createFakeAppServerChild({
+    initializeResult: {
+      userAgent: "test-agent",
+      codexHome: runRoot,
+      platformFamily: "windows",
+      platformOs: "windows",
+    },
+  });
+  const session = await openAppServer(
+    fakeAppServerRuntime(runRoot),
+    {},
+    { spawnProcess: () => child },
+  );
+  const secret = "sk-SYNTHETIC_TEST_ONLY_abcdefghijklmnop";
+  const raw = `warning apiKey=${secret} at C:\\Users\\private\\app.log`;
+  child.stderr.write(raw);
+
+  const snapshot = session.stderr;
+  assert.equal(snapshot.byteLength, Buffer.byteLength(raw));
+  assert.equal(snapshot.sha256, sha256(raw));
+  assert.equal(snapshot.captureTruncated, false);
+  assert.equal(snapshot.diagnostic.redacted, true);
+  assert.equal(JSON.stringify(snapshot).includes(secret), false);
+  assert.equal(JSON.stringify(snapshot).includes("C:\\Users\\private"), false);
+
+  child.confirmClose(0, null);
+  await session.close();
+});
+
+test("App Server stderr bounds its diagnostic while hashing the complete stream", async (t) => {
+  const runRoot = await createTestRoot(t);
+  const child = createFakeAppServerChild({
+    initializeResult: {
+      userAgent: "test-agent",
+      codexHome: runRoot,
+      platformFamily: "windows",
+      platformOs: "windows",
+    },
+  });
+  const session = await openAppServer(
+    fakeAppServerRuntime(runRoot),
+    {},
+    { spawnProcess: () => child },
+  );
+  const raw = `head-marker\n${"x".repeat(24 * 1024)}\ntail-marker`;
+  child.stderr.write(raw);
+
+  const snapshot = session.stderr;
+  assert.equal(snapshot.byteLength, Buffer.byteLength(raw));
+  assert.equal(snapshot.sha256, sha256(raw));
+  assert.equal(snapshot.captureTruncated, true);
+  assert.equal(JSON.stringify(snapshot.diagnostic).includes("head-marker"), true);
+  assert.equal(JSON.stringify(snapshot.diagnostic).includes("tail-marker"), true);
+  assert.equal(Buffer.byteLength(JSON.stringify(snapshot.diagnostic)) < 16 * 1024, true);
+
+  child.confirmClose(0, null);
+  await session.close();
+});
+
+test("App Server stderr head and tail windows do not overlap", async (t) => {
+  const runRoot = await createTestRoot(t);
+  const child = createFakeAppServerChild({
+    initializeResult: {
+      userAgent: "test-agent",
+      codexHome: runRoot,
+      platformFamily: "windows",
+      platformOs: "windows",
+    },
+  });
+  const session = await openAppServer(
+    fakeAppServerRuntime(runRoot),
+    {},
+    { spawnProcess: () => child },
+  );
+  const lines = Array.from({ length: 400 }, (_, index) => `line-${index.toString().padStart(3, "0")}`);
+  const raw = lines.join("\n");
+  assert.equal(Buffer.byteLength(raw) > 3072, true);
+  assert.equal(Buffer.byteLength(raw) < 4608, true);
+  child.stderr.write(raw);
+
+  const snapshot = session.stderr;
+  const retained = snapshot.diagnostic.text ??
+    `${snapshot.diagnostic.head ?? ""}${snapshot.diagnostic.tail ?? ""}`;
+  assert.equal(snapshot.captureTruncated, true);
+  assert.equal(snapshot.diagnostic.budgetExceeded, undefined);
+  assert.equal((retained.match(/line-250/gu) ?? []).length <= 1, true);
+
+  child.confirmClose(0, null);
+  await session.close();
+});
+
+test("App Server stderr drops partial lines at both capture boundaries", async (t) => {
+  const runRoot = await createTestRoot(t);
+  const child = createFakeAppServerChild({
+    initializeResult: {
+      userAgent: "test-agent",
+      codexHome: runRoot,
+      platformFamily: "windows",
+      platformOs: "windows",
+    },
+  });
+  const session = await openAppServer(
+    fakeAppServerRuntime(runRoot),
+    {},
+    { spawnProcess: () => child },
+  );
+  const secret = "sk-SYNTHETIC_TEST_ONLY_abcdefghijklmnop";
+  const head = `safe-head\n${"h".repeat(1522)}${secret}`;
+  const remainingSecret = secret.slice(5);
+  const safeTail = "safe-tail";
+  const tail = `${remainingSecret}${"t".repeat(1536 - remainingSecret.length - 1 - safeTail.length)}\n${safeTail}`;
+  const raw = `${head}${"m".repeat(8 * 1024)}${secret.slice(0, 5)}${tail}`;
+  child.stderr.write(raw);
+
+  const snapshot = session.stderr;
+  const serialized = JSON.stringify(snapshot.diagnostic);
+  assert.equal(snapshot.captureTruncated, true);
+  assert.equal(serialized.includes("safe-head"), true);
+  assert.equal(serialized.includes("safe-tail"), true);
+  assert.equal(serialized.includes("sk-S"), false);
+  assert.equal(serialized.includes("SYNTHETIC_TEST_ONLY"), false);
+
+  child.confirmClose(0, null);
+  await session.close();
+});
+
+test("local image diagnostics match a split Unicode path without persisting private input", async (t) => {
+  const { child, runRoot, session } = await createImageDiagnosticTestSession(t);
+  const privateSegment = "Alice-sk-SYNTHETIC_TEST_ONLY_abcdefghijklmnop";
+  const sentPath = path.join(runRoot, privateSegment, "sent image.png");
+  const resolvedPath = path.join(runRoot, privateSegment, "실제 이미지.png");
+  session.bindLocalImageDiagnostics({
+    root: runRoot,
+    images: [
+      {
+        inputIndex: 7,
+        sentPath,
+        resolvedPath,
+        byteLength: 1234,
+        sha256: "a".repeat(64),
+      },
+    ],
+  });
+  const raw = Buffer.from(
+    `\u001b[31mERROR\u001b[0m error=unable to locate image at \`${resolvedPath}\`: fs sandbox helper failed: apply deny-read ACLs\n`,
+    "utf8",
+  );
+  const unicodeStart = raw.indexOf(Buffer.from("실", "utf8"));
+  assert.notEqual(unicodeStart, -1);
+  child.stderr.write(raw.subarray(0, unicodeStart + 1));
+  child.stderr.write(raw.subarray(unicodeStart + 1));
+
+  assert.deepEqual(
+    session.imageDiagnostics,
+    expectedImageDiagnostics(1, {
+      status: "OBSERVED",
+      observationCount: 1,
+      effectivePathMatch: "MATCH",
+      matchedInputIndex: 7,
+      effectivePathAbsolute: "VERIFIED",
+      effectivePathWithinRoot: "VERIFIED",
+      outerCategory: "unable-to-locate",
+      reportedCategory: "sandbox-helper-failed",
+    }),
+  );
+  const serialized = JSON.stringify(session.imageDiagnostics);
+  assert.equal(serialized.includes(sentPath), false);
+  assert.equal(serialized.includes(resolvedPath), false);
+  assert.equal(serialized.includes(privateSegment), false);
+  assert.equal(serialized.includes("a".repeat(64)), false);
+  assert.equal(serialized.includes(sha256(sentPath)), false);
+  assert.equal(serialized.includes(sha256(resolvedPath)), false);
+});
+
+test("local image diagnostics also match the exact sent path before resolution", async (t) => {
+  const { child, runRoot, session } = await createImageDiagnosticTestSession(t);
+  const sentPath = path.join(runRoot, "sent path.png");
+  const resolvedPath = path.join(runRoot, "different resolved path.png");
+  session.bindLocalImageDiagnostics({
+    root: runRoot,
+    images: [{
+      inputIndex: 8,
+      sentPath,
+      resolvedPath,
+      byteLength: 64,
+      sha256: "9".repeat(64),
+    }],
+  });
+  child.stderr.write(
+    `unable to locate image at \`${sentPath}\`: ENOENT: no such file\n`,
+  );
+
+  assert.deepEqual(
+    session.imageDiagnostics,
+    expectedImageDiagnostics(1, {
+      status: "OBSERVED",
+      observationCount: 1,
+      effectivePathMatch: "MATCH",
+      matchedInputIndex: 8,
+      effectivePathAbsolute: "VERIFIED",
+      effectivePathWithinRoot: "VERIFIED",
+      outerCategory: "unable-to-locate",
+      reportedCategory: "not-found",
+    }),
+  );
+});
+
+test("local image diagnostics classify one exact router failure without retaining its cause", async (t) => {
+  const cases = [
+    ["read", "Access is denied (os error 5)", "unable-to-read", "permission-denied"],
+    ["locate", "ENOENT: no such file or directory", "unable-to-locate", "not-found"],
+    ["locate", "EINVAL: filename syntax is incorrect", "unable-to-locate", "invalid-path"],
+    ["read", "synthetic unrecognized filesystem failure", "unable-to-read", "unclassified"],
+  ];
+
+  for (const [index, [verb, cause, outerCategory, reportedCategory]] of cases.entries()) {
+    await t.test(reportedCategory, async (subtest) => {
+      const { child, runRoot, session } = await createImageDiagnosticTestSession(subtest);
+      const resolvedPath = path.join(runRoot, `image-${index}.png`);
+      session.bindLocalImageDiagnostics({
+        root: runRoot,
+        images: [{
+          inputIndex: index,
+          sentPath: resolvedPath,
+          resolvedPath,
+          byteLength: 32,
+          sha256: `${index}`.repeat(64),
+        }],
+      });
+      child.stderr.write(`unable to ${verb} image at \`${resolvedPath}\`: ${cause}\n`);
+      assert.deepEqual(
+        session.imageDiagnostics,
+        expectedImageDiagnostics(1, {
+          status: "OBSERVED",
+          observationCount: 1,
+          effectivePathMatch: "MATCH",
+          matchedInputIndex: index,
+          effectivePathAbsolute: "VERIFIED",
+          effectivePathWithinRoot: "VERIFIED",
+          outerCategory,
+          reportedCategory,
+        }),
+      );
+      assert.equal(JSON.stringify(session.imageDiagnostics).includes(cause), false);
+    });
+  }
+});
+
+test("local image diagnostics report a mismatched effective path without classifying it", async (t) => {
+  const { child, runRoot, session } = await createImageDiagnosticTestSession(t);
+  const expectedPath = path.join(runRoot, "expected.png");
+  const unexpectedPath = path.join(runRoot, "private-user", "unexpected.png");
+  session.bindLocalImageDiagnostics({
+    root: runRoot,
+    images: [{
+      inputIndex: 3,
+      sentPath: expectedPath,
+      resolvedPath: expectedPath,
+      byteLength: 1,
+      sha256: "b".repeat(64),
+    }],
+  });
+  child.stderr.write(`unable to read image at \`${unexpectedPath}\`: EACCES\n`);
+  assert.deepEqual(
+    session.imageDiagnostics,
+    expectedImageDiagnostics(1, {
+      observationCount: 1,
+      effectivePathMatch: "MISMATCH",
+    }),
+  );
+  assert.equal(JSON.stringify(session.imageDiagnostics).includes(unexpectedPath), false);
+});
+
+test("local image diagnostics distinguish zero from multiple router markers", async (t) => {
+  for (const markerCount of [0, 2]) {
+    await t.test(`${markerCount} markers`, async (subtest) => {
+      const { child, runRoot, session } = await createImageDiagnosticTestSession(subtest);
+      const resolvedPath = path.join(runRoot, "expected.png");
+      session.bindLocalImageDiagnostics({
+        root: runRoot,
+        images: [{
+          inputIndex: 1,
+          sentPath: resolvedPath,
+          resolvedPath,
+          byteLength: 1,
+          sha256: "c".repeat(64),
+        }],
+      });
+      child.stderr.write(markerCount === 0
+        ? "unrelated App Server warning\n"
+        : [
+            `unable to locate image at \`${resolvedPath}\`: ENOENT`,
+            `unable to read image at \`${resolvedPath}\`: EACCES`,
+            "",
+          ].join("\n"));
+      assert.deepEqual(
+        session.imageDiagnostics,
+        expectedImageDiagnostics(1, {
+          status:
+            markerCount === 0 ? "NO_ROUTER_IMAGE_ERROR" : "UNVERIFIED",
+          observationCount: markerCount,
+        }),
+      );
+    });
+  }
+});
+
+test("local image diagnostics fail closed for overlong observations", async (t) => {
+  await t.test("overlong unterminated line", async (subtest) => {
+    const { child, runRoot, session } = await createImageDiagnosticTestSession(subtest);
+    const resolvedPath = path.join(runRoot, "expected.png");
+    session.bindLocalImageDiagnostics({
+      root: runRoot,
+      images: [{
+        inputIndex: 2,
+        sentPath: resolvedPath,
+        resolvedPath,
+        byteLength: 1,
+        sha256: "e".repeat(64),
+      }],
+    });
+    child.stderr.write(
+      `unable to locate image at \`${resolvedPath}\`: ${"x".repeat(128 * 1024)}`,
+    );
+    assert.deepEqual(
+      session.imageDiagnostics,
+      expectedImageDiagnostics(1, { observationCount: 1 }),
+    );
+  });
+});
+
+test("local image diagnostic binding is single-use and must precede stderr", async (t) => {
+  const first = await createImageDiagnosticTestSession(t);
+  const resolvedPath = path.join(first.runRoot, "expected.png");
+  const binding = {
+    root: first.runRoot,
+    images: [{
+      inputIndex: 1,
+      sentPath: resolvedPath,
+      resolvedPath,
+      byteLength: 1,
+      sha256: "f".repeat(64),
+    }],
+  };
+  first.session.bindLocalImageDiagnostics(binding);
+  assert.throws(() => first.session.bindLocalImageDiagnostics(binding), /already bound/u);
+
+  const late = await createImageDiagnosticTestSession(t);
+  late.child.stderr.write("warning before binding\n");
+  assert.throws(
+    () => late.session.bindLocalImageDiagnostics(binding),
+    /before App Server stderr/u,
+  );
+});
+
+test("local image diagnostic binding is bounded to absolute in-root image targets", async (t) => {
+  const { runRoot, session } = await createImageDiagnosticTestSession(t);
+  const validImage = (root, inputIndex) => ({
+    inputIndex,
+    sentPath: path.join(root, `sent-${inputIndex}.png`),
+    resolvedPath: path.join(root, `resolved-${inputIndex}.png`),
+    byteLength: 1,
+    sha256: `${inputIndex}`.repeat(64).slice(0, 64),
+  });
+  const invalidCases = [
+    (root) => [],
+    (root) => Array.from({ length: 9 }, (_, index) => validImage(root, index + 1)),
+    (root) => [{ ...validImage(root, 1), sentPath: "relative.png" }],
+    (root) => [{ ...validImage(root, 1), resolvedPath: "relative.png" }],
+    (root) => [{
+      ...validImage(root, 1),
+      sentPath: path.resolve(root, "..", "outside-sent.png"),
+    }],
+    (root) => [{
+      ...validImage(root, 1),
+      resolvedPath: path.resolve(root, "..", "outside-resolved.png"),
+    }],
+    (root) => [{
+      ...validImage(root, 1),
+      sentPath: path.join(root, `${"한".repeat(4097)}.png`),
+    }],
+    (root) => [{
+      ...validImage(root, 1),
+      resolvedPath: path.join(root, `${"x".repeat(4097)}.png`),
+    }],
+    (root) => [{ ...validImage(root, 1), byteLength: 0 }],
+    (root) => [validImage(root, 1), validImage(root, 1)],
+    (root) => {
+      const first = validImage(root, 1);
+      return [first, { ...validImage(root, 2), sentPath: first.sentPath }];
+    },
+    (root) => {
+      const first = validImage(root, 1);
+      return [first, { ...validImage(root, 2), resolvedPath: first.sentPath }];
+    },
+  ];
+  for (const createImages of invalidCases) {
+    const current = await createImageDiagnosticTestSession(t);
+    assert.throws(
+      () => current.session.bindLocalImageDiagnostics({
+        root: current.runRoot,
+        images: createImages(current.runRoot),
+      }),
+      /binding|descriptor|target|bounded|in-root/iu,
+    );
+  }
+
+  assert.doesNotThrow(() => session.bindLocalImageDiagnostics({
+    root: runRoot,
+    images: Array.from(
+      { length: 8 },
+      (_, index) => validImage(runRoot, index + 1),
+    ),
+  }));
+});
+
+test("successful imageView lifecycle is path-free and matches one bound image", async (t) => {
+  const delivered = [];
+  const { child, runRoot, session } = await createImageDiagnosticTestSession(t, {
+    onNotification(notification) {
+      delivered.push(structuredClone(notification));
+    },
+  });
+  const username = "Alice-SYNTHETIC_TEST_ONLY";
+  const sentPath = path.join(runRoot, username, "sent image.png");
+  const resolvedPath = path.join(runRoot, username, "실제 이미지.png");
+  session.bindLocalImageDiagnostics({
+    root: runRoot,
+    images: [{
+      inputIndex: 4,
+      sentPath,
+      resolvedPath,
+      byteLength: 128,
+      sha256: "a".repeat(64),
+    }],
+  });
+  for (const method of ["item/started", "item/completed"]) {
+    await emitAppServerNotification(child, {
+      method,
+      params: {
+        threadId: "thread-1",
+        turnId: "turn-1",
+        item: { id: "image-1", type: "imageView", path: resolvedPath },
+      },
+    });
+  }
+
+  assert.deepEqual(delivered, ["item/started", "item/completed"].map((method) => ({
+    method,
+    params: {
+      threadId: "thread-1",
+      turnId: "turn-1",
+      item: {
+        id: "image-1",
+        type: "imageView",
+        matchedInputIndex: 4,
+        effectivePathMatch: "MATCH",
+      },
+    },
+  })));
+  assert.deepEqual(session.successfulImageViews, expectedSuccessfulImageViews({
+    eventCount: 2,
+    completedCount: 1,
+    items: [{
+      id: "image-1",
+      matchedInputIndex: 4,
+      eventCount: 2,
+      startedCount: 1,
+      completedCount: 1,
+      complete: true,
+    }],
+  }));
+  const replayed = [];
+  const unsubscribe = session.subscribe(
+    (notification) => replayed.push(notification),
+    { afterCursor: 0 },
+  );
+  unsubscribe();
+  assert.deepEqual(
+    replayed.map((notification) => notification.params.event),
+    ["item/started", "item/completed"].map((method) => ({
+      method,
+      threadId: "thread-1",
+      turnId: "turn-1",
+      complete: true,
+      blockers: [],
+      item: {
+        id: "image-1",
+        type: "imageView",
+        matchedInputIndex: 4,
+        effectivePathMatch: "MATCH",
+      },
+    })),
+  );
+  const serialized = JSON.stringify({ delivered, snapshot: session.successfulImageViews });
+  for (const forbidden of [sentPath, resolvedPath, username, sha256(sentPath), sha256(resolvedPath)]) {
+    assert.equal(serialized.includes(forbidden), false, forbidden);
+  }
+});
+
+test("successful imageView lifecycle distinguishes two bound images without paths", async (t) => {
+  const { child, runRoot, session } = await createImageDiagnosticTestSession(t);
+  const images = [2, 7].map((inputIndex) => ({
+    inputIndex,
+    sentPath: path.join(runRoot, `sent-${inputIndex}.png`),
+    resolvedPath: path.join(runRoot, `resolved-${inputIndex}.png`),
+    byteLength: inputIndex,
+    sha256: `${inputIndex}`.repeat(64),
+  }));
+  session.bindLocalImageDiagnostics({ root: runRoot, images });
+  for (const [itemIndex, image] of images.entries()) {
+    for (const method of ["item/started", "item/completed"]) {
+      await emitAppServerNotification(child, {
+        method,
+        params: {
+          threadId: "thread-1",
+          turnId: "turn-1",
+          item: {
+            id: `image-${itemIndex + 1}`,
+            type: "imageView",
+            path: image.sentPath,
+          },
+        },
+      });
+    }
+  }
+
+  assert.deepEqual(session.successfulImageViews, expectedSuccessfulImageViews({
+    eventCount: 4,
+    completedCount: 2,
+    items: images.map((image, index) => ({
+      id: `image-${index + 1}`,
+      matchedInputIndex: image.inputIndex,
+      eventCount: 2,
+      startedCount: 1,
+      completedCount: 1,
+      complete: true,
+    })),
+  }));
+});
+
+test("unexpected imageView path is rewritten path-free and blocks the lifecycle", async (t) => {
+  const delivered = [];
+  const { child, runRoot, session } = await createImageDiagnosticTestSession(t, {
+    onNotification(notification) {
+      delivered.push(structuredClone(notification));
+    },
+  });
+  const expectedPath = path.join(runRoot, "expected.png");
+  const unexpectedPath = path.join(runRoot, "Private-User", "unexpected.png");
+  session.bindLocalImageDiagnostics({
+    root: runRoot,
+    images: [{
+      inputIndex: 1,
+      sentPath: expectedPath,
+      resolvedPath: path.join(runRoot, "resolved.png"),
+      byteLength: 1,
+      sha256: "b".repeat(64),
+    }],
+  });
+  await emitAppServerNotification(child, {
+    method: "item/started",
+    params: {
+      threadId: "thread-1",
+      turnId: "turn-1",
+      item: { id: "image-bad", type: "imageView", path: unexpectedPath },
+    },
+  });
+
+  assert.deepEqual(delivered[0].params.item, {
+    id: "image-bad",
+    type: "imageView",
+    matchedInputIndex: null,
+    effectivePathMatch: "MISMATCH",
+  });
+  assert.equal(session.successfulImageViews.complete, false);
+  assert.deepEqual(session.successfulImageViews.blockers, [
+    "image-view-target-mismatch",
+    "image-view-lifecycle-incomplete",
+  ]);
+  assert.equal(JSON.stringify(delivered).includes(unexpectedPath), false);
+  assert.equal(JSON.stringify(session.successfulImageViews).includes("Private-User"), false);
+});
+
+test("imageView extra shape and invalid lifecycle fail closed", async (t) => {
+  await t.test("unknown item key", async (subtest) => {
+    const delivered = [];
+    const { child, runRoot, session } = await createImageDiagnosticTestSession(
+      subtest,
+      { onNotification: (notification) => delivered.push(structuredClone(notification)) },
+    );
+    const expectedPath = path.join(runRoot, "expected.png");
+    session.bindLocalImageDiagnostics({
+      root: runRoot,
+      images: [{
+        inputIndex: 1,
+        sentPath: expectedPath,
+        resolvedPath: path.join(runRoot, "resolved.png"),
+        byteLength: 1,
+        sha256: "c".repeat(64),
+      }],
+    });
+    await emitAppServerNotification(child, {
+      method: "item/started",
+      params: {
+        threadId: "thread-1",
+        turnId: "turn-1",
+        item: {
+          id: "image-extra",
+          type: "imageView",
+          path: expectedPath,
+          status: "inProgress",
+        },
+      },
+    });
+    assert.equal(JSON.stringify(delivered).includes(expectedPath), false);
+    assert.deepEqual(delivered[0].params.item, {
+      id: "image-extra",
+      type: "imageView",
+      matchedInputIndex: null,
+      effectivePathMatch: "UNVERIFIED",
+    });
+    assert.deepEqual(session.successfulImageViews.blockers, [
+      "image-view-extra-shape",
+      "image-view-target-unverified",
+      "image-view-lifecycle-incomplete",
+    ]);
+  });
+
+  for (const [label, methods, expectedBlockers] of [
+    [
+      "completed without started",
+      ["item/completed"],
+      ["image-view-completed-without-started"],
+    ],
+    [
+      "duplicate started",
+      ["item/started", "item/started", "item/completed"],
+      ["image-view-duplicate-started"],
+    ],
+    [
+      "duplicate completed",
+      ["item/started", "item/completed", "item/completed"],
+      ["image-view-duplicate-completed"],
+    ],
+  ]) {
+    await t.test(label, async (subtest) => {
+      const { child, runRoot, session } = await createImageDiagnosticTestSession(subtest);
+      const expectedPath = path.join(runRoot, "expected.png");
+      session.bindLocalImageDiagnostics({
+        root: runRoot,
+        images: [{
+          inputIndex: 1,
+          sentPath: expectedPath,
+          resolvedPath: path.join(runRoot, "resolved.png"),
+          byteLength: 1,
+          sha256: "d".repeat(64),
+        }],
+      });
+      for (const method of methods) {
+        await emitAppServerNotification(child, {
+          method,
+          params: {
+            threadId: "thread-1",
+            turnId: "turn-1",
+            item: { id: "image-life", type: "imageView", path: expectedPath },
+          },
+        });
+      }
+      assert.equal(session.successfulImageViews.complete, false);
+      assert.deepEqual(session.successfulImageViews.blockers, expectedBlockers);
+    });
+  }
+});
+
+test("successful imageView snapshot is complete when no image view occurred", async (t) => {
+  const { runRoot, session } = await createImageDiagnosticTestSession(t);
+  session.bindLocalImageDiagnostics({
+    root: runRoot,
+    images: [{
+      inputIndex: 1,
+      sentPath: path.join(runRoot, "sent.png"),
+      resolvedPath: path.join(runRoot, "resolved.png"),
+      byteLength: 1,
+      sha256: "e".repeat(64),
+    }],
+  });
+  assert.deepEqual(session.successfulImageViews, expectedSuccessfulImageViews());
+});
+
+test("reading an incomplete imageView snapshot does not poison its later completion", async (t) => {
+  const { child, runRoot, session } = await createImageDiagnosticTestSession(t);
+  const expectedPath = path.join(runRoot, "expected.png");
+  session.bindLocalImageDiagnostics({
+    root: runRoot,
+    images: [{
+      inputIndex: 1,
+      sentPath: expectedPath,
+      resolvedPath: path.join(runRoot, "resolved.png"),
+      byteLength: 1,
+      sha256: "f".repeat(64),
+    }],
+  });
+  const notification = (method) => ({
+    method,
+    params: {
+      threadId: "thread-1",
+      turnId: "turn-1",
+      item: { id: "image-late", type: "imageView", path: expectedPath },
+    },
+  });
+  await emitAppServerNotification(child, notification("item/started"));
+  assert.deepEqual(session.successfulImageViews.blockers, [
+    "image-view-lifecycle-incomplete",
+  ]);
+  await emitAppServerNotification(child, notification("item/completed"));
+  assert.deepEqual(session.successfulImageViews, expectedSuccessfulImageViews({
+    eventCount: 2,
+    completedCount: 1,
+    items: [{
+      id: "image-late",
+      matchedInputIndex: 1,
+      eventCount: 2,
+      startedCount: 1,
+      completedCount: 1,
+      complete: true,
+    }],
+  }));
+});
+
+test("imageView lifecycle bounds distinct IDs before retaining a ninth state", async (t) => {
+  const callbackNotifications = [];
+  const liveNotifications = [];
+  const { child, runRoot, session } = await createImageDiagnosticTestSession(t, {
+    onNotification(notification) {
+      callbackNotifications.push(structuredClone(notification));
+    },
+  });
+  const expectedPath = path.join(
+    runRoot,
+    "Private-User-SYNTHETIC_TEST_ONLY",
+    "expected image.png",
+  );
+  session.bindLocalImageDiagnostics({
+    root: runRoot,
+    images: [{
+      inputIndex: 1,
+      sentPath: expectedPath,
+      resolvedPath: expectedPath,
+      byteLength: 1,
+      sha256: "1".repeat(64),
+    }],
+  });
+  const unsubscribe = session.subscribe((notification) => {
+    liveNotifications.push(structuredClone(notification));
+  });
+
+  for (let index = 0; index < 9; index += 1) {
+    await emitAppServerNotification(child, {
+      method: "item/started",
+      params: {
+        threadId: "thread-limit",
+        turnId: "turn-limit",
+        item: {
+          id: `image-${index + 1}`,
+          type: "imageView",
+          path: expectedPath,
+        },
+      },
+    });
+  }
+  unsubscribe();
+
+  const snapshot = session.successfulImageViews;
+  assert.equal(snapshot.items.length, 8);
+  assert.equal(snapshot.eventCount <= 16, true);
+  assert.equal(snapshot.blockers.includes("image-view-limit-exceeded"), true);
+  const serialized = JSON.stringify({
+    callbackNotifications,
+    liveNotifications,
+    snapshot,
+  });
+  assert.equal(serialized.includes(expectedPath), false);
+  assert.equal(serialized.includes("Private-User-SYNTHETIC_TEST_ONLY"), false);
+  assert.equal(
+    [...callbackNotifications, ...liveNotifications].every(
+      (notification) => !Object.hasOwn(notification.params.item, "path"),
+    ),
+    true,
+  );
+});
+
+test("imageView lifecycle stops counting after sixteen events", async (t) => {
+  const delivered = [];
+  const { child, runRoot, session } = await createImageDiagnosticTestSession(t, {
+    onNotification(notification) {
+      delivered.push(structuredClone(notification));
+    },
+  });
+  const expectedPath = path.join(runRoot, "private-event-limit", "expected.png");
+  session.bindLocalImageDiagnostics({
+    root: runRoot,
+    images: [{
+      inputIndex: 1,
+      sentPath: expectedPath,
+      resolvedPath: expectedPath,
+      byteLength: 1,
+      sha256: "2".repeat(64),
+    }],
+  });
+
+  for (let index = 0; index < 17; index += 1) {
+    await emitAppServerNotification(child, {
+      method: index % 2 === 0 ? "item/started" : "item/completed",
+      params: {
+        threadId: "thread-event-limit",
+        turnId: "turn-event-limit",
+        item: { id: "image-repeat", type: "imageView", path: expectedPath },
+      },
+    });
+  }
+
+  const snapshot = session.successfulImageViews;
+  assert.equal(snapshot.eventCount, 16);
+  assert.equal(snapshot.items.length, 1);
+  assert.equal(snapshot.blockers.includes("image-view-limit-exceeded"), true);
+  assert.equal(JSON.stringify(delivered).includes(expectedPath), false);
+  assert.equal(
+    delivered.every((notification) => !Object.hasOwn(notification.params.item, "path")),
+    true,
+  );
+});
+
+test("imageView IDs are bounded and credential-shaped IDs never enter lifecycle state", async (t) => {
+  const valid = await createImageDiagnosticTestSession(t);
+  const validPath = path.join(valid.runRoot, "valid.png");
+  const validId = "i".repeat(128);
+  valid.session.bindLocalImageDiagnostics({
+    root: valid.runRoot,
+    images: [{
+      inputIndex: 1,
+      sentPath: validPath,
+      resolvedPath: validPath,
+      byteLength: 1,
+      sha256: "3".repeat(64),
+    }],
+  });
+  for (const method of ["item/started", "item/completed"]) {
+    await emitAppServerNotification(valid.child, {
+      method,
+      params: {
+        threadId: "thread-valid-id",
+        turnId: "turn-valid-id",
+        item: { id: validId, type: "imageView", path: validPath },
+      },
+    });
+  }
+  assert.equal(valid.session.successfulImageViews.items[0].id, validId);
+
+  for (const [label, invalidId] of [
+    ["empty", ""],
+    ["overlong UTF-8", "한".repeat(43)],
+    ["credential-shaped", "sk-SYNTHETIC_TEST_ONLY_abcdefghijklmnop"],
+  ]) {
+    await t.test(label, async (subtest) => {
+      const delivered = [];
+      const current = await createImageDiagnosticTestSession(subtest, {
+        onNotification(notification) {
+          delivered.push(structuredClone(notification));
+        },
+      });
+      const expectedPath = path.join(current.runRoot, `private-${label}.png`);
+      current.session.bindLocalImageDiagnostics({
+        root: current.runRoot,
+        images: [{
+          inputIndex: 1,
+          sentPath: expectedPath,
+          resolvedPath: expectedPath,
+          byteLength: 1,
+          sha256: "4".repeat(64),
+        }],
+      });
+      await emitAppServerNotification(current.child, {
+        method: "item/started",
+        params: {
+          threadId: "thread-invalid-id",
+          turnId: "turn-invalid-id",
+          item: { id: invalidId, type: "imageView", path: expectedPath },
+        },
+      });
+
+      const snapshot = current.session.successfulImageViews;
+      assert.equal(snapshot.items.length, 0);
+      assert.equal(snapshot.blockers.includes("image-view-invalid-id"), true);
+      const serialized = JSON.stringify({ delivered, snapshot });
+      assert.equal(serialized.includes(expectedPath), false);
+      if (invalidId) assert.equal(serialized.includes(invalidId), false);
+    });
+  }
+});
+
+test("App Server close rejects within a bound when kill is not confirmed", async (t) => {
+  const runRoot = await createTestRoot(t);
+  const child = createFakeAppServerChild({
+    initializeResult: {
+      userAgent: "test-agent",
+      codexHome: runRoot,
+      platformFamily: "windows",
+      platformOs: "windows",
+    },
+  });
+  const session = await openAppServer(
+    fakeAppServerRuntime(runRoot),
+    {},
+    {
+      spawnProcess: () => child,
+      gracefulCloseMs: 5,
+      killedCloseMs: 10,
+    },
+  );
+
+  const startedAt = Date.now();
+  await assert.rejects(
+    () => session.close(),
+    /process did not close within 10ms after kill/u,
+  );
+  assert.equal(Date.now() - startedAt < 500, true);
+  assert.equal(child.stdin.writableEnded, true);
+  assert.deepEqual(child.killSignals, ["SIGTERM"]);
+});
+
+test("App Server initialization failure waits for confirmed child close", async (t) => {
+  const runRoot = await createTestRoot(t);
+  let closeConfirmed = false;
+  const child = createFakeAppServerChild({
+    initializeResult: {},
+    onKill(fakeChild) {
+      setTimeout(() => {
+        closeConfirmed = true;
+        fakeChild.confirmClose();
+      }, 15);
+    },
+  });
+
+  await assert.rejects(
+    () =>
+      openAppServer(
+        fakeAppServerRuntime(runRoot),
+        {},
+        {
+          spawnProcess: () => child,
+          gracefulCloseMs: 5,
+          killedCloseMs: 50,
+        },
+      ),
+    /initialize response is malformed/u,
+  );
+  assert.equal(closeConfirmed, true);
+  assert.deepEqual(child.killSignals, ["SIGTERM"]);
+});
+
+test("App Server initialization failure preserves launch identity when close is unconfirmed", async (t) => {
+  const runRoot = await createTestRoot(t);
+  const child = createFakeAppServerChild({ initializeResult: {} });
+  let observed;
+
+  await assert.rejects(
+    () =>
+      openAppServer(
+        fakeAppServerRuntime(runRoot),
+        {},
+        {
+          spawnProcess: () => child,
+          gracefulCloseMs: 5,
+          killedCloseMs: 10,
+        },
+      ),
+    (error) => {
+      observed = error;
+      return /termination was not confirmed/u.test(error.message);
+    },
+  );
+
+  assert.equal(observed.ticketEvidence.appServer.processCloseConfirmed, false);
+  assert.equal(observed.ticketEvidence.appServer.pid, 4242);
+  assert.equal(observed.ticketEvidence.appServer.parentPid, process.pid);
+  assert.equal(observed.ticketEvidence.appServer.executable, "unused-in-test");
+  assert.deepEqual(observed.ticketEvidence.appServer.argv, [
+    "unused-in-test",
+    "app-server",
+    "--strict-config",
+    "--stdio",
+  ]);
+  assert.equal(observed.ticketEvidence.appServer.cwd, runRoot);
+  assert.match(observed.ticketEvidence.appServer.spawnedAtUtc, /^\d{4}-\d{2}-\d{2}T/u);
+  assert.deepEqual(child.killSignals, ["SIGTERM"]);
+});
 
 function createFakeSession({
   notifications = [],
@@ -1762,6 +3579,34 @@ test("one case attempt uses one explicit local thread and its sticky turn", asyn
     1,
   );
   assert.equal(evidence.automatedJudgment, "reviewRequired");
+});
+
+test("evaluation rejects an ephemeral thread that already has turn history", async (t) => {
+  const parent = await createTestRoot(t);
+  const caseRoot = path.join(parent, "prior-turn-case");
+  const session = createFakeSession({
+    notifications: terminalNotifications,
+    threadResponsePatch: {
+      thread: {
+        turns: [{ id: "prior-turn" }],
+      },
+    },
+  });
+  await assert.rejects(
+    () =>
+      runSubjectCase({
+        caseDefinition: {
+          id: "pressure-08-claim-integrity",
+          prompt: "report evidence",
+          setup: "read only",
+          fixtureFiles: { "CURRENT-EVIDENCE.json": "{}" },
+        },
+        caseRoot,
+        session,
+        turnTimeoutMs: 1000,
+      }),
+    /prior turn history/i,
+  );
 });
 
 test("valid message deltas are coalesced while unsafe deltas stay blocking", async (t) => {

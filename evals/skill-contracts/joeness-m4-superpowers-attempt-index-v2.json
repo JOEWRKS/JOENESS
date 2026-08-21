@@ -1,0 +1,234 @@
+{
+  "schemaVersion": 2,
+  "id": "joeness-m4-superpowers-attempt-index-v2",
+  "date": "2026-08-14",
+  "recordType": "bounded-diagnostic-fallback-live-attempt",
+  "predecessor": {
+    "attemptIndex": {
+      "path": "evals/skill-contracts/joeness-m4-superpowers-attempt-index-v1.json",
+      "bytes": 6230,
+      "sha256": "5a00e7e526075dedb066107229f80beb61e94d5cd6fc125952693d27ccd66455"
+    },
+    "disposition": "blocked-at-generic-post-runtime-validation",
+    "sameV1RetryAuthorized": false
+  },
+  "attempt": {
+    "id": "joeness-m4-superpowers-live-v2",
+    "method": "bounded-path-private-fresh-failure-stage-and-lifecycle-retention-no-evaluator-contract-change",
+    "command": "node evals/support/run-joeness-m4-superpowers-live.mjs --mode live --plan evals/skill-contracts/joeness-m4-superpowers-live-plan-v2.json",
+    "startedAtKst": "2026-08-14T20:36:40.2319600+09:00",
+    "endedAtKst": "2026-08-14T20:37:04.5871029+09:00",
+    "wallClockDurationSeconds": 24.3551429,
+    "stopwatchDurationSeconds": 24.349865,
+    "invocationExitCode": 1,
+    "fixedWrapperStderr": "m4-live-wrapper-failed",
+    "fixedWrapperStderrBasis": "DIRECT-fixed-wrapper-message-not-original-runtime-error-or-stderr",
+    "invocationObservationBasis": "DIRECT-invocation-bound-shell-result",
+    "freshTurnPolicyCount": 1,
+    "retryCount": 0,
+    "automaticRetry": false
+  },
+  "plan": {
+    "path": "evals/skill-contracts/joeness-m4-superpowers-live-plan-v2.json",
+    "bytes": 2952,
+    "sha256": "85be6e07cef1d3165fd0cb504de929dbafc74e227d1b2a403777035d198c449c"
+  },
+  "blockedArtifact": {
+    "path": "evals/skill-contracts/joeness-m4-superpowers-live-v2-blocked.json",
+    "bytes": 3540,
+    "sha256": "ba29d79c3955f4bfce5059b1e05fbae8744e50eeaf235dd60d331ef3c7f1e4a0",
+    "status": "blocked"
+  },
+  "executionSource": {
+    "planImplementationCommit": "c3c1f482ec3f0a0174d30d8838baa3798cfaeca6",
+    "executionHead": "dd675a0dce342514b7eb0aa791afa62adf48983a",
+    "executionHeadParent": "c3c1f482ec3f0a0174d30d8838baa3798cfaeca6",
+    "implementationSourcesMatchSupportPlanAndWorking": true,
+    "sourcePins": {
+      "runner": {
+        "path": "evals/support/run-joeness-m4-superpowers-eval.mjs",
+        "bytes": 51811,
+        "sha256": "f6f73ffdf23b612c4a292f5e73cbf464f503d4d831583ebd7edcaa966cb2f634"
+      },
+      "liveWrapper": {
+        "path": "evals/support/run-joeness-m4-superpowers-live.mjs",
+        "bytes": 52794,
+        "sha256": "ecf68d87966a163a56238b99c16ac1f0cfcb15c63dcfeb69095b6d2b9f34e8ae"
+      },
+      "freshTurnAdapter": {
+        "path": "evals/support/run-fresh-evaluator-turn.mjs",
+        "bytes": 55477,
+        "sha256": "f2c7e2e9457b0ef7d6b819425619dcde8054db530f8b920829376f39a13fd087"
+      },
+      "collector": {
+        "path": "evals/support/collect-codex-app-server.mjs",
+        "bytes": 297632,
+        "sha256": "8b81ddb28be2a803500839a2de61f9bb397aa96711d039bdb7a3a86cfad8d687"
+      },
+      "fixtureManifest": {
+        "path": "evals/skill-contracts/fixtures/joeness-m4-superpowers-v1/manifest.json",
+        "bytes": 1738,
+        "sha256": "fdda654ba170e151913c43eb8f59fdef4cf1de47a20da7e461c69389b4377ca4"
+      }
+    }
+  },
+  "observedFailure": {
+    "artifactDirect": {
+      "phase": "post-runtime-validation",
+      "safeCleanup": true,
+      "causeCategory": "evaluation-failed",
+      "freshFailure": {
+        "schemaVersion": 1,
+        "provenance": "runner-observed-default-fresh-adapter-rejection",
+        "runnerStage": "fresh-turn-rejected",
+        "evidenceState": "retained",
+        "lifecycle": {
+          "threadStart": "observed",
+          "turnStart": "observed",
+          "terminal": "non-completed",
+          "terminalCountState": "one"
+        },
+        "eventCounts": {
+          "observed": 9,
+          "retained": 9,
+          "retainedOverLimit": false
+        },
+        "blockers": {
+          "count": 3,
+          "codes": [
+            "runtime-control-blocker",
+            "turn-not-completed"
+          ],
+          "unclassifiedCount": 1
+        },
+        "appServerExit": "zero",
+        "primaryCauseKind": "error",
+        "retention": {
+          "rawOutputPersisted": false,
+          "rawEventsPersisted": false,
+          "threadTurnProcessIdentifiersPersisted": false,
+          "absolutePathsPersisted": false,
+          "rawEventOrOutputDigestsPersisted": false,
+          "rawStderrPersisted": false,
+          "configContentsPersisted": false
+        }
+      },
+      "runtime": {
+        "codexVersion": "codex-cli 0.146.0",
+        "freshTurnCount": 1,
+        "retryCount": 0,
+        "dynamicToolCount": 0,
+        "sourceConfigReadback": "UNCHANGED",
+        "appServerLaunchCount": 1,
+        "appServerCloseConfirmedCount": 1,
+        "remainingOwnedProcessCount": 0,
+        "isolatedCodexHomeReadback": "absent",
+        "runRootReadback": "absent"
+      },
+      "resultBoundary": {
+        "state": "candidate",
+        "validation": "unvalidated",
+        "promotionPass": false,
+        "corePromotion": false,
+        "manifestPromotion": false
+      }
+    },
+    "pinnedControlFlowInference": {
+      "basis": "INFERRED-from-exact-pinned-runner-wrapper-and-default-adapter-identity-gates-not-raw-runtime-payload",
+      "defaultFreshAdapterRejectionAuthenticated": true,
+      "outputExtractionReached": false,
+      "jsonParsingReached": false,
+      "semanticValidationReached": false,
+      "cleanupCompletedBeforeBlockedPublication": true
+    },
+    "boundedConclusion": "The default fresh adapter observed thread and turn starts, then rejected one non-completed terminal with three blockers before output extraction. Two blocker categories were safely classified and one remains intentionally unclassified."
+  },
+  "diagnosticMethodResult": {
+    "boundedStageAndLifecycleRetentionGoal": "ACHIEVED",
+    "m4BehaviorValidation": "BLOCKED/UNVERIFIED",
+    "sampleSemanticValidation": "NOT-REACHED",
+    "joenessPolicyFailure": "UNVERIFIED-not-established",
+    "superpowersCompatibility": "UNVERIFIED"
+  },
+  "outputPresence": {
+    "raw": {
+      "path": "evals/skill-contracts/joeness-m4-superpowers-live-v2-raw.json",
+      "status": "absent"
+    },
+    "evidence": {
+      "path": "evals/skill-contracts/joeness-m4-superpowers-live-v2-evidence.json",
+      "status": "absent"
+    },
+    "blocked": {
+      "path": "evals/skill-contracts/joeness-m4-superpowers-live-v2-blocked.json",
+      "status": "present"
+    }
+  },
+  "cleanup": {
+    "artifactDirect": {
+      "safeCleanup": true,
+      "appServerLaunchCount": 1,
+      "appServerCloseConfirmedCount": 1,
+      "remainingOwnedProcessCount": 0,
+      "isolatedCodexHomeReadback": "absent",
+      "runRootReadback": "absent",
+      "sourceConfigReadback": "UNCHANGED"
+    },
+    "independentReadback": {
+      "basis": "DIRECT-read-only-post-run-observation",
+      "matchingTaskProcessCount": 0,
+      "matchingTaskRunRootCount": 0,
+      "matchingTaskIsolatedHomeCount": 0,
+      "sourceConfig": {
+        "bytes": 8590,
+        "sha256": "3a7b848f3024260adf2d3e93ea4440703b4b253047163b3f95cb374ad9bdba10",
+        "currentReadbackMatchesPinnedPreRunTuple": true,
+        "prePostExactEqualFromArtifact": true
+      },
+      "broadRunRootBaseline": {
+        "algorithm": "SHA-256 of ordinal-sorted basenames joined as UTF-8 with LF separators and no terminal LF",
+        "preCount": 38,
+        "postCount": 38,
+        "sha256": "56dffbde6864a4184208b1366a88506d12289f0f9f32af472d6cc6e79d03b15d",
+        "prePostExactEqual": true
+      },
+      "broadIsolatedHomeBaseline": {
+        "algorithm": "SHA-256 of ordinal-sorted basenames joined as UTF-8 with LF separators and no terminal LF",
+        "preCount": 0,
+        "postCount": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "prePostExactEqual": true
+      },
+      "boundary": "Broad directory sets were baseline-only, were not attributed as task-owned, and were not modified or deleted. Historical PID values and source-config contents were intentionally not retained."
+    }
+  },
+  "limitations": {
+    "installedPluginActivation": "UNVERIFIED-pinned-plugin-texts-were-ordinary-inputs",
+    "modelGenerationStarted": "UNVERIFIED",
+    "exactTerminalStatusAndReason": "NOT-RETAINED",
+    "exactUnclassifiedBlocker": "NOT-RETAINED",
+    "originalRuntimeError": "NOT-RETAINED",
+    "originalRuntimeStderr": "NOT-RETAINED",
+    "rawModelOutput": "NOT-RETAINED-production-unverified",
+    "rawEvents": "NOT-RETAINED",
+    "jsonParsing": "NOT-REACHED",
+    "semanticValidation": "NOT-REACHED",
+    "userAcceptance": "UNVERIFIED"
+  },
+  "disposition": {
+    "m4": "blocked-at-noncompleted-fresh-turn-runtime-control",
+    "candidateState": "candidate/unvalidated",
+    "promotionPass": false,
+    "sameV2RetryAuthorized": false,
+    "primaryAndMateriallyDifferentFallbackExhausted": true
+  },
+  "stopBoundary": {
+    "automaticRetryAuthorized": false,
+    "additionalLiveAttemptAuthorized": false,
+    "coreChangeAuthorized": false,
+    "manifestChangeAuthorized": false,
+    "pluginConfigurationChangeAuthorized": false,
+    "promotionAuthorized": false,
+    "resumeOnlyAfter": "new user decision or materially new evidence supporting a new generation and method"
+  }
+}

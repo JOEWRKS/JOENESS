@@ -1,11 +1,29 @@
 {
   "schemaVersion": 1,
-  "release": {"name":"JOENESS","version":"0.1","entrypoint":"JOENESS-0.1.ps1"},
-  "activeCommonCore": {"path":"evals/candidates/interaction-safety-core-v1.md","sha256":"e7a3c02d4c147eaadde2c00a0452c7de21b3e0f51fa02cf7bd7085c43d97ac4d"},
+  "release": {"name":"JOENESS","version":"0.1","entrypoint":"JOENESS.ps1"},
+  "activeCommonCore": {"path":"evals/candidates/interaction-safety-core-v7.md","sha256":"4c7cc5836f99d19ce67837ad3a138acc3a6522f4a1c1d3fc07b37a6396b383d7"},
   "evaluation": {
     "state": "candidate",
-    "tests": ["tests/design-vendor-integrity.tests.mjs", "tests/thin-hybrid-core.tests.mjs", "vendor/ui-ux-pro-max/scripts/validate_data.py", "vendor/ui-ux-pro-max/scripts/tests/test_core.py"],
+    "tests": ["tests/design-vendor-integrity.tests.mjs", "tests/design-visual-m2.tests.mjs", "tests/thin-hybrid-core.tests.mjs", "tests/skill-contracts.tests.mjs", "vendor/ui-ux-pro-max/scripts/validate_data.py", "vendor/ui-ux-pro-max/scripts/tests/test_core.py"],
     "current": {
+      "mode": "active-skill-contract-v14",
+      "version": 14,
+      "state": "unvalidated",
+      "cases": {"path":"evals/skill-contracts/cases-v14.json","sha256":"b0bdf1a895fab0bebaac1db0226f22d010dc5fb7e90ebbe097fed4e85f086db0"},
+      "staticContractEvidence": {"path":"evals/skill-contracts/design-visual-m2-v14-contract-test-v1.json","sha256":"8308530b6df1550d7f1e0da7150c1c163ea2ff449cada81d0198896c5ce4a8db","scope":"Static contract assertions only; raw stdout is not retained."},
+      "attemptIndex": {"path":"evals/skill-contracts/design-visual-m2-attempt-index-v1.json","sha256":"d34245e2e3bfb9c1357f067890454cf0a9ef130655837d30a87f0adc072727fe"},
+      "designVisualEvidence": {"path":"evals/skill-contracts/design-visual-m2-visual-v7-semantic-review.json","sha256":"fc09ae6e50291824333dc714f2c7f48f3f8ab40d3e9a1c476c4eb7106097809c","disposition":"semantic-review-rejected"},
+      "designOrchestrationEvidence": {"path":"evals/skill-contracts/design-visual-m2-design-v5-blocked.json","sha256":"cc1c1bab3b94c72c94deb97dd1327842a851e496909cf6301e89eee7ce6a913a","disposition":"blocked-orchestration-unverified"},
+      "runtimeEvidence": {"state":"unverified","scope":"Exact corrected MergeDrop and RVR commit/build/install/state/capture bindings are not available."},
+      "specPressureEvidence": {"path":"evals/skill-contracts/spec-delivery-pressure-v2.json","sha256":"46e9eae98f0507d1af3c05d43a4409bcf09d85d12cd1ecb33b48d9bb958103d2"},
+      "ticketPressureEvidence": {"path":"evals/skill-contracts/ticket-delivery-pressure-v1.json","sha256":"c682e16e377eda576cb981d81d9db833067b2b5a5a8be3aa189604f99342b882","scope":"Validates inherited ticket cases only; it does not validate M2 visual behavior."},
+      "hardGate": "m2-partial-static-contract-only",
+      "classification": "candidate",
+      "outcomeReview": "partial",
+      "semanticImprovement": "not-asserted",
+      "promotionPass": false
+    },
+    "history": [{
       "mode": "run-hybrid-v1",
       "version": 1,
       "artifact": {"path":"evals/design-frontend/router-hybrid-v1.json","sha256":"10ddbd6d14bf3153e53561314245607d36c7d950af231585a8b5ae78fc590554"},
@@ -24,9 +42,213 @@
       "outcomeReview": "human-review-required",
       "semanticImprovement": "not-asserted",
       "promotionPass": false
+    }, {
+      "mode": "active-skill-contract-v2",
+      "version": 2,
+      "state": "unvalidated",
+      "cases": {"path":"evals/skill-contracts/cases-v2.json","sha256":"5f0b06d4041ff276967c49cbf17d110ff0942db900e94eeac9c2dac2421a040b"},
+      "hardGate": "unverified",
+      "classification": "candidate",
+      "outcomeReview": "pending",
+      "semanticImprovement": "not-asserted",
+      "promotionPass": false
+    }, {
+      "mode": "active-skill-contract-v3",
+      "version": 3,
+      "state": "semantic-review-rejected",
+      "cases": {"path":"evals/skill-contracts/cases-v3.json","sha256":"6067437488db01ce3660f4df7ff97d3b45bfed17b94812f3a4c3851557243a9f"},
+      "pressureEvidence": {"path":"evals/skill-contracts/visual-verdict-pressure-v3.json","sha256":"d0b22bcdd34f3bedb7b6a9db90ab156ce4eb877e1b142858bd77fd6168104d0d"},
+      "rawEvidence": {"path":"evals/skill-contracts/visual-verdict-pressure-v3-raw.md","sha256":"91fb643ad327ddff8ccb3180d8fd00377476405adc87c4dfd35d5e77fa0a9979"},
+      "hardGate": "failed-semantic-review",
+      "classification": "semantic-review-rejected",
+      "outcomeReview": "failed",
+      "semanticImprovement": "not-asserted",
+      "promotionPass": false
+    }, {
+      "mode": "active-skill-contract-v4",
+      "version": 4,
+      "state": "semantic-review-rejected",
+      "cases": {"path":"evals/skill-contracts/cases-v4.json","sha256":"4bc1005c00129cb478703aaae9edf030dfad211ead7660d220c45f3768c836c3"},
+      "pressureEvidence": {"path":"evals/skill-contracts/visual-verdict-pressure-v4.json","sha256":"7af70b6048985cedfae82b8122c75d1ed76a376c4283be9aacb22fb4c2d14d2e"},
+      "rawEvidence": {"path":"evals/skill-contracts/visual-verdict-pressure-v4-raw.md","sha256":"95bfca841a49c22e2697f044d850c5515557c5f8da7f0f1a18a6aaf0841ededd"},
+      "hardGate": "failed-semantic-review",
+      "classification": "semantic-review-rejected",
+      "outcomeReview": "failed",
+      "semanticImprovement": "not-asserted",
+      "promotionPass": false
+    }, {
+      "mode": "active-skill-contract-v5",
+      "version": 5,
+      "state": "unvalidated",
+      "cases": {"path":"evals/skill-contracts/cases-v4.json","sha256":"4bc1005c00129cb478703aaae9edf030dfad211ead7660d220c45f3768c836c3"},
+      "pressureEvidence": {"path":"evals/skill-contracts/visual-verdict-pressure-v5.json","sha256":"e1dec17c021bbb9fb68dd562d67b6c00dce5cb9e6e387918366fe15c8fe347ee"},
+      "hardGate": "unverified",
+      "classification": "candidate",
+      "outcomeReview": "pending",
+      "semanticImprovement": "not-asserted",
+      "promotionPass": false
+    }, {
+      "mode": "active-skill-contract-v6",
+      "version": 6,
+      "state": "unvalidated",
+      "cases": {"path":"evals/skill-contracts/cases-v6.json","sha256":"be3c59c6d3f55298af2b75f106e5339e3c2ab6e2476b9b4fd0e01a227aad5b80"},
+      "inheritedPressureEvidence": {"path":"evals/skill-contracts/visual-verdict-pressure-v5.json","sha256":"e1dec17c021bbb9fb68dd562d67b6c00dce5cb9e6e387918366fe15c8fe347ee","scope":"Inherited visual-check cases only."},
+      "specPressureEvidence": {"path":"evals/skill-contracts/spec-delivery-pressure-v2.json","sha256":"46e9eae98f0507d1af3c05d43a4409bcf09d85d12cd1ecb33b48d9bb958103d2"},
+      "specPressureHistory": [{"path":"evals/skill-contracts/spec-delivery-pressure-v1-semantic-review.json","sha256":"ba605b10c5428a0c9074f514dd3e32e9c93435843ef78427188a0561af94594b","disposition":"semantic-review-rejected"}],
+      "hardGate": "unverified",
+      "classification": "candidate",
+      "outcomeReview": "pending",
+      "semanticImprovement": "not-asserted",
+      "promotionPass": false
+    }, {
+      "mode": "active-skill-contract-v7",
+      "version": 7,
+      "state": "unvalidated",
+      "cases": {"path":"evals/skill-contracts/cases-v7.json","sha256":"09ae4db37fa1d7d7697947486629836ac93da1957cc107bc55473502b39610e8"},
+      "visualPredecessorEvidence": {
+        "pressure": {"path":"evals/skill-contracts/visual-verdict-pressure-v5.json","sha256":"e1dec17c021bbb9fb68dd562d67b6c00dce5cb9e6e387918366fe15c8fe347ee"},
+        "skill": {"path":"evals/candidates/visual-check-skill-v5.md","bytes":7290,"sha256":"a90a23f72b48581a65a3ba30e2fa7b3592a64d30506d7c4122754323e568e1bf"},
+        "metadata": {"path":"evals/candidates/visual-check-openai-v5.yaml","bytes":1114,"sha256":"564320118d97ade92d8645c92bf08026694662c0a47979cb4ea4bce745e67ee8"},
+        "scope": "Rejected or superseded predecessor evidence only; it does not validate the compact current skill."
+      },
+      "specPressureEvidence": {"path":"evals/skill-contracts/spec-delivery-pressure-v2.json","sha256":"46e9eae98f0507d1af3c05d43a4409bcf09d85d12cd1ecb33b48d9bb958103d2"},
+      "specPressureHistory": [{"path":"evals/skill-contracts/spec-delivery-pressure-v1-semantic-review.json","sha256":"ba605b10c5428a0c9074f514dd3e32e9c93435843ef78427188a0561af94594b","disposition":"semantic-review-rejected"}],
+      "hardGate": "unverified",
+      "classification": "candidate",
+      "outcomeReview": "pending",
+      "semanticImprovement": "not-asserted",
+      "promotionPass": false
+    }, {
+      "mode": "active-skill-contract-v8",
+      "version": 8,
+      "state": "unvalidated",
+      "cases": {"path":"evals/skill-contracts/cases-v8.json","sha256":"9f59ccbe5e52c66de08abd5ebf483a0bdb9036c726c742439e641ab856ac4f4c"},
+      "visualPredecessorEvidence": {
+        "pressure": {"path":"evals/skill-contracts/visual-verdict-pressure-v5.json","sha256":"e1dec17c021bbb9fb68dd562d67b6c00dce5cb9e6e387918366fe15c8fe347ee"},
+        "skill": {"path":"evals/candidates/visual-check-skill-v5.md","bytes":7290,"sha256":"a90a23f72b48581a65a3ba30e2fa7b3592a64d30506d7c4122754323e568e1bf"},
+        "metadata": {"path":"evals/candidates/visual-check-openai-v5.yaml","bytes":1114,"sha256":"564320118d97ade92d8645c92bf08026694662c0a47979cb4ea4bce745e67ee8"},
+        "scope": "Rejected or superseded predecessor evidence only; it does not validate the compact current skill."
+      },
+      "specPressureEvidence": {"path":"evals/skill-contracts/spec-delivery-pressure-v2.json","sha256":"46e9eae98f0507d1af3c05d43a4409bcf09d85d12cd1ecb33b48d9bb958103d2"},
+      "specPressureHistory": [{"path":"evals/skill-contracts/spec-delivery-pressure-v1-semantic-review.json","sha256":"ba605b10c5428a0c9074f514dd3e32e9c93435843ef78427188a0561af94594b","disposition":"semantic-review-rejected"}],
+      "ticketPressureEvidence": {"path":"evals/skill-contracts/ticket-delivery-pressure-v1.json","sha256":"c682e16e377eda576cb981d81d9db833067b2b5a5a8be3aa189604f99342b882"},
+      "hardGate": "unverified",
+      "classification": "candidate",
+      "outcomeReview": "pending",
+      "semanticImprovement": "not-asserted",
+      "promotionPass": false
+    }, {
+      "mode": "active-skill-contract-v9",
+      "version": 9,
+      "state": "unvalidated",
+      "cases": {"path":"evals/skill-contracts/cases-v9.json","sha256":"b9aa05ea16b0e57f3bc233dc148db046bf4b9d1ea0306c0e5a8ca5bac27d40b2"},
+      "visualCoverageEvidence": {"path":"evals/skill-contracts/visual-verdict-pressure-v7.json","sha256":"9998b9fbce625ebd720bf33d4696d64e1cda3b26f2477d4d49b1b4550223835b"},
+      "visualCoverageHistory": [{"path":"evals/skill-contracts/visual-verdict-pressure-v6.json","sha256":"1ce225c361bfb5185c8cac0f2870a5794eca5aedcb1b219af765c5231baaffba","disposition":"semantic-review-rejected"}],
+      "visualPredecessorEvidence": {
+        "pressure": {"path":"evals/skill-contracts/visual-verdict-pressure-v5.json","sha256":"e1dec17c021bbb9fb68dd562d67b6c00dce5cb9e6e387918366fe15c8fe347ee"},
+        "skill": {"path":"evals/candidates/visual-check-skill-v5.md","bytes":7290,"sha256":"a90a23f72b48581a65a3ba30e2fa7b3592a64d30506d7c4122754323e568e1bf"},
+        "metadata": {"path":"evals/candidates/visual-check-openai-v5.yaml","bytes":1114,"sha256":"564320118d97ade92d8645c92bf08026694662c0a47979cb4ea4bce745e67ee8"},
+        "scope": "Rejected or superseded predecessor evidence only; it does not validate the compact current skill."
+      },
+      "specPressureEvidence": {"path":"evals/skill-contracts/spec-delivery-pressure-v2.json","sha256":"46e9eae98f0507d1af3c05d43a4409bcf09d85d12cd1ecb33b48d9bb958103d2"},
+      "specPressureHistory": [{"path":"evals/skill-contracts/spec-delivery-pressure-v1-semantic-review.json","sha256":"ba605b10c5428a0c9074f514dd3e32e9c93435843ef78427188a0561af94594b","disposition":"semantic-review-rejected"}],
+      "ticketPressureEvidence": {"path":"evals/skill-contracts/ticket-delivery-pressure-v1.json","sha256":"c682e16e377eda576cb981d81d9db833067b2b5a5a8be3aa189604f99342b882","scope":"Validates inherited ticket cases only; it does not validate v9 visual coverage."},
+      "hardGate": "unverified",
+      "classification": "candidate",
+      "outcomeReview": "pending",
+      "semanticImprovement": "not-asserted",
+      "promotionPass": false
+    }, {
+      "mode": "active-skill-contract-v10",
+      "version": 10,
+      "state": "semantic-review-rejected",
+      "cases": {"path":"evals/skill-contracts/cases-v10.json","sha256":"d99b5c36099221c98f870e0e82e6f70237258ff1e25eaf248fbeaa187fa39e60"},
+      "designVisualEvidence": {"path":"evals/skill-contracts/design-visual-m2-pressure-v2.json","sha256":"5fe7dfdd62f49c3bc3cc12235a2d39fe37228d576a9e45fdc3a6c33e8f1ff9a2"},
+      "hardGate": "failed-semantic-review",
+      "classification": "semantic-review-rejected",
+      "outcomeReview": "failed",
+      "semanticImprovement": "not-asserted",
+      "promotionPass": false
+    }, {
+      "mode": "active-skill-contract-v11",
+      "version": 11,
+      "state": "semantic-review-rejected",
+      "cases": {"path":"evals/skill-contracts/cases-v11.json","sha256":"a81799cf3aa737930d9f063bba5155187a3ec9d8eca5e5e191a25010e84dec33"},
+      "designVisualEvidence": {"path":"evals/skill-contracts/design-visual-m2-pressure-v3.json","sha256":"e6c853ab502ef24b1043858054f9548d2b648f72f769eddfd4fe77e1f9bec1a1"},
+      "hardGate": "failed-semantic-review",
+      "classification": "semantic-review-rejected",
+      "outcomeReview": "failed",
+      "semanticImprovement": "not-asserted",
+      "promotionPass": false
+    }, {
+      "mode": "active-skill-contract-v12",
+      "version": 12,
+      "state": "unvalidated",
+      "cases": {"path":"evals/skill-contracts/cases-v12.json","sha256":"94b5eec0368769e568f13c491b4ca05bc56fd3f2c795cb1caf84089134c4692d"},
+      "designVisualEvidence": {"path":"evals/skill-contracts/design-visual-m2-pressure-v4.json","sha256":"77723ca48653812b4585cd32b45f484eb2304c9258c5db4260debf67b251c833"},
+      "designVisualHistory": [
+        {"path":"evals/skill-contracts/design-visual-m2-pressure-v1.json","sha256":"c0f601d801015fa295a346efb40a497993a5d437d7494a7a845a43296de2566d","disposition":"semantic-review-rejected"},
+        {"path":"evals/skill-contracts/design-visual-m2-pressure-v2.json","sha256":"5fe7dfdd62f49c3bc3cc12235a2d39fe37228d576a9e45fdc3a6c33e8f1ff9a2","disposition":"semantic-review-rejected"},
+        {"path":"evals/skill-contracts/design-visual-m2-pressure-v3.json","sha256":"e6c853ab502ef24b1043858054f9548d2b648f72f769eddfd4fe77e1f9bec1a1","disposition":"semantic-review-rejected"}
+      ],
+      "visualCoveragePredecessor": {"path":"evals/skill-contracts/visual-verdict-pressure-v7.json","sha256":"9998b9fbce625ebd720bf33d4696d64e1cda3b26f2477d4d49b1b4550223835b","scope":"Pre-M2 collection coverage pressure only."},
+      "specPressureEvidence": {"path":"evals/skill-contracts/spec-delivery-pressure-v2.json","sha256":"46e9eae98f0507d1af3c05d43a4409bcf09d85d12cd1ecb33b48d9bb958103d2"},
+      "ticketPressureEvidence": {"path":"evals/skill-contracts/ticket-delivery-pressure-v1.json","sha256":"c682e16e377eda576cb981d81d9db833067b2b5a5a8be3aa189604f99342b882","scope":"Validates inherited ticket cases only; it does not validate M2 visual behavior."},
+      "hardGate": "m2-static-pass-only",
+      "classification": "candidate",
+      "outcomeReview": "partial",
+      "semanticImprovement": "observed-for-curated-static-scenarios",
+      "promotionPass": false
+    }]
+  },
+  "compatibility": {
+    "legacyInstallSources": {
+      "stateSchemaV1": {
+        "commonCore": {
+          "sourcePath": "evals/candidates/common-core-v1.md",
+          "localPath": "AGENTS.md",
+          "sha256": "5aebc74bc795891c43bf785d9b34ae4d35d4a40bf46eddef3f6246d75919a495"
+        },
+        "skillName": "joewrks-design-frontend",
+        "sourceDependencies": ["ui-ux-pro-max", "apple-design"],
+        "files": [
+          {"sourcePath":"vendor/compatibility/joeness-0.1/skills/joewrks-design-frontend/SKILL.md","localPath":"skills/joewrks-design-frontend/SKILL.md","bytes":3335,"sha256":"a5a0c3c64b94b8565a53e19e10d15fa96dcc995bd152da6c1886ed938261a05e"},
+          {"sourcePath":"vendor/compatibility/joeness-0.1/skills/joewrks-design-frontend/agents/openai.yaml","localPath":"skills/joewrks-design-frontend/agents/openai.yaml","bytes":263,"sha256":"3d0bc6bf72b93b3bd185852f080b19caeb17aed45f582df339d61c2633f81892"}
+        ]
+      },
+      "release0.1": {
+        "activeCommonCore": {
+          "sourcePath": "evals/candidates/interaction-safety-core-v1.md",
+          "localPath": "AGENTS.md",
+          "bytes": 2044,
+          "sha256": "e7a3c02d4c147eaadde2c00a0452c7de21b3e0f51fa02cf7bd7085c43d97ac4d"
+        },
+        "files": [
+          {"sourcePath":"vendor/compatibility/joeness-0.1/skills/joewrks-design-frontend/SKILL.md","localPath":"skills/joewrks-design-frontend/SKILL.md","bytes":3335,"sha256":"a5a0c3c64b94b8565a53e19e10d15fa96dcc995bd152da6c1886ed938261a05e"},
+          {"sourcePath":"vendor/compatibility/joeness-0.1/skills/joewrks-design-frontend/agents/openai.yaml","localPath":"skills/joewrks-design-frontend/agents/openai.yaml","bytes":263,"sha256":"3d0bc6bf72b93b3bd185852f080b19caeb17aed45f582df339d61c2633f81892"},
+          {"sourcePath":"vendor/compatibility/joeness-0.1/skills/joewrks-project-setup/SKILL.md","localPath":"skills/joewrks-project-setup/SKILL.md","bytes":5764,"sha256":"777eecb563479f813015548284b43a2a94b2fa0fd10b2ee0f55198396fe9173c"},
+          {"sourcePath":"vendor/compatibility/joeness-0.1/skills/joewrks-project-setup/agents/openai.yaml","localPath":"skills/joewrks-project-setup/agents/openai.yaml","bytes":353,"sha256":"1581633a8cea5dce3dd33a49bc8fb593169deddc01e496347190928a23cfeffc"},
+          {"sourcePath":"vendor/compatibility/joeness-0.1/skills/joewrks-project-setup/scripts/project-setup.ps1","localPath":"skills/joewrks-project-setup/scripts/project-setup.ps1","bytes":17495,"sha256":"4ffc548078a5c87357fd0e4e63538567ea2666f118243a0558bff29278d13105"},
+          {"sourcePath":"vendor/compatibility/joeness-0.1/skills/handoff/SKILL.md","localPath":"skills/handoff/SKILL.md","bytes":3700,"sha256":"5c49bbe372921e95530d566359670f760cc25da95efe38a4d16c5125a1ca30b4"},
+          {"sourcePath":"vendor/compatibility/joeness-0.1/skills/handoff/agents/openai.yaml","localPath":"skills/handoff/agents/openai.yaml","bytes":141,"sha256":"5c479fd562c691851690e8b18c8501045bef0943c10743d636b2fae26add1d28"},
+          {"sourcePath":"vendor/compatibility/joeness-0.1/skills/handoff/LICENSE","localPath":"skills/handoff/LICENSE","bytes":1068,"sha256":"0e7ac423bf2c6e223b7c5b156f8cf72da49d748e56a1641402c31f22ad07dbb5"}
+        ]
+      }
     }
   },
   "activeSkills": {
+    "design": {
+      "authorship": "joewrks-canonical",
+      "evaluationState": "candidate",
+      "activationPolicy": "hybrid",
+      "sourceDependencies": ["ui-ux-pro-max", "apple-design"],
+      "intentionalDifferences": ["Local activation and routing contract.", "Local OpenAI product metadata."],
+      "validatorSha256": "5347a0a09cfb546bba1c0d1a30dae0a233d9a05f57bd4e7877155c588bcdabf7",
+      "files": [
+        {"localPath":"skills/design/SKILL.md","bytes":5746,"sha256":"9c8090f908174f3f03a1727f8b484dda65c7320c8b2bf9035de06b7ca16df782","exactUpstreamCopy":false},
+        {"localPath":"skills/design/agents/openai.yaml","bytes":389,"sha256":"84f5e052fcb403f3f2675fc16d25e60197defcc07128c383f8181e34a886a17a","exactUpstreamCopy":false}
+      ]
+    },
     "handoff": {
       "authorship": "upstream-adapted",
       "evaluationState": "candidate",
@@ -39,37 +261,64 @@
         "upstreamPath": "skills/productivity/handoff",
         "license": {"name":"MIT","upstreamPath":"LICENSE","localPath":"skills/handoff/LICENSE","sha256":"0e7ac423bf2c6e223b7c5b156f8cf72da49d748e56a1641402c31f22ad07dbb5"}
       },
-      "intentionalDifferences": ["Removed unsupported argument-hint and disable-model-invocation frontmatter; agents/openai.yaml preserves explicit-only activation.", "Relocated the skill and included the exact repository license beside it.", "Added compact evidence and cost receipts, target-root binding, current-state revalidation, handoff-bound authorization checks, and material-failure classification."],
+      "intentionalDifferences": ["Removed unsupported argument-hint and disable-model-invocation frontmatter; agents/openai.yaml preserves explicit-only activation.", "Relocated the skill and included the exact repository license beside it.", "Added compact evidence summaries, target-root binding, current-state revalidation, handoff-bound authorization checks, and material-failure classification without fixed empty fields."],
       "validatorSha256": "5347a0a09cfb546bba1c0d1a30dae0a233d9a05f57bd4e7877155c588bcdabf7",
       "files": [
-        {"localPath":"skills/handoff/SKILL.md","bytes":3700,"sha256":"5c49bbe372921e95530d566359670f760cc25da95efe38a4d16c5125a1ca30b4","exactUpstreamCopy":false},
+        {"localPath":"skills/handoff/SKILL.md","bytes":4274,"sha256":"56bbe775a6b133a51dfdcf2539a3293fb08e4312c86b668e67f201c53399f785","exactUpstreamCopy":false},
         {"localPath":"skills/handoff/agents/openai.yaml","bytes":141,"sha256":"5c479fd562c691851690e8b18c8501045bef0943c10743d636b2fae26add1d28","exactUpstreamCopy":true},
         {"localPath":"skills/handoff/LICENSE","bytes":1068,"sha256":"0e7ac423bf2c6e223b7c5b156f8cf72da49d748e56a1641402c31f22ad07dbb5","exactUpstreamCopy":true}
       ]
     },
-    "joewrks-design-frontend": {
-      "authorship": "joewrks-canonical",
-      "evaluationState": "candidate",
-      "activationPolicy": "hybrid-personal-pilot",
-      "sourceDependencies": ["ui-ux-pro-max", "apple-design"],
-      "intentionalDifferences": ["Local activation and routing contract.", "Local OpenAI product metadata."],
-      "validatorSha256": "5347a0a09cfb546bba1c0d1a30dae0a233d9a05f57bd4e7877155c588bcdabf7",
-      "files": [
-        {"localPath":"skills/joewrks-design-frontend/SKILL.md","bytes":3335,"sha256":"a5a0c3c64b94b8565a53e19e10d15fa96dcc995bd152da6c1886ed938261a05e","exactUpstreamCopy":false},
-        {"localPath":"skills/joewrks-design-frontend/agents/openai.yaml","bytes":263,"sha256":"3d0bc6bf72b93b3bd185852f080b19caeb17aed45f582df339d61c2633f81892","exactUpstreamCopy":false}
-      ]
-    },
-    "joewrks-project-setup": {
+    "project": {
       "authorship": "joewrks-canonical",
       "evaluationState": "candidate",
       "activationPolicy": "hybrid-offer-explicit-write",
       "sourceDependencies": [],
-      "intentionalDifferences": ["Conditional long-project planning offer with explicit writes, bounded discovery, single-ledger reuse, and snapshot-guarded AGENTS.md updates."],
+      "intentionalDifferences": ["Conditional long-project planning offer with explicit writes, bounded discovery, single-ledger reuse, and snapshot-guarded AGENTS.md updates.", "Explicit full-contract setup keeps external skill workflows subordinate to independently authorized user or project scope."],
       "validatorSha256": "5347a0a09cfb546bba1c0d1a30dae0a233d9a05f57bd4e7877155c588bcdabf7",
       "files": [
-        {"localPath":"skills/joewrks-project-setup/SKILL.md","bytes":5764,"sha256":"777eecb563479f813015548284b43a2a94b2fa0fd10b2ee0f55198396fe9173c","exactUpstreamCopy":false},
-        {"localPath":"skills/joewrks-project-setup/agents/openai.yaml","bytes":353,"sha256":"1581633a8cea5dce3dd33a49bc8fb593169deddc01e496347190928a23cfeffc","exactUpstreamCopy":false},
-        {"localPath":"skills/joewrks-project-setup/scripts/project-setup.ps1","bytes":17495,"sha256":"4ffc548078a5c87357fd0e4e63538567ea2666f118243a0558bff29278d13105","exactUpstreamCopy":false}
+        {"localPath":"skills/project/SKILL.md","bytes":6904,"sha256":"451b10444092b9349c42268a24962daf4bd637e1dfd7917f586997e1b4f84887","exactUpstreamCopy":false},
+        {"localPath":"skills/project/agents/openai.yaml","bytes":318,"sha256":"d5757afbeb0e378b6356c118804cdf7989d4394ecd5218bee5365a246efba720","exactUpstreamCopy":false},
+        {"localPath":"skills/project/scripts/project-setup.ps1","bytes":17495,"sha256":"4ffc548078a5c87357fd0e4e63538567ea2666f118243a0558bff29278d13105","exactUpstreamCopy":false}
+      ]
+    },
+    "spec": {
+      "authorship": "joewrks-canonical",
+      "evaluationState": "candidate",
+      "activationPolicy": "implicit-persistent-spec-delivery",
+      "sourceDependencies": [],
+      "intentionalDifferences": ["Conditional user-language decision digest for a created or materially revised persistent specification."],
+      "validatorSha256": "5347a0a09cfb546bba1c0d1a30dae0a233d9a05f57bd4e7877155c588bcdabf7",
+      "files": [
+        {"localPath":"skills/spec/SKILL.md","bytes":1720,"sha256":"2b03833c69b64a8329eb436ddc2d7094277f33007b54d43ccad0a40308709af0","exactUpstreamCopy":false},
+        {"localPath":"skills/spec/agents/openai.yaml","bytes":411,"sha256":"c0236e7b365a2f329f463c43c37033f8d7d8b443090a71b475f88799d3389dc8","exactUpstreamCopy":false}
+      ]
+    },
+    "ticket": {
+      "authorship": "joewrks-canonical",
+      "evaluationState": "candidate",
+      "activationPolicy": "implicit-important-ticket-review",
+      "sourceDependencies": [],
+      "intentionalDifferences": ["Conditional single-writer delivery and new-context candidate review for important prepared work, with explicit shared-model and shared-permission limitations."],
+      "validatorSha256": "5347a0a09cfb546bba1c0d1a30dae0a233d9a05f57bd4e7877155c588bcdabf7",
+      "files": [
+        {"localPath":"skills/ticket/SKILL.md","bytes":3619,"sha256":"1c783553bbc3a0bd0b7e8a1dd376ee912ef00840670e06fa4945bde1ab78211f","exactUpstreamCopy":false},
+        {"localPath":"skills/ticket/agents/openai.yaml","bytes":339,"sha256":"9c145a3c51ae22611fdb00d00c4793be83f87cfffc8a3741b8ff6dff9a0b04de","exactUpstreamCopy":false}
+      ]
+    },
+    "visual-check": {
+      "authorship": "joewrks-canonical",
+      "evaluationState": "candidate",
+      "activationPolicy": "hybrid-visual-verification",
+      "sourceDependencies": [],
+      "intentionalDifferences": ["Compact visual-completion router with always-required durable evidence and conditional defect or translation references.", "Local OpenAI product metadata."],
+      "validatorSha256": "5347a0a09cfb546bba1c0d1a30dae0a233d9a05f57bd4e7877155c588bcdabf7",
+      "files": [
+        {"localPath":"skills/visual-check/SKILL.md","bytes":3453,"sha256":"7bd9b1406073f844da71c0075d5cddb69778425997bb2ec42b74b36fa3996903","exactUpstreamCopy":false},
+        {"localPath":"skills/visual-check/agents/openai.yaml","bytes":603,"sha256":"bffc2c66c0534431d56ae1998f2680fde94742775fc43b9d7bf7e74dbdb8021f","exactUpstreamCopy":false},
+        {"localPath":"skills/visual-check/references/concrete-defect.md","bytes":935,"sha256":"1a620c8ef21081597ab1bf87b84b7dfc0d9b7ebe8cdacffbc10a31318831a209","exactUpstreamCopy":false},
+        {"localPath":"skills/visual-check/references/approved-reference.md","bytes":2972,"sha256":"caea02b7f176d07fbca66133f82b4e7ebb8a5bb8ec441e1e4defa26d0f2c9525","exactUpstreamCopy":false},
+        {"localPath":"skills/visual-check/references/durable-evidence.md","bytes":5391,"sha256":"cb2636a4df90775d4658a2d204b6b8e2ea11ba0173774d172a72ec6a8417195a","exactUpstreamCopy":false}
       ]
     }
   },

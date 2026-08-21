@@ -1,0 +1,58 @@
+{
+  "schemaVersion": 1,
+  "mode": "visual-verdict-pressure-v6",
+  "date": "2026-08-12",
+  "candidate": {
+    "skill": {"path":"skills/visual-check/SKILL.md","bytes":3453,"sha256":"7bd9b1406073f844da71c0075d5cddb69778425997bb2ec42b74b36fa3996903"},
+    "durableEvidence": {"path":"evals/candidates/visual-check-durable-evidence-v6.md","bytes":3660,"sha256":"1ed50df0a402f4ac9fbb822f24a0ae1df5e3561f850f583449e760dd484bda72"},
+    "concreteDefect": {"path":"skills/visual-check/references/concrete-defect.md","bytes":935,"sha256":"1a620c8ef21081597ab1bf87b84b7dfc0d9b7ebe8cdacffbc10a31318831a209"}
+  },
+  "evidence": [
+    {
+      "role": "collection-default-false-pass-screen",
+      "externalProjectPath": "D:/JOEWRKS/MergeDrop/.worktrees/mergedrop-v1/Artifacts/Verification/SkinLeaderboard/Task6-arm64-il2cpp-565b08f-attempt-02/1080x2400/collection-default.png",
+      "bytes": 804518,
+      "sha256": "0684e6867856745762217a70862b81fee8ac70787b5ab57ea13ffa58a870db62",
+      "sourceTracked": false
+    },
+    {
+      "role": "collection-pixel-false-pass-screen",
+      "externalProjectPath": "D:/JOEWRKS/MergeDrop/.worktrees/mergedrop-v1/Artifacts/Verification/SkinLeaderboard/Task6-arm64-il2cpp-565b08f-attempt-02/1080x2400/collection-pixel.png",
+      "bytes": 599539,
+      "sha256": "2970d85dcddbb9e2d2bcb9a1f4920f0575e0ef2cebd352ceee99f2d0d7b16630",
+      "sourceTracked": false
+    }
+  ],
+  "rawEvidence": {
+    "path": "evals/skill-contracts/visual-verdict-pressure-v6-raw.md",
+    "bytes": 6821,
+    "sha256": "f62b3b3035e1fe0cdcb4747a3c3916e0e7f57ce78a0664a5e5b0d74771749794"
+  },
+  "samples": {
+    "count": 2,
+    "freshContext": true,
+    "implementationNarrativeProvided": false,
+    "scores": {
+      "controlMeaningDefectDetection": "2/2",
+      "defaultPreviewDefectDetection": "0/2",
+      "pixelPreviewDefectDetection": "2/2",
+      "narrowPassDoesNotUpgradeWholeScreen": "2/2",
+      "combinedSurfacesIndependentVerdicts": "2/2",
+      "userRejectionWithdrawsPropertyPass": "2/2",
+      "userLanguageOverallVerdictFirst": "2/2"
+    }
+  },
+  "result": "candidate-pressure-partial-failure",
+  "classification": "semantic-review-rejected",
+  "hardGate": "failed-semantic-review",
+  "semanticImprovement": "not-asserted",
+  "promotionPass": false,
+  "limitations": [
+    "Two fresh-context samples are not a promotion-sized evaluation.",
+    "The evaluators use the same model family and tool environment and are not objective external judges.",
+    "The visual authority checks were supplied before viewing; this does not prove that every future agent will discover every missing design requirement.",
+    "The hash-bound images are external untracked project artifacts and are not recoverable from this repository alone.",
+    "No before-and-after model comparison was performed, so semantic improvement is not asserted.",
+    "Both samples prevented an overall false PASS through the control defect but missed the Default preview's spacing and optical-balance defect; the result is therefore a partial failure, not a pass."
+  ]
+}

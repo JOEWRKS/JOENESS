@@ -21,6 +21,7 @@ import { createConnection, createServer } from "node:net";
 import path from "node:path";
 import { createInterface } from "node:readline";
 import { fileURLToPath, pathToFileURL } from "node:url";
+import { types as utilTypes } from "node:util";
 
 export const CASE_IDS = Object.freeze([
   "pressure-08-claim-integrity",
@@ -58,8 +59,18 @@ const CASE_METRIC_KEYS = Object.freeze([
 ]);
 const TOKEN_USAGE_KEYS = Object.freeze(CASE_METRIC_KEYS.slice(0, 5));
 export const EXPECTED_CODEX_VERSION = "codex-cli 0.145.0";
+const ALLOWED_EXPECTED_CODEX_VERSIONS = new Set([
+  EXPECTED_CODEX_VERSION,
+  "codex-cli 0.146.0",
+]);
 export const OUTPUT_LIMIT_BYTES = 64 * 1024;
 export const EVENT_LIMIT = 256;
+const STDERR_CAPTURE_SIDE_BYTES = 1536;
+const STDERR_CAPTURE_BYTES = STDERR_CAPTURE_SIDE_BYTES * 2;
+const LOCAL_IMAGE_DIAGNOSTIC_LINE_BYTES = 16 * 1024;
+const LOCAL_IMAGE_PATH_BYTES = 4096;
+const LOCAL_IMAGE_TARGET_LIMIT = 8;
+const LOCAL_IMAGE_VIEW_EVENT_LIMIT = LOCAL_IMAGE_TARGET_LIMIT * 2;
 const MESSAGE_DELTA_COUNT_LIMIT = EVENT_LIMIT * 16;
 const MESSAGE_DELTA_BYTES_LIMIT = OUTPUT_LIMIT_BYTES * 16;
 export const TURN_TIMEOUT_MS = 180_000;
@@ -285,6 +296,358 @@ export function boundUtf8(value, limitBytes = OUTPUT_LIMIT_BYTES) {
     byteLength,
     sha256: digest,
     truncated: true,
+  };
+}
+
+const DIAGNOSTIC_LIMIT_BYTES = 1024;
+const DIAGNOSTIC_INPUT_LIMIT_BYTES = 4096;
+const DIAGNOSTIC_MAX_DEPTH = 8;
+const DIAGNOSTIC_MAX_ENTRIES = 64;
+const DIAGNOSTIC_MAX_ARRAY_LENGTH = 32;
+const DIAGNOSTIC_BUDGET_MARKER = "[TRUNCATED:diagnostic-budget]";
+const DIAGNOSTIC_SENSITIVE_KEY =
+  /(?:api[-_]?key|auth|cookie|credential|password|secret|session|token)/iu;
+const PROVIDER_TOKEN_PREFIX_SOURCE =
+  "sk-(?:proj|svcacct)-|sk-|sk_|ghp_|github_pat_";
+const PROVIDER_TOKEN_BODY_SOURCE = "[A-Za-z0-9_-]{12,}";
+// Provider-like substrings inside identifiers are ambiguous (for example,
+// "mask-background"). Require a token boundary; labeled secret values are
+// still caught by DIAGNOSTIC_INLINE_SECRET and SECRET_PATTERN.
+const CREDENTIAL_TOKEN_SHAPE_SOURCE = [
+  `(?<![A-Za-z0-9_-])(?:${PROVIDER_TOKEN_PREFIX_SOURCE})${PROVIDER_TOKEN_BODY_SOURCE}`,
+  "(?:AKIA|ASIA)[A-Z0-9]{16}",
+  "eyJ[A-Za-z0-9_-]{10,}\\.[A-Za-z0-9_-]{10,}\\.[A-Za-z0-9_-]{10,}",
+].join("|");
+const CREDENTIAL_TOKEN_PATTERN = new RegExp(CREDENTIAL_TOKEN_SHAPE_SOURCE, "u");
+const CREDENTIAL_TOKEN_PATTERN_GLOBAL = new RegExp(
+  CREDENTIAL_TOKEN_SHAPE_SOURCE,
+  "gu",
+);
+const DIAGNOSTIC_INLINE_SECRET = new RegExp(
+  [
+    "-----BEGIN [A-Z0-9 ]*PRIVATE KEY-----[\\s\\S]*?-----END [A-Z0-9 ]*PRIVATE KEY-----",
+    "ssh-(?:rsa|ed25519)\\s+[A-Za-z0-9+/=]{20,}",
+    "(?<![^\\r\\n])[\\t ]*[A-Za-z0-9+/]{40,}={0,2}[\\t ]*(?![^\\r\\n])",
+    "(?:authorization|proxy-authorization|cookie|set-cookie)\\s*[:=]\\s*[^\\r\\n,]+",
+    "bearer\\s+[A-Za-z0-9._~+/=-]{8,}",
+    "(?:api[-_]?key|password|secret|token)\\s*[:=]\\s*['\\x22]?[^\\s,;'\\x22]{8,}",
+    "--(?:api[-_]?key|token|password|secret|cookie)(?:\\s+|=)\\s*['\\x22]?[^\\s,;'\\x22]{8,}",
+  ].join("|"),
+  "giu",
+);
+const DIAGNOSTIC_DOUBLE_QUOTED_FILE_URL =
+  /"file:\/\/\/[^"<>|\r\n]+"/giu;
+const DIAGNOSTIC_SINGLE_QUOTED_FILE_URL =
+  /'file:\/\/\/[^'<>|\r\n]+'/giu;
+const DIAGNOSTIC_BACKTICK_FILE_URL_MULTILINE =
+  /`file:\/\/\/[^\r\n]*(?:\r\n|\r|\n)(?=[\s\S]*\S)[\s\S]*/giu;
+const DIAGNOSTIC_BACKTICK_QUOTED_FILE_URL =
+  /`file:\/\/\/[^\r\n]*`(?=:\s)/giu;
+const DIAGNOSTIC_BACKTICK_FILE_URL_REMAINDER =
+  /`file:\/\/\/[\s\S]*/giu;
+const DIAGNOSTIC_FILE_URL = /file:\/\/\/[^"<>|\r\n]*/giu;
+const DIAGNOSTIC_DOUBLE_QUOTED_WINDOWS_PATH =
+  /"(?:[A-Za-z]:[\\/]|\\\\)[^"<>|\r\n]+"/gu;
+const DIAGNOSTIC_SINGLE_QUOTED_WINDOWS_PATH =
+  /'(?:[A-Za-z]:[\\/]|\\\\)[^'<>|\r\n]+'/gu;
+const DIAGNOSTIC_BACKTICK_WINDOWS_PATH_MULTILINE =
+  /`(?:[A-Za-z]:[\\/]|\\\\)[^\r\n]*(?:\r\n|\r|\n)(?=[\s\S]*\S)[\s\S]*/gu;
+const DIAGNOSTIC_BACKTICK_QUOTED_WINDOWS_PATH =
+  /`(?:[A-Za-z]:[\\/]|\\\\)[^\r\n]*`(?=:\s)/gu;
+const DIAGNOSTIC_BACKTICK_WINDOWS_PATH_REMAINDER =
+  /`(?:[A-Za-z]:[\\/]|\\\\)[\s\S]*/gu;
+const DIAGNOSTIC_DOUBLE_QUOTED_POSIX_PATH =
+  /"\/(?:[^"<>|\r\n]+)"/gu;
+const DIAGNOSTIC_SINGLE_QUOTED_POSIX_PATH =
+  /'\/(?:[^'<>|\r\n]+)'/gu;
+const DIAGNOSTIC_BACKTICK_POSIX_PATH_MULTILINE =
+  /`\/[^\r\n]*(?:\r\n|\r|\n)(?=[\s\S]*\S)[\s\S]*/gu;
+const DIAGNOSTIC_BACKTICK_QUOTED_POSIX_PATH =
+  /`\/(?:[^\r\n]*)`(?=:\s)/gu;
+const DIAGNOSTIC_BACKTICK_POSIX_PATH_REMAINDER =
+  /`\/[\s\S]*/gu;
+const DIAGNOSTIC_WINDOWS_PATH =
+  /(?:(?<![\p{L}\p{N}_])[A-Za-z]:[\\/]|\\\\)[^"<>|\r\n]*/gu;
+const DIAGNOSTIC_POSIX_PATH =
+  /(?<![\p{L}\p{N}_:/])\/(?:[^"<>|\r\n]*)/gu;
+
+function redactDiagnosticString(value) {
+  let text = value;
+  text = text.replace(DIAGNOSTIC_INLINE_SECRET, "[REDACTED]");
+  text = text.replace(CREDENTIAL_TOKEN_PATTERN_GLOBAL, "[REDACTED]");
+  text = text.replace(DIAGNOSTIC_DOUBLE_QUOTED_FILE_URL, "[REDACTED_PATH]");
+  text = text.replace(DIAGNOSTIC_SINGLE_QUOTED_FILE_URL, "[REDACTED_PATH]");
+  text = text.replace(DIAGNOSTIC_BACKTICK_FILE_URL_MULTILINE, "[REDACTED_PATH]");
+  text = text.replace(DIAGNOSTIC_BACKTICK_QUOTED_FILE_URL, "[REDACTED_PATH]");
+  text = text.replace(DIAGNOSTIC_BACKTICK_FILE_URL_REMAINDER, "[REDACTED_PATH]");
+  text = text.replace(DIAGNOSTIC_FILE_URL, "[REDACTED_PATH]");
+  text = text.replace(DIAGNOSTIC_DOUBLE_QUOTED_WINDOWS_PATH, "[REDACTED_PATH]");
+  text = text.replace(DIAGNOSTIC_SINGLE_QUOTED_WINDOWS_PATH, "[REDACTED_PATH]");
+  text = text.replace(DIAGNOSTIC_BACKTICK_WINDOWS_PATH_MULTILINE, "[REDACTED_PATH]");
+  text = text.replace(DIAGNOSTIC_BACKTICK_QUOTED_WINDOWS_PATH, "[REDACTED_PATH]");
+  text = text.replace(DIAGNOSTIC_BACKTICK_WINDOWS_PATH_REMAINDER, "[REDACTED_PATH]");
+  text = text.replace(DIAGNOSTIC_DOUBLE_QUOTED_POSIX_PATH, "[REDACTED_PATH]");
+  text = text.replace(DIAGNOSTIC_SINGLE_QUOTED_POSIX_PATH, "[REDACTED_PATH]");
+  text = text.replace(DIAGNOSTIC_BACKTICK_POSIX_PATH_MULTILINE, "[REDACTED_PATH]");
+  text = text.replace(DIAGNOSTIC_BACKTICK_QUOTED_POSIX_PATH, "[REDACTED_PATH]");
+  text = text.replace(DIAGNOSTIC_BACKTICK_POSIX_PATH_REMAINDER, "[REDACTED_PATH]");
+  text = text.replace(DIAGNOSTIC_WINDOWS_PATH, "[REDACTED_PATH]");
+  text = text.replace(DIAGNOSTIC_POSIX_PATH, "[REDACTED_PATH]");
+  return { text, redacted: text !== value };
+}
+
+function diagnosticBudgetResult(byteLength = null) {
+  return {
+    text: DIAGNOSTIC_BUDGET_MARKER,
+    byteLength,
+    sha256: sha256(DIAGNOSTIC_BUDGET_MARKER),
+    truncated: true,
+    redacted: true,
+    unsupported: true,
+    budgetExceeded: true,
+  };
+}
+
+function normalizeDiagnosticValue(
+  value,
+  budget,
+  ancestors = new Set(),
+  depth = 0,
+) {
+  budget.nodes += 1;
+  if (budget.nodes > DIAGNOSTIC_MAX_ENTRIES || depth >= DIAGNOSTIC_MAX_DEPTH) {
+    budget.exceeded = true;
+    return null;
+  }
+  if (typeof value === "string") {
+    const byteLength = Buffer.byteLength(value);
+    budget.inputBytes += byteLength;
+    if (budget.inputBytes > DIAGNOSTIC_INPUT_LIMIT_BYTES) {
+      budget.exceeded = true;
+      budget.rootStringByteLength ??= depth === 0 ? byteLength : null;
+      return null;
+    }
+    const safe = redactDiagnosticString(value);
+    return {
+      safe: safe.text,
+      redacted: safe.redacted,
+      unsupported: /^\[UNSUPPORTED:[^\]]+\]$/u.test(value),
+    };
+  }
+  if (
+    value === null ||
+    typeof value === "boolean" ||
+    (typeof value === "number" && Number.isFinite(value))
+  ) {
+    return { safe: value, redacted: false, unsupported: false };
+  }
+  if (
+    value !== null &&
+    (typeof value === "object" || typeof value === "function") &&
+    utilTypes.isProxy(value)
+  ) {
+    return {
+      safe: "[UNSUPPORTED:proxy]",
+      redacted: false,
+      unsupported: true,
+    };
+  }
+  if (
+    typeof value !== "object" ||
+    (!Array.isArray(value) && Object.getPrototypeOf(value) !== Object.prototype)
+  ) {
+    const marker = `[UNSUPPORTED:${value === null ? "null" : typeof value}]`;
+    return { safe: marker, redacted: false, unsupported: true };
+  }
+  if (ancestors.has(value)) {
+    return {
+      safe: "[CIRCULAR]",
+      redacted: false,
+      unsupported: true,
+    };
+  }
+
+  const nextAncestors = new Set(ancestors);
+  nextAncestors.add(value);
+  const isArray = Array.isArray(value);
+  let arrayLength = null;
+  if (isArray) {
+    let lengthDescriptor;
+    try {
+      lengthDescriptor = Object.getOwnPropertyDescriptor(value, "length");
+    } catch {
+      return {
+        safe: "[UNSUPPORTED:object]",
+        redacted: false,
+        unsupported: true,
+      };
+    }
+    if (
+      !Object.hasOwn(lengthDescriptor, "value") ||
+      !Number.isSafeInteger(lengthDescriptor.value) ||
+      lengthDescriptor.value < 0 ||
+      lengthDescriptor.value > DIAGNOSTIC_MAX_ARRAY_LENGTH
+    ) {
+      budget.exceeded = true;
+      return null;
+    }
+    arrayLength = lengthDescriptor.value;
+  }
+  let keys;
+  try {
+    keys = Reflect.ownKeys(value);
+  } catch {
+    return {
+      safe: "[UNSUPPORTED:object]",
+      redacted: false,
+      unsupported: true,
+    };
+  }
+  if (keys.length > DIAGNOSTIC_MAX_ENTRIES + (isArray ? 1 : 0)) {
+    budget.exceeded = true;
+    return null;
+  }
+  if (keys.some((key) => typeof key !== "string")) {
+    return {
+      safe: "[UNSUPPORTED:symbol-key]",
+      redacted: false,
+      unsupported: true,
+    };
+  }
+  if (isArray) {
+    const expectedKeys = Array.from(
+      { length: arrayLength },
+      (_, index) => String(index),
+    );
+    if (
+      keys.length !== expectedKeys.length + 1 ||
+      keys[keys.length - 1] !== "length" ||
+      expectedKeys.some((key, index) => keys[index] !== key)
+    ) {
+      budget.exceeded = true;
+      return null;
+    }
+    keys = expectedKeys;
+  }
+  for (const key of keys) {
+    if (typeof key === "string") {
+      budget.inputBytes += Buffer.byteLength(key);
+      if (budget.inputBytes > DIAGNOSTIC_INPUT_LIMIT_BYTES) {
+        budget.exceeded = true;
+        return null;
+      }
+    }
+  }
+  if (!isArray) {
+    keys.sort((left, right) => String(left).localeCompare(String(right)));
+  }
+  budget.entries += keys.length;
+  if (budget.entries > DIAGNOSTIC_MAX_ENTRIES) {
+    budget.exceeded = true;
+    return null;
+  }
+  const safe = isArray ? [] : {};
+  let redacted = false;
+  let unsupported = false;
+  for (const key of keys) {
+    if (typeof key === "symbol") {
+      unsupported = true;
+      continue;
+    }
+    let descriptor;
+    try {
+      descriptor = Object.getOwnPropertyDescriptor(value, key);
+    } catch {
+      return {
+        safe: "[UNSUPPORTED:object]",
+        redacted: false,
+        unsupported: true,
+      };
+    }
+    if (!Object.hasOwn(descriptor, "value")) {
+      safe[key] = "[UNSUPPORTED:accessor]";
+      unsupported = true;
+      continue;
+    }
+    const normalized = normalizeDiagnosticValue(
+      descriptor.value,
+      budget,
+      nextAncestors,
+      depth + 1,
+    );
+    if (budget.exceeded) return null;
+    unsupported ||= normalized.unsupported;
+    if (DIAGNOSTIC_SENSITIVE_KEY.test(key)) {
+      safe[key] = "[REDACTED]";
+      redacted = true;
+    } else {
+      safe[key] = normalized.safe;
+      redacted ||= normalized.redacted;
+    }
+  }
+  return { safe, redacted, unsupported };
+}
+
+export function diagnosticOwnData(value, key) {
+  try {
+    if (
+      value === null ||
+      (typeof value !== "object" && typeof value !== "function")
+    ) {
+      return { found: false, value: undefined };
+    }
+    const descriptor = Object.getOwnPropertyDescriptor(value, key);
+    if (descriptor === undefined) return { found: false, value: undefined };
+    if (!Object.hasOwn(descriptor, "value")) {
+      return { found: true, value: "[UNSUPPORTED:accessor]" };
+    }
+    return { found: true, value: descriptor.value };
+  } catch {
+    return { found: true, value: "[UNSUPPORTED:object]" };
+  }
+}
+
+export function sanitizeDiagnosticEvidence(
+  value,
+  limitBytes = DIAGNOSTIC_LIMIT_BYTES,
+) {
+  if (!Number.isSafeInteger(limitBytes) || limitBytes < 1) {
+    throw new RangeError("diagnostic limitBytes must be a positive safe integer");
+  }
+  let normalized;
+  const budget = {
+    nodes: 0,
+    entries: 0,
+    inputBytes: 0,
+    exceeded: false,
+    rootStringByteLength: null,
+  };
+  try {
+    normalized = normalizeDiagnosticValue(value, budget);
+  } catch {
+    normalized = {
+      safe: "[UNSUPPORTED:object]",
+      redacted: false,
+      unsupported: true,
+    };
+  }
+  if (budget.exceeded) {
+    return diagnosticBudgetResult(budget.rootStringByteLength);
+  }
+  const safeText =
+    typeof normalized.safe === "string"
+      ? normalized.safe
+      : stableStringify(normalized.safe);
+  const bounded = boundUtf8(safeText, limitBytes);
+  return {
+    ...(bounded.truncated
+      ? { head: bounded.head, tail: bounded.tail }
+      : { text: bounded.text }),
+    byteLength: Buffer.byteLength(safeText),
+    sha256: sha256(safeText),
+    truncated: bounded.truncated,
+    redacted: normalized.redacted,
+    unsupported: normalized.unsupported,
   };
 }
 
@@ -1040,7 +1403,7 @@ export async function handleSyntheticDynamicToolCall(
     const text = stableStringify(responseBody);
     if (
       Buffer.byteLength(text) > BROKER_MESSAGE_LIMIT_BYTES ||
-      SECRET_PATTERN.test(text)
+      containsCredentialText(text)
     ) {
       throw new Error("dynamic tool response is unsafe to expose");
     }
@@ -1067,7 +1430,7 @@ function mcpNameIsSafe(name) {
   return (
     typeof name === "string" &&
     /^[A-Za-z0-9_-]{1,128}$/u.test(name) &&
-    !SECRET_PATTERN.test(name)
+    !containsCredentialText(name)
   );
 }
 
@@ -1643,7 +2006,24 @@ export async function materializeIsolatedCodexHome(
   }
 }
 
-export async function prepareRuntime(runRoot) {
+export function assertExpectedCodexVersion(
+  actualVersion,
+  expectedVersion = EXPECTED_CODEX_VERSION,
+) {
+  if (!ALLOWED_EXPECTED_CODEX_VERSIONS.has(expectedVersion)) {
+    throw new Error("expected Codex version is malformed");
+  }
+  if (actualVersion !== expectedVersion) {
+    throw new Error(`protocol-version-drift: ${actualVersion}`);
+  }
+  return true;
+}
+
+export async function prepareRuntime(
+  runRoot,
+  { expectedCodexVersion = EXPECTED_CODEX_VERSION } = {},
+) {
+  assertExpectedCodexVersion(expectedCodexVersion, expectedCodexVersion);
   const runRootStat = await stat(runRoot);
   if (!runRootStat.isDirectory()) {
     throw new Error("run root must be a directory");
@@ -1686,9 +2066,7 @@ export async function prepareRuntime(runRoot) {
     env: appServerEnvironment,
   });
   const version = requireSuccessfulProcess(versionResult, "codex --version").trim();
-  if (version !== EXPECTED_CODEX_VERSION) {
-    throw new Error(`protocol-version-drift: ${version}`);
-  }
+  assertExpectedCodexVersion(version, expectedCodexVersion);
 
   const originalMcp = parseJsonProcess(
     await runBuffered(executable, ["mcp", "list", "--json"], {
@@ -1716,7 +2094,7 @@ export async function prepareRuntime(runRoot) {
   if (
     doctor?.schemaVersion !== 1 ||
     doctor?.overallStatus !== "ok" ||
-    doctor?.codexVersion !== EXPECTED_CODEX_VERSION.replace("codex-cli ", "")
+    doctor?.codexVersion !== expectedCodexVersion.replace("codex-cli ", "")
   ) {
     throw new Error("Codex doctor overall status is not ok");
   }
@@ -1819,7 +2197,552 @@ export function approvalDenialResponse(method) {
   return null;
 }
 
-export async function openAppServer(runtime, callbacks = {}) {
+function waitForAppServerChildClose(child, timeoutMs, closeConfirmed) {
+  if (closeConfirmed()) {
+    return Promise.resolve(true);
+  }
+  return new Promise((resolve) => {
+    let settled = false;
+    const finish = (closed) => {
+      if (settled) {
+        return;
+      }
+      settled = true;
+      clearTimeout(timer);
+      child.removeListener("close", onClose);
+      resolve(closed);
+    };
+    const onClose = () => finish(true);
+    child.once("close", onClose);
+    const timer = setTimeout(() => finish(false), timeoutMs);
+    if (closeConfirmed()) {
+      finish(true);
+    }
+  });
+}
+
+async function terminateAppServerChild(
+  child,
+  { gracefulCloseMs, killedCloseMs },
+  closeConfirmed,
+) {
+  if (closeConfirmed()) {
+    return;
+  }
+
+  const gracefulClose = waitForAppServerChildClose(
+    child,
+    gracefulCloseMs,
+    closeConfirmed,
+  );
+  child.stdin.end();
+  if (await gracefulClose) {
+    return;
+  }
+
+  child.kill("SIGTERM");
+  if (
+    !(await waitForAppServerChildClose(
+      child,
+      killedCloseMs,
+      closeConfirmed,
+    ))
+  ) {
+    throw new Error(
+      `app server process did not close within ${killedCloseMs}ms after kill`,
+    );
+  }
+}
+
+function emptyLocalImageDiagnostics(expectedTargetCount = 0) {
+  return {
+    status: "UNVERIFIED",
+    observationCount: 0,
+    expectedTargetCount,
+    effectivePathMatch: "UNVERIFIED",
+    matchedInputIndex: null,
+    effectivePathAbsolute: "UNVERIFIED",
+    effectivePathWithinRoot: "UNVERIFIED",
+    modelArgumentAbsolute: "UNVERIFIED",
+    outerCategory: "UNVERIFIED",
+    reportedCategory: "UNVERIFIED",
+    privacy: {
+      rawPathPersisted: false,
+      pathDigestPersisted: false,
+      rawDiagnosticDigestPersisted: false,
+    },
+  };
+}
+
+function reportedImageErrorCategory(cause) {
+  if (
+    /(?:\b(?:fs )?sandbox helper failed\b|apply deny-read ACLs)/iu.test(cause)
+  ) {
+    return "sandbox-helper-failed";
+  }
+  if (
+    /(?:\bEACCES\b|\bEPERM\b|permission denied|access (?:is )?denied|os error 5)/iu.test(
+      cause,
+    )
+  ) {
+    return "permission-denied";
+  }
+  if (
+    /(?:\bENOENT\b|no such file|not found|cannot find|os error 2)/iu.test(cause)
+  ) {
+    return "not-found";
+  }
+  if (
+    /(?:\bEINVAL\b|invalid (?:file name|filename|path)|filename syntax|path syntax|volume label syntax|embedded nul|nul byte)/iu.test(
+      cause,
+    )
+  ) {
+    return "invalid-path";
+  }
+  return "unclassified";
+}
+
+function pathIsWithinOrEqual(root, candidate) {
+  const relative = path.relative(path.resolve(root), path.resolve(candidate));
+  return (
+    relative === "" ||
+    (relative !== ".." &&
+      !relative.startsWith(`..${path.sep}`) &&
+      !path.isAbsolute(relative))
+  );
+}
+
+function validateLocalImageDiagnosticBinding(value) {
+  if (
+    value === null ||
+    typeof value !== "object" ||
+    typeof value.root !== "string" ||
+    !path.isAbsolute(value.root) ||
+    !Array.isArray(value.images) ||
+    value.images.length < 1 ||
+    value.images.length > LOCAL_IMAGE_TARGET_LIMIT
+  ) {
+    throw new TypeError("local image diagnostic binding is malformed");
+  }
+  const inputIndexes = new Set();
+  const targetPaths = new Set();
+  for (const image of value.images) {
+    if (
+      image === null ||
+      typeof image !== "object" ||
+      !Number.isSafeInteger(image.inputIndex) ||
+      image.inputIndex < 0 ||
+      inputIndexes.has(image.inputIndex) ||
+      typeof image.sentPath !== "string" ||
+      typeof image.resolvedPath !== "string" ||
+      !path.isAbsolute(image.sentPath) ||
+      !path.isAbsolute(image.resolvedPath) ||
+      Buffer.byteLength(image.sentPath, "utf8") > LOCAL_IMAGE_PATH_BYTES ||
+      Buffer.byteLength(image.resolvedPath, "utf8") > LOCAL_IMAGE_PATH_BYTES ||
+      !pathIsWithinOrEqual(value.root, image.sentPath) ||
+      !pathIsWithinOrEqual(value.root, image.resolvedPath) ||
+      targetPaths.has(image.sentPath) ||
+      targetPaths.has(image.resolvedPath) ||
+      !Number.isSafeInteger(image.byteLength) ||
+      image.byteLength < 1 ||
+      typeof image.sha256 !== "string" ||
+      !/^[a-f0-9]{64}$/u.test(image.sha256)
+    ) {
+      throw new TypeError("local image diagnostic image descriptor is malformed");
+    }
+    inputIndexes.add(image.inputIndex);
+    targetPaths.add(image.sentPath);
+    targetPaths.add(image.resolvedPath);
+  }
+}
+
+function analyzeLocalImageDiagnosticLine(lineBytes, lineTruncated, binding) {
+  const line = lineBytes.toString("utf8");
+  const marker = /unable to (locate|read) image at `/gu;
+  const observations = [];
+  for (const match of line.matchAll(marker)) {
+    const pathStart = match.index + match[0].length;
+    const matchesByInput = new Map();
+    for (const image of binding.images) {
+      for (const candidate of new Set([image.sentPath, image.resolvedPath])) {
+        const terminator = `${candidate}\`: `;
+        if (line.startsWith(terminator, pathStart)) {
+          matchesByInput.set(image.inputIndex, {
+            inputIndex: image.inputIndex,
+            effectivePathAbsolute: path.isAbsolute(candidate),
+            effectivePathWithinRoot:
+              path.isAbsolute(candidate) &&
+              pathIsWithinOrEqual(binding.root, candidate),
+            cause: line.slice(pathStart + terminator.length),
+          });
+        }
+      }
+    }
+    if (matchesByInput.size === 0) {
+      observations.push({ match: "MISMATCH", truncated: lineTruncated });
+      continue;
+    }
+    if (matchesByInput.size !== 1) {
+      observations.push({ match: "UNVERIFIED", truncated: lineTruncated });
+      continue;
+    }
+    const [matched] = matchesByInput.values();
+    observations.push({
+      match: "MATCH",
+      truncated: lineTruncated,
+      inputIndex: matched.inputIndex,
+      effectivePathAbsolute: matched.effectivePathAbsolute,
+      effectivePathWithinRoot: matched.effectivePathWithinRoot,
+      outerCategory:
+        match[1] === "locate" ? "unable-to-locate" : "unable-to-read",
+      reportedCategory: reportedImageErrorCategory(matched.cause),
+    });
+  }
+  return observations;
+}
+
+function createLocalImageDiagnosticBinder() {
+  let binding = null;
+  let stderrStarted = false;
+  let completedObservationCount = 0;
+  let onlyCompletedObservation = null;
+  let captureTruncated = false;
+  let lineBuffer = Buffer.alloc(0);
+  let lineTruncated = false;
+  let imageViewEventCount = 0;
+  let imageViewCompletedCount = 0;
+  let imageViewEventLimitReported = false;
+  const imageViewStates = new Map();
+  const imageViewBlockers = [];
+
+  const addImageViewBlocker = (reason, state = null) => {
+    if (!imageViewBlockers.includes(reason)) {
+      imageViewBlockers.push(reason);
+    }
+    if (state !== null && !state.blockers.includes(reason)) {
+      state.blockers.push(reason);
+    }
+  };
+  const imageViewPathMatch = (rawItem, exactShape) => {
+    if (!exactShape || binding === null || typeof rawItem.path !== "string") {
+      return { matchedInputIndex: null, effectivePathMatch: "UNVERIFIED" };
+    }
+    const matches = new Set();
+    for (const image of binding.images) {
+      if (
+        rawItem.path === image.sentPath ||
+        rawItem.path === image.resolvedPath
+      ) {
+        matches.add(image.inputIndex);
+      }
+    }
+    if (matches.size === 0) {
+      return { matchedInputIndex: null, effectivePathMatch: "MISMATCH" };
+    }
+    if (matches.size !== 1) {
+      return { matchedInputIndex: null, effectivePathMatch: "UNVERIFIED" };
+    }
+    return {
+      matchedInputIndex: [...matches][0],
+      effectivePathMatch: "MATCH",
+    };
+  };
+  const safeImageViewId = (value) => {
+    const sanitized = sanitizeEventId(value);
+    const byteLength = typeof value === "string"
+      ? Buffer.byteLength(value, "utf8")
+      : 0;
+    if (
+      sanitized.blocker === null &&
+      byteLength >= 1 &&
+      byteLength <= 128
+    ) {
+      return sanitized;
+    }
+    return {
+      value: null,
+      blocker: sanitized.blocker ?? "runtime-drift",
+    };
+  };
+  const safeImageViewNotification = (
+    notification,
+    safeId,
+    matched,
+  ) => ({
+    method: notification.method,
+    params: {
+      threadId: notification?.params?.threadId,
+      turnId: notification?.params?.turnId,
+      item: {
+        id: safeId.blocker === null ? safeId.value : null,
+        type: "imageView",
+        matchedInputIndex: matched.matchedInputIndex,
+        effectivePathMatch: matched.effectivePathMatch,
+      },
+    },
+  });
+  const rewriteImageViewNotification = (notification) => {
+    const rawItem = notification?.params?.item;
+    if (
+      !["item/started", "item/completed"].includes(notification?.method) ||
+      rawItem?.type !== "imageView"
+    ) {
+      return notification;
+    }
+
+    const exactShape = exactKeys(rawItem, ["id", "type", "path"]);
+    const safeId = safeImageViewId(rawItem.id);
+    const matched = imageViewPathMatch(rawItem, exactShape);
+    if (imageViewEventCount >= LOCAL_IMAGE_VIEW_EVENT_LIMIT) {
+      addImageViewBlocker("image-view-limit-exceeded");
+      if (imageViewEventLimitReported) {
+        return null;
+      }
+      imageViewEventLimitReported = true;
+      return safeImageViewNotification(
+        notification,
+        { value: null, blocker: "runtime-drift" },
+        { matchedInputIndex: null, effectivePathMatch: "UNVERIFIED" },
+      );
+    }
+    imageViewEventCount += 1;
+    if (notification.method === "item/completed") {
+      imageViewCompletedCount += 1;
+    }
+    if (safeId.blocker !== null || typeof safeId.value !== "string") {
+      addImageViewBlocker("image-view-invalid-id");
+      return safeImageViewNotification(notification, safeId, matched);
+    }
+    let state = imageViewStates.get(safeId.value);
+    if (state === undefined) {
+      if (imageViewStates.size >= LOCAL_IMAGE_TARGET_LIMIT) {
+        addImageViewBlocker("image-view-limit-exceeded");
+        return safeImageViewNotification(
+          notification,
+          { value: null, blocker: "runtime-drift" },
+          { matchedInputIndex: null, effectivePathMatch: "UNVERIFIED" },
+        );
+      }
+      state = {
+        id: safeId.value,
+        matchedInputIndex: matched.matchedInputIndex,
+        eventCount: 0,
+        startedCount: 0,
+        completedCount: 0,
+        blockers: [],
+      };
+      imageViewStates.set(safeId.value, state);
+    }
+    state.eventCount += 1;
+    if (notification.method === "item/started") {
+      state.startedCount += 1;
+      if (state.startedCount > 1) {
+        addImageViewBlocker("image-view-duplicate-started", state);
+      }
+    } else {
+      state.completedCount += 1;
+      if (state.startedCount === 0) {
+        addImageViewBlocker("image-view-completed-without-started", state);
+      }
+      if (state.completedCount > 1) {
+        addImageViewBlocker("image-view-duplicate-completed", state);
+      }
+    }
+    if (!exactShape) {
+      addImageViewBlocker("image-view-extra-shape", state);
+    }
+    if (matched.effectivePathMatch === "MISMATCH") {
+      addImageViewBlocker("image-view-target-mismatch", state);
+    } else if (matched.effectivePathMatch !== "MATCH") {
+      addImageViewBlocker("image-view-target-unverified", state);
+    }
+    if (
+      state.eventCount > 1 &&
+      state.matchedInputIndex !== matched.matchedInputIndex
+    ) {
+      state.matchedInputIndex = null;
+      addImageViewBlocker("image-view-target-drift", state);
+    }
+
+    return safeImageViewNotification(notification, safeId, matched);
+  };
+
+  const appendLineBytes = (bytes) => {
+    const remaining = LOCAL_IMAGE_DIAGNOSTIC_LINE_BYTES - lineBuffer.length;
+    if (remaining > 0) {
+      lineBuffer = Buffer.concat([lineBuffer, bytes.subarray(0, remaining)]);
+    }
+    if (bytes.length > remaining) {
+      lineTruncated = true;
+      captureTruncated = true;
+    }
+  };
+  const analyzeCurrentLine = () =>
+    binding === null
+      ? []
+      : analyzeLocalImageDiagnosticLine(lineBuffer, lineTruncated, binding);
+  const finishLine = () => {
+    const observations = analyzeCurrentLine();
+    const nextCount = Math.min(
+      Number.MAX_SAFE_INTEGER,
+      completedObservationCount + observations.length,
+    );
+    if (completedObservationCount === 0 && observations.length === 1) {
+      onlyCompletedObservation = observations[0];
+    } else if (nextCount !== 1) {
+      onlyCompletedObservation = null;
+    }
+    completedObservationCount = nextCount;
+    lineBuffer = Buffer.alloc(0);
+    lineTruncated = false;
+  };
+
+  return {
+    bind(value) {
+      if (binding !== null) {
+        throw new Error("local image diagnostics are already bound");
+      }
+      if (stderrStarted) {
+        throw new Error(
+          "local image diagnostics must be bound before App Server stderr",
+        );
+      }
+      validateLocalImageDiagnosticBinding(value);
+      binding = {
+        root: value.root,
+        images: value.images.map((image) => ({
+          inputIndex: image.inputIndex,
+          sentPath: image.sentPath,
+          resolvedPath: image.resolvedPath,
+        })),
+      };
+    },
+    observe(bytes) {
+      if (bytes.length === 0) {
+        return;
+      }
+      stderrStarted = true;
+      if (binding === null) {
+        return;
+      }
+      let offset = 0;
+      while (offset < bytes.length) {
+        const newline = bytes.indexOf(0x0a, offset);
+        const end = newline === -1 ? bytes.length : newline;
+        appendLineBytes(bytes.subarray(offset, end));
+        if (newline === -1) {
+          break;
+        }
+        finishLine();
+        offset = newline + 1;
+      }
+    },
+    snapshot() {
+      const expectedTargetCount = binding?.images.length ?? 0;
+      const result = emptyLocalImageDiagnostics(expectedTargetCount);
+      if (binding === null) {
+        return result;
+      }
+      const currentObservations = analyzeCurrentLine();
+      result.observationCount = Math.min(
+        Number.MAX_SAFE_INTEGER,
+        completedObservationCount + currentObservations.length,
+      );
+      if (!captureTruncated && result.observationCount === 0) {
+        result.status = "NO_ROUTER_IMAGE_ERROR";
+        return result;
+      }
+      if (captureTruncated || result.observationCount !== 1) {
+        return result;
+      }
+      const observation =
+        completedObservationCount === 1
+          ? onlyCompletedObservation
+          : currentObservations[0];
+      if (observation.truncated || observation.match === "UNVERIFIED") {
+        return result;
+      }
+      if (observation.match === "MISMATCH") {
+        result.effectivePathMatch = "MISMATCH";
+        return result;
+      }
+      result.effectivePathMatch = "MATCH";
+      if (
+        !observation.effectivePathAbsolute ||
+        !observation.effectivePathWithinRoot
+      ) {
+        return result;
+      }
+      result.status = "OBSERVED";
+      result.matchedInputIndex = observation.inputIndex;
+      result.effectivePathAbsolute = "VERIFIED";
+      result.effectivePathWithinRoot = "VERIFIED";
+      result.outerCategory = observation.outerCategory;
+      result.reportedCategory = observation.reportedCategory;
+      return result;
+    },
+    rewriteNotification(notification) {
+      return rewriteImageViewNotification(notification);
+    },
+    successfulImageViewsSnapshot() {
+      const states = [...imageViewStates.values()];
+      const items = states.map((state) => ({
+        id: state.id,
+        matchedInputIndex: state.matchedInputIndex,
+        eventCount: state.eventCount,
+        startedCount: state.startedCount,
+        completedCount: state.completedCount,
+        complete:
+          state.blockers.length === 0 &&
+          state.startedCount === 1 &&
+          state.completedCount === 1,
+      }));
+      const blockers = [...imageViewBlockers];
+      if (
+        states.some(
+          (state) => state.startedCount > 0 && state.completedCount === 0,
+        )
+      ) {
+        blockers.push("image-view-lifecycle-incomplete");
+      }
+      return {
+        complete:
+          blockers.length === 0 &&
+          items.every((item) => item.complete),
+        eventCount: imageViewEventCount,
+        completedCount: imageViewCompletedCount,
+        items,
+        blockers,
+        privacy: {
+          rawPathPersisted: false,
+          pathDigestPersisted: false,
+          rawDiagnosticDigestPersisted: false,
+        },
+      };
+    },
+  };
+}
+
+export async function openAppServer(
+  runtime,
+  callbacks = {},
+  lifecycle = {},
+) {
+  const spawnProcess = lifecycle.spawnProcess ?? spawn;
+  const gracefulCloseMs = lifecycle.gracefulCloseMs ?? 5000;
+  const killedCloseMs = lifecycle.killedCloseMs ?? 5000;
+  if (typeof spawnProcess !== "function") {
+    throw new TypeError("app server spawn process must be a function");
+  }
+  for (const [name, value] of [
+    ["gracefulCloseMs", gracefulCloseMs],
+    ["killedCloseMs", killedCloseMs],
+  ]) {
+    if (!Number.isSafeInteger(value) || value < 1) {
+      throw new RangeError(`${name} must be a positive safe integer`);
+    }
+  }
+  const localImageDiagnostics = createLocalImageDiagnosticBinder();
   const notificationListeners = new Set();
   const notificationHistory = [];
   let dynamicToolHandler = null;
@@ -1831,7 +2754,11 @@ export async function openAppServer(runtime, callbacks = {}) {
     environmentAttached: false,
   };
   async function dispatchNotification(message) {
-    const event = normalizeEvent(message);
+    const safeMessage = localImageDiagnostics.rewriteNotification(message);
+    if (safeMessage === null) {
+      return;
+    }
+    const event = normalizeEvent(safeMessage);
     notificationSequence += 1;
     notificationHistory.push({
       sequence: notificationSequence,
@@ -1849,21 +2776,23 @@ export async function openAppServer(runtime, callbacks = {}) {
     if (notificationHistory.length > EVENT_LIMIT * 2) {
       notificationHistory.shift();
     }
-    await callbacks.onNotification?.(message);
+    await callbacks.onNotification?.(safeMessage);
     for (const listener of notificationListeners) {
-      await listener(message);
+      await listener(safeMessage);
     }
   }
 
-  const child = spawn(
+  const appServerArgs = [
+    "app-server",
+    ...runtime.runtimeIsolationArgs,
+    ...runtime.permissionArgs,
+    "--strict-config",
+    "--stdio",
+  ];
+  const spawnedAtUtc = new Date().toISOString();
+  const child = spawnProcess(
     runtime.executable,
-    [
-      "app-server",
-      ...runtime.runtimeIsolationArgs,
-      ...runtime.permissionArgs,
-      "--strict-config",
-      "--stdio",
-    ],
+    appServerArgs,
     {
       cwd: runtime.runRoot,
       env: runtime.appServerEnvironment,
@@ -1874,13 +2803,51 @@ export async function openAppServer(runtime, callbacks = {}) {
   );
   let stderrBytes = 0;
   const stderrHash = createHash("sha256");
+  let stderrPrefix = Buffer.alloc(0);
+  let stderrTail = Buffer.alloc(0);
   let stderrDigest = null;
   let processExitCode = null;
+  let processCloseConfirmed = false;
+  const appServerLaunchEvidence = () => ({
+    pid: Number.isSafeInteger(child.pid) ? child.pid : null,
+    parentPid: process.pid,
+    executable: runtime.executable,
+    argv: [runtime.executable, ...appServerArgs],
+    cwd: runtime.runRoot,
+    spawnedAtUtc,
+    processCloseConfirmed,
+    processExitCode,
+  });
+  const attachAppServerLaunchEvidence = (error) => {
+    const existing =
+      error?.ticketEvidence && typeof error.ticketEvidence === "object"
+        ? error.ticketEvidence
+        : {};
+    error.ticketEvidence = {
+      ...existing,
+      appServer: appServerLaunchEvidence(),
+    };
+    return error;
+  };
   child.stderr.on("data", (chunk) => {
-    stderrBytes += chunk.length;
-    stderrHash.update(chunk);
+    const bytes = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
+    localImageDiagnostics.observe(bytes);
+    stderrBytes += bytes.length;
+    stderrHash.update(bytes);
+    if (stderrPrefix.length < STDERR_CAPTURE_BYTES) {
+      const remaining = STDERR_CAPTURE_BYTES - stderrPrefix.length;
+      stderrPrefix = Buffer.concat([stderrPrefix, bytes.subarray(0, remaining)]);
+    }
+    const tailInput = bytes.length > STDERR_CAPTURE_SIDE_BYTES
+      ? bytes.subarray(bytes.length - STDERR_CAPTURE_SIDE_BYTES)
+      : bytes;
+    stderrTail = Buffer.concat([stderrTail, tailInput]);
+    if (stderrTail.length > STDERR_CAPTURE_SIDE_BYTES) {
+      stderrTail = stderrTail.subarray(stderrTail.length - STDERR_CAPTURE_SIDE_BYTES);
+    }
   });
   child.once("close", (code) => {
+    processCloseConfirmed = true;
     processExitCode = code;
     stderrDigest ??= stderrHash.digest("hex");
   });
@@ -1979,6 +2946,9 @@ export async function openAppServer(runtime, callbacks = {}) {
       get processExitCode() {
         return processExitCode;
       },
+      get processCloseConfirmed() {
+        return processCloseConfirmed;
+      },
       setDynamicToolHandler(handler) {
         if (typeof handler !== "function") {
           throw new TypeError("dynamic tool handler must be a function");
@@ -1995,38 +2965,88 @@ export async function openAppServer(runtime, callbacks = {}) {
           }
         };
       },
+      bindLocalImageDiagnostics(value) {
+        localImageDiagnostics.bind(value);
+      },
+      get imageDiagnostics() {
+        return localImageDiagnostics.snapshot();
+      },
+      get successfulImageViews() {
+        return localImageDiagnostics.successfulImageViewsSnapshot();
+      },
       get stderr() {
+        const captureTruncated = stderrBytes > STDERR_CAPTURE_BYTES;
+        const prefixSide = stderrPrefix.subarray(0, STDERR_CAPTURE_SIDE_BYTES);
+        const prefixLineEnd = prefixSide.lastIndexOf(0x0a);
+        const tailLineStart = stderrTail.indexOf(0x0a);
+        const diagnosticSource = captureTruncated
+          ? Buffer.concat([
+              prefixLineEnd < 0
+                ? Buffer.alloc(0)
+                : prefixSide.subarray(0, prefixLineEnd + 1),
+              Buffer.from("\n[TRUNCATED:stderr-middle]\n", "utf8"),
+              tailLineStart < 0
+                ? Buffer.alloc(0)
+                : stderrTail.subarray(tailLineStart + 1),
+            ]).toString("utf8")
+          : stderrPrefix.toString("utf8");
         return {
-          redacted: true,
           truncated: stderrBytes > OUTPUT_LIMIT_BYTES,
           byteLength: stderrBytes,
           sha256: stderrDigest ?? stderrHash.copy().digest("hex"),
+          captureTruncated,
+          diagnostic: sanitizeDiagnosticEvidence(diagnosticSource, OUTPUT_LIMIT_BYTES),
         };
       },
       async close() {
         closePromise ??= (async () => {
           const inputClosed = client.waitForInputClose();
-          if (child.exitCode === null) {
-            const exited = new Promise((resolve) =>
-              child.once("close", resolve),
+          let terminationError = null;
+          try {
+            await terminateAppServerChild(
+              child,
+              { gracefulCloseMs, killedCloseMs },
+              () => processCloseConfirmed,
             );
-            child.stdin.end();
-            const timeout = setTimeout(() => child.kill(), 5000);
-            timeout.unref?.();
-            await exited;
-            clearTimeout(timeout);
+          } catch (error) {
+            terminationError = error;
+          } finally {
+            client.close(
+              terminationError ?? new Error("app server session closed"),
+            );
           }
-          await inputClosed;
+          let inputError = null;
+          try {
+            await inputClosed;
+          } catch (error) {
+            inputError = error;
+          }
+          if (terminationError !== null) {
+            throw terminationError;
+          }
+          if (inputError !== null) {
+            throw inputError;
+          }
         })();
         await closePromise;
       },
     };
   } catch (error) {
     client.close(error);
-    if (child.exitCode === null) {
-      child.kill();
+    try {
+      await terminateAppServerChild(
+        child,
+        { gracefulCloseMs, killedCloseMs },
+        () => processCloseConfirmed,
+      );
+    } catch (terminationError) {
+      throw attachAppServerLaunchEvidence(new AggregateError(
+        [error, terminationError],
+        "app server initialization failed and process termination was not confirmed",
+        { cause: error },
+      ));
     }
-    throw error;
+    throw attachAppServerLaunchEvidence(error);
   }
 }
 
@@ -2061,8 +3081,17 @@ const UNCONTROLLED_ITEM_TYPES = new Set([
   "fileChange",
 ]);
 const PUBLIC_MESSAGE_TYPES = new Set(["agentMessage", "userMessage"]);
-const SECRET_PATTERN =
-  /(?:-----BEGIN [A-Z0-9 ]*PRIVATE KEY-----|authorization\s*:|bearer\s+[A-Za-z0-9._~+/=-]{12,}|(?:api[-_]?key|token|password|secret|cookie)\s*[:=]\s*["']?[A-Za-z0-9._~+/=-]{8,}|--(?:api[-_]?key|token|password|secret|cookie)(?:\s+|=)\s*["']?[A-Za-z0-9._~+/=-]{8,}|(?:AKIA|ASIA)[A-Z0-9]{16}|(?:sk|ghp|github_pat)_[A-Za-z0-9_-]{12,}|eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}|ssh-(?:rsa|ed25519)\s+[A-Za-z0-9+/=]{20,})/iu;
+const SECRET_PATTERN = new RegExp(
+  [
+    "-----BEGIN [A-Z0-9 ]*PRIVATE KEY-----",
+    "authorization\\s*:",
+    "bearer\\s+[A-Za-z0-9._~+/=-]{12,}",
+    "(?:api[-_]?key|token|password|secret|cookie)\\s*[:=]\\s*[\"']?[A-Za-z0-9._~+/=-]{8,}",
+    "--(?:api[-_]?key|token|password|secret|cookie)(?:\\s+|=)\\s*[\"']?[A-Za-z0-9._~+/=-]{8,}",
+    "ssh-(?:rsa|ed25519)\\s+[A-Za-z0-9+/=]{20,}",
+  ].join("|"),
+  "iu",
+);
 const PASSIVE_NOTIFICATION_METHODS = new Set([
   "account/rateLimits/updated",
   "item/agentMessage/delta",
@@ -2120,7 +3149,9 @@ const SESSION_FATAL_REASONS = new Set([
 ]);
 
 export function containsCredentialText(value) {
-  if (typeof value === "string") return SECRET_PATTERN.test(value);
+  if (typeof value === "string") {
+    return SECRET_PATTERN.test(value) || CREDENTIAL_TOKEN_PATTERN.test(value);
+  }
   if (Array.isArray(value)) return value.some(containsCredentialText);
   if (value !== null && typeof value === "object") {
     return Object.values(value).some(containsCredentialText);
@@ -2263,6 +3294,29 @@ export function normalizeEvent(
         ? "approval-requested"
         : "uncontrolled-tool-surface",
     );
+  } else if (method === "error") {
+    const errorField = diagnosticOwnData(params, "error");
+    const source =
+      errorField.found && errorField.value !== null &&
+      typeof errorField.value === "object"
+        ? errorField.value
+        : params;
+    const code = diagnosticOwnData(source, "codexErrorInfo");
+    const message = diagnosticOwnData(source, "message");
+    const details = diagnosticOwnData(source, "additionalDetails");
+    const runtimeError = {};
+    if (code.found && code.value !== null) {
+      runtimeError.code = sanitizeDiagnosticEvidence(code.value);
+    }
+    if (message.found) {
+      runtimeError.message = sanitizeDiagnosticEvidence(message.value);
+    }
+    if (details.found && details.value !== null) {
+      runtimeError.details = sanitizeDiagnosticEvidence(details.value);
+    }
+    if (Object.keys(runtimeError).length > 0) {
+      event.runtimeError = runtimeError;
+    }
   } else if (method === "remoteControl/status/changed") {
     const environmentId = params.environmentId;
     const validStatus = [
@@ -2315,7 +3369,7 @@ export function normalizeEvent(
     } else {
       const byteLength = Buffer.byteLength(params.delta, "utf8");
       const blockers = [];
-      if (SECRET_PATTERN.test(params.delta)) {
+      if (containsCredentialText(params.delta)) {
         blockers.push("secret-shaped-output");
       }
       if (byteLength > MESSAGE_DELTA_BYTES_LIMIT) {
@@ -2345,6 +3399,30 @@ export function normalizeEvent(
     }
     if (item.type === "reasoning") {
       event.item = itemIdentity(item);
+    } else if (item.type === "imageView") {
+      event.item = {
+        id: item.id,
+        type: "imageView",
+        matchedInputIndex: item.matchedInputIndex,
+        effectivePathMatch: item.effectivePathMatch,
+      };
+      if (
+        !exactKeys(item, [
+          "id",
+          "type",
+          "matchedInputIndex",
+          "effectivePathMatch",
+        ]) ||
+        !Number.isSafeInteger(item.matchedInputIndex) ||
+        item.matchedInputIndex < 0 ||
+        item.effectivePathMatch !== "MATCH"
+      ) {
+        event.blockers.push(
+          item.effectivePathMatch === "MISMATCH"
+            ? "image-view-target-mismatch"
+            : "image-view-target-unverified",
+        );
+      }
     } else if (item.type === "commandExecution") {
       event.item = {
         ...itemIdentity(item),
@@ -2501,7 +3579,7 @@ export function normalizeEvent(
     event.mcpServer = { reported: true };
   }
 
-  if (SECRET_PATTERN.test(stableStringify(event))) {
+  if (containsCredentialText(stableStringify(event))) {
     return {
       method: "collector/redacted",
       threadId: threadIdentity.value,
@@ -2716,11 +3794,11 @@ function observedRuntimeSettingIsSafe(value, { nullable = false } = {}) {
       value.trim().length > 0 &&
       Buffer.byteLength(value) <= 256 &&
       !/[\u0000-\u001f\u007f]/u.test(value) &&
-      !SECRET_PATTERN.test(value))
+      !containsCredentialText(value))
   );
 }
 
-function parseThreadStartResponse(response, request) {
+export function parseThreadStartResponse(response, request) {
   const thread = response?.thread;
   const threadId = thread?.id;
   if (typeof threadId !== "string" || !threadId) {
@@ -2728,6 +3806,9 @@ function parseThreadStartResponse(response, request) {
   }
   if (thread?.ephemeral !== true) {
     throw new Error("thread/start did not create an ephemeral thread");
+  }
+  if (!Array.isArray(thread?.turns) || thread.turns.length !== 0) {
+    throw new Error("thread/start returned prior turn history");
   }
   if (
     comparablePath(response?.cwd) !== comparablePath(request.cwd) ||
@@ -2826,6 +3907,7 @@ function parseThreadStartResponse(response, request) {
     cwd: response.cwd,
     runtimeWorkspaceRoots: response.runtimeWorkspaceRoots,
     ephemeral: thread.ephemeral,
+    priorTurnCount: thread.turns.length,
     instructionSources: response.instructionSources,
     request,
   };
@@ -3228,7 +4310,7 @@ export async function runSubjectCase({
     ) {
       blockers.push("message-delta-limit-exceeded");
     }
-    if (SECRET_PATTERN.test(transcript)) {
+    if (containsCredentialText(transcript)) {
       blockers.push("secret-shaped-output");
     }
     return blockers;
@@ -4155,7 +5237,7 @@ function completeBoundedText(value, allowEmpty = false) {
     value.byteLength === Buffer.byteLength(value.text) &&
     value.byteLength <= OUTPUT_LIMIT_BYTES &&
     value.sha256 === sha256(value.text) &&
-    !SECRET_PATTERN.test(value.text)
+    !containsCredentialText(value.text)
   );
 }
 
@@ -4208,7 +5290,7 @@ function caseEventIsAdmissible(
     return false;
   }
   try {
-    if (SECRET_PATTERN.test(stableStringify(event))) {
+    if (containsCredentialText(stableStringify(event))) {
       return false;
     }
   } catch {
@@ -4261,6 +5343,19 @@ function caseEventIsAdmissible(
     }
     if (event.item.type === "reasoning") {
       return true;
+    }
+    if (event.item.type === "imageView") {
+      return (
+        exactKeys(event.item, [
+          "id",
+          "type",
+          "matchedInputIndex",
+          "effectivePathMatch",
+        ]) &&
+        Number.isSafeInteger(event.item.matchedInputIndex) &&
+        event.item.matchedInputIndex >= 0 &&
+        event.item.effectivePathMatch === "MATCH"
+      );
     }
     if (!PUBLIC_MESSAGE_TYPES.has(event.item.type)) {
       return false;

@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "id": "design-visual-m2-check-groups-v1",
+  "designOutput": {"path":"evals/skill-contracts/design-visual-m2-design-v2-raw.json","bytes":11718,"sha256":"3562f37ac2a6c8e8c4cda36e311dfd04d0162d6c8d16e89594de90cc275e9f34"},
+  "rule": "For each variant, every Design ID appears exactly once in a group or notApplicableDesignCheckIds. Boundary-group UNVERIFIED does not downgrade an otherwise complete in-scope visual PASS.",
+  "commonGroups": {
+    "shell": ["collection-modal-shell","collection-title-and-hierarchy","whole-frame-modal-separation","whole-frame-visual-balance","whole-frame-language-consistency","focused-title-banner"],
+    "sprite": ["sprite-rendering","focused-sprite-integrity"],
+    "navigation": ["navigation-model","whole-frame-navigation-count","focused-navigation-placement"],
+    "target": ["named-target-containment","whole-frame-target-fit"],
+    "boundaries": ["external-source-readback","pixel-exact-art-direction","selectable-style-details","additional-states","additional-viewports-and-inputs","runtime-and-package-readback","candidate-geometry-boundary","user-acceptance"]
+  },
+  "variants": {
+    "Default": {
+      "composition": ["produce-mass-composition","variant-isolation","default-preview","focused-default-layer-count"],
+      "metadataState": ["default-name","default-difficulty","active-action","unlocked-status","state-distinction","focused-variant-metadata","focused-difficulty-encoding","focused-state-action"],
+      "notApplicableDesignCheckIds": ["pixel-name","pixel-difficulty","pixel-preview","selectable-action"]
+    },
+    "Pixel": {
+      "composition": ["produce-mass-composition","variant-isolation","pixel-preview"],
+      "metadataState": ["pixel-name","pixel-difficulty","selectable-action","unlocked-status","state-distinction","focused-variant-metadata","focused-difficulty-encoding","focused-state-action"],
+      "notApplicableDesignCheckIds": ["default-name","default-difficulty","default-preview","active-action","focused-default-layer-count"]
+    }
+  }
+}

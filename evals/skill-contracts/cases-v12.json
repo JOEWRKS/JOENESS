@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 12,
+  "inherits": {
+    "path": "evals/skill-contracts/cases-v11.json",
+    "sha256": "a81799cf3aa737930d9f063bba5155187a3ec9d8eca5e5e191a25010e84dec33"
+  },
+  "cases": [
+    {
+      "id": "reference-invariant-versus-variant-fields",
+      "expectedSkills": ["design", "visual-check"],
+      "forbiddenSkills": [],
+      "requiredBehavior": ["sourced-invariant-variant-state-matrix", "variant-specific-content-not-literal-source-copy", "missing-variation-contract-unverified"],
+      "request": "Use the approved Default collection card to design and verify a Pixel variant. Preserve the shared layout, but do not require the Pixel name, art style, difficulty, or current-selection state to equal the Default example."
+    },
+    {
+      "id": "state-specific-action-semantics",
+      "expectedSkills": ["visual-check"],
+      "forbiddenSkills": ["design"],
+      "requiredBehavior": ["state-specific-label-and-action-check", "in-use-versus-selectable-not-cross-upgraded", "shared-invariants-checked-separately"],
+      "request": "One visual set is currently active and another is selectable. Verify each state against its own action contract while checking the shared modal structure independently."
+    }
+  ]
+}

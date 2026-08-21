@@ -37,6 +37,42 @@ function Get-HarnessExitCode {
     }
 }
 
+function New-HarnessPublicResult {
+    param(
+        [string] $Status, [string] $Mode, [string] $AgentsRoot, [string] $SkillsRoot,
+        [string[]] $ActiveSkills, [object[]] $Warnings, [bool] $ChangesRequired,
+        [object[]] $Changes, [object[]] $Blockers, $BackupPath, $Rollback,
+        [string[]] $UnresolvedTargets
+    )
+    [pscustomobject][ordered]@{
+        status = $Status
+        mode = $Mode
+        agentsRoot = $AgentsRoot
+        skillsRoot = $SkillsRoot
+        activeSkills = @($ActiveSkills | Sort-Object -CaseSensitive)
+        warnings = @($Warnings)
+        changesRequired = $ChangesRequired
+        changes = @($Changes)
+        blockers = @($Blockers)
+        backupPath = $BackupPath
+        rollback = $Rollback
+        unresolvedTargets = @($UnresolvedTargets)
+    }
+}
+
+function Get-HarnessPublicActiveSkills {
+    param([string] $SourceRoot)
+    try {
+        $manifestPath = Join-Path $SourceRoot 'vendor\source-manifest.json'
+        $manifestRead = Read-HarnessUtf8 $manifestPath
+        $manifest = $manifestRead.Text | ConvertFrom-Json
+        if ($null -eq $manifest.activeSkills) { throw 'Missing active skills' }
+        [pscustomobject]@{ ActiveSkills = @($manifest.activeSkills.PSObject.Properties.Name); Warning = $null }
+    } catch {
+        [pscustomobject]@{ ActiveSkills = @(); Warning = 'Unable to determine active skills because the source manifest could not be read.' }
+    }
+}
+
 function Read-HarnessUtf8 {
     param([string] $Path)
     $bytes = [IO.File]::ReadAllBytes($Path)
@@ -203,6 +239,54 @@ function Get-HarnessManifestSelections {
     }
 }
 
+function Get-HarnessLegacyInstallSelections {
+    param($LegacyEntry, $Manifest, [string] $SourceRoot)
+    $selected = [Collections.Generic.List[object]]::new()
+    foreach ($file in @($LegacyEntry.files)) {
+        $sourceRelative = Get-HarnessSafeRelativePath ([string] $file.sourcePath) 'Legacy source path'
+        $targetRelative = Get-HarnessSafeRelativePath ([string] $file.localPath) 'Legacy target path'
+        $sourcePath = Resolve-HarnessSourceFile $SourceRoot $sourceRelative
+        $hash = Get-HarnessValidSha256 $file.sha256 'Legacy source hash'
+        $bytes = [IO.File]::ReadAllBytes($sourcePath)
+        if ($bytes.Length -ne [long] $file.bytes -or (Get-HarnessSha256 $bytes) -cne $hash) {
+            throw "Legacy compatibility source mismatch: $sourceRelative"
+        }
+        $null = $selected.Add([pscustomobject]@{
+            RelativePath = $targetRelative
+            Path = $sourcePath
+            Hash = $hash
+            Entry = $file
+        })
+    }
+    $dependencyProperty = $LegacyEntry.PSObject.Properties['sourceDependencies']
+    foreach ($sourceName in @($(if ($null -ne $dependencyProperty) { $dependencyProperty.Value }))) {
+        $sourceProperty = $Manifest.sources.PSObject.Properties[[string] $sourceName]
+        if ($null -eq $sourceProperty) { throw "Missing legacy source dependency: $sourceName" }
+        foreach ($file in @($sourceProperty.Value.files)) {
+            $relative = Get-HarnessSafeRelativePath ([string] $file.localPath) 'Legacy dependency path'
+            $path = Resolve-HarnessSourceFile $SourceRoot $relative
+            $hash = Get-HarnessValidSha256 $file.sha256 "Legacy dependency hash for $relative"
+            $bytes = [IO.File]::ReadAllBytes($path)
+            if ($bytes.Length -ne [long] $file.bytes -or (Get-HarnessSha256 $bytes) -cne $hash) {
+                throw "Legacy dependency source mismatch: $relative"
+            }
+            $null = $selected.Add([pscustomobject]@{
+                RelativePath = $relative
+                Path = $path
+                Hash = $hash
+                Entry = $file
+            })
+        }
+    }
+    $destinations = [Collections.Generic.HashSet[string]]::new([StringComparer]::OrdinalIgnoreCase)
+    foreach ($selection in $selected) {
+        if (-not $destinations.Add($selection.RelativePath)) {
+            throw "Duplicate legacy install target: $($selection.RelativePath)"
+        }
+    }
+    $selected.ToArray()
+}
+
 function Get-HarnessFileSnapshot {
     param([string] $Path)
     if (-not (Test-Path -LiteralPath $Path)) {
@@ -259,9 +343,65 @@ function New-HarnessTargetDirectory {
     if (-not (Test-Path -LiteralPath $current -PathType Container)) { throw "Target parent is not a directory: $current" }
     for ($i = $missing.Count - 1; $i -ge 0; $i--) {
         $directory = $missing[$i]
-        [IO.Directory]::CreateDirectory($directory) | Out-Null
+        New-Item -ItemType Directory -Path $directory -ErrorAction Stop | Out-Null
         if ($null -ne $CreatedDirectories) { $CreatedDirectories.Add($directory) }
     }
+}
+
+function Remove-HarnessEmptyDirectories {
+    param([string] $BoundaryRoot, [string[]] $Directories)
+    $removed = [Collections.Generic.List[string]]::new()
+    $nonEmpty = [Collections.Generic.List[string]]::new()
+    $failed = [Collections.Generic.List[string]]::new()
+    $seen = [Collections.Generic.HashSet[string]]::new([StringComparer]::OrdinalIgnoreCase)
+    $unique = [Collections.Generic.List[string]]::new()
+    $boundary = [IO.Path]::GetFullPath($BoundaryRoot)
+    $boundaryPathRoot = [IO.Path]::GetPathRoot($boundary)
+    if ($boundary.Length -gt $boundaryPathRoot.Length) { $boundary = $boundary.TrimEnd('\', '/') }
+    $boundaryPrefix = if ($boundary.EndsWith([string] [IO.Path]::DirectorySeparatorChar)) { $boundary } else { $boundary + [IO.Path]::DirectorySeparatorChar }
+    foreach ($candidate in @($Directories)) {
+        if ([string]::IsNullOrWhiteSpace($candidate)) { continue }
+        try {
+            $full = [IO.Path]::GetFullPath($candidate)
+            $pathRoot = [IO.Path]::GetPathRoot($full)
+            if ($full.Length -gt $pathRoot.Length) { $full = $full.TrimEnd('\', '/') }
+            if ($full -ieq $pathRoot) { throw "Directory cleanup target is a filesystem root: $full" }
+            if ($full -ine $boundary -and -not $full.StartsWith($boundaryPrefix, [StringComparison]::OrdinalIgnoreCase)) {
+                throw "Directory cleanup target escapes its boundary: $full"
+            }
+            if ($seen.Add($full)) { $null = $unique.Add($full) }
+        } catch {
+            $null = $failed.Add([string] $candidate)
+        }
+    }
+    $ordered = @($unique | Sort-Object @{ Expression = { $_.Length }; Descending = $true }, @{ Expression = { $_ }; Descending = $true })
+    foreach ($directory in $ordered) {
+        try {
+            Assert-HarnessNoReparsePoint $boundary $directory 'Directory cleanup target'
+            $item = Get-Item -LiteralPath $directory -Force -ErrorAction Stop
+            if (-not $item.PSIsContainer -or ($item.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0) {
+                throw "Directory cleanup target is unsafe: $directory"
+            }
+            if (@(Get-ChildItem -LiteralPath $directory -Force -ErrorAction Stop).Count -ne 0) {
+                $null = $nonEmpty.Add($directory)
+                continue
+            }
+            $deletePath = [IO.Path]::GetFullPath($directory)
+            $deletePathRoot = [IO.Path]::GetPathRoot($deletePath)
+            if ($deletePath.Length -gt $deletePathRoot.Length) { $deletePath = $deletePath.TrimEnd('\', '/') }
+            if ($deletePath -ine $boundary -and -not $deletePath.StartsWith($boundaryPrefix, [StringComparison]::OrdinalIgnoreCase)) {
+                throw "Directory cleanup target escapes its boundary before deletion: $deletePath"
+            }
+            Assert-HarnessNoReparsePoint $boundary $deletePath 'Directory cleanup target before deletion'
+            [IO.Directory]::Delete($deletePath, $false)
+            $null = $removed.Add($directory)
+        } catch [Management.Automation.ItemNotFoundException] {
+            continue
+        } catch {
+            $null = $failed.Add($directory)
+        }
+    }
+    [pscustomobject] @{ removed = @($removed); nonEmpty = @($nonEmpty); failed = @($failed) }
 }
 
 function Set-HarnessFile {
@@ -360,42 +500,39 @@ function Get-HarnessSkillSkeletonState {
 function Get-HarnessFrontmatterCollisions {
     param(
         [string[]] $SkillRoots,
-        [hashtable] $ManagedSkillFiles
+        [hashtable] $ManagedSkillFiles,
+        [string[]] $OwnedSkillFiles = @()
     )
     $collisions = [Collections.Generic.List[string]]::new()
+    $reservedNames = @($ManagedSkillFiles.Keys) + @('joewrks-project-setup', 'joewrks-design-frontend')
     foreach ($root in $SkillRoots) {
         if (-not (Test-Path -LiteralPath $root -PathType Container)) { continue }
-        foreach ($directory in Get-ChildItem -LiteralPath $root -Directory -Recurse -Force -ErrorAction Stop) {
-            $relative = $directory.FullName.Substring($root.Length).TrimStart('\', '/')
-            if (($relative -split '[\\/]') -contains '.system') { continue }
-            foreach ($skillName in @($ManagedSkillFiles.Keys)) {
-                if ($directory.Name -ieq $skillName) {
-                    $managedSkillFile = [string] $ManagedSkillFiles[$skillName]
-                    $managedDirectory = if ([string]::IsNullOrWhiteSpace($managedSkillFile)) { $null } else { Split-Path -Parent $managedSkillFile }
-                    if ($null -eq $managedDirectory -or $directory.FullName -ine $managedDirectory) {
-                        $null = $collisions.Add("Duplicate skill directory: $($directory.FullName)")
-                    }
-                }
-            }
-        }
         foreach ($skillFile in Get-ChildItem -LiteralPath $root -Filter 'SKILL.md' -File -Recurse -Force -ErrorAction Stop) {
             $relative = $skillFile.FullName.Substring($root.Length).TrimStart('\', '/')
             if (($relative -split '[\\/]') -contains '.system') { continue }
-            $isManaged = @($ManagedSkillFiles.Values | Where-Object {
-                -not [string]::IsNullOrWhiteSpace([string] $_) -and $skillFile.FullName -ieq [string] $_
-            }).Count -gt 0
-            if ($isManaged) { continue }
+            $isOwned = @($OwnedSkillFiles | Where-Object { $skillFile.FullName -ieq $_ }).Count -gt 0
+            if ($isOwned) { continue }
             try {
                 $text = (Read-HarnessUtf8 $skillFile.FullName).Text
-                foreach ($skillName in @($ManagedSkillFiles.Keys)) {
-                    $pattern = '(?ms)\A---\s*\r?\n.*?^\s*name\s*:\s*[''"]?' + [regex]::Escape([string] $skillName) + '[''"]?\s*$.*?^---\s*$'
-                    if ($text -match $pattern) {
+                $frontmatter = [regex]::Match(
+                    $text,
+                    '\A---[ \t]*\r?\n(?<body>.*?)(?:\r?\n)---[ \t]*(?:\r?\n|\z)',
+                    [Text.RegularExpressions.RegexOptions]::Singleline
+                )
+                if (-not $frontmatter.Success) { continue }
+                foreach ($skillName in $reservedNames) {
+                    $escapedName = [regex]::Escape([string] $skillName)
+                    $pattern = '(?m)^[ \t]*name[ \t]*:[ \t]*(?:' + $escapedName + '|''' + $escapedName + '''|"' + $escapedName + '")(?:[ \t]+#.*)?[ \t]*$'
+                    if ($frontmatter.Groups['body'].Value -match $pattern) {
                         $null = $collisions.Add("Duplicate skill frontmatter name: $($skillFile.FullName)")
                         break
                     }
                 }
             } catch {
-                $null = $collisions.Add("Cannot inspect skill frontmatter as UTF-8: $($skillFile.FullName)")
+                $isReservedParent = @($reservedNames | Where-Object { $skillFile.Directory.Name -ieq $_ }).Count -gt 0
+                if ($isReservedParent) {
+                    $null = $collisions.Add("Cannot inspect skill frontmatter as UTF-8: $($skillFile.FullName)")
+                }
             }
         }
     }
@@ -417,6 +554,7 @@ function Invoke-JoewrksHarnessSync {
 
     $modeCount = ([int] $Check.IsPresent) + ([int] $Apply.IsPresent) + ([int] $Remove.IsPresent)
     if ($modeCount -ne 1) { throw 'Specify exactly one of -Check, -Apply, or -Remove.' }
+    $mode = if ($Check) { 'check' } elseif ($Apply) { 'apply' } else { 'remove' }
 
     $userProfile = if ([string]::IsNullOrWhiteSpace($env:USERPROFILE)) { [Environment]::GetFolderPath('UserProfile') } else { $env:USERPROFILE }
     $localAppData = if ([string]::IsNullOrWhiteSpace($env:LOCALAPPDATA)) { [Environment]::GetFolderPath('LocalApplicationData') } else { $env:LOCALAPPDATA }
@@ -438,6 +576,13 @@ function Invoke-JoewrksHarnessSync {
     $manifest = $null
     $manifestHash = $null
     $historicalV1WholeFiles = @{}
+    $historicalV1SkillName = $null
+    $release01WholeFiles = @{}
+    $release01SkillFiles = @{}
+    $release01SkillNames = @()
+    $release01LegacySkillNames = @()
+    $release01LegacyPrefixes = @()
+    $release01Dependencies = @()
     $sourceCore = $null
     $blockHash = $null
     $agentSnapshot = $null
@@ -447,7 +592,7 @@ function Invoke-JoewrksHarnessSync {
     $bundleSelection = 'personal-pilot'
     $warnings = @()
     if ($IncludeDesignFrontend) {
-        $warnings += 'DEPRECATED: -IncludeDesignFrontend no longer changes selection; personal-pilot already includes joewrks-design-frontend.'
+        $warnings += 'DEPRECATED: -IncludeDesignFrontend is ignored; the current JOENESS bundle already installs all active skills.'
     }
 
     foreach ($target in @(
@@ -477,7 +622,13 @@ function Invoke-JoewrksHarnessSync {
             $manifestSkillRelativePaths[$skillName] = Get-HarnessSafeRelativePath "skills/$skillName/SKILL.md" 'Manifest skill path'
         }
         $coreEntry = $manifest.activeCommonCore
-        $historicalCoreEntry = $manifest.evaluation.current.commonCore
+        $legacyInstallSources = $manifest.compatibility.legacyInstallSources
+        if ($null -eq $legacyInstallSources) { throw 'Missing legacy install compatibility sources' }
+        $legacyV1Entry = $legacyInstallSources.stateSchemaV1
+        if ($null -eq $legacyV1Entry) { throw 'Missing state schema V1 compatibility source' }
+        $historicalCoreEntry = $legacyV1Entry.commonCore
+        $historicalV1SkillName = [string] $legacyV1Entry.skillName
+        if ([string]::IsNullOrWhiteSpace($historicalV1SkillName)) { throw 'Missing historical V1 skill name' }
         $corePath = Resolve-HarnessSourceFile $sourceRoot ([string] $coreEntry.path)
         if (-not (Test-Path -LiteralPath $corePath -PathType Leaf)) { throw "Missing Common Core source: $($coreEntry.path)" }
         $sourceCoreRead = Read-HarnessUtf8 $corePath
@@ -502,14 +653,54 @@ function Invoke-JoewrksHarnessSync {
             Hash = $manifestHash
             Bytes = $manifestRead.Bytes
         })
-        $historicalDesignSkill = $manifest.activeSkills.PSObject.Properties['joewrks-design-frontend']
-        if ($null -eq $historicalDesignSkill) { throw 'Missing historical V1 design skill source' }
-        $historicalV1Manifest = [pscustomobject] @{
-            activeSkills = [pscustomobject] @{ 'joewrks-design-frontend' = $historicalDesignSkill.Value }
-            sources = $manifest.sources
+        $historicalCoreSource = Get-HarnessSafeRelativePath ([string] $historicalCoreEntry.sourcePath) 'Historical V1 Common Core source path'
+        $historicalCoreTarget = Get-HarnessSafeRelativePath ([string] $historicalCoreEntry.localPath) 'Historical V1 Common Core target path'
+        if ($historicalCoreTarget -cne 'AGENTS.md') { throw 'Historical V1 Common Core target is invalid' }
+        $historicalCorePath = Resolve-HarnessSourceFile $sourceRoot $historicalCoreSource
+        $historicalCoreBytes = [IO.File]::ReadAllBytes($historicalCorePath)
+        $historicalCoreHash = Get-HarnessValidSha256 $historicalCoreEntry.sha256 'Historical V1 Common Core hash'
+        if ((Get-HarnessSha256 $historicalCoreBytes) -cne $historicalCoreHash) {
+            throw "Historical V1 Common Core source mismatch: $historicalCoreSource"
         }
-        foreach ($selection in @(Get-HarnessManifestSelections $historicalV1Manifest $sourceRoot)) {
+        foreach ($selection in @(Get-HarnessLegacyInstallSelections $legacyV1Entry $manifest $sourceRoot)) {
             $historicalV1WholeFiles[$selection.RelativePath] = $selection.Hash
+        }
+
+        $release01 = $legacyInstallSources.PSObject.Properties['release0.1'].Value
+        if ($null -eq $release01) { throw 'Missing release 0.1 compatibility source' }
+        $release01Dependencies = @($legacyV1Entry.sourceDependencies | ForEach-Object { [string] $_ })
+        $releaseSelectionEntry = [pscustomobject] @{
+            files = @($release01.files)
+            sourceDependencies = @($release01Dependencies)
+        }
+        foreach ($selection in @(Get-HarnessLegacyInstallSelections $releaseSelectionEntry $manifest $sourceRoot)) {
+            $release01WholeFiles[$selection.RelativePath] = $selection.Hash
+        }
+        foreach ($file in @($release01.files)) {
+            $relative = Get-HarnessSafeRelativePath ([string] $file.localPath) 'Release 0.1 skill path'
+            $segments = @($relative -split '/')
+            if ($segments.Count -lt 3 -or $segments[0] -cne 'skills') {
+                throw "Release 0.1 skill path is outside a skill root: $relative"
+            }
+            $skillName = $segments[1]
+            if (-not $release01SkillFiles.ContainsKey($skillName)) {
+                $release01SkillFiles[$skillName] = [Collections.Generic.List[object]]::new()
+            }
+            $null = $release01SkillFiles[$skillName].Add($file)
+        }
+        $release01SkillNames = @($release01SkillFiles.Keys | Sort-Object -CaseSensitive)
+        $currentSkillNames = @($manifest.activeSkills.PSObject.Properties.Name | Sort-Object -CaseSensitive)
+        $release01LegacySkillNames = @($release01SkillNames | Where-Object { $currentSkillNames -cnotcontains $_ })
+        if ($release01LegacySkillNames.Count -eq 0) { throw 'Release 0.1 has no legacy skill names' }
+        $release01LegacyPrefixes = @($release01LegacySkillNames | ForEach-Object { "skills/$_/" })
+        $releaseCore = $release01.activeCommonCore
+        $releaseCoreSource = Get-HarnessSafeRelativePath ([string] $releaseCore.sourcePath) 'Release 0.1 Common Core source path'
+        $null = Get-HarnessSafeRelativePath ([string] $releaseCore.localPath) 'Release 0.1 Common Core target path'
+        $releaseCorePath = Resolve-HarnessSourceFile $sourceRoot $releaseCoreSource
+        $releaseCoreBytes = [IO.File]::ReadAllBytes($releaseCorePath)
+        $releaseCoreHash = Get-HarnessValidSha256 $releaseCore.sha256 'Release 0.1 Common Core hash'
+        if ($releaseCoreBytes.Length -ne [long] $releaseCore.bytes -or (Get-HarnessSha256 $releaseCoreBytes) -cne $releaseCoreHash) {
+            throw "Release 0.1 Common Core source mismatch: $releaseCoreSource"
         }
     } catch {
         $null = $blockers.Add([pscustomobject] @{ kind = 'sourceIntegrity'; message = $_.Exception.Message })
@@ -564,7 +755,7 @@ function Invoke-JoewrksHarnessSync {
                 Assert-HarnessObjectShape $state @('schemaVersion', 'sourceIdentities', 'managedBlocks', 'wholeFileTargets') 'State'
             } else {
                 Assert-HarnessObjectShape $state @('schemaVersion', 'bundleSelection', 'agentsHomeIdentitySha256', 'sourceIdentities', 'managedBlocks', 'wholeFileTargets') 'State'
-                if ([string] $state.bundleSelection -cne $bundleSelection) { throw 'State bundleSelection is invalid' }
+                if ([string] $state.bundleSelection -cne $bundleSelection) { throw 'State bundle selection is invalid' }
                 $stateAgentsHomeIdentity = Get-HarnessValidSha256 $state.agentsHomeIdentitySha256 'State AgentsHome identity'
                 if ($stateAgentsHomeIdentity -cne (Get-HarnessPathIdentity $resolvedAgentsHome)) {
                     $stateRootIdentityMismatch = $true
@@ -641,12 +832,12 @@ function Invoke-JoewrksHarnessSync {
                 if ($stateCommonCoreSourceHash -cne $installedCoreHash) {
                     throw 'State commonCore source identity does not match its installed manifest'
                 }
+                $installedSkillNames = @($installedManifest.activeSkills.PSObject.Properties.Name | Sort-Object -CaseSensitive)
                 if ($state.schemaVersion -eq 1) {
-                    $installedSkillNames = @($installedManifest.activeSkills.PSObject.Properties.Name | Sort-Object -CaseSensitive)
-                    if (($installedSkillNames -join "`n") -cne 'joewrks-design-frontend') {
+                    if (($installedSkillNames -join "`n") -cne $historicalV1SkillName) {
                         throw 'V1 installed manifest active skill set is not historical'
                     }
-                    $installedDesignSkill = $installedManifest.activeSkills.'joewrks-design-frontend'
+                    $installedDesignSkill = $installedManifest.activeSkills.PSObject.Properties[$historicalV1SkillName].Value
                     if ($installedDesignSkill.PSObject.Properties.Name -contains 'activationPolicy') {
                         throw 'V1 installed manifest design skill has a non-historical activationPolicy'
                     }
@@ -658,6 +849,60 @@ function Invoke-JoewrksHarnessSync {
                 $installedWholeFiles = @{}
                 foreach ($selection in @(Get-HarnessManifestSelections $installedManifest $resolvedAgentsHome)) {
                     $installedWholeFiles[$selection.RelativePath] = $selection.Hash
+                }
+                $isRelease01V2 = $false
+                if ($state.schemaVersion -eq 2) {
+                    $isRelease01V2 = @($installedSkillNames | Where-Object { $release01LegacySkillNames -ccontains $_ }).Count -gt 0
+                    if (-not $isRelease01V2) {
+                        foreach ($relative in @($installedWholeFiles.Keys)) {
+                            if (@($release01LegacyPrefixes | Where-Object { $relative.StartsWith($_, [StringComparison]::OrdinalIgnoreCase) }).Count -gt 0) {
+                                $isRelease01V2 = $true
+                                break
+                            }
+                        }
+                    }
+                    if ($isRelease01V2) {
+                        if (($installedSkillNames -join "`n") -cne ($release01SkillNames -join "`n")) {
+                            throw 'Release 0.1 installed manifest active skill set is not pinned'
+                        }
+                        if ($installedCorePath -cne $releaseCoreSource -or $installedCoreHash -cne $releaseCoreHash) {
+                            throw 'Release 0.1 installed manifest Common Core identity is not pinned'
+                        }
+                        foreach ($skillName in $release01SkillNames) {
+                            $installedSkill = $installedManifest.activeSkills.PSObject.Properties[$skillName].Value
+                            $expectedDependencies = if ($skillName -ceq $historicalV1SkillName) { @($release01Dependencies) } else { @() }
+                            $installedDependencies = @($installedSkill.sourceDependencies | ForEach-Object { [string] $_ })
+                            if (($installedDependencies -join "`n") -cne ($expectedDependencies -join "`n")) {
+                                throw "Release 0.1 installed manifest dependencies are not pinned: $skillName"
+                            }
+                            $expectedFiles = @($release01SkillFiles[$skillName])
+                            $installedFiles = @($installedSkill.files)
+                            if ($installedFiles.Count -ne $expectedFiles.Count) {
+                                throw "Release 0.1 installed manifest file descriptor count is not pinned: $skillName"
+                            }
+                            for ($fileIndex = 0; $fileIndex -lt $expectedFiles.Count; $fileIndex++) {
+                                $expectedFile = $expectedFiles[$fileIndex]
+                                $installedFile = $installedFiles[$fileIndex]
+                                $installedFilePath = Get-HarnessSafeRelativePath ([string] $installedFile.localPath) "Release 0.1 installed file path for $skillName"
+                                $installedFileHash = Get-HarnessValidSha256 $installedFile.sha256 "Release 0.1 installed file hash for $skillName"
+                                if ($installedFilePath -cne ([string] $expectedFile.localPath) -or
+                                    [long] $installedFile.bytes -ne [long] $expectedFile.bytes -or
+                                    $installedFileHash -cne ([string] $expectedFile.sha256).ToLowerInvariant()) {
+                                    throw "Release 0.1 installed manifest file descriptor is not pinned: $installedFilePath"
+                                }
+                            }
+                        }
+                        $installedNames = @($installedWholeFiles.Keys | Sort-Object -CaseSensitive)
+                        $releaseNames = @($release01WholeFiles.Keys | Sort-Object -CaseSensitive)
+                        if (($installedNames -join "`n") -cne ($releaseNames -join "`n")) {
+                            throw 'Release 0.1 installed manifest selection is not pinned'
+                        }
+                        foreach ($relative in $releaseNames) {
+                            if ($installedWholeFiles[$relative] -cne $release01WholeFiles[$relative]) {
+                                throw "Release 0.1 installed manifest target hash is not pinned: $relative"
+                            }
+                        }
+                    }
                 }
                 if ($state.schemaVersion -eq 1) {
                     $installedNames = @($installedWholeFiles.Keys | Sort-Object -CaseSensitive)
@@ -671,7 +916,13 @@ function Invoke-JoewrksHarnessSync {
                         }
                     }
                 }
-                $expectedWholeFiles = if ($state.schemaVersion -eq 1) { $historicalV1WholeFiles.Clone() } else { $installedWholeFiles }
+                $expectedWholeFiles = if ($state.schemaVersion -eq 1) {
+                    $historicalV1WholeFiles.Clone()
+                } elseif ($isRelease01V2) {
+                    $release01WholeFiles.Clone()
+                } else {
+                    $installedWholeFiles
+                }
                 $expectedWholeFiles[$installedManifestRelative] = $stateManifestSourceHash
                 $actualNames = @($stateWholeFiles.Keys | Sort-Object -CaseSensitive)
                 $expectedNames = @($expectedWholeFiles.Keys | Sort-Object -CaseSensitive)
@@ -747,9 +998,9 @@ function Invoke-JoewrksHarnessSync {
                     $optionalSnapshots[$relative] = $snapshot
                     if (-not $snapshot.Exists) { throw "Installed optional target is missing: $relative" }
                     if ($snapshot.Hash -cne $stateWholeFiles[$relative]) { throw "Installed optional target drifted: $relative" }
-                    $null = $changes.Add([pscustomobject] @{ kind = 'designFrontend'; action = 'remove'; target = $relative; planned = $true })
+                    $null = $changes.Add([pscustomobject] @{ kind = 'managedFile'; action = 'remove'; target = $relative; planned = $true })
                 } catch {
-                    $null = $blockers.Add([pscustomobject] @{ kind = 'optionalDrift'; message = $_.Exception.Message })
+                    $null = $blockers.Add([pscustomobject] @{ kind = 'managedDrift'; message = $_.Exception.Message })
                 }
             }
             if ($blockers.Count -eq 0) {
@@ -838,7 +1089,7 @@ function Invoke-JoewrksHarnessSync {
             if (-not $snapshot.Exists) { throw "Installed optional target is missing: $relative" }
             if ($snapshot.Hash -cne $stateWholeFiles[$relative]) { throw "Installed optional target drifted: $relative" }
         } catch {
-            $null = $blockers.Add([pscustomobject] @{ kind = 'optionalDrift'; message = $_.Exception.Message })
+            $null = $blockers.Add([pscustomobject] @{ kind = 'managedDrift'; message = $_.Exception.Message })
         }
     }
 
@@ -854,11 +1105,11 @@ function Invoke-JoewrksHarnessSync {
                 $optionalSnapshots[$entry.RelativePath] = Get-HarnessFileSnapshot $targetPath
             }
             if ($targetExists -and -not $owned) {
-                $null = $blockers.Add([pscustomobject] @{ kind = 'optionalCollision'; message = "Unmanaged optional target exists: $($entry.RelativePath)" })
+                $null = $blockers.Add([pscustomobject] @{ kind = 'managedCollision'; message = "Unmanaged optional target exists: $($entry.RelativePath)" })
             } elseif (-not $targetExists) {
-                $null = $changes.Add([pscustomobject] @{ kind = 'designFrontend'; action = 'install'; target = $entry.RelativePath; planned = $true })
+                $null = $changes.Add([pscustomobject] @{ kind = 'managedFile'; action = 'install'; target = $entry.RelativePath; planned = $true })
             } elseif ($targetIsFile -and $entry.Hash -cne $stateWholeFiles[$entry.RelativePath]) {
-                $null = $changes.Add([pscustomobject] @{ kind = 'designFrontend'; action = 'update'; target = $entry.RelativePath; planned = $true })
+                $null = $changes.Add([pscustomobject] @{ kind = 'managedFile'; action = 'update'; target = $entry.RelativePath; planned = $true })
             }
         } catch {
             $targetPathSafetyBlocked = $true
@@ -867,11 +1118,17 @@ function Invoke-JoewrksHarnessSync {
     }
     foreach ($relative in @($(if ($Remove) { @() } else { $stateWholeFiles.Keys }))) {
         if (-not $currentOptionalPaths.ContainsKey($relative)) {
-            $null = $changes.Add([pscustomobject] @{ kind = 'designFrontend'; action = 'remove'; target = $relative; planned = $true })
+            $null = $changes.Add([pscustomobject] @{ kind = 'managedFile'; action = 'remove'; target = $relative; planned = $true })
         }
     }
 
     $managedSkillFiles = @{}
+    $ownedSkillFiles = @()
+    foreach ($relative in @($stateWholeFiles.Keys)) {
+        if ([IO.Path]::GetFileName($relative) -ieq 'SKILL.md') {
+            $ownedSkillFiles += Resolve-HarnessSourceFile $resolvedAgentsHome $relative
+        }
+    }
     foreach ($skillName in @($(if ($Remove) { @() } else { $manifestSkillRelativePaths.Keys }))) {
         try {
             $relative = [string] $manifestSkillRelativePaths[$skillName]
@@ -893,7 +1150,7 @@ function Invoke-JoewrksHarnessSync {
     }
     $skillRoots = @((Join-Path $resolvedAgentsHome 'skills'), $codexSkillsPath)
     if (-not $Remove -and -not $targetPathSafetyBlocked) {
-        foreach ($collision in @(Get-HarnessFrontmatterCollisions $skillRoots $managedSkillFiles)) {
+        foreach ($collision in @(Get-HarnessFrontmatterCollisions $skillRoots $managedSkillFiles $ownedSkillFiles)) {
             $null = $blockers.Add([pscustomobject] @{ kind = 'duplicateSkill'; message = $collision })
         }
     }
@@ -958,25 +1215,19 @@ function Invoke-JoewrksHarnessSync {
     }
 
     if ((-not $Apply -and -not $Remove) -or $status -ne 'ready') {
-        return [pscustomobject] @{
-            status = $status
-            bundleSelection = $bundleSelection
-            warnings = @($warnings)
-            changesRequired = [bool] ($plannedChanges.Count -gt 0)
-            changes = @($changes)
-            blockers = @($blockers)
-            targets = $targets
-            capabilities = $capabilities
-            designFrontendPilot = $designFrontendPilot
-            backupPath = $null
-            rollback = $null
-            unresolvedTargets = @()
-        }
+        return New-HarnessPublicResult -Status $status -Mode $mode -AgentsRoot $resolvedAgentsHome -SkillsRoot (Join-Path $resolvedAgentsHome 'skills') -ActiveSkills @($manifestSkillRelativePaths.Keys) -Warnings @($warnings) -ChangesRequired ([bool] ($plannedChanges.Count -gt 0)) -Changes @($changes) -Blockers @($blockers) -BackupPath $null -Rollback $null -UnresolvedTargets @()
     }
 
     $operations = [Collections.Generic.List[object]]::new()
+    $removeCleanupDirectories = [Collections.Generic.List[string]]::new()
     if ($Remove) {
         foreach ($relative in @($stateWholeFiles.Keys | Sort-Object)) {
+            $cleanupDirectory = [IO.Path]::GetDirectoryName((Resolve-HarnessSourceFile $resolvedAgentsHome $relative))
+            while ($cleanupDirectory) {
+                $null = $removeCleanupDirectories.Add($cleanupDirectory)
+                if ($cleanupDirectory -ieq $resolvedAgentsHome) { break }
+                $cleanupDirectory = [IO.Path]::GetDirectoryName($cleanupDirectory)
+            }
             $null = $operations.Add([pscustomobject] @{
                 TargetPath = Resolve-HarnessSourceFile $resolvedAgentsHome $relative
                 DesiredExists = $false
@@ -1064,6 +1315,12 @@ function Invoke-JoewrksHarnessSync {
         }
         foreach ($relative in @($stateWholeFiles.Keys | Sort-Object)) {
             if (-not $currentOptionalPaths.ContainsKey($relative)) {
+                $cleanupDirectory = [IO.Path]::GetDirectoryName((Resolve-HarnessSourceFile $resolvedAgentsHome $relative))
+                while ($cleanupDirectory) {
+                    $null = $removeCleanupDirectories.Add($cleanupDirectory)
+                    if ($cleanupDirectory -ieq $resolvedAgentsHome) { break }
+                    $cleanupDirectory = [IO.Path]::GetDirectoryName($cleanupDirectory)
+                }
                 $null = $operations.Add([pscustomobject] @{
                     TargetPath = Resolve-HarnessSourceFile $resolvedAgentsHome $relative
                     DesiredExists = $false
@@ -1140,20 +1397,14 @@ function Invoke-JoewrksHarnessSync {
                 throw
             }
         }
-        return [pscustomobject] @{
-            status = if ($Remove) { 'removed' } else { 'current' }
-            bundleSelection = $bundleSelection
-            warnings = @($warnings)
-            changesRequired = $false
-            changes = @($changes)
-            blockers = @()
-            targets = $targets
-            capabilities = $capabilities
-            designFrontendPilot = $designFrontendPilot
-            backupPath = $backupPath
-            rollback = $null
-            unresolvedTargets = @()
+        if ($removeCleanupDirectories.Count -gt 0) {
+            $cleanupResult = Remove-HarnessEmptyDirectories $resolvedAgentsHome $removeCleanupDirectories
+            if (@($cleanupResult.failed).Count -gt 0) {
+                $failedCleanupTargets = @($cleanupResult.failed | Sort-Object -Unique)
+                throw "Obsolete directory cleanup failed: $($failedCleanupTargets -join ', ')"
+            }
         }
+        return New-HarnessPublicResult -Status $(if ($Remove) { 'removed' } else { 'current' }) -Mode $mode -AgentsRoot $resolvedAgentsHome -SkillsRoot (Join-Path $resolvedAgentsHome 'skills') -ActiveSkills @($manifestSkillRelativePaths.Keys) -Warnings @($warnings) -ChangesRequired $false -Changes @($changes) -Blockers @() -BackupPath $backupPath -Rollback $null -UnresolvedTargets @()
     } catch {
         $failureMessage = $_.Exception.Message
         for ($i = $applied.Count - 1; $i -ge 0; $i--) {
@@ -1184,7 +1435,7 @@ function Invoke-JoewrksHarnessSync {
                         AppliedHash = $operation.Snapshot.Hash
                         Snapshot = $current
                         Committed = $false
-                    }) $createdDirectories
+                    }) $null
                     $null = $restored.Add($operation.TargetPath)
                 } else {
                     Set-HarnessFile ([pscustomobject] @{
@@ -1195,7 +1446,7 @@ function Invoke-JoewrksHarnessSync {
                         Snapshot = $current
                         Committed = $false
                         Unresolved = $false
-                    }) $createdDirectories
+                    }) $null
                     $null = $removed.Add($operation.TargetPath)
                 }
             } catch {
@@ -1205,15 +1456,33 @@ function Invoke-JoewrksHarnessSync {
                 }
             }
         }
-        for ($i = $createdDirectories.Count - 1; $i -ge 0; $i--) {
-            $directory = $createdDirectories[$i]
-            try {
-                Get-Item -LiteralPath $directory -Force -ErrorAction Stop | Out-Null
-            } catch [Management.Automation.ItemNotFoundException] {
-                continue
-            } catch {
-                # Inspection failure is handled by the unresolved path below.
+        $agentsBoundary = [IO.Path]::GetFullPath($resolvedAgentsHome)
+        $agentsPathRoot = [IO.Path]::GetPathRoot($agentsBoundary)
+        if ($agentsBoundary.Length -gt $agentsPathRoot.Length) { $agentsBoundary = $agentsBoundary.TrimEnd('\', '/') }
+        $codexBoundary = [IO.Path]::GetFullPath($resolvedCodexHome)
+        $codexPathRoot = [IO.Path]::GetPathRoot($codexBoundary)
+        if ($codexBoundary.Length -gt $codexPathRoot.Length) { $codexBoundary = $codexBoundary.TrimEnd('\', '/') }
+        $agentsPrefix = if ($agentsBoundary.EndsWith([string] [IO.Path]::DirectorySeparatorChar)) { $agentsBoundary } else { $agentsBoundary + [IO.Path]::DirectorySeparatorChar }
+        $codexPrefix = if ($codexBoundary.EndsWith([string] [IO.Path]::DirectorySeparatorChar)) { $codexBoundary } else { $codexBoundary + [IO.Path]::DirectorySeparatorChar }
+        $agentsCreated = [Collections.Generic.List[string]]::new()
+        $codexCreated = [Collections.Generic.List[string]]::new()
+        $unclassifiedCreated = [Collections.Generic.List[string]]::new()
+        foreach ($directory in $createdDirectories) {
+            $full = [IO.Path]::GetFullPath($directory)
+            $fullPathRoot = [IO.Path]::GetPathRoot($full)
+            if ($full.Length -gt $fullPathRoot.Length) { $full = $full.TrimEnd('\', '/') }
+            if ($full -ieq $agentsBoundary -or $full.StartsWith($agentsPrefix, [StringComparison]::OrdinalIgnoreCase)) {
+                $null = $agentsCreated.Add($full)
+            } elseif ($full -ieq $codexBoundary -or $full.StartsWith($codexPrefix, [StringComparison]::OrdinalIgnoreCase)) {
+                $null = $codexCreated.Add($full)
+            } else {
+                $null = $unclassifiedCreated.Add($full)
             }
+        }
+        $cleanupResults = [Collections.Generic.List[object]]::new()
+        if ($agentsCreated.Count -gt 0) { $null = $cleanupResults.Add((Remove-HarnessEmptyDirectories $agentsBoundary $agentsCreated)) }
+        if ($codexCreated.Count -gt 0) { $null = $cleanupResults.Add((Remove-HarnessEmptyDirectories $codexBoundary $codexCreated)) }
+        foreach ($directory in @($unclassifiedCreated) + @($cleanupResults | ForEach-Object { @($_.nonEmpty) + @($_.failed) })) {
             if (-not $unresolvedSeen.ContainsKey($directory)) {
                 $unresolvedSeen[$directory] = $true
                 $null = $unresolved.Add($directory)
@@ -1225,20 +1494,7 @@ function Invoke-JoewrksHarnessSync {
             removedTargets = @($removed)
             unresolvedTargets = @($unresolved)
         }
-        return [pscustomobject] @{
-            status = if ($unresolved.Count -eq 0) { 'failed' } else { 'unknown' }
-            bundleSelection = $bundleSelection
-            warnings = @($warnings)
-            changesRequired = $true
-            changes = @($changes)
-            blockers = @([pscustomobject] @{ kind = if ($Remove) { 'removeFailure' } else { 'applyFailure' }; message = $failureMessage })
-            targets = $targets
-            capabilities = $capabilities
-            designFrontendPilot = $designFrontendPilot
-            backupPath = $backupPath
-            rollback = $rollback
-            unresolvedTargets = @($unresolved)
-        }
+        return New-HarnessPublicResult -Status $(if ($unresolved.Count -eq 0) { 'failed' } else { 'unknown' }) -Mode $mode -AgentsRoot $resolvedAgentsHome -SkillsRoot (Join-Path $resolvedAgentsHome 'skills') -ActiveSkills @($manifestSkillRelativePaths.Keys) -Warnings @($warnings) -ChangesRequired $true -Changes @($changes) -Blockers @([pscustomobject] @{ kind = if ($Remove) { 'removeFailure' } else { 'applyFailure' }; message = $failureMessage }) -BackupPath $backupPath -Rollback $rollback -UnresolvedTargets @($unresolved)
     }
 }
 
@@ -1250,18 +1506,12 @@ if ($MyInvocation.InvocationName -ne '.') {
     } catch {
         $invocationWarnings = @()
         if ($IncludeDesignFrontend) {
-            $invocationWarnings += 'DEPRECATED: -IncludeDesignFrontend no longer changes selection; personal-pilot already includes joewrks-design-frontend.'
+            $invocationWarnings += 'DEPRECATED: -IncludeDesignFrontend is ignored; the current JOENESS bundle already installs all active skills.'
         }
-        $result = [pscustomobject] @{
-            status = 'blocked'
-            bundleSelection = 'personal-pilot'
-            warnings = @($invocationWarnings)
-            changesRequired = $false
-            changes = @()
-            blockers = @([pscustomobject] @{ kind = 'invocation'; message = $_.Exception.Message })
-            targets = $null
-            capabilities = [pscustomobject] @{ python = 'observed-only'; figma = 'checked-at-task-time'; browser = 'checked-at-task-time' }
-        }
+        $invocationMode = if ($Check) { 'check' } elseif ($Apply) { 'apply' } else { 'remove' }
+        $publicActiveSkills = Get-HarnessPublicActiveSkills (Split-Path -Parent $PSScriptRoot)
+        if ($publicActiveSkills.Warning) { $invocationWarnings += $publicActiveSkills.Warning }
+        $result = New-HarnessPublicResult -Status 'blocked' -Mode $invocationMode -AgentsRoot $null -SkillsRoot $null -ActiveSkills @($publicActiveSkills.ActiveSkills) -Warnings @($invocationWarnings) -ChangesRequired $false -Changes @() -Blockers @([pscustomobject] @{ kind = 'invocation'; message = $_.Exception.Message }) -BackupPath $null -Rollback $null -UnresolvedTargets @()
     }
     $result | ConvertTo-Json -Compress -Depth 16
     exit (Get-HarnessExitCode $result.status)

@@ -1,0 +1,197 @@
+{
+  "invariants": [
+    {
+      "id": "INV-01",
+      "sourceIds": ["approved-default-composition"],
+      "observableFact": "The Collection UI reads as one centered, rounded cream card with a dark hand-drawn outline, a green COLLECTION ribbon, and restrained leaf decoration over a neutral backdrop."
+    },
+    {
+      "id": "INV-02",
+      "sourceIds": ["approved-default-composition"],
+      "observableFact": "The modal preserves the approved top-to-bottom hierarchy: collection banner, variant name, produce preview, difficulty display, state/status region, and primary action."
+    },
+    {
+      "id": "INV-03",
+      "sourceIds": ["approved-default-composition", "device-and-acceptance-boundary"],
+      "observableFact": "The preview contains ten representative fruit layers arranged as one dense, overlapping produce mass inside a single wide rounded box, rather than as separated icons or a thumbnail grid."
+    },
+    {
+      "id": "INV-04",
+      "sourceIds": ["approved-default-composition", "state-semantics"],
+      "observableFact": "Large fruit forms anchor the upper preview while smaller overlapping fruit forms consolidate the lower edge; edge cropping contributes to a continuous, full produce-box composition."
+    },
+    {
+      "id": "INV-05",
+      "sourceIds": ["state-semantics"],
+      "observableFact": "Every preview fruit is rendered from an actual sprite without aspect-ratio distortion or unintended opacity change."
+    },
+    {
+      "id": "INV-06",
+      "sourceIds": ["state-semantics"],
+      "observableFact": "Collection navigation provides exactly one previous control and one next control, both outside the clipped page content, and provides no BackAction in either the modal body or title banner."
+    },
+    {
+      "id": "INV-07",
+      "sourceIds": ["approved-default-composition"],
+      "observableFact": "The cream, green, orange, and dark-outline visual language remains cohesive across the banner, typography, preview frame, difficulty indicator, navigation controls, and action."
+    }
+  ],
+  "variants": {
+    "default": [
+      {
+        "id": "VAR-DEFAULT-01",
+        "sourceIds": ["variant-metadata"],
+        "observableFact": "The variant name is displayed as DEFAULT FRUIT."
+      },
+      {
+        "id": "VAR-DEFAULT-02",
+        "sourceIds": ["variant-metadata", "approved-default-composition"],
+        "observableFact": "The difficulty display communicates difficulty 1; in the approved rating language, one rating mark is emphasized and the remaining marks are inactive."
+      },
+      {
+        "id": "VAR-DEFAULT-03",
+        "sourceIds": ["approved-default-composition", "device-and-acceptance-boundary"],
+        "observableFact": "The Default preview preserves the approved ten-layer produce-mass arrangement, including dominant melons above and overlapping smaller fruit across the lower portion."
+      }
+    ],
+    "pixel": [
+      {
+        "id": "VAR-PIXEL-01",
+        "sourceIds": ["variant-metadata"],
+        "observableFact": "The variant name is displayed as PIXEL FRUIT."
+      },
+      {
+        "id": "VAR-PIXEL-02",
+        "sourceIds": ["variant-metadata", "approved-default-composition"],
+        "observableFact": "The difficulty display communicates difficulty 2; when using the approved rating language, two rating marks are emphasized and the remaining mark is inactive."
+      },
+      {
+        "id": "VAR-PIXEL-03",
+        "sourceIds": ["approved-default-composition", "state-semantics", "device-and-acceptance-boundary"],
+        "observableFact": "The Pixel preview uses actual Pixel-variant sprites while retaining the approved ten-layer, overlapping produce-box composition; it is not required to reproduce Default artwork literally."
+      }
+    ]
+  },
+  "states": {
+    "active": [
+      {
+        "id": "STATE-ACTIVE-01",
+        "sourceIds": ["state-semantics"],
+        "observableFact": "The primary action label reads IN USE."
+      },
+      {
+        "id": "STATE-ACTIVE-02",
+        "sourceIds": ["state-semantics"],
+        "observableFact": "The action and its surrounding presentation visibly use the active-set styling."
+      },
+      {
+        "id": "STATE-ACTIVE-03",
+        "sourceIds": ["state-semantics"],
+        "observableFact": "The IN USE action is non-interactable."
+      }
+    ],
+    "unlockedSelectable": [
+      {
+        "id": "STATE-SELECTABLE-01",
+        "sourceIds": ["state-semantics"],
+        "observableFact": "The primary action label reads USE THIS SET."
+      },
+      {
+        "id": "STATE-SELECTABLE-02",
+        "sourceIds": ["state-semantics"],
+        "observableFact": "The action and its surrounding presentation visibly use the selectable-set styling and are distinguishable from the active state."
+      },
+      {
+        "id": "STATE-SELECTABLE-03",
+        "sourceIds": ["state-semantics"],
+        "observableFact": "The USE THIS SET action is interactable."
+      }
+    ]
+  },
+  "wholeFrameChecks": [
+    {
+      "id": "WF-01",
+      "sourceIds": ["approved-default-composition", "device-and-acceptance-boundary"],
+      "observableFact": "On Xiaomi 23043RP34G running package com.joewrks.mergedrop.visual version 0.1.3 (4), the full modal—including its outer decoration, banner, preview, metadata, and primary action—is visible in the review frame without edge clipping."
+    },
+    {
+      "id": "WF-02",
+      "sourceIds": ["approved-default-composition"],
+      "observableFact": "At whole-frame scale, the modal remains the dominant centered element with clear surrounding backdrop and an immediately readable banner-to-action hierarchy."
+    },
+    {
+      "id": "WF-03",
+      "sourceIds": ["approved-default-composition", "device-and-acceptance-boundary"],
+      "observableFact": "The title, produce mass, difficulty display, state/status region, and action remain visually separated and legible, with no overlap that obscures content."
+    },
+    {
+      "id": "WF-04",
+      "sourceIds": ["approved-default-composition", "state-semantics"],
+      "observableFact": "The produce preview remains the principal visual focus of the modal while the previous and next controls remain visibly associated with navigation without displacing or obscuring the preview."
+    }
+  ],
+  "focusedChecks": [
+    {
+      "id": "FC-01",
+      "sourceIds": ["approved-default-composition", "variant-metadata"],
+      "observableFact": "In a focused header inspection, COLLECTION is legible on the green ribbon and the current variant name is centered beneath it with the correct Default or Pixel text."
+    },
+    {
+      "id": "FC-02",
+      "sourceIds": ["approved-default-composition", "device-and-acceptance-boundary"],
+      "observableFact": "In a focused preview inspection, ten discernible fruit layers overlap into one continuous produce mass, including purposeful edge crops and no unintended empty gaps that fragment the composition."
+    },
+    {
+      "id": "FC-03",
+      "sourceIds": ["state-semantics"],
+      "observableFact": "In a focused sprite inspection, each fruit retains its source proportions and intended opacity and shows no stretching, squashing, or unintended translucency."
+    },
+    {
+      "id": "FC-04",
+      "sourceIds": ["state-semantics"],
+      "observableFact": "In a focused navigation inspection, one previous and one next control are present, remain outside the clipped page content, and are not clipped themselves; no BackAction is present."
+    },
+    {
+      "id": "FC-05",
+      "sourceIds": ["variant-metadata", "approved-default-composition"],
+      "observableFact": "In a focused difficulty inspection, the emphasized rating count matches the displayed variant: one for Default and two for Pixel."
+    },
+    {
+      "id": "FC-06",
+      "sourceIds": ["state-semantics"],
+      "observableFact": "In a focused action inspection, active and unlocked-selectable renders differ in label, styling, and interaction availability exactly as defined by their respective state checks."
+    }
+  ],
+  "unverifiedBoundaries": [
+    {
+      "id": "UB-01",
+      "sourceIds": ["device-and-acceptance-boundary"],
+      "observableFact": "Explicit user acceptance is a separate evidence layer and remains unverified by agent-observable visual and interaction checks."
+    },
+    {
+      "id": "UB-02",
+      "sourceIds": ["approved-default-composition"],
+      "observableFact": "The approved Default reference does not specify literal Pixel labels, artwork, difficulty, or state; exact Pixel artwork identity and arrangement beyond the shared composition and cited Pixel metadata remain unverified."
+    },
+    {
+      "id": "UB-03",
+      "sourceIds": ["approved-default-composition"],
+      "observableFact": "No exact numeric coordinates, margins, dimensions, corner radii, font metrics, or color values are established by the composition reference; candidate-derived coordinates cannot serve as acceptance authority."
+    },
+    {
+      "id": "UB-04",
+      "sourceIds": ["state-semantics"],
+      "observableFact": "Locked, unavailable, loading, error, transition, and other states beyond active and unlocked-selectable have no cited acceptance semantics and remain unverified."
+    },
+    {
+      "id": "UB-05",
+      "sourceIds": ["state-semantics"],
+      "observableFact": "The authorities establish action interactability and navigation structure but do not establish animation, transition timing, gesture behavior, or numeric touch-target requirements."
+    },
+    {
+      "id": "UB-06",
+      "sourceIds": ["device-and-acceptance-boundary"],
+      "observableFact": "Rendering on devices, orientations, packages, or versions other than Xiaomi 23043RP34G with com.joewrks.mergedrop.visual version 0.1.3 (4) is outside the named acceptance target and remains unverified."
+    }
+  ]
+}

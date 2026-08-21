@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import {
-  existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync,
+  copyFileSync, cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync,
 } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
@@ -370,7 +370,16 @@ test('condition materialization uses real project-skill layout without fixture l
   const evaluator = await loadEvaluator();
   const runRoot = mkdtempSync(path.join(tmpdir(), 'design-router-layout-'));
   t.after(() => rmSync(runRoot, { recursive: true, force: true }));
-  const roots = await evaluator.materializeConditionRoots(runRoot, ROOT);
+  const sourceRoot = path.join(runRoot, 'legacy-source');
+  mkdirSync(path.join(sourceRoot, 'skills'), { recursive: true });
+  copyFileSync(path.join(ROOT, 'AGENTS.md'), path.join(sourceRoot, 'AGENTS.md'));
+  cpSync(path.join(ROOT, 'vendor'), path.join(sourceRoot, 'vendor'), { recursive: true });
+  cpSync(
+    path.join(ROOT, 'vendor', 'compatibility', 'joeness-0.1', 'skills', 'joewrks-design-frontend'),
+    path.join(sourceRoot, 'skills', 'joewrks-design-frontend'),
+    { recursive: true },
+  );
+  const roots = await evaluator.materializeConditionRoots(runRoot, sourceRoot);
   const candidateSkill = path.join(roots.candidate, '.agents', 'skills', 'joewrks-design-frontend', 'SKILL.md');
   assert.ok(existsSync(candidateSkill));
   assert.equal(existsSync(path.join(roots.control, '.agents', 'skills', 'joewrks-design-frontend')), false);

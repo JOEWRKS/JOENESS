@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "id": "design-visual-m2-v14-contract-test-v1",
+  "date": "2026-08-13",
+  "command": "node --test tests/skill-contracts.tests.mjs",
+  "workingDirectory": "D:/JOEWRKS/작업하네스/.worktrees/joeness-interface",
+  "exitCode": 0,
+  "result": {"tests":12,"pass":12,"fail":0,"cancelled":0,"skipped":0,"todo":0,"runnerDurationMs":177.6593},
+  "inputs": [
+    {"path":"skills/design/SKILL.md","bytes":5746,"sha256":"9c8090f908174f3f03a1727f8b484dda65c7320c8b2bf9035de06b7ca16df782"},
+    {"path":"skills/visual-check/references/durable-evidence.md","bytes":5391,"sha256":"cb2636a4df90775d4658a2d204b6b8e2ea11ba0173774d172a72ec6a8417195a"},
+    {"path":"evals/skill-contracts/cases-v14.json","bytes":1922,"sha256":"b0bdf1a895fab0bebaac1db0226f22d010dc5fb7e90ebbe097fed4e85f086db0"},
+    {"path":"tests/skill-contracts.tests.mjs","bytes":48668,"sha256":"2cf6f3bbc87ef6259faf4ee7c1642721f661dfa538b390170fa7bcc109474c5d"}
+  ],
+  "scope": "Static routing, wording, ledger, and contract assertions only; this does not prove fresh-agent semantic behavior, current runtime behavior, or user acceptance.",
+  "limitations": ["Exact stdout was observed in the task but not retained as a raw file; this JSON is a root-normalized invocation receipt."]
+}

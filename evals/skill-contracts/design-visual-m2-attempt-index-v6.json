@@ -1,0 +1,134 @@
+{
+  "schemaVersion": 6,
+  "id": "design-visual-m2-attempt-index-v6",
+  "date": "2026-08-13",
+  "recordType": "method-changed-live-attempt",
+  "predecessor": {
+    "path": "evals/skill-contracts/design-visual-m2-attempt-index-v5.json",
+    "bytes": 4557,
+    "sha256": "04ce185d3918cfa9096d71e8dc7bbe86ccbf2834813c980113b11a3182a332ed",
+    "disposition": "preserved-third-attempt-record"
+  },
+  "attempt": {
+    "id": "design-visual-m2-b1-v4",
+    "attemptCountIncludingV1": 4,
+    "methodChangedFromV3": "failure diagnostics were retained as bounded prioritized fields; evaluator inputs and acceptance contract were unchanged",
+    "command": "node evals/support/run-design-visual-m2-b1.mjs evals/skill-contracts/design-visual-m2-b1-smoke-plan-v4.json",
+    "launcherStatus": "runner-finished-blocked",
+    "launcherExitCode": 1,
+    "runnerExitCode": 1,
+    "retryCount": 0,
+    "automaticRetry": false,
+    "completedSessions": [],
+    "failedSession": 1,
+    "sample-a": "not-started",
+    "sample-b": "not-started"
+  },
+  "plan": {
+    "path": "evals/skill-contracts/design-visual-m2-b1-smoke-plan-v4.json",
+    "bytes": 5616,
+    "sha256": "6a2c1a3408d7d10c9044a86db336653772365f57a0cd01b130b4c4658c740737"
+  },
+  "blockedArtifact": {
+    "path": "evals/skill-contracts/design-visual-m2-b1-v4-blocked.json",
+    "bytes": 10898,
+    "sha256": "da48853672e3b10b26dd7c083a29c50c7d2e2f8e663c38422cbaab44930c021b",
+    "status": "blocked"
+  },
+  "executionSource": {
+    "head": "40b6ae790664b67e0b6153fc5b4a8d52d68021c3",
+    "implementationCommit": "0dc115bd18ab171611622519fe492a3548e1e971",
+    "runner": {
+      "path": "evals/support/run-design-visual-m2-b1.mjs",
+      "bytes": 68925,
+      "sha256": "3e5f6935d66c677bc19cebbf2fd40978f0005f2d79750b471e5614d6e4917f38"
+    },
+    "freshTurnAdapter": {
+      "path": "evals/support/run-fresh-evaluator-turn.mjs",
+      "bytes": 22580,
+      "sha256": "dc6af2d35e03eac862d645ca1dd6fa69b7e6f30b5565b1e77a3810e21588f41b"
+    },
+    "collector": {
+      "path": "evals/support/collect-codex-app-server.mjs",
+      "bytes": 276269,
+      "sha256": "1da319b344bbcb3a1cbe145c85409ac6e88ea76b9e45d664c544ae045f6e0a5b"
+    }
+  },
+  "observedFailure": {
+    "stage": "first Design evaluator evidence validation",
+    "turnTerminalStatus": "completed",
+    "appServerExitCode": 0,
+    "blockers": ["app-server-stderr"],
+    "stderr": {
+      "byteLength": 383,
+      "sha256": "931384259b4560d85c0ca3ab00e814837f54524299de28e5dd2d8edda9049c89",
+      "content": "UNVERIFIED-not-retained"
+    },
+    "confirmedDirectCondition": "non-empty App Server diagnostic output was rejected by the fail-closed policy",
+    "confirmedUnderlyingCause": "UNVERIFIED"
+  },
+  "diagnosticRetention": {
+    "v3DetailLossResolved": "partial",
+    "retained": [
+      "direct blocker",
+      "stderr byte length and raw hash",
+      "thread and turn identifiers",
+      "terminal completed event",
+      "App Server exit code",
+      "cleanup result"
+    ],
+    "notRetained": [
+      "stderr content",
+      "validated model output",
+      "evaluator identity",
+      "full runtime-error scan"
+    ],
+    "eventScan": {
+      "arrayLength": 2157,
+      "observedEventCount": 512,
+      "unscannedIndexCount": 1645,
+      "observedRuntimeErrorCount": 0,
+      "totalRuntimeErrorCount": "UNVERIFIED"
+    }
+  },
+  "cleanup": {
+    "blockedArtifactEvidence": {
+      "finishAttempts": 1,
+      "safeShutdownRequested": true,
+      "runtimeCleanup": "completed",
+      "appServerExitCode": 0,
+      "stagedRoot": "C:/Users/tjdwo/AppData/Local/Temp/joeness-m2b1-design-w6LHF3",
+      "stagedRootReadback": "removed"
+    },
+    "currentReadback": {
+      "matchingRunnerOrM2B1ProcessCount": 0,
+      "matchingRuntimeRootCount": 0,
+      "matchingIsolatedHomeCount": 0,
+      "exactStagedRootExists": false
+    },
+    "boundary": "Only the exact task-owned paths and matching process markers were checked; unrelated system processes are outside this claim."
+  },
+  "limitations": {
+    "stderrContent": "UNVERIFIED",
+    "stderrMeaning": "UNVERIFIED",
+    "underlyingCause": "UNVERIFIED",
+    "validatedModelOutput": "UNVERIFIED",
+    "evaluatorIdentity": "UNVERIFIED",
+    "designArtifact": "not-produced",
+    "sample-a-verdict": "UNVERIFIED-not-run",
+    "sample-b-verdict": "UNVERIFIED-not-run",
+    "originalDetail": "UNVERIFIED",
+    "userAcceptance": "UNVERIFIED",
+    "m2Completion": "UNVERIFIED"
+  },
+  "disposition": {
+    "m2b1": "blocked-with-direct-condition-known-and-underlying-cause-unknown",
+    "promotionPass": false
+  },
+  "nextAuthorizedMethod": {
+    "scope": "retain a bounded sanitized stderr capture while preserving the full byte count and raw hash; independently review it; create a new generation plan without changing evaluator inputs or acceptance rules",
+    "sameV4CommandRetryAuthorized": false,
+    "automaticRetryAuthorized": false,
+    "newAttemptRequiresStderrCaptureFixAndReview": true
+  }
+}

@@ -1,0 +1,6 @@
+interface:
+  display_name: "Visual Check"
+  short_description: "Verify produced visuals before completion"
+  default_prompt: "Use $visual-check only for a produced or changed visual result, an approved-reference translation, or a concrete visual defect. Load its required mode references, inspect the exact current result yourself, scope the verdict to checked named surfaces and states, evaluate sourced observables as PASS, FAIL, or UNVERIFIED, summarize applicable facts with the overall verdict first in the user's language, and block only dependent work."
+policy:
+  allow_implicit_invocation: true

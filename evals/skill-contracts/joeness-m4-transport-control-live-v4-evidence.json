@@ -1,0 +1,101 @@
+{
+  "schemaVersion": 1,
+  "id": "joeness-m4-transport-control-v1",
+  "assessment": {
+    "status": "PASS",
+    "scope": "transport-only",
+    "m4Behavior": "NOT-ASSESSED",
+    "joenessPolicy": "UNVERIFIED",
+    "superpowersCompatibility": "UNVERIFIED",
+    "promotionPass": false
+  },
+  "input": {
+    "descriptorCount": 1,
+    "byteLength": 70,
+    "sha256": "76b05839f5bf74d9374b15bec72cf9b5d4d5024f7ff472b026e223e86c4bfc21"
+  },
+  "output": {
+    "schemaVersion": 1,
+    "transport": "ok",
+    "byteLength": 36,
+    "sha256": "b270bf58038d3d0c99216e11735eeadd9ef29d2dbfa3b14e99bfe8900c36a6ea",
+    "schemaSha256": "874e782d9de6862f9718199125fcebfcf47f7990da06dce54d2d32f8c12db423"
+  },
+  "runtime": {
+    "codexVersion": "codex-cli 0.146.0",
+    "freshTurnCount": 1,
+    "retryCount": 0,
+    "dynamicToolCount": 0,
+    "sourceConfigBefore": {
+      "bytes": 8590,
+      "sha256": "3a7b848f3024260adf2d3e93ea4440703b4b253047163b3f95cb374ad9bdba10"
+    },
+    "sourceConfigAfter": {
+      "bytes": 8590,
+      "sha256": "3a7b848f3024260adf2d3e93ea4440703b4b253047163b3f95cb374ad9bdba10"
+    },
+    "sourceConfigReadback": "UNCHANGED",
+    "cleanup": {
+      "appServerLaunchCount": 1,
+      "appServerCloseConfirmedCount": 1,
+      "remainingOwnedProcessCount": 0,
+      "isolatedCodexHomeReadback": "absent",
+      "runRootReadback": "absent"
+    }
+  },
+  "sourceConfigReadback": "UNCHANGED",
+  "runtimeCleanup": "SAFE",
+  "executionSource": {
+    "planImplementationCommit": "f19f9013be5122867b36b4acc3b6a356f0f5e084",
+    "executionHead": "0431a8ae13ced91811b335cca97bb23a7eca39df",
+    "executionHeadParent": "f19f9013be5122867b36b4acc3b6a356f0f5e084",
+    "plan": {
+      "path": "evals/skill-contracts/joeness-m4-transport-control-live-plan-v4.json",
+      "bytes": 2938,
+      "sha256": "27bca3f7abe9c5cee4e36ef67f7d82d019902b7952e10e2a5a1dba8924425971"
+    },
+    "predecessor": {
+      "id": "joeness-m4-superpowers-live-v3",
+      "implementationCommit": "39387f9ce0708ed56ef7be8e34831690eae31021",
+      "executionHead": "e36175da3fa67e3b8aedddef6c12156dfd04a438",
+      "persistenceCommit": "8f5b8dcfd12fccabb1b25cbc813aec48340b7287",
+      "plan": {
+        "path": "evals/skill-contracts/joeness-m4-superpowers-live-plan-v3.json",
+        "bytes": 2958,
+        "sha256": "2d98638e45b65fa2c1dc98fd11d7eeb86d57d9c6d69ce0a56752315aa83fb855"
+      },
+      "blockedArtifact": {
+        "path": "evals/skill-contracts/joeness-m4-superpowers-live-v3-blocked.json",
+        "bytes": 3670,
+        "sha256": "41aeafdb4a5b4b2bb468510846cb889050681e844f40d21669dbaf4c5175978a"
+      },
+      "attemptIndex": {
+        "path": "evals/skill-contracts/joeness-m4-superpowers-attempt-index-v3.json",
+        "bytes": 10146,
+        "sha256": "6f6dec9b5556b19247c218a9940a7dc30dd29b60d374dd51438b865d9aa1867a"
+      },
+      "sameCommandRetryAuthorized": false,
+      "artifactsMatchSupportPlanAndWorking": true,
+      "executionHeadIsAncestorOfSupport": true,
+      "persistenceCommitIsAncestorOfSupport": true
+    },
+    "implementationSourcesMatchSupportPlanAndWorking": true
+  },
+  "resultBoundary": {
+    "state": "candidate",
+    "validation": "unvalidated",
+    "transportScopeOnly": true,
+    "m4Behavior": "NOT-ASSESSED",
+    "joenessPolicy": "UNVERIFIED",
+    "superpowersCompatibility": "UNVERIFIED",
+    "promotionPass": false,
+    "corePromotion": false,
+    "manifestPromotion": false
+  },
+  "privacy": {
+    "configContentsPersisted": false,
+    "processIdentifiersPersisted": false,
+    "absolutePathsPersisted": false,
+    "rawStderrPersisted": false
+  }
+}

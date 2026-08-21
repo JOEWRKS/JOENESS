@@ -20,14 +20,16 @@ Include:
 - the target, current milestone, and next deliverable;
 - selected decisions and constraints, referencing their existing artifact paths or URLs;
 - the current changed-file, worktree, design, or external-target state relevant to resuming;
-- an evidence receipt listing changes and commands or checks actually observed, their results, and explicit `completed`, `partial`, `unverified`, `blocked`, `unavailable`, or `unknown` status;
-- for a material failure that changed the path, outcome, safety, verification, or handoff: observed evidence; cause confirmed, suspected, or unknown; response fixed, mitigated, worked around, or unresolved; verification; remaining risk; and any workaround removal condition. Link raw logs rather than copying them, omit routine transient, TDD, and syntax failures, and never call a workaround a fix;
+- an evidence summary listing only changes and commands or checks actually observed, their results, and explicit `completed`, `partial`, `unverified`, `blocked`, or `unknown` status;
+- only when a material failure or workaround affects resumption: the outcome-changing fact, actual evidence and verification, whether the result was a direct fix, workaround, or remains unresolved, and any remaining limit or known removal condition. Include a cause only when evidenced and useful to the next decision. If an existing incident artifact already contains the detail, link it and record only the current resumption boundary without repeating its fields. Omit routine transient, TDD, and syntax failures, link raw logs rather than copying them, and never call a workaround a fix;
 - blockers, unknowns, and the receiver's first revalidation step;
 - a "suggested skills" section containing only skills with likely unique value for the next step.
 
+For a repeated visual or deployment incident only, also record the exact failing target/state; the last accepted evidence pointer or applicable source, build, and deployed hashes; the user's current verdict; rejected hypotheses or methods; and the next single hypothesis. Keep ordinary handoffs compact.
+
 Keep the handoff preferably at or below 4 KiB. Exceed that only when links cannot preserve evidence needed to resume safely.
 
-When observed, the evidence receipt also records wall-clock start and end, external run IDs, clean-build count, reviewer count, no-progress retry count, and token usage only when exposed. Mark unavailable fields unavailable; do not reconstruct them.
+Include timing, external run IDs, clean-build or reviewer counts, no-progress retries, or token usage only when already observed and useful for resumption or required by the project. Omit unavailable values and never reconstruct or collect them for the handoff. Do not run a check or create a document or log solely to fill the handoff.
 
 Do not duplicate content already captured in other artifacts (specs, plans, ADRs, issues, commits, diffs). Reference them by path or URL instead.
 

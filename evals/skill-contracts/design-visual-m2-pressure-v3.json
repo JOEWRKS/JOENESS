@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 3,
+  "id": "design-visual-m2-pressure-v3",
+  "date": "2026-08-12",
+  "predecessor": {"path":"evals/skill-contracts/design-visual-m2-pressure-v2.json","bytes":1620,"sha256":"5fe7dfdd62f49c3bc3cc12235a2d39fe37228d576a9e45fdc3a6c33e8f1ff9a2","disposition":"semantic-review-rejected"},
+  "candidate": {
+    "cases": {"path":"evals/skill-contracts/cases-v11.json","bytes":1123,"sha256":"a81799cf3aa737930d9f063bba5155187a3ec9d8eca5e5e191a25010e84dec33"},
+    "approvedReference": {"path":"evals/candidates/visual-check-approved-reference-v11.md","bytes":2527,"sha256":"a8694f9a74e2fe341955c032c908c9dc699deccb255c488cffdbcd3e7d2e82b8"},
+    "fixtureManifest": {"path":"evals/skill-contracts/visual-m2-fixtures-v2.json","bytes":4310,"sha256":"e5316787de5e543a6c550f7f0f43da7276b110f01980ef8f6904a27b01a58b63"}
+  },
+  "rvr": {
+    "blindNativeIconReading": "AMBIGUOUS: driver-or-awl medium; small firearm low",
+    "iconVerdict": "FAIL",
+    "directionSheetVerdict": "FAIL",
+    "acceptedEastStructuralVerdict": "PASS",
+    "acceptedEastNativeIdentityVerdict": "UNVERIFIED",
+    "result": "expected negative detections and scoped positive boundary"
+  },
+  "mergeDrop": {
+    "observed": {"amber":"FAIL","ivory":"FAIL","cobalt":"FAIL","jade":"FAIL"},
+    "groundTruth": {"amber":"FAIL","ivory":"FAIL","cobalt":"PASS","jade":"PASS"},
+    "failure": "The reviewer copied Default example literals across intentional Pixel and active/selectable variants, producing two false negatives."
+  },
+  "result": "semantic-review-rejected",
+  "classification": "reference-overconstraint-false-negative",
+  "methodChangeRequired": "Design must hand off a sourced invariant, variant-dependent, and state-dependent matrix; Visual Check must evaluate each field against its named contract.",
+  "retention": "Root-normalized final verdicts; original agent transport envelopes were not retained.",
+  "promotionPass": false
+}

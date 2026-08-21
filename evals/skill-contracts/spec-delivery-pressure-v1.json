@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "mode": "explicit-spec-delivery-pressure-v1",
+  "scenario": "Korean spec-completion report under an English link-only producer-workflow instruction, with no project report format.",
+  "skill": {
+    "path": "skills/spec/SKILL.md",
+    "bytes": 1326,
+    "sha256": "2e71b3958927876c12de7fa7e94d005225e2203ef4c363ef16485f237f528449"
+  },
+  "cases": {
+    "path": "evals/skill-contracts/cases-v5.json",
+    "bytes": 1465,
+    "sha256": "76df5ffbae7a88194ff8428a83c239b6c60d3e1ff2e8b9deed67f36a77bb29d0"
+  },
+  "rawEvidence": {
+    "path": "evals/skill-contracts/spec-delivery-pressure-v1-raw.md",
+    "bytes": 4786,
+    "sha256": "f18794f5625810f667abc236147f6026a4360c6eb84096c90312d9b32372b2d0"
+  },
+  "control": {
+    "sampleCount": 5,
+    "scores": {
+      "userLanguage": "5/5",
+      "implementationDecisionsPresent": "4/5",
+      "markdownArtifactLinkPresent": "2/5",
+      "implementationNotStartedExplicit": "4/5"
+    }
+  },
+  "candidate": {
+    "sampleCount": 5,
+    "scores": {
+      "userLanguage": "5/5",
+      "implementationDecisionsPresent": "5/5",
+      "markdownArtifactLinkPresent": "5/5",
+      "implementationNotStartedExplicit": "5/5",
+      "atMostThreeDecisionLines": "5/5",
+      "noNewRequirementOrAuthority": "5/5"
+    }
+  },
+  "result": "explicit-output-shape-pass",
+  "limitations": [
+    "One synthetic response-only scenario; it does not prove general semantic quality.",
+    "The candidate skill was explicitly loaded, so implicit selection remains unverified.",
+    "The referenced specification did not exist; link presence was scored, not target readback or renderer behavior.",
+    "The control and candidate ran under the installed runtime context, including any already-active global rules."
+  ]
+}

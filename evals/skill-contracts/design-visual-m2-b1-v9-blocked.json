@@ -1,0 +1,78 @@
+{
+  "schemaVersion": 1,
+  "id": "design-visual-m2-b1-v9-blocked",
+  "status": "blocked",
+  "completedSessions": [],
+  "failedSession": 1,
+  "error": {
+    "message": {
+      "text": "M2B1 Task 1 evidence is incomplete, blocked, or unbounded",
+      "byteLength": 57,
+      "sha256": "663ac4b7803cc3fe8f54a18e3ed68294c9ec59415065e993f08d45a42c3a1292",
+      "truncated": false,
+      "redacted": false,
+      "unsupported": false
+    }
+  },
+  "executionSource": {
+    "head": "078fe826b8b424a8550c3eb45b2b90099811cf9f",
+    "implementation": {
+      "collector": {
+        "bytes": 297632,
+        "path": "evals/support/collect-codex-app-server.mjs",
+        "sha256": "8b81ddb28be2a803500839a2de61f9bb397aa96711d039bdb7a3a86cfad8d687"
+      },
+      "freshTurnAdapter": {
+        "bytes": 42718,
+        "path": "evals/support/run-fresh-evaluator-turn.mjs",
+        "sha256": "d214d7970930769d0a04949f373a146c11ece4469b492156aa3abb92fd8a214d"
+      },
+      "repositoryCommit": "3b868d03519ef12f0fb17546999bc8a1a6bb7359",
+      "runner": {
+        "bytes": 111507,
+        "path": "evals/support/run-design-visual-m2-b1.mjs",
+        "sha256": "6de4c77ac18067d5bb352c1e9efaf3c6d3c89f2295490474becb5a996e732d33"
+      }
+    },
+    "plan": {
+      "bytes": 5648,
+      "path": "evals/skill-contracts/design-visual-m2-b1-smoke-plan-v9.json",
+      "sha256": "fd1aed546ff6d92121435d6de2806a5ec99fb3f7b3f6a866d5c1a9d87707e39a"
+    }
+  },
+  "partialEvidence": {},
+  "task1Prevalidation": {
+    "eventsCount": 1952,
+    "eventsLimit": 512,
+    "eventsOverLimit": true,
+    "mcpAfterCount": 2,
+    "mcpAfterLimit": 128,
+    "mcpAfterOverLimit": false,
+    "rawPayloadRetained": false
+  },
+  "cleanupEvidence": {
+    "finishAttempts": 1,
+    "phase": "post-evaluator-cleanup",
+    "runtime": {
+      "status": "completed"
+    },
+    "safeShutdownRequested": true,
+    "stagedRoots": [
+      {
+        "phase": "design",
+        "readback": "removed",
+        "runId": "design-bce54e36-423c-43e4-95e0-5d533d0ed66e"
+      }
+    ]
+  },
+  "retryCount": 0,
+  "evaluatorIdentities": [
+    {
+      "phase": "design",
+      "runId": "design-bce54e36-423c-43e4-95e0-5d533d0ed66e",
+      "sessionId": "21804",
+      "threadId": "019ffc0f-9173-7c51-abc9-c9bb115ac1d1",
+      "turnId": "019ffc0f-91be-73d1-b56e-7281ce7c2dc9"
+    }
+  ]
+}

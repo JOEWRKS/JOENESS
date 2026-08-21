@@ -1,7 +1,7 @@
 $ErrorActionPreference = 'Stop'
 
 $RepositoryRoot = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..'))
-$Implementation = Join-Path $RepositoryRoot 'skills\joewrks-project-setup\scripts\project-setup.ps1'
+$Implementation = Join-Path $RepositoryRoot 'skills\project\scripts\project-setup.ps1'
 if (-not (Test-Path -LiteralPath $Implementation -PathType Leaf)) {
     throw 'Missing required project setup helper'
 }

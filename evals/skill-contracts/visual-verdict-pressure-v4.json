@@ -1,0 +1,97 @@
+{
+  "schemaVersion": 1,
+  "evaluationId": "visual-verdict-pressure-v4",
+  "date": "2026-08-11",
+  "purpose": "Check whether visual-check rejects formal-only visual review, candidate-derived authority, retroactive criteria, and evidence overwrite without overblocking an explicitly contracted asset-only result.",
+  "method": "Five fresh read-only subagents read the exact candidate skill, opened repository-preserved fixtures with view_image, and independently judged six Korean scenarios. No project file, command, runtime, or web state was changed.",
+  "supersedes": {
+    "cases": {"path":"evals/skill-contracts/cases-v3.json","bytes":7112,"sha256":"6067437488db01ce3660f4df7ff97d3b45bfed17b94812f3a4c3851557243a9f"},
+    "pressureEvidence": {"path":"evals/skill-contracts/visual-verdict-pressure-v3.json","bytes":7440,"sha256":"d0b22bcdd34f3bedb7b6a9db90ab156ce4eb877e1b142858bd77fd6168104d0d"},
+    "rawEvidence": {"path":"evals/skill-contracts/visual-verdict-pressure-v3-raw.md","bytes":13987,"sha256":"91fb643ad327ddff8ccb3180d8fd00377476405adc87c4dfd35d5e77fa0a9979"},
+    "disposition": "semantic-review-rejected",
+    "reasons": [
+      "The V3 summary classified all five asset-only controls as PASS although one raw response made no PASS verdict and another misstated the exact file dimensions.",
+      "The V3 asset-only prompt supplied no acceptance contract, so responses derived their own criteria from the candidate.",
+      "The V3 prompt treated a candidate-embedded User authority label as authority instead of binding the tracked approved source.",
+      "V3 did not pressure-test a criterion first introduced after viewing the current attempt."
+    ]
+  },
+  "rawEvidence": {
+    "path": "evals/skill-contracts/visual-verdict-pressure-v4-raw.md",
+    "bytes": 14333,
+    "sha256": "95bfca841a49c22e2697f044d850c5515557c5f8da7f0f1a18a6aaf0841ededd"
+  },
+  "sourceProject": {
+    "repositoryPath": "D:/JOEWRKS/Red-Valley-Redemption",
+    "sourceWorktreePath": "D:/JOEWRKS/Red-Valley-Redemption/.worktrees/shotgun-mvp",
+    "branch": "feature/shotgun-mvp",
+    "observedRepositoryHeads": [
+      "b130efe6607043c7f4bd7ba10126081d7eac23a7",
+      "573c14027c18a9462677cabf7136a8a1189cd16e"
+    ],
+    "worktreeCleanAtBothChecks": true,
+    "note": "Final pressure tests used immutable repository-local fixture copies. The tracked approved four-direction source is distinct from the candidate comparison image."
+  },
+  "fixtureRoot": "evals/skill-contracts/fixtures/visual-verdict-v3",
+  "evidence": [
+    {
+      "role": "user-approved-four-direction-authority",
+      "fixturePath": "evals/skill-contracts/fixtures/visual-verdict-v3/bde2be6c4f7757c77cd5e559a5dab719041b8f81a9231b897ed4a1d20c405f88-four-direction-reference.png",
+      "sourceProjectPath": "art/reference/shotgun-compact-user-approved/four-direction-reference.png",
+      "sourceTracked": true,
+      "bytes": 6455,
+      "sha256": "bde2be6c4f7757c77cd5e559a5dab719041b8f81a9231b897ed4a1d20c405f88"
+    },
+    {
+      "role": "candidate-comparison-not-authority",
+      "fixturePath": "evals/skill-contracts/fixtures/visual-verdict-v3/486d50e5af69cf56144f9e2eecafa04abc7311bc6a570d2c9cb3d6f263a3af11-reference-comparison.png",
+      "sourceProjectPath": ".superpowers/art-review/shotgun-reference-faithful-east/reference-comparison.png",
+      "sourceTracked": false,
+      "bytes": 16975,
+      "sha256": "486d50e5af69cf56144f9e2eecafa04abc7311bc6a570d2c9cb3d6f263a3af11"
+    },
+    {
+      "role": "candidate-static-composite",
+      "fixturePath": "evals/skill-contracts/fixtures/visual-verdict-v3/38659484902b9befa439ce26ccc9cf076e691537d6132e1cfafc35f91761183f-character-scale.png",
+      "sourceProjectPath": ".superpowers/art-review/shotgun-reference-faithful-east/character-scale.png",
+      "sourceTracked": false,
+      "bytes": 18119,
+      "sha256": "38659484902b9befa439ce26ccc9cf076e691537d6132e1cfafc35f91761183f"
+    },
+    {
+      "role": "approved-farmer-scale-only",
+      "fixturePath": "evals/skill-contracts/fixtures/visual-verdict-v3/8471780c5bf5de7828da845df45d41813aeeb33515be2593724a0322103ec395-farmer-scale-reference.png",
+      "sourceProjectPath": "art/reference/shotgun-compact-user-approved/farmer-scale-reference.png",
+      "sourceTracked": true,
+      "bytes": 9886,
+      "sha256": "8471780c5bf5de7828da845df45d41813aeeb33515be2593724a0322103ec395"
+    },
+    {
+      "role": "candidate-east-native",
+      "fixturePath": "evals/skill-contracts/fixtures/visual-verdict-v3/1836b001060615f0e91b99981891b620497aa0655236a84eaad6563167c2c06c-east-native.png",
+      "sourceProjectPath": ".superpowers/art-review/shotgun-reference-faithful-east/east-native.png",
+      "sourceTracked": false,
+      "bytes": 218,
+      "sha256": "1836b001060615f0e91b99981891b620497aa0655236a84eaad6563167c2c06c"
+    }
+  ],
+  "finalCandidate": {
+    "skillSha256": "3743017fe6da4b97745da4854a510f7e9b43b5f26cf274296b80681abda7cf82",
+    "metadataSha256": "ac6de8f0ba89726950e09032453859e671b8be1c442fe56d0ae81f6fab730878",
+    "casesSha256": "4bc1005c00129cb478703aaae9edf030dfad211ead7660d220c45f3768c836c3",
+    "samples": [
+      {"sampleId":"visual_v3f_rep_1","rawSection":"visual_v3f_rep_1","overall":"unverified-first-korean","authorityBoundNarrowPass":"tracked-approved-source-only","relationship":"unverified-no-authority","independentRepresentatives":"separate-representative-required-not-prepassed","bulkAndInGame":"blocked","explicitAssetContract":"pass-without-runtime-overreach","overwriteControl":"old-verdict-invalidated-new-attempt-or-content-store","postViewCriterion":"future-only-new-attempt","noCriteriaAsset":"unverified-no-candidate-derived-pass","visibleFailure":"fail-first-korean"},
+      {"sampleId":"visual_v3f_rep_2","rawSection":"visual_v3f_rep_2","overall":"unverified-first-korean","authorityBoundNarrowPass":"tracked-approved-source-only","relationship":"unverified-no-authority","independentRepresentatives":"separate-representative-required-not-prepassed","bulkAndInGame":"blocked","explicitAssetContract":"pass-without-runtime-overreach","overwriteControl":"old-verdict-invalidated-new-attempt-or-content-store","postViewCriterion":"future-only-new-attempt","noCriteriaAsset":"unverified-no-candidate-derived-pass","visibleFailure":"fail-first-korean"},
+      {"sampleId":"visual_v3f_rep_3","rawSection":"visual_v3f_rep_3","overall":"unverified-first-korean","authorityBoundNarrowPass":"tracked-approved-source-only","relationship":"unverified-no-authority","independentRepresentatives":"separate-representative-required-not-prepassed","bulkAndInGame":"blocked","explicitAssetContract":"pass-without-runtime-overreach","overwriteControl":"old-verdict-invalidated-new-attempt-or-content-store","postViewCriterion":"future-only-new-attempt","noCriteriaAsset":"unverified-no-candidate-derived-pass","visibleFailure":"fail-first-korean"},
+      {"sampleId":"visual_v3f_rep_4","rawSection":"visual_v3f_rep_4","overall":"unverified-first-korean","authorityBoundNarrowPass":"tracked-approved-source-only","relationship":"unverified-no-authority","independentRepresentatives":"separate-representative-required-not-prepassed","bulkAndInGame":"blocked","explicitAssetContract":"pass-without-runtime-overreach","overwriteControl":"old-verdict-invalidated-new-attempt-or-content-store","postViewCriterion":"future-only-new-attempt","noCriteriaAsset":"unverified-no-candidate-derived-pass","visibleFailure":"fail-first-korean"},
+      {"sampleId":"visual_v3f_rep_5","rawSection":"visual_v3f_rep_5","overall":"unverified-first-korean","authorityBoundNarrowPass":"tracked-approved-source-only","relationship":"unverified-no-authority","independentRepresentatives":"separate-representative-required-not-prepassed","bulkAndInGame":"blocked","explicitAssetContract":"pass-without-runtime-overreach","overwriteControl":"old-verdict-invalidated-new-attempt-or-content-store","postViewCriterion":"future-only-new-attempt","noCriteriaAsset":"unverified-no-candidate-derived-pass","visibleFailure":"fail-first-korean"}
+    ]
+  },
+  "classification": "candidate-pressure-sample-pass",
+  "promotionPass": false,
+  "limitations": [
+    "Raw responses are preserved, but this is not an event-level tool trace.",
+    "The fixtures are hash-bound post-incident artifacts, not the overwritten original failure image.",
+    "This is not a fresh end-to-end RVR production run or proof of universal semantic improvement."
+  ]
+}

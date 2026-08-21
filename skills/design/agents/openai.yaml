@@ -1,0 +1,6 @@
+interface:
+  display_name: "Design"
+  short_description: "Route bounded UI and UX design work"
+  default_prompt: "Use $design to route this bounded UI or UX task; if it produces an output whose acceptance depends on appearance, layout, motion, or target rendering, hand the exact result to $visual-check before any acceptance or readiness claim."
+policy:
+  allow_implicit_invocation: true

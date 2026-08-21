@@ -1,309 +1,165 @@
-# JOENESS 0.1 Beta
+# JOENESS
 
-[한국어](#한국어-설명) · [English](#english-guide)
+> 0.1 Beta
 
-## 한국어 설명
+[한국어](#한국어) · [English](#english-guide)
 
-JOENESS는 Windows용 Codex에 프로젝트 맥락 관리, 디자인 참고자료, 인수인계 기능을 더하는 작업환경입니다. 모델 자체를 강화하는 도구가 아니라 긴 프로젝트에서 범위 이탈, 허위 완료, 불필요한 재작업을 줄이는 것이 목적입니다.
+## 한국어
 
-> 현재는 개인 실사용용 Beta입니다. 정식 안정 배포판으로 인증된 버전은 아닙니다.
+JOENESS는 Windows용 Codex 작업환경입니다. 프로젝트 맥락, 중요 작업의 구현·검토 분리, UI/UX 설계, 시각 결과 확인, 명세 요약, 인수인계를 필요한 작업에서만 돕습니다.
 
-### 1. 준비
+**JOENESS Core**는 모든 작업에서 보이는 얇은 안전 규칙입니다. 정상 작업에는 별도 보고 양식을 만들지 않고, 시각 결과나 영구 명세가 실제로 생긴 경우에만 알맞은 스킬로 넘깁니다.
 
-필요한 것은 다음 세 가지입니다.
+보고할 때는 목표와 성공 조건, 중요한 작업 방식이나 변경, 완료·부분 완료·차단 상태, 직접 해결·우회·미해결 상태, 실제 결과와 검증, 남은 경계를 내부적으로 구분합니다. 사용자에게는 결과를 먼저 말하고 해당하는 내용만 자연스럽게 전달합니다. 고정 항목이나 줄 수를 강제하지 않으며, 빈칸을 채우거나 보고를 위해 별도 검사·문서·로그를 만들지 않습니다.
 
-- Windows와 Codex
-- Windows PowerShell 5.1 이상(`powershell.exe`)
-- 신뢰할 수 있는 곳에서 받은 **JOENESS 전체 파일이 들어 있는 ZIP**
+사용자에게 보내는 경과·설명·의견·질문은 비전공자가 이해할 수 있는 말을 기본으로 합니다. 꼭 필요한 전문용어는 처음 쓸 때 바로 풀어 쓰고, 내부 작업 용어나 어색한 직역은 일상적인 말로 바꿉니다. 에이전트끼리의 내부 대화는 이 제한을 받지 않으며, 사용자가 기술 수준이나 형식을 직접 지정하면 그 요청을 따릅니다.
 
-설치에는 Node.js, Python, npm, Git, 관리자 권한이 필요하지 않습니다. 단, 나중에 프로젝트 지속 규칙을 설정하려면 해당 프로젝트가 Git 저장소여야 합니다.
+### 처음 사용: 5단계
 
-### 2. JOENESS 설치
+1. 받은 ZIP을 **전체 압축 해제**합니다. `JOENESS.ps1`만 따로 옮기지 마세요.
+2. 압축을 푼 폴더를 파일 탐색기로 열고, 위쪽 주소창에 `powershell`을 입력한 뒤 Enter를 눌러 PowerShell을 엽니다.
+3. 설치 전 상태를 확인합니다.
 
-#### 압축 풀기
+   ```powershell
+   powershell.exe -NoProfile -File .\JOENESS.ps1 -Check
+   ```
 
-1. 받은 ZIP 파일을 마우스 오른쪽 버튼으로 누릅니다.
-2. **모두 압축 풀기**를 누릅니다.
-3. 압축을 푼 폴더를 열고 `JOENESS-0.1.ps1`이 보이는지 확인합니다.
+4. PowerShell 출력의 `"status":"ready"`일 때만 적용하고, 바로 다시 확인합니다.
 
-`JOENESS-0.1.ps1`만 다른 곳으로 옮기지 마세요. 같은 폴더의 내부 파일도 설치에 필요합니다.
+   ```powershell
+   powershell.exe -NoProfile -File .\JOENESS.ps1 -Apply
+   powershell.exe -NoProfile -File .\JOENESS.ps1 -Check
+   ```
 
-#### PowerShell 열기
+5. Codex를 재실행하거나 새 작업을 열고, `로그인 화면을 만들어줘`처럼 자연어로 요청합니다.
 
-1. `JOENESS-0.1.ps1`이 보이는 파일 탐색기 창에서 위쪽 **주소창**을 클릭합니다.
-2. 주소를 지우고 `powershell`을 입력한 뒤 Enter를 누릅니다.
-3. 열린 PowerShell 창에 아래 명령을 한 줄씩 입력합니다.
+`ready`, `current`, `blocked` 같은 상태는 **PowerShell 출력**이며 Codex 채팅 답변이 아닙니다. `blocked`, `failed`, `unknown`이면 같은 명령을 반복하지 말고 PowerShell 출력 전체를 Codex에 붙여 넣으세요.
 
-먼저 설치 가능한지 확인합니다. 이 명령은 아직 설치하지 않습니다.
+### 역할
 
-```powershell
-powershell.exe -NoProfile -File .\JOENESS-0.1.ps1 -Check
-```
-
-- `"status":"ready"`이면 다음 명령을 실행합니다.
-- `"status":"current"`이면 이미 현재 받은 버전이 설치되어 있으므로 `-Apply`를 건너뜁니다.
-- `blocked`, `failed`, `unknown`이면 멈추고 PowerShell 출력 전체를 Codex에 붙여 넣습니다.
-
-`ready`일 때만 설치합니다.
-
-```powershell
-powershell.exe -NoProfile -File .\JOENESS-0.1.ps1 -Apply
-```
-
-결과가 `"status":"current"`이면 마지막 확인을 실행합니다. 다른 상태라면 더 실행하지 말고 출력 전체를 Codex에 붙여 넣습니다.
-
-```powershell
-powershell.exe -NoProfile -File .\JOENESS-0.1.ps1 -Check
-```
-
-마지막 결과가 `"status":"current"`이면 JOENESS 파일 설치가 끝난 것입니다. 이 상태는 아래 외부 플러그인의 설치 여부까지 확인한 결과는 아닙니다.
-
-### 3. 필수 플러그인 설치
-
-전체 JOENESS 작업환경에는 다음 세 플러그인이 모두 필요합니다. JOENESS 설치 스크립트가 대신 설치하지 않으므로 다음 순서로 직접 설치합니다.
-
-1. Codex의 설정 또는 플러그인 메뉴에서 플러그인 목록을 엽니다.
-2. 아래 검색 이름을 하나씩 입력하고 **Install(설치)** 버튼을 누릅니다.
-3. 이미 **Installed(설치됨)** 또는 **Enabled(활성화됨)**로 표시된 항목은 건너뜁니다.
-
-| 검색 이름 | 담당 역할 |
-|---|---|
-| **Figma** — `figma@openai-curated-remote` | 실제 Figma 파일 읽기·생성·수정·검증 |
-| **Superpowers** — `superpowers@openai-curated-remote` | 복잡한 기획, 체계적인 디버깅, 테스트 우선 개발, 코드 검토 |
-| **Ponytail** — `ponytail@ponytail` | 최소 구현, 과설계 방지, 불필요한 코드·의존성 감사 |
-
-세 플러그인은 모두 설치하지만 매 작업에서 전부 실행하지는 않습니다. Figma 작업에는 Figma, 복잡한 계획·디버깅에는 관련 Superpowers 기능, 과설계 점검에는 Ponytail만 사용합니다. Figma는 처음 사용할 때 계정 연결이 필요할 수 있습니다.
-
-### 4. Codex에서 처음 사용하기
-
-JOENESS와 세 플러그인을 모두 설치한 다음 새 Codex 작업을 **한 번만** 엽니다. 그래야 새 스킬과 플러그인 목록을 다시 읽습니다.
-
-JOENESS가 추가하는 도우미는 세 가지입니다.
-
-- `joewrks-project-setup`: 장기 프로젝트에 계획 원장이 없으면 한 번 제안하고, 승인 시 검증된 프로젝트 규칙과 단계별 로드맵을 연결합니다.
-- `joewrks-design-frontend`: 의미 있는 UI/UX 작업에서 UI UX Pro Max와 Apple Design 참고자료를 필요한 만큼 사용합니다.
-- `handoff`: 다른 작업이나 사람이 이어갈 때 현재 파일·Git·검사 결과를 짧게 정리합니다.
-
-또한 진행에 사용자 결정이 필요할 때 현재 차단 선택 중 유효한 미결 선택만 사용자 언어의 최종 확인 블록으로 분리하고 권장 기본값과 대기 작업을 표시하는 상호작용 안전 규칙이 설치됩니다. 외부 스킬의 고정 메뉴는 문구 그대로 복사하지 않습니다. 차단 선택이 없으면 작업 종료 시 메뉴 대신 현실적인 다음 단계 하나를 추천합니다. 실패 후에는 네이티브 크래시를 같은 방식으로 자동 재시도하지 않고, 원인을 확인한 오류와 멱등인 일시 오류만 한 번 다시 시도합니다. 중대한 실패나 이어받은 우회책은 항목명과 상태값까지 사용자 언어로 맞춘 증거·원인·처리·검증·남은 위험 영수증으로 보고하며, 선택적 외부 GUI 검증은 최초 방식과 서로 다른 대안 한 번까지만 허용합니다.
-
-설치만으로 프로젝트 코드나 디자인은 바뀌지 않습니다.
-
-앱·게임·웹·디자인 프로젝트를 새로 시작하거나 출시 범위를 크게 넓힐 때, 여러 세션이나 마일스톤이 필요하지만 쓸 수 있는 계획이 없으면 JOENESS가 영구 로드맵을 한 번 제안할 수 있습니다. 동의하면 루트 `TASKS.md`를 만들고 프로젝트 `AGENTS.md`에는 그 위치와 갱신 규칙만 추가합니다. 거절하면 어떤 파일도 만들지 않고 짧은 채팅 계획으로 평소 작업을 계속합니다. 이미 쓰는 이슈 트래커나 로드맵이 있으면 그것을 단일 원장으로 유지하며 중복 파일을 만들지 않습니다. 작은 수정·조사·설명에는 이 제안을 하지 않습니다.
-
-자동 제안을 기다리지 않고 지금 설정하고 싶을 때는 Git 프로젝트 폴더를 열고 다음 문장을 입력합니다.
-
-```text
-$joewrks-project-setup 이 프로젝트의 목표, 현재 구조, 실행·테스트 방법을 읽고 지속 작업 규칙으로 최소 설정해줘.
-```
-
-그 뒤에는 평소처럼 `로그인 화면을 만들어줘`처럼 요청하면 됩니다. 디자인 도우미는 관련 작업에서 자동으로 선택될 수 있으며, 반드시 적용하고 싶을 때만 `$joewrks-design-frontend`를 지정합니다. `$joewrks-project-setup`은 장기 프로젝트에서 조건부로 제안될 수 있고 직접 지정할 수도 있습니다. `$handoff`는 필요할 때 직접 요청합니다.
-
-### 5. 설치 결과와 문제 해결
-
-아래 상태는 Codex 채팅 답변이 아니라 **PowerShell에 출력되는 `"status":"단어"`**입니다.
-
-| 상태 | 뜻 | 할 일 |
+| 호출명 | 하는 일 | 자동 선택 조건 |
 |---|---|---|
-| `ready` | 설치 또는 업데이트 가능 | `-Apply`를 실행합니다. |
-| `current` | 현재 연 ZIP 또는 저장소 버전과 설치 상태가 일치 | 설치를 마치고 Codex를 사용합니다. 인터넷의 최신 버전을 뜻하지는 않습니다. |
-| `blocked` | 충돌을 발견해 덮어쓰지 않고 중단 | 강제로 진행하지 말고 출력 전체를 Codex에 붙여 넣습니다. |
-| `failed` | 설치가 실패하고 변경 내용을 되돌림 | 출력 전체를 Codex에 붙여 넣습니다. |
-| `unknown` | 설치 또는 복구 결과를 확정할 수 없음 | 같은 명령을 반복하지 말고 출력 전체를 Codex에 붙여 넣습니다. |
-| `removed` | 제거 완료 또는 제거할 설치 기록 없음 | 제거가 목적이었다면 끝냅니다. |
+| `$project` | 오래 이어질 프로젝트의 작업 맥락과 계획을 정리 | 쓸 수 있는 계획이 없는 장기 프로젝트 |
+| `$ticket` | 중요한 계획 항목 하나를 구현 에이전트와 새 검토 에이전트로 분리해 합격 조건별로 확인 | 기존 계획이나 티켓에 관찰 가능한 합격 조건이 있고, 여러 파일·데이터·시각 결과·배포처럼 재검토 이득이 큰 작업 |
+| `$design` | UI/UX 설계와 구현을 돕기 | UI/UX 설계 또는 구현이 필요한 작업 |
+| `$visual-check` | 새로 만들거나 수정한 시각 결과물을 완료 전에 직접 확인하고, 승인된 이미지를 다른 크기·형식으로 옮기거나 화면·움직임 문제를 검증 | 화면·이미지·움직임 결과가 생겼을 때, 승인된 이미지를 다른 크기·형식으로 옮길 때, 또는 재현 가능한 시각 결함이 있을 때 |
+| `$spec` | 파일로 만든 명세의 핵심 결정을 사용자 언어로 짧게 전달 | 영구 명세를 새로 만들거나 내용상 크게 고쳤을 때 |
+| `$handoff` | 다음 작업을 위한 짧은 인수인계를 만듦 | 자동 선택하지 않음; 요청할 때만 사용 |
 
-ExecutionPolicy 오류로 기본 명령이 막힐 때만 받은 ZIP이나 commit의 출처를 다시 확인한 뒤 다음 형식을 사용합니다.
+`$spec`은 최종 명세 파일을 다시 확인한 뒤 보고합니다. 프로젝트가 요구하지 않는 검토·승인 질문을 새로 만들지 않습니다.
+
+`$visual-check`는 복합 화면을 화면·상태별로 따로 판정하며, 일부 항목의 통과를 화면 전체 통과로 확대하지 않습니다.
+
+새 장기 프로젝트에 계획이 없으면 `$project`, 기존 계획에 준비된 중요 작업이 있으면 `$ticket`을 사용합니다. 오타·읽기 전용 조사·단일 자동검사로 완전히 판정되는 저위험 수정에는 둘 다 붙이지 않습니다. `$ticket` 검토자는 구현자의 설명을 먼저 받지 않는 새 컨텍스트이지만 같은 Codex 계열과 권한을 쓰므로 객관성을 보증하는 외부 심판은 아닙니다.
+
+자동 선택은 강제 후크가 아니라 **모델 라우팅(model routing)** 입니다. JOENESS Core가 시각 결과와 명세 전달 조건을 항상 알려 누락 가능성을 줄이지만, 특정 스킬 사용을 확실히 지정하려면 요청에 `$visual-check` 또는 `$spec`처럼 호출명을 적으세요.
+
+UI UX Pro Max와 Apple Design은 JOENESS 설치 때 함께 복사되는 `$design` 내부 참고자료입니다. 별도 호출 스킬로 노출되지 않습니다.
+
+### 외부 플러그인
+
+Figma, Superpowers, Ponytail은 JOENESS와 **별도로 설치**하는 외부 플러그인입니다. JOENESS는 이 플러그인의 설치·활성화 설정을 바꾸지 않습니다.
+
+암시적 호출을 제한할 수 없는 플러그인은 JOENESS 명시적 사용 전용 정책과 호환되지 않으므로 기본 비활성화를 권장합니다. JOENESS는 경고만 제공하며 플러그인 설정을 자동으로 변경하지 않습니다.
+
+| 플러그인 | JOENESS 권장 정책 |
+|---|---|
+| Figma | **conditional**: 실제 Figma 파일·노드·결과가 작업 대상일 때만 사용 |
+| Superpowers | **explicit-only**: 사용자가 요청하거나 프로젝트가 요구한 복잡한 계획·디버깅·TDD에만 사용. 암묵 호출을 막을 수 없다면 기본 비활성화 |
+| Ponytail | **default disabled**: 평소에는 끄고, 과설계 검토를 명시한 `review`·`audit`에만 사용 |
+
+### 업데이트와 제거
+
+새 ZIP을 전체 압축 해제한 뒤 같은 순서로 `-Check`를 실행합니다. 제거가 필요할 때만 전체 패키지 폴더에서 실행합니다.
 
 ```powershell
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\JOENESS-0.1.ps1 -Check
+powershell.exe -NoProfile -File .\JOENESS.ps1 -Remove
 ```
 
-이 방식이 필요하면 출처를 확인한 뒤 마지막 `-Check`만 `-Apply`, `-Check`, `-Remove` 중 필요한 작업으로 바꿉니다. `--force` 옵션은 없습니다.
+### 호환 이름
 
-### 6. 업데이트와 제거
-
-업데이트하려면 신뢰할 수 있는 새 ZIP을 다시 압축 해제하고 그 새 폴더에서 `-Check`를 실행합니다. `ready`이면 `-Apply` 후 `-Check`를 다시 실행하고, `current`이면 끝냅니다. 자동 업데이트 기능은 없습니다.
-
-제거하려면 설치에 사용한 전체 폴더 또는 호환되는 새 버전의 전체 폴더에서 다음 명령을 실행합니다.
-
-```powershell
-powershell.exe -NoProfile -File .\JOENESS-0.1.ps1 -Remove
-```
-
-`-Remove`는 미리보기가 아니라 즉시 제거를 시도합니다. JOENESS 소유가 확인된 파일과 관리 구역만 제거하며 다른 파일은 건드리지 않습니다. 백업은 자동으로 복원되거나 삭제되지 않으므로 개인 정보처럼 보관합니다.
-
-### 7. 고급 정보와 개발자용 내용
-
-<details>
-<summary>경로·안전 규칙·검증 정보 보기</summary>
-
-일반 사용자는 `README.md`와 `JOENESS-0.1.ps1`만 직접 사용하면 됩니다. 나머지 폴더와 파일은 설치기가 사용하므로 이름을 바꾸거나 삭제하지 마세요.
-
-기본 설치 위치는 사용자 프로필의 `.codex`와 `.agents`이며, 실행별 백업은 `%LOCALAPPDATA%\JOEWRKS\work-harness\backups`에 저장됩니다. 사용자 지정 위치가 필요하면 `-CodexHome`, `-AgentsHome`, `-BackupRoot`를 사용하고 업데이트·제거에도 같은 값을 사용합니다.
-
-no-state `removed`는 유효한 state나 알려진 차단 증거를 찾지 못했고 관리 파일을 변경하지 않았다는 뜻일 뿐, 인식하지 못한 vendor residue까지 모두 없다는 증명은 아닙니다.
-
-현재 판정과 제한은 [JOENESS 0.1 Beta 검증 원장](evals/JOENESS-0.1-BETA-VALIDATION.md), 설치 파일과 해시는 [source manifest](vendor/source-manifest.json)에 기록되어 있습니다.
-
-저장소의 `common-core.md`는 과거 평가 증거로 남아 있고 설치되지 않습니다. 현재 manifest는 조건부 결정, 실패 영수증, 재시도 경계, 주장과 증거의 일치를 다루는 작은 `interaction-safety-core-v1.md`를 설치합니다.
-
-</details>
+| 이전 이름 | 현재 이름 |
+|---|---|
+| `JOENESS-0.1.ps1` / `harness.ps1` | `JOENESS.ps1` |
+| `$joewrks-project-setup` | `$project` |
+| `$joewrks-design-frontend` | `$design` |
 
 ## English Guide
 
-JOENESS is a Windows Codex work environment for project context, selected design guidance, and evidence-linked handoffs. It does not strengthen the model itself; it aims to reduce scope drift, false completion claims, and avoidable rework in long projects.
+JOENESS is a Windows Codex work environment. It helps with project context, separated implementation and review for important work, UI/UX design, visual-result checks, specification summaries, and handoffs only when a task needs them.
 
-> This is a personal-use Beta, not a certified stable or general distribution.
+**JOENESS Core** is the thin safety instruction visible in every task. It adds no special report format to clean work and routes only an actual visual result or persistent-specification delivery to the applicable skill.
 
-### 1. Requirements
+For reporting, it internally separates the goal and success criteria, material method or deviation, complete/partial/blocked outcome, direct fix/workaround/unresolved handling, actual result and verification, and remaining boundary. It tells the user the outcome first and includes only applicable facts in natural prose. It imposes no fixed fields or line count and creates no check, document, or log merely to fill a report.
 
-You need:
+User-facing progress, explanations, opinions, and questions default to language a non-specialist can understand. Necessary technical terms are explained when first used, while internal workflow labels and awkward literal translations are replaced with ordinary words. Internal agent communication is exempt; an explicitly requested technical level or format takes precedence.
 
-- Windows and Codex
-- Windows PowerShell 5.1 or later (`powershell.exe`)
-- A trusted ZIP containing the **complete JOENESS package**
+### First use: five steps
 
-Installation does not require Node.js, Python, npm, Git, or administrator rights. The optional durable project setup step later requires a Git repository.
+1. **Extract the complete ZIP.** Do not move `JOENESS.ps1` by itself.
+2. Open the extracted folder in File Explorer, type `powershell` in the address bar, and press Enter.
+3. Check the installation state.
 
-### 2. Install JOENESS
+   ```powershell
+   powershell.exe -NoProfile -File .\JOENESS.ps1 -Check
+   ```
 
-#### Extract the package
+4. Only when PowerShell reports `"status":"ready"`, apply it and check again.
 
-1. Right-click the downloaded ZIP and select **Extract All**.
-2. Open the extracted folder.
-3. Confirm that `JOENESS-0.1.ps1` is visible.
+   ```powershell
+   powershell.exe -NoProfile -File .\JOENESS.ps1 -Apply
+   powershell.exe -NoProfile -File .\JOENESS.ps1 -Check
+   ```
 
-Do not move `JOENESS-0.1.ps1` by itself. Installation also needs the internal files beside it.
+5. Restart Codex or open a new task, then make a natural-language request such as “Build a login screen.”
 
-#### Open PowerShell
+Statuses such as `ready`, `current`, and `blocked` are **PowerShell output**, not a Codex chat response. For `blocked`, `failed`, or `unknown`, do not repeat the command; paste the complete PowerShell output into Codex.
 
-1. In the File Explorer window that shows `JOENESS-0.1.ps1`, click the address bar.
-2. Replace the address with `powershell` and press Enter.
-3. Enter the following commands one at a time in the PowerShell window.
+### Roles
 
-Check first. This command does not install anything.
-
-```powershell
-powershell.exe -NoProfile -File .\JOENESS-0.1.ps1 -Check
-```
-
-- If the status is `ready`, continue below.
-- If it is `current`, this package version is already installed; skip Apply.
-- If it is `blocked`, `failed`, or `unknown`, stop and paste the complete PowerShell output into Codex.
-
-Run Apply only after `ready`:
-
-```powershell
-powershell.exe -NoProfile -File .\JOENESS-0.1.ps1 -Apply
-```
-
-If Apply reports `"status":"current"`, run the final check. For any other status, stop and paste the complete output into Codex.
-
-```powershell
-powershell.exe -NoProfile -File .\JOENESS-0.1.ps1 -Check
-```
-
-The final result must be `"status":"current"`. This proves the JOENESS files match the package you opened; it does not check the external plugins below.
-
-### 3. Install the required plugins
-
-The complete JOENESS working environment requires all three plugins below. The JOENESS installer does not install them, so install them as follows:
-
-1. Open the plugin list from Codex settings or its plugin menu.
-2. Enter each search name below and select **Install**.
-3. Skip an item already marked **Installed** or **Enabled**.
-
-| Search name | Responsibility |
-|---|---|
-| **Figma** — `figma@openai-curated-remote` | Read, create, edit, and verify real Figma files |
-| **Superpowers** — `superpowers@openai-curated-remote` | Complex planning, systematic debugging, test-driven development, and code review |
-| **Ponytail** — `ponytail@ponytail` | Minimal implementation, over-engineering prevention, and audits of unnecessary code or dependencies |
-
-Install all three, but do not run all three on every task. Use Figma for real Figma work, the relevant Superpowers capability for complex planning or debugging, and Ponytail for over-engineering checks. Figma may request an account connection the first time it is used.
-
-### 4. Start using Codex
-
-After JOENESS and all three plugins are installed, open **one new Codex task** so Codex refreshes the available skills and plugins.
-
-JOENESS adds three helpers:
-
-- `joewrks-project-setup`: Offers a roadmap when a long-lived project has no usable ledger, then connects verified project rules and milestones after approval.
-- `joewrks-design-frontend`: Uses the relevant UI UX Pro Max and Apple Design material for meaningful UI/UX work.
-- `handoff`: Creates a compact continuation note tied to current files, Git, and observed checks.
-
-Installation also adds a compact interaction safety rule. When progress needs a user decision, it shows only valid unresolved choices in the user's language, with a recommended default and what waits. External skill menus are not copied verbatim. With no blocking choice, task completion gives one realistic recommended next step instead of a menu. After failure, it allows no automatic same-mechanism retry after a native crash and one bounded retry for a diagnosed error or known transient idempotent failure. Material failures or carried-forward workarounds use the user's language for all labels and status values in the five-field evidence, cause, handling, verification, and remaining risk receipt; optional external GUI verification gets one materially different fallback.
-
-Installation alone does not change project code or design.
-
-When an app, game, web, or design project starts at project level or receives a major release-scope expansion, JOENESS may offer one durable roadmap if the work will span sessions or milestones and no usable plan exists. Accepting may create a root `TASKS.md` and add only its location and update rule to the project `AGENTS.md`. Declining creates no files; normal work continues with a compact chat plan. An existing issue tracker or roadmap remains the single source of truth, so JOENESS does not create a duplicate. Small fixes, research, and explanations do not trigger this offer.
-
-Open the Git project folder and use this when you want to configure it immediately instead of waiting for an offer:
-
-```text
-$joewrks-project-setup read this project's goal, structure, run commands, and tests, then persist the smallest durable work contract.
-```
-
-Then request work normally. The design helper may be selected automatically for relevant work; name `$joewrks-design-frontend` only when you want to require it. Project setup may make the conditional offer above or be named explicitly. Request `$handoff` explicitly when needed.
-
-### 5. Read results and solve problems
-
-The statuses below appear in **PowerShell as `"status":"word"`**. They are not Codex chat responses.
-
-| Status | Meaning | Action |
+| Call | What it does | Automatic selection condition |
 |---|---|---|
-| `ready` | Installation or update can proceed | Run Apply. |
-| `current` | Installed state matches the ZIP or commit currently open | Finish setup and use Codex. It does not mean the newest internet release. |
-| `blocked` | A conflict was found and nothing unknown was force-overwritten | Stop and paste the complete output into Codex. |
-| `failed` | Installation failed and its changes were rolled back | Paste the complete output into Codex. |
-| `unknown` | Installation or recovery cannot be determined | Do not repeat the command; paste the complete output into Codex. |
-| `removed` | Removal completed or no owned installation state was found | Stop if removal was your goal. |
+| `$project` | Organizes durable project context and planning | A long-running project has no usable plan |
+| `$ticket` | Separates one important planned item between an implementer and a fresh evaluator, then checks each acceptance criterion | An existing plan or ticket has observable acceptance criteria and independent rechecking is worthwhile for multi-file, data, visual, or deployment work |
+| `$design` | Helps with UI/UX design and implementation | The task needs UI/UX design or implementation |
+| `$visual-check` | Directly checks a created or changed visual output before completion, and also moves an approved image to another size or format or verifies screen and motion problems | When a screen, image, or motion result is created or changed, when moving an approved image to another size or format, or when a reproducible visual defect needs checking |
+| `$spec` | Briefly delivers the key decisions in a persistent specification in the user's language | After creating or materially revising a persistent specification |
+| `$handoff` | Creates a brief handoff for the next task | Never automatic; use it when requested |
 
-If ExecutionPolicy blocks the normal command, verify the ZIP or commit source before using this form:
+`$spec` rechecks the final specification file before reporting. It does not invent a review or approval prompt that the project does not require.
+
+`$visual-check` judges each named surface and state separately and does not expand a narrow PASS into a whole-screen PASS.
+
+Use `$project` when a new long-running project lacks a plan, and `$ticket` for an important prepared item in that plan. Skip both for typos, read-only investigation, or a low-risk change fully decided by one deterministic check. The `$ticket` evaluator starts with fresh context and does not receive the implementer's narrative first, but it uses the same Codex family and permissions and therefore is not an objective external judge.
+
+Automatic selection is **model routing**, not a deterministic hook. JOENESS Core keeps the visual-result and specification-delivery conditions visible to reduce misses. To require a particular skill, include its call such as `$visual-check` or `$spec` in the request.
+
+UI UX Pro Max and Apple Design are bundled with every JOENESS installation as internal `$design` references. They are not exposed as separate callable skills.
+
+### External plugins
+
+Figma, Superpowers, and Ponytail are external plugins installed **separately** from JOENESS. JOENESS does not change their installation or enablement settings.
+
+A plugin whose implicit invocation cannot be constrained is incompatible with JOENESS explicit-only policy; default disabled is recommended. JOENESS only warns and never changes plugin settings automatically.
+
+| Plugin | JOENESS policy |
+|---|---|
+| Figma | **conditional**: only when a real Figma file, node, or result is the task target |
+| Superpowers | **explicit-only**: only when requested or required by the project for complex planning, debugging, or TDD; default disabled if implicit invocation cannot be prevented |
+| Ponytail | **default disabled**: enable only an explicitly requested `review` or `audit` for over-engineering |
+
+### Update and remove
+
+Extract the complete new ZIP, then repeat the Check step. Run removal only when needed from the complete package folder.
 
 ```powershell
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\JOENESS-0.1.ps1 -Check
+powershell.exe -NoProfile -File .\JOENESS.ps1 -Remove
 ```
 
-After verification, change only the final mode to the required `-Apply`, `-Check`, or `-Remove`. There is no `--force` option.
+### Compatibility names
 
-### 6. Update and remove
-
-To update, extract a new trusted ZIP, open PowerShell in that new folder, and run Check. If it reports `ready`, run Apply and then Check again. If it reports `current`, stop. There is no automatic updater.
-
-To remove JOENESS, open PowerShell in the complete package folder used for installation, or a compatible newer complete package, and run:
-
-```powershell
-powershell.exe -NoProfile -File .\JOENESS-0.1.ps1 -Remove
-```
-
-Remove is not a preview; it immediately attempts removal. It deletes only files and managed areas proven to belong to JOENESS. Backups are not restored or deleted automatically.
-
-Backups may contain prior state and the user's `AGENTS.md`; treat them as private.
-
-### 7. Advanced and developer information
-
-<details>
-<summary>Show paths, safety contracts, and verification information</summary>
-
-Regular users need to operate only `README.md` and `JOENESS-0.1.ps1`. Do not rename or delete the other files and folders used by the installer.
-
-Default installation uses the user profile's `.codex` and `.agents` directories. Per-run backups are stored under `%LOCALAPPDATA%\JOEWRKS\work-harness\backups`. When custom locations are necessary, use `-CodexHome`, `-AgentsHome`, and `-BackupRoot`, then reuse the same values for updates and removal.
-
-`harness.ps1` remains a compatibility alias; new users should use `JOENESS-0.1.ps1`.
-
-A no-state `removed` result means no valid state or recognized blocking evidence was found and no managed files were changed; it does not prove that every unrecognized or vendor residue is absent.
-
-An unresolved target or incomplete rollback prevents a final-state claim.
-
-The package includes the explicit-only `handoff` skill. JOENESS may offer a durable roadmap once when a project-level effort starts or a major release scope expands with no usable plan. Accepting may create `TASKS.md` and add only its location and update rule to the project `AGENTS.md`. Declining creates no files and normal work continues with a compact chat plan. An existing tracker remains the single source of truth. Project setup does not change product code, design, or dependencies.
-
-Repository `common-core.md` remains retained evaluation evidence and is not installed. The current manifest installs the compact `interaction-safety-core-v1.md` conditional-decision, failure-receipt, retry-boundary, and claim-evidence-binding rule.
-
-Native Codex handles ordinary small requests; persist only verified project-specific facts and the chosen ledger location in the project `AGENTS.md`.
-
-Do not add a separate `HARNESS.md`.
-
-See the [Beta validation ledger](evals/JOENESS-0.1-BETA-VALIDATION.md) for the current verdict and limitations, and the [source manifest](vendor/source-manifest.json) for installed files and hashes.
-
-Before sharing, run and record an exact-HEAD archive review and deliver the archive SHA-256 out of band.
-
-</details>
+| Previous name | Current name |
+|---|---|
+| `JOENESS-0.1.ps1` / `harness.ps1` | `JOENESS.ps1` |
+| `$joewrks-project-setup` | `$project` |
+| `$joewrks-design-frontend` | `$design` |

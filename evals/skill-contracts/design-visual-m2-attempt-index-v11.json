@@ -1,0 +1,211 @@
+{
+  "schemaVersion": 11,
+  "id": "design-visual-m2-attempt-index-v11",
+  "date": "2026-08-14",
+  "recordType": "method-changed-live-attempt",
+  "predecessor": {
+    "path": "evals/skill-contracts/design-visual-m2-attempt-index-v10.json",
+    "bytes": 8652,
+    "sha256": "4da913372536261cfc6b82298d99c408683c4fc92fde421b540a893f202e0e86",
+    "disposition": "preserved-eighth-attempt-record"
+  },
+  "attempt": {
+    "id": "design-visual-m2-b1-v9",
+    "attemptCountIncludingV1": 9,
+    "methodChangedFromV8": "retain only bounded Task 1 prevalidation counts and exceeded-limit booleans; evaluator inputs, prompts, acceptance contract, and limits were unchanged",
+    "command": "node evals/support/run-design-visual-m2-b1.mjs evals/skill-contracts/design-visual-m2-b1-smoke-plan-v9.json",
+    "invocationExitCode": 1,
+    "invocationDurationSeconds": 88.3,
+    "invocationObservationBasis": "DIRECT-invocation-bound-shell-result",
+    "retryCount": 0,
+    "automaticRetry": false,
+    "completedSessions": [],
+    "failedSession": 1,
+    "sample-a": "not-started",
+    "sample-b": "not-started"
+  },
+  "plan": {
+    "path": "evals/skill-contracts/design-visual-m2-b1-smoke-plan-v9.json",
+    "bytes": 5648,
+    "sha256": "fd1aed546ff6d92121435d6de2806a5ec99fb3f7b3f6a866d5c1a9d87707e39a"
+  },
+  "blockedArtifact": {
+    "path": "evals/skill-contracts/design-visual-m2-b1-v9-blocked.json",
+    "bytes": 2317,
+    "sha256": "e91beb6dad95163cbbdc31b8ba326c222b72bbbc0c71ef02ccde4fd1e7605887",
+    "status": "blocked"
+  },
+  "executionSource": {
+    "head": "078fe826b8b424a8550c3eb45b2b90099811cf9f",
+    "implementationCommit": "3b868d03519ef12f0fb17546999bc8a1a6bb7359",
+    "runner": {
+      "path": "evals/support/run-design-visual-m2-b1.mjs",
+      "bytes": 111507,
+      "sha256": "6de4c77ac18067d5bb352c1e9efaf3c6d3c89f2295490474becb5a996e732d33"
+    },
+    "freshTurnAdapter": {
+      "path": "evals/support/run-fresh-evaluator-turn.mjs",
+      "bytes": 42718,
+      "sha256": "d214d7970930769d0a04949f373a146c11ece4469b492156aa3abb92fd8a214d"
+    },
+    "collector": {
+      "path": "evals/support/collect-codex-app-server.mjs",
+      "bytes": 297632,
+      "sha256": "8b81ddb28be2a803500839a2de61f9bb397aa96711d039bdb7a3a86cfad8d687"
+    }
+  },
+  "observedFailure": {
+    "artifactDirect": {
+      "message": {
+        "text": "M2B1 Task 1 evidence is incomplete, blocked, or unbounded",
+        "byteLength": 57,
+        "sha256": "663ac4b7803cc3fe8f54a18e3ed68294c9ec59415065e993f08d45a42c3a1292",
+        "truncated": false,
+        "redacted": false,
+        "unsupported": false
+      },
+      "completedSessions": [],
+      "failedSession": 1,
+      "partialEvidence": {},
+      "task1Prevalidation": {
+        "eventsCount": 1952,
+        "eventsLimit": 512,
+        "eventsOverLimit": true,
+        "mcpAfterCount": 2,
+        "mcpAfterLimit": 128,
+        "mcpAfterOverLimit": false,
+        "rawPayloadRetained": false
+      },
+      "retryCount": 0,
+      "evaluatorIdentityCount": 1,
+      "evaluatorIdentity": {
+        "phase": "design",
+        "runId": "design-bce54e36-423c-43e4-95e0-5d533d0ed66e",
+        "sessionId": "21804",
+        "threadId": "019ffc0f-9173-7c51-abc9-c9bb115ac1d1",
+        "turnId": "019ffc0f-91be-73d1-b56e-7281ce7c2dc9"
+      }
+    },
+    "pinnedControlFlowInference": {
+      "basis": "INFERRED-from-the-exact-pinned-runner-control-flow-not-a-direct-blocked-artifact-field",
+      "freshTurnReturned": true,
+      "turnShutdownAssertionPassed": true,
+      "failureLocation": "the first retainTask1Evidence guard before the Design session was added to completedSessions"
+    },
+    "boundedConclusion": "The retained event count was 1952 and exceeded 512; the MCP-after count was 2 and did not exceed 128. Why the event count grew to 1952 is not retained."
+  },
+  "outputPresence": {
+    "designRaw": {
+      "path": "evals/skill-contracts/design-visual-m2-b1-v9-design-raw.json",
+      "status": "absent"
+    },
+    "designHandoff": {
+      "path": "evals/skill-contracts/design-visual-m2-b1-v9-design-handoff.json",
+      "status": "absent"
+    },
+    "sampleARaw": {
+      "path": "evals/skill-contracts/design-visual-m2-b1-v9-sample-a-raw.json",
+      "status": "absent"
+    },
+    "sampleAEnvelope": {
+      "path": "evals/skill-contracts/design-visual-m2-b1-v9-sample-a-envelope.json",
+      "status": "absent"
+    },
+    "sampleBRaw": {
+      "path": "evals/skill-contracts/design-visual-m2-b1-v9-sample-b-raw.json",
+      "status": "absent"
+    },
+    "sampleBEnvelope": {
+      "path": "evals/skill-contracts/design-visual-m2-b1-v9-sample-b-envelope.json",
+      "status": "absent"
+    },
+    "summary": {
+      "path": "evals/skill-contracts/design-visual-m2-b1-v9-summary.json",
+      "status": "absent"
+    },
+    "blocked": {
+      "path": "evals/skill-contracts/design-visual-m2-b1-v9-blocked.json",
+      "status": "present"
+    }
+  },
+  "evidenceRetention": {
+    "blockedArtifactAndExecutionSource": "DIRECT",
+    "invocationExitAndDuration": "DIRECT-invocation-bound-shell-result",
+    "task1CountsAndExceededPredicates": "DIRECT",
+    "cleanupEvidence": "DIRECT",
+    "externalCleanupBaselines": "DIRECT-read-only-external-observation",
+    "freshTurnReturnShutdownAndGuardLocation": "INFERRED-from-pinned-control-flow",
+    "eventPayload": "NOT-RETAINED",
+    "eventCountGrowthCause": "UNVERIFIED"
+  },
+  "cleanup": {
+    "blockedArtifactEvidence": {
+      "phase": "post-evaluator-cleanup",
+      "finishAttempts": 1,
+      "safeShutdownRequested": true,
+      "runtimeStatus": "completed",
+      "stagedRoot": {
+        "phase": "design",
+        "runId": "design-bce54e36-423c-43e4-95e0-5d533d0ed66e",
+        "readback": "removed"
+      }
+    },
+    "independentlyObservedBaseline": {
+      "basis": "DIRECT-read-only-external-observation",
+      "algorithm": "ordinal-sorted basenames joined as UTF-8 with LF separators and no terminal LF",
+      "observedAt": {
+        "preRunKst": "2026-08-14T01:57:10.4963522+09:00",
+        "postRunKst": "2026-08-14T02:00:59.9340863+09:00"
+      },
+      "preRun": {
+        "broadStagingBaselineCount": 573,
+        "broadStagingBaselineSha256": "21f13475f69e532ef55f74a30ad211c81ab5a932a6db64fafcf83b3b2a72a367",
+        "broadRunRootBaselineCount": 38,
+        "broadRunRootBaselineSha256": "56dffbde6864a4184208b1366a88506d12289f0f9f32af472d6cc6e79d03b15d",
+        "broadIsolatedHomeBaselineCount": 0,
+        "broadIsolatedHomeBaselineSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "postRun": {
+        "broadStagingBaselineCount": 573,
+        "broadStagingBaselineSha256": "21f13475f69e532ef55f74a30ad211c81ab5a932a6db64fafcf83b3b2a72a367",
+        "broadRunRootBaselineCount": 38,
+        "broadRunRootBaselineSha256": "56dffbde6864a4184208b1366a88506d12289f0f9f32af472d6cc6e79d03b15d",
+        "broadIsolatedHomeBaselineCount": 0,
+        "broadIsolatedHomeBaselineSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "prePostExactEqual": true,
+      "currentReadback": {
+        "matchingTaskProcessCount": 0,
+        "matchingTaskRuntimeRootCount": 0,
+        "matchingTaskIsolatedHomeCount": 0
+      }
+    },
+    "boundary": "The broad directory sets are baseline-only, were not attributed to this attempt, were not claimed task-owned, and were not deleted."
+  },
+  "limitations": {
+    "eventPayload": "NOT-RETAINED",
+    "eventCountGrowthCause": "UNVERIFIED",
+    "modelOutput": "NOT-RETAINED",
+    "designArtifact": "not-produced",
+    "attachmentConversion": "UNVERIFIED",
+    "providerInclusion": "UNVERIFIED",
+    "modelPixelUse": "UNVERIFIED",
+    "originalDetail": "UNVERIFIED",
+    "sample-a-verdict": "UNVERIFIED-not-run",
+    "sample-b-verdict": "UNVERIFIED-not-run",
+    "userAcceptance": "UNVERIFIED",
+    "m2Completion": "UNVERIFIED"
+  },
+  "disposition": {
+    "m2b1": "blocked-at-design-task1-event-count-bound-with-direct-count-retained",
+    "countRetentionMethod": "worked-as-authorized",
+    "promotionPass": false
+  },
+  "nextAuthorizedMethod": {
+    "sameV9CommandRetryAuthorized": false,
+    "automaticRetryAuthorized": false,
+    "limitChangeAuthorized": false,
+    "nextLiveAttemptAuthorized": false,
+    "scope": "Investigate why 1952 event records were produced. Any materially different live method requires independent review and a new pinned plan."
+  }
+}

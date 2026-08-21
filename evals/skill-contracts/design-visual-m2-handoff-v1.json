@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "id": "design-visual-m2-handoff-v1",
+  "date": "2026-08-12",
+  "designRun": {
+    "taskName": "/root/m2_design_fresh_v2",
+    "forkTurns": "none",
+    "allowedInput": {
+      "authority": {"path":"evals/skill-contracts/design-visual-m2-authority-v2.json","bytes":2122,"sha256":"d4071c79e4f6d19919fc308ebff57d123a3bdc959bb0d689cb88846b07267fb1"},
+      "prompt": {"path":"evals/skill-contracts/design-visual-m2-design-prompt-v2.md","bytes":1151,"sha256":"281228d8346eae849d488ba65cb89d2492c4747e451e90c48249bf2037364466"},
+      "designSkill": {"path":"skills/design/SKILL.md","bytes":5136,"sha256":"02fd9c60cab4a82e956618d975c676285fb778ebc8c7781ff62bff13275550b1"},
+      "approvedSource": {"path":"evals/skill-contracts/fixtures/visual-m2-v1/blind/ff71c6e9919567b251659f00fda0a224a5f91fab24ed36042eb070310d739110.png","bytes":1509822,"sha256":"ff71c6e9919567b251659f00fda0a224a5f91fab24ed36042eb070310d739110"}
+    },
+    "output": {
+      "path": "evals/skill-contracts/design-visual-m2-design-v2-raw.json",
+      "bytes": 11718,
+      "sha256": "3562f37ac2a6c8e8c4cda36e311dfd04d0162d6c8d16e89594de90cc275e9f34",
+      "form": "verbatim-agent-final-json"
+    }
+  },
+  "handoffContract": {
+    "authority": "The Design output is the exact sourced acceptance contract for the next Visual run. The Visual evaluator may not add candidate-derived acceptance rules or silently broaden missing checks.",
+    "scope": "MergeDrop Collection Default-active and Pixel-unlocked-selectable static visual review on the named device class.",
+    "requiredSeparation": [
+      "per-check versus overall verdict",
+      "visual observation versus interaction behavior",
+      "agent-observable result versus explicit user acceptance",
+      "preserved capture versus exact installed runtime identity"
+    ]
+  },
+  "provenanceBoundary": {
+    "supported": "The root created a new subagent with forkTurns none, supplied the exact v2 prompt path, and retained the final JSON verbatim.",
+    "unverified": "No App Server transport transcript, tool-event stream, model identity, or machine-enforced read allowlist was retained. This is orchestration metadata, not transport-level proof of isolation."
+  }
+}

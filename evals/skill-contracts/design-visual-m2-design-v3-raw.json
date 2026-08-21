@@ -1,0 +1,729 @@
+{
+  "invariants": [
+    {
+      "id": "inv-modal-panel-treatment",
+      "sourceIds": [
+        "approved-default-composition"
+      ],
+      "observableFact": "The Collection modal uses a warm ivory rounded panel with a dark hand-drawn outer border and a subtle inset broken-line edge accent.",
+      "evidenceLayer": "visible-appearance",
+      "applicability": {
+        "mode": "match",
+        "dimensions": {
+          "surface": "Collection modal"
+        }
+      },
+      "semantics": "acceptance"
+    },
+    {
+      "id": "inv-collection-title",
+      "sourceIds": [
+        "approved-default-composition"
+      ],
+      "observableFact": "The uppercase title COLLECTION is centered in bold white lettering on a green ribbon banner.",
+      "evidenceLayer": "visible-appearance",
+      "applicability": {
+        "mode": "match",
+        "dimensions": {
+          "surface": "title banner"
+        }
+      },
+      "semantics": "acceptance"
+    },
+    {
+      "id": "inv-content-order",
+      "sourceIds": [
+        "approved-default-composition"
+      ],
+      "observableFact": "The modal reads vertically as title banner, variant name, preview, difficulty, status, then action control.",
+      "evidenceLayer": "visible-appearance",
+      "applicability": {
+        "mode": "match",
+        "dimensions": {
+          "surface": "Collection modal"
+        }
+      },
+      "semantics": "acceptance"
+    },
+    {
+      "id": "inv-preview-prominence",
+      "sourceIds": [
+        "approved-default-composition"
+      ],
+      "observableFact": "The framed artwork preview is the modal's largest content block and primary visual mass.",
+      "evidenceLayer": "visible-appearance",
+      "applicability": {
+        "mode": "match",
+        "dimensions": {
+          "surface": "preview"
+        }
+      },
+      "semantics": "acceptance"
+    },
+    {
+      "id": "inv-display-typography",
+      "sourceIds": [
+        "approved-default-composition"
+      ],
+      "observableFact": "Primary labels use bold, high-contrast, uppercase game-display typography.",
+      "evidenceLayer": "visible-appearance",
+      "applicability": {
+        "mode": "match",
+        "dimensions": {
+          "surface": "Collection modal"
+        }
+      },
+      "semantics": "acceptance"
+    },
+    {
+      "id": "inv-navigation-pair",
+      "sourceIds": [
+        "approved-default-composition",
+        "state-semantics"
+      ],
+      "observableFact": "Exactly one previous affordance and one next affordance are visibly presented as the Collection navigation pair.",
+      "evidenceLayer": "visible-appearance",
+      "applicability": {
+        "mode": "match",
+        "dimensions": {
+          "surface": "navigation controls"
+        }
+      },
+      "semantics": "acceptance"
+    },
+    {
+      "id": "inv-navigation-outside-clip",
+      "sourceIds": [
+        "approved-default-composition",
+        "state-semantics"
+      ],
+      "observableFact": "The previous and next affordances flank the preview and remain outside its clipped artwork area.",
+      "evidenceLayer": "visible-appearance",
+      "applicability": {
+        "mode": "match",
+        "dimensions": {
+          "surface": "preview"
+        }
+      },
+      "semantics": "acceptance"
+    },
+    {
+      "id": "inv-difficulty-scale",
+      "sourceIds": [
+        "approved-default-composition",
+        "variant-metadata"
+      ],
+      "observableFact": "Difficulty is shown on a three-star scale in which the number of highlighted stars equals the variant's numeric difficulty.",
+      "evidenceLayer": "visible-appearance",
+      "applicability": {
+        "mode": "match",
+        "dimensions": {
+          "surface": "difficulty row"
+        }
+      },
+      "semantics": "acceptance"
+    },
+    {
+      "id": "inv-action-placement",
+      "sourceIds": [
+        "approved-default-composition"
+      ],
+      "observableFact": "A single wide action control is centered near the bottom of the panel below the status text.",
+      "evidenceLayer": "visible-appearance",
+      "applicability": {
+        "mode": "match",
+        "dimensions": {
+          "surface": "action control"
+        }
+      },
+      "semantics": "acceptance"
+    }
+  ],
+  "variants": [
+    {
+      "id": "variant-default-name",
+      "sourceIds": [
+        "variant-metadata"
+      ],
+      "observableFact": "The Default variant name is displayed as DEFAULT FRUIT.",
+      "evidenceLayer": "visible-appearance",
+      "applicability": {
+        "mode": "match",
+        "dimensions": {
+          "variant": "Default",
+          "surface": "variant name"
+        }
+      },
+      "semantics": "acceptance"
+    },
+    {
+      "id": "variant-default-difficulty",
+      "sourceIds": [
+        "approved-default-composition",
+        "variant-metadata"
+      ],
+      "observableFact": "The Default difficulty row shows one highlighted star and two muted stars.",
+      "evidenceLayer": "visible-appearance",
+      "applicability": {
+        "mode": "match",
+        "dimensions": {
+          "variant": "Default",
+          "surface": "difficulty row"
+        }
+      },
+      "semantics": "acceptance"
+    },
+    {
+      "id": "variant-default-produce-count",
+      "sourceIds": [
+        "approved-default-composition",
+        "device-and-acceptance-boundary"
+      ],
+      "observableFact": "The Default preview presents ten recognizable fruit layers as one continuous overlapping produce mass.",
+      "evidenceLayer": "visible-appearance",
+      "applicability": {
+        "mode": "match",
+        "dimensions": {
+          "variant": "Default",
+          "surface": "preview"
+        }
+      },
+      "semantics": "acceptance"
+    },
+    {
+      "id": "variant-pixel-name",
+      "sourceIds": [
+        "variant-metadata"
+      ],
+      "observableFact": "The Pixel variant name is displayed as PIXEL FRUIT.",
+      "evidenceLayer": "visible-appearance",
+      "applicability": {
+        "mode": "match",
+        "dimensions": {
+          "variant": "Pixel",
+          "surface": "variant name"
+        }
+      },
+      "semantics": "acceptance"
+    },
+    {
+      "id": "variant-pixel-difficulty",
+      "sourceIds": [
+        "approved-default-composition",
+        "variant-metadata"
+      ],
+      "observableFact": "The Pixel difficulty row shows two highlighted stars and one muted star.",
+      "evidenceLayer": "visible-appearance",
+      "applicability": {
+        "mode": "match",
+        "dimensions": {
+          "variant": "Pixel",
+          "surface": "difficulty row"
+        }
+      },
+      "semantics": "acceptance"
+    }
+  ],
+  "states": [
+    {
+      "id": "state-active-label",
+      "sourceIds": [
+        "state-semantics"
+      ],
+      "observableFact": "An active set's action label reads IN USE.",
+      "evidenceLayer": "visible-appearance",
+      "applicability": {
+        "mode": "match",
+        "dimensions": {
+          "state": "active",
+          "surface": "action control"
+        }
+      },
+      "semantics": "acceptance"
+    },
+    {
+      "id": "state-active-styling",
+      "sourceIds": [
+        "approved-default-composition",
+        "state-semantics"
+      ],
+      "observableFact": "An active set's action treatment visibly communicates current selection and is distinguishable from selectable styling.",
+      "evidenceLayer": "visible-appearance",
+      "applicability": {
+        "mode": "match",
+        "dimensions": {
+          "state": "active",
+          "surface": "action control"
+        }
+      },
+      "semantics": "acceptance"
+    },
+    {
+      "id": "state-active-noninteractable",
+      "sourceIds": [
+        "state-semantics"
+      ],
+      "observableFact": "Activating the action surface for an active set produces no set-selection action.",
+      "evidenceLayer": "interaction",
+      "applicability": {
+        "mode": "match",
+        "dimensions": {
+          "state": "active",
+          "surface": "action control"
+        }
+      },
+      "semantics": "acceptance"
+    },
+    {
+      "id": "state-selectable-label",
+      "sourceIds": [
+        "state-semantics"
+      ],
+      "observableFact": "An unlocked selectable set's action label reads USE THIS SET.",
+      "evidenceLayer": "visible-appearance",
+      "applicability": {
+        "mode": "match",
+        "dimensions": {
+          "state": "unlocked-selectable",
+          "surface": "action control"
+        }
+      },
+      "semantics": "acceptance"
+    },
+    {
+      "id": "state-selectable-styling",
+      "sourceIds": [
+        "state-semantics"
+      ],
+      "observableFact": "An unlocked selectable set's action treatment visibly communicates availability and is distinguishable from active styling.",
+      "evidenceLayer": "visible-appearance",
+      "applicability": {
+        "mode": "match",
+        "dimensions": {
+          "state": "unlocked-selectable",
+          "surface": "action control"
+        }
+      },
+      "semantics": "acceptance"
+    },
+    {
+      "id": "state-selectable-interactable",
+      "sourceIds": [
+        "state-semantics"
+      ],
+      "observableFact": "Activating the action surface for an unlocked selectable set performs the set-selection action.",
+      "evidenceLayer": "interaction",
+      "applicability": {
+        "mode": "match",
+        "dimensions": {
+          "state": "unlocked-selectable",
+          "surface": "action control"
+        }
+      },
+      "semantics": "acceptance"
+    }
+  ],
+  "wholeFrameChecks": [
+    {
+      "id": "whole-frame-centered-card",
+      "sourceIds": [
+        "approved-default-composition"
+      ],
+      "observableFact": "The modal is centered in the portrait frame with clear surrounding margin on every side.",
+      "evidenceLayer": "visible-appearance",
+      "applicability": {
+        "mode": "match",
+        "dimensions": {
+          "surface": "whole frame"
+        }
+      },
+      "semantics": "acceptance"
+    },
+    {
+      "id": "whole-frame-subdued-background",
+      "sourceIds": [
+        "approved-default-composition"
+      ],
+      "observableFact": "A subdued neutral-gray surrounding field keeps visual attention on the lighter modal.",
+      "evidenceLayer": "visible-appearance",
+      "applicability": {
+        "mode": "match",
+        "dimensions": {
+          "surface": "whole frame"
+        }
+      },
+      "semantics": "acceptance"
+    },
+    {
+      "id": "whole-frame-target-containment",
+      "sourceIds": [
+        "approved-default-composition",
+        "device-and-acceptance-boundary"
+      ],
+      "observableFact": "The complete panel outline, decorative accents, navigation affordances, labels, preview, and action control remain visible without clipping or overlap on the named review target.",
+      "evidenceLayer": "visible-appearance",
+      "applicability": {
+        "mode": "match",
+        "dimensions": {
+          "target": "Xiaomi 23043RP34G",
+          "surface": "whole frame"
+        }
+      },
+      "semantics": "acceptance"
+    },
+    {
+      "id": "whole-frame-target-operability",
+      "sourceIds": [
+        "state-semantics",
+        "device-and-acceptance-boundary"
+      ],
+      "observableFact": "The previous control, next control, and eligible set-selection action can each be activated without obstruction on the named review target.",
+      "evidenceLayer": "interaction",
+      "applicability": {
+        "mode": "match",
+        "dimensions": {
+          "target": "Xiaomi 23043RP34G",
+          "surface": "Collection modal"
+        }
+      },
+      "semantics": "acceptance"
+    },
+    {
+      "id": "whole-frame-runtime-identity",
+      "sourceIds": [
+        "device-and-acceptance-boundary"
+      ],
+      "observableFact": "Runtime evidence identifies a Xiaomi 23043RP34G running package com.joewrks.mergedrop.visual version 0.1.3 (4).",
+      "evidenceLayer": "runtime-identity",
+      "applicability": {
+        "mode": "match",
+        "dimensions": {
+          "target": "Xiaomi 23043RP34G"
+        }
+      },
+      "semantics": "acceptance"
+    }
+  ],
+  "focusedChecks": [
+    {
+      "id": "focused-preview-frame",
+      "sourceIds": [
+        "approved-default-composition"
+      ],
+      "observableFact": "The preview uses a rounded rectangular dark outline that cleanly clips its artwork.",
+      "evidenceLayer": "visible-appearance",
+      "applicability": {
+        "mode": "match",
+        "dimensions": {
+          "surface": "preview"
+        }
+      },
+      "semantics": "acceptance"
+    },
+    {
+      "id": "focused-default-produce-layering",
+      "sourceIds": [
+        "approved-default-composition",
+        "device-and-acceptance-boundary"
+      ],
+      "observableFact": "The Default artwork layers large melon and watermelon forms behind mid-sized peach, orange, and green-apple forms, with grapes, blueberry, lemon, and red apple forming the lower foreground.",
+      "evidenceLayer": "visible-appearance",
+      "applicability": {
+        "mode": "match",
+        "dimensions": {
+          "variant": "Default",
+          "surface": "preview"
+        }
+      },
+      "semantics": "acceptance"
+    },
+    {
+      "id": "focused-preview-edge-density",
+      "sourceIds": [
+        "approved-default-composition"
+      ],
+      "observableFact": "The Default produce mass fills the preview densely and is intentionally cropped at multiple frame edges rather than appearing as isolated icons with empty gaps.",
+      "evidenceLayer": "visible-appearance",
+      "applicability": {
+        "mode": "match",
+        "dimensions": {
+          "variant": "Default",
+          "surface": "preview"
+        }
+      },
+      "semantics": "acceptance"
+    },
+    {
+      "id": "focused-actual-sprite-binding",
+      "sourceIds": [
+        "state-semantics"
+      ],
+      "observableFact": "Each displayed preview layer resolves to the actual sprite asset for the currently shown visual set.",
+      "evidenceLayer": "artifact-identity",
+      "applicability": {
+        "mode": "match",
+        "dimensions": {
+          "surface": "preview"
+        }
+      },
+      "semantics": "acceptance"
+    },
+    {
+      "id": "focused-sprite-aspect",
+      "sourceIds": [
+        "approved-default-composition",
+        "state-semantics"
+      ],
+      "observableFact": "Preview sprites retain natural proportions without visible horizontal or vertical distortion.",
+      "evidenceLayer": "visible-appearance",
+      "applicability": {
+        "mode": "match",
+        "dimensions": {
+          "surface": "preview"
+        }
+      },
+      "semantics": "acceptance"
+    },
+    {
+      "id": "focused-sprite-opacity",
+      "sourceIds": [
+        "approved-default-composition",
+        "state-semantics"
+      ],
+      "observableFact": "Preview sprites retain solid coloration and native transparent contours without unintended global fading.",
+      "evidenceLayer": "visible-appearance",
+      "applicability": {
+        "mode": "match",
+        "dimensions": {
+          "surface": "preview"
+        }
+      },
+      "semantics": "acceptance"
+    },
+    {
+      "id": "focused-navigation-appearance",
+      "sourceIds": [
+        "approved-default-composition"
+      ],
+      "observableFact": "The previous and next affordances are compact orange-gold controls with dark outlines and visually opposed directions.",
+      "evidenceLayer": "visible-appearance",
+      "applicability": {
+        "mode": "match",
+        "dimensions": {
+          "surface": "navigation controls"
+        }
+      },
+      "semantics": "acceptance"
+    },
+    {
+      "id": "focused-previous-operation",
+      "sourceIds": [
+        "state-semantics"
+      ],
+      "observableFact": "Activating the previous control navigates to the preceding Collection set.",
+      "evidenceLayer": "interaction",
+      "applicability": {
+        "mode": "match",
+        "dimensions": {
+          "surface": "previous control"
+        }
+      },
+      "semantics": "acceptance"
+    },
+    {
+      "id": "focused-next-operation",
+      "sourceIds": [
+        "state-semantics"
+      ],
+      "observableFact": "Activating the next control navigates to the following Collection set.",
+      "evidenceLayer": "interaction",
+      "applicability": {
+        "mode": "match",
+        "dimensions": {
+          "surface": "next control"
+        }
+      },
+      "semantics": "acceptance"
+    },
+    {
+      "id": "focused-no-back-action",
+      "sourceIds": [
+        "state-semantics"
+      ],
+      "observableFact": "Neither the modal surface nor the title banner exposes a BackAction.",
+      "evidenceLayer": "interaction",
+      "applicability": {
+        "mode": "match",
+        "dimensions": {
+          "surface": "Collection modal"
+        }
+      },
+      "semantics": "acceptance"
+    },
+    {
+      "id": "focused-default-status",
+      "sourceIds": [
+        "approved-default-composition"
+      ],
+      "observableFact": "The Default active presentation shows UNLOCKED centered between the difficulty row and the action control.",
+      "evidenceLayer": "visible-appearance",
+      "applicability": {
+        "mode": "match",
+        "dimensions": {
+          "variant": "Default",
+          "state": "active",
+          "surface": "status row"
+        }
+      },
+      "semantics": "acceptance"
+    },
+    {
+      "id": "focused-default-active-control",
+      "sourceIds": [
+        "approved-default-composition",
+        "state-semantics"
+      ],
+      "observableFact": "The Default active action is a dark green rounded control with a dark outline, inset edge detail, and centered white IN USE text.",
+      "evidenceLayer": "visible-appearance",
+      "applicability": {
+        "mode": "match",
+        "dimensions": {
+          "variant": "Default",
+          "state": "active",
+          "surface": "action control"
+        }
+      },
+      "semantics": "acceptance"
+    },
+    {
+      "id": "focused-leaf-accents",
+      "sourceIds": [
+        "approved-default-composition"
+      ],
+      "observableFact": "Small green leaf accents ornament opposing upper-left and lower-right panel corners without covering content.",
+      "evidenceLayer": "visible-appearance",
+      "applicability": {
+        "mode": "match",
+        "dimensions": {
+          "surface": "Collection modal"
+        }
+      },
+      "semantics": "acceptance"
+    }
+  ],
+  "unverifiedBoundaries": [
+    {
+      "id": "boundary-approved-artifact-pin",
+      "sourceIds": [
+        "approved-default-composition"
+      ],
+      "observableFact": "Visual-reference authority is limited to the approved PNG with byte count 1509822 and SHA-256 ff71c6e9919567b251659f00fda0a224a5f91fab24ed36042eb070310d739110; a re-encoded or look-alike image is not the pinned artifact.",
+      "evidenceLayer": "artifact-identity",
+      "applicability": {
+        "mode": "always"
+      },
+      "semantics": "boundary"
+    },
+    {
+      "id": "boundary-external-source-readback",
+      "sourceIds": [
+        "variant-metadata",
+        "state-semantics",
+        "device-and-acceptance-boundary"
+      ],
+      "observableFact": "The variant, state, device, and acceptance facts are frozen controller-supplied facts; their listed external repository originals were not reread in this derivation.",
+      "evidenceLayer": "artifact-identity",
+      "applicability": {
+        "mode": "always"
+      },
+      "semantics": "boundary"
+    },
+    {
+      "id": "boundary-pixel-visible-details",
+      "sourceIds": [
+        "approved-default-composition",
+        "variant-metadata"
+      ],
+      "observableFact": "The approved Default image does not establish Pixel-specific artwork details or Pixel-specific styling beyond the shared modal language and the separately supplied Pixel name and difficulty facts.",
+      "evidenceLayer": "visible-appearance",
+      "applicability": {
+        "mode": "match",
+        "dimensions": {
+          "variant": "Pixel"
+        }
+      },
+      "semantics": "boundary"
+    },
+    {
+      "id": "boundary-static-interaction",
+      "sourceIds": [
+        "approved-default-composition",
+        "state-semantics"
+      ],
+      "observableFact": "The static approved image does not demonstrate navigation behavior, action interactability, or absence of hidden BackAction bindings.",
+      "evidenceLayer": "interaction",
+      "applicability": {
+        "mode": "match",
+        "dimensions": {
+          "surface": "Collection modal"
+        }
+      },
+      "semantics": "boundary"
+    },
+    {
+      "id": "boundary-static-sprite-identity",
+      "sourceIds": [
+        "approved-default-composition",
+        "state-semantics"
+      ],
+      "observableFact": "The static approved image cannot establish that a rendered preview is bound to the actual sprite assets.",
+      "evidenceLayer": "artifact-identity",
+      "applicability": {
+        "mode": "match",
+        "dimensions": {
+          "surface": "preview"
+        }
+      },
+      "semantics": "boundary"
+    },
+    {
+      "id": "boundary-runtime-unverified",
+      "sourceIds": [
+        "device-and-acceptance-boundary"
+      ],
+      "observableFact": "This contract derivation did not observe a running package, device identity, or installed version.",
+      "evidenceLayer": "runtime-identity",
+      "applicability": {
+        "mode": "match",
+        "dimensions": {
+          "target": "Xiaomi 23043RP34G"
+        }
+      },
+      "semantics": "boundary"
+    },
+    {
+      "id": "boundary-other-runtime-targets",
+      "sourceIds": [
+        "device-and-acceptance-boundary"
+      ],
+      "observableFact": "No runtime-identity evidence is supplied for devices other than Xiaomi 23043RP34G.",
+      "evidenceLayer": "runtime-identity",
+      "applicability": {
+        "mode": "always"
+      },
+      "semantics": "boundary"
+    },
+    {
+      "id": "boundary-user-acceptance",
+      "sourceIds": [
+        "device-and-acceptance-boundary"
+      ],
+      "observableFact": "Explicit user acceptance remains unverified and cannot be inferred from agent-observable appearance, artifact, interaction, or runtime evidence.",
+      "evidenceLayer": "user-acceptance",
+      "applicability": {
+        "mode": "always"
+      },
+      "semantics": "boundary"
+    }
+  ]
+}

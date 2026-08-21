@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 4,
+  "id": "design-visual-m2-visual-run-manifest-v4",
+  "date": "2026-08-12",
+  "predecessor": {
+    "manifest": {"path":"evals/skill-contracts/design-visual-m2-visual-run-manifest-v3.json","bytes":1615,"sha256":"1fdccda16b500cfdf8f7df26fc70f5cc50fbd9005ac56c93ef313009dd3c2076"},
+    "result": {"path":"evals/skill-contracts/design-visual-m2-visual-v3-raw.json","bytes":10013,"sha256":"dd0c7609479f9715441244803e145014513f9d76f3407b548e5ab5fe0099b75e"},
+    "disposition": "controller-state-label-rejected"
+  },
+  "methodChange": "Remove variant-to-state coupling, derive only visible action presentation from pixels, and keep underlying runtime state and interaction unverified.",
+  "prompt": {"path":"evals/skill-contracts/design-visual-m2-visual-prompt-v4.md","bytes":2088,"sha256":"a18aec04d616e45f636627ec834f49c0c33f04679079b92b46074461bf849056"},
+  "handoff": {"path":"evals/skill-contracts/design-visual-m2-handoff-v2.json","bytes":2408,"sha256":"a47d669c9c103bda2a00264665539c3fcd85d2aabe14291fc1e360039aaa6d6d"},
+  "visualInput": {"path":"evals/skill-contracts/design-visual-m2-visual-input-v2.json","bytes":3295,"sha256":"ed864e279b06fe7c07a5de3e48b6bb5712c09145b5221eb2bc4445f566892583"},
+  "checkGroups": {"path":"evals/skill-contracts/design-visual-m2-check-groups-v2.json","bytes":2470,"sha256":"9f36eb3564afaf80b1272d6236c148d39c581008ae1b8e143deb05d04c250e5f"},
+  "execution": {
+    "forkTurns": "none",
+    "writePolicy": "read-only",
+    "expectedOutput": "one JSON object under 1800 words",
+    "forbiddenBeforeVerdict": ["fixture manifests", "pressure artifacts", "ground-truth documents", "incident reports", "prior verdicts", "external project files"]
+  }
+}

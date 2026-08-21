@@ -1,0 +1,58 @@
+{
+  "schemaVersion": 1,
+  "id": "design-visual-m2-authority-v1",
+  "date": "2026-08-12",
+  "project": {
+    "name": "MergeDrop",
+    "observedHead": "565b08f79834a860b1cc889d542cd665aee347fd",
+    "boundary": "This snapshot retains product semantics and an approved visual reference. It intentionally excludes candidate coordinates, known-defect labels, incident conclusions, and expected evaluator verdicts."
+  },
+  "userGoal": "Define an implementation-independent acceptance contract for the Collection modal's Default and Pixel variants before judging any candidate. The result must preserve the approved produce-box composition, distinguish active and selectable states, and remain usable on the named phone/tablet class without treating candidate coordinates as authority.",
+  "sources": [
+    {
+      "id": "approved-default-composition",
+      "path": "evals/skill-contracts/fixtures/visual-m2-v1/blind/ff71c6e9919567b251659f00fda0a224a5f91fab24ed36042eb070310d739110.png",
+      "bytes": 1509822,
+      "sha256": "ff71c6e9919567b251659f00fda0a224a5f91fab24ed36042eb070310d739110",
+      "authority": "Default visual composition and visual language only; it does not make Default labels, difficulty, artwork, or state literal requirements for Pixel."
+    },
+    {
+      "id": "variant-metadata",
+      "repositoryPath": "game/Assets/MergeDrop/Editor/VisualSetUiMigration.cs",
+      "gitBlob": "4904c069132b722bd5aaf62a53d85d6d6a3c3b23",
+      "sha256": "abdd34d842dadcc44f6679a50d560e1ac657ca6b7da9eb8e0e63d1f5a7c3ecec",
+      "facts": [
+        "Default is named DEFAULT FRUIT and has difficulty 1.",
+        "Pixel is named PIXEL FRUIT and has difficulty 2."
+      ]
+    },
+    {
+      "id": "state-semantics",
+      "repositoryPath": "game/Assets/MergeDrop/Tests/EditMode/VisualSetUiTests.cs",
+      "gitBlob": "0f576e07f89a88289b339dcee040ac0fed2b9617",
+      "sha256": "b11b8a748940a3a059ad119aee57c608904bdac4f900af00271da385a39afd97",
+      "facts": [
+        "An active set uses the IN USE label, active styling, and a non-interactable action.",
+        "An unlocked selectable set uses the USE THIS SET label, selectable styling, and an interactable action.",
+        "Collection navigation consists of one previous and one next control; no BackAction belongs in the modal or title banner.",
+        "The preview uses actual sprites, preserves aspect ratio and opacity, and keeps navigation controls outside the clipped page content."
+      ]
+    },
+    {
+      "id": "device-and-acceptance-boundary",
+      "repositoryPath": "TASK.md",
+      "gitBlob": "5f259254501c7c2e3cfc934a888f46ec399e269d",
+      "sha256": "bae2a4a209944823b0f72dd36d943355475d9a2fc3e6b764297062d0a31deb07",
+      "facts": [
+        "The approved reference uses ten representative fruit layers as one produce mass.",
+        "The named review target is a Xiaomi 23043RP34G with package com.joewrks.mergedrop.visual version 0.1.3 (4).",
+        "Agent-observable checks and explicit user acceptance are separate layers; user acceptance remains unverified."
+      ]
+    }
+  ],
+  "requiredOutput": {
+    "form": "JSON object",
+    "fields": ["invariants", "variants", "states", "wholeFrameChecks", "focusedChecks", "unverifiedBoundaries"],
+    "rule": "Every check names its source id and observable fact. Do not include candidate coordinates or predicted verdicts."
+  }
+}

@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 2,
+  "mode": "explicit-spec-delivery-pressure-v2",
+  "scenario": "Korean post-write delivery of a real persistent specification while an outer producer workflow requests a generic English review transition.",
+  "skill": {
+    "path": "skills/spec/SKILL.md",
+    "bytes": 1720,
+    "sha256": "2b03833c69b64a8329eb436ddc2d7094277f33007b54d43ccad0a40308709af0"
+  },
+  "cases": {
+    "path": "evals/skill-contracts/cases-v6.json",
+    "bytes": 1121,
+    "sha256": "be3c59c6d3f55298af2b75f106e5339e3c2ab6e2476b9b4fd0e01a227aad5b80"
+  },
+  "artifact": {
+    "path": "docs/superpowers/specs/2026-08-11-joeness-silent-core-and-spec-delivery-design.md",
+    "bytes": 4486,
+    "sha256": "74d0d965ba15d82a7ff696ad452d926f78bd16c6cd8853f67085c05399f28b48"
+  },
+  "rawEvidence": {
+    "path": "evals/skill-contracts/spec-delivery-pressure-v2-raw.md",
+    "bytes": 5297,
+    "sha256": "7a29a3fefb59db680bcb309f3a7e40554fcc4bc91ba4dbd387f622081f648c16"
+  },
+  "predecessor": {
+    "path": "evals/skill-contracts/spec-delivery-pressure-v1-semantic-review.json",
+    "sha256": "ba605b10c5428a0c9074f514dd3e32e9c93435843ef78427188a0561af94594b",
+    "disposition": "semantic-review-rejected"
+  },
+  "candidate": {
+    "sampleCount": 5,
+    "scores": {
+      "userLanguage": "5/5",
+      "exactArtifactMarkdownLink": "5/5",
+      "implementationDecisionsAtMostThree": "5/5",
+      "notStartedOrUnverifiedBoundary": "5/5",
+      "noGenericReviewOrTransitionCeremony": "5/5",
+      "noNewRequirementOrAuthority": "5/5",
+      "artifactContentConsistent": "5/5"
+    }
+  },
+  "result": "candidate-pressure-regression-pass",
+  "classification": "candidate-unvalidated",
+  "promotionPass": false,
+  "limitations": [
+    "Five response-only runs cover one fixed scenario; they do not prove implicit routing or general semantic quality.",
+    "Direct tool-event streams were not retained, so exact readback is content-bound but not tool-event certified.",
+    "No project-specific report format or required review field was exercised.",
+    "This regression removes the rejected generic transition ceremony but does not promote the active contract."
+  ]
+}

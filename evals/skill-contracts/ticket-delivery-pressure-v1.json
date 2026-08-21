@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 1,
+  "mode": "explicit-ticket-delivery-pressure-v1",
+  "scenario": "Route important prepared work through a fixed candidate, separated implementation, and new-context criterion review while bypassing routine work.",
+  "skill": {
+    "path": "skills/ticket/SKILL.md",
+    "bytes": 3619,
+    "sha256": "1c783553bbc3a0bd0b7e8a1dd376ee912ef00840670e06fa4945bde1ab78211f"
+  },
+  "cases": {
+    "path": "evals/skill-contracts/cases-v8.json",
+    "bytes": 4376,
+    "sha256": "9f59ccbe5e52c66de08abd5ebf483a0bdb9036c726c742439e641ab856ac4f4c"
+  },
+  "rawEvidence": {
+    "path": "evals/skill-contracts/ticket-delivery-pressure-v1-raw.md",
+    "bytes": 14396,
+    "sha256": "f67ca5f3b0deb8cc8fbb33cfe665456af87f27089494105eee3d2e12fc1b322a"
+  },
+  "predecessorCases": {
+    "path": "evals/skill-contracts/cases-v7.json",
+    "sha256": "09ae4db37fa1d7d7697947486629836ac93da1957cc107bc55473502b39610e8"
+  },
+  "routing": {
+    "baselineSampleCount": 2,
+    "candidateSampleCount": 5,
+    "scores": {
+      "importantPreparedTicket": "5/5",
+      "changedCandidateInvalidatesVerdict": "5/5",
+      "visualUnavailableIsUnverified": "5/5",
+      "oneReworkThenUserDecision": "5/5",
+      "smallFixBypass": "5/5",
+      "readOnlyBypass": "5/5"
+    }
+  },
+  "orchestration": {
+    "implementerCandidateCreated": true,
+    "candidateBindingVerified": true,
+    "cleanDetachedEvaluationWorkspaceCreated": true,
+    "freshEvaluatorPass": false,
+    "result": "unverified"
+  },
+  "result": "routing-pressure-pass-orchestration-unverified",
+  "classification": "candidate-unvalidated",
+  "promotionPass": false,
+  "limitations": [
+    "Five response-only candidate samples do not prove implicit routing, product quality, or permission isolation.",
+    "The isolated implementer produced the expected candidate, but the final fresh evaluator never completed the required before-and-after readback because its wrapper failed.",
+    "Root-side read-only checks proved the fixture result, but they cannot substitute for the required no-history evaluator verdict.",
+    "The shared model family, filesystem, and tool permissions limit evaluator independence."
+  ]
+}

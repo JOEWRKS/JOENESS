@@ -1,0 +1,6 @@
+interface:
+  display_name: "Ticket"
+  short_description: "Run one important task through implementation and new-context review"
+  default_prompt: "Use $ticket to deliver one important planned task against fixed observable acceptance criteria with separated implementation and new-context review."
+policy:
+  allow_implicit_invocation: true

@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "id": "joeness-ticket-m1c-e2e-v3-repository-index",
+  "classification": "portable-evidence-index",
+  "summary": {
+    "repositoryPath": "evals/experiments/joeness-ticket-m1c-e2e-v3.json",
+    "byteLength": 1181,
+    "sha256": "7812435da05184cf4adcf70240de95231969a9ccd2ec42671ba3504229cae14e"
+  },
+  "raw": {
+    "repositoryPath": "evals/experiments/joeness-ticket-m1c-e2e-v3-raw.json",
+    "byteLength": 1157280,
+    "sha256": "d221070a61cb38492f89268a627cbe447c459a14b18e1f0281a968458b914f7e"
+  },
+  "boundary": "The run-produced summary preserves its original absolute output path. Repository consumers must use these repository-relative paths and exact hashes."
+}

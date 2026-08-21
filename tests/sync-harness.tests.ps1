@@ -2,7 +2,9 @@ $ErrorActionPreference = 'Stop'
 
 $RepositoryRoot = Split-Path -Parent $PSScriptRoot
 $Implementation = Join-Path $RepositoryRoot 'scripts\sync-harness.ps1'
-$ReleaseEntry = Join-Path $RepositoryRoot 'JOENESS-0.1.ps1'
+$ReleaseEntry = Join-Path $RepositoryRoot 'JOENESS.ps1'
+$VersionCompatibilityEntry = Join-Path $RepositoryRoot 'JOENESS-0.1.ps1'
+$LegacyCompatibilityEntry = Join-Path $RepositoryRoot 'harness.ps1'
 $BeginMarker = '<!-- JOEWRKS-HARNESS:BEGIN -->'
 $EndMarker = '<!-- JOEWRKS-HARNESS:END -->'
 
@@ -14,39 +16,110 @@ function Assert-True { param([bool] $Condition, [string] $Message) if (-not $Con
 function Assert-Equal { param($Actual, $Expected, [string] $Message) if ($Actual -cne $Expected) { throw "Assertion failed: $Message; expected [$Expected], got [$Actual]" } }
 function Test-ReadmeContract {
     $readme = [IO.File]::ReadAllText((Join-Path $RepositoryRoot 'README.md'))
-    $koreanRemovedAnchor = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('bm8tc3RhdGUgYHJlbW92ZWRg64qUIOycoO2aqO2VnCBzdGF0ZeuCmCDslYzroKTsp4Qg7LCo64uoIOymneqxsOulvCDssL7sp4Ag66q77ZaI6rOgIOq0gOumrCDtjIzsnbzsnYQg67OA6rK97ZWY7KeAIOyViuyVmOuLpOuKlCDrnLvsnbwg67+QLCDsnbjsi53tlZjsp4Ag66q77ZWcIHZlbmRvciByZXNpZHVl6rmM7KeAIOuqqOuRkCDsl4bri6TripQg7Kad66qF7J2AIOyVhOuLmeuLiOuLpC4='))
-    $koreanPlanningAcceptAnchor = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('64+Z7J2Y7ZWY66m0IOujqO2KuCBgVEFTS1MubWRg66W8IOunjOuTpOqzoCDtlITroZzsoJ3tirggYEFHRU5UUy5tZGDsl5DripQg6re4IOychOy5mOyZgCDqsLHsi6Ag6rec7LmZ66eMIOy2lOqwgO2VqeuLiOuLpC4='))
-    $koreanPlanningDeclineAnchor = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('6rGw7KCI7ZWY66m0IOyWtOuWpCDtjIzsnbzrj4Qg66eM65Ok7KeAIOyViuqzoCDsp6fsnYAg7LGE7YyFIOqzhO2ajeycvOuhnCDtj4nshowg7J6R7JeF7J2EIOqzhOyGje2VqeuLiOuLpC4='))
-    $koreanPlanningExistingAnchor = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('7J2066+4IOyTsOuKlCDsnbTsiogg7Yq4656Y7Luk64KYIOuhnOuTnOunteydtCDsnojsnLzrqbQg6re46rKD7J2EIOuLqOydvCDsm5DsnqXsnLzroZwg7Jyg7KeA7ZWY66mwIOykkeuztSDtjIzsnbzsnYQg66eM65Ok7KeAIOyViuyKteuLiOuLpC4='))
-    foreach ($command in @(
-        'powershell.exe -NoProfile -File .\JOENESS-0.1.ps1 -Check',
-        'powershell.exe -NoProfile -File .\JOENESS-0.1.ps1 -Apply',
-        'powershell.exe -NoProfile -File .\JOENESS-0.1.ps1 -Remove'
-    )) {
-        Assert-True $readme.Contains($command) "README quick start contains $command"
+    Assert-True $readme.StartsWith("# JOENESS`n`n> 0.1 Beta") 'README uses the JOENESS title and Beta status'
+    $parts = $readme -split '## English Guide', 2
+    Assert-Equal $parts.Count 2 'README keeps Korean and English sections'
+    $sections = @{ Korean = $parts[0]; English = $parts[1] }
+    $koreanPowerShell = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('UG93ZXJTaGVsbCDstpzroKU='))
+    $koreanChat = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('Q29kZXgg7LGE7YyFIOuLteuzgOydtCDslYTri5nri4jri6Q='))
+    $koreanNewTask = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('7IOIIOyekeyXhQ=='))
+    $koreanRestart = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('7J6s7Iuk7ZaJ'))
+    $koreanSeparate = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('67OE64+E66GcIOyEpOy5mA=='))
+    $koreanModelRouting = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('66qo6424IOudvOyasO2MhQ=='))
+    $koreanRolesHeader = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('fCDtmLjstpzrqoUgfCDtlZjripQg7J28IHwg7J6Q64+ZIOyEoO2DnSDsobDqsbQgfA=='))
+    $koreanFirstUse = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('7LKY7J2MIOyCrOyaqTogNeuLqOqzhA=='))
+    $koreanRoles = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('7Jet7ZWg'))
+    $koreanCompatibility = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('7Zi47ZmYIOydtOumhA=='))
+    $koreanOutcomeFirst = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('6rKw6rO866W8IOuovOyggA=='))
+    $koreanNoFixedFields = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('6rOg7KCVIO2VreuqqeydtOuCmCDspIQg7IiY'))
+    $koreanNoReportFiller = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('67O06rOg66W8IOychO2VtCDrs4Trj4Qg6rKA7IKswrfrrLjshJzCt+uhnOq3uOulvCDrp4zrk6Tsp4Ag7JWK7Iq164uI64ukLg=='))
+    $koreanPluginIncompatible = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('7JWU7Iuc7KCBIO2YuOy2nOydhCDsoJztlZztlaAg7IiYIOyXhuuKlCDtlIzrn6zqt7jsnbjsnYAgSk9FTkVTUyDrqoXsi5zsoIEg7IKs7JqpIOyghOyaqSDsoJXssYXqs7wg7Zi47ZmY65CY7KeAIOyViuycvOuvgOuhnCDquLDrs7gg67mE7Zmc7ISx7ZmU66W8IOq2jOyepe2VqeuLiOuLpC4='))
+    $koreanPluginWarningOnly = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('Sk9FTkVTU+uKlCDqsr3qs6Drp4wg7KCc6rO17ZWY66mwIO2UjOufrOq3uOyduCDshKTsoJXsnYQg7J6Q64+Z7Jy866GcIOuzgOqyve2VmOyngCDslYrsirXri4jri6Qu'))
+
+    function Get-ReadmeSubsection {
+        param([string] $Text, [string] $Heading)
+        $match = [regex]::Match($Text, "(?ms)^### $([regex]::Escape($Heading))\r?\n(?<body>.*?)(?=^### |\z)")
+        Assert-True $match.Success "README contains subsection: $Heading"
+        $match.Groups['body'].Value
     }
-    foreach ($anchor in @(
-        'powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\JOENESS-0.1.ps1 -Check',
-        '`harness.ps1` remains a compatibility alias',
-        $koreanRemovedAnchor,
-        'A no-state `removed` result means no valid state or recognized blocking evidence was found and no managed files were changed; it does not prove that every unrecognized or vendor residue is absent.',
-        'Do not add a separate `HARNESS.md`.',
-        'Repository `common-core.md` remains retained evaluation evidence and is not installed. The current manifest installs the compact `interaction-safety-core-v1.md` conditional-decision, failure-receipt, retry-boundary, and claim-evidence-binding rule.',
-        'JOENESS may offer a durable roadmap once when a project-level effort starts or a major release scope expands with no usable plan.',
-        'Accepting may create `TASKS.md` and add only its location and update rule to the project `AGENTS.md`.',
-        'Declining creates no files and normal work continues with a compact chat plan.',
-        'An existing tracker remains the single source of truth.',
-        $koreanPlanningAcceptAnchor,
-        $koreanPlanningDeclineAnchor,
-        $koreanPlanningExistingAnchor,
-        'the explicit-only `handoff` skill',
-        'An unresolved target or incomplete rollback prevents a final-state claim.',
-        'Backups may contain prior state and the user''s `AGENTS.md`; treat them as private.',
-        'Before sharing, run and record an exact-HEAD archive review and deliver the archive SHA-256 out of band.'
-    )) {
-        Assert-True $readme.Contains($anchor) "README contains safety anchor: $anchor"
+
+    function Get-ReadmeTable {
+        param([string] $Text, [string] $Heading)
+        $body = Get-ReadmeSubsection $Text $Heading
+        $match = [regex]::Match($body, '(?ms)(?<table>^\|.*\|\r?\n^\|[-| ]+\|\r?\n(?:^\|.*\|\r?\n?)+)')
+        Assert-True $match.Success "README subsection has a table: $Heading"
+        $match.Groups['table'].Value.TrimEnd()
     }
-    Assert-True (($readme -split '## English').Count -eq 2) 'README keeps Korean and English sections'
+
+    foreach ($language in $sections.Keys) {
+        $section = $sections[$language]
+        foreach ($command in @(
+            'powershell.exe -NoProfile -File .\JOENESS.ps1 -Check',
+            'powershell.exe -NoProfile -File .\JOENESS.ps1 -Apply',
+            'powershell.exe -NoProfile -File .\JOENESS.ps1 -Remove'
+        )) {
+            Assert-True $section.Contains($command) "$language guide contains $command"
+        }
+        Assert-True (($section.Contains('PowerShell output') -and $section.Contains('not a Codex chat response')) -or ($section.Contains($koreanPowerShell) -and $section.Contains($koreanChat))) "$language guide distinguishes PowerShell output from chat responses"
+        Assert-True ($section.Contains('Restart Codex or open a new task') -or ($section.Contains($koreanRestart) -and $section.Contains($koreanNewTask))) "$language guide starts a fresh task after Apply"
+        Assert-True ($section.Contains('installed **separately**') -or $section.Contains($koreanSeparate)) "$language guide explains external plugin boundaries"
+        Assert-True ($section -match '(?is)UI UX Pro Max.{0,120}Apple Design.{0,120}\$design') "$language guide describes design references"
+        Assert-True ($section.Contains('JOENESS Core')) "$language guide uses the public Core name"
+        Assert-True ($section.Contains('model routing') -or $section.Contains($koreanModelRouting)) "$language guide explains that implicit skill selection is model routing"
+        if ($language -eq 'English') {
+            Assert-True ($section.Contains('outcome first') -and $section.Contains('no fixed fields or line count') -and $section.Contains('creates no check, document, or log merely to fill a report')) "$language guide explains adaptive outcome-first reporting"
+        } else {
+            Assert-True ($section.Contains($koreanOutcomeFirst) -and $section.Contains($koreanNoFixedFields) -and $section.Contains($koreanNoReportFiller)) "$language guide explains adaptive outcome-first reporting"
+        }
+        Assert-True ($section -match '(?is)Figma.{0,160}conditional') "$language guide makes Figma conditional"
+        Assert-True ($section -match '(?is)Superpowers.{0,160}explicit-only') "$language guide makes Superpowers explicit-only"
+        Assert-True ($section -match '(?is)Ponytail.{0,160}default disabled') "$language guide makes Ponytail default disabled"
+        if ($language -eq 'English') {
+            Assert-True $section.Contains('A plugin whose implicit invocation cannot be constrained is incompatible with JOENESS explicit-only policy; default disabled is recommended.') 'English guide marks unconstrained implicit invocation incompatible and recommends default disabled'
+            Assert-True $section.Contains('JOENESS only warns and never changes plugin settings automatically.') 'English guide says JOENESS warns without changing plugin settings'
+        } else {
+            Assert-True $section.Contains($koreanPluginIncompatible) 'Korean guide marks unconstrained implicit invocation incompatible and recommends default disabled'
+            Assert-True $section.Contains($koreanPluginWarningOnly) 'Korean guide says JOENESS warns without changing plugin settings'
+        }
+
+        $firstUse = Get-ReadmeSubsection $section $(if ($language -eq 'English') { 'First use: five steps' } else { $koreanFirstUse })
+        $steps = @([regex]::Matches($firstUse, '(?m)^([1-9][0-9]*)\. '))
+        Assert-Equal $steps.Count 5 "$language first-use section has exactly five numbered steps"
+        Assert-Equal (@($steps | ForEach-Object { $_.Groups[1].Value }) -join ',') '1,2,3,4,5' "$language first-use steps are numbered 1 through 5"
+        if ($language -eq 'Korean') { Assert-True $firstUse.Contains('Enter') 'Korean PowerShell step tells the user to press Enter' }
+
+        $roles = Get-ReadmeTable $section $(if ($language -eq 'English') { 'Roles' } else { $koreanRoles })
+        $roleLines = @($roles -split '\r?\n')
+        Assert-True (($roleLines[0] -eq '| Call | What it does | Automatic selection condition |') -or ($roleLines[0] -eq $koreanRolesHeader)) "$language roles table has only the public three-column header"
+        $roleRows = @($roleLines | Select-Object -Skip 2)
+        Assert-Equal $roleRows.Count 6 "$language roles table has exactly six calls"
+        Assert-Equal (@($roleRows | ForEach-Object { ($_ -split '\|')[1].Trim().Trim('`') }) -join ',') '$project,$ticket,$design,$visual-check,$spec,$handoff' "$language roles table has only the active calls"
+        Assert-True (@($roleLines | Where-Object { $_ -notmatch '^\|[^|]+\|[^|]+\|[^|]+\|$' }).Count -eq 0) "$language roles table has exactly three columns"
+        if ($language -eq 'English') {
+            Assert-True $section.Contains('low-risk change fully decided by one deterministic check') 'English guide limits the deterministic-check ticket bypass to low-risk work'
+            Assert-True $roles.Contains('moving an approved image to another size or format') 'English visual-check row explains approved-image translation'
+            Assert-True $roles.Contains('visual output before completion') 'English visual-check row explains the visual completion gate'
+            Assert-True ($roles.Contains('persistent specification') -and $roles.Contains("user's language")) 'English spec row explains conditional user-language delivery'
+        } else {
+            $koreanLowRisk = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('64uo7J28IOyekOuPmeqygOyCrOuhnCDsmYTsoITtnogg7YyQ7KCV65CY64qUIOyggOychO2XmCDsiJjsoJU='))
+            Assert-True $section.Contains($koreanLowRisk) 'Korean guide limits the deterministic-check ticket bypass to low-risk work'
+            $koreanApprovedImage = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('7Iq57J2465CcIOydtOuvuOyngOulvCDri6Trpbgg7YGs6riwwrftmJXsi53snLzroZwg7Jiu6ri4IOuVjA=='))
+            $koreanVisualCompletion = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('7Iuc6rCBIOqysOqzvOusvOydhCDsmYTro4wg7KCE7JeQIOyngeygkSDtmZXsnbg='))
+            $koreanSpec = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('66qF7IS4'))
+            $koreanUserLanguage = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('7IKs7Jqp7J6QIOyWuOyWtA=='))
+            Assert-True $roles.Contains($koreanApprovedImage) 'Korean visual-check row explains approved-image translation'
+            Assert-True $roles.Contains($koreanVisualCompletion) 'Korean visual-check row explains the visual completion gate'
+            Assert-True ($roles.Contains($koreanSpec) -and $roles.Contains($koreanUserLanguage)) 'Korean spec row explains conditional user-language delivery'
+        }
+
+        $compatibility = Get-ReadmeTable $section $(if ($language -eq 'English') { 'Compatibility names' } else { $koreanCompatibility })
+        $withoutCompatibility = $section.Replace($compatibility, '')
+        foreach ($oldName in @('JOENESS-0.1.ps1', 'harness.ps1', 'joewrks-project-setup', 'joewrks-design-frontend')) {
+            Assert-True $compatibility.Contains($oldName) "$language compatibility table maps $oldName"
+            Assert-True (-not $withoutCompatibility.Contains($oldName)) "$language keeps $oldName inside its compatibility table"
+        }
+        Assert-True (-not ($section -match '(?im)^\s*(?:[-*]\s+)?`?\$?(?:figma|superpowers|ponytail)(?::|[-_][a-z])')) "$language guide does not present provider internal skills as commands"
+    }
 }
 function Assert-ThrowsLike {
     param([scriptblock] $Action, [string] $Pattern, [string] $Message)
@@ -80,15 +153,18 @@ function Get-ActiveCoreRelativePath {
 
 function Get-V1SelectedFiles {
     param($Manifest)
-    $paths = @()
-    foreach ($skill in @($Manifest.activeSkills.PSObject.Properties.Value)) {
-        $paths += @($skill.files | ForEach-Object { ([string] $_.localPath).Replace('/', '\') })
-        foreach ($sourceName in @($skill.sourceDependencies)) {
+    $legacy = $Manifest.compatibility.legacyInstallSources.stateSchemaV1
+    $selected = @($legacy.files | ForEach-Object {
+        [pscustomobject] @{ SourcePath = ([string] $_.sourcePath).Replace('/', '\'); LocalPath = ([string] $_.localPath).Replace('/', '\') }
+    })
+    foreach ($sourceName in @($legacy.sourceDependencies)) {
             $source = $Manifest.sources.PSObject.Properties[[string] $sourceName].Value
-            $paths += @($source.files | ForEach-Object { ([string] $_.localPath).Replace('/', '\') })
-        }
+            $selected += @($source.files | ForEach-Object {
+                $relative = ([string] $_.localPath).Replace('/', '\')
+                [pscustomobject] @{ SourcePath = $relative; LocalPath = $relative }
+            })
     }
-    @($paths | Sort-Object -Unique)
+    @($selected | Sort-Object LocalPath -Unique)
 }
 
 function Copy-RelativeFile {
@@ -111,7 +187,9 @@ function New-Fixture {
     $source = Join-Path $root 'source'
     [IO.Directory]::CreateDirectory($source) | Out-Null
     $activeCore = Get-ActiveCoreRelativePath $RepositoryRoot
-    foreach ($path in @($activeCore, 'evals\candidates\common-core-v1.md', 'scripts\sync-harness.ps1', 'vendor\source-manifest.json') + (Get-OptionalFiles $RepositoryRoot)) { Copy-RelativeFile $RepositoryRoot $source $path }
+    $compatibilityFiles = Get-ChildItem -LiteralPath (Join-Path $RepositoryRoot 'vendor\compatibility') -File -Recurse |
+        ForEach-Object { $_.FullName.Substring($RepositoryRoot.Length).TrimStart('\') }
+    foreach ($path in @($activeCore, 'evals\candidates\common-core-v1.md', 'evals\candidates\interaction-safety-core-v1.md', 'scripts\sync-harness.ps1', 'vendor\source-manifest.json') + (Get-OptionalFiles $RepositoryRoot) + $compatibilityFiles) { Copy-RelativeFile $RepositoryRoot $source $path }
     [pscustomobject]@{
         Root = $root; SourceRoot = $source; Script = Join-Path $source 'scripts\sync-harness.ps1'
         CodexHome = Join-Path $root 'codex'; AgentsHome = Join-Path $root 'agents'; BackupRoot = Join-Path $root 'backups'
@@ -122,18 +200,18 @@ function New-Fixture {
 function Remove-Fixture { param($Fixture) if (Test-Path -LiteralPath $Fixture.Root) { [IO.Directory]::Delete($Fixture.Root, $true) } }
 
 function Invoke-Harness {
-    param($Fixture, [ValidateSet('Check', 'Apply', 'Remove')] [string] $Mode, [switch] $IncludeDesignFrontend, [switch] $PublicEntry, [switch] $ReleasePublicEntry, [switch] $UseEnvironmentCodexHome, [string[]] $ExtraArguments = @())
+    param($Fixture, [ValidateSet('Check', 'Apply', 'Remove')] [string] $Mode, [switch] $IncludeDesignFrontend, [switch] $PublicEntry, [switch] $ReleasePublicEntry, [switch] $UseVersionCompatibilityEntry, [switch] $UseEnvironmentCodexHome, [string[]] $ExtraArguments = @())
     $arguments = @("-$Mode")
     if (-not $UseEnvironmentCodexHome) { $arguments += @('-CodexHome', $Fixture.CodexHome) }
     $arguments += @('-AgentsHome', $Fixture.AgentsHome, '-BackupRoot', $Fixture.BackupRoot)
     if ($IncludeDesignFrontend) { $arguments += '-IncludeDesignFrontend' }
-    Invoke-HarnessRaw $Fixture $arguments -PublicEntry:$PublicEntry -ReleasePublicEntry:$ReleasePublicEntry -UseEnvironmentCodexHome:$UseEnvironmentCodexHome -ExtraArguments $ExtraArguments
+    Invoke-HarnessRaw $Fixture $arguments -PublicEntry:$PublicEntry -ReleasePublicEntry:$ReleasePublicEntry -UseVersionCompatibilityEntry:$UseVersionCompatibilityEntry -UseEnvironmentCodexHome:$UseEnvironmentCodexHome -ExtraArguments $ExtraArguments
 }
 
 function Invoke-HarnessRaw {
-    param($Fixture, [string[]] $Arguments, [switch] $PublicEntry, [switch] $ReleasePublicEntry, [switch] $UseEnvironmentCodexHome, [string[]] $ExtraArguments = @())
+    param($Fixture, [string[]] $Arguments, [switch] $PublicEntry, [switch] $ReleasePublicEntry, [switch] $UseVersionCompatibilityEntry, [switch] $UseEnvironmentCodexHome, [string[]] $ExtraArguments = @())
     $out = Join-Path $Fixture.Root 'stdout.txt'; $err = Join-Path $Fixture.Root 'stderr.txt'
-    $scriptPath = if ($ReleasePublicEntry) { $ReleaseEntry } elseif ($PublicEntry) { Join-Path $RepositoryRoot 'harness.ps1' } else { $Fixture.Script }
+    $scriptPath = if ($ReleasePublicEntry) { $ReleaseEntry } elseif ($UseVersionCompatibilityEntry) { $VersionCompatibilityEntry } elseif ($PublicEntry) { $LegacyCompatibilityEntry } else { $Fixture.Script }
     $commandArgs = @('-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', $scriptPath) + $Arguments
     $oldPreference = $ErrorActionPreference
     $oldCodexHome = $env:CODEX_HOME
@@ -155,13 +233,22 @@ function Write-V1FixtureState {
     param($Fixture, [switch] $WithBundle)
     $manifestPath = Join-Path $Fixture.SourceRoot 'vendor\source-manifest.json'
     $legacyManifest = [IO.File]::ReadAllText($manifestPath) | ConvertFrom-Json
+    $legacyEntry = $legacyManifest.compatibility.legacyInstallSources.stateSchemaV1
     $legacyManifest.PSObject.Properties.Remove('activeCommonCore')
-    $legacyManifest.evaluation.current.commonCore.path = 'AGENTS.md'
-    $legacyManifest.activeSkills.PSObject.Properties.Remove('handoff')
-    $legacyManifest.activeSkills.PSObject.Properties.Remove('joewrks-project-setup')
-    $legacyManifest.activeSkills.'joewrks-design-frontend'.PSObject.Properties.Remove('activationPolicy')
+    $legacyManifest.evaluation.current | Add-Member -Force -NotePropertyName commonCore -NotePropertyValue ([pscustomobject] @{
+        path = [string] $legacyEntry.commonCore.localPath
+        sha256 = [string] $legacyEntry.commonCore.sha256
+    })
+    $historicalSkill = [pscustomobject] @{
+        sourceDependencies = @($legacyEntry.sourceDependencies)
+        files = @($legacyEntry.files | ForEach-Object {
+            [pscustomobject] @{ localPath = $_.localPath; bytes = $_.bytes; sha256 = $_.sha256; exactUpstreamCopy = $false }
+        })
+    }
+    $legacyManifest.activeSkills = [pscustomobject] @{ ([string] $legacyEntry.skillName) = $historicalSkill }
+    $legacyManifest.PSObject.Properties.Remove('compatibility')
     $legacyManifestText = $legacyManifest | ConvertTo-Json -Depth 100
-    $corePath = Join-Path $Fixture.SourceRoot 'evals\candidates\common-core-v1.md'
+    $corePath = Join-Path $Fixture.SourceRoot (([string] $legacyEntry.commonCore.sourcePath).Replace('/', '\'))
     $core = [IO.File]::ReadAllText($corePath).TrimEnd("`r", "`n")
     $block = "$BeginMarker`n$core`n$EndMarker"
     $agentsPath = Join-Path $Fixture.CodexHome 'AGENTS.md'
@@ -172,12 +259,18 @@ function Write-V1FixtureState {
     }
     $wholeFileTargets = [ordered] @{}
     if ($WithBundle) {
-        Assert-Equal (($legacyManifest.activeSkills.PSObject.Properties.Name | Sort-Object) -join ',') 'joewrks-design-frontend' 'V1 fixture has only the historical design skill'
-        Assert-True (-not ($legacyManifest.activeSkills.'joewrks-design-frontend'.PSObject.Properties.Name -contains 'activationPolicy')) 'V1 fixture predates activationPolicy'
-        foreach ($relative in Get-V1SelectedFiles $legacyManifest) {
-            Copy-RelativeFile $Fixture.SourceRoot $Fixture.AgentsHome $relative
-            $canonical = $relative.Replace('\', '/')
-            $wholeFileTargets[$canonical] = Get-Hash (Join-Path $Fixture.AgentsHome $relative)
+        Assert-Equal (($legacyManifest.activeSkills.PSObject.Properties.Name | Sort-Object) -join ',') ([string] $legacyEntry.skillName) 'V1 fixture has only the historical design skill'
+        Assert-True (-not ($historicalSkill.PSObject.Properties.Name -contains 'activationPolicy')) 'V1 fixture predates activationPolicy'
+        foreach ($selection in Get-V1SelectedFiles ([IO.File]::ReadAllText($manifestPath) | ConvertFrom-Json)) {
+            Copy-RelativeFile $Fixture.SourceRoot $Fixture.AgentsHome $selection.SourcePath
+            if ($selection.SourcePath -cne $selection.LocalPath) {
+                $source = Join-Path $Fixture.AgentsHome $selection.SourcePath
+                $target = Join-Path $Fixture.AgentsHome $selection.LocalPath
+                [IO.Directory]::CreateDirectory((Split-Path -Parent $target)) | Out-Null
+                [IO.File]::Move($source, $target)
+            }
+            $canonical = $selection.LocalPath.Replace('\', '/')
+            $wholeFileTargets[$canonical] = Get-Hash (Join-Path $Fixture.AgentsHome $selection.LocalPath)
         }
         $installedManifest = Join-Path $Fixture.AgentsHome 'vendor\source-manifest.json'
         Write-Utf8 $installedManifest ($legacyManifestText + "`n")
@@ -197,44 +290,286 @@ function Write-V1FixtureState {
     Write-Utf8 $Fixture.State (($state | ConvertTo-Json -Depth 16) + "`n")
 }
 
+function Write-LegacyNamedV2FixtureState {
+    param($Fixture)
+    $manifestPath = Join-Path $Fixture.SourceRoot 'vendor\source-manifest.json'
+    $sourceManifest = [IO.File]::ReadAllText($manifestPath) | ConvertFrom-Json
+    $release = $sourceManifest.compatibility.legacyInstallSources.'release0.1'
+    $legacyManifest = [IO.File]::ReadAllText($manifestPath) | ConvertFrom-Json
+    $historyProperty = $legacyManifest.evaluation.PSObject.Properties['history']
+    if ($null -ne $historyProperty -and @($historyProperty.Value).Count -gt 0) {
+        $legacyManifest.evaluation.current = @($historyProperty.Value)[0]
+        $legacyManifest.evaluation.PSObject.Properties.Remove('history')
+    }
+    $legacyManifest.release.entrypoint = 'JOENESS-0.1.ps1'
+    $legacyManifest.activeCommonCore = [pscustomobject] @{
+        path = [string] $release.activeCommonCore.sourcePath
+        sha256 = [string] $release.activeCommonCore.sha256
+    }
+    $newLegacySkill = {
+        param([string] $Prefix, [string[]] $Dependencies)
+        [pscustomobject] @{
+            sourceDependencies = @($Dependencies)
+            files = @($release.files | Where-Object {
+                ([string] $_.localPath).StartsWith($Prefix, [StringComparison]::Ordinal)
+            } | ForEach-Object {
+                [pscustomobject] @{
+                    localPath = [string] $_.localPath
+                    bytes = [long] $_.bytes
+                    sha256 = [string] $_.sha256
+                    exactUpstreamCopy = $false
+                }
+            })
+        }
+    }
+    $legacyManifest.activeSkills = [pscustomobject] [ordered] @{
+        handoff = & $newLegacySkill 'skills/handoff/' @()
+        'joewrks-design-frontend' = & $newLegacySkill 'skills/joewrks-design-frontend/' @('ui-ux-pro-max', 'apple-design')
+        'joewrks-project-setup' = & $newLegacySkill 'skills/joewrks-project-setup/' @()
+    }
+
+    $wholeFileTargets = [ordered] @{}
+    foreach ($file in @($release.files)) {
+        $sourcePath = Join-Path $Fixture.SourceRoot (([string] $file.sourcePath).Replace('/', '\'))
+        $targetRelative = ([string] $file.localPath).Replace('/', '\')
+        $targetPath = Join-Path $Fixture.AgentsHome $targetRelative
+        [IO.Directory]::CreateDirectory((Split-Path -Parent $targetPath)) | Out-Null
+        [IO.File]::Copy($sourcePath, $targetPath, $true)
+        $wholeFileTargets[([string] $file.localPath)] = Get-Hash $targetPath
+    }
+    foreach ($sourceName in @('ui-ux-pro-max', 'apple-design')) {
+        foreach ($file in @($sourceManifest.sources.PSObject.Properties[$sourceName].Value.files)) {
+            $relative = ([string] $file.localPath).Replace('/', '\')
+            Copy-RelativeFile $Fixture.SourceRoot $Fixture.AgentsHome $relative
+            $wholeFileTargets[([string] $file.localPath)] = Get-Hash (Join-Path $Fixture.AgentsHome $relative)
+        }
+    }
+
+    $installedManifestPath = Join-Path $Fixture.AgentsHome 'vendor\source-manifest.json'
+    Write-Utf8 $installedManifestPath (($legacyManifest | ConvertTo-Json -Depth 100) + "`n")
+    $wholeFileTargets['vendor/source-manifest.json'] = Get-Hash $installedManifestPath
+
+    $coreSourcePath = Join-Path $Fixture.SourceRoot (([string] $release.activeCommonCore.sourcePath).Replace('/', '\'))
+    $core = [IO.File]::ReadAllText($coreSourcePath).TrimEnd("`r", "`n")
+    $agentsPath = Join-Path $Fixture.CodexHome 'AGENTS.md'
+    Write-Utf8 $agentsPath "$BeginMarker`n$core`n$EndMarker"
+    $state = [ordered] @{
+        schemaVersion = 2
+        bundleSelection = 'personal-pilot'
+        agentsHomeIdentitySha256 = Get-PathIdentity $Fixture.AgentsHome
+        sourceIdentities = [ordered] @{
+            commonCore = [ordered] @{
+                path = [string] $release.activeCommonCore.sourcePath
+                sha256 = [string] $release.activeCommonCore.sha256
+            }
+            bundleManifest = [ordered] @{
+                path = 'vendor/source-manifest.json'
+                sha256 = $wholeFileTargets['vendor/source-manifest.json']
+            }
+        }
+        managedBlocks = [ordered] @{ 'AGENTS.md' = Get-Hash $agentsPath }
+        wholeFileTargets = $wholeFileTargets
+    }
+    Write-Utf8 $Fixture.State (($state | ConvertTo-Json -Depth 16) + "`n")
+}
+
+function Write-SelfConsistentForgedLegacyNamedV2FixtureState {
+    param($Fixture)
+    Write-LegacyNamedV2FixtureState $Fixture
+
+    $relative = 'skills/joewrks-design-frontend/agents/openai.yaml'
+    $targetPath = Join-Path $Fixture.AgentsHome ($relative.Replace('/', '\'))
+    Write-Utf8 $targetPath "forged legacy descriptor`n"
+    $targetHash = Get-Hash $targetPath
+    $targetBytes = (Get-Item -LiteralPath $targetPath).Length
+
+    $installedManifestPath = Join-Path $Fixture.AgentsHome 'vendor\source-manifest.json'
+    $installedManifest = Get-Content -Raw -LiteralPath $installedManifestPath | ConvertFrom-Json
+    $descriptor = @($installedManifest.activeSkills.'joewrks-design-frontend'.files | Where-Object {
+        [string] $_.localPath -ceq $relative
+    })[0]
+    $descriptor.bytes = $targetBytes
+    $descriptor.sha256 = $targetHash
+    Write-Utf8 $installedManifestPath (($installedManifest | ConvertTo-Json -Depth 100) + "`n")
+
+    $state = Get-Content -Raw -LiteralPath $Fixture.State | ConvertFrom-Json
+    $state.wholeFileTargets.PSObject.Properties[$relative].Value = $targetHash
+    $manifestHash = Get-Hash $installedManifestPath
+    $state.wholeFileTargets.PSObject.Properties['vendor/source-manifest.json'].Value = $manifestHash
+    $state.sourceIdentities.bundleManifest.sha256 = $manifestHash
+    Write-Utf8 $Fixture.State (($state | ConvertTo-Json -Depth 16) + "`n")
+}
+
+function Test-EmptyDirectoryCleanupDeleteRace {
+    $f = New-Fixture
+    try {
+        . $f.Script
+        $directory = Join-Path $f.AgentsHome 'skills\delete-race'
+        $externalPath = Join-Path $directory 'external.txt'
+        [IO.Directory]::CreateDirectory($directory) | Out-Null
+        $result = & {
+            function Get-ChildItem {
+                [CmdletBinding()]
+                param([string[]] $LiteralPath, [switch] $Force)
+                $entries = @(Microsoft.PowerShell.Management\Get-ChildItem @PSBoundParameters)
+                if (@($LiteralPath).Count -eq 1 -and $LiteralPath[0] -ieq $directory) {
+                    Write-Utf8 $externalPath 'external'
+                }
+                $entries
+            }
+            function Remove-Item {
+                [CmdletBinding()]
+                param([string[]] $LiteralPath, [switch] $Force)
+                Microsoft.PowerShell.Management\Remove-Item @PSBoundParameters -Recurse
+            }
+            Remove-HarnessEmptyDirectories $f.AgentsHome @($directory)
+        }
+        Assert-True (Test-Path -LiteralPath $externalPath -PathType Leaf) 'cleanup preserves a file created after inspection'
+        Assert-Equal ([IO.File]::ReadAllText($externalPath)) 'external' 'cleanup preserves concurrent file bytes'
+        Assert-True (@($result.failed | Where-Object { $_ -ieq $directory }).Count -eq 1) 'cleanup reports the delete-time non-empty directory as failed'
+        Assert-True (@($result.removed | Where-Object { $_ -ieq $directory }).Count -eq 0) 'cleanup does not report the raced directory as removed'
+    } finally { Remove-Fixture $f }
+}
+
+function Test-EmptyDirectoryCleanupReparseRace {
+    $f = New-Fixture
+    $ancestor = Join-Path $f.AgentsHome 'skills\swap-parent'
+    try {
+        . $f.Script
+        $directory = Join-Path $ancestor 'child'
+        $externalRoot = Join-Path $f.Root 'external-target'
+        $externalDirectory = Join-Path $externalRoot 'child'
+        [IO.Directory]::CreateDirectory($directory) | Out-Null
+        [IO.Directory]::CreateDirectory($externalDirectory) | Out-Null
+        $originalAssert = (Get-Command Assert-HarnessNoReparsePoint).ScriptBlock
+        $behavior = @{ Swapped = $false }
+        $result = & {
+            function Assert-HarnessNoReparsePoint {
+                param([string] $Root, [string] $Path, [string] $Label)
+                & $originalAssert $Root $Path $Label
+                if (-not $behavior.Swapped -and $Path -ieq $directory) {
+                    [IO.Directory]::Delete($ancestor, $true)
+                    New-Item -ItemType Junction -Path $ancestor -Target $externalRoot | Out-Null
+                    $behavior.Swapped = $true
+                }
+            }
+            Remove-HarnessEmptyDirectories $f.AgentsHome @($directory)
+        }
+        Assert-True $behavior.Swapped 'reparse race swaps the ancestor after the first safety check'
+        Assert-True (Test-Path -LiteralPath $externalDirectory -PathType Container) 'cleanup preserves an external directory reached through a swapped junction'
+        Assert-True (@($result.failed | Where-Object { $_ -ieq $directory }).Count -eq 1) 'cleanup reports the swapped-ancestor candidate as failed'
+    } finally {
+        $entry = Get-Item -LiteralPath $ancestor -Force -ErrorAction SilentlyContinue
+        if ($null -ne $entry -and ($entry.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0) { [IO.Directory]::Delete($ancestor) }
+        Remove-Fixture $f
+    }
+}
+
+function Test-TargetDirectoryCreationOwnershipRace {
+    $f = New-Fixture
+    try {
+        . $f.Script
+        $directory = Join-Path $f.AgentsHome 'skills\creation-race'
+        $created = [Collections.Generic.List[string]]::new()
+        $behavior = @{ Calls = 0 }
+        & {
+            function Test-Path {
+                [CmdletBinding()]
+                param([string[]] $LiteralPath, [Microsoft.PowerShell.Commands.TestPathType] $PathType)
+                if (@($LiteralPath).Count -eq 1 -and $LiteralPath[0] -ieq $directory) {
+                    $behavior.Calls++
+                    if ($behavior.Calls -eq 1) { return $false }
+                    if ($behavior.Calls -eq 2) {
+                        [IO.Directory]::CreateDirectory($directory) | Out-Null
+                        return $false
+                    }
+                }
+                Microsoft.PowerShell.Management\Test-Path @PSBoundParameters
+            }
+            Assert-ThrowsLike { New-HarnessTargetDirectory $directory $created } '*already exists*' 'concurrent directory creation is distinguished from owned creation'
+        }
+        Assert-Equal $created.Count 0 'concurrently created directory is not recorded as run-owned'
+        Assert-True (Test-Path -LiteralPath $directory -PathType Container) 'concurrently created directory is preserved'
+    } finally { Remove-Fixture $f }
+}
+
+function Test-EmptyDirectoryCleanupPathBoundaries {
+    $f = New-Fixture
+    try {
+        . $f.Script
+        $boundary = Join-Path $f.Root 'agents'
+        $prefixSibling = Join-Path $f.Root 'agents-other'
+        [IO.Directory]::CreateDirectory($boundary) | Out-Null
+        [IO.Directory]::CreateDirectory($prefixSibling) | Out-Null
+        $prefixResult = Remove-HarnessEmptyDirectories $boundary @($prefixSibling)
+        Assert-True (Test-Path -LiteralPath $prefixSibling -PathType Container) 'cleanup preserves a prefix-sibling directory outside its boundary'
+        Assert-True (@($prefixResult.failed | Where-Object { $_ -ieq $prefixSibling }).Count -eq 1) 'cleanup rejects a prefix-sibling candidate'
+
+        $fileSystemRoot = [IO.Path]::GetPathRoot($f.Root)
+        $rootResult = Remove-HarnessEmptyDirectories $fileSystemRoot @($fileSystemRoot)
+        Assert-True (@($rootResult.failed | Where-Object { $_ -ieq $fileSystemRoot }).Count -eq 1) 'cleanup rejects a filesystem-root candidate'
+        Assert-True (@($rootResult.nonEmpty | Where-Object { $_ -ieq $fileSystemRoot }).Count -eq 0) 'filesystem root is rejected before content inspection'
+    } finally { Remove-Fixture $f }
+}
+
 function Test-PublicHarnessEntry {
     $f = New-Fixture
     try {
         $releaseCheck = Invoke-Harness $f Check -ReleasePublicEntry
-        Assert-Equal $releaseCheck.ExitCode 0 'JOENESS-0.1 entry check succeeds'
-        Assert-Equal (Read-Result $releaseCheck 'JOENESS-0.1 entry check').status 'ready' 'JOENESS-0.1 entry forwards check'
-        Assert-True (-not (Test-Path -LiteralPath $f.CodexHome)) 'JOENESS-0.1 check remains read-only'
+        Assert-Equal $releaseCheck.ExitCode 0 'JOENESS entry check succeeds'
+        $releaseResult = Read-Result $releaseCheck 'JOENESS entry check'
+        Assert-Equal $releaseResult.status 'ready' 'JOENESS entry forwards check'
+        Assert-PublicResultContract $releaseResult 'check' 'JOENESS entry check'
+        Assert-True (-not (Test-Path -LiteralPath $f.CodexHome)) 'JOENESS check remains read-only'
+
+        $versionCheck = Invoke-Harness $f Check -UseVersionCompatibilityEntry
+        Assert-Equal $versionCheck.ExitCode 0 'JOENESS-0.1 compatibility entry check succeeds'
+        $versionResult = Read-Result $versionCheck 'JOENESS-0.1 compatibility entry check'
+        Assert-PublicResultContract $versionResult 'check' 'JOENESS-0.1 compatibility entry check'
+        Assert-Equal $versionCheck.StdOut $releaseCheck.StdOut 'JOENESS and JOENESS-0.1 entries return the same check JSON'
 
         $emptyRemove = Invoke-Harness $f Remove -PublicEntry
         Assert-Equal $emptyRemove.ExitCode 0 'public entry empty remove succeeds'
-        Assert-Equal (Read-Result $emptyRemove 'public entry empty remove').status 'removed' 'public entry forwards empty remove'
+        $emptyRemoveResult = Read-Result $emptyRemove 'public entry empty remove'
+        Assert-Equal $emptyRemoveResult.status 'removed' 'public entry forwards empty remove'
+        Assert-PublicResultContract $emptyRemoveResult 'remove' 'public entry empty remove'
         Assert-True (-not (Test-Path -LiteralPath $f.BackupRoot)) 'public entry empty remove creates no backup'
 
         $check = Invoke-Harness $f Check -PublicEntry
         Assert-Equal $check.ExitCode 0 'public entry check succeeds'
-        Assert-Equal (Read-Result $check 'public entry check').status 'ready' 'public entry forwards check'
-        Assert-Equal $check.StdOut $releaseCheck.StdOut 'legacy and JOENESS-0.1 entries return the same check result'
+        $checkResult = Read-Result $check 'public entry check'
+        Assert-Equal $checkResult.status 'ready' 'public entry forwards check'
+        Assert-PublicResultContract $checkResult 'check' 'public entry check'
+        Assert-Equal $check.StdOut $releaseCheck.StdOut 'legacy and JOENESS entries return the same check JSON'
         Assert-True (-not (Test-Path -LiteralPath $f.CodexHome)) 'public entry check remains read-only'
 
         $apply = Invoke-Harness $f Apply -PublicEntry
         Assert-Equal $apply.ExitCode 0 'public entry apply succeeds'
-        Assert-Equal (Read-Result $apply 'public entry apply').status 'current' 'public entry forwards apply'
+        $applyResult = Read-Result $apply 'public entry apply'
+        Assert-Equal $applyResult.status 'current' 'public entry forwards apply'
+        Assert-PublicResultContract $applyResult 'apply' 'public entry apply'
         Assert-True (Test-Path -LiteralPath (Join-Path $f.CodexHome 'AGENTS.md') -PathType Leaf) 'public entry apply installs Common Core'
         Assert-StringSetEqual @((Get-TreeHashes $f.AgentsHome).Keys) (Get-OptionalFiles $f.SourceRoot) 'public entry installs the personal pilot bundle'
 
         $pilot = Invoke-Harness $f Check -IncludeDesignFrontend -PublicEntry
         Assert-Equal $pilot.ExitCode 0 'public entry accepts the compatibility flag'
         $pilotResult = Read-Result $pilot 'public entry pilot check'
-        Assert-PilotDisclosure $pilotResult.designFrontendPilot 'default-personal-pilot' 'public entry pilot check'
+        Assert-PublicResultContract $pilotResult 'check' 'public entry compatibility check'
         Assert-Equal @($pilotResult.warnings).Count 1 'public entry exposes one compatibility warning'
 
         $invalid = Invoke-Harness $f Check -PublicEntry -ExtraArguments @('-Apply')
         Assert-Equal $invalid.ExitCode 2 'public entry preserves blocked exit status'
-        Assert-Equal (Read-Result $invalid 'public entry invalid invocation').status 'blocked' 'public entry preserves blocked result'
+        $invalidResult = Read-Result $invalid 'public entry invalid invocation'
+        Assert-Equal $invalidResult.status 'blocked' 'public entry preserves blocked result'
+        Assert-PublicResultContract $invalidResult 'check' 'public entry invalid invocation'
+        $manifest = Get-Content -Raw -LiteralPath (Join-Path $f.SourceRoot 'vendor\source-manifest.json') | ConvertFrom-Json
+        Assert-Equal (@($invalidResult.activeSkills) -join ',') (@($manifest.activeSkills.PSObject.Properties.Name | Sort-Object -CaseSensitive) -join ',') 'public entry invalid invocation returns sorted manifest skill keys'
 
         $remove = Invoke-Harness $f Remove -PublicEntry
         Assert-Equal $remove.ExitCode 0 'public entry owned remove succeeds'
-        Assert-Equal (Read-Result $remove 'public entry owned remove').status 'removed' 'public entry forwards owned remove'
+        $removeResult = Read-Result $remove 'public entry owned remove'
+        Assert-Equal $removeResult.status 'removed' 'public entry forwards owned remove'
+        Assert-PublicResultContract $removeResult 'remove' 'public entry owned remove'
         Assert-True (-not (Test-Path -LiteralPath $f.State)) 'public entry owned remove deletes state'
     } finally { Remove-Fixture $f }
 }
@@ -323,18 +658,16 @@ function Get-ExternalAgentBytes {
 
 function Assert-BytesEqual { param([byte[]] $Actual, [byte[]] $Expected, [string] $Message) Assert-Equal ([Convert]::ToBase64String($Actual)) ([Convert]::ToBase64String($Expected)) $Message }
 function Assert-StringSetEqual { param([string[]] $Actual, [string[]] $Expected, [string] $Message) Assert-Equal (($Actual | Sort-Object) -join "`n") (($Expected | Sort-Object) -join "`n") $Message }
-function Assert-PilotDisclosure {
-    param($Pilot, [string] $Selection, [string] $Message)
-    Assert-True ($null -ne $Pilot) "$Message discloses the pilot"
-    Assert-Equal $Pilot.selection $Selection "$Message distinguishes pilot selection"
-    Assert-Equal $Pilot.state 'candidate' "$Message reports candidate state"
-    Assert-Equal $Pilot.hardGate 'pass' "$Message reports the manifest hard gate"
-    Assert-Equal $Pilot.promotionPass $false "$Message does not claim promotion"
-    Assert-Equal $Pilot.classification 'implicit-unverified' "$Message reports unverified classification"
-    Assert-Equal $Pilot.outcomeReview 'human-review-required' "$Message requires human outcome review"
-    Assert-Equal $Pilot.semanticImprovement 'not-asserted' "$Message does not assert semantic improvement"
-    Assert-Equal $Pilot.figma 'task-time-verification-not-certified' "$Message does not certify Figma"
-    Assert-Equal $Pilot.browser 'task-time-verification-not-certified' "$Message does not certify browser behavior"
+function Assert-PublicResultContract {
+    param($Result, [string] $ExpectedMode, [string] $Message)
+    $required = @('activeSkills','agentsRoot','backupPath','blockers','changes','changesRequired','mode','rollback','skillsRoot','status','unresolvedTargets','warnings')
+    Assert-Equal (($Result.PSObject.Properties.Name | Sort-Object) -join ',') (($required | Sort-Object) -join ',') "$Message result keys"
+    Assert-Equal $Result.mode $ExpectedMode "$Message mode"
+    $json = $Result | ConvertTo-Json -Compress -Depth 16
+    foreach ($forbidden in @('designFrontendRoot','designFrontendPilot','bundleSelection','personal-pilot')) {
+        Assert-True (-not $json.Contains($forbidden)) "$Message hides $forbidden"
+    }
+    Assert-True (-not (@($Result.changes).kind -contains 'designFrontend')) "$Message uses neutral change kinds"
 }
 
 function Assert-OneJsonResult {
@@ -416,6 +749,11 @@ function Test-RemoveContract {
             Assert-True (-not (Test-Path -LiteralPath (Join-Path $f.AgentsHome $relative))) "owned remove deletes state-owned file: $relative"
             Assert-BytesEqual ([IO.File]::ReadAllBytes((Join-Path $removed.backupPath (Join-Path 'agents' $relative)))) $ownedBytes[$relative] "owned remove backs up exact owned bytes: $relative"
         }
+        Assert-True (-not (Test-Path -LiteralPath (Join-Path $f.AgentsHome 'skills\design'))) 'owned remove deletes the empty design skill directory'
+        Assert-True (-not (Test-Path -LiteralPath (Join-Path $f.AgentsHome 'skills\project'))) 'owned remove deletes the empty project skill directory'
+        Assert-True (-not (Test-Path -LiteralPath (Join-Path $f.AgentsHome 'skills\ticket'))) 'owned remove deletes the empty ticket skill directory'
+        Assert-True (-not (Test-Path -LiteralPath (Join-Path $f.AgentsHome 'skills\visual-check'))) 'owned remove deletes the empty visual-check skill directory'
+        Assert-True (-not (Test-Path -LiteralPath (Join-Path $f.AgentsHome 'vendor'))) 'owned remove deletes the empty managed vendor directory'
         Assert-BytesEqual ([IO.File]::ReadAllBytes((Join-Path $removed.backupPath 'codex\AGENTS.md'))) $installedAgentsBytes 'owned remove backs up exact AGENTS bytes'
         Assert-BytesEqual ([IO.File]::ReadAllBytes((Join-Path $removed.backupPath 'codex\joewrks-harness-state.json'))) $stateBytes 'owned remove backs up exact state bytes'
         Assert-Equal $orderedTargets[$orderedTargets.Count - 1] $f.State 'remove deletes state last'
@@ -430,6 +768,20 @@ function Test-RemoveContract {
         $reapply = Invoke-Harness $f Apply
         Assert-Equal $reapply.ExitCode 0 'apply reuses the clean managed directory skeleton'
         Assert-Equal (Read-Result $reapply 'apply after remove').status 'current' 'apply after remove restores the bundle'
+    } finally { Remove-Fixture $f }
+
+    $f = New-Fixture
+    try {
+        Assert-Equal (Invoke-Harness $f Apply).ExitCode 0 'non-owned residue remove baseline apply succeeds'
+        $externalPath = Join-Path $f.AgentsHome 'skills\design\external.txt'
+        Write-Utf8 $externalPath 'external'
+        $removed = Invoke-Harness $f Remove
+        Assert-Equal $removed.ExitCode 0 'non-owned residue remove succeeds'
+        Assert-Equal (Read-Result $removed 'non-owned residue remove').status 'removed' 'non-owned residue remove reports removed'
+        Assert-True (Test-Path -LiteralPath $externalPath -PathType Leaf) 'remove preserves a non-owned file in a managed directory'
+        Assert-Equal ([IO.File]::ReadAllText($externalPath)) 'external' 'remove preserves non-owned file bytes'
+        Assert-True (Test-Path -LiteralPath (Split-Path -Parent $externalPath) -PathType Container) 'remove preserves a managed directory containing a non-owned file'
+        Assert-True (-not (Test-Path -LiteralPath (Join-Path $f.AgentsHome 'skills\project'))) 'remove still deletes other proven-empty managed directories'
     } finally { Remove-Fixture $f }
 
     $f = New-Fixture
@@ -464,7 +816,7 @@ function Test-NoFinalNewlineRoundTrip {
 function Test-RemovePreflightBlockers {
     foreach ($case in @(
         @{ Name = 'orphan marker'; Prepare = { param($f) Write-Utf8 (Join-Path $f.CodexHome 'AGENTS.md') "$BeginMarker`nforeign`n$EndMarker" } },
-        @{ Name = 'orphan managed skill namespace'; Prepare = { param($f) Write-Utf8 (Join-Path $f.AgentsHome 'skills\joewrks-project-setup\external.txt') 'external' } }
+        @{ Name = 'orphan managed skill namespace'; Prepare = { param($f) Write-Utf8 (Join-Path $f.AgentsHome 'skills\project\external.txt') 'external' } }
     )) {
         $f = New-Fixture
         try {
@@ -479,9 +831,9 @@ function Test-RemovePreflightBlockers {
     }
 
     foreach ($case in @(
-        @{ Name = 'drifted owned target'; Prepare = { param($f) Add-Content -LiteralPath (Join-Path $f.AgentsHome 'skills\joewrks-design-frontend\SKILL.md') -Value 'drift' } },
+        @{ Name = 'drifted owned target'; Prepare = { param($f) Add-Content -LiteralPath (Join-Path $f.AgentsHome 'skills\design\SKILL.md') -Value 'drift' } },
         @{ Name = 'drifted owned Common Core'; Prepare = { param($f) $path = Join-Path $f.CodexHome 'AGENTS.md'; Write-Utf8 $path ([IO.File]::ReadAllText($path).Replace($EndMarker, "# Drifted managed slot`n$EndMarker")) } },
-        @{ Name = 'missing owned target'; Prepare = { param($f) [IO.File]::Delete((Join-Path $f.AgentsHome 'skills\joewrks-design-frontend\SKILL.md')) } },
+        @{ Name = 'missing owned target'; Prepare = { param($f) [IO.File]::Delete((Join-Path $f.AgentsHome 'skills\design\SKILL.md')) } },
         @{ Name = 'missing owned AGENTS'; Prepare = { param($f) [IO.File]::Delete((Join-Path $f.CodexHome 'AGENTS.md')) } }
     )) {
         $f = New-Fixture
@@ -579,7 +931,7 @@ function Test-CleanSkeletonAdversaries {
             Name = 'file in expected skeleton directory'
             Prepare = {
                 param($f)
-                Write-Utf8 (Join-Path $f.AgentsHome 'skills\joewrks-project-setup\agents\external.txt') 'external'
+                Write-Utf8 (Join-Path $f.AgentsHome 'skills\project\agents\external.txt') 'external'
                 $null
             }
         },
@@ -587,7 +939,7 @@ function Test-CleanSkeletonAdversaries {
             Name = 'unexpected skeleton subdirectory'
             Prepare = {
                 param($f)
-                [IO.Directory]::CreateDirectory((Join-Path $f.AgentsHome 'skills\joewrks-project-setup\unexpected')) | Out-Null
+                [IO.Directory]::CreateDirectory((Join-Path $f.AgentsHome 'skills\project\unexpected')) | Out-Null
                 $null
             }
         },
@@ -595,8 +947,9 @@ function Test-CleanSkeletonAdversaries {
             Name = 'skill root reparse'
             Prepare = {
                 param($f)
-                $path = Join-Path $f.AgentsHome 'skills\joewrks-project-setup'
-                [IO.Directory]::Delete($path, $true)
+                $path = Join-Path $f.AgentsHome 'skills\project'
+                if (Test-Path -LiteralPath $path) { [IO.Directory]::Delete($path, $true) }
+                [IO.Directory]::CreateDirectory((Split-Path -Parent $path)) | Out-Null
                 $target = Join-Path $f.Root 'root-reparse-target'
                 [IO.Directory]::CreateDirectory($target) | Out-Null
                 New-Item -ItemType Junction -Path $path -Target $target | Out-Null
@@ -607,8 +960,9 @@ function Test-CleanSkeletonAdversaries {
             Name = 'skeleton descendant reparse'
             Prepare = {
                 param($f)
-                $path = Join-Path $f.AgentsHome 'skills\joewrks-project-setup\agents'
-                [IO.Directory]::Delete($path)
+                $path = Join-Path $f.AgentsHome 'skills\project\agents'
+                if (Test-Path -LiteralPath $path) { [IO.Directory]::Delete($path) }
+                [IO.Directory]::CreateDirectory((Split-Path -Parent $path)) | Out-Null
                 $target = Join-Path $f.Root 'descendant-reparse-target'
                 [IO.Directory]::CreateDirectory($target) | Out-Null
                 New-Item -ItemType Junction -Path $path -Target $target | Out-Null
@@ -648,7 +1002,8 @@ function Test-CleanSkeletonAdversaries {
     try {
         Assert-Equal (Invoke-Harness $f Apply).ExitCode 0 'skeleton inspection-error baseline apply succeeds'
         Assert-Equal (Invoke-Harness $f Remove).ExitCode 0 'skeleton inspection-error baseline remove succeeds'
-        $skillRoot = Join-Path $f.AgentsHome 'skills\joewrks-project-setup'
+        $skillRoot = Join-Path $f.AgentsHome 'skills\project'
+        [IO.Directory]::CreateDirectory($skillRoot) | Out-Null
         $before = Get-TreeEntries $f.Root
         . $f.Script
         $results = & {
@@ -713,12 +1068,13 @@ function Test-EmptyCheckAndApply {
     try {
         $check = Invoke-Harness $f Check; Assert-Equal $check.ExitCode 0 'empty check succeeds'
         $result = Read-Result $check 'empty check'; Assert-Equal $result.status 'ready' 'empty check is ready'; Assert-True ([bool]$result.changesRequired) 'empty check needs changes'
-        Assert-Equal $result.bundleSelection 'personal-pilot' 'default selects personal pilot'
+        Assert-PublicResultContract $result 'check' 'default check'
+        $manifest = Get-Content -Raw -LiteralPath (Join-Path $f.SourceRoot 'vendor\source-manifest.json') | ConvertFrom-Json
+        Assert-Equal (@($result.activeSkills) -join ',') (@($manifest.activeSkills.PSObject.Properties.Name | Sort-Object -CaseSensitive) -join ',') 'default check returns sorted current manifest skill keys'
         Assert-Equal @($result.warnings).Count 0 'default check has no warnings'
-        Assert-PilotDisclosure $result.designFrontendPilot 'default-personal-pilot' 'default check'
         Assert-True ((@($result.changes) | ConvertTo-Json -Depth 8) -match '(?i)common.?core') 'empty check plans Common Core'
         Assert-True (-not (Test-Path -LiteralPath $f.CodexHome)) 'check creates no target/state'; Assert-True (-not (Test-Path -LiteralPath $f.AgentsHome)) 'check creates no agents directory'; Assert-True (-not (Test-Path -LiteralPath $f.BackupRoot)) 'check creates no backup'
-        $apply = Invoke-Harness $f Apply; Assert-Equal $apply.ExitCode 0 'first apply succeeds'; $applyResult = Read-Result $apply 'first apply'; Assert-Equal $applyResult.status 'current' 'first apply is current'; Assert-Equal $applyResult.bundleSelection 'personal-pilot' 'apply reports personal pilot'
+        $apply = Invoke-Harness $f Apply; Assert-Equal $apply.ExitCode 0 'first apply succeeds'; $applyResult = Read-Result $apply 'first apply'; Assert-Equal $applyResult.status 'current' 'first apply is current'; Assert-PublicResultContract $applyResult 'apply' 'first apply'
         $agents = Join-Path $f.CodexHome 'AGENTS.md'; Assert-True (Test-Path -LiteralPath $agents) 'apply creates Common Core target'; Assert-True (Test-Path -LiteralPath $f.State) 'apply creates state'
         Assert-StringSetEqual @((Get-TreeHashes $f.AgentsHome).Keys) (Get-OptionalFiles $f.SourceRoot) 'default installs full manifest unit'
         $state = Get-Content -Raw -LiteralPath $f.State | ConvertFrom-Json
@@ -789,21 +1145,21 @@ function Test-ManifestPathSafety {
     try {
         $manifestPath = Join-Path $f.SourceRoot 'vendor\source-manifest.json'
         $exactDuplicateManifest = ([IO.File]::ReadAllText($manifestPath) | ConvertFrom-Json)
-        $exactFile = $exactDuplicateManifest.activeSkills.'joewrks-design-frontend'.files[0]
-        $exactDuplicateManifest.activeSkills.'joewrks-design-frontend'.files = @($exactFile, $exactFile)
+        $exactFile = $exactDuplicateManifest.activeSkills.design.files[0]
+        $exactDuplicateManifest.activeSkills.design.files = @($exactFile, $exactFile)
         Assert-ThrowsLike {
             Get-HarnessManifestSelections $exactDuplicateManifest $f.SourceRoot
         } '*duplicate*' 'exact duplicate blocks'
 
         $caseAliasManifest = ([IO.File]::ReadAllText($manifestPath) | ConvertFrom-Json)
-        $firstFile = $caseAliasManifest.activeSkills.'joewrks-design-frontend'.files[0]
+        $firstFile = $caseAliasManifest.activeSkills.design.files[0]
         $aliasFile = [pscustomobject] @{
             localPath = ([string] $firstFile.localPath).ToUpperInvariant()
             bytes = $firstFile.bytes
             sha256 = $firstFile.sha256
             exactUpstreamCopy = $firstFile.exactUpstreamCopy
         }
-        $caseAliasManifest.activeSkills.'joewrks-design-frontend'.files = @($firstFile, $aliasFile)
+        $caseAliasManifest.activeSkills.design.files = @($firstFile, $aliasFile)
         Assert-ThrowsLike {
             Get-HarnessManifestSelections $caseAliasManifest $f.SourceRoot
         } '*case-insensitive destination*' 'case-only aliases block'
@@ -905,52 +1261,74 @@ function Test-PreflightBlockers {
         @{ Name = 'malformed marker'; Action = { param($f) Write-Utf8 (Join-Path $f.CodexHome 'AGENTS.md') "$BeginMarker`npartial" } },
         @{ Name = 'duplicate markers'; Action = { param($f) Write-Utf8 (Join-Path $f.CodexHome 'AGENTS.md') "$BeginMarker`na`n$EndMarker`n$BeginMarker`nb`n$EndMarker" } },
         @{ Name = 'override shadow'; Action = { param($f) Write-Utf8 (Join-Path $f.CodexHome 'AGENTS.override.md') 'user override' } },
-        @{ Name = 'current skill collision'; Action = { param($f) Write-Utf8 (Join-Path $f.AgentsHome 'skills\joewrks-design-frontend\SKILL.md') 'unmanaged' } },
+        @{ Name = 'current skill collision'; Action = { param($f) Write-Utf8 (Join-Path $f.AgentsHome 'skills\design\SKILL.md') 'unmanaged' } },
         @{ Name = 'legacy skill collision'; Action = { param($f) Write-Utf8 (Join-Path $f.CodexHome 'skills\other\SKILL.md') "---`nname: joewrks-design-frontend`n---" } }
     )
     foreach ($case in $cases) { $f = New-Fixture; try { Assert-BlockedBeforeWrites $f $case.Action $case.Name } finally { Remove-Fixture $f } }
-    $f = New-Fixture; try { Add-Content -LiteralPath (Join-Path $f.SourceRoot 'skills\joewrks-design-frontend\SKILL.md') -Value 'bad source'; Assert-BlockedBeforeWrites $f {} 'source hash mismatch' } finally { Remove-Fixture $f }
+    $f = New-Fixture; try { Add-Content -LiteralPath (Join-Path $f.SourceRoot 'skills\design\SKILL.md') -Value 'bad source'; Assert-BlockedBeforeWrites $f {} 'source hash mismatch' } finally { Remove-Fixture $f }
     $f = New-Fixture; try { Set-SourceCore $f ('# oversized' + ('x' * (33KB))); Assert-BlockedBeforeWrites $f {} 'oversized planned AGENTS.md' } finally { Remove-Fixture $f }
     $f = New-Fixture
     try {
-        Add-Content -LiteralPath (Join-Path $f.SourceRoot 'skills\joewrks-design-frontend\SKILL.md') -Value 'bad source'
+        Add-Content -LiteralPath (Join-Path $f.SourceRoot 'skills\design\SKILL.md') -Value 'bad source'
         $result = Read-Result (Invoke-Harness $f Check -IncludeDesignFrontend) 'pilot source-integrity blocker'
         Assert-Equal $result.status 'blocked' 'pilot source-integrity mismatch blocks'
-        Assert-Equal $result.designFrontendPilot.hardGate 'unverified' 'source-integrity blocker does not report a passing hard gate'
+        Assert-PublicResultContract $result 'check' 'source-integrity blocker'
     } finally { Remove-Fixture $f }
 }
 
 function Test-ManifestSkillCollisions {
-    $cases = @(
-        @{
-            Name = 'current design frontmatter collision'
-            Action = { param($f) Write-Utf8 (Join-Path $f.AgentsHome 'skills\other\SKILL.md') "---`nname: joewrks-design-frontend`n---" }
-        },
-        @{
-            Name = 'legacy project directory collision'
-            Action = { param($f) Write-Utf8 (Join-Path $f.CodexHome 'skills\joewrks-project-setup\SKILL.md') 'unmanaged' }
-        },
-        @{
-            Name = 'exact project directory without managed skill file'
-            Action = { param($f) Write-Utf8 (Join-Path $f.AgentsHome 'skills\joewrks-project-setup\unrelated.txt') 'unmanaged' }
+    . $Implementation
+    $f = New-Fixture
+    try {
+        $skillRoot = Join-Path $f.AgentsHome 'skills'
+        $managedSkillFiles = @{
+            design = $null
+            project = $null
         }
-    )
-    foreach ($case in $cases) {
-        $f = New-Fixture
-        try {
-            & $case.Action $f
-            $codex = Get-TreeHashes $f.CodexHome
-            $agents = Get-TreeHashes $f.AgentsHome
-            $run = Invoke-Harness $f Check -IncludeDesignFrontend
-            $result = Read-Result $run $case.Name
-            Assert-True ($run.ExitCode -ne 0) "$($case.Name) exits nonzero"
-            Assert-Equal $result.status 'blocked' "$($case.Name) reports blocked"
-            Assert-True (@($result.blockers).kind -contains 'duplicateSkill') "$($case.Name) reports duplicateSkill"
-            Assert-TreeEqual (Get-TreeHashes $f.CodexHome) $codex "$($case.Name) check creates no Codex writes"
-            Assert-TreeEqual (Get-TreeHashes $f.AgentsHome) $agents "$($case.Name) check creates no agents writes"
-            Assert-True (-not (Test-Path -LiteralPath $f.BackupRoot)) "$($case.Name) creates no backup"
-        } finally { Remove-Fixture $f }
-    }
+        $cases = @(
+            @{ Name = 'actual design frontmatter'; Skill = 'design'; ExpectBlocked = $true },
+            @{ Name = 'actual project frontmatter'; Skill = 'project'; ExpectBlocked = $true },
+            @{ Name = 'plain project directory'; Skill = $null; ExpectBlocked = $false },
+            @{ Name = 'unowned legacy design skill'; Skill = 'joewrks-design-frontend'; ExpectBlocked = $true },
+            @{ Name = 'unowned legacy project skill'; Skill = 'joewrks-project-setup'; ExpectBlocked = $true },
+            @{ Name = 'state-owned legacy skill'; Skill = 'state-owned'; ExpectBlocked = $false }
+        )
+        foreach ($case in $cases) {
+            $caseDirectory = if ($null -eq $case.Skill) { 'project' } else { $case.Name }
+            $caseRoot = Join-Path $skillRoot $caseDirectory
+            $skillFile = Join-Path $caseRoot 'SKILL.md'
+            if ($null -eq $case.Skill) {
+                Write-Utf8 (Join-Path $caseRoot 'unrelated.txt') 'plain directory'
+                $collisions = @(Get-HarnessFrontmatterCollisions @($skillRoot) $managedSkillFiles)
+            } elseif ($case.Skill -eq 'state-owned') {
+                Write-Utf8 $skillFile "---`nname: design`n---"
+                $collisions = @(Get-HarnessFrontmatterCollisions @($skillRoot) $managedSkillFiles @($skillFile))
+            } else {
+                Write-Utf8 $skillFile "---`nname: $($case.Skill)`n---"
+                $collisions = @(Get-HarnessFrontmatterCollisions @($skillRoot) $managedSkillFiles)
+            }
+            Assert-Equal ([bool] $collisions.Count) $case.ExpectBlocked "$($case.Name) matches the skill namespace"
+            Remove-Item -LiteralPath $caseRoot -Recurse -Force
+        }
+
+        $unreadableUnreserved = Join-Path $skillRoot 'unreadable\SKILL.md'
+        Write-Bytes $unreadableUnreserved ([byte[]] @(0xff, 0xfe, 0x2d, 0x00))
+        Assert-Equal @(Get-HarnessFrontmatterCollisions @($skillRoot) $managedSkillFiles).Count 0 'unreadable non-reserved SKILL.md does not block inspection'
+
+        $unreadableReserved = Join-Path $skillRoot 'project\SKILL.md'
+        Write-Bytes $unreadableReserved ([byte[]] @(0xff, 0xfe, 0x2d, 0x00))
+        Assert-True (@(Get-HarnessFrontmatterCollisions @($skillRoot) $managedSkillFiles | Where-Object { $_ -like "*Cannot inspect skill frontmatter as UTF-8: $unreadableReserved" }).Count -eq 1) 'unreadable reserved SKILL.md blocks inspection'
+    } finally { Remove-Fixture $f }
+
+    $f = New-Fixture
+    try {
+        Write-Utf8 (Join-Path $f.AgentsHome 'skills\project\unrelated.txt') 'unmanaged'
+        $run = Invoke-Harness $f Check -IncludeDesignFrontend
+        $result = Read-Result $run 'exact project target directory without managed skill file'
+        Assert-True ($run.ExitCode -ne 0) 'exact project target directory without managed skill file exits nonzero'
+        Assert-Equal $result.status 'blocked' 'exact project target directory without managed skill file reports blocked'
+        Assert-True (@($result.blockers).kind -contains 'duplicateSkill') 'exact project target directory without managed skill file stays blocked by skeleton preflight'
+    } finally { Remove-Fixture $f }
 
     $f = New-Fixture
     try {
@@ -986,6 +1364,20 @@ function Test-StateTrust {
             $state.schemaVersion = 3
             Write-Utf8 $fixture.State ($state | ConvertTo-Json -Depth 16)
         } 'wrong state schema' 'invalidState'
+    } finally { Remove-Fixture $f }
+
+    $f = New-Fixture
+    try {
+        Assert-Equal (Invoke-Harness $f Apply).ExitCode 0 'bundle selection tamper baseline apply succeeds'
+        $state = Get-Content -Raw -LiteralPath $f.State | ConvertFrom-Json
+        $state.bundleSelection = 'tampered'
+        Write-Utf8 $f.State ($state | ConvertTo-Json -Depth 16)
+        $run = Invoke-Harness $f Check -PublicEntry
+        $result = Read-Result $run 'bundle selection tamper public check'
+        Assert-Equal $run.ExitCode 2 'bundle selection tamper public check exits blocked'
+        Assert-Equal $result.status 'blocked' 'bundle selection tamper public check reports blocked'
+        Assert-PublicResultContract $result 'check' 'bundle selection tamper public check'
+        Assert-Equal ([string](@($result.blockers | Where-Object { $_.kind -eq 'invalidState' }).message)) 'State bundle selection is invalid' 'bundle selection tamper reports a neutral invalid-state message'
     } finally { Remove-Fixture $f }
 
     $f = New-Fixture
@@ -1038,7 +1430,7 @@ function Test-StateTrust {
         Assert-BlockedBeforeWrites $f {
             param($fixture)
             $state = Get-Content -Raw -LiteralPath $fixture.State | ConvertFrom-Json
-            $state.wholeFileTargets.PSObject.Properties.Remove('skills/joewrks-design-frontend/agents/openai.yaml')
+            $state.wholeFileTargets.PSObject.Properties.Remove('skills/design/agents/openai.yaml')
             Write-Utf8 $fixture.State ($state | ConvertTo-Json -Depth 16)
         } 'missing manifest-selected ownership' 'invalidState'
         Write-Bytes $f.State $cleanState
@@ -1059,34 +1451,37 @@ function Test-OptionalBundleStateAndDrift {
         $default = Read-Result (Invoke-Harness $f Check) 'default pilot check'
         $explicit = Read-Result (Invoke-Harness $f Check -IncludeDesignFrontend) 'explicit pilot check'
         Assert-Equal $default.status 'ready' 'default pilot check is ready'
-        Assert-PilotDisclosure $default.designFrontendPilot 'default-personal-pilot' 'default pilot check'
+        Assert-PublicResultContract $default 'check' 'default check'
         Assert-Equal @($default.warnings).Count 0 'default pilot check has no warnings'
         Assert-Equal $explicit.status 'ready' 'explicit pilot check is ready'
-        Assert-PilotDisclosure $explicit.designFrontendPilot 'default-personal-pilot' 'explicit pilot check'
+        Assert-PublicResultContract $explicit 'check' 'compatibility check'
         Assert-Equal @($explicit.warnings).Count 1 'compatibility flag emits one warning'
-        Assert-Equal ([string]$explicit.warnings) 'DEPRECATED: -IncludeDesignFrontend no longer changes selection; personal-pilot already includes joewrks-design-frontend.' 'compatibility flag emits the exact warning'
+        Assert-Equal ([string]$explicit.warnings) 'DEPRECATED: -IncludeDesignFrontend is ignored; the current JOENESS bundle already installs all active skills.' 'compatibility flag emits the exact warning'
         Assert-Equal (($default.changes | ConvertTo-Json -Compress -Depth 8)) (($explicit.changes | ConvertTo-Json -Compress -Depth 8)) 'compatibility flag leaves planned targets unchanged'
 
         Assert-Equal (Invoke-Harness $f Apply).ExitCode 0 'default apply succeeds'
         $expectedFiles = Get-OptionalFiles $f.SourceRoot; Assert-StringSetEqual @((Get-TreeHashes $f.AgentsHome).Keys) $expectedFiles 'default installs exactly the manifest-selected files'
-        $installedDesign = Join-Path $f.AgentsHome 'skills\joewrks-design-frontend\SKILL.md'
+        $installedDesign = Join-Path $f.AgentsHome 'skills\design\SKILL.md'
         $installedRoot = Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $installedDesign))
         Assert-True (Test-Path (Join-Path $installedRoot 'vendor\ui-ux-pro-max\scripts\search.py')) 'installed UIUX runtime resolves'
         Assert-True (Test-Path (Join-Path $installedRoot 'vendor\apple-design\SKILL.md')) 'installed Apple reference resolves'
         Assert-True (Test-Path (Join-Path $f.AgentsHome 'skills\handoff\SKILL.md')) 'explicit handoff skill installs'
         Assert-True (([IO.File]::ReadAllText((Join-Path $f.AgentsHome 'skills\handoff\agents\openai.yaml'))) -match 'allow_implicit_invocation:\s*false') 'handoff remains explicit-only'
         Assert-True (Test-Path (Join-Path $f.AgentsHome 'skills\handoff\LICENSE')) 'handoff license installs'
-        Assert-True (Test-Path (Join-Path $f.AgentsHome 'skills\joewrks-project-setup\scripts\project-setup.ps1')) 'project helper installs'
-        Assert-True (([IO.File]::ReadAllText((Join-Path $f.AgentsHome 'skills\joewrks-project-setup\agents\openai.yaml'))) -match 'allow_implicit_invocation:\s*true') 'project setup allows conditional implicit selection'
+        Assert-True (Test-Path (Join-Path $f.AgentsHome 'skills\project\scripts\project-setup.ps1')) 'project helper installs'
+        Assert-True (([IO.File]::ReadAllText((Join-Path $f.AgentsHome 'skills\project\agents\openai.yaml'))) -match 'allow_implicit_invocation:\s*true') 'project setup allows conditional implicit selection'
+        Assert-True (Test-Path (Join-Path $f.AgentsHome 'skills\ticket\SKILL.md')) 'ticket skill installs'
+        Assert-True (([IO.File]::ReadAllText((Join-Path $f.AgentsHome 'skills\ticket\agents\openai.yaml'))) -match 'allow_implicit_invocation:\s*true') 'ticket allows conditional implicit selection'
+        Assert-True (Test-Path (Join-Path $f.AgentsHome 'skills\visual-check\SKILL.md')) 'visual-check skill installs'
         $before = Get-TreeHashes $f.AgentsHome
         $beforeState = [IO.File]::ReadAllBytes($f.State)
         $compatApply = Read-Result (Invoke-Harness $f Apply -IncludeDesignFrontend) 'compatibility no-op apply'
         Assert-Equal $compatApply.status 'current' 'compatibility flag apply is current'
-        Assert-Equal ([string]$compatApply.warnings) 'DEPRECATED: -IncludeDesignFrontend no longer changes selection; personal-pilot already includes joewrks-design-frontend.' 'compatibility apply emits the exact warning'
+        Assert-Equal ([string]$compatApply.warnings) 'DEPRECATED: -IncludeDesignFrontend is ignored; the current JOENESS bundle already installs all active skills.' 'compatibility apply emits the exact warning'
         Assert-TreeEqual (Get-TreeHashes $f.AgentsHome) $before 'compatibility flag changes no target hashes'
         Assert-BytesEqual ([IO.File]::ReadAllBytes($f.State)) $beforeState 'compatibility flag changes no desired state bytes'
-        Add-Content -LiteralPath (Join-Path $f.AgentsHome 'skills\joewrks-design-frontend\SKILL.md') -Value 'external drift'; $drift = Get-TreeHashes $f.AgentsHome
-        $check = Invoke-Harness $f Check; $driftResult = Read-Result $check 'optional drift check'; Assert-Equal $driftResult.status 'blocked' 'installed optional drift blocks default check'; Assert-PilotDisclosure $driftResult.designFrontendPilot 'default-personal-pilot' 'optional drift check'; Assert-TreeEqual (Get-TreeHashes $f.AgentsHome) $drift 'optional drift check is read-only'
+        Add-Content -LiteralPath (Join-Path $f.AgentsHome 'skills\design\SKILL.md') -Value 'external drift'; $drift = Get-TreeHashes $f.AgentsHome
+        $check = Invoke-Harness $f Check; $driftResult = Read-Result $check 'optional drift check'; Assert-Equal $driftResult.status 'blocked' 'installed optional drift blocks default check'; Assert-PublicResultContract $driftResult 'check' 'optional drift check'; Assert-TreeEqual (Get-TreeHashes $f.AgentsHome) $drift 'optional drift check is read-only'
         $run = Invoke-Harness $f Apply; Assert-True ($run.ExitCode -ne 0) 'installed optional drift blocks apply'; Assert-Equal (Read-Result $run 'optional drift').status 'blocked' 'installed optional drift reports blocked'; Assert-TreeEqual (Get-TreeHashes $f.AgentsHome) $drift 'installed optional drift is not overwritten'
         $stateText = [IO.File]::ReadAllText($f.State); $state = $stateText | ConvertFrom-Json
         Assert-True ($stateText -notmatch '(?i)[a-z]:\\') 'state stores no drive letter'
@@ -1101,7 +1496,7 @@ function Test-PreservedOptionalAfterCoreUpdate {
     $f = New-Fixture
     try {
         Assert-Equal (Invoke-Harness $f Apply -IncludeDesignFrontend).ExitCode 0 'preserved optional baseline apply succeeds'
-        $designSkill = Join-Path $f.AgentsHome 'skills\joewrks-design-frontend\SKILL.md'
+        $designSkill = Join-Path $f.AgentsHome 'skills\design\SKILL.md'
         $beforeDesignSkill = Get-Hash $designSkill
         Set-SourceCore $f ((Get-Content -Raw -LiteralPath (Join-Path $f.SourceRoot (Get-ActiveCoreRelativePath $f.SourceRoot))) + "`n# core-only update")
 
@@ -1113,11 +1508,25 @@ function Test-PreservedOptionalAfterCoreUpdate {
         Assert-Equal $check.ExitCode 0 'check after preserved optional core update succeeds'
         $result = Read-Result $check 'check after preserved optional core update'
         Assert-Equal $result.status 'current' 'preserved optional state remains valid after a core-only update'
-        Assert-PilotDisclosure $result.designFrontendPilot 'default-personal-pilot' 'check after preserved optional core update'
+        Assert-PublicResultContract $result 'check' 'check after preserved optional core update'
     } finally { Remove-Fixture $f }
 }
 
 function Test-V1HistoricalTrust {
+    $f = New-Fixture
+    try {
+        $legacySkill = Join-Path $f.SourceRoot 'vendor\compatibility\joeness-0.1\skills\joewrks-design-frontend\SKILL.md'
+        Add-Content -LiteralPath $legacySkill -Value 'drift'
+        Assert-BlockedBeforeWrites $f {} 'legacy compatibility source hash mismatch' 'sourceIntegrity'
+    } finally { Remove-Fixture $f }
+
+    $f = New-Fixture
+    try {
+        $legacySkill = Join-Path $f.SourceRoot 'vendor\compatibility\joeness-0.1\skills\joewrks-design-frontend\SKILL.md'
+        [IO.File]::Delete($legacySkill)
+        Assert-BlockedBeforeWrites $f {} 'legacy compatibility source missing' 'sourceIntegrity'
+    } finally { Remove-Fixture $f }
+
     $f = New-Fixture
     try {
         Write-V1FixtureState $f
@@ -1187,7 +1596,10 @@ function Test-LegacyV2ActiveCoreMigration {
         $installedManifestPath = Join-Path $f.AgentsHome 'vendor\source-manifest.json'
         $installedManifest = Get-Content -Raw -LiteralPath $installedManifestPath | ConvertFrom-Json
         $installedManifest.PSObject.Properties.Remove('activeCommonCore')
-        $installedManifest.evaluation.current.commonCore.path = 'AGENTS.md'
+        $installedManifest.evaluation.current | Add-Member -Force -NotePropertyName commonCore -NotePropertyValue ([pscustomobject] @{
+            path = 'AGENTS.md'
+            sha256 = Get-Hash $historicalCorePath
+        })
         Write-Utf8 $installedManifestPath (($installedManifest | ConvertTo-Json -Depth 100) + "`n")
 
         $state = Get-Content -Raw -LiteralPath $f.State | ConvertFrom-Json
@@ -1213,6 +1625,127 @@ function Test-LegacyV2ActiveCoreMigration {
     } finally { Remove-Fixture $f }
 }
 
+function Test-LegacyNamedV2Migration {
+    $f = New-Fixture
+    try {
+        Write-LegacyNamedV2FixtureState $f
+        $before = Get-TreeEntries $f.Root
+        $check = Read-Result (Invoke-Harness $f Check) 'legacy named V2 migration check'
+        Assert-Equal $check.status 'ready' 'legacy named V2 migration is ready'
+        Assert-StringSetEqual (Get-TreeEntries $f.Root) $before 'legacy named V2 check is read-only'
+
+        $apply = Read-Result (Invoke-Harness $f Apply) 'legacy named V2 migration apply'
+        Assert-Equal $apply.status 'current' 'legacy named V2 migration reaches current'
+        $installedManifest = Get-Content -Raw -LiteralPath (Join-Path $f.AgentsHome 'vendor\source-manifest.json') | ConvertFrom-Json
+        Assert-Equal (($installedManifest.activeSkills.PSObject.Properties.Name | Sort-Object) -join ',') 'design,handoff,project,spec,ticket,visual-check' 'legacy named V2 migration installs exact clean skill keys'
+        Assert-Equal ((Get-ChildItem -LiteralPath (Join-Path $f.AgentsHome 'skills') -Directory | Select-Object -ExpandProperty Name | Sort-Object) -join ',') 'design,handoff,project,spec,ticket,visual-check' 'legacy named V2 migration leaves only clean skill directories'
+        Assert-True (-not (Test-Path -LiteralPath (Join-Path $f.AgentsHome 'skills\joewrks-design-frontend'))) 'legacy named V2 migration removes the empty design directory'
+        Assert-True (-not (Test-Path -LiteralPath (Join-Path $f.AgentsHome 'skills\joewrks-project-setup'))) 'legacy named V2 migration removes the empty project directory'
+        Assert-StringSetEqual @((Get-TreeHashes $f.AgentsHome).Keys) (Get-OptionalFiles $f.SourceRoot) 'legacy named V2 migration materializes the exact current manifest unit'
+        $state = Get-Content -Raw -LiteralPath $f.State | ConvertFrom-Json
+        Assert-StringSetEqual @($state.wholeFileTargets.PSObject.Properties.Name) @((Get-OptionalFiles $f.SourceRoot) | ForEach-Object { $_.Replace('\', '/') }) 'legacy named V2 migration records exact current targets'
+    } finally { Remove-Fixture $f }
+
+    $f = New-Fixture
+    try {
+        Write-LegacyNamedV2FixtureState $f
+        Assert-BlockedBeforeWrites $f {
+            param($fixture)
+            Add-Content -LiteralPath (Join-Path $fixture.AgentsHome 'skills\joewrks-design-frontend\SKILL.md') -Value 'drift'
+        } 'drifted legacy named V2 file' 'managedDrift'
+    } finally { Remove-Fixture $f }
+
+    $f = New-Fixture
+    try {
+        Write-LegacyNamedV2FixtureState $f
+        Assert-BlockedBeforeWrites $f {
+            param($fixture)
+            Write-Utf8 (Join-Path $fixture.CodexHome 'skills\second-old-design\SKILL.md') "---`nname: joewrks-design-frontend`n---"
+        } 'unowned second legacy named V2 skill' 'duplicateSkill'
+    } finally { Remove-Fixture $f }
+}
+
+function Test-LegacyNamedV2PinnedIdentity {
+    $f = New-Fixture
+    try {
+        Write-SelfConsistentForgedLegacyNamedV2FixtureState $f
+        Assert-BlockedBeforeWrites $f {} 'self-consistent forged legacy named V2 install' 'invalidState'
+    } finally { Remove-Fixture $f }
+}
+
+function Test-LegacyNamedV2CleanupFailure {
+    $f = New-Fixture
+    try {
+        Write-LegacyNamedV2FixtureState $f
+        $oldDesignRoot = Join-Path $f.AgentsHome 'skills\joewrks-design-frontend'
+        $oldDesignAgentsRoot = Join-Path $oldDesignRoot 'agents'
+        $oldProjectRoot = Join-Path $f.AgentsHome 'skills\joewrks-project-setup'
+        $beforeState = [IO.File]::ReadAllBytes($f.State)
+        $beforeCodex = Get-TreeHashes $f.CodexHome
+        $beforeAgents = Get-TreeHashes $f.AgentsHome
+        $cleanupInjection = @{ Triggered = $false }
+        . $f.Script
+        $realCleanup = ${function:Remove-HarnessEmptyDirectories}
+        $result = & {
+            function Remove-HarnessEmptyDirectories {
+                param([string] $BoundaryRoot, [string[]] $Directories)
+                if (-not $cleanupInjection.Triggered -and @($Directories | Where-Object { $_ -ieq $oldDesignRoot }).Count -gt 0) {
+                    $cleanupInjection.Triggered = $true
+                    [IO.Directory]::Delete($oldDesignAgentsRoot, $false)
+                    return [pscustomobject] @{ removed = @($oldDesignAgentsRoot); nonEmpty = @(); failed = @($oldProjectRoot) }
+                }
+                & $realCleanup $BoundaryRoot $Directories
+            }
+            Invoke-JoewrksHarnessSync -Apply -CodexHome $f.CodexHome -AgentsHome $f.AgentsHome -BackupRoot $f.BackupRoot
+        }
+
+        Assert-True $cleanupInjection.Triggered 'legacy named V2 migration injects obsolete-directory cleanup failure'
+        Assert-Equal $result.status 'failed' 'obsolete-directory cleanup failure does not report current'
+        Assert-Equal $result.rollback.status 'complete' 'obsolete-directory cleanup failure rolls back completely'
+        Assert-Equal @($result.unresolvedTargets).Count 0 'complete cleanup rollback has no unresolved targets'
+        Assert-True (@($result.blockers).kind -contains 'applyFailure') 'obsolete-directory cleanup failure reports applyFailure'
+        Assert-True ([string] @($result.blockers)[0].message -like '*directory cleanup failed*') 'obsolete-directory cleanup failure names the next action'
+        Assert-True (Test-Path -LiteralPath $oldDesignRoot -PathType Container) 'failed cleanup leaves the old design directory'
+        Assert-True (Test-Path -LiteralPath $oldProjectRoot -PathType Container) 'failed cleanup leaves the old project directory'
+        Assert-BytesEqual ([IO.File]::ReadAllBytes($f.State)) $beforeState 'cleanup failure restores exact legacy V2 state bytes'
+        Assert-TreeEqual (Get-TreeHashes $f.CodexHome) $beforeCodex 'cleanup failure restores the legacy V2 Codex tree'
+        Assert-TreeEqual (Get-TreeHashes $f.AgentsHome) $beforeAgents 'cleanup failure restores the legacy V2 Agents tree'
+        $retry = Read-Result (Invoke-Harness $f Check) 'legacy named V2 cleanup retry check'
+        Assert-Equal $retry.status 'ready' 'cleanup failure leaves migration ready for retry'
+        Assert-True $retry.changesRequired 'cleanup retry exposes the pending migration'
+    } finally { Remove-Fixture $f }
+}
+
+function Test-LegacyNamedV2CommentCollision {
+    $f = New-Fixture
+    try {
+        Write-LegacyNamedV2FixtureState $f
+        Assert-BlockedBeforeWrites $f {
+            param($fixture)
+            Write-Utf8 (Join-Path $fixture.CodexHome 'skills\second-old-design\SKILL.md') "---`nname: joewrks-design-frontend # compatibility copy`n---"
+        } 'commented unowned second legacy named V2 skill' 'duplicateSkill'
+    } finally { Remove-Fixture $f }
+
+    . $Implementation
+    $root = Join-Path ([IO.Path]::GetTempPath()) ('joewrks-frontmatter-scalar-' + [guid]::NewGuid().ToString('N'))
+    try {
+        $managed = @{ design = 'skills/design/SKILL.md' }
+        foreach ($case in @(
+            @{ Directory = 'double-quoted'; Text = "---`nname: `"joewrks-design-frontend`" # compatibility copy`n---"; Collision = $true },
+            @{ Directory = 'single-quoted'; Text = "---`nname: 'joewrks-design-frontend' # compatibility copy`n---"; Collision = $true },
+            @{ Directory = 'quoted-comment'; Text = "---`nname: `"joewrks-design-frontend # compatibility copy`"`n---"; Collision = $false }
+        )) {
+            $path = Join-Path $root (Join-Path $case.Directory 'SKILL.md')
+            Write-Utf8 $path $case.Text
+            $collisions = @(Get-HarnessFrontmatterCollisions @($root) $managed)
+            Assert-Equal ($collisions.Count -gt 0) $case.Collision "frontmatter scalar distinguishes $($case.Directory)"
+            [IO.Directory]::Delete((Split-Path -Parent $path), $true)
+        }
+    } finally {
+        if (Test-Path -LiteralPath $root) { [IO.Directory]::Delete($root, $true) }
+    }
+}
+
 function Test-V1StateMigration {
     foreach ($case in @(
         @{ Name = 'core-only'; WithBundle = $false },
@@ -1226,7 +1759,7 @@ function Test-V1StateMigration {
             $beforeAgents = Get-TreeHashes $f.AgentsHome
             $check = Read-Result (Invoke-Harness $f Check) "$($case.Name) V1 migration check"
             Assert-Equal $check.status 'ready' "$($case.Name) V1 migration is ready"
-            Assert-Equal $check.bundleSelection 'personal-pilot' "$($case.Name) V1 migration selects the personal pilot"
+            Assert-PublicResultContract $check 'check' "$($case.Name) V1 migration check"
             Assert-BytesEqual ([IO.File]::ReadAllBytes($f.State)) $beforeState "$($case.Name) check leaves exact V1 state bytes"
             Assert-TreeEqual (Get-TreeHashes $f.CodexHome) $beforeCodex "$($case.Name) check leaves the Codex tree"
             Assert-TreeEqual (Get-TreeHashes $f.AgentsHome) $beforeAgents "$($case.Name) check leaves the Agents tree"
@@ -1238,7 +1771,8 @@ function Test-V1StateMigration {
             Assert-Equal (($state.sourceIdentities.PSObject.Properties.Name | Sort-Object) -join ',') 'bundleManifest,commonCore' "$($case.Name) migration writes exact source identity keys"
             Assert-Equal $state.schemaVersion 2 "$($case.Name) migration writes schema V2"
             Assert-Equal $state.agentsHomeIdentitySha256 (Get-PathIdentity $f.AgentsHome) "$($case.Name) migration binds AgentsHome"
-            Assert-True (Test-Path -LiteralPath (Join-Path $f.AgentsHome 'skills\joewrks-project-setup\SKILL.md')) "$($case.Name) migration installs the project skill"
+            Assert-True (Test-Path -LiteralPath (Join-Path $f.AgentsHome 'skills\project\SKILL.md')) "$($case.Name) migration installs the project skill"
+            Assert-True (Test-Path -LiteralPath (Join-Path $f.AgentsHome 'skills\ticket\SKILL.md')) "$($case.Name) migration installs the ticket skill"
             Assert-StringSetEqual @((Get-TreeHashes $f.AgentsHome).Keys) (Get-OptionalFiles $f.SourceRoot) "$($case.Name) migration installs the full manifest unit"
         } finally { Remove-Fixture $f }
     }
@@ -1259,8 +1793,8 @@ function Test-V1StateMigration {
                 throw 'failure during V1 target migration'
             }
         }
-        Assert-Equal $result.status 'unknown' 'V1 target migration incomplete rollback is unknown'
-        Assert-Equal $result.rollback.status 'incomplete' 'V1 target migration preserves created directories for inspection'
+        Assert-Equal $result.status 'failed' 'V1 target migration clean rollback reports failed'
+        Assert-Equal $result.rollback.status 'complete' 'V1 target migration clean rollback completes'
         Assert-BytesEqual ([IO.File]::ReadAllBytes($f.State)) $beforeState 'target failure leaves exact V1 state bytes'
         Assert-TreeEqual (Get-TreeHashes $f.CodexHome) $beforeTree.codex 'target failure restores the V1 Codex tree'
         Assert-TreeEqual (Get-TreeHashes $f.AgentsHome) $beforeTree.agents 'target failure restores the V1 Agents tree'
@@ -1273,8 +1807,8 @@ function Test-V1StateMigration {
             $failedTargetParent
         )
         foreach ($directory in $createdDirectories) {
-            Assert-True (Test-Path -LiteralPath $directory -PathType Container) "target failure preserves created directory: $directory"
-            Assert-Equal (@($result.unresolvedTargets | Where-Object { $_ -ieq $directory }).Count) 1 "target failure reports created directory once: $directory"
+            Assert-True (-not (Test-Path -LiteralPath $directory)) "target failure deletes created empty directory: $directory"
+            Assert-Equal (@($result.unresolvedTargets | Where-Object { $_ -ieq $directory }).Count) 0 "target failure does not report deleted empty directory: $directory"
         }
     } finally { Remove-Fixture $f }
 
@@ -1284,23 +1818,23 @@ function Test-V1StateMigration {
         $beforeTree = @{ codex = Get-TreeHashes $f.CodexHome; agents = Get-TreeHashes $f.AgentsHome }
         $beforeState = [IO.File]::ReadAllBytes($f.State)
         $createdDirectories = @(
-            (Join-Path $f.AgentsHome 'skills\joewrks-project-setup'),
-            (Join-Path $f.AgentsHome 'skills\joewrks-project-setup\agents'),
-            (Join-Path $f.AgentsHome 'skills\joewrks-project-setup\scripts')
+            (Join-Path $f.AgentsHome 'skills\project'),
+            (Join-Path $f.AgentsHome 'skills\project\agents'),
+            (Join-Path $f.AgentsHome 'skills\project\scripts')
         )
         . $f.Script
         $failedAfterState = Invoke-JoewrksHarnessSync -Apply -CodexHome $f.CodexHome -AgentsHome $f.AgentsHome -BackupRoot $f.BackupRoot -AfterReplace {
             param($replacement)
             if ($replacement.TargetPath -ieq $f.State) { throw 'failure after V2 state replacement' }
         }
-        Assert-Equal $failedAfterState.status 'unknown' 'state-write incomplete rollback is unknown'
-        Assert-Equal $failedAfterState.rollback.status 'incomplete' 'state-write rollback preserves created directories for inspection'
+        Assert-Equal $failedAfterState.status 'failed' 'state-write clean rollback reports failed'
+        Assert-Equal $failedAfterState.rollback.status 'complete' 'state-write clean rollback completes'
         Assert-BytesEqual ([IO.File]::ReadAllBytes($f.State)) $beforeState 'exact V1 state bytes return'
         Assert-TreeEqual (Get-TreeHashes $f.CodexHome) $beforeTree.codex 'Codex tree returns to V1'
         Assert-TreeEqual (Get-TreeHashes $f.AgentsHome) $beforeTree.agents 'Agents tree returns to V1'
         foreach ($directory in $createdDirectories) {
-            Assert-True (Test-Path -LiteralPath $directory -PathType Container) "state-write rollback preserves created directory: $directory"
-            Assert-Equal (@($failedAfterState.unresolvedTargets | Where-Object { $_ -ieq $directory }).Count) 1 "state-write rollback reports created directory once: $directory"
+            Assert-True (-not (Test-Path -LiteralPath $directory)) "state-write rollback deletes created empty directory: $directory"
+            Assert-Equal (@($failedAfterState.unresolvedTargets | Where-Object { $_ -ieq $directory }).Count) 0 "state-write rollback does not report deleted empty directory: $directory"
         }
     } finally { Remove-Fixture $f }
 }
@@ -1309,7 +1843,7 @@ function Test-CreatedDirectoryRollbackResidue {
     $f = New-Fixture
     try {
         Write-V1FixtureState $f
-        $createdParent = Join-Path $f.AgentsHome 'skills\joewrks-design-frontend'
+        $createdParent = Join-Path $f.AgentsHome 'skills\design'
         $externalPath = Join-Path $createdParent 'external.txt'
         $createdDirectories = @($f.AgentsHome, (Join-Path $f.AgentsHome 'skills'), $createdParent)
         . $f.Script
@@ -1327,15 +1861,15 @@ function Test-CreatedDirectoryRollbackResidue {
             Assert-Equal (@($result.unresolvedTargets | Where-Object { $_ -ieq $directory }).Count) 1 "external residue reports created directory once: $directory"
         }
         Assert-True (Test-Path -LiteralPath $externalPath -PathType Leaf) 'created-directory cleanup preserves an external file'
-        Assert-StringSetEqual @((Get-TreeHashes $f.AgentsHome).Keys) @('skills\joewrks-design-frontend\external.txt') 'failed rollback leaves no run-created marker or managed file'
+        Assert-StringSetEqual @((Get-TreeHashes $f.AgentsHome).Keys) @('skills\design\external.txt') 'failed rollback leaves no run-created marker or managed file'
     } finally { Remove-Fixture $f }
 
     $f = New-Fixture
-    $danglingDirectory = Join-Path $f.AgentsHome 'skills\joewrks-design-frontend'
+    $danglingDirectory = Join-Path $f.AgentsHome 'skills\design'
     try {
         Write-V1FixtureState $f
         $danglingTarget = Join-Path $f.Root 'removed-junction-target'
-        $absentDirectory = Join-Path $f.AgentsHome 'skills\joewrks-project-setup\agents'
+        $absentDirectory = Join-Path $f.AgentsHome 'skills\project\agents'
         $testPathBehavior = @{ TreatDanglingAsUnreachable = $false }
         . $f.Script
         $result = & {
@@ -1422,7 +1956,7 @@ function Test-ObsoleteOptionalReconciliation {
     $f = New-Fixture
     try {
         Assert-Equal (Invoke-Harness $f Apply -IncludeDesignFrontend).ExitCode 0 'obsolete-file baseline apply succeeds'
-        $obsoleteRelative = 'skills/joewrks-design-frontend/agents/openai.yaml'
+        $obsoleteRelative = 'skills/design/agents/openai.yaml'
         $obsoletePath = Join-Path $f.AgentsHome ($obsoleteRelative -replace '/', '\')
         $beforeAgents = Get-TreeHashes $f.AgentsHome
         $beforeState = [IO.File]::ReadAllBytes($f.State)
@@ -1459,7 +1993,7 @@ function Test-ConcurrentDisappearanceBeforeDelete {
     $f = New-Fixture
     try {
         Assert-Equal (Invoke-Harness $f Apply -IncludeDesignFrontend).ExitCode 0 'delete-race baseline apply succeeds'
-        $obsoleteRelative = 'skills/joewrks-design-frontend/agents/openai.yaml'
+        $obsoleteRelative = 'skills/design/agents/openai.yaml'
         $obsoletePath = Join-Path $f.AgentsHome ($obsoleteRelative -replace '/', '\')
         Remove-SourceOptionalEntry $f $obsoleteRelative
 
@@ -1506,7 +2040,7 @@ function Test-DeterministicRollback {
     try {
         . $f.Script; Assert-True ((Get-Command Invoke-JoewrksHarnessSync).Parameters.ContainsKey('AfterReplace')) 'dot-sourced function exposes internal callback'
         $result = Invoke-JoewrksHarnessSync -Apply -CodexHome $f.CodexHome -AgentsHome $f.AgentsHome -BackupRoot $f.BackupRoot -AfterReplace { param($replacement) throw 'test failure' }
-        Assert-Equal $result.status 'unknown' 'callback failure with created-directory residue reports unknown'; Assert-True (-not (Test-Path -LiteralPath $f.State)) 'rollback removes unwritten state'; Assert-True (-not (Test-Path -LiteralPath (Join-Path $f.CodexHome 'AGENTS.md'))) 'rollback restores absent target'
+        Assert-Equal $result.status 'failed' 'clean callback rollback reports failed'; Assert-Equal $result.rollback.status 'complete' 'clean callback rollback completes'; Assert-True (-not (Test-Path -LiteralPath $f.State)) 'rollback removes unwritten state'; Assert-True (-not (Test-Path -LiteralPath (Join-Path $f.CodexHome 'AGENTS.md'))) 'rollback restores absent target'; Assert-True (-not (Test-Path -LiteralPath $f.CodexHome)) 'clean rollback deletes the run-created Codex directory'; Assert-True (-not (Test-Path -LiteralPath $f.AgentsHome)) 'clean rollback deletes the run-created Agents directory'
         Assert-True ((Invoke-Harness $f Check -ExtraArguments @('-AfterReplace', 'nope')).ExitCode -ne 0) 'CLI exposes no callback switch'
     } finally { Remove-Fixture $f }
     $f = New-Fixture
@@ -1522,8 +2056,8 @@ function Test-UncommittedIdenticalCreation {
     $f = New-Fixture
     try {
         . $f.Script
-        $externalTarget = Join-Path $f.AgentsHome 'skills\joewrks-design-frontend\SKILL.md'
-        $externalBytes = [IO.File]::ReadAllBytes((Join-Path $f.SourceRoot 'skills\joewrks-design-frontend\SKILL.md'))
+        $externalTarget = Join-Path $f.AgentsHome 'skills\design\SKILL.md'
+        $externalBytes = [IO.File]::ReadAllBytes((Join-Path $f.SourceRoot 'skills\design\SKILL.md'))
         $callback = {
             param($replacement)
             [IO.Directory]::CreateDirectory([IO.Path]::GetDirectoryName($externalTarget)) | Out-Null
@@ -1552,10 +2086,10 @@ function Test-MultiTargetRollback {
             if ($replacements.Count -eq 2) { throw 'test multi-target failure' }
         }.GetNewClosure()
         $result = Invoke-JoewrksHarnessSync -Apply -IncludeDesignFrontend -CodexHome $f.CodexHome -AgentsHome $f.AgentsHome -BackupRoot $f.BackupRoot -AfterReplace $callback
-        Assert-Equal $result.status 'unknown' 'multi-target callback failure reports unknown'
-        Assert-PilotDisclosure $result.designFrontendPilot 'default-personal-pilot' 'failed personal-pilot apply'
+        Assert-Equal $result.status 'failed' 'clean multi-target callback rollback reports failed'
+        Assert-PublicResultContract $result 'apply' 'failed apply rollback'
         Assert-Equal $replacements.Count 2 'failure occurs after two replacements'
-        Assert-Equal $result.rollback.status 'incomplete' 'multi-target rollback preserves created directories for inspection'
+        Assert-Equal $result.rollback.status 'complete' 'clean multi-target rollback completes'
         $failedTargetParent = [IO.Path]::GetDirectoryName($replacements[1])
         $createdDirectories = @(
             $f.CodexHome,
@@ -1563,8 +2097,8 @@ function Test-MultiTargetRollback {
             $failedTargetParent
         )
         foreach ($directory in $createdDirectories) {
-            Assert-True (Test-Path -LiteralPath $directory -PathType Container) "multi-target rollback preserves created directory: $directory"
-            Assert-Equal (@($result.unresolvedTargets | Where-Object { $_ -ieq $directory }).Count) 1 "multi-target rollback reports created directory once: $directory"
+            Assert-True (-not (Test-Path -LiteralPath $directory)) "multi-target rollback deletes created empty directory: $directory"
+            Assert-Equal (@($result.unresolvedTargets | Where-Object { $_ -ieq $directory }).Count) 0 "multi-target rollback does not report deleted empty directory: $directory"
         }
         Assert-Equal (Get-TreeHashes $f.CodexHome).Count 0 'multi-target rollback removes created Codex files'
         Assert-TreeEqual (Get-TreeHashes $f.AgentsHome) $beforeAgents 'multi-target rollback removes created optional files and preserves external content'
@@ -1599,8 +2133,8 @@ function Test-Task2CheckRegressions {
         $result = Read-Result $run 'optional directory collision'
         Assert-True ($run.ExitCode -ne 0) 'optional directory collision exits nonzero'
         Assert-Equal $result.status 'blocked' 'optional directory collision blocks'
-        Assert-PilotDisclosure $result.designFrontendPilot 'default-personal-pilot' 'optional directory collision'
-        Assert-True ((@($result.blockers).kind -contains 'optionalCollision')) 'optional directory collision is reported'
+        Assert-PublicResultContract $result 'check' 'optional directory collision'
+        Assert-True ((@($result.blockers).kind -contains 'managedCollision')) 'optional directory collision is reported'
         Assert-TreeEqual (Get-TreeHashes $f.AgentsHome) $before 'optional directory collision check is read-only'
         Assert-True (Test-Path -LiteralPath $collision -PathType Container) 'optional directory collision remains a directory'
         Assert-True (-not (Test-Path -LiteralPath $f.BackupRoot)) 'optional directory collision creates no backup'
@@ -1617,6 +2151,10 @@ Test-CleanSkeletonAdversaries
 Test-RemoveRollback
 Test-ManifestPathSafety
 Test-ReparsePlanningBoundaries
+Test-EmptyDirectoryCleanupDeleteRace
+Test-EmptyDirectoryCleanupReparseRace
+Test-TargetDirectoryCreationOwnershipRace
+Test-EmptyDirectoryCleanupPathBoundaries
 Test-Task2CheckRegressions
 Test-EmptyCheckAndApply
 Test-AgentEncodingAndCoreUpdate
@@ -1625,6 +2163,10 @@ Test-ManifestSkillCollisions
 Test-StateTrust
 Test-V1HistoricalTrust
 Test-LegacyV2ActiveCoreMigration
+Test-LegacyNamedV2Migration
+Test-LegacyNamedV2PinnedIdentity
+Test-LegacyNamedV2CleanupFailure
+Test-LegacyNamedV2CommentCollision
 Test-V1StateMigration
 Test-CreatedDirectoryRollbackResidue
 Test-HomeResolutionAndIdentity
