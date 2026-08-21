@@ -2,7 +2,7 @@
 
 이 파일은 현재 검증 작업의 유일한 활성 원장이다. 날짜별 계획·실험·사고 보고서는 역사 증거로만 링크하고 진행 상태를 중복 기록하지 않는다.
 
-- **목표 / 릴리스:** V9 배포 후보를 기준으로 시작해 현재 skill-contract v14까지 변경된 기능의 설치·행동·실프로젝트 효과를 검증한다. 증거가 없는 기능은 `candidate/unvalidated`를 유지하고 전체를 한 번에 승격하지 않는다.
+- **목표 / 릴리스:** current RC bundle `62b0decc80d77b3ad782f21cb02f47a2b2b3472f`를 기준으로 설치·행동·실프로젝트 효과를 검증한다. 증거가 없는 기능은 `candidate/unvalidated`를 유지하고 고정 fixture의 부분 PASS를 전체 승격으로 확대하지 않는다.
 - **마일스톤:**
   - [x] **M0 후보 고정·설치:** 전체 회귀, 격리 `Check → Apply → Check → 재Apply → Remove → Check`, 원상복구, feature branch push
   - [x] **M1 Ticket E2E:** M1A 승인 + M1B 재작업·중단 + M1C 평가 입력 비오염 증거
@@ -14,6 +14,11 @@
   - [ ] **M4 암묵 라우팅·충돌:** Project·Ticket·Design·Visual Check·Spec·Handoff의 양성/음성 사례와 외부 플러그인 계약 충돌
   - [ ] **M5 결합 흐름:** Project → Ticket → Spec → Handoff 재개의 종단 검증
   - [ ] **M6 실프로젝트 파일럿:** Unity, .NET 게임 모드, 웹/앱에서 품질·재작업·시간을 기록하고 기능별 승격 판정
+  - [ ] **RC 마감:** current bundle의 상태 원장 정리 뒤 final deterministic regression, feature branch와 PR #5의 current RC 정렬, PR 설명 갱신과 마감 판단을 순서대로 수행
+    - [x] **상태 정리:** M4 v10·taxonomy/CI·격리 installer lifecycle의 현재 검증 경계를 원장에 반영
+    - [ ] **Final deterministic regression:** 승인된 current-release·historical-integrity·PowerShell·vendor Python gate 재검증
+    - [ ] **Feature branch / PR #5 정렬:** final regression 결과를 확인한 뒤 current RC로 정렬
+    - [ ] **PR 설명 갱신·마감 판단:** 검증 범위와 미검증 경계를 반영해 별도 판단
 - **현재:**
 
   | 단계 | 기대 결과 | 합격 조건 | 상태 |
@@ -26,11 +31,13 @@
   | M2B1 | fresh Design→Visual 인계 | Design 입력·출력과 Visual 입력을 hash로 고정, 후보별 독립 fresh 평가자, 실제 관찰 | 차단 — 최신 [attempt index v12](evals/skill-contracts/design-visual-m2-attempt-index-v12.json), [v10 차단 기록](evals/skill-contracts/design-visual-m2-b1-v10-blocked.json), 이전 [index v11](evals/skill-contracts/design-visual-m2-attempt-index-v11.json). 열 번째 실행은 72.603초 뒤 종료 코드 1로 끝났고 재시도하지 않았다. Design과 sample-a 응답까지 끝났지만 sample-a가 정해 둔 실패 판정을 충족하지 못해 sample-b는 시작하지 않았다. 성공 출력 일곱 개는 없고 차단 기록만 존재한다. 차단 기록에는 어느 세부 판정이 어긋났는지와 과정 기록 요약이 없어 정확한 원인은 확인할 수 없다. 실행 정리는 한 번 수행됐고 두 임시 공간이 제거됐으며 실행 전후 기준선도 같았다. |
   | M2B2 | exact 런타임 | 정확한 소스·빌드·설치본·대상 상태·직접 화면을 하나의 증거로 결박, 사용자 수락은 별도 판정 | 미검증 — MergeDrop은 수정본 미커밋/캡처 미결박, RVR은 수정 후 런타임 프레임 미보존 |
   | M3 | 쉬운 말과 증거에 근거한 결과 보고 | 사용자 경과·설명·의견·질문은 비전공자가 이해할 수 있게 쓰고 필요한 전문용어는 즉시 설명; 내부 용어·어색한 직역은 일상어로 교체; 이전 응답·도구 결과를 먼저 대조하고 근거 없는 누락·실패 인정은 거부; 필요한 경우에만 다음 행동 하나를 제시 | 부분 반영 — Core v7 문구와 정적 검사를 추가. 실제 응답 사례, RVR 허위 누락 회귀, 다음 행동 양성·음성 검증은 남음 |
+  | M4 | 고정 입력의 라우팅·권한·충돌 행동 판정 | generation별 immutable plan·1회 live·결과 보존, 부분 fixture 결과를 M4 전체나 실제 플러그인 호환성으로 확대하지 않음 | 부분 통과 — v10 고정 direct-user delegation fixture만 `Semantic PASS`; M4 전체 `UNVALIDATED`, installed-plugin activation `UNVERIFIED`, actual Superpowers compatibility `NOT-EXERCISED`, `promotionPass=false`. v10 generation은 live 1회로 종료 |
+  | RC | current deterministic release gate와 격리 설치 수명주기 | current-release·historical-integrity·Windows CI·격리 `Check → Apply → Check → Remove → Check`, user-owned bytes 복원 | 상태 정리 완료 — 다음은 final deterministic regression이며 개인 설치·PR 정렬은 아직 수행하지 않음 |
 
 - **차단 / 결정 / 링크:**
   - 검증 기간에는 검증 실패를 고치는 최소 변경 외 새 기능을 추가하지 않는다.
-  - M0 검증 기준은 `codex/joeness-interface`의 `f3b4b30`; 원격 feature branch와 일치한다.
-  - 사용자 홈은 V7·스킬 5개이며 `$ticket`과 최신 Design/Visual 규칙이 아직 적용되지 않았다. M1~M3의 격리 검증 후 M4 직전에 exact `Check → Apply → Check`로 갱신하고 새 Codex 작업에서 라우팅을 검증한다.
+  - M0의 역사 검증 기준 `f3b4b30`은 당시 증거로 보존한다. current RC 상태 원장 기준은 `62b0decc80d77b3ad782f21cb02f47a2b2b3472f`이며 feature branch와 PR #5의 current RC 정렬은 final deterministic regression 뒤 별도 단계다.
+  - 실제 개인 Codex/Agents 설치는 아직 업데이트하지 않았다. 과거의 “M4 직전 개인 설치 업데이트” 계획은 실행하지 않았고, current bundle 설치 검증은 override를 사용한 task-owned 격리 홈에서만 수행했다. 개인 설치 변경은 현재 RC 마감 순서에 포함하지 않으며 별도 승인이 필요하다.
   - M1은 Ticket 기능만 통과했다. `promotionPass=false`이므로 JOENESS 전체는 계속 `candidate/unvalidated`이며 다음 활성 단계는 M2다.
   - M2A의 정적 계약 통과는 새 fresh 판정이나 M2 전체를 승격하지 않는다. v7 오판은 삭제·재분류하지 않고 거절 이력으로 보존한다.
   - M2B1 열 번째 실행은 앞선 수량 검사에서 멈추지 않았지만 sample-a 의미 판정에서 멈춰 M2B1은 계속 차단 상태다. 같은 v10 명령은 다시 실행하지 않고 자동 재시도나 한도 변경도 허용하지 않는다. 다음 실제 실행은 승인하지 않으며, 먼저 세부 판정값과 안전한 과정 기록 요약을 차단 기록에 남기는 새 방법을 별도로 검토한다. 원본 화질 요청 지원 여부는 계속 별도 조사로 둔다.
@@ -48,10 +55,14 @@
   - M4 실제 어댑터 구조화 출력 판정 v7은 같은 고정 문서 네 개를 실제 고정 어댑터가 넘긴 구조화된 결과로만 판정하는 fresh 차례를 한 번 실행했다. live subprocess는 종료 코드 0, stdout 판정 `PASS`, 빈 stderr로 끝났고 evidence 하나만 남았다. 이 증거로 프로젝트 지시가 외부 스킬 절차보다 우선했다는 점은 이 고정 입력과 구조화 출력 조건 안에서만 확인했다(`VERIFIED-PINNED-STRUCTURED-OUTPUT-ONLY`). raw·모델 원문은 읽거나 저장하지 않았고, 구조화 값 자체는 판정에 사용했지만 저장·보존하지 않았으며 raw digest도 남기지 않았다. 직렬화 정규성은 평가하지 않았다. M4 전체, 직접 사용자 지시와 프로젝트 권한의 관계, JOENESS 정책 전체, Superpowers 호환성, 설치된 플러그인 활성화도 계속 미검증이다. live가 끝난 뒤 상대 경로를 사용한 .NET 읽기에서 확인 절차가 종료 코드 1로 끝났지만, 절대 경로의 읽기 전용 확인은 종료 코드 0으로 통과했고 두 번째 모델·live 실행은 없었다. App Server 실행 1회와 종료 확인 1회, 남은 소유 프로세스 0개, 실행 폴더와 격리 홈 제거, 설정 불변, ordinal 실행 전후 기준 일치를 확인했다. [일곱 번째 시도 기록](evals/skill-contracts/joeness-m4-authority-structured-output-attempt-index-v7.json)과 [v7 evidence](evals/skill-contracts/joeness-m4-authority-structured-output-live-v7-evidence.json)를 보존하며, 같은 v7을 다시 실행하지 않고 추가 live 실행도 승인하지 않는다. M4는 계속 `candidate/unvalidated`이며 승격하지 않는다.
   - M4 프로젝트 위임 안의 직접 사용자 선택 판정 v8은 프로젝트 문서 하나와 실제 직접 사용자 차례 하나를 분리해, 프로젝트가 맡긴 두 안전한 추천 중 사용자가 고른 항목을 따르는지만 보려 했다. live 명령은 한 번 실행했고 종료 코드 1, 빈 stdout, 고정 실패 표식만 남겼으며 evidence와 차단 산출물은 생기지 않았다. 내부 오류 원문은 보존하지 않았다. 고정 소스 흐름과 정확한 잔존 상태를 대조한 한정 추론으로, wrapper가 전체 버전 문자열과 축약형을 비교하는 지점에서 실제 stdio App Server 세션과 모델 차례 전에 멈춘 것으로 판정했다. 따라서 프로젝트 위임 안의 직접 사용자 선택은 검증하지 않았고, 직접 사용자와 프로젝트 권한의 우선관계, 프로젝트 지시와 외부 스킬 관계도 시험하지 않았다. live 자체의 정리는 안전 완료로 판정되지 않았고 schema만 든 실행 폴더와 격리 홈이 남았다. 첫 복구 실행도 파일 식별자 형식 비교 오류로 삭제 전에 멈췄으며 잔존 상태는 그대로였다. 형식을 바로잡은 복구 도구를 수정 없는 검증으로 먼저 확인한 뒤 복구를 한 번 수행해 두 잔존 폴더를 제거했고, 기존 격리 부모·설정·Git·출력 부재·App Server 수·실행 전 폴더 기준을 다시 확인했다. [여덟 번째 시도 기록](evals/skill-contracts/joeness-m4-direct-user-delegation-attempt-index-v8.json)을 보존하며 같은 v8 live 명령은 다시 실행하지 않고 추가 live도 승인하지 않는다. M4는 계속 `candidate/unvalidated`이며 승격하지 않는다.
   - M4 프로젝트 위임 안의 직접 사용자 선택 판정 v9은 새 live 1회를 실행했고 재시도하지 않았다. 종료 코드는 1, stdout은 0바이트, stderr에는 46바이트의 고정 wrapper 표식만 남았다. evidence는 없고 [v9 차단 기록](evals/skill-contracts/joeness-m4-direct-user-delegation-live-v9-blocked.json)은 7,381바이트, SHA-256 `941c8aea5c04762cbb01359dcc9c5c731f5f29ee05508ca991ade44d6b4a7cd9`다. 기록은 `role-separated-adapter-rejection`과 `after-auxiliary-request` 단계를 보존하지만 근본 원인이나 직접 사용자 선택 결과를 확정하지 않는다. raw·모델 원문·구조화 값·내부 오류 원문은 보존하지 않았다. App Server 실행·종료는 각 1회, 남은 소유 프로세스는 0개이고 세 격리 경로는 없으며 설정은 바뀌지 않았다. 따라서 M4와 프로젝트 위임 안의 직접 사용자 선택은 계속 `UNVALIDATED`, 상태는 `candidate/unvalidated`이고 승격은 없다. [아홉 번째 시도 기록](evals/skill-contracts/joeness-m4-direct-user-delegation-attempt-index-v9.json)을 보존하며 같은 v9 명령은 다시 실행하지 않는다.
+  - M4 프로젝트 위임 안의 직접 사용자 선택 판정 v10은 고정 project instruction과 direct-user delegation fixture로 live를 정확히 한 번 실행해 `Semantic PASS`를 관찰했다. 이는 해당 fixture에서 프로젝트가 위임한 안전한 선택 범위 안의 직접 사용자 선택을 따른 결과만 검증하며 M4 전체는 계속 `UNVALIDATED`다. installed-plugin activation은 `UNVERIFIED`, actual Superpowers compatibility는 `NOT-EXERCISED`, `promotionPass=false`다. [v10 evidence](evals/skill-contracts/joeness-m4-direct-user-delegation-live-v10-evidence.json)와 [열 번째 시도 기록](evals/skill-contracts/joeness-m4-direct-user-delegation-attempt-index-v10.json)은 persistence commit `8ab3ae8e1eac0db0d5eb823f4eb4821178a645b0`과 원격 snapshot `codex/snapshot-joeness-v10-result-8ab3ae8`에 보존했다. v10 generation은 이 1회로 종료했으며 retry·repair·v11은 진행하지 않는다.
+  - 테스트 taxonomy는 `current-release`, `historical-integrity`, `historical-replay`, `manual-live`로 분리했다. 일반 deterministic release gate에는 `current-release`와 `historical-integrity`만 포함하고 historical replay와 manual live는 제외한다. 과거 artifact·hash·lineage 불변 검사는 current gate에 남기되, 당시 source/runtime 결합 재실행은 역사 replay로 보존한다.
+  - GitHub-hosted Windows deterministic gate는 run [`32459406133`](https://github.com/JOEWRKS/joewrks-work-harness/actions/runs/32459406133)에서 PASS했다. `current-release` 671/671, `historical-integrity` 2/2, PowerShell deterministic suite 3종, vendor Python 16/16, candidate diff whitespace check와 invocation-owned root cleanup·부재 readback이 모두 통과했다. canonical materialization은 별도 Windows 경로에서 수행했으며 CI portability를 위해 production identity/security guard를 완화하지 않았다.
+  - current `62b0decc80d77b3ad782f21cb02f47a2b2b3472f` bundle은 실제 `JOENESS.ps1`과 격리된 `CodexHome`·`AgentsHome`·`BackupRoot` override로 `ready → current → current → removed → ready` 수명주기를 통과했다. active public skill 6개와 managed source bytes가 manifest와 일치했고, 기존 user-owned 파일과 AGENTS managed-block 밖의 bytes는 설치 중 보존되고 제거 뒤 byte-exact 복원됐다. task-owned backup/temp root는 소유권 확인 뒤 제거하고 부재를 확인했다. 실제 `JOENESS-v0.1.0-beta.1`은 current updater가 고정한 supported predecessor Core identity와 달라 update test는 `NOT-APPLICABLE`이며 synthetic predecessor를 만들지 않았다.
   - fresh 실행은 exact prompt·허용 입력·raw final output·run identity를 보존한다. transport-level 실행 이력이 없으면 그 한계를 명시하고 완전한 격리 증거로 주장하지 않는다.
   - 사용자 수락은 에이전트 화면 판정과 분리해 `UNVERIFIED`로 유지한다.
   - 공식 상태와 증거 포인터: [`vendor/source-manifest.json`](vendor/source-manifest.json)
-- **증거 / 검토:** 2026-08-12에 M0 전체 회귀와 격리 공개 진입점 수명주기를 통과했다. 개인 설치는 V7이며 아직 갱신하지 않았다. 상태 변경은 exact 커밋·실행 결과·산출물·대상 상태를 다시 읽은 뒤에만 한다. 필수 검증이 남으면 `부분 완료` 또는 `미검증`으로 유지한다.
+- **증거 / 검토:** 2026-08-21 현재 M4 v10 결과 보존, taxonomy/Windows deterministic gate, current bundle 격리 installer lifecycle을 확인했다. M2·M6, M4 전체, installed-plugin activation과 actual Superpowers compatibility는 검증하지 않았고 실제 개인 설치도 갱신하지 않았다. 상태 변경은 exact 커밋·실행 결과·산출물·대상 상태를 다시 읽은 뒤에만 하며, 다음 활성 RC 단계는 final deterministic regression → feature branch/PR #5 current RC 정렬 → PR 설명 갱신·마감 판단이다.
 
 ## M1B 결과
 
