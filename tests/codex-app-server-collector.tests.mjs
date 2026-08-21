@@ -85,6 +85,26 @@ const SYNTHETIC_TOKEN_SHAPES = Object.freeze([
   "eyJSYNTHETIC0.eyJSYNTHETIC1.SYNTHETICSIGNATURE",
 ]);
 
+const BROKER_DIAGNOSTIC_TEXT_LIMIT = 2048;
+
+function boundedBrokerFailureDiagnostic(result) {
+  function boundedText(value) {
+    const text = typeof value === "string" ? value : "";
+    return {
+      text: text.slice(0, BROKER_DIAGNOSTIC_TEXT_LIMIT),
+      byteLength: Buffer.byteLength(text, "utf8"),
+      truncated: text.length > BROKER_DIAGNOSTIC_TEXT_LIMIT,
+    };
+  }
+
+  return JSON.stringify({
+    processExitCode: result.processExitCode ?? null,
+    signal: result.signal ?? null,
+    stdout: boundedText(result.stdout),
+    stderr: boundedText(result.stderr),
+  });
+}
+
 test("runtime error notifications map the pinned TurnError payload without changing the blocker", () => {
   const event = normalizeEvent({
     method: "error",
@@ -1623,6 +1643,37 @@ test("broker close still destroys incomplete connections within a bound", async 
   assert.deepEqual(await broker.close(), snapshot);
 });
 
+test("PowerShell broker failure diagnostic is bounded to captured process fields", () => {
+  const diagnostic = JSON.parse(boundedBrokerFailureDiagnostic({
+    processExitCode: 17,
+    signal: "SIGTERM",
+    stdout: `${"o".repeat(4096)}STDOUT-TAIL`,
+    stderr: `${"e".repeat(4096)}STDERR-TAIL`,
+    ignored: "must not be copied",
+  }));
+
+  assert.deepEqual(Object.keys(diagnostic), [
+    "processExitCode",
+    "signal",
+    "stdout",
+    "stderr",
+  ]);
+  assert.equal(diagnostic.processExitCode, 17);
+  assert.equal(diagnostic.signal, "SIGTERM");
+  assert.deepEqual(Object.keys(diagnostic.stdout), [
+    "text",
+    "byteLength",
+    "truncated",
+  ]);
+  assert.equal(diagnostic.stdout.text.length, 2048);
+  assert.equal(diagnostic.stdout.byteLength, 4107);
+  assert.equal(diagnostic.stdout.truncated, true);
+  assert.equal(diagnostic.stderr.text.length, 2048);
+  assert.equal(diagnostic.stderr.byteLength, 4107);
+  assert.equal(diagnostic.stderr.truncated, true);
+  assert.doesNotMatch(JSON.stringify(diagnostic), /TAIL|ignored|must not be copied/u);
+});
+
 test("PowerShell mock is a working broker client", async (t) => {
   const broker = await startSyntheticWriteBroker();
   t.after(() => broker.close());
@@ -1653,8 +1704,9 @@ test("PowerShell mock is a working broker client", async (t) => {
     ],
     { timeoutMs: 10_000 },
   );
-  assert.equal(result.processExitCode, 0);
-  assert.equal(result.stderr, "");
+  const resultDiagnostic = boundedBrokerFailureDiagnostic(result);
+  assert.equal(result.processExitCode, 0, resultDiagnostic);
+  assert.equal(result.stderr, "", resultDiagnostic);
   assert.deepEqual(JSON.parse(result.stdout), {
     status: "ok",
     operation: "Probe",
@@ -1680,8 +1732,13 @@ test("PowerShell mock is a working broker client", async (t) => {
     ],
     { timeoutMs: 10_000 },
   );
-  assert.notEqual(lost.processExitCode, 0);
-  assert.match(lost.stderr, /synthetic response loss after committed write/);
+  const lostDiagnostic = boundedBrokerFailureDiagnostic(lost);
+  assert.notEqual(lost.processExitCode, 0, lostDiagnostic);
+  assert.match(
+    lost.stderr,
+    /synthetic response loss after committed write/,
+    lostDiagnostic,
+  );
   assert.equal(broker.snapshot().effects.length, 1);
 });
 
