@@ -44,6 +44,81 @@ export const TEST_GROUPS = Object.freeze({
   ]),
 });
 
+export const HISTORICAL_LOCAL_CASES = Object.freeze([
+  Object.freeze({
+    file: "tests/codex-app-server-collector.tests.mjs",
+    name: "paired v1 artifacts and blocked controls remain valid after recovery",
+  }),
+  Object.freeze({
+    file: "tests/common-core-v1-v2-ab.tests.mjs",
+    name: "collector raw validation rejects post-capture evidence, hash, and review mutation",
+  }),
+  Object.freeze({
+    file: "tests/project-aware-lean-ab.tests.mjs",
+    name: "smoke validates frozen candidate identity and the six-session contract without calling Codex",
+  }),
+]);
+
+function escapeRegex(value) {
+  return value.replace(/[\\^$.*+?()[\]{}|]/gu, "\\$&");
+}
+
+function historicalLocalSkipPattern({ groups, historicalLocalCases }) {
+  const currentReleaseFiles = new Set(groups["current-release"] ?? []);
+  const identities = new Set();
+  const names = [];
+  for (const entry of historicalLocalCases) {
+    if (
+      entry === null ||
+      typeof entry !== "object" ||
+      typeof entry.file !== "string" ||
+      typeof entry.name !== "string" ||
+      entry.file.length === 0 ||
+      entry.name.length === 0
+    ) {
+      throw new Error("invalid historical local case");
+    }
+    if (!currentReleaseFiles.has(entry.file)) {
+      throw new Error(`historical local case file is not current-release: ${entry.file}`);
+    }
+    const identity = `${entry.file}\0${entry.name}`;
+    if (identities.has(identity)) {
+      throw new Error(`duplicate historical local case: ${entry.file} :: ${entry.name}`);
+    }
+    identities.add(identity);
+    names.push(escapeRegex(entry.name));
+  }
+  if (names.length === 0) {
+    return undefined;
+  }
+  return `^(?:${names.join("|")})$`;
+}
+
+export function nodeTestArguments(
+  group,
+  {
+    groups = TEST_GROUPS,
+    historicalLocalCases = HISTORICAL_LOCAL_CASES,
+  } = {},
+) {
+  const files = groups[group];
+  if (!Array.isArray(files)) {
+    throw new Error(`unknown Node test group: ${group}`);
+  }
+  const args = ["--test"];
+  if (group === "current-release") {
+    const pattern = historicalLocalSkipPattern({
+      groups,
+      historicalLocalCases,
+    });
+    if (pattern !== undefined) {
+      args.push(`--test-skip-pattern=${pattern}`);
+    }
+  }
+  args.push(...files);
+  return args;
+}
+
 export function validateTaxonomy({ discoveredFiles, groups = TEST_GROUPS }) {
   const discovered = [...discoveredFiles].sort();
   const discoveredSet = new Set(discovered);
@@ -120,7 +195,7 @@ async function main() {
     return 2;
   }
 
-  const result = spawnSync(process.execPath, ["--test", ...TEST_GROUPS[group]], {
+  const result = spawnSync(process.execPath, nodeTestArguments(group), {
     cwd: ROOT,
     stdio: "inherit",
   });
