@@ -6,10 +6,10 @@
 - **마일스톤:**
   - [x] **M0 후보 고정·설치:** 전체 회귀, 격리 `Check → Apply → Check → 재Apply → Remove → Check`, 원상복구, feature branch push
   - [x] **M1 Ticket E2E:** M1A 승인 + M1B 재작업·중단 + M1C 평가 입력 비오염 증거
-  - [ ] **M2 Design→Visual:** M2A 정적 회귀, M2B1 fresh 인계, M2B2 exact 런타임을 모두 통과해야 완료
+  - [ ] **M2 Design→Visual:** 과거 M2A·M2B1 상태는 그대로 보존하며, M2B2의 RVR representative exact-runtime pilot만 완료. M2 전체 승격은 하지 않음
     - [ ] **M2A 큐레이션 정적 회귀:** skill-contract 전체 suite 12/12(그중 v14 신규 사례 4건); fresh 후보 평가는 미완료
     - [ ] **M2B1 fresh 인계:** 차단 — 열 번째 실행은 Design과 sample-a 응답까지 끝났지만 sample-a가 정해 둔 실패 판정을 충족하지 못해 결과를 거부했다. 어느 세부 판정이 어긋났는지는 저장되지 않았고 sample-b는 시작하지 않았다.
-    - [ ] **M2B2 exact 런타임:** MergeDrop 폰·태블릿과 RVR 수정본을 exact commit/build/install/state/capture로 결박
+    - [x] **M2B2 representative exact 런타임:** RVR shotgun durability 50% inventory tooltip을 exact source/build/install/runtime/native capture/rollback으로 결박하고 validator PASS와 사용자 `accepted`를 분리 기록
   - [ ] **M3 Core V7:** 쉬운 사용자 설명, clean·partial·blocked·workaround·반복 오류·복구 상황의 결과 우선 보고, 과거 누락·실패 인정 전 원본 작업 증거 대조, 조건부 다음 행동, 중단 규칙
   - [ ] **M4 암묵 라우팅·충돌:** Project·Ticket·Design·Visual Check·Spec·Handoff의 양성/음성 사례와 외부 플러그인 계약 충돌
   - [ ] **M5 결합 흐름:** Project → Ticket → Spec → Handoff 재개의 종단 검증
@@ -29,7 +29,7 @@
   | M1C | 평가 입력·상태 증거 | prompt manifest·allowlist·hash와 전후 generated/ignored snapshot | 완료 — [index](evals/experiments/joeness-ticket-m1c-e2e-v3-index.json), [summary](evals/experiments/joeness-ticket-m1c-e2e-v3.json), [raw](evals/experiments/joeness-ticket-m1c-e2e-v3-raw.json), 증거 `115cc52` |
   | M2A | 큐레이션 정적 회귀 | blind fixture·숨긴 ground truth·출처 우선 기준·변형/상태 구분·부분/전체 판정, 실패 이력 보존 | 부분 통과 — [skill-contract suite 12/12](evals/skill-contracts/design-visual-m2-v14-contract-test-v1.json), 그중 v14 신규 사례 4건; [전체 회귀 영수증](evals/skill-contracts/design-visual-m2-v14-partial-validation-v1.json). v7은 [semantic review](evals/skill-contracts/design-visual-m2-visual-v7-semantic-review.json)에서 오판이 확인돼 거절 |
   | M2B1 | fresh Design→Visual 인계 | Design 입력·출력과 Visual 입력을 hash로 고정, 후보별 독립 fresh 평가자, 실제 관찰 | 차단 — 최신 [attempt index v12](evals/skill-contracts/design-visual-m2-attempt-index-v12.json), [v10 차단 기록](evals/skill-contracts/design-visual-m2-b1-v10-blocked.json), 이전 [index v11](evals/skill-contracts/design-visual-m2-attempt-index-v11.json). 열 번째 실행은 72.603초 뒤 종료 코드 1로 끝났고 재시도하지 않았다. Design과 sample-a 응답까지 끝났지만 sample-a가 정해 둔 실패 판정을 충족하지 못해 sample-b는 시작하지 않았다. 성공 출력 일곱 개는 없고 차단 기록만 존재한다. 차단 기록에는 어느 세부 판정이 어긋났는지와 과정 기록 요약이 없어 정확한 원인은 확인할 수 없다. 실행 정리는 한 번 수행됐고 두 임시 공간이 제거됐으며 실행 전후 기준선도 같았다. |
-  | M2B2 | exact 런타임 | 정확한 소스·빌드·설치본·대상 상태·직접 화면을 하나의 증거로 결박, 사용자 수락은 별도 판정 | 미검증 — MergeDrop은 수정본 미커밋/캡처 미결박, RVR은 수정 후 런타임 프레임 미보존 |
+  | M2B2 | representative exact 런타임 | 정확한 소스·빌드·설치본·대상 상태·직접 화면·판정·rollback을 하나의 증거로 결박, 사용자 수락은 별도 판정 | PASS — RVR shotgun durability 50% inventory tooltip 단일 fixture에서 [B2-v2 evidence](evals/skill-contracts/m2-rvr-current-tooltip-b2-v2-evidence-v1.json), [native frame](evals/skill-contracts/m2-rvr-current-tooltip-b2-v2-native-frame.png), [user verdict](evals/skill-contracts/m2-rvr-current-tooltip-b2-v2-user-verdict-v1.json)로 validator `PASS`와 user `accepted`를 고정. RVR 전체 visual behavior와 JOENESS 전체 승격으로 확대하지 않음 |
   | M3 | 쉬운 말과 증거에 근거한 결과 보고 | 사용자 경과·설명·의견·질문은 비전공자가 이해할 수 있게 쓰고 필요한 전문용어는 즉시 설명; 내부 용어·어색한 직역은 일상어로 교체; 이전 응답·도구 결과를 먼저 대조하고 근거 없는 누락·실패 인정은 거부; 필요한 경우에만 다음 행동 하나를 제시 | 부분 반영 — Core v7 문구와 정적 검사를 추가. 실제 응답 사례, RVR 허위 누락 회귀, 다음 행동 양성·음성 검증은 남음 |
   | M4 | 고정 입력의 라우팅·권한·충돌 행동 판정 | generation별 immutable plan·1회 live·결과 보존, 부분 fixture 결과를 M4 전체나 실제 플러그인 호환성으로 확대하지 않음 | 부분 통과 — v10 고정 direct-user delegation fixture만 `Semantic PASS`; M4 전체 `UNVALIDATED`, installed-plugin activation `UNVERIFIED`, actual Superpowers compatibility `NOT-EXERCISED`, `promotionPass=false`. v10 generation은 live 1회로 종료 |
   | RC | current deterministic release gate와 격리 설치 수명주기 | current-release·historical-integrity·Windows CI·격리 `Check → Apply → Check → Remove → Check`, user-owned bytes 복원 | 상태 정리 완료 — 다음은 final deterministic regression이며 개인 설치·PR 정렬은 아직 수행하지 않음 |
@@ -38,10 +38,10 @@
   - 검증 기간에는 검증 실패를 고치는 최소 변경 외 새 기능을 추가하지 않는다.
   - M0의 역사 검증 기준 `f3b4b30`은 당시 증거로 보존한다. current RC 상태 원장 기준은 `62b0decc80d77b3ad782f21cb02f47a2b2b3472f`이며 feature branch와 PR #5의 current RC 정렬은 final deterministic regression 뒤 별도 단계다.
   - 실제 개인 Codex/Agents 설치는 아직 업데이트하지 않았다. 과거의 “M4 직전 개인 설치 업데이트” 계획은 실행하지 않았고, current bundle 설치 검증은 override를 사용한 task-owned 격리 홈에서만 수행했다. 개인 설치 변경은 현재 RC 마감 순서에 포함하지 않으며 별도 승인이 필요하다.
-  - M1은 Ticket 기능만 통과했다. `promotionPass=false`이므로 JOENESS 전체는 계속 `candidate/unvalidated`이며 다음 활성 단계는 M2다.
+  - M1은 Ticket 기능만 통과했다. `promotionPass=false`이므로 JOENESS 전체는 계속 `candidate/unvalidated`다. M2-RVR representative exact-runtime pilot closeout 뒤 다음 활성 단계는 M6 real-project pilot이다.
   - M2A의 정적 계약 통과는 새 fresh 판정이나 M2 전체를 승격하지 않는다. v7 오판은 삭제·재분류하지 않고 거절 이력으로 보존한다.
   - M2B1 열 번째 실행은 앞선 수량 검사에서 멈추지 않았지만 sample-a 의미 판정에서 멈춰 M2B1은 계속 차단 상태다. 같은 v10 명령은 다시 실행하지 않고 자동 재시도나 한도 변경도 허용하지 않는다. 다음 실제 실행은 승인하지 않으며, 먼저 세부 판정값과 안전한 과정 기록 요약을 차단 기록에 남기는 새 방법을 별도로 검토한다. 원본 화질 요청 지원 여부는 계속 별도 조사로 둔다.
-  - M2B2가 끝날 때까지 M2는 부분 완료다. 정적 비교본, 미추적 캡처, 사용자 서술은 exact corrected runtime 직접 화면을 대체하지 않는다.
+  - M2-RVR representative exact-runtime pilot은 source `ee0e15b26fdf076eda86d297d45a1964cdb05b93`에서 source→artifact→install→runtime target state→native Game Bar PNG→validator PASS→SAFE rollback을 하나의 lineage로 연결했고, exact frame `e06054153d37ed8ac7c51bdc78dde08577a71d682c3076aa1f7d230d77fff2cb`에 대해 사용자가 `accepted`로 판정했다. historical `c930af02…`와 `e5edd12…` clean-commit compiler provenance 실패는 역사 evidence로 유지하며 현재 PASS로 덮어쓰지 않는다. 이번 PASS는 50% inventory tooltip 단일 fixture에만 적용하고 firing·motion·directional pose·muzzle alignment·repair·cleaning과 RVR 전체 visual behavior는 `UNVERIFIED`, JOENESS `promotionPass=false`를 유지한다.
   - M3 신규 회귀는 RVR 원본 세션의 기존 결정 요약과 이후의 상반된 누락 주장을 함께 고정한다. 기대 동작은 기존 전달 증거를 우선해 허위 누락을 거부하고, 결정 요약에 검증·커밋 정보를 섞은 범위 이탈만 별도로 판정하는 것이다. 일반 승인·전환 문구는 관찰상 `$spec`에 어긋나지만 Superpowers brainstorming 승인 게이트와 충돌하므로 M4에서 원인과 우선순위를 별도 판정한다. 현재 `$spec` 계약 자체를 실패 원인으로 재분류하지 않는다.
   - M3의 `다음 행동`은 고정 보고 항목이 아니다. 필수 작업·구체적 재개 조건·결과를 바꾸는 사용자 결정이 있을 때만 가장 합리적인 범위 내 행동 하나와 이유를 제시하고, 완전 완료나 단순 선택 사항이면 생략한다.
   - M3 사용자용 문장은 비전공자 기준의 쉬운 말을 기본으로 한다. 꼭 필요한 전문용어는 처음 쓸 때 바로 설명하고, 내부 작업 이름·은어·어색한 직역은 일상적인 표현으로 바꾼다. 에이전트끼리의 내부 대화는 제외하며, 사용자가 기술 수준이나 형식을 직접 지정하면 그 요청을 따른다.
@@ -60,9 +60,9 @@
   - GitHub-hosted Windows deterministic gate는 run [`32459406133`](https://github.com/JOEWRKS/joewrks-work-harness/actions/runs/32459406133)에서 PASS했다. `current-release` 671/671, `historical-integrity` 2/2, PowerShell deterministic suite 3종, vendor Python 16/16, candidate diff whitespace check와 invocation-owned root cleanup·부재 readback이 모두 통과했다. canonical materialization은 별도 Windows 경로에서 수행했으며 CI portability를 위해 production identity/security guard를 완화하지 않았다.
   - current `62b0decc80d77b3ad782f21cb02f47a2b2b3472f` bundle은 실제 `JOENESS.ps1`과 격리된 `CodexHome`·`AgentsHome`·`BackupRoot` override로 `ready → current → current → removed → ready` 수명주기를 통과했다. active public skill 6개와 managed source bytes가 manifest와 일치했고, 기존 user-owned 파일과 AGENTS managed-block 밖의 bytes는 설치 중 보존되고 제거 뒤 byte-exact 복원됐다. task-owned backup/temp root는 소유권 확인 뒤 제거하고 부재를 확인했다. 실제 `JOENESS-v0.1.0-beta.1`은 current updater가 고정한 supported predecessor Core identity와 달라 update test는 `NOT-APPLICABLE`이며 synthetic predecessor를 만들지 않았다.
   - fresh 실행은 exact prompt·허용 입력·raw final output·run identity를 보존한다. transport-level 실행 이력이 없으면 그 한계를 명시하고 완전한 격리 증거로 주장하지 않는다.
-  - 사용자 수락은 에이전트 화면 판정과 분리해 `UNVERIFIED`로 유지한다.
+  - 사용자 수락은 validator 판정과 분리한다. M2-RVR exact frame `e0605415…f2cb`의 단일 tooltip fixture만 user `accepted`이며, 다른 fixture와 RVR 전체 visual behavior의 사용자 수락은 `UNVERIFIED`다.
   - 공식 상태와 증거 포인터: [`vendor/source-manifest.json`](vendor/source-manifest.json)
-- **증거 / 검토:** 2026-08-21 현재 M4 v10 결과 보존, taxonomy/Windows deterministic gate, current bundle 격리 installer lifecycle을 확인했다. M2·M6, M4 전체, installed-plugin activation과 actual Superpowers compatibility는 검증하지 않았고 실제 개인 설치도 갱신하지 않았다. 상태 변경은 exact 커밋·실행 결과·산출물·대상 상태를 다시 읽은 뒤에만 하며, 다음 활성 RC 단계는 final deterministic regression → feature branch/PR #5 current RC 정렬 → PR 설명 갱신·마감 판단이다.
+- **증거 / 검토:** 2026-08-23 현재 M2-RVR representative exact-runtime pilot은 단일 50% inventory tooltip fixture에서 validator `PASS`, user `accepted`, rollback `SAFE`로 닫았다. historical `c930af02…`/`e5edd12…` provenance 실패는 그대로 보존한다. 이 결과는 RVR 전체 visual behavior나 JOENESS 전체 promotion으로 확대하지 않으며 M6는 아직 미검증이다. 다음 활성 단계는 M6 real-project pilot이다.
 
 ## M1B 결과
 

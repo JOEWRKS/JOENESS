@@ -1,0 +1,218 @@
+{
+  "schemaVersion": 1,
+  "id": "m2-rvr-current-tooltip-b2-exact-runtime-transaction-plan-v2",
+  "date": "2026-08-23",
+  "method": "manual-input-handoff-single-exact-runtime-gamebar-png-transaction",
+  "lineage": {
+    "authoritativeJoenessBaseline": "4be3d212b799b1035ac07f1c960f2172df633ab7",
+    "b1V2EvidenceCommit": "3c22d214667f1010b6a64276dc96addcc80f864a",
+    "b2V1PlanCommit": "428bd3d719daf279623ee99d0b50aa4228ba0104",
+    "b2V1EvidenceCommit": "84bc9508378e7efb20a94cff0bdd4ee4f997f919",
+    "requiredExecutionParent": "84bc9508378e7efb20a94cff0bdd4ee4f997f919"
+  },
+  "source": {
+    "repository": "Red-Valley-Redemption",
+    "commit": "ee0e15b26fdf076eda86d297d45a1964cdb05b93",
+    "tree": "88b75dd5e31214e472c2018b5f96386d614b0a04"
+  },
+  "candidate": {
+    "path": "D:\\JOEWRKS\\m2-rvr-b1-v2-ee0e15b\\candidate\\RedValleyRedemption-0.1.0-ee0e15b.zip",
+    "bytes": 375635,
+    "sha256": "71f21d2b9517efc1c9f94a718221f1c5c1f4eafe8ec5daa88a077f03d5ff84d2",
+    "entryCount": 19,
+    "manifestDescriptorBytes": 2184,
+    "manifestDescriptorSha256": "f80426183246cd41c9ff767a0244c5d73e6b85306092a106f7d7f59ac788ad81",
+    "mainDll": {
+      "bytes": 138240,
+      "sha256": "a442f6f8e6a6ad81f051a36c07e5d6b8da089deb2172c64ca72986d4fccd38dd"
+    },
+    "coreDll": {
+      "bytes": 86528,
+      "sha256": "6c3339f8a2cbeca9aedebdb81f7b1371b0320f1787cb1408abe6cf1234d9a935"
+    },
+    "buildAllowed": false,
+    "restoreAllowed": false
+  },
+  "preState": {
+    "runtimeProcessCount": 0,
+    "install": {
+      "realDirectory": true,
+      "reparse": false,
+      "fileCount": 19,
+      "descriptorBytes": 1804,
+      "descriptorSha256": "ac4765f4a9011a6e3ae39bb476ea385ce6fc3ad192d62a65b5638e752d57a067",
+      "mainDllSha256": "210c99fce2415a93cf4a3170166fde1f8e378f5225d02538b83acef4e028520e"
+    },
+    "targetSave": {
+      "selector": "only save containing JOEWRKS.RedValleyRedemption_DoubleBarrelShotgun",
+      "opaqueId": "f7275aeaa49edff5",
+      "fileCount": 6,
+      "descriptorBytes": 550,
+      "descriptorSha256": "62613729f597a0432b80b3b1440d8e33499b5302bb536d9a670d66e3a49355fa"
+    },
+    "configs": [
+      {
+        "role": "startup_preferences",
+        "bytes": 8927,
+        "sha256": "86a2468166566ff523c6ba38de9212508e8e59dcf2f1ec84fe4fd1d9666470bb"
+      },
+      {
+        "role": "default_options",
+        "bytes": 6145,
+        "sha256": "557242810697b67d3faae2d07294b68656f3d4558847c339f235c5707883cd89"
+      }
+    ],
+    "errorLogs": {
+      "fileCount": 1,
+      "descriptorBytes": 88,
+      "descriptorSha256": "a4672829a42db6b4299cf1f94d4cf03126e503996c2172739fa7d4bcf153bb13"
+    },
+    "captures": {
+      "logicalRoot": "Videos/Captures",
+      "realDirectory": true,
+      "reparse": false,
+      "directoryCreationTimeUtcTicks": "637705876871340210",
+      "entryCount": 7,
+      "inventoryDescriptorBytes": 1353,
+      "inventoryDescriptorSha256": "15f2c5af36b2928b6ff5edcffc9658246d723e88badbf247ea715ac84c082205",
+      "reparseEntryCount": 0
+    }
+  },
+  "ownership": {
+    "agentOwned": [
+      "pre-state and source/candidate identity readback",
+      "rollback snapshots before external install write",
+      "candidate extraction, validation, bounded directory swap and installed identity readback",
+      "one StardewModdingAPI runtime session",
+      "one rvr_set_durability 50 console command and bounded output evidence",
+      "Captures directory pre/post inventory and exact new-file correlation",
+      "byte-exact evidence copy and hash readback",
+      "controlled runtime termination, process readback, rollback and cleanup",
+      "post-rollback visual-check of the exact copied PNG"
+    ],
+    "userOwned": [
+      "load the target single-player save after the save-load handoff prompt",
+      "equip the RVR shotgun and hold its inventory tooltip hover after the equip-hover handoff prompt",
+      "press Win+Alt+PrintScreen exactly once only after the explicit capture handoff prompt"
+    ],
+    "forbidden": [
+      "agent Windows-key or Game Bar hotkey injection",
+      "Computer Use screenshot API",
+      "any additional screenshot or capture request",
+      "any other debug command",
+      "sleep or day transition",
+      "gameplay progression",
+      "build, restore, repackaging or candidate mutation",
+      "runtime retry or second session",
+      "ambiguous process kill"
+    ]
+  },
+  "handoffGates": [
+    {
+      "id": "save-load",
+      "agentPrecondition": "candidate installed identity exact and one runtime session ready",
+      "agentPrompt": "target save를 불러온 뒤 완료했다고 알려주세요.",
+      "userAction": "load only the target single-player save",
+      "completionEvidence": "direct user acknowledgement plus bounded runtime-ready observation"
+    },
+    {
+      "id": "equip-hover",
+      "agentPrecondition": "save-load gate complete",
+      "agentPrompt": "RVR shotgun을 장착하고 inventory tooltip hover 상태를 유지한 뒤 완료했다고 알려주세요.",
+      "userAction": "equip only the RVR shotgun and hold its inventory tooltip hover",
+      "completionEvidence": "direct user acknowledgement, followed by one successful durability command observation"
+    },
+    {
+      "id": "gamebar-capture",
+      "agentPrecondition": "equip-hover gate complete, durability command confirms 50, target hover remains held, and immediate Captures inventory still equals pre-state",
+      "agentPrompt": "지금 `Win+Alt+PrintScreen`을 한 번만 눌러주세요.",
+      "userAction": "press Win+Alt+PrintScreen exactly once",
+      "completionEvidence": "exactly one new regular non-reparse non-zero PNG with valid PNG signature"
+    }
+  ],
+  "transaction": {
+    "taskRoot": "D:\\JOEWRKS\\m2-rvr-b2-v2-ee0e15b",
+    "taskRootMustStartAbsent": true,
+    "rollbackSnapshotBeforeExternalWrite": true,
+    "rollbackSnapshotMustMatchOriginal": true,
+    "candidateExtractCount": 1,
+    "pathTraversalAllowed": false,
+    "reparseAllowed": false,
+    "foreignEntryAllowed": false,
+    "swapMethod": "same-volume exact directory move with original-live and independent rollback snapshot",
+    "candidateInstallMustMatchManifestBeforeRuntime": true,
+    "rollbackRequiredOnEveryExit": true
+  },
+  "runtime": {
+    "sessionCount": 1,
+    "retryCount": 0,
+    "launcher": "StardewModdingAPI.exe",
+    "allowedDebugCommand": "rvr_set_durability 50",
+    "allowedDebugCommandCount": 1,
+    "targetState": {
+      "mode": "single-player",
+      "saveOpaqueId": "f7275aeaa49edff5",
+      "equippedItem": "JOEWRKS.RedValleyRedemption_DoubleBarrelShotgun",
+      "durability": 50,
+      "inventoryHover": "equipped RVR shotgun tooltip"
+    },
+    "controlledConsoleTerminationMaximumCount": 1,
+    "ambiguousProcessHandling": "leave running, report UNRESOLVED, no kill"
+  },
+  "capture": {
+    "mechanism": "Xbox Game Bar Win+Alt+PrintScreen",
+    "agentHotkeyInjectionAllowed": false,
+    "userHotkeyCount": 1,
+    "computerUseScreenshotAllowed": false,
+    "captureDifferenceRequiredCount": 1,
+    "requiredExtension": ".png",
+    "requiredPngSignatureHex": "89504e470d0a1a0a",
+    "regularFileRequired": true,
+    "reparseAllowed": false,
+    "nonZeroBytesRequired": true,
+    "cropAllowed": false,
+    "resizeAllowed": false,
+    "recompressionAllowed": false,
+    "annotationAllowed": false,
+    "colorConversionAllowed": false,
+    "evidenceCopyMustBeByteExact": true,
+    "invocationCreatedOriginalMayBeRemovedOnlyAfterExactCopyReadback": true,
+    "zeroOrMultipleNewFilesHandling": "CAPTURE-AMBIGUOUS / STOP, no additional hotkey"
+  },
+  "criterion": {
+    "name": "Shotgun durability 50% native tooltip gauge",
+    "expectedObservable": "Goldenrod condition fill이 recessed track 내부 폭의 약 절반을 차지하고, opaque dark-brown border 안에 완전히 포함되며, clipping이나 다른 tooltip 요소와 overlap이 없어야 한다.",
+    "checks": [
+      "fill occupies approximately half of the recessed track interior width",
+      "fill is fully contained inside the opaque dark-brown border",
+      "gauge has no clipping or overlap with other tooltip elements"
+    ],
+    "sourceGeometry": "160x20 gauge, border 3, interior 154x14, half fill 77x14",
+    "sourceGeometryIsSupportingEvidenceOnly": true,
+    "physicalPixelGate": false
+  },
+  "rollback": {
+    "originalInstallDescriptorMustMatch": "ac4765f4a9011a6e3ae39bb476ea385ce6fc3ad192d62a65b5638e752d57a067",
+    "originalMainDllMustMatch": "210c99fce2415a93cf4a3170166fde1f8e378f5225d02538b83acef4e028520e",
+    "targetSaveMustMatchPreState": true,
+    "configsMustMatchPreState": true,
+    "errorLogsMustMatchPreState": true,
+    "capturesInventoryMustReturnToPreState": true,
+    "runtimeProcessCountMustBeZero": true,
+    "candidateInstallAndStagingMustBeAbsent": true,
+    "visualCheckAllowedOnlyAfterSafeRollback": true
+  },
+  "claimBoundary": {
+    "validator": "UNVERIFIED",
+    "userVerdict": "not-reviewed",
+    "singlePngOnly": true,
+    "diagonal": "NOT-EXERCISED",
+    "firing": "NOT-EXERCISED",
+    "repair": "NOT-EXERCISED",
+    "cleaning": "NOT-EXERCISED",
+    "fourDirectionMotion": "NOT-EXERCISED",
+    "muzzleAlignment": "NOT-EXERCISED",
+    "m2ExactRuntime": "UNVALIDATED",
+    "promotionPass": false
+  }
+}

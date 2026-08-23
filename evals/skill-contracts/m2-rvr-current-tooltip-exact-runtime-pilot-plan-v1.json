@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "id": "m2-rvr-current-tooltip-exact-runtime-pilot-v1",
+  "date": "2026-08-22",
+  "joeness": {
+    "baselineCommit": "4be3d212b799b1035ac07f1c960f2172df633ab7",
+    "branch": "codex/m2-rvr-current-tooltip-pilot"
+  },
+  "target": {
+    "repository": "Red-Valley-Redemption",
+    "commit": "ee0e15b26fdf076eda86d297d45a1964cdb05b93",
+    "tree": "88b75dd5e31214e472c2018b5f96386d614b0a04"
+  },
+  "criterion": {
+    "name": "Shotgun durability 50% native tooltip gauge",
+    "runtimeState": "single-player, shotgun equipped, durability 50, inventory hover",
+    "logicalGeometry": {
+      "gauge": "160x20",
+      "border": 3,
+      "interior": "154x14",
+      "halfFill": "77x14"
+    },
+    "visualCriterion": "Goldenrod condition fill이 recessed track 내부 폭의 약 절반을 차지하고, opaque dark-brown border 안에 완전히 포함되며, clipping이나 다른 tooltip 요소와 overlap이 없어야 한다.",
+    "physicalPixelCriterion": false,
+    "status": "UNVERIFIED"
+  },
+  "stages": [
+    {
+      "id": "B1",
+      "name": "provenance-bound source-to-artifact build",
+      "status": "AUTHORIZED"
+    },
+    {
+      "id": "B2",
+      "name": "exact artifact isolated install and native runtime capture",
+      "status": "NOT-AUTHORIZED"
+    },
+    {
+      "id": "B3",
+      "name": "visual-check validator and separate user verdict with rollback",
+      "status": "NOT-AUTHORIZED"
+    }
+  ],
+  "hardStop": {
+    "buildCount": 1,
+    "retry": false,
+    "sourceOrDependencyDrift": "STOP",
+    "foreignCompilerInput": "STOP",
+    "pdbSourceChecksumMismatch": "STOP",
+    "buildFailure": "STOP",
+    "installOrRuntime": "NOT-AUTHORIZED"
+  },
+  "claimBoundary": {
+    "sourceToArtifact": "UNVERIFIED",
+    "runtimeObserved": false,
+    "visualCheck": "NOT-RUN",
+    "userVerdict": "NOT-COLLECTED",
+    "m2Overall": "UNVALIDATED",
+    "promotionPass": false
+  }
+}

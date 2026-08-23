@@ -1,0 +1,211 @@
+{
+  "schemaVersion": 1,
+  "id": "m2-rvr-current-tooltip-b2-evidence-v1",
+  "date": "2026-08-23",
+  "recordType": "exact-artifact-install-native-capture-rollback-attempt",
+  "lineage": {
+    "authoritativeJoenessBaseline": "4be3d212b799b1035ac07f1c960f2172df633ab7",
+    "b1V2EvidenceCommit": "3c22d214667f1010b6a64276dc96addcc80f864a",
+    "b2PlanCommit": "428bd3d719daf279623ee99d0b50aa4228ba0104",
+    "b2Plan": {
+      "path": "evals/skill-contracts/m2-rvr-current-tooltip-b2-exact-runtime-transaction-plan-v1.json",
+      "bytes": 5091,
+      "sha256": "6ed8689f320519f7b5f3741ebf2e9cbbbab03c45c268eb0787d0745c4964081e"
+    }
+  },
+  "source": {
+    "repository": "Red-Valley-Redemption",
+    "commit": "ee0e15b26fdf076eda86d297d45a1964cdb05b93",
+    "tree": "88b75dd5e31214e472c2018b5f96386d614b0a04"
+  },
+  "candidate": {
+    "zip": {
+      "bytes": 375635,
+      "sha256": "71f21d2b9517efc1c9f94a718221f1c5c1f4eafe8ec5daa88a077f03d5ff84d2",
+      "entryCount": 19,
+      "manifestDescriptorSha256": "f80426183246cd41c9ff767a0244c5d73e6b85306092a106f7d7f59ac788ad81"
+    },
+    "stagedInstall": {
+      "fileCount": 19,
+      "descriptorBytes": 1804,
+      "descriptorSha256": "4aee439e1fd0473b64d255f09b9a6748383ff6a1b43cd222688c344b4535a666",
+      "pathTraversalFound": false,
+      "reparseFound": false,
+      "foreignEntryFound": false
+    },
+    "mainDll": {
+      "bytes": 138240,
+      "sha256": "a442f6f8e6a6ad81f051a36c07e5d6b8da089deb2172c64ca72986d4fccd38dd",
+      "productVersionCommit": "ee0e15b26fdf076eda86d297d45a1964cdb05b93"
+    },
+    "coreDll": {
+      "bytes": 86528,
+      "sha256": "6c3339f8a2cbeca9aedebdb81f7b1371b0320f1787cb1408abe6cf1234d9a935",
+      "productVersionCommit": "ee0e15b26fdf076eda86d297d45a1964cdb05b93"
+    }
+  },
+  "preInstall": {
+    "runtimeProcessCount": 0,
+    "install": {
+      "realDirectory": true,
+      "reparse": false,
+      "fileCount": 19,
+      "descriptorBytes": 1804,
+      "descriptorSha256": "ac4765f4a9011a6e3ae39bb476ea385ce6fc3ad192d62a65b5638e752d57a067",
+      "mainDllSha256": "210c99fce2415a93cf4a3170166fde1f8e378f5225d02538b83acef4e028520e"
+    },
+    "targetSave": {
+      "opaqueId": "f7275aeaa49edff5",
+      "fileCount": 6,
+      "descriptorBytes": 550,
+      "descriptorSha256": "62613729f597a0432b80b3b1440d8e33499b5302bb536d9a670d66e3a49355fa"
+    },
+    "configs": [
+      {
+        "role": "startup_preferences",
+        "bytes": 8927,
+        "sha256": "86a2468166566ff523c6ba38de9212508e8e59dcf2f1ec84fe4fd1d9666470bb"
+      },
+      {
+        "role": "default_options",
+        "bytes": 6145,
+        "sha256": "557242810697b67d3faae2d07294b68656f3d4558847c339f235c5707883cd89"
+      }
+    ],
+    "errorLogs": {
+      "fileCount": 1,
+      "descriptorBytes": 88,
+      "descriptorSha256": "a4672829a42db6b4299cf1f94d4cf03126e503996c2172739fa7d4bcf153bb13"
+    }
+  },
+  "rollbackSnapshot": {
+    "installDescriptorMatchedOriginal": true,
+    "targetSaveDescriptorMatchedOriginal": true,
+    "configsMatchedOriginal": true,
+    "errorLogsDescriptorMatchedOriginal": true,
+    "createdBeforeExternalInstallWrite": true
+  },
+  "installedCandidateReadback": {
+    "fileCount": 19,
+    "descriptorBytes": 1804,
+    "descriptorSha256": "4aee439e1fd0473b64d255f09b9a6748383ff6a1b43cd222688c344b4535a666",
+    "mainDllSha256": "a442f6f8e6a6ad81f051a36c07e5d6b8da089deb2172c64ca72986d4fccd38dd",
+    "coreDllSha256": "6c3339f8a2cbeca9aedebdb81f7b1371b0320f1787cb1408abe6cf1234d9a935",
+    "productVersionsBoundToSourceCommit": true
+  },
+  "runtime": {
+    "sessionCount": 1,
+    "retryCount": 0,
+    "launchReached": true,
+    "modsReadyReached": true,
+    "singlePlayerSaveLoaded": false,
+    "shotgunEquipped": false,
+    "allowedDebugCommandInvocationCount": 0,
+    "targetStateReached": false,
+    "durableNativeFrameCount": 0,
+    "windowObservation": {
+      "windowMatchedExactlyOnce": true,
+      "windowStateReadAttemptCount": 3,
+      "displayModeFallbackCount": 1,
+      "failureCategory": "windows-graphics-capture-interface-unavailable",
+      "boundedDiagnostic": "SetIsBorderRequired interface unsupported (0x80004002)"
+    },
+    "normalExitReached": false,
+    "controlledConsoleTerminationCount": 1,
+    "invocationExitCode": 1,
+    "postExitRuntimeProcessCount": 0
+  },
+  "targetStateEvidence": {
+    "saveOpaqueId": "f7275aeaa49edff5",
+    "debugCommandObserved": false,
+    "inventoryHoverObserved": false,
+    "nativeFrame": {
+      "status": "absent",
+      "bytes": 0,
+      "sha256": null
+    }
+  },
+  "visualCheck": {
+    "validator": "UNVERIFIED",
+    "basis": "target state and durable native frame were not reached because the approved capture mechanism and its single display-mode fallback both failed",
+    "checks": [
+      {
+        "criterion": "fill occupies approximately half of the recessed track interior width",
+        "status": "UNVERIFIED"
+      },
+      {
+        "criterion": "fill is fully contained inside the opaque dark-brown border",
+        "status": "UNVERIFIED"
+      },
+      {
+        "criterion": "gauge has no clipping or overlap with other tooltip elements",
+        "status": "UNVERIFIED"
+      }
+    ],
+    "sourceGeometryUsedAsPhysicalPixelGate": false,
+    "userVerdict": "not-reviewed"
+  },
+  "rollback": {
+    "safe": true,
+    "runtimeProcessCount": 0,
+    "install": {
+      "fileCount": 19,
+      "descriptorBytes": 1804,
+      "descriptorSha256": "ac4765f4a9011a6e3ae39bb476ea385ce6fc3ad192d62a65b5638e752d57a067",
+      "mainDllSha256": "210c99fce2415a93cf4a3170166fde1f8e378f5225d02538b83acef4e028520e",
+      "allOriginalFileBytesRestored": true
+    },
+    "targetSave": {
+      "changed": false,
+      "fileCount": 6,
+      "descriptorBytes": 550,
+      "descriptorSha256": "62613729f597a0432b80b3b1440d8e33499b5302bb536d9a670d66e3a49355fa"
+    },
+    "configs": [
+      {
+        "role": "startup_preferences",
+        "runtimeChanged": true,
+        "restored": true,
+        "bytes": 8927,
+        "sha256": "86a2468166566ff523c6ba38de9212508e8e59dcf2f1ec84fe4fd1d9666470bb"
+      },
+      {
+        "role": "default_options",
+        "runtimeChanged": false,
+        "restored": false,
+        "bytes": 6145,
+        "sha256": "557242810697b67d3faae2d07294b68656f3d4558847c339f235c5707883cd89"
+      }
+    ],
+    "errorLogs": {
+      "runtimeChanged": true,
+      "restored": true,
+      "fileCount": 1,
+      "descriptorBytes": 88,
+      "descriptorSha256": "a4672829a42db6b4299cf1f94d4cf03126e503996c2172739fa7d4bcf153bb13"
+    },
+    "candidateInstallAbsent": true,
+    "stagingAbsent": true,
+    "taskRootAbsent": true
+  },
+  "result": {
+    "transaction": "INFRA-BLOCKED",
+    "sourceToArtifact": "PASS-B1-V2",
+    "artifactToInstall": "PASS",
+    "runtimeBehavior": "UNVERIFIED",
+    "visualCriterion": "UNVERIFIED",
+    "userVerdict": "not-reviewed",
+    "m2ExactRuntime": "UNVALIDATED",
+    "promotionPass": false
+  },
+  "limitations": {
+    "rootCauseEstablished": false,
+    "nativeTooltipBehaviorObserved": false,
+    "diagonal": "NOT-EXERCISED",
+    "firing": "NOT-EXERCISED",
+    "fourDirectionMotion": "NOT-EXERCISED",
+    "muzzleAlignment": "NOT-EXERCISED",
+    "gameplayProgression": "NOT-EXERCISED",
+    "additionalRuntimeAuthorized": false
+  }
+}
