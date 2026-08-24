@@ -1,0 +1,210 @@
+{
+  "schemaVersion": 1,
+  "recordType": "joeness-core-v8-stage-aware-feedback-isolated-installer-lifecycle",
+  "result": "PASS",
+  "candidate": {
+    "head": "7690704c97f304b92fa18d319a5896d6475fabfd",
+    "branch": "codex/joeness-core-v8-feedback-candidate"
+  },
+  "activeCore": {
+    "path": "evals/candidates/interaction-safety-core-v8.md",
+    "bytes": 2934,
+    "sha256": "41b3f8435c6077a9289e0c9d3315aa00d68a96e2e9add7168de6bb42f9730aea"
+  },
+  "isolatedEnvironment": {
+    "root": "C:\\joeness-core-v8-installer-20260824-01",
+    "codexHome": "C:\\joeness-core-v8-installer-20260824-01\\codex-home",
+    "agentsHome": "C:\\joeness-core-v8-installer-20260824-01\\agents-home",
+    "backupRoot": "C:\\joeness-core-v8-installer-20260824-01\\backups",
+    "operationsRoot": "C:\\joeness-core-v8-installer-20260824-01\\operations",
+    "owner": "DESKTOP-MMD21EB\\tjdwo",
+    "createdUtc": "2026-08-24T14:52:32.3221671Z",
+    "lexicalPathsEqualNativeRealPaths": true,
+    "realNonReparse": true,
+    "reparseEntries": 0
+  },
+  "lifecycle": {
+    "sequence": [
+      "Check",
+      "Apply",
+      "Check",
+      "Remove",
+      "Check"
+    ],
+    "operationCounts": {
+      "Check": 3,
+      "Apply": 1,
+      "Remove": 1,
+      "total": 5,
+      "retry": 0
+    },
+    "operations": [
+      {
+        "ordinal": 1,
+        "mode": "Check",
+        "exit": 0,
+        "status": "ready",
+        "changesRequired": true,
+        "targetMutation": false
+      },
+      {
+        "ordinal": 2,
+        "mode": "Apply",
+        "exit": 0,
+        "status": "current",
+        "changesRequired": false
+      },
+      {
+        "ordinal": 3,
+        "mode": "Check",
+        "exit": 0,
+        "status": "current",
+        "changesRequired": false,
+        "targetMutation": false
+      },
+      {
+        "ordinal": 4,
+        "mode": "Remove",
+        "exit": 0,
+        "status": "removed",
+        "changesRequired": false,
+        "unresolvedTargets": 0
+      },
+      {
+        "ordinal": 5,
+        "mode": "Check",
+        "exit": 0,
+        "status": "ready",
+        "changesRequired": true,
+        "targetMutation": false
+      }
+    ]
+  },
+  "installedReadback": {
+    "activeSkills": [
+      "design",
+      "handoff",
+      "project",
+      "spec",
+      "ticket",
+      "visual-check"
+    ],
+    "activeSkillCount": 6,
+    "managedFileCount": 64,
+    "managedFileMismatchCount": 0,
+    "unexpectedFileCount": 0,
+    "coreSource": {
+      "path": "evals/candidates/interaction-safety-core-v8.md",
+      "bytes": 2934,
+      "sha256": "41b3f8435c6077a9289e0c9d3315aa00d68a96e2e9add7168de6bb42f9730aea"
+    },
+    "managedAgentsBlock": {
+      "bytes": 3005,
+      "sha256": "e766dffc3ff82e5cc0b4cfab252ab57a615e1f4789fc657ad771b36ab0737ca3",
+      "beginMarkerCount": 1,
+      "endMarkerCount": 1
+    },
+    "installedManifest": {
+      "bytes": 37574,
+      "sha256": "a593ec7c1e124938e9eef543e01814362236a6a15ba567b341a10805ece5569f",
+      "matchesCandidateSource": true
+    },
+    "state": {
+      "schemaVersion": 2,
+      "bytes": 10176,
+      "sha256": "b96cf6a4914551e7c5b1faf02b6e8f6b26e81f40f55845e17b87d07edeaf5180"
+    },
+    "tempStagingResidue": 0
+  },
+  "preservationFixture": {
+    "agentsUnmanagedBytes": {
+      "pre": {
+        "bytes": 42,
+        "sha256": "94dafddc6c6c1446ef8dc0d2c47999d7230d2dddaea89b31f3345721650817ea"
+      },
+      "preservedDuringApply": true,
+      "postRemove": {
+        "bytes": 42,
+        "sha256": "94dafddc6c6c1446ef8dc0d2c47999d7230d2dddaea89b31f3345721650817ea"
+      },
+      "restoredExact": true
+    },
+    "unmanagedFile": {
+      "relativePath": "user-owned.txt",
+      "pre": {
+        "bytes": 12,
+        "sha256": "a10f389ab12d6e37085c0a4fa0f75d43db8070c5256dc1751b10685d47c6ac8e"
+      },
+      "postRemove": {
+        "bytes": 12,
+        "sha256": "a10f389ab12d6e37085c0a4fa0f75d43db8070c5256dc1751b10685d47c6ac8e"
+      },
+      "restoredExact": true
+    }
+  },
+  "removeAndCleanup": {
+    "managedFilesAbsentAfterRemove": 64,
+    "stateAbsentAfterRemove": true,
+    "unexpectedRemainingFiles": 0,
+    "tempStagingTombstoneResidue": 0,
+    "applyBackup": {
+      "path": "C:\\joeness-core-v8-installer-20260824-01\\backups\\20260824T1453584930260Z-9e82e1d767224770b000d85cc0da5939",
+      "files": 1,
+      "identityMismatchCount": 0
+    },
+    "removeBackup": {
+      "path": "C:\\joeness-core-v8-installer-20260824-01\\backups\\20260824T1457409217062Z-2917fcc576194573ae801a92e12c30bf",
+      "files": 66,
+      "identityMismatchCount": 0
+    },
+    "backupFilesBeforeTaskCleanup": 67,
+    "taskRootCleanup": "PASS",
+    "taskRootAbsent": true
+  },
+  "actualPersonalInstallation": {
+    "writeOperations": 0,
+    "update": "PENDING",
+    "pre": [
+      {
+        "path": "C:\\Users\\tjdwo\\.codex\\AGENTS.md",
+        "bytes": 2500,
+        "sha256": "17bf72c905338a8d7695a684650fa8c3c306b3720f7d34449fdc4626051e9ab0"
+      },
+      {
+        "path": "C:\\Users\\tjdwo\\.codex\\joewrks-harness-state.json",
+        "bytes": 10176,
+        "sha256": "cdfbe548ca0033bd96590c146064af8318babb1f1b4398cb5785eed21d560bb6"
+      },
+      {
+        "path": "C:\\Users\\tjdwo\\.agents\\vendor\\source-manifest.json",
+        "bytes": 37574,
+        "sha256": "dc829e6263a34758c85240e954bf61474f6a59332323b65b1f6b0cc8924bce91"
+      }
+    ],
+    "post": [
+      {
+        "path": "C:\\Users\\tjdwo\\.codex\\AGENTS.md",
+        "bytes": 2500,
+        "sha256": "17bf72c905338a8d7695a684650fa8c3c306b3720f7d34449fdc4626051e9ab0"
+      },
+      {
+        "path": "C:\\Users\\tjdwo\\.codex\\joewrks-harness-state.json",
+        "bytes": 10176,
+        "sha256": "cdfbe548ca0033bd96590c146064af8318babb1f1b4398cb5785eed21d560bb6"
+      },
+      {
+        "path": "C:\\Users\\tjdwo\\.agents\\vendor\\source-manifest.json",
+        "bytes": 37574,
+        "sha256": "dc829e6263a34758c85240e954bf61474f6a59332323b65b1f6b0cc8924bce91"
+      }
+    ],
+    "postMatchesPre": true,
+    "unchanged": true
+  },
+  "boundaries": {
+    "liveBehavior": "NOT-EXERCISED",
+    "historicalReplay": "NOT-RUN",
+    "manualLive": "NOT-RUN",
+    "promotionPass": false
+  }
+}
