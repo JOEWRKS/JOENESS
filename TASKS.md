@@ -2,7 +2,7 @@
 
 이 파일은 현재 검증 작업의 유일한 활성 원장이다. 날짜별 계획·실험·사고 보고서는 역사 증거로만 링크하고 진행 상태를 중복 기록하지 않는다.
 
-- **목표 / 릴리스:** current RC bundle `62b0decc80d77b3ad782f21cb02f47a2b2b3472f`를 기준으로 설치·행동·실프로젝트 효과를 검증한다. 증거가 없는 기능은 `candidate/unvalidated`를 유지하고 고정 fixture의 부분 PASS를 전체 승격으로 확대하지 않는다.
+- **목표 / 릴리스:** current main `de5b1e0a4dc0a32db9170c5fa10b4f77b9a0ff69`를 기준으로 설치·행동·실프로젝트 효과를 검증한다. 증거가 없는 기능은 `candidate/unvalidated`를 유지하고 고정 fixture의 부분 PASS를 전체 승격으로 확대하지 않는다.
 - **마일스톤:**
   - [x] **M0 후보 고정·설치:** 전체 회귀, 격리 `Check → Apply → Check → 재Apply → Remove → Check`, 원상복구, feature branch push
   - [x] **M1 Ticket E2E:** M1A 승인 + M1B 재작업·중단 + M1C 평가 입력 비오염 증거
@@ -14,11 +14,11 @@
   - [ ] **M4 암묵 라우팅·충돌:** Project·Ticket·Design·Visual Check·Spec·Handoff의 양성/음성 사례와 외부 플러그인 계약 충돌
   - [ ] **M5 결합 흐름:** Project → Ticket → Spec → Handoff 재개의 종단 검증
   - [ ] **M6 실프로젝트 파일럿:** original multi-domain M6는 `PARTIAL`. representative T081 real-project slice만 `PASS WITH FOLLOW-UP`; Unity real-project observation과 actual installed Superpowers compatibility는 `NOT-EXERCISED`, JOENESS `promotionPass=false`
-  - [ ] **RC 마감:** current bundle의 상태 원장 정리 뒤 final deterministic regression, feature branch와 PR #5의 current RC 정렬, PR 설명 갱신과 마감 판단을 순서대로 수행
+  - [x] **RC repository integration:** actual personal JOENESS installation은 Core v7 + public skills 6개로 current이며, PR #5·M2 evidence PR #6·M6 retrospective PR #7은 current main에 merged, latest post-merge deterministic CI는 `PASS`. 이 완료는 JOENESS 전체 승격을 뜻하지 않으며 `promotionPass=false`를 유지
     - [x] **상태 정리:** M4 v10·taxonomy/CI·격리 installer lifecycle의 현재 검증 경계를 원장에 반영
-    - [ ] **Final deterministic regression:** 승인된 current-release·historical-integrity·PowerShell·vendor Python gate 재검증
-    - [ ] **Feature branch / PR #5 정렬:** final regression 결과를 확인한 뒤 current RC로 정렬
-    - [ ] **PR 설명 갱신·마감 판단:** 검증 범위와 미검증 경계를 반영해 별도 판단
+    - [x] **Final deterministic regression:** latest post-merge deterministic CI `PASS`
+    - [x] **PR merge 정렬:** PR #5, M2 evidence PR #6, M6 retrospective PR #7 merged
+    - [x] **Current main readback:** `de5b1e0a4dc0a32db9170c5fa10b4f77b9a0ff69`
 - **현재:**
 
   | 단계 | 기대 결과 | 합격 조건 | 상태 |
@@ -33,12 +33,12 @@
   | M3 | 쉬운 말과 증거에 근거한 결과 보고 | 사용자 경과·설명·의견·질문은 비전공자가 이해할 수 있게 쓰고 필요한 전문용어는 즉시 설명; 내부 용어·어색한 직역은 일상어로 교체; 이전 응답·도구 결과를 먼저 대조하고 근거 없는 누락·실패 인정은 거부; 필요한 경우에만 다음 행동 하나를 제시 | 부분 반영 — Core v7 문구와 정적 검사를 추가. 실제 응답 사례, RVR 허위 누락 회귀, 다음 행동 양성·음성 검증은 남음 |
   | M4 | 고정 입력의 라우팅·권한·충돌 행동 판정 | generation별 immutable plan·1회 live·결과 보존, 부분 fixture 결과를 M4 전체나 실제 플러그인 호환성으로 확대하지 않음 | 부분 통과 — v10 고정 direct-user delegation fixture만 `Semantic PASS`; M4 전체 `UNVALIDATED`, installed-plugin activation `UNVERIFIED`, actual Superpowers compatibility `NOT-EXERCISED`, `promotionPass=false`. v10 generation은 live 1회로 종료 |
   | M6 | 실제 프로젝트에서 차단·복구·인계·검증·사용자 판정의 범위 준수 | 관찰된 결과만 exact repository evidence와 file hashes에 결박하고 미실행 domain과 전체 승격을 분리 | `PARTIAL` — [representative T081 slice](evals/experiments/joeness-m6-t081-representative-real-project-slice-retrospective-v1.json)만 `PASS WITH FOLLOW-UP`; Unity real-project observation과 actual installed Superpowers compatibility는 `NOT-EXERCISED`, `promotionPass=false` |
-  | RC | current deterministic release gate와 격리 설치 수명주기 | current-release·historical-integrity·Windows CI·격리 `Check → Apply → Check → Remove → Check`, user-owned bytes 복원 | 상태 정리 완료 — 다음은 final deterministic regression이며 개인 설치·PR 정렬은 아직 수행하지 않음 |
+  | RC | current deterministic release gate와 격리 설치 수명주기 | current-release·historical-integrity·Windows CI·격리 `Check → Apply → Check → Remove → Check`, user-owned bytes 복원 | repository integration 완료 — actual personal Core v7 + public skills 6개 current, PR #5·#6·#7 merged, current main `de5b1e0a…`, latest post-merge deterministic CI `PASS`; `promotionPass=false` 유지 |
 
 - **차단 / 결정 / 링크:**
   - 검증 기간에는 검증 실패를 고치는 최소 변경 외 새 기능을 추가하지 않는다.
-  - M0의 역사 검증 기준 `f3b4b30`은 당시 증거로 보존한다. current RC 상태 원장 기준은 `62b0decc80d77b3ad782f21cb02f47a2b2b3472f`이며 feature branch와 PR #5의 current RC 정렬은 final deterministic regression 뒤 별도 단계다.
-  - 실제 개인 Codex/Agents 설치는 아직 업데이트하지 않았다. 과거의 “M4 직전 개인 설치 업데이트” 계획은 실행하지 않았고, current bundle 설치 검증은 override를 사용한 task-owned 격리 홈에서만 수행했다. 개인 설치 변경은 현재 RC 마감 순서에 포함하지 않으며 별도 승인이 필요하다.
+  - M0의 역사 검증 기준 `f3b4b30`은 당시 증거로 보존한다. current main 상태 원장 기준은 `de5b1e0a4dc0a32db9170c5fa10b4f77b9a0ff69`이며 PR #5·M2 evidence PR #6·M6 retrospective PR #7은 모두 merged, latest post-merge deterministic CI는 `PASS`다.
+  - actual personal JOENESS installation은 Core v7 + public skills 6개로 current다. 이는 M4의 actual installed Superpowers compatibility를 검증하지 않으며 해당 범위는 `NOT-EXERCISED`다.
   - M1은 Ticket 기능만 통과했다. M6 representative T081 real-project slice는 `PASS WITH FOLLOW-UP`이지만 original multi-domain M6는 `PARTIAL`이고 `promotionPass=false`이므로 JOENESS 전체는 계속 `candidate/unvalidated`다.
   - M2A의 정적 계약 통과는 새 fresh 판정이나 M2 전체를 승격하지 않는다. v7 오판은 삭제·재분류하지 않고 거절 이력으로 보존한다.
   - M2B1 열 번째 실행은 앞선 수량 검사에서 멈추지 않았지만 sample-a 의미 판정에서 멈춰 M2B1은 계속 차단 상태다. 같은 v10 명령은 다시 실행하지 않고 자동 재시도나 한도 변경도 허용하지 않는다. 다음 실제 실행은 승인하지 않으며, 먼저 세부 판정값과 안전한 과정 기록 요약을 차단 기록에 남기는 새 방법을 별도로 검토한다. 원본 화질 요청 지원 여부는 계속 별도 조사로 둔다.
