@@ -173,7 +173,7 @@ test("the interaction safety core stays silent on clean success without rewritin
   const interactionDecision = JSON.parse(
     await readFile(path.join(root, "evals", "experiments", "joeness-0.1-interaction-safety-core-v1.json"), "utf8"),
   );
-  assert.equal(manifest.activeCommonCore.path, "evals/candidates/interaction-safety-core-v7.md");
+  assert.equal(manifest.activeCommonCore.path, "evals/candidates/interaction-safety-core-v8.md");
 
   const core = await readFile(path.join(root, manifest.activeCommonCore.path), "utf8");
   const visualSkill = await readFile(path.join(root, "skills", "visual-check", "SKILL.md"), "utf8");
