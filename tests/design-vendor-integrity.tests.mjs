@@ -21,6 +21,7 @@ const INTERACTION_SAFETY_CORE_V4 = path.join(ROOT, 'evals', 'candidates', 'inter
 const INTERACTION_SAFETY_CORE_V5 = path.join(ROOT, 'evals', 'candidates', 'interaction-safety-core-v5.md');
 const INTERACTION_SAFETY_CORE_V6 = path.join(ROOT, 'evals', 'candidates', 'interaction-safety-core-v6.md');
 const INTERACTION_SAFETY_CORE_V7 = path.join(ROOT, 'evals', 'candidates', 'interaction-safety-core-v7.md');
+const INTERACTION_SAFETY_CORE_V8 = path.join(ROOT, 'evals', 'candidates', 'interaction-safety-core-v8.md');
 const GITATTRIBUTES = path.join(ROOT, '.gitattributes');
 const UI_FILES = [
   'SKILL.md',
@@ -888,13 +889,19 @@ test('the interaction safety core is active without rewriting broader Core evide
     'e7a3c02d4c147eaadde2c00a0452c7de21b3e0f51fa02cf7bd7085c43d97ac4d',
   );
   assert.deepEqual(manifest.activeCommonCore, {
-    path: 'evals/candidates/interaction-safety-core-v7.md',
-    sha256: '4c7cc5836f99d19ce67837ad3a138acc3a6522f4a1c1d3fc07b37a6396b383d7',
+    path: 'evals/candidates/interaction-safety-core-v8.md',
+    sha256: '41b3f8435c6077a9289e0c9d3315aa00d68a96e2e9add7168de6bb42f9730aea',
   });
+  assert.equal(lstatSync(INTERACTION_SAFETY_CORE_V8).size, 2934);
+  assert.ok(lstatSync(INTERACTION_SAFETY_CORE_V8).size <= 3072);
+  assert.equal(sha256(INTERACTION_SAFETY_CORE_V8), manifest.activeCommonCore.sha256);
   assert.equal(lstatSync(INTERACTION_SAFETY_CORE_V7).size, 2441);
   assert.ok(lstatSync(INTERACTION_SAFETY_CORE_V7).size <= 3072);
-  assert.equal(sha256(INTERACTION_SAFETY_CORE_V7), manifest.activeCommonCore.sha256);
-  assert.equal(existsSync(path.join(ROOT, 'evals', 'candidates', 'interaction-safety-core-v8.md')), false);
+  assert.equal(
+    sha256(INTERACTION_SAFETY_CORE_V7),
+    '4c7cc5836f99d19ce67837ad3a138acc3a6522f4a1c1d3fc07b37a6396b383d7',
+  );
+  assert.equal(existsSync(INTERACTION_SAFETY_CORE_V8), true);
   assert.equal(lstatSync(INTERACTION_SAFETY_CORE_V6).size, 2047);
   assert.equal(sha256(INTERACTION_SAFETY_CORE_V6), '897495e89128194afe695ff55e537c5e7ef52e6778bf260b10c9b6ab35857ceb');
   assert.equal(lstatSync(INTERACTION_SAFETY_CORE_V5).size, 2040);
@@ -926,6 +933,7 @@ test('the interaction safety core is active without rewriting broader Core evide
   assert.match(readFileSync(GITATTRIBUTES, 'utf8'), /^\/evals\/candidates\/interaction-safety-core-v5\.md text eol=lf$/m);
   assert.match(readFileSync(GITATTRIBUTES, 'utf8'), /^\/evals\/candidates\/interaction-safety-core-v6\.md text eol=lf$/m);
   assert.match(readFileSync(GITATTRIBUTES, 'utf8'), /^\/evals\/candidates\/interaction-safety-core-v7\.md text eol=lf$/m);
+  assert.match(readFileSync(GITATTRIBUTES, 'utf8'), /^\/evals\/candidates\/interaction-safety-core-v8\.md text eol=lf$/m);
   assert.match(readFileSync(GITATTRIBUTES, 'utf8'), /^\/evals\/candidates\/visual-check-skill-v5\.md text eol=lf$/m);
   assert.match(readFileSync(GITATTRIBUTES, 'utf8'), /^\/evals\/candidates\/visual-check-openai-v5\.yaml text eol=lf$/m);
   assert.match(readFileSync(GITATTRIBUTES, 'utf8'), /^\/evals\/candidates\/visual-check-durable-evidence-v6\.md text eol=lf$/m);
@@ -948,7 +956,7 @@ test('M4 preserves project workflow authority without promoting or expanding Cor
 
   assert.match(agents, new RegExp(`^- ${authorityRule.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'm'));
   assert.doesNotMatch(agents, /<!-- JOEWRKS-HARNESS:(?:BEGIN|END) -->/);
-  assert.equal(manifest.activeCommonCore.path, 'evals/candidates/interaction-safety-core-v7.md');
+  assert.equal(manifest.activeCommonCore.path, 'evals/candidates/interaction-safety-core-v8.md');
   assert.equal(manifest.evaluation.state, 'candidate');
   assert.equal(manifest.evaluation.current.state, 'unvalidated');
   assert.equal(manifest.evaluation.current.promotionPass, false);
