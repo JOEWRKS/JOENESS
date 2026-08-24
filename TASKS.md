@@ -13,7 +13,7 @@
   - [ ] **M3 Core V7:** 쉬운 사용자 설명, clean·partial·blocked·workaround·반복 오류·복구 상황의 결과 우선 보고, 과거 누락·실패 인정 전 원본 작업 증거 대조, 조건부 다음 행동, 중단 규칙
   - [ ] **M4 암묵 라우팅·충돌:** Project·Ticket·Design·Visual Check·Spec·Handoff의 양성/음성 사례와 외부 플러그인 계약 충돌
   - [ ] **M5 결합 흐름:** Project → Ticket → Spec → Handoff 재개의 종단 검증
-  - [ ] **M6 실프로젝트 파일럿:** Unity, .NET 게임 모드, 웹/앱에서 품질·재작업·시간을 기록하고 기능별 승격 판정
+  - [ ] **M6 실프로젝트 파일럿:** original multi-domain M6는 `PARTIAL`. representative T081 real-project slice만 `PASS WITH FOLLOW-UP`; Unity real-project observation과 actual installed Superpowers compatibility는 `NOT-EXERCISED`, JOENESS `promotionPass=false`
   - [ ] **RC 마감:** current bundle의 상태 원장 정리 뒤 final deterministic regression, feature branch와 PR #5의 current RC 정렬, PR 설명 갱신과 마감 판단을 순서대로 수행
     - [x] **상태 정리:** M4 v10·taxonomy/CI·격리 installer lifecycle의 현재 검증 경계를 원장에 반영
     - [ ] **Final deterministic regression:** 승인된 current-release·historical-integrity·PowerShell·vendor Python gate 재검증
@@ -32,13 +32,14 @@
   | M2B2 | representative exact 런타임 | 정확한 소스·빌드·설치본·대상 상태·직접 화면·판정·rollback을 하나의 증거로 결박, 사용자 수락은 별도 판정 | PASS — RVR shotgun durability 50% inventory tooltip 단일 fixture에서 [B2-v2 evidence](evals/skill-contracts/m2-rvr-current-tooltip-b2-v2-evidence-v1.json), [native frame](evals/skill-contracts/m2-rvr-current-tooltip-b2-v2-native-frame.png), [user verdict](evals/skill-contracts/m2-rvr-current-tooltip-b2-v2-user-verdict-v1.json)로 validator `PASS`와 user `accepted`를 고정. RVR 전체 visual behavior와 JOENESS 전체 승격으로 확대하지 않음 |
   | M3 | 쉬운 말과 증거에 근거한 결과 보고 | 사용자 경과·설명·의견·질문은 비전공자가 이해할 수 있게 쓰고 필요한 전문용어는 즉시 설명; 내부 용어·어색한 직역은 일상어로 교체; 이전 응답·도구 결과를 먼저 대조하고 근거 없는 누락·실패 인정은 거부; 필요한 경우에만 다음 행동 하나를 제시 | 부분 반영 — Core v7 문구와 정적 검사를 추가. 실제 응답 사례, RVR 허위 누락 회귀, 다음 행동 양성·음성 검증은 남음 |
   | M4 | 고정 입력의 라우팅·권한·충돌 행동 판정 | generation별 immutable plan·1회 live·결과 보존, 부분 fixture 결과를 M4 전체나 실제 플러그인 호환성으로 확대하지 않음 | 부분 통과 — v10 고정 direct-user delegation fixture만 `Semantic PASS`; M4 전체 `UNVALIDATED`, installed-plugin activation `UNVERIFIED`, actual Superpowers compatibility `NOT-EXERCISED`, `promotionPass=false`. v10 generation은 live 1회로 종료 |
+  | M6 | 실제 프로젝트에서 차단·복구·인계·검증·사용자 판정의 범위 준수 | 관찰된 결과만 exact repository evidence와 file hashes에 결박하고 미실행 domain과 전체 승격을 분리 | `PARTIAL` — [representative T081 slice](evals/experiments/joeness-m6-t081-representative-real-project-slice-retrospective-v1.json)만 `PASS WITH FOLLOW-UP`; Unity real-project observation과 actual installed Superpowers compatibility는 `NOT-EXERCISED`, `promotionPass=false` |
   | RC | current deterministic release gate와 격리 설치 수명주기 | current-release·historical-integrity·Windows CI·격리 `Check → Apply → Check → Remove → Check`, user-owned bytes 복원 | 상태 정리 완료 — 다음은 final deterministic regression이며 개인 설치·PR 정렬은 아직 수행하지 않음 |
 
 - **차단 / 결정 / 링크:**
   - 검증 기간에는 검증 실패를 고치는 최소 변경 외 새 기능을 추가하지 않는다.
   - M0의 역사 검증 기준 `f3b4b30`은 당시 증거로 보존한다. current RC 상태 원장 기준은 `62b0decc80d77b3ad782f21cb02f47a2b2b3472f`이며 feature branch와 PR #5의 current RC 정렬은 final deterministic regression 뒤 별도 단계다.
   - 실제 개인 Codex/Agents 설치는 아직 업데이트하지 않았다. 과거의 “M4 직전 개인 설치 업데이트” 계획은 실행하지 않았고, current bundle 설치 검증은 override를 사용한 task-owned 격리 홈에서만 수행했다. 개인 설치 변경은 현재 RC 마감 순서에 포함하지 않으며 별도 승인이 필요하다.
-  - M1은 Ticket 기능만 통과했다. `promotionPass=false`이므로 JOENESS 전체는 계속 `candidate/unvalidated`다. M2-RVR representative exact-runtime pilot closeout 뒤 다음 활성 단계는 M6 real-project pilot이다.
+  - M1은 Ticket 기능만 통과했다. M6 representative T081 real-project slice는 `PASS WITH FOLLOW-UP`이지만 original multi-domain M6는 `PARTIAL`이고 `promotionPass=false`이므로 JOENESS 전체는 계속 `candidate/unvalidated`다.
   - M2A의 정적 계약 통과는 새 fresh 판정이나 M2 전체를 승격하지 않는다. v7 오판은 삭제·재분류하지 않고 거절 이력으로 보존한다.
   - M2B1 열 번째 실행은 앞선 수량 검사에서 멈추지 않았지만 sample-a 의미 판정에서 멈춰 M2B1은 계속 차단 상태다. 같은 v10 명령은 다시 실행하지 않고 자동 재시도나 한도 변경도 허용하지 않는다. 다음 실제 실행은 승인하지 않으며, 먼저 세부 판정값과 안전한 과정 기록 요약을 차단 기록에 남기는 새 방법을 별도로 검토한다. 원본 화질 요청 지원 여부는 계속 별도 조사로 둔다.
   - M2-RVR representative exact-runtime pilot은 source `ee0e15b26fdf076eda86d297d45a1964cdb05b93`에서 source→artifact→install→runtime target state→native Game Bar PNG→validator PASS→SAFE rollback을 하나의 lineage로 연결했고, exact frame `e06054153d37ed8ac7c51bdc78dde08577a71d682c3076aa1f7d230d77fff2cb`에 대해 사용자가 `accepted`로 판정했다. historical `c930af02…`와 `e5edd12…` clean-commit compiler provenance 실패는 역사 evidence로 유지하며 현재 PASS로 덮어쓰지 않는다. 이번 PASS는 50% inventory tooltip 단일 fixture에만 적용하고 firing·motion·directional pose·muzzle alignment·repair·cleaning과 RVR 전체 visual behavior는 `UNVERIFIED`, JOENESS `promotionPass=false`를 유지한다.
@@ -62,7 +63,7 @@
   - fresh 실행은 exact prompt·허용 입력·raw final output·run identity를 보존한다. transport-level 실행 이력이 없으면 그 한계를 명시하고 완전한 격리 증거로 주장하지 않는다.
   - 사용자 수락은 validator 판정과 분리한다. M2-RVR exact frame `e0605415…f2cb`의 단일 tooltip fixture만 user `accepted`이며, 다른 fixture와 RVR 전체 visual behavior의 사용자 수락은 `UNVERIFIED`다.
   - 공식 상태와 증거 포인터: [`vendor/source-manifest.json`](vendor/source-manifest.json)
-- **증거 / 검토:** 2026-08-23 현재 M2-RVR representative exact-runtime pilot은 단일 50% inventory tooltip fixture에서 validator `PASS`, user `accepted`, rollback `SAFE`로 닫았다. historical `c930af02…`/`e5edd12…` provenance 실패는 그대로 보존한다. 이 결과는 RVR 전체 visual behavior나 JOENESS 전체 promotion으로 확대하지 않으며 M6는 아직 미검증이다. 다음 활성 단계는 M6 real-project pilot이다.
+- **증거 / 검토:** 2026-08-24 현재 [M6 representative T081 real-project slice](evals/experiments/joeness-m6-t081-representative-real-project-slice-retrospective-v1.json)는 `PASS WITH FOLLOW-UP`이다. original multi-domain M6는 `PARTIAL`, Unity real-project observation과 actual installed Superpowers compatibility는 `NOT-EXERCISED`, JOENESS `promotionPass=false`다. M2-RVR 단일 fixture와 historical M2/M4 경계는 변경하지 않는다.
 
 ## M1B 결과
 
