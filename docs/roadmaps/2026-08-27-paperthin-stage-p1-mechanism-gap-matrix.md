@@ -3,7 +3,7 @@
 - Stage: `P1` only — prior-art mechanism extraction
 - JOENESS comparison baseline: `JOEWRKS/joewrks-work-harness@1d867465cc2f99788a0b478d5fba4eb090fcde83`
 - Paperthin source baseline: `LilMGenius/paperthin@3bca079a51bcfff5dafb53d1d7f9f523d66ee317`
-- Paperthin license readback: MIT, `LICENSE` 1,088 bytes, SHA-256 `5d5bb4170aed4da90f7919089d10298a2c6a2a17c7a6b5fb1ef120197415186d`
+- Paperthin canonical source identity: MIT, `LICENSE` 1,067 bytes, Git blob SHA `d863715d3437b2c292174a714f594cd0b009fc9b`, raw LF bytes SHA-256 `a3f8d514b2bdd3e16ed555c53add0b3381d3890fe2af312859c0b043867c1fb3`
 - Scope: roadmap의 `WATCH` 5개만 비교한다. `PARKED` 후보와 P2 이후의 실제-project fit/adoption 판단은 포함하지 않는다.
 
 ## 판정 기준
