@@ -1,6 +1,6 @@
 # JOENESS × Paperthin Prior-Art Adoption Roadmap
 
-- Status: planning / no adoption approved
+- Status: planning / P0+P1 complete / P2 pending / no adoption approved
 - JOENESS baseline: `main@1d867465cc2f99788a0b478d5fba4eb090fcde83`
 - Active Core baseline: `interaction-safety-core-v8.md` — `2,934 bytes` / SHA-256 `41b3f8435c6077a9289e0c9d3315aa00d68a96e2e9add7168de6bb42f9730aea`
 - Public skills baseline: `project`, `ticket`, `design`, `visual-check`, `spec`, `handoff`
@@ -84,6 +84,8 @@ Pass:
 
 ### Stage P1 — Prior-art mechanism extraction
 
+Status: complete — [`2026-08-27-paperthin-stage-p1-mechanism-gap-matrix.md`](2026-08-27-paperthin-stage-p1-mechanism-gap-matrix.md), corrected source-identity commit `dbdad2c0b9cfe3413e711ea467d8852924b0f649`.
+
 Purpose: reduce Paperthin from a 28-skill catalog to a mechanism-level comparison.
 
 Actions:
@@ -135,6 +137,12 @@ Pass:
 ### Stage P3 — Evidence-to-pattern fit review
 
 Purpose: test whether any Paperthin mechanism solves an observed JOENESS problem rather than merely sounding useful.
+
+Prepared pre-P2 evidence input:
+
+- [`2026-08-27-paperthin-p3-rvr-evidence-intake.md`](2026-08-27-paperthin-p3-rvr-evidence-intake.md) registers the user-supplied RED VALLEY REDEMPTION revolver visual-verification incident as a P3 evidence lead without changing the harness or Dororong pilot.
+- The intake keeps the supplied report's filename, byte count, and SHA-256, while leaving the source report's repository/commit/path and incident-time installed JOENESS identities `UNVERIFIED` instead of reconstructing them.
+- It records two bounded `visual-check` questions for P3 — criteria-before-candidate freeze and change-impact invariant recheck — plus the incident's signals for `mandela` and `re0-memo`. These are questions only, not approved changes.
 
 For every `GAP_CANDIDATE`, classify the observed evidence:
 
@@ -284,10 +292,16 @@ The minimum record for a candidate is:
 
 Do not implement a Paperthin-derived change yet.
 
+Completed before Dororong review:
+
+1. P0 baselines are frozen.
+2. P1 mechanism extraction is complete and source identity corrected.
+3. The RVR visual-verification incident is registered as a bounded P3 evidence intake without modifying JOENESS or the Dororong pilot.
+
 Next:
 
-1. let the active Dororong M1 pilot reach its existing completion/partial/blocked boundary;
-2. in parallel, perform Stage P1 read-only mechanism extraction against the pinned Paperthin commit;
-3. when both exist, run Stage P3 once to decide whether zero, one, or at most three candidates deserve a bounded design.
+1. let the active Dororong M1 pilot reach its existing completion / partial / blocked boundary under the unchanged installed JOENESS;
+2. collect Dororong closeout evidence without injecting Paperthin-derived behavior;
+3. run Stage P3 once using the P1 matrix, the prepared RVR intake, and Dororong evidence to decide whether zero, one, or at most three candidates deserve a bounded design.
 
 Until that review, JOENESS Core v8 and the six public skills remain frozen.
