@@ -1,6 +1,6 @@
 # JOENESS × Paperthin Prior-Art Adoption Roadmap
 
-- Status: planning / P0+P1 complete / pre-P2 evidence prepared / P2 pending / no adoption approved
+- Status: planning / `P0+P1+P2+P3 COMPLETE` / `P4 NEXT` / no adoption implemented
 - JOENESS baseline: `main@1d867465cc2f99788a0b478d5fba4eb090fcde83`
 - Active Core baseline: `interaction-safety-core-v8.md` — `2,934 bytes` / SHA-256 `41b3f8435c6077a9289e0c9d3315aa00d68a96e2e9add7168de6bb42f9730aea`
 - Public skills baseline: `project`, `ticket`, `design`, `visual-check`, `spec`, `handoff`
@@ -11,324 +11,221 @@
 
 Use Paperthin as prior art to identify low-level agentic failure patterns that JOENESS does not already cover, then adopt only the smallest changes that earn their way in through real-project evidence.
 
-This is not a migration to Paperthin, a dependency installation, or a catalog import. The target remains JOENESS: thin Core, conditional skills, one main writer, evidence-bound completion, minimal persistent state, and no rule accumulation without observed need.
+This is not a Paperthin migration, dependency installation, or skill-catalog import. A no-change result remains valid success.
 
-Success means either:
+The controlling question is:
 
-1. a Paperthin-derived mechanism closes a demonstrated JOENESS gap with lower rework or clearer verification; or
-2. the mechanism is rejected/parked with an evidence-backed reason and JOENESS remains unchanged.
-
-A no-change result is a valid success.
+> Which failure reflex is actually missing from JOENESS, where is the lowest-cost layer that can express it, and what real evidence proves the change is worth permanent complexity?
 
 ## 2. Hard boundaries
 
-Until an adoption gate is explicitly passed:
+Until a later adoption gate explicitly passes:
 
 - do not modify Core v8;
-- do not add, remove, or change public skills;
+- do not add/remove public skills;
 - do not change installer/manifest behavior;
-- do not change current M2/M3/M4/M5/M6 evidence classifications from this research branch;
+- do not change M2/M3/M4/M5/M6 classifications or `TASKS.md` from this research branch;
 - do not install Paperthin into the active JOENESS environment;
-- do not import Paperthin's full skill catalog, `.re0/` casebook topology, `sip` orchestration, automatic build loops, symlink/update model, or external-write behavior;
-- do not create synthetic eval volume merely to justify a candidate;
-- do not treat same-model or multi-agent agreement as proof;
-- do not interrupt or alter an active real-project pilot to make it fit this roadmap;
-- do not turn one RVR project, even with multiple incident contexts, directly into a global Core rule.
+- do not import Paperthin's full catalog, `.re0/` topology, `sip`, automatic loops, symlink/update model, or external-write behavior;
+- do not create synthetic eval volume to justify a candidate;
+- do not treat same-model/multi-agent agreement as proof;
+- do not turn one RVR project, even with multiple incident contexts, directly into a Core rule;
+- do not interpret Dororong research-stage completion as Dororong product completion.
 
-Paperthin concepts should be translated to mechanisms, not copied verbatim. If substantial Paperthin text or code is ever reused, preserve the MIT license notice/provenance required by the source license.
+Paperthin concepts are translated to mechanisms, not copied verbatim. Substantial copied source material would require MIT provenance/notice.
 
-## 3. Working hypothesis
+## 3. Evidence surfaces
 
-JOENESS and Paperthin overlap in philosophy but operate at different layers.
+Keep one document per stage/evidence purpose rather than duplicating state:
 
-- JOENESS owns workflow authority, scope, write safety, retry limits, evidence, completion, project/ticket/spec/visual/handoff boundaries.
-- Paperthin supplies low-level reflexes around request interpretation, fresh-context comprehension, validation independence, iteration learning, human re-entry, and perspective diversity.
+1. P1 source comparison: [`2026-08-27-paperthin-stage-p1-mechanism-gap-matrix.md`](2026-08-27-paperthin-stage-p1-mechanism-gap-matrix.md)
+2. RVR combined incident intake: [`2026-08-27-paperthin-p3-rvr-evidence-intake.md`](2026-08-27-paperthin-p3-rvr-evidence-intake.md)
+3. P2 closeout + P3 fit decision: [`2026-08-28-paperthin-stage-p2-p3-evidence-fit.md`](2026-08-28-paperthin-stage-p2-p3-evidence-fit.md)
+4. Independent Dororong checkpoint: `JOEWRKS/Doropet`, Draft PR [`#1`](https://github.com/JOEWRKS/Doropet/pull/1), head `cc04e67e8cc330d9afe0af607b66188527a42cd4`
 
-The adoption question is not “which Paperthin skills should JOENESS install?” but:
+The RVR intake still leaves source-report repo/commit/path, incident-time JOENESS identity, and Open Design plugin/runtime/log identity partly `UNVERIFIED`. Those boundaries remain in force.
 
-> Which failure reflex is actually missing from JOENESS, where is the lowest-cost layer that can express it, and what real evidence proves the change is worth its permanent complexity?
+## 4. Completed stages
 
-## 4. P1 watchlist — historical classifications remain unchanged until P3
+### P0 — Freeze and bind baselines — COMPLETE
 
-P1 source extraction is complete in [`2026-08-27-paperthin-stage-p1-mechanism-gap-matrix.md`](2026-08-27-paperthin-stage-p1-mechanism-gap-matrix.md), with corrected source-identity commit `dbdad2c0b9cfe3413e711ea467d8852924b0f649`.
-
-| Paperthin mechanism | P1 classification | Pre-P2 real-use signal now available |
-|---|---|---|
-| `readchk` — silent request-understanding check | `GAP_CANDIDATE` | **new lead** from Open Design user/tool-boundary mistranslation; exact user instruction + plugin manifest still unbound |
-| `shower` — fresh zero-context comprehension read | `GAP_CANDIDATE` | partial visual-review signal only |
-| `mandela` — validation leakage audit | `GAP_CANDIDATE` | **strong RVR lead**: implementation/mock/checks shared assumptions and circularly agreed |
-| `re0-memo` — complaint → pattern → gate | `ALREADY_COVERED` | **reopen in P3 only for lesson→execution transfer**; one-off→global-rule guard remains already covered |
-| `catchup` — human re-entry from live state | `GAP_CANDIDATE` | no material RVR signal |
-
-P1 classification is source-level history. P3 may narrow, split, park, or reject a mechanism based on real use; it does not rewrite what P1 observed in the pinned contracts.
-
-## 5. Prepared real-project evidence before Dororong review
-
-The combined RVR evidence intake is [`2026-08-27-paperthin-p3-rvr-evidence-intake.md`](2026-08-27-paperthin-p3-rvr-evidence-intake.md).
-
-It fingerprints the latest supplied integrated RVR report as:
-
-- attachment: `붙여넣은 마크다운(1)(7).md`
-- bytes: `99,068`
-- SHA-256: `79740b56627900fa5e67c1de6ad5dfffd7a847eee21e728dc6ec0d4adf72bd0c`
-
-The previous visual-only report fingerprint remains historical evidence that the first analysis existed before later appended execution incidents.
-
-The combined intake preserves two separate incident families:
-
-### 5.1 Visual verification / deployment family
-
-Observed leads:
-
-- structural/identity checks were widened into visual PASS;
-- candidate-visible strengths became post-hoc whole acceptance criteria;
-- `4×` native pixel scale was confused with acceptable physical size;
-- the `2×` fix improved physical size while violating pixel-grid density;
-- implementation/mock/checks shared assumptions and produced circular “evidence”;
-- exact ZIP/live identity proved exact deployment of wrong results, not quality;
-- a correct first failure report did not prevent later recurrence.
-
-### 5.2 Open Design tool-boundary / execution family
-
-Observed leads:
-
-- plugin/mode naming was treated as evidence about actual backing runtime and user-visible side effects;
-- recovery/re-registration was attempted before the plugin/runtime structure was fully diagnosed;
-- two Local Codex runs reportedly ended with `daemon_shutdown` and zero art outputs;
-- the broad execution structure was repeated after the first shutdown without a proven cause fix/new evidence;
-- `Open Design.exe -e ...` was used as though it were a Node.js runner, launching an Electron GUI/process tree and producing `EPIPE`;
-- delegation did not preserve the user's intended execution-effect boundary strongly enough.
-
-The exact source repo/commit/path, incident-time installed JOENESS identities, exact Open Design plugin/runtime revision, raw run logs, and exact user instruction remain `UNVERIFIED` in this research branch unless later bound from primary evidence.
-
-## 6. Cross-incident synthesis — hypothesis only
-
-The two incident families share a higher-level shape:
-
-> A procedural label or narrow successful step was widened into success of the user's actual goal/effect.
-
-Examples:
-
-- `visual-check invoked / image opened / tests passed` → incorrectly widened toward “visual acceptance verified”;
-- `plugin selected / Local Codex started / Cloud not selected` → incorrectly widened toward “user's tool/side-effect boundary satisfied”.
-
-This is meaningful because it recurs across **different failure contexts**, but both contexts are still inside one RVR project. Treat it as a cross-context signal, not yet a cross-project Core candidate.
-
-## 7. Roadmap stages
-
-### Stage P0 — Freeze and bind baselines — COMPLETE
-
-Purpose: ensure prior-art research cannot silently rewrite the system being evaluated.
-
-Pass state:
-
-- exact JOENESS and Paperthin baselines pinned;
+- exact JOENESS/Paperthin baselines pinned;
 - Core/public skills unchanged;
-- existing validation classifications unchanged.
+- existing release/validation classifications unchanged.
 
-### Stage P1 — Prior-art mechanism extraction — COMPLETE
+### P1 — Prior-art mechanism extraction — COMPLETE
 
-Deliverable: one compact mechanism-level gap matrix, not per-skill research files.
+Historical source-level classifications:
 
-Result:
+| Mechanism | P1 classification |
+|---|---|
+| `readchk` | `GAP_CANDIDATE` |
+| `shower` | `GAP_CANDIDATE` |
+| `mandela` | `GAP_CANDIDATE` |
+| `re0-memo` | `ALREADY_COVERED` |
+| `catchup` | `GAP_CANDIDATE` |
 
-- `ALREADY_COVERED=1` (`re0-memo` narrow P1 mechanism)
-- `GAP_CANDIDATE=4` (`readchk`, `shower`, `mandela`, `catchup`)
+These classifications describe contract overlap at the pinned source baseline; they are not adoption approvals.
 
-These are not adoption approvals.
+### P2 — Dororong live pilot — COMPLETE
 
-### Stage P2 — Finish Dororong live pilot without contamination — NEXT
+Research-stage result: `P2 COMPLETE`; product result: **Dororong M1 remains `PARTIAL`**.
 
-Purpose: obtain an independent end-to-end JOENESS observation before changing the harness in response to Paperthin/RVR.
+Verified remote checkpoint boundary:
 
-Actions:
+- body-outline scope `PASS`;
+- attempt-8 visual asset identity `PRESERVED` at checkpoint;
+- exact attempt-8 → checkpoint runtime-binary provenance `UNVERIFIED`;
+- closed-eye/state-animation/remaining interaction/non-interference acceptance `UNVERIFIED`;
+- Draft PR is open, unmerged, and explicitly not an M1-completion PR.
 
-1. Finish the existing Dororong M1 path under the already-installed Core v8 and current six skills.
-2. Keep Paperthin/RVR-derived candidate rules out of the live pilot unless the user independently asks for the same behavior.
-3. At closeout collect observed friction **and observed successes** relevant to:
-   - instruction/boundary misread or needless clarification;
-   - hidden-session-context dependence in spec/handoff;
-   - self-confirming validation;
-   - lesson recorded but not converted into later execution behavior;
-   - human re-entry/context loss;
-   - procedural/tool label being mistaken for actual effect;
-   - retry/side-effect handling if an unexpected external-process/tool failure naturally occurs.
-4. Do not manufacture any of these conditions to test the roadmap.
+Observed JOENESS-positive behavior includes:
 
-Pass:
+- GUI automation failure stayed separate from product verdict and manual current-PC observation was used instead;
+- real Windows failure overruled narrower static/repository success;
+- user's `좋다` closed the current body-outline stage while next-phase expression/animation feedback was deferred rather than retroactively rewriting the PASS;
+- partial/unverified layers were preserved;
+- binary hash mismatch stopped downstream work, triggered one bounded reconstruction, and remained `UNVERIFIED` when exact DLL provenance could not be reproduced;
+- no Paperthin/RVR-derived runtime rule was injected mid-pilot.
 
-- Dororong product verdict remains independent of this research;
-- evidence is bound to real transcript/artifact/runtime state;
-- no Paperthin/RVR-inspired JOENESS mutation occurred mid-pilot.
+Per-attempt installed Core/skill identity was not independently re-hashed inside Doropet, so P2 does not claim exact Core-v8 invocation proof for every runtime attempt.
 
-### Stage P3 — Evidence-to-pattern fit review
+### P3 — Evidence-to-pattern fit — COMPLETE
 
-Run once after P2. Inputs:
+Full decision: [`2026-08-28-paperthin-stage-p2-p3-evidence-fit.md`](2026-08-28-paperthin-stage-p2-p3-evidence-fit.md).
 
-1. P1 mechanism matrix;
-2. combined RVR evidence intake;
-3. Dororong closeout evidence;
-4. existing JOENESS source/contract evidence needed to distinguish missing rule from nonexecution.
+Paperthin-named mechanisms after real-use fit:
 
-For each P1 candidate classify the observed evidence:
+| Mechanism | P3 result | Disposition |
+|---|---|---|
+| `readchk` | `REAL_SINGLE_PROJECT_GAP` | `PARK`; no Core/public skill change |
+| `shower` | `THEORETICAL_ONLY` | `PARK` |
+| `mandela` | `REAL_SINGLE_PROJECT_GAP` | no standalone public skill; retain bounded validation-independence concern |
+| `re0-memo` one-off→rule guard | `ALREADY_COVERED_IN_PRACTICE` | no change |
+| `re0-memo` lesson→next-execution transfer | `REAL_SINGLE_PROJECT_GAP` | `PARK`; no standalone memo skill |
+| `catchup` | `THEORETICAL_ONLY` | `PARK` |
 
-- `REPEATED_COMMON_FAILURE` — repeated across distinct projects/contexts strongly enough to justify a reusable mechanism;
-- `REAL_SINGLE_PROJECT_GAP` — real and costly, but not yet cross-project;
-- `ALREADY_COVERED_IN_PRACTICE` — current JOENESS handled it adequately;
-- `THEORETICAL_ONLY` — no observed need;
-- `CONFLICTS_WITH_JOENESS` — would add ceremony, duplicate authority, or weaken safety.
+RVR-specific bounded seams after subtracting existing JOENESS:
 
-Also review these **bounded non-Paperthin seams** exposed by RVR:
+- **A+B visual acceptance frame + impacted-invariant recheck:** `REAL_SINGLE_PROJECT_GAP`; the only candidate advancing to P4.
+- **C+D tool backing-runtime/effect identity + delegated side-effect authority:** `REAL_SINGLE_PROJECT_GAP` with incomplete evidence identity; parked in the existing M4/plugin-conflict thread.
+- **E procedure-label success ≠ actual effect:** `ALREADY_COVERED_IN_PRACTICE` at Core level; RVR is nonexecution evidence and Dororong provides positive counter-evidence.
 
-A. `visual-check`: criteria-before-candidate freeze.  
-B. `visual-check`: change-impact invariant recheck.  
-C. tool/M4: logical tool identity → backing runtime/effect identity when side effects materially affect user authority.  
-D. tool/M4/ticket: delegated authority preserves material tool/side-effect constraints without boilerplate.  
-E. maintenance: procedure-label success must not substitute for actual user-goal/effect evidence.
+P3 outcome:
 
-P3 must first ask for each RVR issue:
+- Core candidates: `0`
+- new public-skill candidates: `0`
+- installer/manifest candidates: `0`
+- P4 survivors: `1`
 
-> Was this already required by the active contract and merely not executed?
+## 5. P3 ↔ M4 boundary
 
-Only the residual behavior after that subtraction is a true change candidate.
+The Open Design incident remains useful real-project evidence for the existing M4 external-plugin contract-conflict scope:
 
-Adoption gates:
-
-- **Core change:** only repeated cross-project common failure or material cross-project safety defect.
-- **Existing skill change:** at least one real failure at that skill boundary plus evidence the bounded fix generalizes.
-- **New public skill:** unique recurring user value that cannot fit an existing skill without mixing responsibilities.
-- **Internal policy/reference:** validation/maintenance principle needing no user-facing routing.
-- **No change:** default when existing rules are sufficient or evidence is insufficient.
-
-Pass:
-
-- advance no more than three total candidates;
-- every advancing candidate names the exact observed gap it closes;
-- every candidate states what existing JOENESS already covered;
-- “Paperthin has a skill for it” or “the incident was expensive” is never itself an adoption reason.
-
-### Stage P3-M4 cross-thread — Open Design plugin evidence
-
-The Open Design incident also belongs to the existing JOENESS validation-debt roadmap's M4 external-plugin contract-conflict scope.
-
-This branch does **not** change M4 status or `TASKS.md`. When M4 resumes, use the combined RVR intake as an evidence lead for:
-
-- plugin logical identity versus backing runtime/effect identity;
-- installed-plugin contract conflict before recovery/re-registration;
-- delegation preserving tool/side-effect authority;
+- logical plugin/mode identity versus backing runtime/effect identity;
+- recovery/re-registration before contract diagnosis;
+- delegation preserving user tool/side-effect authority;
 - retry behavior after `daemon_shutdown` or unexpected GUI/process side effects.
 
-Do not call the incident an exact M4 PASS/FAIL until the evidence identity required for that claim is actually bound.
+This research branch does **not** change M4 status. Do not call the incident an exact M4 PASS/FAIL until the missing incident-time identities are bound or independent evidence reproduces the same gap.
 
-### Stage P4 — Choose the lowest-cost integration form
+## 6. P4 — Choose lowest-cost integration form — NEXT
 
-For each P3 survivor choose exactly one:
+P4 may design **one candidate only**:
 
-1. `REJECT`
-2. `PARK`
-3. `REFERENCE`
-4. `EXISTING_SKILL_TWEAK`
-5. `NEW_CONDITIONAL_SKILL`
-6. `CORE_CANDIDATE`
+> `$visual-check` acceptance-frame + materially impacted-invariant discipline.
 
-Default preference is the lowest numbered form that fully closes the observed gap.
+The candidate may become `PARK` if a compact non-ceremonial delta cannot be stated. The maximum allowed implementation form entering P4 is `EXISTING_SKILL_TWEAK`; it is **not** a Core or new-skill candidate.
 
-Before implementation, write a bounded design covering exact behavior delta, trigger/non-trigger, authority, observable acceptance, stop/failure behavior, expected files, and non-goals.
+Before touching runtime files, P4 must answer:
 
-One candidate per implementation branch unless two changes are mechanically inseparable.
+1. What exact existing `$visual-check` behavior changes?
+2. What triggers it, and what ordinary visual work does **not** trigger it?
+3. Which sourced acceptance axes/invariants must be frozen before candidate interpretation?
+4. After a fix, how are only **materially impacted** invariants selected for recheck?
+5. What falsifiable observation proves the behavior occurred?
+6. Why current `approved-reference`, `durable-evidence`, and `concrete-defect` text cannot already express the required behavior without modification?
+7. What independent outside truth would validate the claimed practical benefit?
+8. Which exact files would change, and which files are explicitly out of scope?
 
-### Stage P5 — Bounded candidate validation
+Non-goals:
+
+- no universal preflight checklist;
+- no rerun-all-after-every-edit rule;
+- no RVR Gate 0–8 or nine-state taxonomy import;
+- no new public visual skill;
+- no bundled Paperthin mechanism.
+
+P4 output should be one bounded design/decision. If `PARK`, stop this adoption track and return to real-use observation.
+
+## 7. P5 — Bounded candidate validation
+
+Run only if P4 approves a concrete change.
 
 Use only checks relevant to the claimed delta:
 
-- static contract/trigger assertions when routing text changes;
+- static contract/trigger assertions for routing/contract text;
 - deterministic repository regression once after the candidate is internally complete;
-- fresh-context behavioral smoke only for claimed context-isolation behavior;
-- real-project evidence when practical behavior is claimed;
-- installer lifecycle only when install/manifest/managed identity changes;
-- visual/runtime/process acceptance only when those surfaces are affected.
+- fresh-context smoke only if the change claims context isolation;
+- actual project evidence where practical behavior is claimed;
+- visual/runtime evidence only at the affected layer.
 
-For every new eval ask:
+For any new evaluation ask:
 
 > What independent outside truth enters this validation?
 
-If the answer is “none”, the result may be a contract check but not behavioral proof.
+If none enters, the result may prove contract consistency but not behavioral value.
 
-Do not automatically run broad A/B, generational retries, reviewer panels, or synthetic evals that share the same ground truth.
+Do not reopen broad A/B, repeated generations, reviewer panels, or self-confirming eval volume.
 
-### Stage P6 — Adopt one change at a time
+## 8. P6 — Adopt one change at a time
 
-For each accepted candidate:
+Only after P5 passes at the claimed layer:
 
-1. change only approved files;
-2. keep Core/catalog/manifest unchanged unless required by the approved integration form;
-3. preserve provenance when source material is substantially reused;
-4. run required gates;
-5. push feature branch;
-6. PR with exact evidence boundary;
-7. merge after hosted CI;
-8. verify post-merge CI;
-9. update personal install only if installed artifact changed;
-10. sync `TASKS.md` only after the real state exists.
+1. update approved files only;
+2. preserve Core/catalog/manifest unless the approved form explicitly requires otherwise;
+3. run required deterministic gates;
+4. push one feature branch;
+5. PR with exact evidence boundary;
+6. merge only after hosted CI passes;
+7. verify post-merge CI;
+8. update personal installation only if an installed artifact changed;
+9. sync `TASKS.md` only after the real state exists.
 
-Do not bundle another idea because the first one passed.
+No second prior-art idea rides the same adoption.
 
-### Stage P7 — Freeze and real-use observation
+## 9. P7 — Freeze and real-use observation
 
-After adoption:
+After any adoption:
 
-1. freeze the change;
-2. use JOENESS in real projects;
-3. collect only outcome-changing feedback;
-4. distinguish a specific complaint from a reusable pattern;
-5. reopen only on repeated evidence or material safety defect.
+- freeze the change;
+- use JOENESS in real projects;
+- collect outcome-changing evidence only;
+- distinguish one complaint from a reusable pattern;
+- reopen only for repeated evidence or a material safety defect.
 
-## 8. Evidence ledger shape
-
-Use existing evidence surfaces where possible. Do not create a new document per thought.
-
-| Field | Meaning |
-|---|---|
-| source mechanism | exact Paperthin file/commit or exact JOENESS seam |
-| JOENESS overlap | current Core/skill/contract that already covers part of it |
-| observed gap | exact real-project/transcript/evidence pointer |
-| identity status | exact / partial / unverified source/runtime/revision binding |
-| candidate form | reject / park / reference / skill tweak / new skill / Core |
-| claimed benefit | one falsifiable behavior change |
-| proof surface | what can actually prove that claim |
-| result | pass / fail / unverified / no-change |
-| boundary | what this evidence does not prove |
-
-## 9. Decision principles
+## 10. Decision principles
 
 1. **No-change is first-class.** Prior art/incidents can validate the current design without creating work.
 2. **Mechanism over branding.** Tool/plugin/skill names do not prove execution semantics.
-3. **Current artifact/state beats narrative.** Actual visual/runtime/process effects outrank descriptions of what was supposed to happen within their evidence layer.
-4. **One layer does not prove another.** Build/deploy/process/visual/user-acceptance/tool-contract evidence stay separate.
-5. **Fresh context is a tool, not automatic proof.** Use it only when context contamination is the actual failure mode.
-6. **One symptom is evidence, not a global rule.** Cross-context evidence inside one project is stronger than one symptom but still weaker than cross-project repetition.
-7. **Independent truth matters.** Self-generated mocks, expected values, or implementation-mirroring tests cannot by themselves prove external correctness.
-8. **Delegation does not expand authority.** Subagents inherit the relevant user/project tool/write/side-effect boundary.
-9. **Retry permission is not diagnosis permission.** A user-authorized retry does not erase existing evidence-based retry/stop constraints.
-10. **Restraint is measurable.** If P3 finds existing rules sufficient, the correct result is better enforcement/observation or no change, not a new rule.
+3. **Current artifact/state beats narrative.** Actual visual/runtime/process effects control their own evidence layer.
+4. **One layer does not prove another.** Build/deploy/process/visual/user-acceptance/tool-contract evidence remain separate.
+5. **Fresh context is a tool, not automatic proof.** Use it only for an observed context-contamination failure.
+6. **One symptom is not a global rule.** Cross-context evidence within one project still falls short of cross-project repetition.
+7. **Independent truth matters.** Self-generated mocks/expected values/implementation-mirroring checks do not prove external correctness by themselves.
+8. **Delegation does not expand authority.** Subagents inherit relevant user/project tool/write/side-effect boundaries.
+9. **Retry permission is not diagnosis permission.** User-authorized retry does not erase evidence-based stop constraints.
+10. **Positive evidence matters too.** Dororong behavior that current JOENESS handled correctly is evidence against unnecessary new rules.
+11. **Restraint is measurable.** If a bounded delta cannot be justified, P4 should park it and leave JOENESS unchanged.
 
-## 10. Immediate next action
+## 11. Immediate next action
 
-Completed before Dororong review:
+Do **not** start implementation yet.
 
-1. P0 baselines frozen.
-2. P1 mechanism extraction complete and source identity corrected.
-3. RVR visual-verification incident registered.
-4. Open Design tool-boundary incident integrated into the same evidence intake.
-5. P3 now has explicit bounded questions for visual criteria/invariants, validation independence, lesson transfer, request/tool-boundary understanding, tool execution identity, delegation, and retry nonexecution.
-6. M4 relation recorded without changing M4 status or `TASKS.md`.
+Next action is Stage P4 only:
 
-Next:
+1. inspect current `$visual-check` plus `approved-reference`, `durable-evidence`, and `concrete-defect` at the pinned JOENESS baseline/current main;
+2. write the smallest candidate delta for pre-candidate acceptance framing + materially impacted invariant recheck;
+3. decide `PARK` versus `EXISTING_SKILL_TWEAK` before changing any runtime file.
 
-1. let Dororong M1 reach its existing completion / partial / blocked boundary under unchanged installed JOENESS;
-2. collect Dororong closeout evidence without injecting any candidate rule from this roadmap;
-3. run Stage P3 once using P1 + combined RVR + Dororong evidence;
-4. separately carry the Open Design contract-conflict evidence lead into M4 when that existing milestone resumes;
-5. advance zero to at most three candidates to bounded design.
-
-Until that review, JOENESS Core v8 and the six public skills remain frozen.
+Until that decision, Core v8, six public skills, installer/manifest, and `TASKS.md` remain frozen. Doropet PR #1 remains a separate unmerged product checkpoint.
