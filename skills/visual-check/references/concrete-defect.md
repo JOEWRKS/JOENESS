@@ -4,6 +4,8 @@ Bind the original failure to the exact named target and state. Add only protecte
 
 When the user rejects an observable property on an exact target and state, withdraw the prior PASS for that property, preserve the historical verdict, and recheck the corrected exact target before a new verdict. Keep unrelated property verdicts and unresolved artifact identity separate.
 
+When the correction mechanism materially affects another required acceptance invariant, recheck that impacted invariant with the rejected property before a new verdict. Do not recheck unrelated or unaffected properties solely because a correction occurred.
+
 Use one causal hypothesis and the minimum evidence needed to test it. If the request authorizes inspection or diagnosis only, reproduce and inspect; do not change artifacts. Only with fix authority, use the minimum coherent change set and record why inseparable edits belong together. Retry identity is the causal mechanism plus expected observation, not a tool or command name.
 
 A rejected hypothesis requires new evidence; without it, do not repeat the hypothesis or method.
