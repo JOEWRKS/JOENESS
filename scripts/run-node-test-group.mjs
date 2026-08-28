@@ -26,6 +26,7 @@ export const TEST_GROUPS = Object.freeze({
     "tests/ticket-evaluator-provenance.tests.mjs",
     "tests/ticket-m1b-fixture.tests.mjs",
     "tests/ticket-verdict.tests.mjs",
+    "tests/visual-check-acceptance-invariants.tests.mjs",
   ]),
   "historical-integrity": Object.freeze([
     "tests/joeness-m4-historical-integrity.tests.mjs",
