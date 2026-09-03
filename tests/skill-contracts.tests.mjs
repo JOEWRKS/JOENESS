@@ -483,6 +483,9 @@ test('design vNext names the shared capability stack without delegating design a
   assert.match(routing, /Open Design.*excluded/is);
   assert.match(routing, /do not.*invoke.*all.*(?:tools|capabilities)/is);
 
+  const productBoundary = routing.match(/^If a visual proposal changes[^\r\n]*then resume `\$design` from the resolved product decision\.$/m)?.[0];
+  assert.ok(productBoundary, 'missing product-boundary routing paragraph');
+
   for (const [concept, requirement] of [
     ['behavior', /\bproduct behavior\b/i],
     ['flow', /\bflow\b/i],
@@ -494,7 +497,7 @@ test('design vNext names the shared capability stack without delegating design a
     ['product definition', /\bproduct definition\b/i],
     ['resume', /\bresume\b/i],
   ]) {
-    assert.match(routing, requirement, `routing is missing product-boundary ${concept}`);
+    assert.match(productBoundary, requirement, `product-boundary paragraph is missing ${concept}`);
   }
 
   assert.match(routing, /same visual direction.*(?:twice|two).*no.*third.*polish.*S1.*S2/is);
