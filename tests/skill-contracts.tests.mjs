@@ -436,6 +436,37 @@ test('design vNext routes by stage and defines sourced Visual Claims before mate
   assert.match(design, /reversible bounded draft.*pre-draft.*decision\/approval question.*does not waive.*post-proof.*user visual-acceptance checkpoint.*material keyframe.*materially distinct final variant.*signature motion/is);
 });
 
+test('design vNext names the shared capability stack without delegating design authority', () => {
+  const design = readRoleFile('design', 'SKILL.md');
+
+  for (const name of [
+    'UI UX Pro Max',
+    'Apple Design',
+    'Refero',
+    'oh-my-design',
+    'Impeccable',
+    'Hallmark',
+    'Watermelon',
+    'Componentry',
+    'Cult UI',
+    'Anime.js',
+    '$visual-check',
+  ]) {
+    assert.match(design, new RegExp(name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i'));
+  }
+
+  assert.match(design, /Impeccable.*(?:critique|layout|typeset|polish).*material.*user.*(?:gate|approval)/is);
+  assert.match(design, /Hallmark.*audit.*(?:study).*not.*(?:automatic|auto).*redesign/is);
+  assert.match(design, /oh-my-design.*reference.*not.*full.*orchestration/is);
+  assert.match(design, /Watermelon.*product.*utility.*Componentry.*implementation.*Cult UI.*selective/is);
+  assert.match(design, /Anime\.js.*project runtime.*not.*global/is);
+  assert.match(design, /Open Design.*excluded/is);
+  assert.match(design, /do not.*invoke.*all.*(?:tools|capabilities)/is);
+  assert.match(design, /product.*(?:behavior|flow|route|data|role|policy).*product definition.*resume/is);
+  assert.match(design, /same visual direction.*(?:twice|two).*no.*third.*polish.*S1.*S2/is);
+  assert.match(design, /already covered.*project-specific.*(?:repeated|common).*missing mechanism/is);
+});
+
 test('visual-check binds one hypothesis to the exact observed state', () => {
   const visualCheck = readRoleFile('visual-check', 'SKILL.md');
   const metadata = readRoleFile('visual-check', 'agents', 'openai.yaml');

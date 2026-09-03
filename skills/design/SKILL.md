@@ -58,6 +58,28 @@ Before material visual rendering or output, each Visual Claim binds `source`, `c
 
 `ㄱㄱ`, `진행`, `구현해`, or equivalent continuation authorization allows the next action inside current authority; it is not exact rendered visual acceptance unless the context explicitly makes that acceptance clear.
 
+## Design capability routing
+
+Choose capabilities from the current stage/problem; do not invoke all available design tools by default. Capability availability or successful execution is not authority or design success.
+
+- **UI UX Pro Max** — advisory design-system/UX/stack guidance when direction or a domain is genuinely unspecified.
+- **Apple Design** — advisory motion, spatial continuity, interaction feel, typography/material, and accessibility guidance when relevant.
+- **Refero** — real-world reference relationship evidence; reference source, not project authority.
+- **oh-my-design** — DESIGN.md/reference/anti-slop evidence source by default. Do not invoke/install its full orchestration bundle as a normal `$design` subworkflow.
+- **Impeccable** — rendered critique, layout, typeset, polish/refine, and candidate variations under existing authority. A materially new direction or materially distinct final variant requires the normal user gate; it may not silently rewrite product truth or project `DESIGN.md`.
+- **Hallmark** — independent anti-slop `audit` by default; `study` only when reference analysis helps. Do not automatically run build/redesign or write/lock project design.
+- **Watermelon** — on-demand product/utility primitive source when an already-defined UI need can be satisfied without importing a conflicting visual language.
+- **Componentry** — on-demand advanced interaction implementation/pattern research; do not assemble signature experiences as a component showcase.
+- **Cult UI OSS** — on-demand selective component/effect source after the need is defined.
+- **Anime.js or another motion library** — project runtime only. Route to the runtime for an actual motion problem; do not install it globally and do not add motion because a runtime exists.
+- **Figma / browser / image generation / optimize-web-animations** — use only when the current stage and evidence need them; retain current write/safety rules.
+- **$visual-check** — verifier of exact visual results, never a substitute art director.
+- **Open Design** — excluded from JOENESS design routing.
+
+If a visual proposal changes product behavior, flow, route, data meaning, role, durable policy, or state semantics, stop the visual decision at that boundary, resolve it through the current product/UX authority (including `joewrks-product-definition` when present), then resume `$design` from the resolved product decision.
+
+If the same visual direction is materially rejected twice, do not make a third local polish pass by default: stop dependent expansion, return to S1/S2, compare the exact failed evidence against project design/references, and reconsider composition/object ownership rather than only CSS values. Repeated project failure becomes a JOENESS change candidate only after classifying it as already covered nonexecution, project-specific, or a repeated/common missing mechanism.
+
 ## Visual defect boundary
 
 Use this skill for new UI/UX intent, including subjective first-draft feedback. Route a concrete mismatch against an approved state, state-dependent rendering failure, or visual regression to `$visual-check`. When both intent and verification change, settle the intended design first, then verify the implementation as a separate responsibility.
