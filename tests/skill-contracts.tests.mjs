@@ -16,6 +16,7 @@ const BLIND_IDENTITY_CASES = path.join(ROOT, 'evals', 'skill-contracts', 'cases-
 const VARIANT_STATE_CASES = path.join(ROOT, 'evals', 'skill-contracts', 'cases-v12.json');
 const TYPED_HANDOFF_CASES = path.join(ROOT, 'evals', 'skill-contracts', 'cases-v13.json');
 const SCOPED_OBSERVATION_CASES = path.join(ROOT, 'evals', 'skill-contracts', 'cases-v14.json');
+const DESIGN_TEMPLATE_PATH = path.join(ROOT, 'skills', 'design', 'templates', 'DESIGN.md');
 
 const rolePaths = {
   project: path.join(ROOT, 'skills', 'project'),
@@ -367,6 +368,44 @@ test('design owns intent while visual-check owns concrete regressions', () => {
 test('design excludes layout-unaffected copy and literal-value fixes', () => {
   const design = readRoleFile('design', 'SKILL.md');
   assert.match(design, /do not use.*layout-unaffected one-line copy or literal-value changes/is);
+});
+
+test('design vNext binds one project DESIGN.md lifecycle to a non-aesthetic canonical seed', () => {
+  const design = readRoleFile('design', 'SKILL.md');
+  assert.ok(existsSync(DESIGN_TEMPLATE_PATH), 'missing skills/design/templates/DESIGN.md');
+  const template = readFileSync(DESIGN_TEMPLATE_PATH, 'utf8');
+
+  assert.match(design, /project[- ]root `?DESIGN\.md`?.*single.*durable visual/is);
+  assert.match(design, /ABSENT.*DRAFT.*APPROVED/is);
+  assert.match(design, /DRAFT.*(?:not|never).*approved authority/is);
+  assert.match(design, /material.*(?:revision|amendment).*user.*approval/is);
+  assert.match(design, /temporary.*brief.*not.*durable visual rule/is);
+  assert.match(design, /approved exact visual.*(?:evidence|preservation target).*not.*project-wide.*rule/is);
+
+  for (const heading of [
+    'Visual North Star',
+    'Experience / Brand Character',
+    'Durable Visual Principles',
+    'Surface Modes',
+    'Typography',
+    'Color / Surface Semantics',
+    'Composition / Spatial Hierarchy',
+    'Imagery / Artwork',
+    'Component / Control Grammar',
+    'Motion / Interaction',
+    'Responsive Translation',
+    'Accessibility / Legibility',
+    'Project-specific Anti-patterns',
+    'Reference Relationships',
+    'Visual Acceptance Anchors',
+    'Amendment Rule',
+  ]) {
+    assert.match(template, new RegExp(`^## .*${heading.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`, 'mi'));
+  }
+
+  assert.match(template, /^\*\*Status:\*\* DRAFT$/m);
+  assert.match(template, /^\*\*Revision:\*\* 1$/m);
+  assert.doesNotMatch(template, /Editorial Biopharma|Quiet Luxury|warm mineral|neon lime|glassmorphism|BIO\/02/i);
 });
 
 test('visual-check binds one hypothesis to the exact observed state', () => {
