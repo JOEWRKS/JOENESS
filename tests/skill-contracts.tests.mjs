@@ -482,7 +482,21 @@ test('design vNext names the shared capability stack without delegating design a
   assert.match(routing, /Anime\.js.*project runtime.*not.*global/is);
   assert.match(routing, /Open Design.*excluded/is);
   assert.match(routing, /do not.*invoke.*all.*(?:tools|capabilities)/is);
-  assert.match(routing, /product.*behavior.*flow.*route.*data.*role.*policy.*product definition.*resume/is);
+
+  for (const [concept, requirement] of [
+    ['behavior', /\bproduct behavior\b/i],
+    ['flow', /\bflow\b/i],
+    ['route', /\broute\b/i],
+    ['data meaning', /\bdata meaning\b/i],
+    ['role', /\brole\b/i],
+    ['durable policy', /\bdurable policy\b/i],
+    ['state semantics', /\bstate semantics\b/i],
+    ['product definition', /\bproduct definition\b/i],
+    ['resume', /\bresume\b/i],
+  ]) {
+    assert.match(routing, requirement, `routing is missing product-boundary ${concept}`);
+  }
+
   assert.match(routing, /same visual direction.*(?:twice|two).*no.*third.*polish.*S1.*S2/is);
   assert.match(routing, /already covered.*project-specific.*(?:repeated|common).*missing mechanism/is);
 });
