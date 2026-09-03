@@ -122,21 +122,27 @@ const EXPECTED_DESIGN_SKILL = {
   activationPolicy: 'hybrid',
   sourceDependencies: ['ui-ux-pro-max', 'apple-design'],
   intentionalDifferences: [
-    'Local activation and routing contract.',
-    'Local OpenAI product metadata.',
+    'Local stage-aware orchestration and project design contract.',
+    'Local OpenAI metadata and DESIGN.md template.',
   ],
   validatorSha256: '5347a0a09cfb546bba1c0d1a30dae0a233d9a05f57bd4e7877155c588bcdabf7',
   files: [
     {
       localPath: 'skills/design/SKILL.md',
-      bytes: 5746,
-      sha256: '9c8090f908174f3f03a1727f8b484dda65c7320c8b2bf9035de06b7ca16df782',
+      bytes: 13982,
+      sha256: 'c23e10f47be3852820d0f1e5080d981478e6c103480c8d7a0f0ca1f5c7edc535',
       exactUpstreamCopy: false,
     },
     {
       localPath: 'skills/design/agents/openai.yaml',
-      bytes: 389,
-      sha256: '84f5e052fcb403f3f2675fc16d25e60197defcc07128c383f8181e34a886a17a',
+      bytes: 515,
+      sha256: 'bdf38986c6e079f89be1e993a9fda02d9d41eb234d8374c0b6c96168a6c226a6',
+      exactUpstreamCopy: false,
+    },
+    {
+      localPath: 'skills/design/templates/DESIGN.md',
+      bytes: 2781,
+      sha256: '21a67e4bcaae510c2f9bbc9e028ca62a846ac6398c98e17b9c5238ad87e19b80',
       exactUpstreamCopy: false,
     },
   ],

@@ -56,6 +56,8 @@ JOENESS는 Windows용 Codex 작업환경입니다. 프로젝트 맥락, 중요 �
 
 UI UX Pro Max와 Apple Design은 JOENESS 설치 때 함께 복사되는 `$design` 내부 참고자료입니다. 별도 호출 스킬로 노출되지 않습니다.
 
+`$design`은 디자인 작업 전에 프로젝트 루트의 `DESIGN.md`가 있는지 확인하고, 필요한 경우 JOENESS의 공용 틀에서 프로젝트 전용 DRAFT를 제안합니다. 새 방향·정적 시안·움직임 증명·실제 구현·반응형 검증 중 현재 단계에 필요한 디자인 기능만 골라 사용하며, 중요한 시안이나 시그니처 움직임은 내부 검증과 사용자 시각 승인을 구분합니다. 외부 디자인 도구의 결과가 프로젝트 디자인 규칙이나 제품 동작을 자동으로 바꾸지는 않습니다.
+
 ### 외부 플러그인
 
 Figma, Superpowers, Ponytail은 JOENESS와 **별도로 설치**하는 외부 플러그인입니다. JOENESS는 이 플러그인의 설치·활성화 설정을 바꾸지 않습니다.
@@ -135,6 +137,8 @@ Use `$project` when a new long-running project lacks a plan, and `$ticket` for a
 Automatic selection is **model routing**, not a deterministic hook. JOENESS Core keeps the visual-result and specification-delivery conditions visible to reduce misses. To require a particular skill, include its call such as `$visual-check` or `$spec` in the request.
 
 UI UX Pro Max and Apple Design are bundled with every JOENESS installation as internal `$design` references. They are not exposed as separate callable skills.
+
+`$design` checks for a project-root `DESIGN.md` before design work and, when durable direction is needed, can propose a project-specific DRAFT from the JOENESS seed structure. It routes only the design capabilities needed for the current stage—direction, static proof, motion proof, production, responsive translation, or acceptance—and keeps internal verification separate from user visual acceptance for material keyframes and signature motion. External design-tool output cannot silently change project design rules or product behavior.
 
 ### External plugins
 

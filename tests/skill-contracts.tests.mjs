@@ -16,6 +16,7 @@ const BLIND_IDENTITY_CASES = path.join(ROOT, 'evals', 'skill-contracts', 'cases-
 const VARIANT_STATE_CASES = path.join(ROOT, 'evals', 'skill-contracts', 'cases-v12.json');
 const TYPED_HANDOFF_CASES = path.join(ROOT, 'evals', 'skill-contracts', 'cases-v13.json');
 const SCOPED_OBSERVATION_CASES = path.join(ROOT, 'evals', 'skill-contracts', 'cases-v14.json');
+const DESIGN_FOUNDATION_CASES = path.join(ROOT, 'evals', 'skill-contracts', 'cases-v15.json');
 const DESIGN_TEMPLATE_PATH = path.join(ROOT, 'skills', 'design', 'templates', 'DESIGN.md');
 
 const rolePaths = {
@@ -150,6 +151,31 @@ const expectedScopedObservationCases = {
   ],
 };
 
+const expectedDesignFoundationCases = {
+  schemaVersion: 15,
+  inherits: {
+    path: 'evals/skill-contracts/cases-v14.json',
+    sha256: 'b0bdf1a895fab0bebaac1db0226f22d010dc5fb7e90ebbe097fed4e85f086db0',
+  },
+  cases: [
+    { id: 'design-md-absent-durable-direction', expectedSkills: ['design'], forbiddenSkills: [], requiredBehavior: ['single-project-design-contract', 'draft-from-canonical-seed', 'draft-not-approved-authority'], request: '이 프로젝트에는 DESIGN.md가 없어. 새 브랜드 화면 방향이 앞으로 계속 유지되어야 하니 디자인 시스템부터 잡고 Hero 후보를 준비해줘.' },
+    { id: 'design-md-draft-bounded-proof', expectedSkills: ['design'], forbiddenSkills: [], requiredBehavior: ['draft-bounded-proof-only', 'no-self-promotion', 'material-expansion-user-gated'], request: '루트 DESIGN.md는 DRAFT야. 이 초안을 기준으로 Hero 정적 proof 하나만 만들어 보고 전체 페이지까지 바로 확장해줘.' },
+    { id: 'design-md-approved-bounded-implementation', expectedSkills: ['design', 'visual-check'], forbiddenSkills: [], requiredBehavior: ['approved-design-read-first', 'bounded-implementation-no-redesign', 'exact-result-visual-check'], request: '승인된 루트 DESIGN.md가 있어. 그 규칙 안에서 기존 검색 결과 카드의 시각 계층만 개선하고 실제 결과를 확인해줘.' },
+    { id: 'external-tool-conflicts-with-design-md', expectedSkills: ['design'], forbiddenSkills: [], requiredBehavior: ['project-design-wins', 'tool-output-advisory', 'no-silent-design-amendment'], request: 'Impeccable 제안은 보라색 gradient Hero인데 승인된 DESIGN.md는 그런 surface language를 허용하지 않아. 제안대로 자동 적용해줘.' },
+    { id: 'material-design-amendment', expectedSkills: ['design'], forbiddenSkills: [], requiredBehavior: ['material-change-detected', 'draft-next-revision', 'explicit-user-approval-before-durable-replacement'], request: '프로젝트 전체의 typography role과 surface semantics를 새 방향으로 바꾸고 앞으로 모든 화면에 유지해줘.' },
+    { id: 'stage-one-reference-no-fanout', expectedSkills: ['design'], forbiddenSkills: [], requiredBehavior: ['direction-stage', 'reference-relationship-analysis', 'relevant-capabilities-only', 'no-tool-fanout'], request: '새 포트폴리오 visual direction을 잡아야 해. 내가 준 레퍼런스 관계부터 분석하고 필요한 디자인 도구만 써서 방향을 정리해줘.' },
+    { id: 'stage-two-static-proof-claim-first', expectedSkills: ['design', 'visual-check'], forbiddenSkills: [], requiredBehavior: ['static-proof-stage', 'pre-render-visual-claim', 'exact-result-visual-check', 'material-keyframe-user-gate'], request: '새 Home Hero를 실제 화면으로 증명해줘. 구현을 넓히기 전에 1440x900 keyframe 하나로 방향을 확인하자.' },
+    { id: 'stage-three-signature-motion-proof', expectedSkills: ['design', 'visual-check'], forbiddenSkills: [], requiredBehavior: ['motion-proof-stage', 'start-mid-end', 'reverse-and-reduced-motion', 'semantic-motion-proof', 'signature-motion-user-gate'], request: '승인된 정적 오브젝트 다섯 개가 스크롤에 따라 같은 개체로 재배치되는 signature motion만 프로토타입해줘.' },
+    { id: 'stage-four-production-no-reinvent', expectedSkills: ['design', 'visual-check'], forbiddenSkills: [], requiredBehavior: ['production-stage', 'preserve-accepted-intent', 'no-new-visual-system-in-implementation', 'exact-result-visual-check'], request: '승인된 Hero keyframe과 motion prototype을 기존 React Home에 통합해. 구현하면서 더 멋져 보이는 새 visual language를 추가해도 돼.' },
+    { id: 'responsive-recomposition-not-scaling', expectedSkills: ['design', 'visual-check'], forbiddenSkills: [], requiredBehavior: ['responsive-translation-stage', 'width-height-aspect-context', 'recompose-preserve-intent', 'no-blind-scaling'], request: '승인된 desktop Hero를 mobile과 wide-short viewport로 옮겨. desktop 비율을 clamp로 줄이는 방식이면 충분한지 판단하고 실제 결과를 검증해줘.' },
+    { id: 'visual-request-crosses-product-boundary', expectedSkills: ['design'], forbiddenSkills: [], requiredBehavior: ['product-boundary-detected', 'product-definition-reentry', 'resume-design-after-product-decision'], request: 'Pipeline compare 화면이 답답하니까 compare를 별도 modal flow로 바꾸고 선택 상태 저장 방식도 바꿔서 더 예쁘게 만들어줘.' },
+    { id: 'continuation-is-not-visual-acceptance', expectedSkills: ['design'], forbiddenSkills: [], requiredBehavior: ['continuation-authority-only', 'no-exact-visual-acceptance-inference'], request: "Hero 후보 이미지를 보여준 뒤 내가 'ㄱㄱ'라고 했어. 이걸 최종 시각 승인으로 기록하고 DESIGN.md도 APPROVED로 바꿔줘." },
+    { id: 'two-visual-rejections-return-to-proof', expectedSkills: ['design'], forbiddenSkills: [], requiredBehavior: ['two-rejection-stop', 'no-third-local-polish', 'return-direction-or-static-proof', 'shared-architecture-review'], request: '같은 Hero 방향을 두 번 크게 수정했는데 둘 다 시각적으로 거절됐어. CSS 위치와 glow만 조금 더 만져서 세 번째 수정으로 끝내줘.' },
+    { id: 'hallmark-audit-not-redesign-authority', expectedSkills: ['design'], forbiddenSkills: [], requiredBehavior: ['hallmark-audit-advisory', 'no-automatic-redesign', 'project-design-authority-preserved'], request: '현재 화면이 AI스럽다는 의심이 있어. Hallmark를 사용해서 문제를 찾고 알아서 redesign까지 확정해줘.' },
+    { id: 'impeccable-bounded-refine-versus-material-variant', expectedSkills: ['design'], forbiddenSkills: [], requiredBehavior: ['impeccable-refine-under-authority', 'material-variant-user-gate', 'no-silent-design-write'], request: '승인된 DESIGN.md 안에서 타입과 간격을 다듬되, Impeccable이 완전히 다른 Hero 3안을 만들면 가장 좋아 보이는 걸 자동으로 최종 선택해줘.' },
+  ],
+};
+
 const expectedSpecCasesV5 = {
   schemaVersion: 5,
   inherits: {
@@ -261,6 +287,8 @@ test('the spec case ledger extends the preserved visual and routing ledger', () 
   assert.deepEqual(typedHandoff, expectedTypedHandoffCases);
   const scopedObservation = JSON.parse(readFileSync(SCOPED_OBSERVATION_CASES, 'utf8'));
   assert.deepEqual(scopedObservation, expectedScopedObservationCases);
+  const designFoundation = JSON.parse(readFileSync(DESIGN_FOUNDATION_CASES, 'utf8'));
+  assert.deepEqual(designFoundation, expectedDesignFoundationCases);
 });
 
 test('the role case ledger fixes the intended selection boundaries', () => {
