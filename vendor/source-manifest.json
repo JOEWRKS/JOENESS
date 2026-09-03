@@ -28,7 +28,7 @@
       "version": 1,
       "artifact": {"path":"evals/design-frontend/router-hybrid-v1.json","sha256":"10ddbd6d14bf3153e53561314245607d36c7d950af231585a8b5ae78fc590554"},
       "collector": {"path":"evals/design-frontend/collect-hybrid-router-evaluation.mjs","sha256":"24e04d090c5c7535718878d0e9cd40a2c8324e1bd52c362ba292e68585e9ac12"},
-      "validator": {"path":"evals/design-frontend/validate-hybrid-router-evidence.mjs","sha256":"4ae8a2fd461456af9568bd8f6c33a1697620ac90d5e5a501a304c3f9775e134d"},
+      "validator": {"path":"evals/design-frontend/validate-hybrid-router-evidence.mjs","sha256":"4ae8a2fd461456af9568bd6c33a1697620ac90d5e5a501a304c3f9775e134d"},
       "validation": {
         "state": "retained-evidence-validated",
         "scope": "Retained output claims, runtime isolation and inventory, repository and materialized-root snapshots.",
@@ -91,7 +91,7 @@
       "mode": "active-skill-contract-v6",
       "version": 6,
       "state": "unvalidated",
-      "cases": {"path":"evals/skill-contracts/cases-v6.json","sha256":"be3c59c6d3f55298af2b75f106e5339e3c2ab6e2476b9b4fd0e01a227aad5b80"},
+      "cases": {"path":"evals/skill-contracts/cases-v6.json","sha256":"be3c59c6d3f55298af2b75f106e5339e3c2dac2421a040b"},
       "inheritedPressureEvidence": {"path":"evals/skill-contracts/visual-verdict-pressure-v5.json","sha256":"e1dec17c021bbb9fb68dd562d67b6c00dce5cb9e6e387918366fe15c8fe347ee","scope":"Inherited visual-check cases only."},
       "specPressureEvidence": {"path":"evals/skill-contracts/spec-delivery-pressure-v2.json","sha256":"46e9eae98f0507d1af3c05d43a4409bcf09d85d12cd1ecb33b48d9bb958103d2"},
       "specPressureHistory": [{"path":"evals/skill-contracts/spec-delivery-pressure-v1-semantic-review.json","sha256":"ba605b10c5428a0c9074f514dd3e32e9c93435843ef78427188a0561af94594b","disposition":"semantic-review-rejected"}],
@@ -299,10 +299,10 @@
       "evaluationState": "candidate",
       "activationPolicy": "implicit-important-ticket-review",
       "sourceDependencies": [],
-      "intentionalDifferences": ["Conditional single-writer delivery and new-context candidate review for important prepared work, with explicit shared-model and shared-permission limitations."],
+      "intentionalDifferences": ["Conditional single-writer delivery, new-context candidate review, and bounded optional Ponytail over-engineering audit for important prepared work, with explicit shared-model and shared-permission limitations."],
       "validatorSha256": "5347a0a09cfb546bba1c0d1a30dae0a233d9a05f57bd4e7877155c588bcdabf7",
       "files": [
-        {"localPath":"skills/ticket/SKILL.md","bytes":3619,"sha256":"1c783553bbc3a0bd0b7e8a1dd376ee912ef00840670e06fa4945bde1ab78211f","exactUpstreamCopy":false},
+        {"localPath":"skills/ticket/SKILL.md","bytes":4791,"sha256":"9168c5210ae889554422598aea4fdda5afaf421ade568532469b8a45a1f29842","exactUpstreamCopy":false},
         {"localPath":"skills/ticket/agents/openai.yaml","bytes":339,"sha256":"9c145a3c51ae22611fdb00d00c4793be83f87cfffc8a3741b8ff6dff9a0b04de","exactUpstreamCopy":false}
       ]
     },
