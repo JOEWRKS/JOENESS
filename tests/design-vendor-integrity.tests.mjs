@@ -129,8 +129,8 @@ const EXPECTED_DESIGN_SKILL = {
   files: [
     {
       localPath: 'skills/design/SKILL.md',
-      bytes: 13982,
-      sha256: 'c23e10f47be3852820d0f1e5080d981478e6c103480c8d7a0f0ca1f5c7edc535',
+      bytes: 14510,
+      sha256: '244543bca87b1ac1f46f3c318c32eeba059c00425223832ac086dcd8f44e97b4',
       exactUpstreamCopy: false,
     },
     {
@@ -612,7 +612,7 @@ const EXPECTED_CURRENT_EVALUATION = {
   },
   staticContractEvidence: {
     path: 'evals/skill-contracts/design-foundation-v15-contract-test-v1.json',
-    sha256: 'dbcb23a1ea98790e53b19d08fa2f0a9264d8e6d49a017bf5fe58f84ca803b2b0',
+    sha256: '844907a03c1eb44f3bfcef4caf5ec9f6160e5ed4a2992e8aa74be3a1f30b27df',
     scope: 'Static contract assertions only; raw stdout is not retained.',
   },
   attemptIndex: {
@@ -1026,7 +1026,7 @@ test('candidate ledger separates the unvalidated active contract from retained h
   }
   const staticReceipt = JSON.parse(readFileSync(path.join(ROOT, ...current.staticContractEvidence.path.split('/')), 'utf8'));
   assert.equal(staticReceipt.exitCode, 0);
-  assert.deepEqual(staticReceipt.result, { tests: 16, pass: 16, fail: 0, cancelled: 0, skipped: 0, todo: 0, runnerDurationMs: 233.2722 });
+  assert.deepEqual(staticReceipt.result, { tests: 17, pass: 17, fail: 0, cancelled: 0, skipped: 0, todo: 0, runnerDurationMs: 232.262 });
   const semanticReview = JSON.parse(readFileSync(path.join(ROOT, ...current.designVisualEvidence.path.split('/')), 'utf8'));
   assert.equal(semanticReview.result, 'semantic-review-rejected');
   assert.equal(semanticReview.promotionPass, false);

@@ -398,6 +398,20 @@ test('design excludes layout-unaffected copy and literal-value fixes', () => {
   assert.match(design, /do not use.*layout-unaffected one-line copy or literal-value changes/is);
 });
 
+test('design vNext binds top-level authority by domain and scope', () => {
+  const design = readRoleFile('design', 'SKILL.md');
+  const authority = design.match(/^## Authority and safety\r?\n([\s\S]*?)(?=^## )/m)?.[1] ?? '';
+
+  assert.match(authority, /domain and scope.*not.*(?:single|global).*(?:cascade|order)/is);
+  assert.match(authority, /current explicit user instruction.*current result.*scope/is);
+  assert.match(authority, /Product\s*\/\s*UX authority.*behavior.*flow.*route.*data.*role.*policy.*meaning/is);
+  assert.match(authority, /APPROVED project `DESIGN\.md`.*durable visual decisions/is);
+  assert.match(authority, /approved exact visual evidence.*named surface.*state.*preservation evidence/is);
+  assert.match(authority, /accepted existing implementation.*(?:not|unless).*superseded/is);
+  assert.match(authority, /Figma.*reference.*tool.*vendor.*component.*(?:advisory|external).*cannot silently override/is);
+  assert.doesNotMatch(authority, /User scope, approved Figma or reference intent, project tokens and existing code, rendered behavior, accessibility requirements, then vendor guidance is the authority order\./);
+});
+
 test('design vNext binds one project DESIGN.md lifecycle to a non-aesthetic canonical seed', () => {
   const design = readRoleFile('design', 'SKILL.md');
   assert.ok(existsSync(DESIGN_TEMPLATE_PATH), 'missing skills/design/templates/DESIGN.md');

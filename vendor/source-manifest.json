@@ -10,7 +10,7 @@
       "version": 15,
       "state": "unvalidated",
       "cases": {"path":"evals/skill-contracts/cases-v15.json","sha256":"c583bb1a3d5ce1d631a3afa34b3cbe7102b30aa2f799eac44269bfe461b986a6"},
-      "staticContractEvidence": {"path":"evals/skill-contracts/design-foundation-v15-contract-test-v1.json","sha256":"dbcb23a1ea98790e53b19d08fa2f0a9264d8e6d49a017bf5fe58f84ca803b2b0","scope":"Static contract assertions only; raw stdout is not retained."},
+      "staticContractEvidence": {"path":"evals/skill-contracts/design-foundation-v15-contract-test-v1.json","sha256":"844907a03c1eb44f3bfcef4caf5ec9f6160e5ed4a2992e8aa74be3a1f30b27df","scope":"Static contract assertions only; raw stdout is not retained."},
       "attemptIndex": {"path":"evals/skill-contracts/design-visual-m2-attempt-index-v1.json","sha256":"d34245e2e3bfb9c1357f067890454cf0a9ef130655837d30a87f0adc072727fe"},
       "designVisualEvidence": {"path":"evals/skill-contracts/design-visual-m2-visual-v7-semantic-review.json","sha256":"fc09ae6e50291824333dc714f2c7f48f3f8ab40d3e9a1c476c4eb7106097809c","disposition":"semantic-review-rejected"},
       "designOrchestrationEvidence": {"path":"evals/skill-contracts/design-visual-m2-design-v5-blocked.json","sha256":"cc1c1bab3b94c72c94deb97dd1327842a851e496909cf6301e89eee7ce6a913a","disposition":"blocked-orchestration-unverified"},
@@ -245,7 +245,7 @@
       "intentionalDifferences": ["Local stage-aware orchestration and project design contract.", "Local OpenAI metadata and DESIGN.md template."],
       "validatorSha256": "5347a0a09cfb546bba1c0d1a30dae0a233d9a05f57bd4e7877155c588bcdabf7",
       "files": [
-        {"localPath":"skills/design/SKILL.md","bytes":13982,"sha256":"c23e10f47be3852820d0f1e5080d981478e6c103480c8d7a0f0ca1f5c7edc535","exactUpstreamCopy":false},
+        {"localPath":"skills/design/SKILL.md","bytes":14510,"sha256":"244543bca87b1ac1f46f3c318c32eeba059c00425223832ac086dcd8f44e97b4","exactUpstreamCopy":false},
         {"localPath":"skills/design/agents/openai.yaml","bytes":515,"sha256":"bdf38986c6e079f89be1e993a9fda02d9d41eb234d8374c0b6c96168a6c226a6","exactUpstreamCopy":false},
         {"localPath":"skills/design/templates/DESIGN.md","bytes":2781,"sha256":"21a67e4bcaae510c2f9bbc9e028ca62a846ac6398c98e17b9c5238ad87e19b80","exactUpstreamCopy":false}
       ]

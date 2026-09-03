@@ -5,13 +5,13 @@
   "command": "node --test tests/skill-contracts.tests.mjs",
   "workingDirectory": "D:/JOEWRKS/작업하네스/.worktrees/joeness-design-foundation-vnext-p0",
   "exitCode": 0,
-  "result": {"tests":16,"pass":16,"fail":0,"cancelled":0,"skipped":0,"todo":0,"runnerDurationMs":233.2722},
+  "result": {"tests":17,"pass":17,"fail":0,"cancelled":0,"skipped":0,"todo":0,"runnerDurationMs":232.262},
   "inputs": [
-    {"path":"skills/design/SKILL.md","bytes":13982,"sha256":"c23e10f47be3852820d0f1e5080d981478e6c103480c8d7a0f0ca1f5c7edc535"},
+    {"path":"skills/design/SKILL.md","bytes":14510,"sha256":"244543bca87b1ac1f46f3c318c32eeba059c00425223832ac086dcd8f44e97b4"},
     {"path":"skills/design/agents/openai.yaml","bytes":515,"sha256":"bdf38986c6e079f89be1e993a9fda02d9d41eb234d8374c0b6c96168a6c226a6"},
     {"path":"skills/design/templates/DESIGN.md","bytes":2781,"sha256":"21a67e4bcaae510c2f9bbc9e028ca62a846ac6398c98e17b9c5238ad87e19b80"},
     {"path":"evals/skill-contracts/cases-v15.json","bytes":6006,"sha256":"c583bb1a3d5ce1d631a3afa34b3cbe7102b30aa2f799eac44269bfe461b986a6"},
-    {"path":"tests/skill-contracts.tests.mjs","bytes":63365,"sha256":"023be9d798ba0cc68bab554a3222dfa7ff88e5036fbc6b1bee668460d174bdc7"}
+    {"path":"tests/skill-contracts.tests.mjs","bytes":64513,"sha256":"db3c973b8b5162930a8cafbda85f9e39e5e9e4f3e7dd2e0a14c5d8983424fc74"}
   ],
   "scope": "Static routing, wording, DESIGN.md lifecycle/template, stage, capability-role, Visual Claim, and user-gate contract assertions only; this does not prove fresh-agent semantic routing, managed-extension readiness, runtime visual behavior, BIO/02 dogfood, or user acceptance.",
   "limitations": ["Populate result/inputs from the exact observed run; do not promote this receipt beyond static contract evidence."]
