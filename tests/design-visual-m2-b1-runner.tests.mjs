@@ -207,6 +207,54 @@ function digest(value) {
   return createHash("sha256").update(value).digest("hex");
 }
 
+async function readGitBlob(commit, repositoryPath, label) {
+  try {
+    const source = await execFile(
+      "git",
+      ["show", `${commit}:${repositoryPath}`],
+      { cwd: ROOT, encoding: "buffer", maxBuffer: 1024 * 1024 },
+    );
+    return source.stdout;
+  } catch (error) {
+    throw new Error(`M2B1 historical ${label} blob provenance is missing`, { cause: error });
+  }
+}
+
+async function historicalDesignSkillBlob(plan, planPath = null) {
+  let repositoryCommit = plan.source?.repositoryCommit;
+  if (repositoryCommit === undefined) {
+    if (planPath === null) {
+      throw new Error("M2B1 historical Design blob provenance has no plan path");
+    }
+    const repositoryPlanPath = path.relative(ROOT, planPath).replaceAll("\\", "/");
+    const history = await execFile(
+      "git",
+      ["log", "--diff-filter=A", "--format=%H", "--", repositoryPlanPath],
+      { cwd: ROOT, encoding: "utf8", maxBuffer: 1024 * 1024 },
+    );
+    const introducingCommits = history.stdout.trim().split(/\r?\n/u).filter(Boolean);
+    if (introducingCommits.length !== 1 || !/^[0-9a-f]{40}$/u.test(introducingCommits[0])) {
+      throw new Error("M2B1 historical Design blob provenance is not uniquely proven by plan history");
+    }
+    repositoryCommit = introducingCommits[0];
+    const introducedPlan = await readGitBlob(repositoryCommit, repositoryPlanPath, "plan");
+    const currentPlan = await readFile(planPath);
+    if (!introducedPlan.equals(currentPlan)) {
+      throw new Error("M2B1 historical Design blob provenance plan differs from its introducing revision");
+    }
+  }
+
+  const pin = plan.inputs.designSkill;
+  const bytes = await readGitBlob(repositoryCommit, pin.path, "Design");
+  if (bytes.byteLength !== pin.bytes) {
+    throw new Error("M2B1 historical Design bytes provenance differs");
+  }
+  if (digest(bytes) !== pin.sha256) {
+    throw new Error("M2B1 historical Design SHA-256 provenance differs");
+  }
+  return bytes;
+}
+
 function designOutput() {
   const check = (id, observableFact, evidenceLayer, applicability, semantics = "acceptance") => ({
     id,
@@ -313,7 +361,11 @@ async function fixtureRoot(t) {
   for (const pin of pins) {
     const destination = path.join(root, ...pin.path.split("/"));
     await mkdir(path.dirname(destination), { recursive: true });
-    await cp(path.join(ROOT, ...pin.path.split("/")), destination);
+    if (pin === plan.inputs.designSkill) {
+      await writeFile(destination, await historicalDesignSkillBlob(plan, PLAN_PATH));
+    } else {
+      await cp(path.join(ROOT, ...pin.path.split("/")), destination);
+    }
   }
   const copiedPlan = path.join(root, ...path.relative(ROOT, PLAN_PATH).split(path.sep));
   await mkdir(path.dirname(copiedPlan), { recursive: true });
@@ -342,7 +394,9 @@ async function successorFixtureRoot(t, plan) {
   for (const pin of pins) {
     const destination = path.join(root, ...pin.path.split("/"));
     await mkdir(path.dirname(destination), { recursive: true });
-    if ([plan.source.runner, plan.source.freshTurnAdapter, plan.source.collector].includes(pin)) {
+    if (pin === plan.inputs.designSkill) {
+      await writeFile(destination, await historicalDesignSkillBlob(plan));
+    } else if ([plan.source.runner, plan.source.freshTurnAdapter, plan.source.collector].includes(pin)) {
       const source = await execFile(
         "git",
         ["show", `${plan.source.repositoryCommit}:${pin.path}`],
@@ -583,6 +637,38 @@ function successfulDependencies(design = designOutput()) {
     },
   };
 }
+
+test("M2B1 historical fixtures materialize the pinned Design skill instead of the live skill", async (t) => {
+  const liveDesignSkill = await readFile(path.join(ROOT, "skills/design/SKILL.md"));
+  const v1 = await fixtureRoot(t);
+  const v2Plan = JSON.parse(await readFile(SUCCESSOR_PLAN_PATH, "utf8"));
+  const v2 = await successorFixtureRoot(t, v2Plan);
+
+  for (const { label, root, pin } of [
+    { label: "v1", root: v1.root, pin: v1.plan.inputs.designSkill },
+    { label: "v2", root: v2.root, pin: v2Plan.inputs.designSkill },
+  ]) {
+    const materialized = await readFile(path.join(root, ...pin.path.split("/")));
+    assert.equal(materialized.byteLength, pin.bytes, `${label} Design bytes`);
+    assert.equal(digest(materialized), pin.sha256, `${label} Design SHA-256`);
+    assert.notEqual(digest(materialized), digest(liveDesignSkill), `${label} must not use live Design`);
+  }
+});
+
+test("M2B1 historical fixture Design provenance fails closed on a missing or mismatched blob", async (t) => {
+  const base = JSON.parse(await readFile(SUCCESSOR_PLAN_PATH, "utf8"));
+  for (const [label, mutate, expected] of [
+    ["bytes", (plan) => { plan.inputs.designSkill.bytes += 1; }, /Design.*bytes.*provenance/iu],
+    ["SHA-256", (plan) => { plan.inputs.designSkill.sha256 = "0".repeat(64); }, /Design.*SHA-256.*provenance/iu],
+    ["missing blob", (plan) => { plan.inputs.designSkill.path = "skills/design/MISSING.md"; }, /Design.*blob.*provenance/iu],
+  ]) {
+    await t.test(label, async (t) => {
+      const plan = structuredClone(base);
+      mutate(plan);
+      await assert.rejects(successorFixtureRoot(t, plan), expected);
+    });
+  }
+});
 
 test("M2B1 plan pins the successor prompt and opaque approved/defect/control inputs", async () => {
   const subject = await loadSubject();
@@ -1150,17 +1236,18 @@ test("M2B1 v5 preflight accepts the unchanged v4 evaluator contract and rejects 
 
   for (const target of ["input", "candidate"]) {
     const changedPlan = structuredClone(acceptedPlan);
+    const changedFixture = await successorFixtureRoot(t, acceptedPlan);
     const changedBytes = Buffer.from(`changed-v5-${target}\n`, "utf8");
     const pin = target === "input"
       ? changedPlan.inputs.designSkill
       : changedPlan.candidates[0].image;
     pin.bytes = changedBytes.byteLength;
     pin.sha256 = digest(changedBytes);
-    const changedFixture = await successorFixtureRoot(t, changedPlan);
     await writeFile(
       path.join(changedFixture.root, ...pin.path.split("/")),
       changedBytes,
     );
+    await writeFile(changedFixture.planPath, JSON.stringify(changedPlan, null, 2) + "\n");
     await assert.rejects(
       subject.preflightDesignVisualM2B1({
         repositoryRoot: changedFixture.root,
@@ -1192,39 +1279,8 @@ test("M2B1 preflight rejects a source pin whose commit blob differs", async (t) 
 
 test("M2B1 successor run emits v2 summary and blocked identities", async (t) => {
   const subject = await loadSubject();
-  const root = await mkdtemp(path.join(tmpdir(), "joeness-m2-b1-v2-"));
-  t.after(() => rm(root, { recursive: true, force: true }));
   const plan = JSON.parse(await readFile(SUCCESSOR_PLAN_PATH, "utf8"));
-  for (const pin of [
-    ...Object.values(plan.inputs),
-    ...plan.candidates.map(({ image }) => image),
-    plan.predecessor.plan,
-    plan.predecessor.blockedAttempt,
-    plan.predecessor.latestReceipt,
-    plan.source.runner,
-    plan.source.freshTurnAdapter,
-    plan.source.collector,
-  ]) {
-    const destination = path.join(root, ...pin.path.split("/"));
-    await mkdir(path.dirname(destination), { recursive: true });
-    if ([
-      plan.source.runner,
-      plan.source.freshTurnAdapter,
-      plan.source.collector,
-    ].includes(pin)) {
-      const source = await execFile(
-        "git",
-        ["show", `${plan.source.repositoryCommit}:${pin.path}`],
-        { cwd: ROOT, encoding: "buffer", maxBuffer: 1024 * 1024 },
-      );
-      await writeFile(destination, source.stdout);
-    } else {
-      await cp(path.join(ROOT, ...pin.path.split("/")), destination);
-    }
-  }
-  const planPath = path.join(root, ...path.relative(ROOT, SUCCESSOR_PLAN_PATH).split(path.sep));
-  await mkdir(path.dirname(planPath), { recursive: true });
-  await writeFile(planPath, JSON.stringify(plan, null, 2) + "\n");
+  const { root, planPath } = await successorFixtureRoot(t, plan);
 
   const success = successfulDependencies();
   success.gitIdentity = async (_root, implementationCommit) => {

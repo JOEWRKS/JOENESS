@@ -603,16 +603,16 @@ const EXPECTED_SKILL_CONTRACT_V12 = {
   promotionPass: false,
 };
 const EXPECTED_CURRENT_EVALUATION = {
-  mode: 'active-skill-contract-v14',
-  version: 14,
+  mode: 'active-skill-contract-v15',
+  version: 15,
   state: 'unvalidated',
   cases: {
-    path: 'evals/skill-contracts/cases-v14.json',
-    sha256: 'b0bdf1a895fab0bebaac1db0226f22d010dc5fb7e90ebbe097fed4e85f086db0',
+    path: 'evals/skill-contracts/cases-v15.json',
+    sha256: 'c583bb1a3d5ce1d631a3afa34b3cbe7102b30aa2f799eac44269bfe461b986a6',
   },
   staticContractEvidence: {
-    path: 'evals/skill-contracts/design-visual-m2-v14-contract-test-v1.json',
-    sha256: '8308530b6df1550d7f1e0da7150c1c163ea2ff449cada81d0198896c5ce4a8db',
+    path: 'evals/skill-contracts/design-foundation-v15-contract-test-v1.json',
+    sha256: 'dbcb23a1ea98790e53b19d08fa2f0a9264d8e6d49a017bf5fe58f84ca803b2b0',
     scope: 'Static contract assertions only; raw stdout is not retained.',
   },
   attemptIndex: {
@@ -638,7 +638,7 @@ const EXPECTED_CURRENT_EVALUATION = {
     ...EXPECTED_SKILL_CONTRACT_V8.ticketPressureEvidence,
     scope: 'Validates inherited ticket cases only; it does not validate M2 visual behavior.',
   },
-  hardGate: 'm2-partial-static-contract-only',
+  hardGate: 'design-foundation-static-contract-only',
   classification: 'candidate',
   outcomeReview: 'partial',
   semanticImprovement: 'not-asserted',
@@ -1017,7 +1017,7 @@ test('candidate ledger separates the unvalidated active contract from retained h
   const v8Cases = path.join(ROOT, ...EXPECTED_SKILL_CONTRACT_V8.cases.path.split('/'));
   assert.equal(lstatSync(v8Cases).size, 4376);
   assert.equal(sha256(v8Cases), EXPECTED_SKILL_CONTRACT_V8.cases.sha256);
-  assert.equal(lstatSync(path.join(ROOT, ...current.cases.path.split('/'))).size, 1922);
+  assert.equal(lstatSync(path.join(ROOT, ...current.cases.path.split('/'))).size, 6006);
   assert.equal(sha256(path.join(ROOT, ...current.cases.path.split('/'))), current.cases.sha256);
   for (const key of ['staticContractEvidence', 'attemptIndex', 'designVisualEvidence', 'designOrchestrationEvidence']) {
     const evidence = current[key];
@@ -1026,7 +1026,7 @@ test('candidate ledger separates the unvalidated active contract from retained h
   }
   const staticReceipt = JSON.parse(readFileSync(path.join(ROOT, ...current.staticContractEvidence.path.split('/')), 'utf8'));
   assert.equal(staticReceipt.exitCode, 0);
-  assert.deepEqual(staticReceipt.result, { tests: 12, pass: 12, fail: 0, cancelled: 0, skipped: 0, todo: 0, runnerDurationMs: 177.6593 });
+  assert.deepEqual(staticReceipt.result, { tests: 16, pass: 16, fail: 0, cancelled: 0, skipped: 0, todo: 0, runnerDurationMs: 233.2722 });
   const semanticReview = JSON.parse(readFileSync(path.join(ROOT, ...current.designVisualEvidence.path.split('/')), 'utf8'));
   assert.equal(semanticReview.result, 'semantic-review-rejected');
   assert.equal(semanticReview.promotionPass, false);
