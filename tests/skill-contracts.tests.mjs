@@ -438,6 +438,20 @@ test('design vNext routes by stage and defines sourced Visual Claims before mate
 
 test('design vNext names the shared capability stack without delegating design authority', () => {
   const design = readRoleFile('design', 'SKILL.md');
+  const routingHeadings = [...design.matchAll(/^## Design capability routing$/gm)];
+
+  assert.equal(routingHeadings.length, 1, 'expected exactly one capability-routing section');
+  const [routingHeading] = routingHeadings;
+  const routingStart = routingHeading.index + routingHeading[0].length;
+  const nextHeading = design.indexOf('\n## ', routingStart);
+  const routing = design.slice(routingStart, nextHeading === -1 ? design.length : nextHeading);
+  const beforeRouting = design.slice(0, routingHeading.index);
+
+  assert.doesNotMatch(beforeRouting, /Search UI UX Pro Max.*vendor\/ui-ux-pro-max\/scripts\/search\.py/is);
+  assert.doesNotMatch(beforeRouting, /Read Apple Design.*vendor\/apple-design\/SKILL\.md/is);
+  assert.doesNotMatch(beforeRouting, /Figma and browser use follows the actual task/is);
+  assert.doesNotMatch(beforeRouting, /Generated colors are advisory/is);
+  assert.doesNotMatch(beforeRouting, /Find these repository-relative paths by ascending exactly two directories/is);
 
   for (const name of [
     'UI UX Pro Max',
@@ -452,19 +466,25 @@ test('design vNext names the shared capability stack without delegating design a
     'Anime.js',
     '$visual-check',
   ]) {
-    assert.match(design, new RegExp(name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i'));
+    assert.match(routing, new RegExp(name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i'));
   }
 
-  assert.match(design, /Impeccable.*(?:critique|layout|typeset|polish).*material.*user.*(?:gate|approval)/is);
-  assert.match(design, /Hallmark.*audit.*(?:study).*not.*(?:automatic|auto).*redesign/is);
-  assert.match(design, /oh-my-design.*reference.*not.*full.*orchestration/is);
-  assert.match(design, /Watermelon.*product.*utility.*Componentry.*implementation.*Cult UI.*selective/is);
-  assert.match(design, /Anime\.js.*project runtime.*not.*global/is);
-  assert.match(design, /Open Design.*excluded/is);
-  assert.match(design, /do not.*invoke.*all.*(?:tools|capabilities)/is);
-  assert.match(design, /product.*(?:behavior|flow|route|data|role|policy).*product definition.*resume/is);
-  assert.match(design, /same visual direction.*(?:twice|two).*no.*third.*polish.*S1.*S2/is);
-  assert.match(design, /already covered.*project-specific.*(?:repeated|common).*missing mechanism/is);
+  assert.match(routing, /UI UX Pro Max.*only when.*unspecified design direction.*design-system choice.*stack-specific UI\/UX.*vendor\/ui-ux-pro-max\/scripts\/search\.py.*zero-result.*once.*broader terms.*related domains or stacks/is);
+  assert.match(routing, /Apple Design.*only when.*motion.*gesture.*spatial continuity.*material.*typography.*interaction feel.*vendor\/apple-design\/SKILL\.md.*only.*related sections/is);
+  assert.match(routing, /Figma.*browser.*image generation.*optimize-web-animations.*only when.*current stage.*evidence.*actual task.*approved references.*available capability.*completion evidence/is);
+  assert.match(routing, /Figma and browser.*needed capability.*unavailable.*continue independent work.*report verification incomplete/is);
+  assert.match(routing, /Generated colors.*actual contrast check/is);
+  assert.match(routing, /repository-relative paths.*ascending exactly two directories.*explicitly supplied repository root.*do not use.*product-specific plugin-root variables.*absolute roots.*downloads.*replacement packages/is);
+  assert.match(routing, /Impeccable.*(?:critique|layout|typeset|polish).*material.*user.*(?:gate|approval)/is);
+  assert.match(routing, /Hallmark.*audit.*(?:study).*not.*(?:automatic|auto).*redesign/is);
+  assert.match(routing, /oh-my-design.*reference-only.*do not.*(?:normally )?invoke.*install.*full.*orchestration/is);
+  assert.match(routing, /Watermelon.*product.*utility.*Componentry.*implementation.*Cult UI.*selective/is);
+  assert.match(routing, /Anime\.js.*project runtime.*not.*global/is);
+  assert.match(routing, /Open Design.*excluded/is);
+  assert.match(routing, /do not.*invoke.*all.*(?:tools|capabilities)/is);
+  assert.match(routing, /product.*behavior.*flow.*route.*data.*role.*policy.*product definition.*resume/is);
+  assert.match(routing, /same visual direction.*(?:twice|two).*no.*third.*polish.*S1.*S2/is);
+  assert.match(routing, /already covered.*project-specific.*(?:repeated|common).*missing mechanism/is);
 });
 
 test('visual-check binds one hypothesis to the exact observed state', () => {
