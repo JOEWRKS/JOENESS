@@ -408,6 +408,33 @@ test('design vNext binds one project DESIGN.md lifecycle to a non-aesthetic cano
   assert.doesNotMatch(template, /Editorial Biopharma|Quiet Luxury|warm mineral|neon lime|glassmorphism|BIO\/02/i);
 });
 
+test('design vNext routes by stage and defines sourced Visual Claims before material rendering', () => {
+  const design = readRoleFile('design', 'SKILL.md');
+
+  for (const [id, label] of [
+    ['S0', 'Context / Authority'],
+    ['S1', 'Direction / Reference'],
+    ['S2', 'Static Visual Proof'],
+    ['S3', 'Motion / Interaction Proof'],
+    ['S4', 'Production Implementation'],
+    ['S5', 'Responsive / State Translation'],
+    ['S6', 'Acceptance'],
+  ]) {
+    assert.match(design, new RegExp(`${id}.*${label.replace('/', '\\/')}`, 'is'));
+  }
+
+  assert.match(design, /MUST.*WHEN NEEDED.*FORBIDDEN/is);
+  assert.match(design, /Visual Claim.*source.*surface.*state.*target dimensions.*expected observable.*evidence method.*acceptance.*boundary/is);
+  assert.match(design, /before.*material visual.*(?:render|output).*Visual Claim/is);
+  assert.match(design, /S2.*exact.*visual-check/is);
+  assert.match(design, /S3.*start.*midpoint.*end.*reverse.*reduced motion/is);
+  assert.match(design, /S5.*height.*aspect.*(?:container|containing).*recomposition/is);
+  assert.match(design, /Technical.*Responsive.*Accessibility.*Performance.*Visual Internal.*User Acceptance/is);
+  assert.match(design, /(?:ㄱㄱ|진행|구현해).*not.*(?:exact )?visual acceptance/is);
+  assert.match(design, /material keyframe.*user.*(?:gate|approval)/is);
+  assert.match(design, /signature motion.*user.*(?:gate|approval)/is);
+});
+
 test('visual-check binds one hypothesis to the exact observed state', () => {
   const visualCheck = readRoleFile('visual-check', 'SKILL.md');
   const metadata = readRoleFile('visual-check', 'agents', 'openai.yaml');

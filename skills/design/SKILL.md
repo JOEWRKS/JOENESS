@@ -40,6 +40,22 @@ For authorized Figma writes, serialize by file key: inspect, one bounded change 
 
 Before completion, unless the current request or project contract requires the preview to remain running, stop only disposable verification preview processes started for the task after matching their PID and resolved command line; verify their listeners are gone and report any survivor; never kill by port alone.
 
+## Stage routing and proof
+
+Classify the current design stage before choosing capabilities. These stages are not a mandatory waterfall; use only the stages the task actually needs, but do not omit a responsibility that applies.
+
+- **S0 — Context / Authority.** MUST bind user scope, product/UX authority, project `DESIGN.md` state, relevant approved/rejected visual evidence, and whether the request changes product meaning. WHEN NEEDED route behavior/flow/route/data/role/policy ambiguity back to product definition. FORBIDDEN: redesign from current implementation appearance alone or treating DRAFT/tool output as approved authority.
+- **S1 — Direction / Reference.** MUST use when durable direction is absent/unresolved, a material design amendment is requested, or repeated rejection returns the work to direction. Analyze references as relationships; when they materially affect the decision state `TAKE / DO NOT TAKE / WHY / APPLIES TO`. WHEN NEEDED use the relevant reference capabilities only. FORBIDDEN: tool fan-out or using production implementation as the proof of a new direction.
+- **S2 — Static Visual Proof.** MUST define the smallest sourced Visual Claim set before material rendering; bind surface/state/target dimensions where relevant, expected observables, and evidence method. WHEN NEEDED use critique/layout/typeset, image generation, Figma, or browser rendering. MUST hand the exact produced result to `$visual-check`. A material keyframe or materially distinct final variant requires user visual approval before dependent expansion.
+- **S3 — Motion / Interaction Proof.** MUST define meaningful start/midpoint/end, reverse when applicable, interruption/user-control expectations when applicable, reduced motion, and the semantic information gained. Material/signature motion is proven in a bounded prototype before broad integration. WHEN NEEDED use the project's runtime and motion guidance. MUST hand exact motion evidence/result to `$visual-check`. Signature motion architecture/final material motion direction requires user approval.
+- **S4 — Production Implementation.** MUST implement sufficiently accepted intent without inventing a new visual system in production, while preserving relevant responsive/keyboard/focus/loading/empty/error behavior. WHEN NEEDED use project primitives or on-demand implementation sources. FORBIDDEN: adding impressive components without an already-defined need or installing dependencies without authority.
+- **S5 — Responsive / State Translation.** MUST preserve intent rather than literal coordinates, detect when width alone is insufficient and height/aspect/container context materially changes composition, and verify named target surfaces/states with `$visual-check`. FORBIDDEN: mobile as scaled desktop or fluid scaling as a substitute for needed recomposition.
+- **S6 — Acceptance.** Keep `Technical`, `Responsive`, `Accessibility`, `Performance`, `Visual Internal`, and `User Acceptance` separate when applicable. Build/test/DOM/console/performance/tool success cannot upgrade a failed visual claim or infer User Acceptance.
+
+Before material visual rendering or output, each Visual Claim binds `source`, `claim`, `surface`, `state`, `target dimensions` when material, `expected observable`, `evidence method`, and `semantics` (`acceptance` or `boundary`). Use only claims needed for the current task; do not create a universal design checklist and do not derive acceptance from the candidate after rendering.
+
+`ㄱㄱ`, `진행`, `구현해`, or equivalent continuation authorization allows the next action inside current authority; it is not exact rendered visual acceptance unless the context explicitly makes that acceptance clear.
+
 ## Visual defect boundary
 
 Use this skill for new UI/UX intent, including subjective first-draft feedback. Route a concrete mismatch against an approved state, state-dependent rendering failure, or visual regression to `$visual-check`. When both intent and verification change, settle the intended design first, then verify the implementation as a separate responsibility.
