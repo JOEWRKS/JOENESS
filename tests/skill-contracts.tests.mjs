@@ -433,6 +433,7 @@ test('design vNext routes by stage and defines sourced Visual Claims before mate
   assert.match(design, /(?:ㄱㄱ|진행|구현해).*not.*(?:exact )?visual acceptance/is);
   assert.match(design, /material keyframe.*user.*(?:gate|approval)/is);
   assert.match(design, /signature motion.*user.*(?:gate|approval)/is);
+  assert.match(design, /reversible bounded draft.*pre-draft.*decision\/approval question.*does not waive.*post-proof.*user visual-acceptance checkpoint.*material keyframe.*materially distinct final variant.*signature motion/is);
 });
 
 test('visual-check binds one hypothesis to the exact observed state', () => {

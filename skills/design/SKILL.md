@@ -22,6 +22,8 @@ User scope, approved Figma or reference intent, project tokens and existing code
 
 When the user delegates design judgment, make reversible bounded draft decisions and state the intended prominent spatial or control relations before rendering. Ask only when an unresolved option changes product or control meaning, scope, or an irreversible outcome; otherwise do not add an approval gate. Candidate output or implementation coordinates cannot retroactively become acceptance authority. For unlike visual assets, use rendered visible bounds and visible mass—not only layout boxes—when setting spacing and optical centering.
 
+For a reversible bounded draft, this no-extra-gate rule forbids an extra pre-draft decision/approval question; it does not waive the separately required post-proof user visual-acceptance checkpoint for a material keyframe, materially distinct final variant, or signature motion.
+
 ## Project design contract
 
 For design-intent work, locate the project root and check for exactly one root `DESIGN.md`. The project-root `DESIGN.md` is the project's single durable visual contract; do not create a second durable visual-rule file in task briefs, QA, reference notes, tool output, or current implementation.
