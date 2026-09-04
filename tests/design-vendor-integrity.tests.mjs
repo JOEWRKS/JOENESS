@@ -1455,15 +1455,32 @@ test('README exposes only the Lean kernel and operational installer surface', ()
   const readme = readFileSync(README, 'utf8');
   const [korean, english] = readme.split('## English Guide');
   assert.ok(english, 'README must retain the English guide');
-  for (const section of [korean, english]) {
+  const expectedModes = ['Apply', 'Check', 'Remove'];
+  const assertPublicSurface = (section, language) => {
+    const modes = [...new Set([...section.matchAll(/JOENESS\.ps1[ \t]+-(?<mode>[A-Za-z][A-Za-z0-9-]*)/gi)]
+      .map(({ groups }) => groups.mode))].sort();
+    assert.deepEqual(modes, expectedModes, `${language} must document only the Check, Apply, and Remove operation modes`);
+    const publicCallTokens = section.match(/\$[A-Za-z][A-Za-z0-9_-]*/g) ?? [];
+    assert.deepEqual(publicCallTokens, [], `${language} must expose no public $... call tokens`);
+  };
+  for (const [language, section] of [['Korean', korean], ['English', english]]) {
+    assertPublicSurface(section, language);
+    assert.throws(
+      () => assertPublicSurface(`${section}\npowershell.exe -NoProfile -File .\\JOENESS.ps1 -Repair`, language),
+      /must document only the Check, Apply, and Remove operation modes/,
+    );
+    assert.throws(
+      () => assertPublicSurface(`${section}\n$joewrks-project-setup $joewrks-design-frontend`, language),
+      /must expose no public \$\.\.\. call tokens/,
+    );
     assert.match(section, /small[\s\S]{0,100}always-on[\s\S]{0,100}work-safety kernel|작고[\s\S]{0,100}항상 적용되는[\s\S]{0,100}작업 안전 커널/i);
     assert.match(section, /after installation[\s\S]{0,140}work normally|설치한 뒤[\s\S]{0,140}평소처럼 작업/i);
-    for (const operation of ['Check', 'Apply', 'Remove']) {
-      assert.match(section, new RegExp(`powershell\\.exe -NoProfile -File \\.\\\\JOENESS\\.ps1 -${operation}`, 'i'));
-    }
     assert.match(section, /PowerShell output[\s\S]{0,100}not a Codex chat response|PowerShell 출력[\s\S]{0,100}Codex 채팅 답변이 아닙니다/i);
+    const backupTerms = language === 'Korean'
+      ? [/변경 대상 파일을 백업/, /기존 `AGENTS\.md` 전체/, /관리 블록 밖/]
+      : [/backs up affected files/i, /entire pre-change `AGENTS\.md`/i, /user-owned content outside its managed block/i];
+    for (const term of backupTerms) assert.match(section, term);
     assert.match(section, /only JOENESS-owned[\s\S]{0,220}user-owned|JOENESS가 소유한[\s\S]{0,220}사용자 소유/i);
-    assert.doesNotMatch(section, /\$(?:project|ticket|design|visual-check|spec|handoff)\b/i);
     assert.doesNotMatch(section, /Figma|Superpowers|Ponytail|UI UX Pro Max|Apple Design/i);
   }
 });

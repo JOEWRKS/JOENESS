@@ -16,6 +16,13 @@ if (-not (Test-Path -LiteralPath $Implementation -PathType Leaf)) {
 
 function Assert-True { param([bool] $Condition, [string] $Message) if (-not $Condition) { throw "Assertion failed: $Message" } }
 function Assert-Equal { param($Actual, $Expected, [string] $Message) if ($Actual -cne $Expected) { throw "Assertion failed: $Message; expected [$Expected], got [$Actual]" } }
+function Assert-ReadmeInvocationSurface {
+    param([string] $Text, [string] $Label)
+    $modes = @([regex]::Matches($Text, '(?i)JOENESS\.ps1[ \t]+-(?<mode>[A-Za-z][A-Za-z0-9-]*)') | ForEach-Object { $_.Groups['mode'].Value } | Sort-Object -Unique)
+    Assert-Equal ($modes -join ',') 'Apply,Check,Remove' "$Label guide documents only the Check, Apply, and Remove operation modes"
+    $publicCallTokens = @([regex]::Matches($Text, '\$[A-Za-z][A-Za-z0-9_-]*') | ForEach-Object { $_.Value })
+    Assert-Equal $publicCallTokens.Count 0 "$Label guide exposes no public `$... call tokens"
+}
 function Test-ReadmeContract {
     $readme = [IO.File]::ReadAllText((Join-Path $RepositoryRoot 'README.md'))
     Assert-True $readme.StartsWith("# JOENESS`n`n> 0.1 Beta") 'README uses the JOENESS title and Beta status'
@@ -33,20 +40,20 @@ function Test-ReadmeContract {
     $koreanJoenessOwned = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('Sk9FTkVTU+qwgCDshozsnKDtlZw='))
     $koreanUserOwned = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('7IKs7Jqp7J6QIOyGjOycoA=='))
     $koreanPreserve = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('67O07KG0'))
+    $koreanBackupAffected = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('67OA6rK9IOuMgOyDgSDtjIzsnbzsnYQg67Cx7JeF'))
+    $koreanEntireAgents = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('6riw7KG0IGBBR0VOVFMubWRgIOyghOyytA=='))
+    $koreanOutsideBlock = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('6rSA66asIOu4lOuhnSDrsJY='))
     foreach ($language in $sections.Keys) {
         $section = $sections[$language]
-        foreach ($command in @(
-            'powershell.exe -NoProfile -File .\JOENESS.ps1 -Check',
-            'powershell.exe -NoProfile -File .\JOENESS.ps1 -Apply',
-            'powershell.exe -NoProfile -File .\JOENESS.ps1 -Remove'
-        )) {
-            Assert-True $section.Contains($command) "$language guide contains $command"
-        }
+        Assert-ReadmeInvocationSurface $section $language
+        Assert-ThrowsLike { Assert-ReadmeInvocationSurface ($section + "`npowershell.exe -NoProfile -File .\JOENESS.ps1 -Repair") $language } '*documents only the Check, Apply, and Remove operation modes*' "$language guide rejects a fourth installer operation"
+        Assert-ThrowsLike { Assert-ReadmeInvocationSurface ($section + "`n" + '$joewrks-project-setup $joewrks-design-frontend') $language } '*exposes no public $... call tokens*' "$language guide rejects retired public call aliases"
         if ($language -eq 'English') {
             Assert-True ($section -match '(?is)small.{0,80}always-on.{0,80}work-safety kernel') 'English guide presents one small always-on work-safety kernel'
             Assert-True ($section -match '(?is)after installation.{0,120}work normally') 'English guide tells users to work normally after installation'
             Assert-True ($section.Contains('PowerShell output') -and $section.Contains('not a Codex chat response')) 'English guide distinguishes PowerShell output from chat responses'
             Assert-True ($section -match '(?is)-Check.{0,200}read-only') 'English guide says Check is read-only'
+            Assert-True ($section -match '(?is)backs up affected files.{0,180}entire pre-change `AGENTS\.md`.{0,180}user-owned content outside.{0,100}managed block') 'English guide distinguishes whole-file backup scope from managed writes'
             Assert-True ($section -match '(?is)only JOENESS-owned.{0,200}preserv(?:e|es).{0,80}user-owned') 'English guide limits writes to JOENESS-owned state and preserves user-owned content'
             Assert-True ($section -match '(?is)-Remove.{0,220}JOENESS-owned.{0,160}user-owned') 'English guide states the safe Remove boundary'
         } else {
@@ -54,10 +61,10 @@ function Test-ReadmeContract {
             Assert-True ($section.Contains($koreanAfterInstallation) -and $section.Contains($koreanWorkNormally)) 'Korean guide tells users to work normally after installation'
             Assert-True ($section.Contains($koreanPowerShellOutput) -and $section.Contains($koreanNotChat)) 'Korean guide distinguishes PowerShell output from chat responses'
             Assert-True ($section.Contains('-Check') -and $section.Contains($koreanReadOnly)) 'Korean guide says Check is read-only'
+            Assert-True ($section.Contains($koreanBackupAffected) -and $section.Contains($koreanEntireAgents) -and $section.Contains($koreanOutsideBlock)) 'Korean guide distinguishes whole-file backup scope from managed writes'
             Assert-True ($section.Contains($koreanJoenessOwned) -and $section.Contains($koreanUserOwned) -and $section.Contains($koreanPreserve)) 'Korean guide limits writes to JOENESS-owned state and preserves user-owned content'
             Assert-True ($section.Contains('-Remove') -and $section.Contains($koreanJoenessOwned) -and $section.Contains($koreanUserOwned)) 'Korean guide states the safe Remove boundary'
         }
-        Assert-True (-not ($section -match '(?i)\$(?:project|ticket|design|visual-check|spec|handoff)\b')) "$language guide exposes no public skill calls"
         Assert-True (-not ($section -match '(?i)Figma|Superpowers|Ponytail|UI UX Pro Max|Apple Design')) "$language guide exposes no plugin or design-vendor policy"
     }
 }

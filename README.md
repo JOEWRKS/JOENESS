@@ -38,7 +38,7 @@ JOENESS는 Windows용 Codex에 설치하는 작고 항상 적용되는 작업 �
 
 업데이트할 때도 새 ZIP을 전체 압축 해제하고 그 폴더에서 `-Check`를 먼저 실행합니다. `ready`일 때만 `-Apply`를 실행한 뒤 `-Check`로 다시 확인하세요.
 
-`-Apply`는 JOENESS가 소유한 관리 블록과 설치 파일만 백업하고 변경합니다. 이전 JOENESS 0.1 설치를 갱신할 때도 기록된 JOENESS 소유 파일만 교체하거나 제거하며, 관리 블록 바깥과 사용자 소유 파일은 보존합니다. 소유권이나 기존 파일 상태를 확인할 수 없으면 쓰지 않고 `blocked`로 멈춥니다.
+`-Apply`는 변경 대상 파일을 백업하며, 되돌리기 위해 관리 블록 밖의 사용자 소유 내용까지 포함한 기존 `AGENTS.md` 전체를 백업할 수 있습니다. 실제 변경은 JOENESS가 소유한 관리 블록과 설치 파일로 제한합니다. 이전 JOENESS 0.1 갱신에서도 기록된 소유 파일만 교체·제거하고 사용자 소유 내용은 보존하며, 소유권이나 상태를 확인할 수 없으면 쓰지 않고 `blocked`로 멈춥니다.
 
 제거는 설치에 사용한 전체 패키지 폴더에서 실행합니다.
 
@@ -82,7 +82,7 @@ After installation, work normally. You do not need to choose JOENESS roles or ca
 
 For an update, extract the complete new ZIP and run `-Check` from that folder first. Run `-Apply` only for `ready`, then run `-Check` again.
 
-`-Apply` backs up and changes only JOENESS-owned installation files and its managed block. When updating a previous JOENESS 0.1 installation, it replaces or removes only recorded JOENESS-owned files and preserves user-owned files and content outside the managed block. If ownership or existing file state cannot be verified, it performs no write and stops with `blocked`.
+`-Apply` backs up affected files and may copy the entire pre-change `AGENTS.md`, including user-owned content outside its managed block, for rollback. It changes only JOENESS-owned installation files and the JOENESS managed block. A previous JOENESS 0.1 update likewise replaces or removes only recorded owned files and preserves user-owned content; if ownership or state cannot be verified, it performs no write and stops with `blocked`.
 
 Run removal from the complete package folder used for the installation.
 
