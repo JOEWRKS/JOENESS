@@ -293,14 +293,14 @@ const EXPECTED_TICKET_SKILL = {
   activationPolicy: 'implicit-important-ticket-review',
   sourceDependencies: [],
   intentionalDifferences: [
-    'Conditional single-writer delivery and new-context candidate review for important prepared work, with explicit shared-model and shared-permission limitations.',
+    'Conditional single-writer delivery, new-context candidate review, and bounded optional Ponytail over-engineering audit for important prepared work, with explicit shared-model and shared-permission limitations.',
   ],
   validatorSha256: '5347a0a09cfb546bba1c0d1a30dae0a233d9a05f57bd4e7877155c588bcdabf7',
   files: [
     {
       localPath: 'skills/ticket/SKILL.md',
-      bytes: 3619,
-      sha256: '1c783553bbc3a0bd0b7e8a1dd376ee912ef00840670e06fa4945bde1ab78211f',
+      bytes: 4791,
+      sha256: '9168c5210ae889554422598aea4fdda5afaf421ade568532469b8a45a1f29842',
       exactUpstreamCopy: false,
     },
     {
@@ -842,8 +842,8 @@ test('vendor bundle is exactly the pinned non-discoverable source set', () => {
       const localFile = path.join(ROOT, ...file.localPath.split('/'));
       assert.ok(existsSync(localFile), `missing registered file: ${file.localPath}`);
       assert.equal(lstatSync(localFile).isSymbolicLink(), false, `registered symlink: ${file.localPath}`);
-      assert.equal(lstatSync(localFile).size, file.bytes, `wrong byte length: ${file.localPath}`);
-      assert.equal(sha256(localFile), file.sha256, `wrong hash: ${file.localPath}`);
+      assert.equal(lstatSync(localFile).size, file.bytes, `wrong original byte length: ${file.localPath}`);
+      assert.equal(sha256(localFile), file.sha256, `wrong original hash: ${file.localPath}`);
     }
   }
   for (const skill of [EXPECTED_DESIGN_SKILL, EXPECTED_PROJECT_SKILL, EXPECTED_VISUAL_CHECK_SKILL, EXPECTED_SPEC_SKILL, EXPECTED_TICKET_SKILL, EXPECTED_HANDOFF_SKILL]) {
@@ -1201,7 +1201,10 @@ test('candidate ledger separates the unvalidated active contract from retained h
   assert.equal(lstatSync(ticketPressurePath).size, 2163);
   assert.equal(sha256(ticketPressurePath), current.ticketPressureEvidence.sha256);
   const ticketPressure = JSON.parse(readFileSync(ticketPressurePath, 'utf8'));
-  assert.equal(ticketPressure.skill.sha256, EXPECTED_TICKET_SKILL.files[0].sha256);
+  assert.equal(
+    ticketPressure.skill.sha256,
+    '1c783553bbc3a0bd0b7e8a1dd376ee912ef00840670e06fa4945bde1ab78211f',
+  );
   assert.equal(ticketPressure.cases.sha256, EXPECTED_SKILL_CONTRACT_V8.cases.sha256);
   assert.equal(ticketPressure.routing.candidateSampleCount, 5);
   assert.deepEqual(new Set(Object.values(ticketPressure.routing.scores)), new Set(['5/5']));
