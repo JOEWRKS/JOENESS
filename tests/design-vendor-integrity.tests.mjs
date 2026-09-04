@@ -1457,9 +1457,12 @@ test('README exposes only the Lean kernel and operational installer surface', ()
   assert.ok(english, 'README must retain the English guide');
   const expectedModes = ['Apply', 'Check', 'Remove'];
   const assertPublicSurface = (section, language) => {
-    const invocationLines = section.split(/\r?\n/)
+    const powerShellBlocks = [...section.matchAll(/^[ \t]*```powershell[ \t]*\r?\n(?<body>[\s\S]*?)^[ \t]*```[ \t]*\r?$/gm)];
+    assert.equal(powerShellBlocks.length, 4, `${language} must document four PowerShell command blocks`);
+    const invocationLines = powerShellBlocks.flatMap(({ groups }) => groups.body.split(/\r?\n/)
       .map((line) => line.trim())
-      .filter((line) => line.includes('.\\JOENESS.ps1'));
+      .filter(Boolean));
+    assert.equal(invocationLines.length, 4, `${language} must document four non-empty PowerShell command lines`);
     const modes = [...new Set(invocationLines.map((line) => {
       const match = line.match(/^powershell\.exe -NoProfile -File \.\\JOENESS\.ps1 -(?<mode>Check|Apply|Remove)$/);
       assert.ok(match, `${language} must document only exact JOENESS.ps1 command lines`);
@@ -1473,7 +1476,7 @@ test('README exposes only the Lean kernel and operational installer surface', ()
     const exactCheck = 'powershell.exe -NoProfile -File .\\JOENESS.ps1 -Check';
     assertPublicSurface(section, language);
     assert.throws(
-      () => assertPublicSurface(`${section}\npowershell.exe -NoProfile -File .\\JOENESS.ps1 -Repair`, language),
+      () => assertPublicSurface(section.replace(exactCheck, 'powershell.exe -NoProfile -File .\\JOENESS.ps1 -Repair'), language),
       /must document only exact JOENESS\.ps1 command lines/,
     );
     assert.throws(
@@ -1482,6 +1485,10 @@ test('README exposes only the Lean kernel and operational installer surface', ()
     );
     assert.throws(
       () => assertPublicSurface(section.replace(exactCheck, '.\\JOENESS.ps1 -Check'), language),
+      /must document only exact JOENESS\.ps1 command lines/,
+    );
+    assert.throws(
+      () => assertPublicSurface(section.replace(exactCheck, 'JOENESS.ps1 -Repair'), language),
       /must document only exact JOENESS\.ps1 command lines/,
     );
     assert.throws(
