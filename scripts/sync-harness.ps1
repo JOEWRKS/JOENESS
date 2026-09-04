@@ -202,7 +202,8 @@ function Assert-HarnessObjectShape {
 function Get-HarnessManifestSelections {
     param($Manifest, [string] $Root)
     $selected = [Collections.Generic.List[object]]::new()
-    foreach ($skill in @($Manifest.activeSkills.PSObject.Properties.Value)) {
+    foreach ($skillProperty in @($Manifest.activeSkills.PSObject.Properties)) {
+        $skill = $skillProperty.Value
         foreach ($file in @($skill.files)) { $null = $selected.Add($file) }
         foreach ($sourceName in @($skill.sourceDependencies)) {
             $source = $Manifest.sources.PSObject.Properties[[string] $sourceName]
@@ -566,7 +567,6 @@ function Invoke-JoewrksHarnessSync {
     $agentsPath = Join-Path $resolvedCodexHome 'AGENTS.md'
     $overridePath = Join-Path $resolvedCodexHome 'AGENTS.override.md'
     $statePath = Join-Path $resolvedCodexHome 'joewrks-harness-state.json'
-    $optionalRoot = $resolvedAgentsHome
     $codexSkillsPath = Join-Path $resolvedCodexHome 'skills'
     $blockers = [Collections.Generic.List[object]]::new()
     $changes = [Collections.Generic.List[object]]::new()
@@ -689,8 +689,9 @@ function Invoke-JoewrksHarnessSync {
             $null = $release01SkillFiles[$skillName].Add($file)
         }
         $release01SkillNames = @($release01SkillFiles.Keys | Sort-Object -CaseSensitive)
-        $currentSkillNames = @($manifest.activeSkills.PSObject.Properties.Name | Sort-Object -CaseSensitive)
-        $release01LegacySkillNames = @($release01SkillNames | Where-Object { $currentSkillNames -cnotcontains $_ })
+        $release01LegacySkillNames = @($release01SkillNames | Where-Object {
+            $_ -ceq $historicalV1SkillName -or $_.StartsWith('joewrks-', [StringComparison]::Ordinal)
+        })
         if ($release01LegacySkillNames.Count -eq 0) { throw 'Release 0.1 has no legacy skill names' }
         $release01LegacyPrefixes = @($release01LegacySkillNames | ForEach-Object { "skills/$_/" })
         $releaseCore = $release01.activeCommonCore
@@ -1185,35 +1186,6 @@ function Invoke-JoewrksHarnessSync {
     } else {
         'current'
     }
-    $targets = [pscustomobject] @{
-        codexHome = $resolvedCodexHome
-        agentsHome = $resolvedAgentsHome
-        backupRoot = $resolvedBackupRoot
-        commonCore = $agentsPath
-        state = $statePath
-        designFrontendRoot = $optionalRoot
-    }
-    $capabilities = [pscustomobject] @{
-        python = 'observed-only'
-        figma = 'checked-at-task-time'
-        browser = 'checked-at-task-time'
-    }
-    $designFrontendPilot = $null
-    if ($null -ne $manifest) {
-        $sourceIntegrityBlocked = @($blockers | Where-Object { $_.kind -eq 'sourceIntegrity' }).Count -gt 0
-        $designFrontendPilot = [pscustomobject] @{
-            selection = 'default-personal-pilot'
-            state = [string] $manifest.evaluation.state
-            hardGate = if ($sourceIntegrityBlocked) { 'unverified' } else { [string] $manifest.evaluation.current.hardGate }
-            promotionPass = [bool] $manifest.evaluation.current.promotionPass
-            classification = [string] $manifest.evaluation.current.classification
-            outcomeReview = [string] $manifest.evaluation.current.outcomeReview
-            semanticImprovement = [string] $manifest.evaluation.current.semanticImprovement
-            figma = 'task-time-verification-not-certified'
-            browser = 'task-time-verification-not-certified'
-        }
-    }
-
     if ((-not $Apply -and -not $Remove) -or $status -ne 'ready') {
         return New-HarnessPublicResult -Status $status -Mode $mode -AgentsRoot $resolvedAgentsHome -SkillsRoot (Join-Path $resolvedAgentsHome 'skills') -ActiveSkills @($manifestSkillRelativePaths.Keys) -Warnings @($warnings) -ChangesRequired ([bool] ($plannedChanges.Count -gt 0)) -Changes @($changes) -Blockers @($blockers) -BackupPath $null -Rollback $null -UnresolvedTargets @()
     }
