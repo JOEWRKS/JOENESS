@@ -9,6 +9,7 @@ export const TEST_GROUPS = Object.freeze({
   "current-release": Object.freeze([
     "tests/codex-app-server-collector.tests.mjs",
     "tests/design-vendor-integrity.tests.mjs",
+    "tests/joeness-lean-ab-plan.tests.mjs",
     "tests/lean-kernel-contract.tests.mjs",
     "tests/node-test-group-runner.tests.mjs",
   ]),
