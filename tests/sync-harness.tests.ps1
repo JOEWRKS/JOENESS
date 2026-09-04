@@ -22,37 +22,17 @@ function Test-ReadmeContract {
     $parts = $readme -split '## English Guide', 2
     Assert-Equal $parts.Count 2 'README keeps Korean and English sections'
     $sections = @{ Korean = $parts[0]; English = $parts[1] }
-    $koreanPowerShell = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('UG93ZXJTaGVsbCDstpzroKU='))
-    $koreanChat = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('Q29kZXgg7LGE7YyFIOuLteuzgOydtCDslYTri5nri4jri6Q='))
-    $koreanNewTask = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('7IOIIOyekeyXhQ=='))
-    $koreanRestart = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('7J6s7Iuk7ZaJ'))
-    $koreanSeparate = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('67OE64+E66GcIOyEpOy5mA=='))
-    $koreanModelRouting = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('66qo6424IOudvOyasO2MhQ=='))
-    $koreanRolesHeader = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('fCDtmLjstpzrqoUgfCDtlZjripQg7J28IHwg7J6Q64+ZIOyEoO2DnSDsobDqsbQgfA=='))
-    $koreanFirstUse = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('7LKY7J2MIOyCrOyaqTogNeuLqOqzhA=='))
-    $koreanRoles = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('7Jet7ZWg'))
-    $koreanCompatibility = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('7Zi47ZmYIOydtOumhA=='))
-    $koreanOutcomeFirst = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('6rKw6rO866W8IOuovOyggA=='))
-    $koreanNoFixedFields = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('6rOg7KCVIO2VreuqqeydtOuCmCDspIQg7IiY'))
-    $koreanNoReportFiller = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('67O06rOg66W8IOychO2VtCDrs4Trj4Qg6rKA7IKswrfrrLjshJzCt+uhnOq3uOulvCDrp4zrk6Tsp4Ag7JWK7Iq164uI64ukLg=='))
-    $koreanPluginIncompatible = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('7JWU7Iuc7KCBIO2YuOy2nOydhCDsoJztlZztlaAg7IiYIOyXhuuKlCDtlIzrn6zqt7jsnbjsnYAgSk9FTkVTUyDrqoXsi5zsoIEg7IKs7JqpIOyghOyaqSDsoJXssYXqs7wg7Zi47ZmY65CY7KeAIOyViuycvOuvgOuhnCDquLDrs7gg67mE7Zmc7ISx7ZmU66W8IOq2jOyepe2VqeuLiOuLpC4='))
-    $koreanPluginWarningOnly = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('Sk9FTkVTU+uKlCDqsr3qs6Drp4wg7KCc6rO17ZWY66mwIO2UjOufrOq3uOyduCDshKTsoJXsnYQg7J6Q64+Z7Jy866GcIOuzgOqyve2VmOyngCDslYrsirXri4jri6Qu'))
-
-    function Get-ReadmeSubsection {
-        param([string] $Text, [string] $Heading)
-        $match = [regex]::Match($Text, "(?ms)^### $([regex]::Escape($Heading))\r?\n(?<body>.*?)(?=^### |\z)")
-        Assert-True $match.Success "README contains subsection: $Heading"
-        $match.Groups['body'].Value
-    }
-
-    function Get-ReadmeTable {
-        param([string] $Text, [string] $Heading)
-        $body = Get-ReadmeSubsection $Text $Heading
-        $match = [regex]::Match($body, '(?ms)(?<table>^\|.*\|\r?\n^\|[-| ]+\|\r?\n(?:^\|.*\|\r?\n?)+)')
-        Assert-True $match.Success "README subsection has a table: $Heading"
-        $match.Groups['table'].Value.TrimEnd()
-    }
-
+    $koreanSmall = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('7J6R6rOg'))
+    $koreanAlwaysApplied = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('7ZWt7IOBIOyggeyaqeuQmOuKlA=='))
+    $koreanWorkSafetyKernel = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('7J6R7JeFIOyViOyghCDsu6TrhJA='))
+    $koreanAfterInstallation = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('7ISk7LmY7ZWcIOuSpA=='))
+    $koreanWorkNormally = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('7Y+J7IaM7LKY65+8IOyekeyXhQ=='))
+    $koreanPowerShellOutput = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('UG93ZXJTaGVsbCDstpzroKU='))
+    $koreanNotChat = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('Q29kZXgg7LGE7YyFIOuLteuzgOydtCDslYTri5nri4jri6Q='))
+    $koreanReadOnly = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('7J296riwIOyghOyaqQ=='))
+    $koreanJoenessOwned = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('Sk9FTkVTU+qwgCDshozsnKDtlZw='))
+    $koreanUserOwned = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('7IKs7Jqp7J6QIOyGjOycoA=='))
+    $koreanPreserve = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('67O07KG0'))
     foreach ($language in $sections.Keys) {
         $section = $sections[$language]
         foreach ($command in @(
@@ -62,65 +42,23 @@ function Test-ReadmeContract {
         )) {
             Assert-True $section.Contains($command) "$language guide contains $command"
         }
-        Assert-True (($section.Contains('PowerShell output') -and $section.Contains('not a Codex chat response')) -or ($section.Contains($koreanPowerShell) -and $section.Contains($koreanChat))) "$language guide distinguishes PowerShell output from chat responses"
-        Assert-True ($section.Contains('Restart Codex or open a new task') -or ($section.Contains($koreanRestart) -and $section.Contains($koreanNewTask))) "$language guide starts a fresh task after Apply"
-        Assert-True ($section.Contains('installed **separately**') -or $section.Contains($koreanSeparate)) "$language guide explains external plugin boundaries"
-        Assert-True ($section -match '(?is)UI UX Pro Max.{0,120}Apple Design.{0,120}\$design') "$language guide describes design references"
-        Assert-True ($section.Contains('JOENESS Core')) "$language guide uses the public Core name"
-        Assert-True ($section.Contains('model routing') -or $section.Contains($koreanModelRouting)) "$language guide explains that implicit skill selection is model routing"
         if ($language -eq 'English') {
-            Assert-True ($section.Contains('outcome first') -and $section.Contains('no fixed fields or line count') -and $section.Contains('creates no check, document, or log merely to fill a report')) "$language guide explains adaptive outcome-first reporting"
+            Assert-True ($section -match '(?is)small.{0,80}always-on.{0,80}work-safety kernel') 'English guide presents one small always-on work-safety kernel'
+            Assert-True ($section -match '(?is)after installation.{0,120}work normally') 'English guide tells users to work normally after installation'
+            Assert-True ($section.Contains('PowerShell output') -and $section.Contains('not a Codex chat response')) 'English guide distinguishes PowerShell output from chat responses'
+            Assert-True ($section -match '(?is)-Check.{0,200}read-only') 'English guide says Check is read-only'
+            Assert-True ($section -match '(?is)only JOENESS-owned.{0,200}preserv(?:e|es).{0,80}user-owned') 'English guide limits writes to JOENESS-owned state and preserves user-owned content'
+            Assert-True ($section -match '(?is)-Remove.{0,220}JOENESS-owned.{0,160}user-owned') 'English guide states the safe Remove boundary'
         } else {
-            Assert-True ($section.Contains($koreanOutcomeFirst) -and $section.Contains($koreanNoFixedFields) -and $section.Contains($koreanNoReportFiller)) "$language guide explains adaptive outcome-first reporting"
+            Assert-True ($section.Contains($koreanSmall) -and $section.Contains($koreanAlwaysApplied) -and $section.Contains($koreanWorkSafetyKernel)) 'Korean guide presents one small always-on work-safety kernel'
+            Assert-True ($section.Contains($koreanAfterInstallation) -and $section.Contains($koreanWorkNormally)) 'Korean guide tells users to work normally after installation'
+            Assert-True ($section.Contains($koreanPowerShellOutput) -and $section.Contains($koreanNotChat)) 'Korean guide distinguishes PowerShell output from chat responses'
+            Assert-True ($section.Contains('-Check') -and $section.Contains($koreanReadOnly)) 'Korean guide says Check is read-only'
+            Assert-True ($section.Contains($koreanJoenessOwned) -and $section.Contains($koreanUserOwned) -and $section.Contains($koreanPreserve)) 'Korean guide limits writes to JOENESS-owned state and preserves user-owned content'
+            Assert-True ($section.Contains('-Remove') -and $section.Contains($koreanJoenessOwned) -and $section.Contains($koreanUserOwned)) 'Korean guide states the safe Remove boundary'
         }
-        Assert-True ($section -match '(?is)Figma.{0,160}conditional') "$language guide makes Figma conditional"
-        Assert-True ($section -match '(?is)Superpowers.{0,160}explicit-only') "$language guide makes Superpowers explicit-only"
-        Assert-True ($section -match '(?is)Ponytail.{0,160}default disabled') "$language guide makes Ponytail default disabled"
-        if ($language -eq 'English') {
-            Assert-True $section.Contains('A plugin whose implicit invocation cannot be constrained is incompatible with JOENESS explicit-only policy; default disabled is recommended.') 'English guide marks unconstrained implicit invocation incompatible and recommends default disabled'
-            Assert-True $section.Contains('JOENESS only warns and never changes plugin settings automatically.') 'English guide says JOENESS warns without changing plugin settings'
-        } else {
-            Assert-True $section.Contains($koreanPluginIncompatible) 'Korean guide marks unconstrained implicit invocation incompatible and recommends default disabled'
-            Assert-True $section.Contains($koreanPluginWarningOnly) 'Korean guide says JOENESS warns without changing plugin settings'
-        }
-
-        $firstUse = Get-ReadmeSubsection $section $(if ($language -eq 'English') { 'First use: five steps' } else { $koreanFirstUse })
-        $steps = @([regex]::Matches($firstUse, '(?m)^([1-9][0-9]*)\. '))
-        Assert-Equal $steps.Count 5 "$language first-use section has exactly five numbered steps"
-        Assert-Equal (@($steps | ForEach-Object { $_.Groups[1].Value }) -join ',') '1,2,3,4,5' "$language first-use steps are numbered 1 through 5"
-        if ($language -eq 'Korean') { Assert-True $firstUse.Contains('Enter') 'Korean PowerShell step tells the user to press Enter' }
-
-        $roles = Get-ReadmeTable $section $(if ($language -eq 'English') { 'Roles' } else { $koreanRoles })
-        $roleLines = @($roles -split '\r?\n')
-        Assert-True (($roleLines[0] -eq '| Call | What it does | Automatic selection condition |') -or ($roleLines[0] -eq $koreanRolesHeader)) "$language roles table has only the public three-column header"
-        $roleRows = @($roleLines | Select-Object -Skip 2)
-        Assert-Equal $roleRows.Count 6 "$language roles table has exactly six calls"
-        Assert-Equal (@($roleRows | ForEach-Object { ($_ -split '\|')[1].Trim().Trim('`') }) -join ',') '$project,$ticket,$design,$visual-check,$spec,$handoff' "$language roles table has only the active calls"
-        Assert-True (@($roleLines | Where-Object { $_ -notmatch '^\|[^|]+\|[^|]+\|[^|]+\|$' }).Count -eq 0) "$language roles table has exactly three columns"
-        if ($language -eq 'English') {
-            Assert-True $section.Contains('low-risk change fully decided by one deterministic check') 'English guide limits the deterministic-check ticket bypass to low-risk work'
-            Assert-True $roles.Contains('moving an approved image to another size or format') 'English visual-check row explains approved-image translation'
-            Assert-True $roles.Contains('visual output before completion') 'English visual-check row explains the visual completion gate'
-            Assert-True ($roles.Contains('persistent specification') -and $roles.Contains("user's language")) 'English spec row explains conditional user-language delivery'
-        } else {
-            $koreanLowRisk = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('64uo7J28IOyekOuPmeqygOyCrOuhnCDsmYTsoITtnogg7YyQ7KCV65CY64qUIOyggOychO2XmCDsiJjsoJU='))
-            Assert-True $section.Contains($koreanLowRisk) 'Korean guide limits the deterministic-check ticket bypass to low-risk work'
-            $koreanApprovedImage = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('7Iq57J2465CcIOydtOuvuOyngOulvCDri6Trpbgg7YGs6riwwrftmJXsi53snLzroZwg7Jiu6ri4IOuVjA=='))
-            $koreanVisualCompletion = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('7Iuc6rCBIOqysOqzvOusvOydhCDsmYTro4wg7KCE7JeQIOyngeygkSDtmZXsnbg='))
-            $koreanSpec = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('66qF7IS4'))
-            $koreanUserLanguage = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('7IKs7Jqp7J6QIOyWuOyWtA=='))
-            Assert-True $roles.Contains($koreanApprovedImage) 'Korean visual-check row explains approved-image translation'
-            Assert-True $roles.Contains($koreanVisualCompletion) 'Korean visual-check row explains the visual completion gate'
-            Assert-True ($roles.Contains($koreanSpec) -and $roles.Contains($koreanUserLanguage)) 'Korean spec row explains conditional user-language delivery'
-        }
-
-        $compatibility = Get-ReadmeTable $section $(if ($language -eq 'English') { 'Compatibility names' } else { $koreanCompatibility })
-        $withoutCompatibility = $section.Replace($compatibility, '')
-        foreach ($oldName in @('JOENESS-0.1.ps1', 'harness.ps1', 'joewrks-project-setup', 'joewrks-design-frontend')) {
-            Assert-True $compatibility.Contains($oldName) "$language compatibility table maps $oldName"
-            Assert-True (-not $withoutCompatibility.Contains($oldName)) "$language keeps $oldName inside its compatibility table"
-        }
-        Assert-True (-not ($section -match '(?im)^\s*(?:[-*]\s+)?`?\$?(?:figma|superpowers|ponytail)(?::|[-_][a-z])')) "$language guide does not present provider internal skills as commands"
+        Assert-True (-not ($section -match '(?i)\$(?:project|ticket|design|visual-check|spec|handoff)\b')) "$language guide exposes no public skill calls"
+        Assert-True (-not ($section -match '(?i)Figma|Superpowers|Ponytail|UI UX Pro Max|Apple Design')) "$language guide exposes no plugin or design-vendor policy"
     }
 }
 function Assert-ThrowsLike {

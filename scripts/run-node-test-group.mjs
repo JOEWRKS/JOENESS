@@ -7,41 +7,41 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
 export const TEST_GROUPS = Object.freeze({
   "current-release": Object.freeze([
-    "tests/authority-role-separated-evaluator-turn.tests.mjs",
     "tests/codex-app-server-collector.tests.mjs",
+    "tests/design-vendor-integrity.tests.mjs",
+    "tests/lean-kernel-contract.tests.mjs",
+    "tests/node-test-group-runner.tests.mjs",
+    "tests/skill-contracts.tests.mjs",
+  ]),
+  "historical-integrity": Object.freeze([
+    "tests/design-visual-m2.tests.mjs",
+    "tests/joeness-m4-historical-integrity.tests.mjs",
+    "tests/thin-hybrid-core.tests.mjs",
+  ]),
+  "historical-replay": Object.freeze([
+    "tests/authority-role-separated-evaluator-turn.tests.mjs",
     "tests/common-core-coding-ab.tests.mjs",
     "tests/common-core-v1-v2-ab.tests.mjs",
     "tests/design-frontend-hybrid-routing.tests.mjs",
     "tests/design-frontend-routing.tests.mjs",
-    "tests/design-vendor-integrity.tests.mjs",
     "tests/design-visual-m2-b1-runner.tests.mjs",
-    "tests/design-visual-m2.tests.mjs",
     "tests/fresh-evaluator-turn.tests.mjs",
-    "tests/joeness-m4-direct-user-delegation-eval.tests.mjs",
-    "tests/joeness-m4-direct-user-delegation-live.tests.mjs",
-    "tests/lean-kernel-contract.tests.mjs",
-    "tests/node-test-group-runner.tests.mjs",
-    "tests/project-aware-lean-ab.tests.mjs",
-    "tests/skill-contracts.tests.mjs",
-    "tests/thin-hybrid-core.tests.mjs",
-    "tests/ticket-evaluator-provenance.tests.mjs",
-    "tests/ticket-m1b-fixture.tests.mjs",
-    "tests/ticket-verdict.tests.mjs",
-  ]),
-  "historical-integrity": Object.freeze([
-    "tests/joeness-m4-historical-integrity.tests.mjs",
-  ]),
-  "historical-replay": Object.freeze([
     "tests/joeness-m4-authority-behavior-eval.tests.mjs",
     "tests/joeness-m4-authority-behavior-live.tests.mjs",
     "tests/joeness-m4-authority-structured-output-eval.tests.mjs",
     "tests/joeness-m4-authority-structured-output-live.tests.mjs",
+    "tests/joeness-m4-direct-user-delegation-eval.tests.mjs",
+    "tests/joeness-m4-direct-user-delegation-live.tests.mjs",
     "tests/joeness-m4-pinned-load-control-eval.tests.mjs",
     "tests/joeness-m4-pinned-load-control-live.tests.mjs",
     "tests/joeness-m4-superpowers-eval.tests.mjs",
     "tests/joeness-m4-superpowers-live.tests.mjs",
     "tests/joeness-m4-transport-control-eval.tests.mjs",
     "tests/joeness-m4-transport-control-live.tests.mjs",
+    "tests/project-aware-lean-ab.tests.mjs",
+    "tests/ticket-evaluator-provenance.tests.mjs",
+    "tests/ticket-m1b-fixture.tests.mjs",
+    "tests/ticket-verdict.tests.mjs",
   ]),
 });
 
@@ -49,14 +49,6 @@ export const HISTORICAL_LOCAL_CASES = Object.freeze([
   Object.freeze({
     file: "tests/codex-app-server-collector.tests.mjs",
     name: "paired v1 artifacts and blocked controls remain valid after recovery",
-  }),
-  Object.freeze({
-    file: "tests/common-core-v1-v2-ab.tests.mjs",
-    name: "collector raw validation rejects post-capture evidence, hash, and review mutation",
-  }),
-  Object.freeze({
-    file: "tests/project-aware-lean-ab.tests.mjs",
-    name: "smoke validates frozen candidate identity and the six-session contract without calling Codex",
   }),
 ]);
 

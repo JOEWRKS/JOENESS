@@ -28,9 +28,9 @@ test("taxonomy classifies every Node test exactly once", async () => {
   assert.deepEqual(validateTaxonomy({ discoveredFiles, groups: TEST_GROUPS }), {
     total: 31,
     groups: {
-      "current-release": 20,
-      "historical-integrity": 1,
-      "historical-replay": 10,
+      "current-release": 5,
+      "historical-integrity": 3,
+      "historical-replay": 23,
     },
   });
 });
@@ -61,19 +61,11 @@ test("taxonomy rejects unclassified and duplicate test ownership", () => {
   );
 });
 
-test("historical local registry owns exactly the three mixed-taxonomy cases", () => {
+test("historical local registry owns only the mixed current collector case", () => {
   assert.deepEqual(HISTORICAL_LOCAL_CASES, [
     {
       file: "tests/codex-app-server-collector.tests.mjs",
       name: "paired v1 artifacts and blocked controls remain valid after recovery",
-    },
-    {
-      file: "tests/common-core-v1-v2-ab.tests.mjs",
-      name: "collector raw validation rejects post-capture evidence, hash, and review mutation",
-    },
-    {
-      file: "tests/project-aware-lean-ab.tests.mjs",
-      name: "smoke validates frozen candidate identity and the six-session contract without calling Codex",
     },
   ]);
   assert.equal(Object.isFrozen(HISTORICAL_LOCAL_CASES), true);

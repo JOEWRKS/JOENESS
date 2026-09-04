@@ -1451,22 +1451,21 @@ test('operational skills bound handoff context and high-cost validation', () => 
   assert.doesNotMatch(projectSetup, /reviewer trees|one controller check|at most one independent reviewer|at most one evidence-scoped re-review/i);
 });
 
-test('README keeps the public Core, Spec, and external-plugin policy explicit', () => {
+test('README exposes only the Lean kernel and operational installer surface', () => {
   const readme = readFileSync(README, 'utf8');
   const [korean, english] = readme.split('## English Guide');
   assert.ok(english, 'README must retain the English guide');
   for (const section of [korean, english]) {
-    assert.match(section, /JOENESS Core/);
-    assert.match(section, /model routing|모델 라우팅/i);
-    assert.match(section, /Figma[\s\S]{0,180}conditional/i);
-    assert.match(section, /Superpowers[\s\S]{0,220}explicit-only/i);
-    assert.match(section, /Ponytail[\s\S]{0,180}default disabled/i);
-    assert.match(section, /\$spec/);
-    assert.doesNotMatch(section, /\$summary/i);
+    assert.match(section, /small[\s\S]{0,100}always-on[\s\S]{0,100}work-safety kernel|작고[\s\S]{0,100}항상 적용되는[\s\S]{0,100}작업 안전 커널/i);
+    assert.match(section, /after installation[\s\S]{0,140}work normally|설치한 뒤[\s\S]{0,140}평소처럼 작업/i);
+    for (const operation of ['Check', 'Apply', 'Remove']) {
+      assert.match(section, new RegExp(`powershell\\.exe -NoProfile -File \\.\\\\JOENESS\\.ps1 -${operation}`, 'i'));
+    }
+    assert.match(section, /PowerShell output[\s\S]{0,100}not a Codex chat response|PowerShell 출력[\s\S]{0,100}Codex 채팅 답변이 아닙니다/i);
+    assert.match(section, /only JOENESS-owned[\s\S]{0,220}user-owned|JOENESS가 소유한[\s\S]{0,220}사용자 소유/i);
+    assert.doesNotMatch(section, /\$(?:project|ticket|design|visual-check|spec|handoff)\b/i);
+    assert.doesNotMatch(section, /Figma|Superpowers|Ponytail|UI UX Pro Max|Apple Design/i);
   }
-  assert.match(korean, /결과를 먼저.*고정 항목이나 줄 수.*보고를 위해 별도 검사·문서·로그를 만들지 않습니다/is);
-  assert.match(english, /outcome first.*no fixed fields or line count.*creates no check, document, or log merely to fill a report/is);
-  assert.match(readme, /does not change their installation or enablement settings|설치·활성화 설정을 바꾸지 않습니다/i);
 });
 
 test('Git preserves exact vendor and active skill bytes on checkout', () => {
