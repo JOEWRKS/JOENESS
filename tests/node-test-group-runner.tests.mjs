@@ -10,6 +10,7 @@ import {
   HISTORICAL_LOCAL_CASES,
   TEST_GROUPS,
   nodeTestArguments,
+  nodeTestInvocations,
   validateTaxonomy,
 } from "../scripts/run-node-test-group.mjs";
 
@@ -95,24 +96,38 @@ test("historical local registry owns exactly the mixed current historical cases"
   );
 });
 
-test("historical integrity executes each registered mixed current case exactly once", async () => {
-  const childEnvironment = Object.fromEntries(
-    Object.entries(process.env).filter(([name]) => name !== "NODE_TEST_CONTEXT"),
+test("historical integrity plans the owned group and exact mixed cases without executing them", () => {
+  const invocations = nodeTestInvocations("historical-integrity");
+  assert.equal(invocations.length, 2);
+  assert.deepEqual(invocations[0], [
+    "--test",
+    "tests/design-visual-m2.tests.mjs",
+    "tests/joeness-m4-historical-integrity.tests.mjs",
+    "tests/skill-contracts.tests.mjs",
+    "tests/thin-hybrid-core.tests.mjs",
+  ]);
+  assert.deepEqual(
+    invocations[1].filter((argument) => argument.endsWith(".tests.mjs")),
+    [
+      "tests/codex-app-server-collector.tests.mjs",
+      "tests/design-vendor-integrity.tests.mjs",
+    ],
   );
-  const { stdout, stderr } = await execFileAsync(
-    process.execPath,
-    [RUNNER, "historical-integrity"],
-    { cwd: ROOT, encoding: "utf8", env: childEnvironment },
-  );
-
-  assert.equal(stderr, "");
+  assert.equal(invocations[1][0], "--test");
+  const patternArguments = invocations[1].filter((argument) =>
+    argument.startsWith("--test-name-pattern="));
+  assert.equal(patternArguments.length, 1);
+  const pattern = new RegExp(patternArguments[0].slice("--test-name-pattern=".length), "u");
   for (const { name } of HISTORICAL_LOCAL_CASES) {
-    assert.equal(stdout.split(name).length - 1, 1, name);
+    assert.equal(pattern.test(name), true, name);
+    assert.equal(pattern.test(`${name} portable current contract`), false, name);
   }
+  assert.equal(pattern.test("an unrelated historical integrity case"), false);
 });
 
 test("current release derives one skip pattern that removes only registered cases", () => {
   const args = nodeTestArguments("current-release");
+  assert.deepEqual(nodeTestInvocations("current-release"), [args]);
   assert.equal(args[0], "--test");
   const patternArgument = args.find((argument) =>
     argument.startsWith("--test-skip-pattern="));

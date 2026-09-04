@@ -150,6 +150,17 @@ export function nodeTestArguments(
   return args;
 }
 
+export function nodeTestInvocations(group, options = {}) {
+  const invocations = [nodeTestArguments(group, options)];
+  if (group === "historical-integrity") {
+    const localArguments = historicalLocalTestArguments(options);
+    if (localArguments !== undefined) {
+      invocations.push(localArguments);
+    }
+  }
+  return invocations;
+}
+
 export function validateTaxonomy({ discoveredFiles, groups = TEST_GROUPS }) {
   const discovered = [...discoveredFiles].sort();
   const discoveredSet = new Set(discovered);
@@ -226,14 +237,7 @@ async function main() {
     return 2;
   }
 
-  const invocations = [nodeTestArguments(group)];
-  if (group === "historical-integrity") {
-    const localArguments = historicalLocalTestArguments();
-    if (localArguments !== undefined) {
-      invocations.push(localArguments);
-    }
-  }
-  for (const args of invocations) {
+  for (const args of nodeTestInvocations(group)) {
     const result = spawnSync(process.execPath, args, {
       cwd: ROOT,
       stdio: "inherit",
