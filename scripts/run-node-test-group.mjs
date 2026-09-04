@@ -19,6 +19,7 @@ export const TEST_GROUPS = Object.freeze({
     "tests/fresh-evaluator-turn.tests.mjs",
     "tests/joeness-m4-direct-user-delegation-eval.tests.mjs",
     "tests/joeness-m4-direct-user-delegation-live.tests.mjs",
+    "tests/lean-kernel-contract.tests.mjs",
     "tests/node-test-group-runner.tests.mjs",
     "tests/project-aware-lean-ab.tests.mjs",
     "tests/skill-contracts.tests.mjs",

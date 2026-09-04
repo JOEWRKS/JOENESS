@@ -26,9 +26,9 @@ test("taxonomy classifies every Node test exactly once", async () => {
     .sort();
 
   assert.deepEqual(validateTaxonomy({ discoveredFiles, groups: TEST_GROUPS }), {
-    total: 30,
+    total: 31,
     groups: {
-      "current-release": 19,
+      "current-release": 20,
       "historical-integrity": 1,
       "historical-replay": 10,
     },
