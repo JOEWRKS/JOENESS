@@ -18,7 +18,13 @@ function Assert-True { param([bool] $Condition, [string] $Message) if (-not $Con
 function Assert-Equal { param($Actual, $Expected, [string] $Message) if ($Actual -cne $Expected) { throw "Assertion failed: $Message; expected [$Expected], got [$Actual]" } }
 function Assert-ReadmeInvocationSurface {
     param([string] $Text, [string] $Label)
-    $modes = @([regex]::Matches($Text, '(?i)JOENESS\.ps1[ \t]+-(?<mode>[A-Za-z][A-Za-z0-9-]*)') | ForEach-Object { $_.Groups['mode'].Value } | Sort-Object -Unique)
+    $invocationLines = @($Text -split '\r?\n' | ForEach-Object { $_.Trim() } | Where-Object { $_.Contains('.\JOENESS.ps1') })
+    $modes = @(foreach ($line in $invocationLines) {
+        $match = [regex]::Match($line, '^powershell\.exe -NoProfile -File \.\\JOENESS\.ps1 -(?<mode>Check|Apply|Remove)$')
+        Assert-True $match.Success "$Label guide documents only exact JOENESS.ps1 command lines"
+        $match.Groups['mode'].Value
+    })
+    $modes = @($modes | Sort-Object -Unique)
     Assert-Equal ($modes -join ',') 'Apply,Check,Remove' "$Label guide documents only the Check, Apply, and Remove operation modes"
     $publicCallTokens = @([regex]::Matches($Text, '\$[A-Za-z][A-Za-z0-9_-]*') | ForEach-Object { $_.Value })
     Assert-Equal $publicCallTokens.Count 0 "$Label guide exposes no public `$... call tokens"
@@ -45,8 +51,11 @@ function Test-ReadmeContract {
     $koreanOutsideBlock = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('6rSA66asIOu4lOuhnSDrsJY='))
     foreach ($language in $sections.Keys) {
         $section = $sections[$language]
+        $exactCheck = 'powershell.exe -NoProfile -File .\JOENESS.ps1 -Check'
         Assert-ReadmeInvocationSurface $section $language
-        Assert-ThrowsLike { Assert-ReadmeInvocationSurface ($section + "`npowershell.exe -NoProfile -File .\JOENESS.ps1 -Repair") $language } '*documents only the Check, Apply, and Remove operation modes*' "$language guide rejects a fourth installer operation"
+        Assert-ThrowsLike { Assert-ReadmeInvocationSurface ($section + "`npowershell.exe -NoProfile -File .\JOENESS.ps1 -Repair") $language } '*documents only exact JOENESS.ps1 command lines*' "$language guide rejects a fourth installer operation"
+        Assert-ThrowsLike { Assert-ReadmeInvocationSurface ($section.Replace($exactCheck, "$exactCheck -Repair")) $language } '*documents only exact JOENESS.ps1 command lines*' "$language guide rejects trailing installer switches"
+        Assert-ThrowsLike { Assert-ReadmeInvocationSurface ($section.Replace($exactCheck, '.\JOENESS.ps1 -Check')) $language } '*documents only exact JOENESS.ps1 command lines*' "$language guide rejects a missing command prefix"
         Assert-ThrowsLike { Assert-ReadmeInvocationSurface ($section + "`n" + '$joewrks-project-setup $joewrks-design-frontend') $language } '*exposes no public $... call tokens*' "$language guide rejects retired public call aliases"
         if ($language -eq 'English') {
             Assert-True ($section -match '(?is)small.{0,80}always-on.{0,80}work-safety kernel') 'English guide presents one small always-on work-safety kernel'

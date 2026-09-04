@@ -1457,17 +1457,32 @@ test('README exposes only the Lean kernel and operational installer surface', ()
   assert.ok(english, 'README must retain the English guide');
   const expectedModes = ['Apply', 'Check', 'Remove'];
   const assertPublicSurface = (section, language) => {
-    const modes = [...new Set([...section.matchAll(/JOENESS\.ps1[ \t]+-(?<mode>[A-Za-z][A-Za-z0-9-]*)/gi)]
-      .map(({ groups }) => groups.mode))].sort();
+    const invocationLines = section.split(/\r?\n/)
+      .map((line) => line.trim())
+      .filter((line) => line.includes('.\\JOENESS.ps1'));
+    const modes = [...new Set(invocationLines.map((line) => {
+      const match = line.match(/^powershell\.exe -NoProfile -File \.\\JOENESS\.ps1 -(?<mode>Check|Apply|Remove)$/);
+      assert.ok(match, `${language} must document only exact JOENESS.ps1 command lines`);
+      return match.groups.mode;
+    }))].sort();
     assert.deepEqual(modes, expectedModes, `${language} must document only the Check, Apply, and Remove operation modes`);
     const publicCallTokens = section.match(/\$[A-Za-z][A-Za-z0-9_-]*/g) ?? [];
     assert.deepEqual(publicCallTokens, [], `${language} must expose no public $... call tokens`);
   };
   for (const [language, section] of [['Korean', korean], ['English', english]]) {
+    const exactCheck = 'powershell.exe -NoProfile -File .\\JOENESS.ps1 -Check';
     assertPublicSurface(section, language);
     assert.throws(
       () => assertPublicSurface(`${section}\npowershell.exe -NoProfile -File .\\JOENESS.ps1 -Repair`, language),
-      /must document only the Check, Apply, and Remove operation modes/,
+      /must document only exact JOENESS\.ps1 command lines/,
+    );
+    assert.throws(
+      () => assertPublicSurface(section.replace(exactCheck, `${exactCheck} -Repair`), language),
+      /must document only exact JOENESS\.ps1 command lines/,
+    );
+    assert.throws(
+      () => assertPublicSurface(section.replace(exactCheck, '.\\JOENESS.ps1 -Check'), language),
+      /must document only exact JOENESS\.ps1 command lines/,
     );
     assert.throws(
       () => assertPublicSurface(`${section}\n$joewrks-project-setup $joewrks-design-frontend`, language),
