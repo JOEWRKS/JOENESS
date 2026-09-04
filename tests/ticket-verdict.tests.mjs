@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import test from 'node:test';
 
 import { summarizeTicketVerdicts } from '../evals/support/ticket-verdict.mjs';
@@ -67,4 +68,14 @@ test('invalid criteria fail deterministically', () => {
   for (const [value, error] of invalidCases) {
     assert.throws(() => summarizeTicketVerdicts(value), error);
   }
+});
+
+test('ticket conditionally invokes Ponytail only as a bounded over-engineering audit', () => {
+  const ticket = readFileSync(new URL('../skills/ticket/SKILL.md', import.meta.url), 'utf8');
+
+  assert.match(ticket, /Ponytail.*(?:review|audit).*read-only/is);
+  assert.match(ticket, /concrete.*(?:over-engineering|complexity).*risk.*abstraction.*framework.*dependenc.*layer.*generaliz/is);
+  assert.match(ticket, /(?:unavailable|disabled).*not.*block/is);
+  assert.match(ticket, /(?:cannot|must not).*add.*(?:scope|requirement|acceptance criter)/is);
+  assert.match(ticket, /low-risk.*(?:skip|do not.*Ponytail)/is);
 });

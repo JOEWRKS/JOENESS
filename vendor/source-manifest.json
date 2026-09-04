@@ -299,10 +299,10 @@
       "evaluationState": "candidate",
       "activationPolicy": "implicit-important-ticket-review",
       "sourceDependencies": [],
-      "intentionalDifferences": ["Conditional single-writer delivery and new-context candidate review for important prepared work, with explicit shared-model and shared-permission limitations."],
+      "intentionalDifferences": ["Conditional single-writer delivery, new-context candidate review, and bounded optional Ponytail over-engineering audit for important prepared work, with explicit shared-model and shared-permission limitations."],
       "validatorSha256": "5347a0a09cfb546bba1c0d1a30dae0a233d9a05f57bd4e7877155c588bcdabf7",
       "files": [
-        {"localPath":"skills/ticket/SKILL.md","bytes":3619,"sha256":"1c783553bbc3a0bd0b7e8a1dd376ee912ef00840670e06fa4945bde1ab78211f","exactUpstreamCopy":false},
+        {"localPath":"skills/ticket/SKILL.md","bytes":4791,"sha256":"9168c5210ae889554422598aea4fdda5afaf421ade568532469b8a45a1f29842","exactUpstreamCopy":false},
         {"localPath":"skills/ticket/agents/openai.yaml","bytes":339,"sha256":"9c145a3c51ae22611fdb00d00c4793be83f87cfffc8a3741b8ff6dff9a0b04de","exactUpstreamCopy":false}
       ]
     },

@@ -33,6 +33,14 @@ Implementer logs and self-authored evidence are leads, not `PASS`. `PASS` needs 
 
 For visual criteria the evaluator applies `$visual-check` to the exact candidate. Its `PASS` does not replace the root PM's direct `$visual-check` inspection of the same exact result before a final visual claim. Either inspection unavailable -> `UNVERIFIED`.
 
+## Optional over-engineering audit
+
+For an important candidate with concrete over-engineering or complexity risk—such as a new abstraction or framework, a new dependency, multiple new layers or coordination surfaces disproportionate to scope, or generalization beyond the accepted need—the root PM may explicitly invoke one Ponytail `review` or `audit` as a read-only advisory check. Skip Ponytail for low-risk fixes, read-only work, explanations, and low-risk changes decided by one deterministic check.
+
+Ponytail cannot add scope, requirements, acceptance criteria, write authority, or a new definition of done. Verify any finding against the existing ticket/project authority; style preference alone does not change a verdict. If a finding proves an existing scope, criterion, or safety violation, use the normal `REWORK` path. The implementer remains the only product writer, and any changed candidate requires the normal new-context evaluation again.
+
+If Ponytail is unavailable or disabled, do not block completion unless the user or project contract made that audit required; continue the existing verification and report the missing audit only when relevant.
+
 ## Stop
 
 A changed candidate invalidates the verdict and needs another no-history evaluator. Allow one automatic rework round limited to failed criteria. The same failure again or no material change -> `USER_DECISION`. Missing evidence stays `UNVERIFIED`; reserve `USER_DECISION` for goal, scope, authority, or acceptance choices. JOENESS Core's stricter limit wins.
