@@ -11,11 +11,11 @@ export const TEST_GROUPS = Object.freeze({
     "tests/design-vendor-integrity.tests.mjs",
     "tests/lean-kernel-contract.tests.mjs",
     "tests/node-test-group-runner.tests.mjs",
-    "tests/skill-contracts.tests.mjs",
   ]),
   "historical-integrity": Object.freeze([
     "tests/design-visual-m2.tests.mjs",
     "tests/joeness-m4-historical-integrity.tests.mjs",
+    "tests/skill-contracts.tests.mjs",
     "tests/thin-hybrid-core.tests.mjs",
   ]),
   "historical-replay": Object.freeze([
