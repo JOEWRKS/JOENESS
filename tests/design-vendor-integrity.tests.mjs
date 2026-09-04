@@ -849,7 +849,7 @@ test('the Lean readiness ledger binds candidate status without claiming A/B prom
     sha256: '0727f159bb33f67d40e4e0a1f1f391f76f96a6d980f7e1e6177df193208c3054',
   });
   assert.deepEqual(ledger.candidate, {
-    state: 'deterministic-implementation-in-progress',
+    state: 'LEAN_JOENESS_CANDIDATE_READY_FOR_AB',
     distributionManifest: {
       path: 'vendor/source-manifest.json',
       bytes: 14688,

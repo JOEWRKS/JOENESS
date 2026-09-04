@@ -61,11 +61,31 @@ test("taxonomy rejects unclassified and duplicate test ownership", () => {
   );
 });
 
-test("historical local registry owns only the mixed current collector case", () => {
+test("historical local registry owns exactly the mixed current historical cases", () => {
   assert.deepEqual(HISTORICAL_LOCAL_CASES, [
     {
       file: "tests/codex-app-server-collector.tests.mjs",
       name: "paired v1 artifacts and blocked controls remain valid after recovery",
+    },
+    {
+      file: "tests/design-vendor-integrity.tests.mjs",
+      name: "Control vendor and public-skill identities remain exact historical facts",
+    },
+    {
+      file: "tests/design-vendor-integrity.tests.mjs",
+      name: "Control M4 preserves project workflow authority without promoting or expanding Core",
+    },
+    {
+      file: "tests/design-vendor-integrity.tests.mjs",
+      name: "Control evaluation history remains available from its immutable Git owner",
+    },
+    {
+      file: "tests/design-vendor-integrity.tests.mjs",
+      name: "operational skills bound handoff context and high-cost validation",
+    },
+    {
+      file: "tests/design-vendor-integrity.tests.mjs",
+      name: "Git preserves exact vendor and active skill bytes on checkout",
     },
   ]);
   assert.equal(Object.isFrozen(HISTORICAL_LOCAL_CASES), true);
@@ -73,6 +93,22 @@ test("historical local registry owns only the mixed current collector case", () 
     HISTORICAL_LOCAL_CASES.every((entry) => Object.isFrozen(entry)),
     true,
   );
+});
+
+test("historical integrity executes each registered mixed current case exactly once", async () => {
+  const childEnvironment = Object.fromEntries(
+    Object.entries(process.env).filter(([name]) => name !== "NODE_TEST_CONTEXT"),
+  );
+  const { stdout, stderr } = await execFileAsync(
+    process.execPath,
+    [RUNNER, "historical-integrity"],
+    { cwd: ROOT, encoding: "utf8", env: childEnvironment },
+  );
+
+  assert.equal(stderr, "");
+  for (const { name } of HISTORICAL_LOCAL_CASES) {
+    assert.equal(stdout.split(name).length - 1, 1, name);
+  }
 });
 
 test("current release derives one skip pattern that removes only registered cases", () => {

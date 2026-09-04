@@ -51,15 +51,36 @@ export const HISTORICAL_LOCAL_CASES = Object.freeze([
     file: "tests/codex-app-server-collector.tests.mjs",
     name: "paired v1 artifacts and blocked controls remain valid after recovery",
   }),
+  Object.freeze({
+    file: "tests/design-vendor-integrity.tests.mjs",
+    name: "Control vendor and public-skill identities remain exact historical facts",
+  }),
+  Object.freeze({
+    file: "tests/design-vendor-integrity.tests.mjs",
+    name: "Control M4 preserves project workflow authority without promoting or expanding Core",
+  }),
+  Object.freeze({
+    file: "tests/design-vendor-integrity.tests.mjs",
+    name: "Control evaluation history remains available from its immutable Git owner",
+  }),
+  Object.freeze({
+    file: "tests/design-vendor-integrity.tests.mjs",
+    name: "operational skills bound handoff context and high-cost validation",
+  }),
+  Object.freeze({
+    file: "tests/design-vendor-integrity.tests.mjs",
+    name: "Git preserves exact vendor and active skill bytes on checkout",
+  }),
 ]);
 
 function escapeRegex(value) {
   return value.replace(/[\\^$.*+?()[\]{}|]/gu, "\\$&");
 }
 
-function historicalLocalSkipPattern({ groups, historicalLocalCases }) {
+function historicalLocalSelection({ groups, historicalLocalCases }) {
   const currentReleaseFiles = new Set(groups["current-release"] ?? []);
   const identities = new Set();
+  const files = new Set();
   const names = [];
   for (const entry of historicalLocalCases) {
     if (
@@ -80,12 +101,28 @@ function historicalLocalSkipPattern({ groups, historicalLocalCases }) {
       throw new Error(`duplicate historical local case: ${entry.file} :: ${entry.name}`);
     }
     identities.add(identity);
+    files.add(entry.file);
     names.push(escapeRegex(entry.name));
   }
-  if (names.length === 0) {
+  return {
+    files: [...files],
+    pattern: names.length === 0 ? undefined : `^(?:${names.join("|")})$`,
+  };
+}
+
+function historicalLocalSkipPattern(options) {
+  return historicalLocalSelection(options).pattern;
+}
+
+function historicalLocalTestArguments({
+  groups = TEST_GROUPS,
+  historicalLocalCases = HISTORICAL_LOCAL_CASES,
+} = {}) {
+  const { files, pattern } = historicalLocalSelection({ groups, historicalLocalCases });
+  if (pattern === undefined) {
     return undefined;
   }
-  return `^(?:${names.join("|")})$`;
+  return ["--test", `--test-name-pattern=${pattern}`, ...files];
 }
 
 export function nodeTestArguments(
@@ -189,18 +226,30 @@ async function main() {
     return 2;
   }
 
-  const result = spawnSync(process.execPath, nodeTestArguments(group), {
-    cwd: ROOT,
-    stdio: "inherit",
-  });
-  if (result.error) {
-    throw result.error;
+  const invocations = [nodeTestArguments(group)];
+  if (group === "historical-integrity") {
+    const localArguments = historicalLocalTestArguments();
+    if (localArguments !== undefined) {
+      invocations.push(localArguments);
+    }
   }
-  if (result.signal) {
-    process.stderr.write(`Node test group terminated by ${result.signal}.\n`);
-    return 1;
+  for (const args of invocations) {
+    const result = spawnSync(process.execPath, args, {
+      cwd: ROOT,
+      stdio: "inherit",
+    });
+    if (result.error) {
+      throw result.error;
+    }
+    if (result.signal) {
+      process.stderr.write(`Node test group terminated by ${result.signal}.\n`);
+      return 1;
+    }
+    if (result.status !== 0) {
+      return result.status ?? 1;
+    }
   }
-  return result.status ?? 1;
+  return 0;
 }
 
 const isMain =
