@@ -300,7 +300,7 @@ const EXPECTED_TICKET_SKILL = {
     {
       localPath: 'skills/ticket/SKILL.md',
       bytes: 4791,
-      sha256: '9168c5210ae889554422598aea4fdda5afaf421ade568532469b8a45a1f29842',
+      sha256: 'db0711bbb305310f8ee8ab0653426d6719b62d73274600e6b67499b0c6439307',
       exactUpstreamCopy: false,
     },
     {

@@ -303,7 +303,7 @@
       "intentionalDifferences": ["Conditional single-writer delivery, new-context candidate review, and bounded optional Ponytail over-engineering audit for important prepared work, with explicit shared-model and shared-permission limitations."],
       "validatorSha256": "5347a0a09cfb546bba1c0d1a30dae0a233d9a05f57bd4e7877155c588bcdabf7",
       "files": [
-        {"localPath":"skills/ticket/SKILL.md","bytes":4791,"sha256":"9168c5210ae889554422598aea4fdda5afaf421ade568532469b8a45a1f29842","exactUpstreamCopy":false},
+        {"localPath":"skills/ticket/SKILL.md","bytes":4791,"sha256":"db0711bbb305310f8ee8ab0653426d6719b62d73274600e6b67499b0c6439307","exactUpstreamCopy":false},
         {"localPath":"skills/ticket/agents/openai.yaml","bytes":339,"sha256":"9c145a3c51ae22611fdb00d00c4793be83f87cfffc8a3741b8ff6dff9a0b04de","exactUpstreamCopy":false}
       ]
     },
