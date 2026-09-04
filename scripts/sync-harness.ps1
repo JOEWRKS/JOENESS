@@ -20,6 +20,17 @@ function Get-HarnessSha256 {
     finally { $sha.Dispose() }
 }
 
+function Get-HarnessWholeFileSelectionSha256 {
+    param($WholeFiles)
+    [string[]] $paths = @($WholeFiles.Keys | ForEach-Object { [string] $_ })
+    [Array]::Sort($paths, [StringComparer]::Ordinal)
+    $lines = @($paths | ForEach-Object {
+        "$_=$($WholeFiles[$_])"
+    })
+    $bytes = (New-Object Text.UTF8Encoding($false)).GetBytes(($lines -join "`n"))
+    Get-HarnessSha256 $bytes
+}
+
 function Get-HarnessPathIdentity {
     param([string] $Path)
     $normalized = [IO.Path]::GetFullPath($Path).TrimEnd('\', '/').Replace('/', '\').ToUpperInvariant()
@@ -583,6 +594,13 @@ function Invoke-JoewrksHarnessSync {
     $release01LegacySkillNames = @()
     $release01LegacyPrefixes = @()
     $release01Dependencies = @()
+    $controlV2ManifestHash = $null
+    $controlV2ManifestBytes = $null
+    $controlV2CorePath = $null
+    $controlV2CoreHash = $null
+    $controlV2SkillNames = @()
+    $controlV2WholeFileCount = $null
+    $controlV2SelectionHash = $null
     $sourceCore = $null
     $blockHash = $null
     $agentSnapshot = $null
@@ -624,6 +642,29 @@ function Invoke-JoewrksHarnessSync {
         $coreEntry = $manifest.activeCommonCore
         $legacyInstallSources = $manifest.compatibility.legacyInstallSources
         if ($null -eq $legacyInstallSources) { throw 'Missing legacy install compatibility sources' }
+        $controlV2 = $manifest.compatibility.installIdentities.controlSixSkill
+        Assert-HarnessObjectShape $controlV2 @('commit', 'distributionManifest', 'activeCommonCore', 'selection') 'Control V2 compatibility identity'
+        if ([string] $controlV2.commit -cnotmatch '\A[0-9a-f]{40}\z') { throw 'Control V2 compatibility commit is not a Git identity' }
+        Assert-HarnessObjectShape $controlV2.distributionManifest @('path', 'bytes', 'sha256') 'Control V2 manifest identity'
+        $controlV2ManifestPath = Get-HarnessSafeRelativePath ([string] $controlV2.distributionManifest.path) 'Control V2 manifest path'
+        if ($controlV2ManifestPath -cne 'vendor/source-manifest.json') { throw 'Control V2 manifest path is invalid' }
+        $controlV2ManifestBytes = [long] $controlV2.distributionManifest.bytes
+        if ($controlV2ManifestBytes -le 0) { throw 'Control V2 manifest byte count is invalid' }
+        $controlV2ManifestHash = Get-HarnessValidSha256 $controlV2.distributionManifest.sha256 'Control V2 manifest hash'
+        Assert-HarnessObjectShape $controlV2.activeCommonCore @('path', 'sha256') 'Control V2 Common Core identity'
+        $controlV2CorePath = Get-HarnessSafeRelativePath ([string] $controlV2.activeCommonCore.path) 'Control V2 Common Core path'
+        $controlV2CoreHash = Get-HarnessValidSha256 $controlV2.activeCommonCore.sha256 'Control V2 Common Core hash'
+        Assert-HarnessObjectShape $controlV2.selection @('canonicalization', 'activeSkillNames', 'wholeFileCount', 'sha256') 'Control V2 selection identity'
+        if ([string] $controlV2.selection.canonicalization -cne 'ordinal-sorted localPath=sha256 UTF-8 lines joined by LF without trailing LF') {
+            throw 'Control V2 selection canonicalization is unsupported'
+        }
+        $controlV2SkillNames = @($controlV2.selection.activeSkillNames | ForEach-Object { [string] $_ })
+        if ($controlV2SkillNames.Count -eq 0 -or ($controlV2SkillNames -join "`n") -cne (@($controlV2SkillNames | Sort-Object -CaseSensitive -Unique) -join "`n")) {
+            throw 'Control V2 active skill names are not uniquely sorted'
+        }
+        $controlV2WholeFileCount = [long] $controlV2.selection.wholeFileCount
+        if ($controlV2WholeFileCount -le 0) { throw 'Control V2 selection count is invalid' }
+        $controlV2SelectionHash = Get-HarnessValidSha256 $controlV2.selection.sha256 'Control V2 selection hash'
         $legacyV1Entry = $legacyInstallSources.stateSchemaV1
         if ($null -eq $legacyV1Entry) { throw 'Missing state schema V1 compatibility source' }
         $historicalCoreEntry = $legacyV1Entry.commonCore
@@ -852,6 +893,9 @@ function Invoke-JoewrksHarnessSync {
                     $installedWholeFiles[$selection.RelativePath] = $selection.Hash
                 }
                 $isRelease01V2 = $false
+                $isCurrentV2 = $false
+                $isControlV2 = $false
+                $isPriorLeanV2 = $false
                 if ($state.schemaVersion -eq 2) {
                     $isRelease01V2 = @($installedSkillNames | Where-Object { $release01LegacySkillNames -ccontains $_ }).Count -gt 0
                     if (-not $isRelease01V2) {
@@ -903,6 +947,27 @@ function Invoke-JoewrksHarnessSync {
                                 throw "Release 0.1 installed manifest target hash is not pinned: $relative"
                             }
                         }
+                    } elseif ($stateManifestSourceHash -ceq $manifestHash) {
+                        $isCurrentV2 = $true
+                    } elseif ($stateManifestSourceHash -ceq $controlV2ManifestHash) {
+                        if ($installedManifestRead.Bytes.Length -ne $controlV2ManifestBytes) {
+                            throw 'Control V2 installed manifest byte count is not pinned'
+                        }
+                        if ($installedCorePath -cne $controlV2CorePath -or $installedCoreHash -cne $controlV2CoreHash) {
+                            throw 'Control V2 installed manifest Common Core identity is not pinned'
+                        }
+                        if (($installedSkillNames -join "`n") -cne ($controlV2SkillNames -join "`n")) {
+                            throw 'Control V2 installed manifest active skill set is not pinned'
+                        }
+                        if ($installedWholeFiles.Count -ne $controlV2WholeFileCount -or
+                            (Get-HarnessWholeFileSelectionSha256 $installedWholeFiles) -cne $controlV2SelectionHash) {
+                            throw 'Control V2 installed manifest selection is not pinned'
+                        }
+                        $isControlV2 = $true
+                    } elseif ($installedSkillNames.Count -eq 0 -and $installedWholeFiles.Count -eq 0) {
+                        $isPriorLeanV2 = $true
+                    } else {
+                        throw 'V2 installed manifest identity is not trusted'
                     }
                 }
                 if ($state.schemaVersion -eq 1) {
@@ -921,8 +986,10 @@ function Invoke-JoewrksHarnessSync {
                     $historicalV1WholeFiles.Clone()
                 } elseif ($isRelease01V2) {
                     $release01WholeFiles.Clone()
-                } else {
+                } elseif ($isCurrentV2 -or $isControlV2 -or $isPriorLeanV2) {
                     $installedWholeFiles
+                } else {
+                    throw 'Installed manifest ownership identity was not established'
                 }
                 $expectedWholeFiles[$installedManifestRelative] = $stateManifestSourceHash
                 $actualNames = @($stateWholeFiles.Keys | Sort-Object -CaseSensitive)

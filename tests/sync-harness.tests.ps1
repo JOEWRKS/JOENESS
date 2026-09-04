@@ -1837,10 +1837,9 @@ function Test-V1StateMigration {
 function Test-CreatedDirectoryRollbackResidue {
     $f = New-Fixture
     try {
-        Write-V1FixtureState $f
-        $createdParent = Join-Path $f.AgentsHome 'skills\design'
+        $createdParent = Join-Path $f.AgentsHome 'vendor'
         $externalPath = Join-Path $createdParent 'external.txt'
-        $createdDirectories = @($f.AgentsHome, (Join-Path $f.AgentsHome 'skills'), $createdParent)
+        $createdDirectories = @($f.AgentsHome, $createdParent)
         . $f.Script
         $result = Invoke-JoewrksHarnessSync -Apply -CodexHome $f.CodexHome -AgentsHome $f.AgentsHome -BackupRoot $f.BackupRoot -AfterReplace {
             param($replacement)
@@ -1856,15 +1855,14 @@ function Test-CreatedDirectoryRollbackResidue {
             Assert-Equal (@($result.unresolvedTargets | Where-Object { $_ -ieq $directory }).Count) 1 "external residue reports created directory once: $directory"
         }
         Assert-True (Test-Path -LiteralPath $externalPath -PathType Leaf) 'created-directory cleanup preserves an external file'
-        Assert-StringSetEqual @((Get-TreeHashes $f.AgentsHome).Keys) @('skills\design\external.txt') 'failed rollback leaves no run-created marker or managed file'
+        Assert-StringSetEqual @((Get-TreeHashes $f.AgentsHome).Keys) @('vendor\external.txt') 'failed rollback leaves no run-created marker or managed file'
     } finally { Remove-Fixture $f }
 
     $f = New-Fixture
-    $danglingDirectory = Join-Path $f.AgentsHome 'skills\design'
+    $danglingDirectory = Join-Path $f.AgentsHome 'vendor'
     try {
-        Write-V1FixtureState $f
         $danglingTarget = Join-Path $f.Root 'removed-junction-target'
-        $absentDirectory = Join-Path $f.AgentsHome 'skills\project\agents'
+        $absentDirectory = $f.CodexHome
         $testPathBehavior = @{ TreatDanglingAsUnreachable = $false }
         . $f.Script
         $result = & {
@@ -2294,11 +2292,54 @@ function Test-ControlSixSkillToLeanMigration {
     } finally { Remove-Fixture $f }
 }
 
+function Test-ControlV2PinnedIdentity {
+    $f = New-ControlMigrationFixture
+    try {
+        $leanScript = $f.Script
+        $f.Script = $f.ControlScript
+        Assert-Equal (Invoke-Harness $f Apply).ExitCode 0 'forged Control baseline apply succeeds'
+        $f.Script = $leanScript
+
+        $userPath = Join-Path $f.AgentsHome 'user-owned.txt'
+        $userBytes = (New-Object Text.UTF8Encoding($false)).GetBytes('user-owned')
+        Write-Bytes $userPath $userBytes
+        $installedManifestPath = Join-Path $f.AgentsHome 'vendor\source-manifest.json'
+        $installedManifest = Get-Content -Raw -LiteralPath $installedManifestPath | ConvertFrom-Json
+        $installedManifest.activeSkills.design.files += [pscustomobject] @{
+            localPath = 'user-owned.txt'
+            bytes = $userBytes.Length
+            sha256 = Get-Hash $userPath
+        }
+        Write-Utf8 $installedManifestPath (($installedManifest | ConvertTo-Json -Depth 100) + "`n")
+
+        $forgedManifestHash = Get-Hash $installedManifestPath
+        $state = Get-Content -Raw -LiteralPath $f.State | ConvertFrom-Json
+        $state.wholeFileTargets.'vendor/source-manifest.json' = $forgedManifestHash
+        $state.wholeFileTargets | Add-Member -NotePropertyName 'user-owned.txt' -NotePropertyValue (Get-Hash $userPath)
+        $state.sourceIdentities.bundleManifest.sha256 = $forgedManifestHash
+        Write-Utf8 $f.State (($state | ConvertTo-Json -Depth 100) + "`n")
+
+        $beforeCodex = Get-TreeHashes $f.CodexHome
+        $beforeAgents = Get-TreeHashes $f.AgentsHome
+        $beforeBackups = Get-TreeHashes $f.BackupRoot
+        $check = Invoke-Harness $f Check
+        $result = Read-Result $check 'self-consistent forged unprefixed Control-like install'
+        Assert-True ($check.ExitCode -ne 0) 'forged unprefixed Control-like install exits nonzero'
+        Assert-Equal $result.status 'blocked' 'forged unprefixed Control-like install fails closed'
+        Assert-True (@($result.blockers).kind -contains 'invalidState') 'forged unprefixed Control-like install reports invalidState'
+        Assert-TreeEqual (Get-TreeHashes $f.CodexHome) $beforeCodex 'forged Control Check preserves Codex bytes'
+        Assert-TreeEqual (Get-TreeHashes $f.AgentsHome) $beforeAgents 'forged Control Check preserves user-owned bytes'
+        Assert-TreeEqual (Get-TreeHashes $f.BackupRoot) $beforeBackups 'forged Control Check creates no backup'
+        Assert-BytesEqual ([IO.File]::ReadAllBytes($userPath)) $userBytes 'forged Control Check preserves the claimed user file byte-exact'
+    } finally { Remove-Fixture $f }
+}
+
 $allTests = @(
     'Test-PublicHarnessEntry',
     'Test-ReadmeContract',
     'Test-LeanZeroSkillLifecycle',
     'Test-ControlSixSkillToLeanMigration',
+    'Test-ControlV2PinnedIdentity',
     'Test-ModeAndExitContract',
     'Test-RemoveContract',
     'Test-NoFinalNewlineRoundTrip',
@@ -2323,6 +2364,7 @@ $allTests = @(
     'Test-LegacyNamedV2CleanupFailure',
     'Test-LegacyNamedV2CommentCollision',
     'Test-V1StateMigration',
+    'Test-CreatedDirectoryRollbackResidue',
     'Test-HomeResolutionAndIdentity',
     'Test-OptionalBundleStateAndDrift',
     'Test-ConcurrentDisappearanceBeforeDelete',

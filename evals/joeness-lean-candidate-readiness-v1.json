@@ -26,8 +26,8 @@
     "state": "deterministic-implementation-in-progress",
     "distributionManifest": {
       "path": "vendor/source-manifest.json",
-      "bytes": 13710,
-      "sha256": "1184fc323704fa9df561451fa47c0509f288056f024b57a5d10db7d25acdc218"
+      "bytes": 14688,
+      "sha256": "ff1b4fa0f6cecf568c927dc9c5312060bc6154363f05a8a6b25d20841613757f"
     },
     "publicSkillCount": 0,
     "defaultVendorDependencyCount": 0

@@ -774,6 +774,24 @@ test('the distribution manifest exposes only the Lean desired state and migratio
   assert.equal(lstatSync(LEAN_KERNEL).size, manifest.activeCommonCore.bytes);
   assert.equal(sha256(LEAN_KERNEL), manifest.activeCommonCore.sha256);
   assert.deepEqual(manifest.activeSkills, {});
+  assert.deepEqual(manifest.compatibility.installIdentities.controlSixSkill, {
+    commit: '80c79e9f4be91d730b1b3cdc62d7bf51508895e8',
+    distributionManifest: {
+      path: 'vendor/source-manifest.json',
+      bytes: 37845,
+      sha256: 'f7866fb42f3336e0bd82f01e0f3940ab8b6a5d5b55e4677b9306e461be3c0158',
+    },
+    activeCommonCore: {
+      path: 'evals/candidates/interaction-safety-core-v8.md',
+      sha256: '41b3f8435c6077a9289e0c9d3315aa00d68a96e2e9add7168de6bb42f9730aea',
+    },
+    selection: {
+      canonicalization: 'ordinal-sorted localPath=sha256 UTF-8 lines joined by LF without trailing LF',
+      activeSkillNames: ['design', 'handoff', 'project', 'spec', 'ticket', 'visual-check'],
+      wholeFileCount: 64,
+      sha256: 'f4a3c7fbacd8d6f8cfb1b958c094e73f5ba739a1bb633d3fff5614e34b8a7587',
+    },
+  });
   assert.deepEqual(
     Object.values(manifest.activeSkills).flatMap((skill) => skill.sourceDependencies ?? []),
     [],
@@ -834,8 +852,8 @@ test('the Lean readiness ledger binds candidate status without claiming A/B prom
     state: 'deterministic-implementation-in-progress',
     distributionManifest: {
       path: 'vendor/source-manifest.json',
-      bytes: 13710,
-      sha256: '1184fc323704fa9df561451fa47c0509f288056f024b57a5d10db7d25acdc218',
+      bytes: 14688,
+      sha256: 'ff1b4fa0f6cecf568c927dc9c5312060bc6154363f05a8a6b25d20841613757f',
     },
     publicSkillCount: 0,
     defaultVendorDependencyCount: 0,
