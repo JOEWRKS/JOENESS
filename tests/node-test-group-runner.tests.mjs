@@ -11,6 +11,7 @@ import {
   TEST_GROUPS,
   nodeTestArguments,
   nodeTestInvocations,
+  validateHistoricalLocalTap,
   validateTaxonomy,
 } from "../scripts/run-node-test-group.mjs";
 
@@ -98,7 +99,7 @@ test("historical local registry owns exactly the mixed current historical cases"
 
 test("historical integrity plans the owned group and exact mixed cases without executing them", () => {
   const invocations = nodeTestInvocations("historical-integrity");
-  assert.equal(invocations.length, 2);
+  assert.equal(invocations.length, 3);
   assert.deepEqual(invocations[0], [
     "--test",
     "tests/design-visual-m2.tests.mjs",
@@ -107,22 +108,75 @@ test("historical integrity plans the owned group and exact mixed cases without e
     "tests/thin-hybrid-core.tests.mjs",
   ]);
   assert.deepEqual(
-    invocations[1].filter((argument) => argument.endsWith(".tests.mjs")),
+    invocations.slice(1).map((invocation) =>
+      invocation.filter((argument) => argument.endsWith(".tests.mjs"))),
     [
-      "tests/codex-app-server-collector.tests.mjs",
-      "tests/design-vendor-integrity.tests.mjs",
+      ["tests/codex-app-server-collector.tests.mjs"],
+      ["tests/design-vendor-integrity.tests.mjs"],
     ],
   );
-  assert.equal(invocations[1][0], "--test");
-  const patternArguments = invocations[1].filter((argument) =>
-    argument.startsWith("--test-name-pattern="));
-  assert.equal(patternArguments.length, 1);
-  const pattern = new RegExp(patternArguments[0].slice("--test-name-pattern=".length), "u");
-  for (const { name } of HISTORICAL_LOCAL_CASES) {
-    assert.equal(pattern.test(name), true, name);
-    assert.equal(pattern.test(`${name} portable current contract`), false, name);
+  for (const invocation of invocations.slice(1)) {
+    assert.equal(invocation[0], "--test");
+    assert.equal(invocation[1], "--test-reporter=tap");
+    const patternArguments = invocation.filter((argument) =>
+      argument.startsWith("--test-name-pattern="));
+    assert.equal(patternArguments.length, 1);
+    const pattern = new RegExp(patternArguments[0].slice("--test-name-pattern=".length), "u");
+    const file = invocation.at(-1);
+    for (const { name } of HISTORICAL_LOCAL_CASES) {
+      assert.equal(pattern.test(name), HISTORICAL_LOCAL_CASES.some(
+        (entry) => entry.file === file && entry.name === name,
+      ), name);
+      assert.equal(pattern.test(`${name} portable current contract`), false, name);
+    }
+    assert.equal(pattern.test("an unrelated historical integrity case"), false);
   }
-  assert.equal(pattern.test("an unrelated historical integrity case"), false);
+});
+
+test("historical local TAP validation fails closed on missing renamed skip todo or duplicate results", () => {
+  const expectedCases = [
+    { file: "tests/example.tests.mjs", name: "expected historical case" },
+  ];
+  const invalidTap = [
+    ["absent", "TAP version 13\n1..0\n# tests 0\n", /missing/iu],
+    ["renamed", "TAP version 13\nok 1 - renamed historical case\n1..1\n", /unexpected pass.*missing/iu],
+    ["skip", "TAP version 13\nok 1 - expected historical case # SKIP unavailable\n1..1\n", /skip/iu],
+    ["todo", "TAP version 13\nok 1 - expected historical case # TODO pending\n1..1\n", /todo/iu],
+    ["duplicate", "TAP version 13\nok 1 - expected historical case\nok 2 - expected historical case\n1..2\n", /duplicate/iu],
+  ];
+  for (const [condition, tap, expectedError] of invalidTap) {
+    assert.throws(
+      () => validateHistoricalLocalTap({
+        file: "tests/example.tests.mjs",
+        expectedCases,
+        tap,
+      }),
+      expectedError,
+      condition,
+    );
+  }
+});
+
+test("historical local TAP validation accepts every expected identity once as pass", () => {
+  assert.equal(validateHistoricalLocalTap({
+    file: "tests/example.tests.mjs",
+    expectedCases: [
+      { file: "tests/example.tests.mjs", name: "first historical case" },
+      { file: "tests/example.tests.mjs", name: "second historical case" },
+    ],
+    tap: [
+      "TAP version 13",
+      "ok 1 - first historical case",
+      "ok 2 - second historical case",
+      "1..2",
+      "# tests 2",
+      "# pass 2",
+      "# fail 0",
+      "# skipped 0",
+      "# todo 0",
+      "",
+    ].join("\n"),
+  }), 2);
 });
 
 test("current release derives one skip pattern that removes only registered cases", () => {

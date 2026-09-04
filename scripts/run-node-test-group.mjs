@@ -118,11 +118,64 @@ function historicalLocalTestArguments({
   groups = TEST_GROUPS,
   historicalLocalCases = HISTORICAL_LOCAL_CASES,
 } = {}) {
-  const { files, pattern } = historicalLocalSelection({ groups, historicalLocalCases });
-  if (pattern === undefined) {
-    return undefined;
+  const { files } = historicalLocalSelection({ groups, historicalLocalCases });
+  return files.map((file) => {
+    const names = historicalLocalCases
+      .filter((entry) => entry.file === file)
+      .map((entry) => escapeRegex(entry.name));
+    return [
+      "--test",
+      "--test-reporter=tap",
+      `--test-name-pattern=^(?:${names.join("|")})$`,
+      file,
+    ];
+  });
+}
+
+export function validateHistoricalLocalTap({ file, expectedCases, tap }) {
+  if (typeof file !== "string" || !Array.isArray(expectedCases) || typeof tap !== "string") {
+    throw new Error("historical local result validation requires file, cases, and TAP output");
   }
-  return ["--test", `--test-name-pattern=${pattern}`, ...files];
+  const expectedNames = new Set();
+  for (const expectedCase of expectedCases) {
+    if (expectedCase?.file !== file || typeof expectedCase.name !== "string") {
+      throw new Error(`historical local result has invalid expected identity for ${file}`);
+    }
+    if (expectedNames.has(expectedCase.name)) {
+      throw new Error(`historical local result has duplicate expected identity for ${file}`);
+    }
+    expectedNames.add(expectedCase.name);
+  }
+
+  const results = [];
+  const resultPattern = /^(not ok|ok) \d+ - (.*?)(?: # (SKIP|TODO)\b.*)?$/gimu;
+  for (const match of tap.matchAll(resultPattern)) {
+    results.push({
+      name: match[2],
+      status: match[3]?.toLowerCase() ?? (match[1] === "ok" ? "pass" : "fail"),
+    });
+  }
+
+  const problems = [];
+  for (const result of results) {
+    if (!expectedNames.has(result.name)) {
+      problems.push(`unexpected ${result.status}: ${result.name}`);
+    }
+  }
+  for (const name of expectedNames) {
+    const matches = results.filter((result) => result.name === name);
+    if (matches.length === 0) {
+      problems.push(`missing: ${name}`);
+    } else if (matches.length !== 1) {
+      problems.push(`duplicate (${matches.length}): ${name}`);
+    } else if (matches[0].status !== "pass") {
+      problems.push(`${matches[0].status}: ${name}`);
+    }
+  }
+  if (problems.length > 0) {
+    throw new Error(`historical local result invalid for ${file}: ${problems.join("; ")}`);
+  }
+  return expectedNames.size;
 }
 
 export function nodeTestArguments(
@@ -153,10 +206,7 @@ export function nodeTestArguments(
 export function nodeTestInvocations(group, options = {}) {
   const invocations = [nodeTestArguments(group, options)];
   if (group === "historical-integrity") {
-    const localArguments = historicalLocalTestArguments(options);
-    if (localArguments !== undefined) {
-      invocations.push(localArguments);
-    }
+    invocations.push(...historicalLocalTestArguments(options));
   }
   return invocations;
 }
@@ -237,10 +287,13 @@ async function main() {
     return 2;
   }
 
-  for (const args of nodeTestInvocations(group)) {
+  const invocations = nodeTestInvocations(group);
+  for (const [index, args] of invocations.entries()) {
+    const validatesHistoricalLocal = group === "historical-integrity" && index > 0;
     const result = spawnSync(process.execPath, args, {
       cwd: ROOT,
-      stdio: "inherit",
+      encoding: validatesHistoricalLocal ? "utf8" : undefined,
+      stdio: validatesHistoricalLocal ? ["inherit", "pipe", "pipe"] : "inherit",
     });
     if (result.error) {
       throw result.error;
@@ -248,6 +301,21 @@ async function main() {
     if (result.signal) {
       process.stderr.write(`Node test group terminated by ${result.signal}.\n`);
       return 1;
+    }
+    if (validatesHistoricalLocal) {
+      process.stdout.write(result.stdout);
+      process.stderr.write(result.stderr);
+      const file = args.at(-1);
+      try {
+        validateHistoricalLocalTap({
+          file,
+          expectedCases: HISTORICAL_LOCAL_CASES.filter((entry) => entry.file === file),
+          tap: result.stdout,
+        });
+      } catch (error) {
+        process.stderr.write(`${error.message}\n`);
+        return 1;
+      }
     }
     if (result.status !== 0) {
       return result.status ?? 1;
