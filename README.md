@@ -62,11 +62,13 @@ Figma, Superpowers, Ponytail은 JOENESS와 **별도로 설치**하는 외부 플
 
 암시적 호출을 제한할 수 없는 플러그인은 JOENESS 명시적 사용 전용 정책과 호환되지 않으므로 기본 비활성화를 권장합니다. JOENESS는 경고만 제공하며 플러그인 설정을 자동으로 변경하지 않습니다.
 
+Ponytail은 사용자가 매번 직접 호출해야 하는 도구가 아닙니다. 중요한 `$ticket` 구현에서 새 추상화·프레임워크·의존성·과도한 계층·현재 요구를 넘는 일반화처럼 구체적인 과설계 위험이 있으면 JOENESS의 root PM이 `review` 또는 `audit`을 한 번 명시적으로 요청할 수 있습니다. 결과는 자문이며 새 범위·요구사항·합격 기준을 만들 수 없습니다.
+
 | 플러그인 | JOENESS 권장 정책 |
 |---|---|
 | Figma | **conditional**: 실제 Figma 파일·노드·결과가 작업 대상일 때만 사용 |
 | Superpowers | **explicit-only**: 사용자가 요청하거나 프로젝트가 요구한 복잡한 계획·디버깅·TDD에만 사용. 암묵 호출을 막을 수 없다면 기본 비활성화 |
-| Ponytail | **default disabled**: 평소에는 끄고, 과설계 검토를 명시한 `review`·`audit`에만 사용 |
+| Ponytail | **default disabled / conditional explicit audit**: 평소에는 끄되, 중요한 `$ticket`에서 구체적인 과설계 위험이 있으면 JOENESS가 `review`·`audit`을 명시적으로 요청할 수 있음. 사용할 수 없으면 사용자·프로젝트가 필수로 지정한 경우 외에는 완료를 막지 않음 |
 
 ### 업데이트와 제거
 
@@ -142,11 +144,13 @@ Figma, Superpowers, and Ponytail are external plugins installed **separately** f
 
 A plugin whose implicit invocation cannot be constrained is incompatible with JOENESS explicit-only policy; default disabled is recommended. JOENESS only warns and never changes plugin settings automatically.
 
+Ponytail does not have to be called manually by the user every time. For an important `$ticket`, when concrete over-engineering risk is present—such as a new abstraction, framework, dependency, excessive layering, or generalization beyond the accepted need—the JOENESS root PM may explicitly request one `review` or `audit`. Its result is advisory and cannot create new scope, requirements, or acceptance criteria.
+
 | Plugin | JOENESS policy |
 |---|---|
 | Figma | **conditional**: only when a real Figma file, node, or result is the task target |
 | Superpowers | **explicit-only**: only when requested or required by the project for complex planning, debugging, or TDD; default disabled if implicit invocation cannot be prevented |
-| Ponytail | **default disabled**: enable only an explicitly requested `review` or `audit` for over-engineering |
+| Ponytail | **default disabled / conditional explicit audit**: normally off, but JOENESS may explicitly request `review` or `audit` for an important `$ticket` with concrete over-engineering risk. If unavailable, it does not block completion unless the user or project contract made the audit required |
 
 ### Update and remove
 
