@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "control": {
+    "repository": "JOEWRKS/joewrks-work-harness",
+    "commit": "80c79e9f4be91d730b1b3cdc62d7bf51508895e8",
+    "tree": "8ba2159f1aa4b425ee523f2b6eebe43d4778bb8f",
+    "distributionManifest": {
+      "path": "vendor/source-manifest.json",
+      "bytes": 37845,
+      "sha256": "f7866fb42f3336e0bd82f01e0f3940ab8b6a5d5b55e4677b9306e461be3c0158"
+    }
+  },
+  "approvedSpec": {
+    "path": "docs/superpowers/specs/2026-09-04-joeness-lean-split-design.md",
+    "commit": "f338238558aa0863ed68ebc9d0f9ff500ca002df",
+    "bytes": 32428,
+    "sha256": "e15dddf5230307f499e67a118ef1a891fd62a39269e02efbdc546bbf3ecc34b9"
+  },
+  "leanKernel": {
+    "path": "evals/candidates/joeness-lean-kernel-v1.md",
+    "commit": "78d2f8ae390543d0cdc1f36e5b44ffec0981fa73",
+    "bytes": 1690,
+    "sha256": "0727f159bb33f67d40e4e0a1f1f391f76f96a6d980f7e1e6177df193208c3054"
+  },
+  "candidate": {
+    "state": "deterministic-implementation-in-progress",
+    "distributionManifest": {
+      "path": "vendor/source-manifest.json",
+      "bytes": 13710,
+      "sha256": "1184fc323704fa9df561451fa47c0509f288056f024b57a5d10db7d25acdc218"
+    },
+    "publicSkillCount": 0,
+    "defaultVendorDependencyCount": 0
+  },
+  "evaluation": {
+    "abStatus": "NOT-RUN",
+    "promotionPass": false
+  },
+  "historicalEvidence": {
+    "owner": "Git history and existing evals artifacts",
+    "controlCommit": "80c79e9f4be91d730b1b3cdc62d7bf51508895e8",
+    "roots": ["evals/", "vendor/compatibility/joeness-0.1/"],
+    "mutationPolicy": "preserve; record reruns as additive artifacts"
+  }
+}

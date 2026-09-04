@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
@@ -160,10 +161,12 @@ test("the Core v8 candidate statically preserves v7 and the stage-aware feedback
   }
 });
 
-test("the interaction safety core stays silent on clean success without rewriting retry evidence", async () => {
-  const manifest = JSON.parse(
-    await readFile(path.join(root, "vendor", "source-manifest.json"), "utf8"),
-  );
+test("the Control interaction safety core stays exact without rewriting retry evidence", async () => {
+  const manifest = JSON.parse(execFileSync(
+    "git",
+    ["show", "80c79e9f4be91d730b1b3cdc62d7bf51508895e8:vendor/source-manifest.json"],
+    { cwd: root, encoding: "utf8" },
+  ));
   const priorDecision = JSON.parse(
     await readFile(path.join(root, "evals", "experiments", "common-core-final-decision-v1.json"), "utf8"),
   );

@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import {
   copyFileSync, cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync,
@@ -19,6 +20,7 @@ const PAIR_V3_PATH = path.join(ROOT, 'evals', 'design-frontend', 'router-pair-v3
 const COLLECTOR_PATH = path.join(ROOT, 'evals', 'support', 'collect-codex-app-server.mjs');
 const P0_PATH = path.join(ROOT, 'evals', 'p0', 'common-core-v5.json');
 const MANIFEST_PATH = path.join(ROOT, 'vendor', 'source-manifest.json');
+const CONTROL_COMMIT = '80c79e9f4be91d730b1b3cdc62d7bf51508895e8';
 const POSITIVE_IDS = [
   'df-positive-responsive-portfolio-flow',
   'df-positive-approved-figma-implementation',
@@ -74,6 +76,14 @@ function repositoryBindings() {
     p0Baseline: { path: 'evals/p0/common-core-v5.json', sha256: sha256(P0_PATH) },
     router: V3_ROUTER_BINDING,
   };
+}
+
+function controlManifest() {
+  return JSON.parse(execFileSync(
+    'git',
+    ['show', `${CONTROL_COMMIT}:vendor/source-manifest.json`],
+    { cwd: ROOT, encoding: 'utf8' },
+  ));
 }
 
 function operationArguments(evaluator, fixtureCase, operation) {
@@ -346,7 +356,7 @@ test('routing and evaluator inputs retain LF bytes on checkout', () => {
 });
 
 test('v3 evidence binds the retired skill separately from the active contract', () => {
-  const manifest = JSON.parse(readFileSync(MANIFEST_PATH, 'utf8'));
+  const manifest = controlManifest();
   const v3Evidence = manifest.behaviorEvidenceHistory.find(
     ({ pairVersion }) => pairVersion === 3,
   );
@@ -723,7 +733,7 @@ test('reviewed P0 baseline and atomic pair configuration are bound', async () =>
     controlRunId: 'design-router-control-v3',
     candidateRunId: 'design-router-candidate-v3',
   });
-  const manifest = JSON.parse(readFileSync(MANIFEST_PATH, 'utf8'));
+  const manifest = controlManifest();
   assert.equal(Array.isArray(manifest.behaviorEvidenceHistory), true);
   const v1Evidence = manifest.behaviorEvidenceHistory.find(
     ({ pairVersion }) => pairVersion === 1,

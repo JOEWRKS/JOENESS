@@ -650,9 +650,17 @@ test('handoff expands only repeated visual or deployment incidents', () => {
   assert.doesNotMatch(handoff, /Mark unavailable fields unavailable/is);
 });
 
-test('the six public roles are the exact active manifest skills', () => {
+test('the Lean distribution exposes zero public roles while preserving their source history', () => {
   const manifest = JSON.parse(readFileSync(path.join(ROOT, 'vendor', 'source-manifest.json'), 'utf8'));
-  assert.deepEqual(Object.keys(manifest.activeSkills).sort(), [
+  assert.deepEqual(Object.keys(manifest.activeSkills), []);
+  assert.deepEqual([
+    'design',
+    'handoff',
+    'project',
+    'spec',
+    'ticket',
+    'visual-check',
+  ].filter((name) => existsSync(path.join(ROOT, 'skills', name, 'SKILL.md'))), [
     'design',
     'handoff',
     'project',

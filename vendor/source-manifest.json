@@ -1,205 +1,256 @@
 {
   "schemaVersion": 1,
-  "release": {"name":"JOENESS","version":"0.1","entrypoint":"JOENESS.ps1"},
-  "activeCommonCore": {"path":"evals/candidates/interaction-safety-core-v8.md","sha256":"41b3f8435c6077a9289e0c9d3315aa00d68a96e2e9add7168de6bb42f9730aea"},
-  "evaluation": {
-    "state": "candidate",
-    "tests": ["tests/design-vendor-integrity.tests.mjs", "tests/design-visual-m2.tests.mjs", "tests/thin-hybrid-core.tests.mjs", "tests/skill-contracts.tests.mjs", "vendor/ui-ux-pro-max/scripts/validate_data.py", "vendor/ui-ux-pro-max/scripts/tests/test_core.py"],
-    "current": {
-      "mode": "active-skill-contract-v15",
-      "version": 15,
-      "state": "unvalidated",
-      "cases": {"path":"evals/skill-contracts/cases-v15.json","sha256":"c583bb1a3d5ce1d631a3afa34b3cbe7102b30aa2f799eac44269bfe461b986a6"},
-      "staticContractEvidence": {"path":"evals/skill-contracts/design-foundation-v15-contract-test-v1.json","sha256":"844907a03c1eb44f3bfcef4caf5ec9f6160e5ed4a2992e8aa74be3a1f30b27df","scope":"Static contract assertions only; raw stdout is not retained."},
-      "attemptIndex": {"path":"evals/skill-contracts/design-visual-m2-attempt-index-v1.json","sha256":"d34245e2e3bfb9c1357f067890454cf0a9ef130655837d30a87f0adc072727fe"},
-      "designVisualEvidence": {"path":"evals/skill-contracts/design-visual-m2-visual-v7-semantic-review.json","sha256":"fc09ae6e50291824333dc714f2c7f48f3f8ab40d3e9a1c476c4eb7106097809c","disposition":"semantic-review-rejected"},
-      "designOrchestrationEvidence": {"path":"evals/skill-contracts/design-visual-m2-design-v5-blocked.json","sha256":"cc1c1bab3b94c72c94deb97dd1327842a851e496909cf6301e89eee7ce6a913a","disposition":"blocked-orchestration-unverified"},
-      "runtimeEvidence": {"state":"unverified","scope":"Exact corrected MergeDrop and RVR commit/build/install/state/capture bindings are not available."},
-      "specPressureEvidence": {"path":"evals/skill-contracts/spec-delivery-pressure-v2.json","sha256":"46e9eae98f0507d1af3c05d43a4409bcf09d85d12cd1ecb33b48d9bb958103d2"},
-      "ticketPressureEvidence": {"path":"evals/skill-contracts/ticket-delivery-pressure-v1.json","sha256":"c682e16e377eda576cb981d81d9db833067b2b5a5a8be3aa189604f99342b882","scope":"Validates inherited ticket cases only; it does not validate M2 visual behavior."},
-      "hardGate": "design-foundation-static-contract-only",
-      "classification": "candidate",
-      "outcomeReview": "partial",
-      "semanticImprovement": "not-asserted",
-      "promotionPass": false
+  "release": {
+    "name": "JOENESS",
+    "version": "0.1",
+    "entrypoint": "JOENESS.ps1"
+  },
+  "activeCommonCore": {
+    "path": "evals/candidates/joeness-lean-kernel-v1.md",
+    "localPath": "AGENTS.md",
+    "bytes": 1690,
+    "sha256": "0727f159bb33f67d40e4e0a1f1f391f76f96a6d980f7e1e6177df193208c3054"
+  },
+  "activeSkills": {},
+  "sources": {
+    "ui-ux-pro-max": {
+      "files": [
+        {
+          "localPath": "vendor/ui-ux-pro-max/data/app-interface.csv",
+          "bytes": 9743,
+          "sha256": "2a17ef810dab715ce1f339861817a8fbe3ccc38142b70517301e874803e838ac"
+        },
+        {
+          "localPath": "vendor/ui-ux-pro-max/data/charts.csv",
+          "bytes": 19365,
+          "sha256": "a70ef7460b0eaaea8614f86a0d09a4bc38b467804179762464b5ca45b491baac"
+        },
+        {
+          "localPath": "vendor/ui-ux-pro-max/data/colors.csv",
+          "bytes": 38668,
+          "sha256": "cb26759805217edaaa31b09836aec09eab0fe245c58f5884e9a16ef802c6e26a"
+        },
+        {
+          "localPath": "vendor/ui-ux-pro-max/data/google-fonts.csv",
+          "bytes": 743272,
+          "sha256": "3fd2898fb0fdd31ba758bf05cfcd2b58cd0f038a20cf08e417d09e5a8a4a509e"
+        },
+        {
+          "localPath": "vendor/ui-ux-pro-max/data/icons.csv",
+          "bytes": 20637,
+          "sha256": "f376c29fb4df37b4bdb366a5aa70cb211ba3dd8b435390aaa03152a64b07d2e8"
+        },
+        {
+          "localPath": "vendor/ui-ux-pro-max/data/landing.csv",
+          "bytes": 16685,
+          "sha256": "121a2cac7cf21050234b5f80e7b4e182f10123536032e0f9ad862ad3aec9677d"
+        },
+        {
+          "localPath": "vendor/ui-ux-pro-max/data/motion.csv",
+          "bytes": 10500,
+          "sha256": "6452fbd8028ab71d52993775340e1bc40a150d92be8d4b4cb8710620fd1a7512"
+        },
+        {
+          "localPath": "vendor/ui-ux-pro-max/data/products.csv",
+          "bytes": 73485,
+          "sha256": "e9749e4fd8f7d4c94919c25ebd347a4adaddb671e7b01d33fbc2c87d447e6667"
+        },
+        {
+          "localPath": "vendor/ui-ux-pro-max/data/react-performance.csv",
+          "bytes": 14822,
+          "sha256": "904c8afcda229629545912dde0e8ac37503757131f0169f80b016f1f58c4fd3f"
+        },
+        {
+          "localPath": "vendor/ui-ux-pro-max/data/stacks/angular.csv",
+          "bytes": 18137,
+          "sha256": "9de35bbda536ced9af7642d88b7675cefa3e18c370ab40c0875f75ab473f0fd6"
+        },
+        {
+          "localPath": "vendor/ui-ux-pro-max/data/stacks/astro.csv",
+          "bytes": 11870,
+          "sha256": "6b587e32df201b6e5e7b2ed187b65eee8e6d55dcd6cc16bde29fc25e0f911dae"
+        },
+        {
+          "localPath": "vendor/ui-ux-pro-max/data/stacks/avalonia.csv",
+          "bytes": 25626,
+          "sha256": "6bfa40ec6609fcb59e52a38281edcc3a3e5b5e56341304fe5628b32cb9b1f875"
+        },
+        {
+          "localPath": "vendor/ui-ux-pro-max/data/stacks/flutter.csv",
+          "bytes": 10416,
+          "sha256": "fe36d404c799781e8ba6e9a8179b45799ed5126a545528550cd2eb0f2346e8c5"
+        },
+        {
+          "localPath": "vendor/ui-ux-pro-max/data/stacks/html-tailwind.csv",
+          "bytes": 11305,
+          "sha256": "7aef38e75c53559470afcfa91580a9917ca8b7dbf8b92110389e23e93703ac52"
+        },
+        {
+          "localPath": "vendor/ui-ux-pro-max/data/stacks/javafx.csv",
+          "bytes": 30871,
+          "sha256": "5545e331b2479eb431ca45203799ce1b0ab1e369045ab7735d5a9f85ec78f956"
+        },
+        {
+          "localPath": "vendor/ui-ux-pro-max/data/stacks/jetpack-compose.csv",
+          "bytes": 8195,
+          "sha256": "6c8fd4b0391c342c12b0af15610cd5becbeccaef0bbe8dcfc01d928c3195d93e"
+        },
+        {
+          "localPath": "vendor/ui-ux-pro-max/data/stacks/laravel.csv",
+          "bytes": 18519,
+          "sha256": "3e9f551b5232136f7b5ce1304c5e1bf5a83bd63c0dc02afb37502b238772d145"
+        },
+        {
+          "localPath": "vendor/ui-ux-pro-max/data/stacks/nextjs.csv",
+          "bytes": 12493,
+          "sha256": "e828ccc04843742f52f545a068e8a9ab0d2b97c0e771f7e93bf0cef74da05554"
+        },
+        {
+          "localPath": "vendor/ui-ux-pro-max/data/stacks/nuxtjs.csv",
+          "bytes": 16539,
+          "sha256": "f7a3f2d9542856d00199f85c6c023b7c284cc698e2e6e12d61afce2edacb24d6"
+        },
+        {
+          "localPath": "vendor/ui-ux-pro-max/data/stacks/nuxt-ui.csv",
+          "bytes": 21230,
+          "sha256": "b9972b31e721faabc667ee2b4e93ba2af29e1df86f186c2ff608b68370f0e3a5"
+        },
+        {
+          "localPath": "vendor/ui-ux-pro-max/data/stacks/react.csv",
+          "bytes": 12962,
+          "sha256": "e5624ab41d33427d88e41d07581ce4eca59b37b36ab72a6ad43a9c8e2d0a1c72"
+        },
+        {
+          "localPath": "vendor/ui-ux-pro-max/data/stacks/react-native.csv",
+          "bytes": 9983,
+          "sha256": "077aefc81d194895ecf7936b3ed298b978e36961f183e3a275f8acda19b5f621"
+        },
+        {
+          "localPath": "vendor/ui-ux-pro-max/data/stacks/shadcn.csv",
+          "bytes": 15921,
+          "sha256": "395c2e415ef6f48a474acccdc8eb2c7258a6ed751a5037ba171a2d8823e02ded"
+        },
+        {
+          "localPath": "vendor/ui-ux-pro-max/data/stacks/svelte.csv",
+          "bytes": 11009,
+          "sha256": "71af52d64f266c88070b91dbbaa900c2f8074b6baae9f35eaea6ba9cec6fd803"
+        },
+        {
+          "localPath": "vendor/ui-ux-pro-max/data/stacks/swiftui.csv",
+          "bytes": 10821,
+          "sha256": "c9c2d2510f8e66281a2514e8dd0125a6b653b9ef53a71281b5e7dfe003d5b569"
+        },
+        {
+          "localPath": "vendor/ui-ux-pro-max/data/stacks/threejs.csv",
+          "bytes": 44860,
+          "sha256": "c74d6ba76021f8d72c0ed12c559caecfeb6961829242acf6bcb9e99926b1a396"
+        },
+        {
+          "localPath": "vendor/ui-ux-pro-max/data/stacks/uno.csv",
+          "bytes": 27471,
+          "sha256": "5d2e0f396bb9dc5a2661204264cc0eda7cc4fa3d78152dec89d668704a41b8fc"
+        },
+        {
+          "localPath": "vendor/ui-ux-pro-max/data/stacks/uwp.csv",
+          "bytes": 22867,
+          "sha256": "debf669928871261ced9333788d5afd5784377ea1fa1b4f53993dd8f1574c0fc"
+        },
+        {
+          "localPath": "vendor/ui-ux-pro-max/data/stacks/vue.csv",
+          "bytes": 11006,
+          "sha256": "c2724915d3c11cd67263f25896cff721f787a0fdd8326002d31e9f5806dfd8f8"
+        },
+        {
+          "localPath": "vendor/ui-ux-pro-max/data/stacks/winui.csv",
+          "bytes": 25152,
+          "sha256": "2d970b08e44509d7afa53ce7feb446930b2d5e0667fa637df9aeeed65c42bbbe"
+        },
+        {
+          "localPath": "vendor/ui-ux-pro-max/data/stacks/wpf.csv",
+          "bytes": 22538,
+          "sha256": "ca78b5f28dc50d66900548d602d74856400097284c73e076fcfbb5a38ae5083c"
+        },
+        {
+          "localPath": "vendor/ui-ux-pro-max/data/styles.csv",
+          "bytes": 142602,
+          "sha256": "1bf9c1d8484a0a7a54fb67555902380446865b604c8449e47a449cb3d9c1ef88"
+        },
+        {
+          "localPath": "vendor/ui-ux-pro-max/data/typography.csv",
+          "bytes": 49830,
+          "sha256": "7abead73de0e43e09544f164cb60cd431674e411f1e063e555a8b44d51273328"
+        },
+        {
+          "localPath": "vendor/ui-ux-pro-max/data/ui-reasoning.csv",
+          "bytes": 52908,
+          "sha256": "06e4369445388ba9b7a57347510b125b7a2145bbf8546a327ba50292503b204a"
+        },
+        {
+          "localPath": "vendor/ui-ux-pro-max/data/ux-guidelines.csv",
+          "bytes": 18667,
+          "sha256": "e01943c433b2cad3040f19389b3b0455673758a569b7a927b5bedf65c989cb96"
+        },
+        {
+          "localPath": "vendor/ui-ux-pro-max/references/pro-rules.md",
+          "bytes": 9585,
+          "sha256": "bc56db7cb40c5f4d8d4f6229f5c7072865278488fe5b97c76d3a38eb596da4fc"
+        },
+        {
+          "localPath": "vendor/ui-ux-pro-max/references/quick-reference.md",
+          "bytes": 21637,
+          "sha256": "b01ad594cc069d18786d5e8865356cc511226ba6f48d328fd975d31aae8e5781"
+        },
+        {
+          "localPath": "vendor/ui-ux-pro-max/scripts/core.py",
+          "bytes": 18801,
+          "sha256": "64c149019196ee24647464a27278eb96d3b4638ded73ebfc35ccd2bc99c083a9"
+        },
+        {
+          "localPath": "vendor/ui-ux-pro-max/scripts/design_system.py",
+          "bytes": 59417,
+          "sha256": "fcdb279eb9691dffd6c80c333d29a4e5567368e38d724520c60013c8b1aaf242"
+        },
+        {
+          "localPath": "vendor/ui-ux-pro-max/scripts/search.py",
+          "bytes": 8687,
+          "sha256": "69a349d69543f35f45a12c0c82922c550d1b0a16a2b37f6b1406afb2ad2919c8"
+        },
+        {
+          "localPath": "vendor/ui-ux-pro-max/scripts/tests/test_core.py",
+          "bytes": 5901,
+          "sha256": "ce60ac571164cf35e8c866550ad989fa686706a56fa48df4fdf76444b94fdd8d"
+        },
+        {
+          "localPath": "vendor/ui-ux-pro-max/scripts/validate_data.py",
+          "bytes": 4185,
+          "sha256": "f1b5e0916f3c2f8271416f93f6ff9ebf3311a68a943a19c1b83f16823cbb05a7"
+        },
+        {
+          "localPath": "vendor/ui-ux-pro-max/SKILL.md",
+          "bytes": 13577,
+          "sha256": "305a7527fcb2f5b6e4129ab22cd839b5172d26df7f14d3324bfdec8fc1763560"
+        },
+        {
+          "localPath": "vendor/notices/ui-ux-pro-max-LICENSE",
+          "bytes": 1075,
+          "sha256": "738f69dfa83db5c347c678fb9d90e560877059f0de93a327c39001bff92dc014"
+        }
+      ]
     },
-    "history": [{
-      "mode": "run-hybrid-v1",
-      "version": 1,
-      "artifact": {"path":"evals/design-frontend/router-hybrid-v1.json","sha256":"10ddbd6d14bf3153e53561314245607d36c7d950af231585a8b5ae78fc590554"},
-      "collector": {"path":"evals/design-frontend/collect-hybrid-router-evaluation.mjs","sha256":"24e04d090c5c7535718878d0e9cd40a2c8324e1bd52c362ba292e68585e9ac12"},
-      "validator": {"path":"evals/design-frontend/validate-hybrid-router-evidence.mjs","sha256":"4ae8a2fd461456af9568bd8f6c33a1697620ac90d5e5a501a304c3f9775e134d"},
-      "validation": {
-        "state": "retained-evidence-validated",
-        "scope": "Retained output claims, runtime isolation and inventory, repository and materialized-root snapshots.",
-        "limitation": "V1 retains no normalized command, file, or tool events; event-only failures are rejected as unsubstantiated, so this is not event-level certification."
-      },
-      "cases": {"path":"evals/design-frontend/cases.json","sha256":"8a940cd84b4f2cbf265154c060941734ad6e983d0f49cb7dd5d06fc3df5ee1f7"},
-      "router": {"path":"evals/candidates/design-frontend-router-hybrid-v1.md","sha256":"0694f0d0880c079ab50b2af2621ef37f9745eae356f0c9ebc5a1351cd0d8a67d"},
-      "commonCore": {"path":"evals/candidates/common-core-v1.md","sha256":"5aebc74bc795891c43bf785d9b34ae4d35d4a40bf46eddef3f6246d75919a495"},
-      "classification": "implicit-unverified",
-      "hardGate": "pass",
-      "outcomeReview": "human-review-required",
-      "semanticImprovement": "not-asserted",
-      "promotionPass": false
-    }, {
-      "mode": "active-skill-contract-v2",
-      "version": 2,
-      "state": "unvalidated",
-      "cases": {"path":"evals/skill-contracts/cases-v2.json","sha256":"5f0b06d4041ff276967c49cbf17d110ff0942db900e94eeac9c2dac2421a040b"},
-      "hardGate": "unverified",
-      "classification": "candidate",
-      "outcomeReview": "pending",
-      "semanticImprovement": "not-asserted",
-      "promotionPass": false
-    }, {
-      "mode": "active-skill-contract-v3",
-      "version": 3,
-      "state": "semantic-review-rejected",
-      "cases": {"path":"evals/skill-contracts/cases-v3.json","sha256":"6067437488db01ce3660f4df7ff97d3b45bfed17b94812f3a4c3851557243a9f"},
-      "pressureEvidence": {"path":"evals/skill-contracts/visual-verdict-pressure-v3.json","sha256":"d0b22bcdd34f3bedb7b6a9db90ab156ce4eb877e1b142858bd77fd6168104d0d"},
-      "rawEvidence": {"path":"evals/skill-contracts/visual-verdict-pressure-v3-raw.md","sha256":"91fb643ad327ddff8ccb3180d8fd00377476405adc87c4dfd35d5e77fa0a9979"},
-      "hardGate": "failed-semantic-review",
-      "classification": "semantic-review-rejected",
-      "outcomeReview": "failed",
-      "semanticImprovement": "not-asserted",
-      "promotionPass": false
-    }, {
-      "mode": "active-skill-contract-v4",
-      "version": 4,
-      "state": "semantic-review-rejected",
-      "cases": {"path":"evals/skill-contracts/cases-v4.json","sha256":"4bc1005c00129cb478703aaae9edf030dfad211ead7660d220c45f3768c836c3"},
-      "pressureEvidence": {"path":"evals/skill-contracts/visual-verdict-pressure-v4.json","sha256":"7af70b6048985cedfae82b8122c75d1ed76a376c4283be9aacb22fb4c2d14d2e"},
-      "rawEvidence": {"path":"evals/skill-contracts/visual-verdict-pressure-v4-raw.md","sha256":"95bfca841a49c22e2697f044d850c5515557c5f8da7f0f1a18a6aaf0841ededd"},
-      "hardGate": "failed-semantic-review",
-      "classification": "semantic-review-rejected",
-      "outcomeReview": "failed",
-      "semanticImprovement": "not-asserted",
-      "promotionPass": false
-    }, {
-      "mode": "active-skill-contract-v5",
-      "version": 5,
-      "state": "unvalidated",
-      "cases": {"path":"evals/skill-contracts/cases-v4.json","sha256":"4bc1005c00129cb478703aaae9edf030dfad211ead7660d220c45f3768c836c3"},
-      "pressureEvidence": {"path":"evals/skill-contracts/visual-verdict-pressure-v5.json","sha256":"e1dec17c021bbb9fb68dd562d67b6c00dce5cb9e6e387918366fe15c8fe347ee"},
-      "hardGate": "unverified",
-      "classification": "candidate",
-      "outcomeReview": "pending",
-      "semanticImprovement": "not-asserted",
-      "promotionPass": false
-    }, {
-      "mode": "active-skill-contract-v6",
-      "version": 6,
-      "state": "unvalidated",
-      "cases": {"path":"evals/skill-contracts/cases-v6.json","sha256":"be3c59c6d3f55298af2b75f106e5339e3c2ab6e2476b9b4fd0e01a227aad5b80"},
-      "inheritedPressureEvidence": {"path":"evals/skill-contracts/visual-verdict-pressure-v5.json","sha256":"e1dec17c021bbb9fb68dd562d67b6c00dce5cb9e6e387918366fe15c8fe347ee","scope":"Inherited visual-check cases only."},
-      "specPressureEvidence": {"path":"evals/skill-contracts/spec-delivery-pressure-v2.json","sha256":"46e9eae98f0507d1af3c05d43a4409bcf09d85d12cd1ecb33b48d9bb958103d2"},
-      "specPressureHistory": [{"path":"evals/skill-contracts/spec-delivery-pressure-v1-semantic-review.json","sha256":"ba605b10c5428a0c9074f514dd3e32e9c93435843ef78427188a0561af94594b","disposition":"semantic-review-rejected"}],
-      "hardGate": "unverified",
-      "classification": "candidate",
-      "outcomeReview": "pending",
-      "semanticImprovement": "not-asserted",
-      "promotionPass": false
-    }, {
-      "mode": "active-skill-contract-v7",
-      "version": 7,
-      "state": "unvalidated",
-      "cases": {"path":"evals/skill-contracts/cases-v7.json","sha256":"09ae4db37fa1d7d7697947486629836ac93da1957cc107bc55473502b39610e8"},
-      "visualPredecessorEvidence": {
-        "pressure": {"path":"evals/skill-contracts/visual-verdict-pressure-v5.json","sha256":"e1dec17c021bbb9fb68dd562d67b6c00dce5cb9e6e387918366fe15c8fe347ee"},
-        "skill": {"path":"evals/candidates/visual-check-skill-v5.md","bytes":7290,"sha256":"a90a23f72b48581a65a3ba30e2fa7b3592a64d30506d7c4122754323e568e1bf"},
-        "metadata": {"path":"evals/candidates/visual-check-openai-v5.yaml","bytes":1114,"sha256":"564320118d97ade92d8645c92bf08026694662c0a47979cb4ea4bce745e67ee8"},
-        "scope": "Rejected or superseded predecessor evidence only; it does not validate the compact current skill."
-      },
-      "specPressureEvidence": {"path":"evals/skill-contracts/spec-delivery-pressure-v2.json","sha256":"46e9eae98f0507d1af3c05d43a4409bcf09d85d12cd1ecb33b48d9bb958103d2"},
-      "specPressureHistory": [{"path":"evals/skill-contracts/spec-delivery-pressure-v1-semantic-review.json","sha256":"ba605b10c5428a0c9074f514dd3e32e9c93435843ef78427188a0561af94594b","disposition":"semantic-review-rejected"}],
-      "hardGate": "unverified",
-      "classification": "candidate",
-      "outcomeReview": "pending",
-      "semanticImprovement": "not-asserted",
-      "promotionPass": false
-    }, {
-      "mode": "active-skill-contract-v8",
-      "version": 8,
-      "state": "unvalidated",
-      "cases": {"path":"evals/skill-contracts/cases-v8.json","sha256":"9f59ccbe5e52c66de08abd5ebf483a0bdb9036c726c742439e641ab856ac4f4c"},
-      "visualPredecessorEvidence": {
-        "pressure": {"path":"evals/skill-contracts/visual-verdict-pressure-v5.json","sha256":"e1dec17c021bbb9fb68dd562d67b6c00dce5cb9e6e387918366fe15c8fe347ee"},
-        "skill": {"path":"evals/candidates/visual-check-skill-v5.md","bytes":7290,"sha256":"a90a23f72b48581a65a3ba30e2fa7b3592a64d30506d7c4122754323e568e1bf"},
-        "metadata": {"path":"evals/candidates/visual-check-openai-v5.yaml","bytes":1114,"sha256":"564320118d97ade92d8645c92bf08026694662c0a47979cb4ea4bce745e67ee8"},
-        "scope": "Rejected or superseded predecessor evidence only; it does not validate the compact current skill."
-      },
-      "specPressureEvidence": {"path":"evals/skill-contracts/spec-delivery-pressure-v2.json","sha256":"46e9eae98f0507d1af3c05d43a4409bcf09d85d12cd1ecb33b48d9bb958103d2"},
-      "specPressureHistory": [{"path":"evals/skill-contracts/spec-delivery-pressure-v1-semantic-review.json","sha256":"ba605b10c5428a0c9074f514dd3e32e9c93435843ef78427188a0561af94594b","disposition":"semantic-review-rejected"}],
-      "ticketPressureEvidence": {"path":"evals/skill-contracts/ticket-delivery-pressure-v1.json","sha256":"c682e16e377eda576cb981d81d9db833067b2b5a5a8be3aa189604f99342b882"},
-      "hardGate": "unverified",
-      "classification": "candidate",
-      "outcomeReview": "pending",
-      "semanticImprovement": "not-asserted",
-      "promotionPass": false
-    }, {
-      "mode": "active-skill-contract-v9",
-      "version": 9,
-      "state": "unvalidated",
-      "cases": {"path":"evals/skill-contracts/cases-v9.json","sha256":"b9aa05ea16b0e57f3bc233dc148db046bf4b9d1ea0306c0e5a8ca5bac27d40b2"},
-      "visualCoverageEvidence": {"path":"evals/skill-contracts/visual-verdict-pressure-v7.json","sha256":"9998b9fbce625ebd720bf33d4696d64e1cda3b26f2477d4d49b1b4550223835b"},
-      "visualCoverageHistory": [{"path":"evals/skill-contracts/visual-verdict-pressure-v6.json","sha256":"1ce225c361bfb5185c8cac0f2870a5794eca5aedcb1b219af765c5231baaffba","disposition":"semantic-review-rejected"}],
-      "visualPredecessorEvidence": {
-        "pressure": {"path":"evals/skill-contracts/visual-verdict-pressure-v5.json","sha256":"e1dec17c021bbb9fb68dd562d67b6c00dce5cb9e6e387918366fe15c8fe347ee"},
-        "skill": {"path":"evals/candidates/visual-check-skill-v5.md","bytes":7290,"sha256":"a90a23f72b48581a65a3ba30e2fa7b3592a64d30506d7c4122754323e568e1bf"},
-        "metadata": {"path":"evals/candidates/visual-check-openai-v5.yaml","bytes":1114,"sha256":"564320118d97ade92d8645c92bf08026694662c0a47979cb4ea4bce745e67ee8"},
-        "scope": "Rejected or superseded predecessor evidence only; it does not validate the compact current skill."
-      },
-      "specPressureEvidence": {"path":"evals/skill-contracts/spec-delivery-pressure-v2.json","sha256":"46e9eae98f0507d1af3c05d43a4409bcf09d85d12cd1ecb33b48d9bb958103d2"},
-      "specPressureHistory": [{"path":"evals/skill-contracts/spec-delivery-pressure-v1-semantic-review.json","sha256":"ba605b10c5428a0c9074f514dd3e32e9c93435843ef78427188a0561af94594b","disposition":"semantic-review-rejected"}],
-      "ticketPressureEvidence": {"path":"evals/skill-contracts/ticket-delivery-pressure-v1.json","sha256":"c682e16e377eda576cb981d81d9db833067b2b5a5a8be3aa189604f99342b882","scope":"Validates inherited ticket cases only; it does not validate v9 visual coverage."},
-      "hardGate": "unverified",
-      "classification": "candidate",
-      "outcomeReview": "pending",
-      "semanticImprovement": "not-asserted",
-      "promotionPass": false
-    }, {
-      "mode": "active-skill-contract-v10",
-      "version": 10,
-      "state": "semantic-review-rejected",
-      "cases": {"path":"evals/skill-contracts/cases-v10.json","sha256":"d99b5c36099221c98f870e0e82e6f70237258ff1e25eaf248fbeaa187fa39e60"},
-      "designVisualEvidence": {"path":"evals/skill-contracts/design-visual-m2-pressure-v2.json","sha256":"5fe7dfdd62f49c3bc3cc12235a2d39fe37228d576a9e45fdc3a6c33e8f1ff9a2"},
-      "hardGate": "failed-semantic-review",
-      "classification": "semantic-review-rejected",
-      "outcomeReview": "failed",
-      "semanticImprovement": "not-asserted",
-      "promotionPass": false
-    }, {
-      "mode": "active-skill-contract-v11",
-      "version": 11,
-      "state": "semantic-review-rejected",
-      "cases": {"path":"evals/skill-contracts/cases-v11.json","sha256":"a81799cf3aa737930d9f063bba5155187a3ec9d8eca5e5e191a25010e84dec33"},
-      "designVisualEvidence": {"path":"evals/skill-contracts/design-visual-m2-pressure-v3.json","sha256":"e6c853ab502ef24b1043858054f9548d2b648f72f769eddfd4fe77e1f9bec1a1"},
-      "hardGate": "failed-semantic-review",
-      "classification": "semantic-review-rejected",
-      "outcomeReview": "failed",
-      "semanticImprovement": "not-asserted",
-      "promotionPass": false
-    }, {
-      "mode": "active-skill-contract-v12",
-      "version": 12,
-      "state": "unvalidated",
-      "cases": {"path":"evals/skill-contracts/cases-v12.json","sha256":"94b5eec0368769e568f13c491b4ca05bc56fd3f2c795cb1caf84089134c4692d"},
-      "designVisualEvidence": {"path":"evals/skill-contracts/design-visual-m2-pressure-v4.json","sha256":"77723ca48653812b4585cd32b45f484eb2304c9258c5db4260debf67b251c833"},
-      "designVisualHistory": [
-        {"path":"evals/skill-contracts/design-visual-m2-pressure-v1.json","sha256":"c0f601d801015fa295a346efb40a497993a5d437d7494a7a845a43296de2566d","disposition":"semantic-review-rejected"},
-        {"path":"evals/skill-contracts/design-visual-m2-pressure-v2.json","sha256":"5fe7dfdd62f49c3bc3cc12235a2d39fe37228d576a9e45fdc3a6c33e8f1ff9a2","disposition":"semantic-review-rejected"},
-        {"path":"evals/skill-contracts/design-visual-m2-pressure-v3.json","sha256":"e6c853ab502ef24b1043858054f9548d2b648f72f769eddfd4fe77e1f9bec1a1","disposition":"semantic-review-rejected"}
-      ],
-      "visualCoveragePredecessor": {"path":"evals/skill-contracts/visual-verdict-pressure-v7.json","sha256":"9998b9fbce625ebd720bf33d4696d64e1cda3b26f2477d4d49b1b4550223835b","scope":"Pre-M2 collection coverage pressure only."},
-      "specPressureEvidence": {"path":"evals/skill-contracts/spec-delivery-pressure-v2.json","sha256":"46e9eae98f0507d1af3c05d43a4409bcf09d85d12cd1ecb33b48d9bb958103d2"},
-      "ticketPressureEvidence": {"path":"evals/skill-contracts/ticket-delivery-pressure-v1.json","sha256":"c682e16e377eda576cb981d81d9db833067b2b5a5a8be3aa189604f99342b882","scope":"Validates inherited ticket cases only; it does not validate M2 visual behavior."},
-      "hardGate": "m2-static-pass-only",
-      "classification": "candidate",
-      "outcomeReview": "partial",
-      "semanticImprovement": "observed-for-curated-static-scenarios",
-      "promotionPass": false
-    }]
+    "apple-design": {
+      "files": [
+        {
+          "localPath": "vendor/apple-design/SKILL.md",
+          "bytes": 22715,
+          "sha256": "11840b24a11d7f94f39c6aaab074750ae4e4de4ef54ee4b1dd97e16ebd485e61"
+        },
+        {
+          "localPath": "vendor/notices/apple-design-LICENSE",
+          "bytes": 1070,
+          "sha256": "4ff5bdb7887ec1435c9cab0e8d1a7caee704d894d65c2a008ccc68b1cc2f260b"
+        }
+      ]
+    }
   },
   "compatibility": {
     "legacyInstallSources": {
@@ -210,10 +261,23 @@
           "sha256": "5aebc74bc795891c43bf785d9b34ae4d35d4a40bf46eddef3f6246d75919a495"
         },
         "skillName": "joewrks-design-frontend",
-        "sourceDependencies": ["ui-ux-pro-max", "apple-design"],
+        "sourceDependencies": [
+          "ui-ux-pro-max",
+          "apple-design"
+        ],
         "files": [
-          {"sourcePath":"vendor/compatibility/joeness-0.1/skills/joewrks-design-frontend/SKILL.md","localPath":"skills/joewrks-design-frontend/SKILL.md","bytes":3335,"sha256":"a5a0c3c64b94b8565a53e19e10d15fa96dcc995bd152da6c1886ed938261a05e"},
-          {"sourcePath":"vendor/compatibility/joeness-0.1/skills/joewrks-design-frontend/agents/openai.yaml","localPath":"skills/joewrks-design-frontend/agents/openai.yaml","bytes":263,"sha256":"3d0bc6bf72b93b3bd185852f080b19caeb17aed45f582df339d61c2633f81892"}
+          {
+            "sourcePath": "vendor/compatibility/joeness-0.1/skills/joewrks-design-frontend/SKILL.md",
+            "localPath": "skills/joewrks-design-frontend/SKILL.md",
+            "bytes": 3335,
+            "sha256": "a5a0c3c64b94b8565a53e19e10d15fa96dcc995bd152da6c1886ed938261a05e"
+          },
+          {
+            "sourcePath": "vendor/compatibility/joeness-0.1/skills/joewrks-design-frontend/agents/openai.yaml",
+            "localPath": "skills/joewrks-design-frontend/agents/openai.yaml",
+            "bytes": 263,
+            "sha256": "3d0bc6bf72b93b3bd185852f080b19caeb17aed45f582df339d61c2633f81892"
+          }
         ]
       },
       "release0.1": {
@@ -224,198 +288,56 @@
           "sha256": "e7a3c02d4c147eaadde2c00a0452c7de21b3e0f51fa02cf7bd7085c43d97ac4d"
         },
         "files": [
-          {"sourcePath":"vendor/compatibility/joeness-0.1/skills/joewrks-design-frontend/SKILL.md","localPath":"skills/joewrks-design-frontend/SKILL.md","bytes":3335,"sha256":"a5a0c3c64b94b8565a53e19e10d15fa96dcc995bd152da6c1886ed938261a05e"},
-          {"sourcePath":"vendor/compatibility/joeness-0.1/skills/joewrks-design-frontend/agents/openai.yaml","localPath":"skills/joewrks-design-frontend/agents/openai.yaml","bytes":263,"sha256":"3d0bc6bf72b93b3bd185852f080b19caeb17aed45f582df339d61c2633f81892"},
-          {"sourcePath":"vendor/compatibility/joeness-0.1/skills/joewrks-project-setup/SKILL.md","localPath":"skills/joewrks-project-setup/SKILL.md","bytes":5764,"sha256":"777eecb563479f813015548284b43a2a94b2fa0fd10b2ee0f55198396fe9173c"},
-          {"sourcePath":"vendor/compatibility/joeness-0.1/skills/joewrks-project-setup/agents/openai.yaml","localPath":"skills/joewrks-project-setup/agents/openai.yaml","bytes":353,"sha256":"1581633a8cea5dce3dd33a49bc8fb593169deddc01e496347190928a23cfeffc"},
-          {"sourcePath":"vendor/compatibility/joeness-0.1/skills/joewrks-project-setup/scripts/project-setup.ps1","localPath":"skills/joewrks-project-setup/scripts/project-setup.ps1","bytes":17495,"sha256":"4ffc548078a5c87357fd0e4e63538567ea2666f118243a0558bff29278d13105"},
-          {"sourcePath":"vendor/compatibility/joeness-0.1/skills/handoff/SKILL.md","localPath":"skills/handoff/SKILL.md","bytes":3700,"sha256":"5c49bbe372921e95530d566359670f760cc25da95efe38a4d16c5125a1ca30b4"},
-          {"sourcePath":"vendor/compatibility/joeness-0.1/skills/handoff/agents/openai.yaml","localPath":"skills/handoff/agents/openai.yaml","bytes":141,"sha256":"5c479fd562c691851690e8b18c8501045bef0943c10743d636b2fae26add1d28"},
-          {"sourcePath":"vendor/compatibility/joeness-0.1/skills/handoff/LICENSE","localPath":"skills/handoff/LICENSE","bytes":1068,"sha256":"0e7ac423bf2c6e223b7c5b156f8cf72da49d748e56a1641402c31f22ad07dbb5"}
+          {
+            "sourcePath": "vendor/compatibility/joeness-0.1/skills/joewrks-design-frontend/SKILL.md",
+            "localPath": "skills/joewrks-design-frontend/SKILL.md",
+            "bytes": 3335,
+            "sha256": "a5a0c3c64b94b8565a53e19e10d15fa96dcc995bd152da6c1886ed938261a05e"
+          },
+          {
+            "sourcePath": "vendor/compatibility/joeness-0.1/skills/joewrks-design-frontend/agents/openai.yaml",
+            "localPath": "skills/joewrks-design-frontend/agents/openai.yaml",
+            "bytes": 263,
+            "sha256": "3d0bc6bf72b93b3bd185852f080b19caeb17aed45f582df339d61c2633f81892"
+          },
+          {
+            "sourcePath": "vendor/compatibility/joeness-0.1/skills/joewrks-project-setup/SKILL.md",
+            "localPath": "skills/joewrks-project-setup/SKILL.md",
+            "bytes": 5764,
+            "sha256": "777eecb563479f813015548284b43a2a94b2fa0fd10b2ee0f55198396fe9173c"
+          },
+          {
+            "sourcePath": "vendor/compatibility/joeness-0.1/skills/joewrks-project-setup/agents/openai.yaml",
+            "localPath": "skills/joewrks-project-setup/agents/openai.yaml",
+            "bytes": 353,
+            "sha256": "1581633a8cea5dce3dd33a49bc8fb593169deddc01e496347190928a23cfeffc"
+          },
+          {
+            "sourcePath": "vendor/compatibility/joeness-0.1/skills/joewrks-project-setup/scripts/project-setup.ps1",
+            "localPath": "skills/joewrks-project-setup/scripts/project-setup.ps1",
+            "bytes": 17495,
+            "sha256": "4ffc548078a5c87357fd0e4e63538567ea2666f118243a0558bff29278d13105"
+          },
+          {
+            "sourcePath": "vendor/compatibility/joeness-0.1/skills/handoff/SKILL.md",
+            "localPath": "skills/handoff/SKILL.md",
+            "bytes": 3700,
+            "sha256": "5c49bbe372921e95530d566359670f760cc25da95efe38a4d16c5125a1ca30b4"
+          },
+          {
+            "sourcePath": "vendor/compatibility/joeness-0.1/skills/handoff/agents/openai.yaml",
+            "localPath": "skills/handoff/agents/openai.yaml",
+            "bytes": 141,
+            "sha256": "5c479fd562c691851690e8b18c8501045bef0943c10743d636b2fae26add1d28"
+          },
+          {
+            "sourcePath": "vendor/compatibility/joeness-0.1/skills/handoff/LICENSE",
+            "localPath": "skills/handoff/LICENSE",
+            "bytes": 1068,
+            "sha256": "0e7ac423bf2c6e223b7c5b156f8cf72da49d748e56a1641402c31f22ad07dbb5"
+          }
         ]
       }
-    }
-  },
-  "activeSkills": {
-    "design": {
-      "authorship": "joewrks-canonical",
-      "evaluationState": "candidate",
-      "activationPolicy": "hybrid",
-      "sourceDependencies": ["ui-ux-pro-max", "apple-design"],
-      "intentionalDifferences": ["Local stage-aware orchestration and project design contract.", "Local OpenAI metadata and DESIGN.md template."],
-      "validatorSha256": "5347a0a09cfb546bba1c0d1a30dae0a233d9a05f57bd4e7877155c588bcdabf7",
-      "files": [
-        {"localPath":"skills/design/SKILL.md","bytes":14510,"sha256":"244543bca87b1ac1f46f3c318c32eeba059c00425223832ac086dcd8f44e97b4","exactUpstreamCopy":false},
-        {"localPath":"skills/design/agents/openai.yaml","bytes":515,"sha256":"bdf38986c6e079f89be1e993a9fda02d9d41eb234d8374c0b6c96168a6c226a6","exactUpstreamCopy":false},
-        {"localPath":"skills/design/templates/DESIGN.md","bytes":2781,"sha256":"21a67e4bcaae510c2f9bbc9e028ca62a846ac6398c98e17b9c5238ad87e19b80","exactUpstreamCopy":false}
-      ]
-    },
-    "handoff": {
-      "authorship": "upstream-adapted",
-      "evaluationState": "candidate",
-      "activationPolicy": "explicit-only",
-      "sourceDependencies": [],
-      "upstream": {
-        "repository": "mattpocock/skills",
-        "url": "https://github.com/mattpocock/skills",
-        "commit": "2ab958093e83e0ec752e6c1c5932da465bf23e0c",
-        "upstreamPath": "skills/productivity/handoff",
-        "license": {"name":"MIT","upstreamPath":"LICENSE","localPath":"skills/handoff/LICENSE","sha256":"0e7ac423bf2c6e223b7c5b156f8cf72da49d748e56a1641402c31f22ad07dbb5"}
-      },
-      "intentionalDifferences": ["Removed unsupported argument-hint and disable-model-invocation frontmatter; agents/openai.yaml preserves explicit-only activation.", "Relocated the skill and included the exact repository license beside it.", "Added compact evidence summaries, target-root binding, current-state revalidation, handoff-bound authorization checks, and material-failure classification without fixed empty fields."],
-      "validatorSha256": "5347a0a09cfb546bba1c0d1a30dae0a233d9a05f57bd4e7877155c588bcdabf7",
-      "files": [
-        {"localPath":"skills/handoff/SKILL.md","bytes":4274,"sha256":"56bbe775a6b133a51dfdcf2539a3293fb08e4312c86b668e67f201c53399f785","exactUpstreamCopy":false},
-        {"localPath":"skills/handoff/agents/openai.yaml","bytes":141,"sha256":"5c479fd562c691851690e8b18c8501045bef0943c10743d636b2fae26add1d28","exactUpstreamCopy":true},
-        {"localPath":"skills/handoff/LICENSE","bytes":1068,"sha256":"0e7ac423bf2c6e223b7c5b156f8cf72da49d748e56a1641402c31f22ad07dbb5","exactUpstreamCopy":true}
-      ]
-    },
-    "project": {
-      "authorship": "joewrks-canonical",
-      "evaluationState": "candidate",
-      "activationPolicy": "hybrid-offer-explicit-write",
-      "sourceDependencies": [],
-      "intentionalDifferences": ["Conditional long-project planning offer with explicit writes, bounded discovery, single-ledger reuse, and snapshot-guarded AGENTS.md updates.", "Explicit full-contract setup keeps external skill workflows subordinate to independently authorized user or project scope."],
-      "validatorSha256": "5347a0a09cfb546bba1c0d1a30dae0a233d9a05f57bd4e7877155c588bcdabf7",
-      "files": [
-        {"localPath":"skills/project/SKILL.md","bytes":6904,"sha256":"451b10444092b9349c42268a24962daf4bd637e1dfd7917f586997e1b4f84887","exactUpstreamCopy":false},
-        {"localPath":"skills/project/agents/openai.yaml","bytes":318,"sha256":"d5757afbeb0e378b6356c118804cdf7989d4394ecd5218bee5365a246efba720","exactUpstreamCopy":false},
-        {"localPath":"skills/project/scripts/project-setup.ps1","bytes":17495,"sha256":"4ffc548078a5c87357fd0e4e63538567ea2666f118243a0558bff29278d13105","exactUpstreamCopy":false}
-      ]
-    },
-    "spec": {
-      "authorship": "joewrks-canonical",
-      "evaluationState": "candidate",
-      "activationPolicy": "implicit-persistent-spec-delivery",
-      "sourceDependencies": [],
-      "intentionalDifferences": ["Conditional user-language decision digest for a created or materially revised persistent specification."],
-      "validatorSha256": "5347a0a09cfb546bba1c0d1a30dae0a233d9a05f57bd4e7877155c588bcdabf7",
-      "files": [
-        {"localPath":"skills/spec/SKILL.md","bytes":1720,"sha256":"2b03833c69b64a8329eb436ddc2d7094277f33007b54d43ccad0a40308709af0","exactUpstreamCopy":false},
-        {"localPath":"skills/spec/agents/openai.yaml","bytes":411,"sha256":"c0236e7b365a2f329f463c43c37033f8d7d8b443090a71b475f88799d3389dc8","exactUpstreamCopy":false}
-      ]
-    },
-    "ticket": {
-      "authorship": "joewrks-canonical",
-      "evaluationState": "candidate",
-      "activationPolicy": "implicit-important-ticket-review",
-      "sourceDependencies": [],
-      "intentionalDifferences": ["Conditional single-writer delivery, new-context candidate review, and bounded optional Ponytail over-engineering audit for important prepared work, with explicit shared-model and shared-permission limitations."],
-      "validatorSha256": "5347a0a09cfb546bba1c0d1a30dae0a233d9a05f57bd4e7877155c588bcdabf7",
-      "files": [
-        {"localPath":"skills/ticket/SKILL.md","bytes":4791,"sha256":"db0711bbb305310f8ee8ab0653426d6719b62d73274600e6b67499b0c6439307","exactUpstreamCopy":false},
-        {"localPath":"skills/ticket/agents/openai.yaml","bytes":339,"sha256":"9c145a3c51ae22611fdb00d00c4793be83f87cfffc8a3741b8ff6dff9a0b04de","exactUpstreamCopy":false}
-      ]
-    },
-    "visual-check": {
-      "authorship": "joewrks-canonical",
-      "evaluationState": "candidate",
-      "activationPolicy": "hybrid-visual-verification",
-      "sourceDependencies": [],
-      "intentionalDifferences": ["Compact visual-completion router with always-required durable evidence and conditional defect or translation references.", "Local OpenAI product metadata."],
-      "validatorSha256": "5347a0a09cfb546bba1c0d1a30dae0a233d9a05f57bd4e7877155c588bcdabf7",
-      "files": [
-        {"localPath":"skills/visual-check/SKILL.md","bytes":3453,"sha256":"7bd9b1406073f844da71c0075d5cddb69778425997bb2ec42b74b36fa3996903","exactUpstreamCopy":false},
-        {"localPath":"skills/visual-check/agents/openai.yaml","bytes":603,"sha256":"bffc2c66c0534431d56ae1998f2680fde94742775fc43b9d7bf7e74dbdb8021f","exactUpstreamCopy":false},
-        {"localPath":"skills/visual-check/references/concrete-defect.md","bytes":935,"sha256":"1a620c8ef21081597ab1bf87b84b7dfc0d9b7ebe8cdacffbc10a31318831a209","exactUpstreamCopy":false},
-        {"localPath":"skills/visual-check/references/approved-reference.md","bytes":2972,"sha256":"caea02b7f176d07fbca66133f82b4e7ebb8a5bb8ec441e1e4defa26d0f2c9525","exactUpstreamCopy":false},
-        {"localPath":"skills/visual-check/references/durable-evidence.md","bytes":5391,"sha256":"cb2636a4df90775d4658a2d204b6b8e2ea11ba0173774d172a72ec6a8417195a","exactUpstreamCopy":false}
-      ]
-    }
-  },
-  "behaviorEvidenceHistory": [
-    {
-      "pairVersion": 1,
-      "mode": "run-pair-v1",
-      "resultPath": "evals/design-frontend/router-pair-v1.json",
-      "sha256": "bd37c7a245e5705be555e9b759f8d5fee0e20d6a55c72943e76fedad1c2b4042",
-      "promotionPass": false
-    },
-    {
-      "pairVersion": 2,
-      "mode": "run-pair-v2",
-      "resultPath": "evals/design-frontend/router-pair-v2.json",
-      "sha256": "0d2129bdaceb8ad858cb7a19c9c041a25f2d955834c94565e4ef4a73dbc4a610",
-      "promotionPass": false
-    },
-    {
-      "pairVersion": 3,
-      "mode": "run-pair-v3",
-      "resultPath": "evals/design-frontend/router-pair-v3.json",
-      "sha256": "3646ca28cfab0a6ec1ccec5bb7600715275388410d6661c031cbabcb548e2327",
-      "promotionPass": false
-    }
-  ],
-  "behaviorEvidence": {
-    "pairVersion": 3,
-    "mode": "run-pair-v3",
-    "resultPath": "evals/design-frontend/router-pair-v3.json",
-    "runIds": {"control":"design-router-control-v3","candidate":"design-router-candidate-v3"},
-    "evaluator": {"path":"evals/design-frontend/collect-router-evaluation.mjs","sha256":"f2f13c00e22ac12dac83c91a116ee9d5de4a3530be54142b1eccf312585690b6"},
-    "cases": {"path":"evals/design-frontend/cases.json","sha256":"8a940cd84b4f2cbf265154c060941734ad6e983d0f49cb7dd5d06fc3df5ee1f7"},
-    "router": {"path":"evals/candidates/design-frontend-router-pair-v3.md","sha256":"d641c0210e02ca10cc70f1f3219eafbff99c480fb4e0f7ccca5348e6d2e14dfa"},
-    "p0Baseline": {"path":"evals/p0/common-core-v5.json","sha256":"05631b136be55626987f7deed16ec8bf4c34b38880e4764b2375051f42249316"},
-    "syntheticLimitation": "Selection evidence only; no live Figma connection or browser result is proven."
-  },
-  "sources": {
-    "ui-ux-pro-max": {
-      "repository": "nextlevelbuilder/ui-ux-pro-max-skill", "url": "https://github.com/nextlevelbuilder/ui-ux-pro-max-skill", "commit": "3b5df7547964f0cb3424de74cff55b69039250d3", "upstreamPath": ".claude/skills/ui-ux-pro-max/**", "archiveSha256": "ba29a4e0e380a0017f833a1041f558972a55fbad81d056c3d9a549e1609f0841", "activationMode": "non-discoverable-router-only", "evaluationStatus": "validated", "enforcingTests": ["tests/design-vendor-integrity.tests.mjs", "vendor/ui-ux-pro-max/scripts/validate_data.py", "vendor/ui-ux-pro-max/scripts/tests/test_core.py"],
-      "upstreamAuditNotes": ["SKILL.md reports 98 UX and 104 icon rows; the pinned data contains 99 and 105.", "styles.csv omits No=54; search behavior is unaffected."],
-      "license": { "name": "MIT", "upstreamPath": "LICENSE", "sha256": "738f69dfa83db5c347c678fb9d90e560877059f0de93a327c39001bff92dc014" },
-      "files": [
-        {"localPath":"vendor/ui-ux-pro-max/data/app-interface.csv","bytes":9743,"sha256":"2a17ef810dab715ce1f339861817a8fbe3ccc38142b70517301e874803e838ac","exactUpstreamCopy":true},
-        {"localPath":"vendor/ui-ux-pro-max/data/charts.csv","bytes":19365,"sha256":"a70ef7460b0eaaea8614f86a0d09a4bc38b467804179762464b5ca45b491baac","exactUpstreamCopy":true},
-        {"localPath":"vendor/ui-ux-pro-max/data/colors.csv","bytes":38668,"sha256":"cb26759805217edaaa31b09836aec09eab0fe245c58f5884e9a16ef802c6e26a","exactUpstreamCopy":true},
-        {"localPath":"vendor/ui-ux-pro-max/data/google-fonts.csv","bytes":743272,"sha256":"3fd2898fb0fdd31ba758bf05cfcd2b58cd0f038a20cf08e417d09e5a8a4a509e","exactUpstreamCopy":true},
-        {"localPath":"vendor/ui-ux-pro-max/data/icons.csv","bytes":20637,"sha256":"f376c29fb4df37b4bdb366a5aa70cb211ba3dd8b435390aaa03152a64b07d2e8","exactUpstreamCopy":true},
-        {"localPath":"vendor/ui-ux-pro-max/data/landing.csv","bytes":16685,"sha256":"121a2cac7cf21050234b5f80e7b4e182f10123536032e0f9ad862ad3aec9677d","exactUpstreamCopy":true},
-        {"localPath":"vendor/ui-ux-pro-max/data/motion.csv","bytes":10500,"sha256":"6452fbd8028ab71d52993775340e1bc40a150d92be8d4b4cb8710620fd1a7512","exactUpstreamCopy":true},
-        {"localPath":"vendor/ui-ux-pro-max/data/products.csv","bytes":73485,"sha256":"e9749e4fd8f7d4c94919c25ebd347a4adaddb671e7b01d33fbc2c87d447e6667","exactUpstreamCopy":true},
-        {"localPath":"vendor/ui-ux-pro-max/data/react-performance.csv","bytes":14822,"sha256":"904c8afcda229629545912dde0e8ac37503757131f0169f80b016f1f58c4fd3f","exactUpstreamCopy":true},
-        {"localPath":"vendor/ui-ux-pro-max/data/stacks/angular.csv","bytes":18137,"sha256":"9de35bbda536ced9af7642d88b7675cefa3e18c370ab40c0875f75ab473f0fd6","exactUpstreamCopy":true},
-        {"localPath":"vendor/ui-ux-pro-max/data/stacks/astro.csv","bytes":11870,"sha256":"6b587e32df201b6e5e7b2ed187b65eee8e6d55dcd6cc16bde29fc25e0f911dae","exactUpstreamCopy":true},
-        {"localPath":"vendor/ui-ux-pro-max/data/stacks/avalonia.csv","bytes":25626,"sha256":"6bfa40ec6609fcb59e52a38281edcc3a3e5b5e56341304fe5628b32cb9b1f875","exactUpstreamCopy":true},
-        {"localPath":"vendor/ui-ux-pro-max/data/stacks/flutter.csv","bytes":10416,"sha256":"fe36d404c799781e8ba6e9a8179b45799ed5126a545528550cd2eb0f2346e8c5","exactUpstreamCopy":true},
-        {"localPath":"vendor/ui-ux-pro-max/data/stacks/html-tailwind.csv","bytes":11305,"sha256":"7aef38e75c53559470afcfa91580a9917ca8b7dbf8b92110389e23e93703ac52","exactUpstreamCopy":true},
-        {"localPath":"vendor/ui-ux-pro-max/data/stacks/javafx.csv","bytes":30871,"sha256":"5545e331b2479eb431ca45203799ce1b0ab1e369045ab7735d5a9f85ec78f956","exactUpstreamCopy":true},
-        {"localPath":"vendor/ui-ux-pro-max/data/stacks/jetpack-compose.csv","bytes":8195,"sha256":"6c8fd4b0391c342c12b0af15610cd5becbeccaef0bbe8dcfc01d928c3195d93e","exactUpstreamCopy":true},
-        {"localPath":"vendor/ui-ux-pro-max/data/stacks/laravel.csv","bytes":18519,"sha256":"3e9f551b5232136f7b5ce1304c5e1bf5a83bd63c0dc02afb37502b238772d145","exactUpstreamCopy":true},
-        {"localPath":"vendor/ui-ux-pro-max/data/stacks/nextjs.csv","bytes":12493,"sha256":"e828ccc04843742f52f545a068e8a9ab0d2b97c0e771f7e93bf0cef74da05554","exactUpstreamCopy":true},
-        {"localPath":"vendor/ui-ux-pro-max/data/stacks/nuxtjs.csv","bytes":16539,"sha256":"f7a3f2d9542856d00199f85c6c023b7c284cc698e2e6e12d61afce2edacb24d6","exactUpstreamCopy":true},
-        {"localPath":"vendor/ui-ux-pro-max/data/stacks/nuxt-ui.csv","bytes":21230,"sha256":"b9972b31e721faabc667ee2b4e93ba2af29e1df86f186c2ff608b68370f0e3a5","exactUpstreamCopy":true},
-        {"localPath":"vendor/ui-ux-pro-max/data/stacks/react.csv","bytes":12962,"sha256":"e5624ab41d33427d88e41d07581ce4eca59b37b36ab72a6ad43a9c8e2d0a1c72","exactUpstreamCopy":true},
-        {"localPath":"vendor/ui-ux-pro-max/data/stacks/react-native.csv","bytes":9983,"sha256":"077aefc81d194895ecf7936b3ed298b978e36961f183e3a275f8acda19b5f621","exactUpstreamCopy":true},
-        {"localPath":"vendor/ui-ux-pro-max/data/stacks/shadcn.csv","bytes":15921,"sha256":"395c2e415ef6f48a474acccdc8eb2c7258a6ed751a5037ba171a2d8823e02ded","exactUpstreamCopy":true},
-        {"localPath":"vendor/ui-ux-pro-max/data/stacks/svelte.csv","bytes":11009,"sha256":"71af52d64f266c88070b91dbbaa900c2f8074b6baae9f35eaea6ba9cec6fd803","exactUpstreamCopy":true},
-        {"localPath":"vendor/ui-ux-pro-max/data/stacks/swiftui.csv","bytes":10821,"sha256":"c9c2d2510f8e66281a2514e8dd0125a6b653b9ef53a71281b5e7dfe003d5b569","exactUpstreamCopy":true},
-        {"localPath":"vendor/ui-ux-pro-max/data/stacks/threejs.csv","bytes":44860,"sha256":"c74d6ba76021f8d72c0ed12c559caecfeb6961829242acf6bcb9e99926b1a396","exactUpstreamCopy":true},
-        {"localPath":"vendor/ui-ux-pro-max/data/stacks/uno.csv","bytes":27471,"sha256":"5d2e0f396bb9dc5a2661204264cc0eda7cc4fa3d78152dec89d668704a41b8fc","exactUpstreamCopy":true},
-        {"localPath":"vendor/ui-ux-pro-max/data/stacks/uwp.csv","bytes":22867,"sha256":"debf669928871261ced9333788d5afd5784377ea1fa1b4f53993dd8f1574c0fc","exactUpstreamCopy":true},
-        {"localPath":"vendor/ui-ux-pro-max/data/stacks/vue.csv","bytes":11006,"sha256":"c2724915d3c11cd67263f25896cff721f787a0fdd8326002d31e9f5806dfd8f8","exactUpstreamCopy":true},
-        {"localPath":"vendor/ui-ux-pro-max/data/stacks/winui.csv","bytes":25152,"sha256":"2d970b08e44509d7afa53ce7feb446930b2d5e0667fa637df9aeeed65c42bbbe","exactUpstreamCopy":true},
-        {"localPath":"vendor/ui-ux-pro-max/data/stacks/wpf.csv","bytes":22538,"sha256":"ca78b5f28dc50d66900548d602d74856400097284c73e076fcfbb5a38ae5083c","exactUpstreamCopy":true},
-        {"localPath":"vendor/ui-ux-pro-max/data/styles.csv","bytes":142602,"sha256":"1bf9c1d8484a0a7a54fb67555902380446865b604c8449e47a449cb3d9c1ef88","exactUpstreamCopy":true},
-        {"localPath":"vendor/ui-ux-pro-max/data/typography.csv","bytes":49830,"sha256":"7abead73de0e43e09544f164cb60cd431674e411f1e063e555a8b44d51273328","exactUpstreamCopy":true},
-        {"localPath":"vendor/ui-ux-pro-max/data/ui-reasoning.csv","bytes":52908,"sha256":"06e4369445388ba9b7a57347510b125b7a2145bbf8546a327ba50292503b204a","exactUpstreamCopy":true},
-        {"localPath":"vendor/ui-ux-pro-max/data/ux-guidelines.csv","bytes":18667,"sha256":"e01943c433b2cad3040f19389b3b0455673758a569b7a927b5bedf65c989cb96","exactUpstreamCopy":true},
-        {"localPath":"vendor/ui-ux-pro-max/references/pro-rules.md","bytes":9585,"sha256":"bc56db7cb40c5f4d8d4f6229f5c7072865278488fe5b97c76d3a38eb596da4fc","exactUpstreamCopy":true},
-        {"localPath":"vendor/ui-ux-pro-max/references/quick-reference.md","bytes":21637,"sha256":"b01ad594cc069d18786d5e8865356cc511226ba6f48d328fd975d31aae8e5781","exactUpstreamCopy":true},
-        {"localPath":"vendor/ui-ux-pro-max/scripts/core.py","bytes":18801,"sha256":"64c149019196ee24647464a27278eb96d3b4638ded73ebfc35ccd2bc99c083a9","exactUpstreamCopy":true},
-        {"localPath":"vendor/ui-ux-pro-max/scripts/design_system.py","bytes":59417,"sha256":"fcdb279eb9691dffd6c80c333d29a4e5567368e38d724520c60013c8b1aaf242","exactUpstreamCopy":true},
-        {"localPath":"vendor/ui-ux-pro-max/scripts/search.py","bytes":8687,"sha256":"69a349d69543f35f45a12c0c82922c550d1b0a16a2b37f6b1406afb2ad2919c8","exactUpstreamCopy":true},
-        {"localPath":"vendor/ui-ux-pro-max/scripts/tests/test_core.py","bytes":5901,"sha256":"ce60ac571164cf35e8c866550ad989fa686706a56fa48df4fdf76444b94fdd8d","exactUpstreamCopy":true},
-        {"localPath":"vendor/ui-ux-pro-max/scripts/validate_data.py","bytes":4185,"sha256":"f1b5e0916f3c2f8271416f93f6ff9ebf3311a68a943a19c1b83f16823cbb05a7","exactUpstreamCopy":true},
-        {"localPath":"vendor/ui-ux-pro-max/SKILL.md","bytes":13577,"sha256":"305a7527fcb2f5b6e4129ab22cd839b5172d26df7f14d3324bfdec8fc1763560","exactUpstreamCopy":true},
-        {"localPath":"vendor/notices/ui-ux-pro-max-LICENSE","bytes":1075,"sha256":"738f69dfa83db5c347c678fb9d90e560877059f0de93a327c39001bff92dc014","exactUpstreamCopy":true}
-      ]
-    },
-    "apple-design": {
-      "repository": "emilkowalski/skills", "url": "https://github.com/emilkowalski/skills", "commit": "e695d13cb298db0f46d5ef05be2ad13fa12908a6", "upstreamPath": "skills/apple-design/SKILL.md", "archiveSha256": "870b5b75ddc1763b5f8bb19cbac2c2478b54e12c8a42ec8627c189f95c286670", "activationMode": "non-discoverable-router-only", "evaluationStatus": "validated", "enforcingTests": ["tests/design-vendor-integrity.tests.mjs"],
-      "license": { "name": "MIT", "upstreamPath": "LICENSE", "sha256": "4ff5bdb7887ec1435c9cab0e8d1a7caee704d894d65c2a008ccc68b1cc2f260b" },
-      "files": [
-        {"localPath":"vendor/apple-design/SKILL.md","bytes":22715,"sha256":"11840b24a11d7f94f39c6aaab074750ae4e4de4ef54ee4b1dd97e16ebd485e61","exactUpstreamCopy":true},
-        {"localPath":"vendor/notices/apple-design-LICENSE","bytes":1070,"sha256":"4ff5bdb7887ec1435c9cab0e8d1a7caee704d894d65c2a008ccc68b1cc2f260b","exactUpstreamCopy":true}
-      ]
     }
   }
 }

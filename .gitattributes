@@ -41,6 +41,7 @@
 /evals/candidates/project-aware-lean-v1.md text eol=lf
 /evals/candidates/design-frontend-router-hybrid-v1.md text eol=lf
 /evals/candidates/design-frontend-router-pair-v3.md text eol=lf
+/evals/joeness-lean-candidate-readiness-v1.json text eol=lf
 /evals/coding/*.json text eol=lf
 /evals/coding/archive/**/*.json text eol=lf
 /evals/coding/diagnostics/*.json text eol=lf

@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { existsSync, lstatSync, readFileSync, readdirSync } from 'node:fs';
 import path from 'node:path';
@@ -9,6 +10,9 @@ const ROOT = path.resolve(import.meta.dirname, '..');
 const VENDOR = path.join(ROOT, 'vendor');
 const COMPATIBILITY = path.join(VENDOR, 'compatibility');
 const MANIFEST = path.join(VENDOR, 'source-manifest.json');
+const LEAN_READINESS_LEDGER = path.join(ROOT, 'evals', 'joeness-lean-candidate-readiness-v1.json');
+const LEAN_KERNEL = path.join(ROOT, 'evals', 'candidates', 'joeness-lean-kernel-v1.md');
+const CONTROL_COMMIT = '80c79e9f4be91d730b1b3cdc62d7bf51508895e8';
 const README = path.join(ROOT, 'README.md');
 const ROOT_AGENTS = path.join(ROOT, 'AGENTS.md');
 const HISTORICAL_COMMON_CORE = path.join(ROOT, 'evals', 'candidates', 'common-core-v1.md');
@@ -709,6 +713,18 @@ function sha256(file) {
   return createHash('sha256').update(readFileSync(file)).digest('hex');
 }
 
+function sha256Bytes(bytes) {
+  return createHash('sha256').update(bytes).digest('hex');
+}
+
+function controlManifest() {
+  return JSON.parse(execFileSync(
+    'git',
+    ['show', `${CONTROL_COMMIT}:vendor/source-manifest.json`],
+    { cwd: ROOT, encoding: 'utf8' },
+  ));
+}
+
 function vendorFiles(directory, relative = 'vendor') {
   const entries = readdirSync(directory, { withFileTypes: true });
   return entries.flatMap((entry) => {
@@ -731,11 +747,140 @@ function assertVendorPath(localPath) {
   assert.equal(localPath.includes('..'), false, `traversal path: ${localPath}`);
 }
 
-test('vendor bundle is exactly the pinned non-discoverable source set', () => {
+test('the distribution manifest exposes only the Lean desired state and migration inputs', () => {
+  const manifestText = readFileSync(MANIFEST, 'utf8');
+  const manifest = JSON.parse(manifestText);
+
+  assert.deepEqual(Object.keys(manifest), [
+    'schemaVersion',
+    'release',
+    'activeCommonCore',
+    'activeSkills',
+    'sources',
+    'compatibility',
+  ]);
+  assert.equal(manifest.schemaVersion, 1);
+  assert.deepEqual(manifest.release, {
+    name: 'JOENESS',
+    version: '0.1',
+    entrypoint: 'JOENESS.ps1',
+  });
+  assert.deepEqual(manifest.activeCommonCore, {
+    path: 'evals/candidates/joeness-lean-kernel-v1.md',
+    localPath: 'AGENTS.md',
+    bytes: 1690,
+    sha256: '0727f159bb33f67d40e4e0a1f1f391f76f96a6d980f7e1e6177df193208c3054',
+  });
+  assert.equal(lstatSync(LEAN_KERNEL).size, manifest.activeCommonCore.bytes);
+  assert.equal(sha256(LEAN_KERNEL), manifest.activeCommonCore.sha256);
+  assert.deepEqual(manifest.activeSkills, {});
+  assert.deepEqual(
+    Object.values(manifest.activeSkills).flatMap((skill) => skill.sourceDependencies ?? []),
+    [],
+  );
+  assert.deepEqual(
+    Object.fromEntries(Object.entries(manifest.sources).map(([name, source]) => [name, Object.keys(source)])),
+    {
+      'ui-ux-pro-max': ['files'],
+      'apple-design': ['files'],
+    },
+    'legacy vendor bytes remain migration inputs, not active/default dependency metadata',
+  );
+  for (const source of Object.values(manifest.sources)) {
+    for (const file of source.files) {
+      assert.deepEqual(Object.keys(file), ['localPath', 'bytes', 'sha256']);
+      assertVendorPath(file.localPath);
+      const sourcePath = path.join(ROOT, ...file.localPath.split('/'));
+      assert.equal(lstatSync(sourcePath).size, file.bytes, file.localPath);
+      assert.equal(sha256(sourcePath), file.sha256, file.localPath);
+    }
+  }
+  for (const removedKey of ['evaluation', 'behaviorEvidenceHistory', 'behaviorEvidence']) {
+    assert.equal(removedKey in manifest, false, `${removedKey} belongs under evals, not distribution`);
+  }
+});
+
+test('the Lean readiness ledger binds candidate status without claiming A/B promotion', () => {
+  assert.equal(existsSync(LEAN_READINESS_LEDGER), true, 'missing additive Lean readiness ledger');
+  assert.match(
+    readFileSync(GITATTRIBUTES, 'utf8'),
+    /^\/evals\/joeness-lean-candidate-readiness-v1\.json text eol=lf$/m,
+  );
+  const ledger = JSON.parse(readFileSync(LEAN_READINESS_LEDGER, 'utf8'));
+
+  assert.deepEqual(ledger.control, {
+    repository: 'JOEWRKS/joewrks-work-harness',
+    commit: '80c79e9f4be91d730b1b3cdc62d7bf51508895e8',
+    tree: '8ba2159f1aa4b425ee523f2b6eebe43d4778bb8f',
+    distributionManifest: {
+      path: 'vendor/source-manifest.json',
+      bytes: 37845,
+      sha256: 'f7866fb42f3336e0bd82f01e0f3940ab8b6a5d5b55e4677b9306e461be3c0158',
+    },
+  });
+  assert.deepEqual(ledger.approvedSpec, {
+    path: 'docs/superpowers/specs/2026-09-04-joeness-lean-split-design.md',
+    commit: 'f338238558aa0863ed68ebc9d0f9ff500ca002df',
+    bytes: 32428,
+    sha256: 'e15dddf5230307f499e67a118ef1a891fd62a39269e02efbdc546bbf3ecc34b9',
+  });
+  assert.deepEqual(ledger.leanKernel, {
+    path: 'evals/candidates/joeness-lean-kernel-v1.md',
+    commit: '78d2f8ae390543d0cdc1f36e5b44ffec0981fa73',
+    bytes: 1690,
+    sha256: '0727f159bb33f67d40e4e0a1f1f391f76f96a6d980f7e1e6177df193208c3054',
+  });
+  assert.deepEqual(ledger.candidate, {
+    state: 'deterministic-implementation-in-progress',
+    distributionManifest: {
+      path: 'vendor/source-manifest.json',
+      bytes: 13710,
+      sha256: '1184fc323704fa9df561451fa47c0509f288056f024b57a5d10db7d25acdc218',
+    },
+    publicSkillCount: 0,
+    defaultVendorDependencyCount: 0,
+  });
+  assert.deepEqual(ledger.evaluation, {
+    abStatus: 'NOT-RUN',
+    promotionPass: false,
+  });
+  assert.deepEqual(ledger.historicalEvidence, {
+    owner: 'Git history and existing evals artifacts',
+    controlCommit: '80c79e9f4be91d730b1b3cdc62d7bf51508895e8',
+    roots: ['evals/', 'vendor/compatibility/joeness-0.1/'],
+    mutationPolicy: 'preserve; record reruns as additive artifacts',
+  });
+
+  assert.equal(
+    execFileSync('git', ['rev-parse', `${ledger.control.commit}^{tree}`], { cwd: ROOT, encoding: 'utf8' }).trim(),
+    ledger.control.tree,
+  );
+  const controlManifestBytes = execFileSync(
+    'git',
+    ['show', `${ledger.control.commit}:${ledger.control.distributionManifest.path}`],
+    { cwd: ROOT },
+  );
+  assert.equal(controlManifestBytes.length, ledger.control.distributionManifest.bytes);
+  assert.equal(sha256Bytes(controlManifestBytes), ledger.control.distributionManifest.sha256);
+
+  for (const binding of [ledger.approvedSpec, ledger.leanKernel]) {
+    const committedBytes = execFileSync('git', ['show', `${binding.commit}:${binding.path}`], { cwd: ROOT });
+    assert.equal(committedBytes.length, binding.bytes, `${binding.path} committed bytes`);
+    assert.equal(sha256Bytes(committedBytes), binding.sha256, `${binding.path} committed hash`);
+  }
+  const workingKernelBytes = readFileSync(path.join(ROOT, ...ledger.leanKernel.path.split('/')));
+  assert.equal(workingKernelBytes.length, ledger.leanKernel.bytes);
+  assert.equal(sha256Bytes(workingKernelBytes), ledger.leanKernel.sha256);
+  const candidateManifestBytes = readFileSync(path.join(ROOT, ...ledger.candidate.distributionManifest.path.split('/')));
+  assert.equal(candidateManifestBytes.length, ledger.candidate.distributionManifest.bytes);
+  assert.equal(sha256Bytes(candidateManifestBytes), ledger.candidate.distributionManifest.sha256);
+});
+
+test('Control vendor and public-skill identities remain exact historical facts', () => {
   assert.ok(existsSync(MANIFEST), 'missing vendor/source-manifest.json');
   const manifestText = readFileSync(MANIFEST, 'utf8');
   assert.doesNotMatch(manifestText, /(?:[A-Za-z]:\\\\|[A-Za-z]:\/(?!\/)|(?:^|["\s])\/(?:Users|home)\/)/i, 'manifest contains a personal absolute path');
-  const manifest = JSON.parse(manifestText);
+  const manifest = controlManifest();
 
   assert.equal(manifest.schemaVersion, 1);
   assert.deepEqual(manifest.release, {
@@ -882,8 +1027,8 @@ test('the JOENESS 0.1 compatibility archive is an exact separate source set', ()
   }
 });
 
-test('the interaction safety core is active without rewriting broader Core evidence', () => {
-  const manifest = JSON.parse(readFileSync(MANIFEST, 'utf8'));
+test('the Control interaction safety core remains exact historical evidence', () => {
+  const manifest = controlManifest();
 
   assert.equal(lstatSync(HISTORICAL_COMMON_CORE).size, 7933);
   assert.equal(
@@ -954,8 +1099,8 @@ test('the interaction safety core is active without rewriting broader Core evide
   assert.match(readFileSync(GITATTRIBUTES, 'utf8'), /^\/docs\/superpowers\/plans\/2026-08-11-joeness-routing-and-plugin-policy\.md text eol=lf$/m);
 });
 
-test('M4 preserves project workflow authority without promoting or expanding Core', () => {
-  const manifest = JSON.parse(readFileSync(MANIFEST, 'utf8'));
+test('Control M4 preserves project workflow authority without promoting or expanding Core', () => {
+  const manifest = controlManifest();
   const agents = readFileSync(ROOT_AGENTS, 'utf8');
   const spec = readFileSync(path.join(ROOT, 'docs', 'superpowers', 'specs', '2026-08-11-joeness-routing-and-plugin-policy-design.md'), 'utf8');
   const authorityRule = 'Invoking an external skill does not approve its whole workflow; use only the parts independently authorized by the current user request or project contract.';
@@ -978,8 +1123,8 @@ test('M4 preserves project workflow authority without promoting or expanding Cor
   assert.match(spec, /installed-plugin activation.*unverified.*separate activation evidence/is);
 });
 
-test('candidate ledger separates the unvalidated active contract from retained hybrid evidence', async () => {
-  const manifest = JSON.parse(readFileSync(MANIFEST, 'utf8'));
+test('Control evaluation history remains available from its immutable Git owner', async () => {
+  const manifest = controlManifest();
   const current = manifest.evaluation.current;
   assert.deepEqual(current, EXPECTED_CURRENT_EVALUATION);
   assert.deepEqual(manifest.evaluation.history, [EXPECTED_HYBRID_EVALUATION, EXPECTED_SKILL_CONTRACT_V2, EXPECTED_SKILL_CONTRACT_V3_REJECTED, EXPECTED_SKILL_CONTRACT_V4_REJECTED, EXPECTED_SKILL_CONTRACT_V5, EXPECTED_SKILL_CONTRACT_V6, EXPECTED_SKILL_CONTRACT_V7, EXPECTED_SKILL_CONTRACT_V8, EXPECTED_SKILL_CONTRACT_V9, EXPECTED_SKILL_CONTRACT_V10_REJECTED, EXPECTED_SKILL_CONTRACT_V11_REJECTED, EXPECTED_SKILL_CONTRACT_V12]);
