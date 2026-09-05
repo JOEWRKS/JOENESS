@@ -8,6 +8,14 @@ JOENESS 연구에서 검증한 작업 안전 보정은 현재 Bare Astra에서 �
 
 이 저장소는 Astra-native baseline, 이전 GPT-5.6 호환성, 평가 evidence, 기존 설치의 안전한 제거 경로를 보존합니다. `skills/**`와 `vendor/**`는 선택 가능한 미래 참고 자료 또는 역사 source이며 active runtime이나 기본 설치 항목이 아닙니다.
 
+## Shared cross-system contracts
+
+`docs/contracts/`는 JOEFLOW, Product Definition, JOEDESIGN 등 둘 이상의 시스템이 동일하게 알아야 하는 **cross-system authority boundary만** 보관하는 active documentation 영역입니다.
+
+이 영역은 JOENESS runtime을 다시 활성화하지 않으며 JOENESS를 상위 control plane으로 만들지 않습니다. 소비자는 JOENESS 전체 저장소나 역사 자료를 로드하지 말고, bootstrap·handoff·authority conflict·bounded re-entry·contract revision처럼 필요한 시점에 명시적으로 참조된 contract만 읽습니다.
+
+현재 기준 계약은 [`docs/contracts/JOEWRKS_CROSS_SYSTEM_AUTHORITY_V1.md`](docs/contracts/JOEWRKS_CROSS_SYSTEM_AUTHORITY_V1.md)입니다.
+
 ## Astra-native 상태 확인
 
 새 환경에서는 다음 읽기 전용 확인만 필요합니다.
@@ -55,6 +63,8 @@ JOENESS requires no runtime installation by default for GPT-6 Astra.
 The safety overlay studied by JOENESS did not demonstrate a unique benefit over Bare Astra in the current evidence. This does not claim that Bare Astra can never fail; it means the evidence does not justify installing a behavioral overlay now.
 
 This repository preserves the Astra-native baseline, GPT-5.6 compatibility, evaluation evidence, and a fail-closed removal path for supported legacy installs. Files under `skills/**` and `vendor/**` are optional future references or historical source, not active runtime or default installation payload.
+
+`docs/contracts/` is the only active shared-document area: it stores small cross-system authority contracts used by multiple JOEWRKS systems. These documents do not reactivate JOENESS runtime or make JOENESS a control plane. Consumers should read only the explicitly referenced contract when a cross-system boundary is relevant, not load historical JOENESS material into normal work.
 
 For a new environment, run only the read-only check:
 
