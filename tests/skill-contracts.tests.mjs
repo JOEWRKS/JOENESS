@@ -650,9 +650,9 @@ test('handoff expands only repeated visual or deployment incidents', () => {
   assert.doesNotMatch(handoff, /Mark unavailable fields unavailable/is);
 });
 
-test('the Lean distribution exposes zero public roles while preserving their source history', () => {
+test('the Astra-native distribution exposes zero public roles while preserving their source history', () => {
   const manifest = JSON.parse(readFileSync(path.join(ROOT, 'vendor', 'source-manifest.json'), 'utf8'));
-  assert.deepEqual(Object.keys(manifest.activeSkills), []);
+  assert.deepEqual(manifest.publicSkills, []);
   assert.deepEqual([
     'design',
     'handoff',

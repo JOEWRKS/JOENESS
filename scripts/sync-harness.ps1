@@ -40,7 +40,7 @@ function Get-HarnessPathIdentity {
 function Get-HarnessExitCode {
     param([string] $Status)
     switch ($Status) {
-        { $_ -in @('current', 'ready', 'removed') } { return 0 }
+        { $_ -in @('current', 'ready', 'removed', 'legacy', 'unsupported') } { return 0 }
         'failed' { return 1 }
         'blocked' { return 2 }
         'unknown' { return 3 }
@@ -77,8 +77,8 @@ function Get-HarnessPublicActiveSkills {
         $manifestPath = Join-Path $SourceRoot 'vendor\source-manifest.json'
         $manifestRead = Read-HarnessUtf8 $manifestPath
         $manifest = $manifestRead.Text | ConvertFrom-Json
-        if ($null -eq $manifest.activeSkills) { throw 'Missing active skills' }
-        [pscustomobject]@{ ActiveSkills = @($manifest.activeSkills.PSObject.Properties.Name); Warning = $null }
+        if ($null -eq $manifest.publicSkills) { throw 'Missing public skills' }
+        [pscustomobject]@{ ActiveSkills = @($manifest.publicSkills | ForEach-Object { [string] $_ }); Warning = $null }
     } catch {
         [pscustomobject]@{ ActiveSkills = @(); Warning = 'Unable to determine active skills because the source manifest could not be read.' }
     }
@@ -601,6 +601,8 @@ function Invoke-JoewrksHarnessSync {
     $controlV2SkillNames = @()
     $controlV2WholeFileCount = $null
     $controlV2SelectionHash = $null
+    $isExactControlInstall = $false
+    $astraNative = $false
     $sourceCore = $null
     $blockHash = $null
     $agentSnapshot = $null
@@ -635,13 +637,18 @@ function Invoke-JoewrksHarnessSync {
         $manifestRead = Read-HarnessUtf8 $manifestPath
         $manifestHash = Get-HarnessSha256 $manifestRead.Bytes
         $manifest = $manifestRead.Text | ConvertFrom-Json
-        foreach ($skillProperty in @($manifest.activeSkills.PSObject.Properties)) {
-            $skillName = [string] $skillProperty.Name
-            $manifestSkillRelativePaths[$skillName] = Get-HarnessSafeRelativePath "skills/$skillName/SKILL.md" 'Manifest skill path'
+        $astraNative = [string] $manifest.runtimeMode -ceq 'none'
+        if (-not $astraNative -or [string] $manifest.target.model -cne 'gpt-6-astra' -or [string] $manifest.target.reasoningEffort -cne 'xhigh') {
+            throw 'Active distribution is not the supported Astra-native identity'
+        }
+        if ($null -ne $manifest.activeCommonCore -or
+            @($manifest.managedRuntimeFiles).Count -ne 0 -or
+            @($manifest.publicSkills).Count -ne 0 -or
+            @($manifest.defaultVendors).Count -ne 0 -or
+            $null -ne $manifest.pluginRouting) {
+            throw 'Astra-native distribution must have zero managed runtime payload'
         }
         $coreEntry = $manifest.activeCommonCore
-        $legacyInstallSources = $manifest.compatibility.legacyInstallSources
-        if ($null -eq $legacyInstallSources) { throw 'Missing legacy install compatibility sources' }
         $controlV2 = $manifest.compatibility.installIdentities.controlSixSkill
         Assert-HarnessObjectShape $controlV2 @('commit', 'distributionManifest', 'activeCommonCore', 'selection') 'Control V2 compatibility identity'
         if ([string] $controlV2.commit -cnotmatch '\A[0-9a-f]{40}\z') { throw 'Control V2 compatibility commit is not a Git identity' }
@@ -665,85 +672,7 @@ function Invoke-JoewrksHarnessSync {
         $controlV2WholeFileCount = [long] $controlV2.selection.wholeFileCount
         if ($controlV2WholeFileCount -le 0) { throw 'Control V2 selection count is invalid' }
         $controlV2SelectionHash = Get-HarnessValidSha256 $controlV2.selection.sha256 'Control V2 selection hash'
-        $legacyV1Entry = $legacyInstallSources.stateSchemaV1
-        if ($null -eq $legacyV1Entry) { throw 'Missing state schema V1 compatibility source' }
-        $historicalCoreEntry = $legacyV1Entry.commonCore
-        $historicalV1SkillName = [string] $legacyV1Entry.skillName
-        if ([string]::IsNullOrWhiteSpace($historicalV1SkillName)) { throw 'Missing historical V1 skill name' }
-        $corePath = Resolve-HarnessSourceFile $sourceRoot ([string] $coreEntry.path)
-        if (-not (Test-Path -LiteralPath $corePath -PathType Leaf)) { throw "Missing Common Core source: $($coreEntry.path)" }
-        $sourceCoreRead = Read-HarnessUtf8 $corePath
-        $sourceCore = $sourceCoreRead.Text.TrimEnd("`r", "`n")
-        if ((Get-HarnessSha256 $sourceCoreRead.Bytes) -cne ([string] $coreEntry.sha256).ToLowerInvariant()) {
-            throw "Common Core source hash mismatch: $($coreEntry.path)"
-        }
-
-        foreach ($selection in @(Get-HarnessManifestSelections $manifest $sourceRoot)) {
-            $relative = $selection.RelativePath
-            $path = $selection.Path
-            $entry = $selection.Entry
-            if (-not (Test-Path -LiteralPath $path -PathType Leaf)) { throw "Missing manifest source file: $relative" }
-            $bytes = [IO.File]::ReadAllBytes($path)
-            if ($bytes.Length -ne [long] $entry.bytes) { throw "Source size mismatch: $relative" }
-            $hash = Get-HarnessSha256 $bytes
-            if ($hash -cne $selection.Hash) { throw "Source hash mismatch: $relative" }
-            $null = $optionalEntries.Add([pscustomobject] @{ RelativePath = $relative; Hash = $hash; Bytes = $bytes })
-        }
-        $null = $optionalEntries.Add([pscustomobject] @{
-            RelativePath = 'vendor/source-manifest.json'
-            Hash = $manifestHash
-            Bytes = $manifestRead.Bytes
-        })
-        $historicalCoreSource = Get-HarnessSafeRelativePath ([string] $historicalCoreEntry.sourcePath) 'Historical V1 Common Core source path'
-        $historicalCoreTarget = Get-HarnessSafeRelativePath ([string] $historicalCoreEntry.localPath) 'Historical V1 Common Core target path'
-        if ($historicalCoreTarget -cne 'AGENTS.md') { throw 'Historical V1 Common Core target is invalid' }
-        $historicalCorePath = Resolve-HarnessSourceFile $sourceRoot $historicalCoreSource
-        $historicalCoreBytes = [IO.File]::ReadAllBytes($historicalCorePath)
-        $historicalCoreHash = Get-HarnessValidSha256 $historicalCoreEntry.sha256 'Historical V1 Common Core hash'
-        if ((Get-HarnessSha256 $historicalCoreBytes) -cne $historicalCoreHash) {
-            throw "Historical V1 Common Core source mismatch: $historicalCoreSource"
-        }
-        foreach ($selection in @(Get-HarnessLegacyInstallSelections $legacyV1Entry $manifest $sourceRoot)) {
-            $historicalV1WholeFiles[$selection.RelativePath] = $selection.Hash
-        }
-
-        $release01 = $legacyInstallSources.PSObject.Properties['release0.1'].Value
-        if ($null -eq $release01) { throw 'Missing release 0.1 compatibility source' }
-        $release01Dependencies = @($legacyV1Entry.sourceDependencies | ForEach-Object { [string] $_ })
-        $releaseSelectionEntry = [pscustomobject] @{
-            files = @($release01.files)
-            sourceDependencies = @($release01Dependencies)
-        }
-        foreach ($selection in @(Get-HarnessLegacyInstallSelections $releaseSelectionEntry $manifest $sourceRoot)) {
-            $release01WholeFiles[$selection.RelativePath] = $selection.Hash
-        }
-        foreach ($file in @($release01.files)) {
-            $relative = Get-HarnessSafeRelativePath ([string] $file.localPath) 'Release 0.1 skill path'
-            $segments = @($relative -split '/')
-            if ($segments.Count -lt 3 -or $segments[0] -cne 'skills') {
-                throw "Release 0.1 skill path is outside a skill root: $relative"
-            }
-            $skillName = $segments[1]
-            if (-not $release01SkillFiles.ContainsKey($skillName)) {
-                $release01SkillFiles[$skillName] = [Collections.Generic.List[object]]::new()
-            }
-            $null = $release01SkillFiles[$skillName].Add($file)
-        }
-        $release01SkillNames = @($release01SkillFiles.Keys | Sort-Object -CaseSensitive)
-        $release01LegacySkillNames = @($release01SkillNames | Where-Object {
-            $_ -ceq $historicalV1SkillName -or $_.StartsWith('joewrks-', [StringComparison]::Ordinal)
-        })
-        if ($release01LegacySkillNames.Count -eq 0) { throw 'Release 0.1 has no legacy skill names' }
-        $release01LegacyPrefixes = @($release01LegacySkillNames | ForEach-Object { "skills/$_/" })
-        $releaseCore = $release01.activeCommonCore
-        $releaseCoreSource = Get-HarnessSafeRelativePath ([string] $releaseCore.sourcePath) 'Release 0.1 Common Core source path'
-        $null = Get-HarnessSafeRelativePath ([string] $releaseCore.localPath) 'Release 0.1 Common Core target path'
-        $releaseCorePath = Resolve-HarnessSourceFile $sourceRoot $releaseCoreSource
-        $releaseCoreBytes = [IO.File]::ReadAllBytes($releaseCorePath)
-        $releaseCoreHash = Get-HarnessValidSha256 $releaseCore.sha256 'Release 0.1 Common Core hash'
-        if ($releaseCoreBytes.Length -ne [long] $releaseCore.bytes -or (Get-HarnessSha256 $releaseCoreBytes) -cne $releaseCoreHash) {
-            throw "Release 0.1 Common Core source mismatch: $releaseCoreSource"
-        }
+        if ($null -ne $coreEntry) { throw 'Astra-native manifest unexpectedly selects a Common Core' }
     } catch {
         $null = $blockers.Add([pscustomobject] @{ kind = 'sourceIntegrity'; message = $_.Exception.Message })
     }
@@ -964,6 +893,7 @@ function Invoke-JoewrksHarnessSync {
                             throw 'Control V2 installed manifest selection is not pinned'
                         }
                         $isControlV2 = $true
+                        $isExactControlInstall = $true
                     } elseif ($installedSkillNames.Count -eq 0 -and $installedWholeFiles.Count -eq 0) {
                         $isPriorLeanV2 = $true
                     } else {
@@ -1013,8 +943,14 @@ function Invoke-JoewrksHarnessSync {
     } else {
         $stateSnapshot = [pscustomobject] @{ Exists = $false; Hash = $null; Bytes = [byte[]] @() }
     }
+    if ($null -ne $state -and -not $isExactControlInstall) {
+        $state = $null
+        $stateCoreHash = $null
+        $stateWholeFiles = @{}
+        $null = $blockers.Add([pscustomobject] @{ kind = 'invalidState'; message = 'Installed JOENESS state is not the exact supported Control identity' })
+    }
     $removeAgentBytes = $null
-    if ($Remove) {
+    if ($Remove -or $isExactControlInstall) {
         if ($null -eq $state -and -not $stateSnapshot.Exists) {
             if (Test-Path -LiteralPath $agentsPath) {
                 try {
@@ -1028,6 +964,10 @@ function Invoke-JoewrksHarnessSync {
                 } catch {
                     $null = $blockers.Add([pscustomobject] @{ kind = 'commonCorePreflight'; message = $_.Exception.Message })
                 }
+            }
+            $unownedManifestPath = Join-Path $resolvedAgentsHome 'vendor\source-manifest.json'
+            if (Test-Path -LiteralPath $unownedManifestPath) {
+                $null = $blockers.Add([pscustomobject] @{ kind = 'unownedEvidence'; message = "Unowned JOENESS manifest exists: $unownedManifestPath" })
             }
             foreach ($skillName in @($manifestSkillSkeletons.Keys)) {
                 $skeleton = $manifestSkillSkeletons[$skillName]
@@ -1082,13 +1022,23 @@ function Invoke-JoewrksHarnessSync {
                 }
             }
         }
-    } elseif (-not $targetPathSafetyBlocked -and (Test-Path -LiteralPath $overridePath -PathType Leaf)) {
-        try {
-            if ((Get-Item -LiteralPath $overridePath).Length -gt 0) {
-                $null = $blockers.Add([pscustomobject] @{ kind = 'overrideShadow'; message = "Nonempty override blocks Common Core: $overridePath" })
+    } elseif (-not $targetPathSafetyBlocked -and $null -eq $state) {
+        if (Test-Path -LiteralPath $agentsPath) {
+            try {
+                if (-not (Test-Path -LiteralPath $agentsPath -PathType Leaf)) { throw "AGENTS.md path is not a file: $agentsPath" }
+                $agentBytes = [IO.File]::ReadAllBytes($agentsPath)
+                $beginCount = @(Get-HarnessByteOffsets $agentBytes ([Text.Encoding]::UTF8.GetBytes($script:HarnessBeginMarker))).Count
+                $endCount = @(Get-HarnessByteOffsets $agentBytes ([Text.Encoding]::UTF8.GetBytes($script:HarnessEndMarker))).Count
+                if ($beginCount -gt 0 -or $endCount -gt 0) {
+                    $null = $blockers.Add([pscustomobject] @{ kind = 'unownedEvidence'; message = "Unowned Common Core marker exists: $agentsPath" })
+                }
+            } catch {
+                $null = $blockers.Add([pscustomobject] @{ kind = 'commonCorePreflight'; message = $_.Exception.Message })
             }
-        } catch {
-            $null = $blockers.Add([pscustomobject] @{ kind = 'overrideInspection'; message = $_.Exception.Message })
+        }
+        $unownedManifestPath = Join-Path $resolvedAgentsHome 'vendor\source-manifest.json'
+        if (Test-Path -LiteralPath $unownedManifestPath) {
+            $null = $blockers.Add([pscustomobject] @{ kind = 'unownedEvidence'; message = "Unowned JOENESS manifest exists: $unownedManifestPath" })
         }
     }
 
@@ -1224,7 +1174,7 @@ function Invoke-JoewrksHarnessSync {
     }
 
     $plannedChanges = @($changes | Where-Object { $_.planned })
-    if (-not $Remove -and $plannedChanges.Count -gt 0 -and $blockers.Count -eq 0) {
+    if (-not $Remove -and -not $isExactControlInstall -and $plannedChanges.Count -gt 0 -and $blockers.Count -eq 0) {
         $writeParents = @($agentsPath, $statePath)
         $writeParents += @($optionalEntries | ForEach-Object { Resolve-HarnessSourceFile $resolvedAgentsHome $_.RelativePath })
         $writeParents += @($stateWholeFiles.Keys | ForEach-Object { Resolve-HarnessSourceFile $resolvedAgentsHome $_ })
@@ -1244,6 +1194,15 @@ function Invoke-JoewrksHarnessSync {
         }
     }
 
+    if ($blockers.Count -eq 0 -and $isExactControlInstall -and -not $Remove) {
+        $warnings += 'Legacy GPT-5.6 Control installation detected. Apply is a no-op; use explicit Remove for the supported safe removal path.'
+        return New-HarnessPublicResult -Status 'legacy' -Mode $mode -AgentsRoot $resolvedAgentsHome -SkillsRoot (Join-Path $resolvedAgentsHome 'skills') -ActiveSkills @() -Warnings @($warnings) -ChangesRequired $false -Changes @([pscustomobject] @{ kind = 'legacyInstallation'; action = 'removeAvailable'; target = 'GPT-5.6 Control'; planned = $false }) -Blockers @() -BackupPath $null -Rollback $null -UnresolvedTargets @()
+    }
+    if ($blockers.Count -eq 0 -and $Apply) {
+        $warnings += 'Apply is unsupported for the Astra-native zero-runtime distribution; no files were changed.'
+        return New-HarnessPublicResult -Status 'unsupported' -Mode $mode -AgentsRoot $resolvedAgentsHome -SkillsRoot (Join-Path $resolvedAgentsHome 'skills') -ActiveSkills @() -Warnings @($warnings) -ChangesRequired $false -Changes @() -Blockers @() -BackupPath $null -Rollback $null -UnresolvedTargets @()
+    }
+
     $status = if ($blockers.Count -gt 0) {
         'blocked'
     } elseif ($Remove) {
@@ -1254,7 +1213,7 @@ function Invoke-JoewrksHarnessSync {
         'current'
     }
     if ((-not $Apply -and -not $Remove) -or $status -ne 'ready') {
-        return New-HarnessPublicResult -Status $status -Mode $mode -AgentsRoot $resolvedAgentsHome -SkillsRoot (Join-Path $resolvedAgentsHome 'skills') -ActiveSkills @($manifestSkillRelativePaths.Keys) -Warnings @($warnings) -ChangesRequired ([bool] ($plannedChanges.Count -gt 0)) -Changes @($changes) -Blockers @($blockers) -BackupPath $null -Rollback $null -UnresolvedTargets @()
+        return New-HarnessPublicResult -Status $status -Mode $mode -AgentsRoot $resolvedAgentsHome -SkillsRoot (Join-Path $resolvedAgentsHome 'skills') -ActiveSkills @() -Warnings @($warnings) -ChangesRequired ([bool] ($plannedChanges.Count -gt 0)) -Changes @($changes) -Blockers @($blockers) -BackupPath $null -Rollback $null -UnresolvedTargets @()
     }
 
     $operations = [Collections.Generic.List[object]]::new()

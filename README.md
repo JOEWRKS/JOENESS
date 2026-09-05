@@ -1,93 +1,73 @@
 # JOENESS
 
-> 0.1 Beta
+> GPT-6 Astra-native / zero runtime
 
-[한국어](#한국어) · [English](#english-guide)
+GPT-6 Astra에서는 JOENESS runtime 설치가 기본적으로 필요하지 않습니다.
 
-## 한국어
+JOENESS 연구에서 검증한 작업 안전 보정은 현재 Bare Astra에서 고유 이점을 입증하지 못했기 때문에 기본 runtime overlay를 제공하지 않습니다. 이는 Bare Astra에서 미래 실패가 불가능하다는 뜻이 아니라, 현재 증거로 별도 행동 규칙을 설치할 근거가 없다는 뜻입니다.
 
-JOENESS는 Windows용 Codex에 설치하는 작고 항상 적용되는 작업 안전 커널(모든 작업에 적용되는 작은 규칙 묶음)입니다. 사용자와 프로젝트의 권한, 요청 범위, 현재 상태, 외부 쓰기, 재시도, 완료 증거의 기본 안전선만 지킵니다.
+이 저장소는 Astra-native baseline, 이전 GPT-5.6 호환성, 평가 evidence, 기존 설치의 안전한 제거 경로를 보존합니다. `skills/**`와 `vendor/**`는 선택 가능한 미래 참고 자료 또는 역사 source이며 active runtime이나 기본 설치 항목이 아닙니다.
 
-설치한 뒤에는 JOENESS용 역할이나 호출명을 고를 필요 없이 평소처럼 작업하면 됩니다. Codex에 원하는 결과를 자연어로 요청하세요.
+## Astra-native 상태 확인
 
-### 설치와 확인
+새 환경에서는 다음 읽기 전용 확인만 필요합니다.
 
-1. 받은 ZIP을 **전체 압축 해제**합니다. `JOENESS.ps1`만 따로 옮기지 마세요.
-2. 압축을 푼 폴더를 파일 탐색기로 열고, 위쪽 주소창에 `powershell`을 입력한 뒤 Enter를 눌러 PowerShell을 엽니다.
-3. 설치 상태를 확인합니다.
+```powershell
+powershell.exe -NoProfile -File .\JOENESS.ps1 -Check
+```
 
-   ```powershell
-   powershell.exe -NoProfile -File .\JOENESS.ps1 -Check
-   ```
+JOENESS가 관리하는 runtime이나 상태가 없으면 `current`와 `changesRequired: false`를 반환합니다. Apply를 실행하라는 안내나 빈 설치를 만들지 않습니다.
 
-   `-Check`는 읽기 전용이며 파일을 바꾸지 않습니다. `ready`, `current`, `blocked` 같은 상태는 **PowerShell 출력**이며 Codex 채팅 답변이 아닙니다. `blocked`, `failed`, `unknown`이면 같은 명령을 반복하지 말고 PowerShell 출력 전체를 Codex에 붙여 넣으세요.
+`Apply`는 Astra-native 배포에서 지원되지 않는 명시적 no-op입니다. 파일을 설치하거나 기존 GPT-5.6 설치를 자동 제거하지 않습니다.
 
-4. PowerShell 출력의 `"status":"ready"`일 때만 적용하고, 바로 다시 확인합니다.
+## 이전 GPT-5.6 설치 제거
 
-   ```powershell
-   powershell.exe -NoProfile -File .\JOENESS.ps1 -Apply
-   ```
+`Check`가 정확히 지원되는 GPT-5.6 Control 설치를 확인하면 `legacy`를 반환하고 명시적 제거가 가능하다고 알립니다. 먼저 확인하세요.
 
-   ```powershell
-   powershell.exe -NoProfile -File .\JOENESS.ps1 -Check
-   ```
+```powershell
+powershell.exe -NoProfile -File .\JOENESS.ps1 -Check
+```
 
-5. Codex를 재실행하거나 새 작업을 엽니다. 설치한 뒤에는 `로그인 화면을 만들어줘`처럼 평소처럼 작업하면 됩니다.
-
-### 업데이트와 제거
-
-업데이트할 때도 새 ZIP을 전체 압축 해제하고 그 폴더에서 `-Check`를 먼저 실행합니다. `ready`일 때만 `-Apply`를 실행한 뒤 `-Check`로 다시 확인하세요.
-
-`-Apply`는 변경 대상 파일을 백업하며, 되돌리기 위해 관리 블록 밖의 사용자 소유 내용까지 포함한 기존 `AGENTS.md` 전체를 백업할 수 있습니다. 실제 변경은 JOENESS가 소유한 관리 블록과 설치 파일로 제한합니다. 이전 JOENESS 0.1 갱신에서도 기록된 소유 파일만 교체·제거하고 사용자 소유 내용은 보존하며, 소유권이나 상태를 확인할 수 없으면 쓰지 않고 `blocked`로 멈춥니다.
-
-제거는 설치에 사용한 전체 패키지 폴더에서 실행합니다.
+그 결과가 `legacy`일 때만 다음 제거 작업을 실행합니다.
 
 ```powershell
 powershell.exe -NoProfile -File .\JOENESS.ps1 -Remove
 ```
 
-`-Remove`는 기록된 소유권과 현재 파일 상태를 먼저 확인하고 JOENESS가 소유한 설치 파일과 관리 블록만 제거합니다. 사용자 소유 파일과 관리 블록 바깥 내용은 보존하며, 변경이나 소유권을 확인할 수 없으면 제거하지 않고 멈춥니다.
+Remove는 설치 manifest, ownership ledger, source hash, 관리 marker가 모두 정확할 때만 진행합니다. 영향을 받는 파일의 전체 변경 전 bytes를 백업하고 다시 읽어 확인한 뒤 JOENESS 소유 runtime과 상태만 제거합니다. `AGENTS.md`의 관리 block 밖 bytes, 관리 폴더 안의 비관리 파일, 그 밖의 사용자 소유 파일은 그대로 보존합니다.
+
+파일이나 ownership 정보가 달라졌거나 출처를 확정할 수 없으면 `blocked`로 멈추며 자동 수정이나 부분 제거를 완료로 보고하지 않습니다.
+
+## 보존 범위
+
+- GPT-5.6 Control, Lean Candidate, Lean Readiness의 Git identity
+- 1,690-byte Lean Kernel과 그 exact hash
+- 기존 평가 결과와 거절·대체 이력
+- TrackB Astra rebaseline 및 stress-falsification evidence
+- 향후 선택을 위한 skills와 vendor source
+
+평가 자료는 active distribution manifest에 포함되지 않습니다. 새로운 행동 규칙은 실제로 관찰된 Astra 실패와 그 규칙의 고유한 개선 증거가 있을 때만 검토합니다.
 
 ## English Guide
 
-JOENESS is a small, always-on work-safety kernel—a small set of rules applied to every task—installed into Codex on Windows. It keeps a basic safety boundary around user and project authority, requested scope, current state, external writes, retries, and completion evidence.
+JOENESS requires no runtime installation by default for GPT-6 Astra.
 
-After installation, work normally. You do not need to choose JOENESS roles or call names; ask Codex for the result you want in natural language.
+The safety overlay studied by JOENESS did not demonstrate a unique benefit over Bare Astra in the current evidence. This does not claim that Bare Astra can never fail; it means the evidence does not justify installing a behavioral overlay now.
 
-### Install and check
+This repository preserves the Astra-native baseline, GPT-5.6 compatibility, evaluation evidence, and a fail-closed removal path for supported legacy installs. Files under `skills/**` and `vendor/**` are optional future references or historical source, not active runtime or default installation payload.
 
-1. **Extract the complete ZIP.** Do not move `JOENESS.ps1` by itself.
-2. Open the extracted folder in File Explorer, type `powershell` in the address bar, and press Enter.
-3. Check the installation state.
+For a new environment, run only the read-only check:
 
-   ```powershell
-   powershell.exe -NoProfile -File .\JOENESS.ps1 -Check
-   ```
+```powershell
+powershell.exe -NoProfile -File .\JOENESS.ps1 -Check
+```
 
-   `-Check` is read-only and changes no files. Statuses such as `ready`, `current`, and `blocked` are **PowerShell output**, not a Codex chat response. For `blocked`, `failed`, or `unknown`, do not repeat the command; paste the complete PowerShell output into Codex.
+A clean Astra environment returns `current` with `changesRequired: false`. Apply is an explicit unsupported no-op and never installs an empty distribution or automatically removes a historical Control install.
 
-4. Run Apply only when PowerShell reports `"status":"ready"`, then check again immediately.
-
-   ```powershell
-   powershell.exe -NoProfile -File .\JOENESS.ps1 -Apply
-   ```
-
-   ```powershell
-   powershell.exe -NoProfile -File .\JOENESS.ps1 -Check
-   ```
-
-5. Restart Codex or open a new task. After installation, work normally with a request such as “Build a login screen.”
-
-### Update and remove
-
-For an update, extract the complete new ZIP and run `-Check` from that folder first. Run `-Apply` only for `ready`, then run `-Check` again.
-
-`-Apply` backs up affected files and may copy the entire pre-change `AGENTS.md`, including user-owned content outside its managed block, for rollback. It changes only JOENESS-owned installation files and the JOENESS managed block. A previous JOENESS 0.1 update likewise replaces or removes only recorded owned files and preserves user-owned content; if ownership or state cannot be verified, it performs no write and stops with `blocked`.
-
-Run removal from the complete package folder used for the installation.
+For legacy removal, run Check first. Only an exact supported GPT-5.6 Control installation returns `legacy`. Then removal must be explicitly requested:
 
 ```powershell
 powershell.exe -NoProfile -File .\JOENESS.ps1 -Remove
 ```
 
-`-Remove` first verifies recorded ownership and current file state, then removes only JOENESS-owned installation files and its managed block. It preserves user-owned files and content outside the managed block; if a change or ownership cannot be verified, it stops without removing them.
+Remove validates exact ownership and source identities, backs up and reads back affected files, removes only JOENESS-owned bytes and state, preserves unmanaged and user-owned bytes, and verifies cleanup. Drifted, forged, or uncertain ownership returns `blocked` without repair or partial removal.

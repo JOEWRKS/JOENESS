@@ -233,7 +233,8 @@ test("the Control interaction safety core stays exact without rewriting retry ev
   assert.notEqual(projectAgents, core);
   assert.doesNotMatch(projectAgents, /Treat an explicit request.*closed contract/is);
   assert.match(projectAgents, /rejected broad.*always-on Core.*disabled.*preserved.*evidence/is);
-  assert.match(projectAgents, /thin Interaction Safety Core.*activeCommonCore.*manifest/is);
+  assert.match(projectAgents, /active GPT-6 Astra distribution.*no runtime behavioral overlay.*Common Core/is);
+  assert.doesNotMatch(projectAgents, /activeCommonCore.*(?:pointer|manifest)/is);
   assert.doesNotMatch(projectAgents, /^# JOENESS Interaction Safety Core$/m);
   const coreV4 = await readFile(
     path.join(root, "evals", "candidates", "interaction-safety-core-v4.md"),

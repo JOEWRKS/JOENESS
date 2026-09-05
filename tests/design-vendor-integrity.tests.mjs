@@ -747,77 +747,6 @@ function assertVendorPath(localPath) {
   assert.equal(localPath.includes('..'), false, `traversal path: ${localPath}`);
 }
 
-test('the distribution manifest exposes only the Lean desired state and migration inputs', () => {
-  const manifestText = readFileSync(MANIFEST, 'utf8');
-  const manifest = JSON.parse(manifestText);
-
-  assert.deepEqual(Object.keys(manifest), [
-    'schemaVersion',
-    'release',
-    'activeCommonCore',
-    'activeSkills',
-    'sources',
-    'compatibility',
-  ]);
-  assert.equal(manifest.schemaVersion, 1);
-  assert.deepEqual(manifest.release, {
-    name: 'JOENESS',
-    version: '0.1',
-    entrypoint: 'JOENESS.ps1',
-  });
-  assert.deepEqual(manifest.activeCommonCore, {
-    path: 'evals/candidates/joeness-lean-kernel-v1.md',
-    localPath: 'AGENTS.md',
-    bytes: 1690,
-    sha256: '0727f159bb33f67d40e4e0a1f1f391f76f96a6d980f7e1e6177df193208c3054',
-  });
-  assert.equal(lstatSync(LEAN_KERNEL).size, manifest.activeCommonCore.bytes);
-  assert.equal(sha256(LEAN_KERNEL), manifest.activeCommonCore.sha256);
-  assert.deepEqual(manifest.activeSkills, {});
-  assert.deepEqual(manifest.compatibility.installIdentities.controlSixSkill, {
-    commit: '80c79e9f4be91d730b1b3cdc62d7bf51508895e8',
-    distributionManifest: {
-      path: 'vendor/source-manifest.json',
-      bytes: 37845,
-      sha256: 'f7866fb42f3336e0bd82f01e0f3940ab8b6a5d5b55e4677b9306e461be3c0158',
-    },
-    activeCommonCore: {
-      path: 'evals/candidates/interaction-safety-core-v8.md',
-      sha256: '41b3f8435c6077a9289e0c9d3315aa00d68a96e2e9add7168de6bb42f9730aea',
-    },
-    selection: {
-      canonicalization: 'ordinal-sorted localPath=sha256 UTF-8 lines joined by LF without trailing LF',
-      activeSkillNames: ['design', 'handoff', 'project', 'spec', 'ticket', 'visual-check'],
-      wholeFileCount: 64,
-      sha256: 'f4a3c7fbacd8d6f8cfb1b958c094e73f5ba739a1bb633d3fff5614e34b8a7587',
-    },
-  });
-  assert.deepEqual(
-    Object.values(manifest.activeSkills).flatMap((skill) => skill.sourceDependencies ?? []),
-    [],
-  );
-  assert.deepEqual(
-    Object.fromEntries(Object.entries(manifest.sources).map(([name, source]) => [name, Object.keys(source)])),
-    {
-      'ui-ux-pro-max': ['files'],
-      'apple-design': ['files'],
-    },
-    'legacy vendor bytes remain migration inputs, not active/default dependency metadata',
-  );
-  for (const source of Object.values(manifest.sources)) {
-    for (const file of source.files) {
-      assert.deepEqual(Object.keys(file), ['localPath', 'bytes', 'sha256']);
-      assertVendorPath(file.localPath);
-      const sourcePath = path.join(ROOT, ...file.localPath.split('/'));
-      assert.equal(lstatSync(sourcePath).size, file.bytes, file.localPath);
-      assert.equal(sha256(sourcePath), file.sha256, file.localPath);
-    }
-  }
-  for (const removedKey of ['evaluation', 'behaviorEvidenceHistory', 'behaviorEvidence']) {
-    assert.equal(removedKey in manifest, false, `${removedKey} belongs under evals, not distribution`);
-  }
-});
-
 test('the Lean readiness ledger binds candidate status without claiming A/B promotion', () => {
   assert.equal(existsSync(LEAN_READINESS_LEDGER), true, 'missing additive Lean readiness ledger');
   assert.match(
@@ -889,7 +818,11 @@ test('the Lean readiness ledger binds candidate status without claiming A/B prom
   const workingKernelBytes = readFileSync(path.join(ROOT, ...ledger.leanKernel.path.split('/')));
   assert.equal(workingKernelBytes.length, ledger.leanKernel.bytes);
   assert.equal(sha256Bytes(workingKernelBytes), ledger.leanKernel.sha256);
-  const candidateManifestBytes = readFileSync(path.join(ROOT, ...ledger.candidate.distributionManifest.path.split('/')));
+  const candidateManifestBytes = execFileSync(
+    'git',
+    ['show', `2491dd65b4491c0997aeb1fcdaf88777864f326a:${ledger.candidate.distributionManifest.path}`],
+    { cwd: ROOT },
+  );
   assert.equal(candidateManifestBytes.length, ledger.candidate.distributionManifest.bytes);
   assert.equal(sha256Bytes(candidateManifestBytes), ledger.candidate.distributionManifest.sha256);
 });
@@ -1019,7 +952,11 @@ test('Control vendor and public-skill identities remain exact historical facts',
 });
 
 test('the JOENESS 0.1 compatibility archive is an exact separate source set', () => {
-  const manifest = JSON.parse(readFileSync(MANIFEST, 'utf8'));
+  const manifest = JSON.parse(execFileSync(
+    'git',
+    ['show', '2491dd65b4491c0997aeb1fcdaf88777864f326a:vendor/source-manifest.json'],
+    { cwd: ROOT, encoding: 'utf8' },
+  ));
   assert.ok(manifest.compatibility, 'missing compatibility manifest contract');
   const legacyInstallSources = manifest.compatibility.legacyInstallSources;
   assert.deepEqual(legacyInstallSources.stateSchemaV1, EXPECTED_STATE_SCHEMA_V1);
@@ -1449,62 +1386,6 @@ test('operational skills bound handoff context and high-cost validation', () => 
   assert.match(projectSetup, /project-documented, risk-proportional acceptance and release evidence/i);
   assert.match(projectSetup, /preserve only project-specified review requirements.*do not invent validation topology or duplicate unchanged clean builds/i);
   assert.doesNotMatch(projectSetup, /reviewer trees|one controller check|at most one independent reviewer|at most one evidence-scoped re-review/i);
-});
-
-test('README exposes only the Lean kernel and operational installer surface', () => {
-  const readme = readFileSync(README, 'utf8');
-  const [korean, english] = readme.split('## English Guide');
-  assert.ok(english, 'README must retain the English guide');
-  const expectedModes = ['Apply', 'Check', 'Remove'];
-  const assertPublicSurface = (section, language) => {
-    const powerShellBlocks = [...section.matchAll(/^[ \t]*```powershell[ \t]*\r?\n(?<body>[\s\S]*?)^[ \t]*```[ \t]*\r?$/gm)];
-    assert.equal(powerShellBlocks.length, 4, `${language} must document four PowerShell command blocks`);
-    const invocationLines = powerShellBlocks.flatMap(({ groups }) => groups.body.split(/\r?\n/)
-      .map((line) => line.trim())
-      .filter(Boolean));
-    assert.equal(invocationLines.length, 4, `${language} must document four non-empty PowerShell command lines`);
-    const modes = [...new Set(invocationLines.map((line) => {
-      const match = line.match(/^powershell\.exe -NoProfile -File \.\\JOENESS\.ps1 -(?<mode>Check|Apply|Remove)$/);
-      assert.ok(match, `${language} must document only exact JOENESS.ps1 command lines`);
-      return match.groups.mode;
-    }))].sort();
-    assert.deepEqual(modes, expectedModes, `${language} must document only the Check, Apply, and Remove operation modes`);
-    const publicCallTokens = section.match(/\$[A-Za-z][A-Za-z0-9_-]*/g) ?? [];
-    assert.deepEqual(publicCallTokens, [], `${language} must expose no public $... call tokens`);
-  };
-  for (const [language, section] of [['Korean', korean], ['English', english]]) {
-    const exactCheck = 'powershell.exe -NoProfile -File .\\JOENESS.ps1 -Check';
-    assertPublicSurface(section, language);
-    assert.throws(
-      () => assertPublicSurface(section.replace(exactCheck, 'powershell.exe -NoProfile -File .\\JOENESS.ps1 -Repair'), language),
-      /must document only exact JOENESS\.ps1 command lines/,
-    );
-    assert.throws(
-      () => assertPublicSurface(section.replace(exactCheck, `${exactCheck} -Repair`), language),
-      /must document only exact JOENESS\.ps1 command lines/,
-    );
-    assert.throws(
-      () => assertPublicSurface(section.replace(exactCheck, '.\\JOENESS.ps1 -Check'), language),
-      /must document only exact JOENESS\.ps1 command lines/,
-    );
-    assert.throws(
-      () => assertPublicSurface(section.replace(exactCheck, 'JOENESS.ps1 -Repair'), language),
-      /must document only exact JOENESS\.ps1 command lines/,
-    );
-    assert.throws(
-      () => assertPublicSurface(`${section}\n$joewrks-project-setup $joewrks-design-frontend`, language),
-      /must expose no public \$\.\.\. call tokens/,
-    );
-    assert.match(section, /small[\s\S]{0,100}always-on[\s\S]{0,100}work-safety kernel|작고[\s\S]{0,100}항상 적용되는[\s\S]{0,100}작업 안전 커널/i);
-    assert.match(section, /after installation[\s\S]{0,140}work normally|설치한 뒤[\s\S]{0,140}평소처럼 작업/i);
-    assert.match(section, /PowerShell output[\s\S]{0,100}not a Codex chat response|PowerShell 출력[\s\S]{0,100}Codex 채팅 답변이 아닙니다/i);
-    const backupTerms = language === 'Korean'
-      ? [/변경 대상 파일을 백업/, /기존 `AGENTS\.md` 전체/, /관리 블록 밖/]
-      : [/backs up affected files/i, /entire pre-change `AGENTS\.md`/i, /user-owned content outside its managed block/i];
-    for (const term of backupTerms) assert.match(section, term);
-    assert.match(section, /only JOENESS-owned[\s\S]{0,220}user-owned|JOENESS가 소유한[\s\S]{0,220}사용자 소유/i);
-    assert.doesNotMatch(section, /Figma|Superpowers|Ponytail|UI UX Pro Max|Apple Design/i);
-  }
 });
 
 test('Git preserves exact vendor and active skill bytes on checkout', () => {

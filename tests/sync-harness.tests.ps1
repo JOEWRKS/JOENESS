@@ -157,10 +157,10 @@ function New-Fixture {
     [IO.Directory]::CreateDirectory($source) | Out-Null
     $activeCore = Get-ActiveCoreRelativePath $RepositoryRoot
     $sourceManifest = Get-Content -Raw -LiteralPath (Join-Path $RepositoryRoot 'vendor\source-manifest.json') | ConvertFrom-Json
-    $compatibilitySourceFiles = @(Get-V1SelectedFiles $sourceManifest | ForEach-Object { $_.SourcePath })
+    $compatibilitySourceFiles = @()
     $compatibilityFiles = Get-ChildItem -LiteralPath (Join-Path $RepositoryRoot 'vendor\compatibility') -File -Recurse |
         ForEach-Object { $_.FullName.Substring($RepositoryRoot.Length).TrimStart('\') }
-    foreach ($path in @($activeCore, 'evals\candidates\common-core-v1.md', 'evals\candidates\interaction-safety-core-v1.md', 'scripts\sync-harness.ps1', 'vendor\source-manifest.json') + (Get-OptionalFiles $RepositoryRoot) + $compatibilitySourceFiles + $compatibilityFiles) { Copy-RelativeFile $RepositoryRoot $source $path }
+    foreach ($path in @(@($activeCore, 'evals\candidates\common-core-v1.md', 'evals\candidates\interaction-safety-core-v1.md', 'scripts\sync-harness.ps1', 'vendor\source-manifest.json') + (Get-OptionalFiles $RepositoryRoot) + $compatibilitySourceFiles + $compatibilityFiles | Where-Object { -not [string]::IsNullOrWhiteSpace($_) })) { Copy-RelativeFile $RepositoryRoot $source $path }
     [pscustomobject]@{
         Root = $root; SourceRoot = $source; Script = Join-Path $source 'scripts\sync-harness.ps1'
         CodexHome = Join-Path $root 'codex'; AgentsHome = Join-Path $root 'agents'; BackupRoot = Join-Path $root 'backups'
@@ -1003,9 +1003,11 @@ function Test-CleanSkeletonAdversaries {
 }
 
 function Test-RemoveRollback {
-    $f = New-Fixture
+    $f = New-ControlMigrationFixture
     try {
-        Assert-Equal (Invoke-Harness $f Apply).ExitCode 0 'complete remove rollback baseline apply succeeds'
+        $f.Script = $f.ControlScript
+        Assert-Equal (Invoke-Harness $f Apply).ExitCode 0 'complete remove rollback Control baseline apply succeeds'
+        $f.Script = Join-Path $f.SourceRoot 'scripts\sync-harness.ps1'
         $beforeCodex = Get-TreeEntries $f.CodexHome
         $beforeAgents = Get-TreeEntries $f.AgentsHome
         . $f.Script
@@ -1016,9 +1018,11 @@ function Test-RemoveRollback {
         Assert-StringSetEqual (Get-TreeEntries $f.AgentsHome) $beforeAgents 'complete remove rollback restores exact Agents tree'
     } finally { Remove-Fixture $f }
 
-    $f = New-Fixture
+    $f = New-ControlMigrationFixture
     try {
-        Assert-Equal (Invoke-Harness $f Apply).ExitCode 0 'unknown remove rollback baseline apply succeeds'
+        $f.Script = $f.ControlScript
+        Assert-Equal (Invoke-Harness $f Apply).ExitCode 0 'unknown remove rollback Control baseline apply succeeds'
+        $f.Script = Join-Path $f.SourceRoot 'scripts\sync-harness.ps1'
         $beforeState = [IO.File]::ReadAllBytes($f.State)
         $changedBytes = [Text.Encoding]::UTF8.GetBytes('concurrent replacement')
         $capture = @{ Path = $null }
@@ -2115,6 +2119,18 @@ function New-ControlMigrationFixture {
     $fixture
 }
 
+function New-LeanReadinessFixture {
+    $fixture = New-Fixture
+    $leanCommit = '2491dd65b4491c0997aeb1fcdaf88777864f326a'
+    $archivePath = Join-Path $fixture.Root 'lean-readiness-source.zip'
+    $leanSourceRoot = Join-Path $fixture.Root 'lean-readiness-source'
+    $archiveOutput = & git -C $RepositoryRoot archive --format=zip "--output=$archivePath" $leanCommit scripts/sync-harness.ps1 evals/candidates skills vendor 2>&1
+    Assert-Equal $LASTEXITCODE 0 "exact Lean readiness source archive materializes: $archiveOutput"
+    Expand-Archive -LiteralPath $archivePath -DestinationPath $leanSourceRoot
+    $fixture | Add-Member -NotePropertyName LeanReadinessScript -NotePropertyValue (Join-Path $leanSourceRoot 'scripts\sync-harness.ps1')
+    $fixture
+}
+
 function Test-LeanZeroSkillLifecycle {
     $f = New-Fixture
     try {
@@ -2300,7 +2316,161 @@ function Test-ControlV2PinnedIdentity {
     } finally { Remove-Fixture $f }
 }
 
-$allTests = @(
+function Test-AstraNativeCleanAndApplyNoOp {
+    $f = New-Fixture
+    try {
+        $beforeCodex = Get-TreeHashes $f.CodexHome
+        $beforeAgents = Get-TreeHashes $f.AgentsHome
+        $beforeBackups = Get-TreeHashes $f.BackupRoot
+
+        $check = Read-Result (Invoke-Harness $f Check) 'clean Astra Check'
+        Assert-Equal $check.status 'current' 'clean Astra requires no action'
+        Assert-Equal $check.changesRequired $false 'clean Astra does not require Apply'
+        Assert-Equal @($check.activeSkills).Count 0 'clean Astra exposes no public skills'
+        Assert-TreeEqual (Get-TreeHashes $f.CodexHome) $beforeCodex 'clean Astra Check preserves Codex bytes'
+        Assert-TreeEqual (Get-TreeHashes $f.AgentsHome) $beforeAgents 'clean Astra Check preserves Agents bytes'
+        Assert-TreeEqual (Get-TreeHashes $f.BackupRoot) $beforeBackups 'clean Astra Check creates no backup'
+
+        $apply = Read-Result (Invoke-Harness $f Apply) 'clean Astra Apply'
+        Assert-Equal $apply.status 'unsupported' 'Astra Apply is explicitly unsupported'
+        Assert-Equal $apply.changesRequired $false 'Astra Apply remains a no-op'
+        Assert-TreeEqual (Get-TreeHashes $f.CodexHome) $beforeCodex 'Astra Apply preserves Codex bytes'
+        Assert-TreeEqual (Get-TreeHashes $f.AgentsHome) $beforeAgents 'Astra Apply preserves Agents bytes'
+        Assert-TreeEqual (Get-TreeHashes $f.BackupRoot) $beforeBackups 'Astra Apply creates no backup'
+    } finally { Remove-Fixture $f }
+}
+
+function Test-ExactControlLegacyRemovalLifecycle {
+    $f = New-ControlMigrationFixture
+    try {
+        $f.Script = $f.ControlScript
+        $originalAgentsBytes = (New-Object Text.UTF8Encoding($false)).GetBytes("user prefix`r`nuser suffix`r`n")
+        Write-Bytes (Join-Path $f.CodexHome 'AGENTS.md') $originalAgentsBytes
+        Assert-Equal (Invoke-Harness $f Apply).ExitCode 0 'exact Control fixture installs'
+
+        $userRootPath = Join-Path $f.AgentsHome 'user-owned.bin'
+        $userRootBytes = [byte[]] @(0, 255, 33, 10)
+        Write-Bytes $userRootPath $userRootBytes
+        $userSkillPath = Join-Path $f.AgentsHome 'skills\design\user-owned.bin'
+        $userSkillBytes = [byte[]] @(9, 8, 7, 6)
+        Write-Bytes $userSkillPath $userSkillBytes
+
+        $f.Script = Join-Path $f.SourceRoot 'scripts\sync-harness.ps1'
+        $beforeLegacyCodex = Get-TreeHashes $f.CodexHome
+        $beforeLegacyAgents = Get-TreeHashes $f.AgentsHome
+        $beforeLegacyBackups = Get-TreeHashes $f.BackupRoot
+        $check = Read-Result (Invoke-Harness $f Check) 'exact Control legacy Check'
+        Assert-Equal $check.status 'legacy' 'exact Control is reported as removable legacy'
+        Assert-Equal $check.changesRequired $false 'legacy Check does not direct users to Apply'
+        Assert-TreeEqual (Get-TreeHashes $f.CodexHome) $beforeLegacyCodex 'legacy Check preserves Codex bytes'
+        Assert-TreeEqual (Get-TreeHashes $f.AgentsHome) $beforeLegacyAgents 'legacy Check preserves Agents bytes'
+
+        $apply = Read-Result (Invoke-Harness $f Apply) 'exact Control Astra Apply'
+        Assert-Equal $apply.status 'legacy' 'Astra Apply leaves exact Control installed for explicit Remove'
+        Assert-TreeEqual (Get-TreeHashes $f.CodexHome) $beforeLegacyCodex 'Astra Apply does not remove Control state'
+        Assert-TreeEqual (Get-TreeHashes $f.AgentsHome) $beforeLegacyAgents 'Astra Apply does not remove Control files'
+        Assert-TreeEqual (Get-TreeHashes $f.BackupRoot) $beforeLegacyBackups 'Astra Apply creates no migration backup'
+
+        $installedStateBytes = [IO.File]::ReadAllBytes($f.State)
+        $installedAgentsBytes = [IO.File]::ReadAllBytes((Join-Path $f.CodexHome 'AGENTS.md'))
+        $installedState = [Text.Encoding]::UTF8.GetString($installedStateBytes) | ConvertFrom-Json
+        $installedOwnedBytes = @{}
+        foreach ($relative in @($installedState.wholeFileTargets.PSObject.Properties.Name)) {
+            $installedOwnedBytes[$relative] = [IO.File]::ReadAllBytes((Join-Path $f.AgentsHome ($relative -replace '/', '\')))
+        }
+        $remove = Read-Result (Invoke-Harness $f Remove) 'exact Control Remove'
+        Assert-Equal $remove.status 'removed' 'explicit Remove removes exact Control'
+        Assert-True (Test-Path -LiteralPath $remove.backupPath -PathType Container) 'Remove creates a verified backup'
+        Assert-BytesEqual ([IO.File]::ReadAllBytes((Join-Path $remove.backupPath 'codex\AGENTS.md'))) $installedAgentsBytes 'Remove backup preserves exact installed AGENTS bytes'
+        Assert-BytesEqual ([IO.File]::ReadAllBytes((Join-Path $remove.backupPath 'codex\joewrks-harness-state.json'))) $installedStateBytes 'Remove backup preserves exact ownership state bytes'
+        foreach ($relative in @($installedOwnedBytes.Keys)) {
+            Assert-BytesEqual ([IO.File]::ReadAllBytes((Join-Path $remove.backupPath (Join-Path 'agents' ($relative -replace '/', '\'))))) $installedOwnedBytes[$relative] "Remove backup preserves exact managed bytes: $relative"
+        }
+        Assert-True (-not (Test-Path -LiteralPath $f.State)) 'Remove deletes managed state'
+        Assert-BytesEqual ([IO.File]::ReadAllBytes((Join-Path $f.CodexHome 'AGENTS.md'))) $originalAgentsBytes 'Remove restores user-owned AGENTS bytes'
+        Assert-BytesEqual ([IO.File]::ReadAllBytes($userRootPath)) $userRootBytes 'Remove preserves unrelated user bytes'
+        Assert-BytesEqual ([IO.File]::ReadAllBytes($userSkillPath)) $userSkillBytes 'Remove preserves unmanaged bytes inside a former managed directory'
+        Assert-Equal @((Get-ChildItem -LiteralPath $f.Root -Recurse -Force -File | Where-Object { $_.Name -like '*.joewrks-tmp-*' })).Count 0 'Remove leaves no temporary residue'
+
+        $final = Read-Result (Invoke-Harness $f Check) 'post-Remove Astra Check'
+        Assert-Equal $final.status 'current' 'post-Remove environment is clean Astra'
+        Assert-Equal $final.changesRequired $false 'post-Remove Astra requires no Apply'
+    } finally { Remove-Fixture $f }
+}
+
+function Test-UncertainHistoricalStateFailsClosed {
+    $f = New-LeanReadinessFixture
+    try {
+        $f.Script = $f.LeanReadinessScript
+        Assert-Equal (Invoke-Harness $f Apply).ExitCode 0 'exact Lean readiness fixture installs'
+        $f.Script = Join-Path $f.SourceRoot 'scripts\sync-harness.ps1'
+        $beforeCodex = Get-TreeHashes $f.CodexHome
+        $beforeAgents = Get-TreeHashes $f.AgentsHome
+        $beforeBackups = Get-TreeHashes $f.BackupRoot
+        foreach ($mode in @('Check', 'Apply', 'Remove')) {
+            $run = Invoke-Harness $f $mode
+            $result = Read-Result $run "unsupported Lean readiness $mode"
+            Assert-True ($run.ExitCode -ne 0) "unsupported Lean readiness $mode exits nonzero"
+            Assert-Equal $result.status 'blocked' "unsupported Lean readiness $mode fails closed"
+            Assert-TreeEqual (Get-TreeHashes $f.CodexHome) $beforeCodex "unsupported Lean readiness $mode preserves Codex bytes"
+            Assert-TreeEqual (Get-TreeHashes $f.AgentsHome) $beforeAgents "unsupported Lean readiness $mode preserves Agents bytes"
+            Assert-TreeEqual (Get-TreeHashes $f.BackupRoot) $beforeBackups "unsupported Lean readiness $mode creates no backup"
+        }
+    } finally { Remove-Fixture $f }
+
+    foreach ($case in @(
+        @{ Name = 'unowned managed marker'; Prepare = { param($fixture) Write-Utf8 (Join-Path $fixture.CodexHome 'AGENTS.md') "$BeginMarker`nunknown`n$EndMarker" } },
+        @{ Name = 'unowned installed manifest'; Prepare = { param($fixture) Write-Utf8 (Join-Path $fixture.AgentsHome 'vendor\source-manifest.json') '{}' } }
+    )) {
+        $f = New-Fixture
+        try {
+            & $case.Prepare $f
+            $before = Get-TreeHashes $f.Root
+            foreach ($mode in @('Check', 'Remove')) {
+                $run = Invoke-Harness $f $mode
+                Assert-Equal (Read-Result $run "$($case.Name) $mode").status 'blocked' "$($case.Name) $mode fails closed"
+                Assert-TreeEqual (Get-TreeHashes $f.Root) $before "$($case.Name) $mode performs no writes"
+            }
+        } finally { Remove-Fixture $f }
+    }
+}
+
+function Test-AstraLegacyRemovalFailsClosed {
+    $cases = @(
+        @{ Name = 'drifted Control file'; Prepare = { param($fixture) Add-Content -LiteralPath (Join-Path $fixture.AgentsHome 'skills\design\SKILL.md') -Value 'drift' } },
+        @{ Name = 'drifted Control managed block'; Prepare = { param($fixture) $path = Join-Path $fixture.CodexHome 'AGENTS.md'; Write-Utf8 $path ([IO.File]::ReadAllText($path).Replace($EndMarker, "drift`n$EndMarker")) } },
+        @{ Name = 'forged ownership'; Prepare = {
+            param($fixture)
+            $state = Get-Content -Raw -LiteralPath $fixture.State | ConvertFrom-Json
+            $state.wholeFileTargets | Add-Member -NotePropertyName 'user-owned.txt' -NotePropertyValue ('0' * 64)
+            Write-Utf8 $fixture.State (($state | ConvertTo-Json -Depth 100) + "`n")
+        } }
+    )
+    foreach ($case in $cases) {
+        $f = New-ControlMigrationFixture
+        try {
+            $f.Script = $f.ControlScript
+            Assert-Equal (Invoke-Harness $f Apply).ExitCode 0 "$($case.Name) fixture installs"
+            $f.Script = Join-Path $f.SourceRoot 'scripts\sync-harness.ps1'
+            & $case.Prepare $f
+            $beforeCodex = Get-TreeHashes $f.CodexHome
+            $beforeAgents = Get-TreeHashes $f.AgentsHome
+            $beforeBackups = Get-TreeHashes $f.BackupRoot
+
+            foreach ($mode in @('Check', 'Remove')) {
+                $run = Invoke-Harness $f $mode
+                $result = Read-Result $run "$($case.Name) $mode"
+                Assert-True ($run.ExitCode -ne 0) "$($case.Name) $mode exits nonzero"
+                Assert-Equal $result.status 'blocked' "$($case.Name) $mode fails closed"
+                Assert-TreeEqual (Get-TreeHashes $f.CodexHome) $beforeCodex "$($case.Name) $mode preserves Codex bytes"
+                Assert-TreeEqual (Get-TreeHashes $f.AgentsHome) $beforeAgents "$($case.Name) $mode preserves Agents bytes"
+                Assert-TreeEqual (Get-TreeHashes $f.BackupRoot) $beforeBackups "$($case.Name) $mode creates no backup"
+            }
+        } finally { Remove-Fixture $f }
+    }
+}
+
+$historicalReplayTests = @(
     'Test-PublicHarnessEntry',
     'Test-ReadmeContract',
     'Test-LeanZeroSkillLifecycle',
@@ -2310,13 +2480,8 @@ $allTests = @(
     'Test-RemoveContract',
     'Test-NoFinalNewlineRoundTrip',
     'Test-RemovePreflightBlockers',
-    'Test-RemoveRollback',
     'Test-ManifestPathSafety',
     'Test-ReparsePlanningBoundaries',
-    'Test-EmptyDirectoryCleanupDeleteRace',
-    'Test-EmptyDirectoryCleanupReparseRace',
-    'Test-TargetDirectoryCreationOwnershipRace',
-    'Test-EmptyDirectoryCleanupPathBoundaries',
     'Test-Task2CheckRegressions',
     'Test-EmptyCheckAndApply',
     'Test-AgentEncodingAndCoreUpdate',
@@ -2339,9 +2504,23 @@ $allTests = @(
     'Test-UncommittedIdenticalCreation',
     'Test-MultiTargetRollback'
 )
+
+# These cases exercise retired Apply/update semantics and remain readable above and in Git at
+# Lean Readiness. The current Astra-native gate runs only zero-runtime and exact-Control removal.
+$allTests = @(
+    'Test-AstraNativeCleanAndApplyNoOp',
+    'Test-ExactControlLegacyRemovalLifecycle',
+    'Test-AstraLegacyRemovalFailsClosed',
+    'Test-UncertainHistoricalStateFailsClosed',
+    'Test-RemoveRollback',
+    'Test-EmptyDirectoryCleanupDeleteRace',
+    'Test-EmptyDirectoryCleanupReparseRace',
+    'Test-TargetDirectoryCreationOwnershipRace',
+    'Test-EmptyDirectoryCleanupPathBoundaries'
+)
 $selectedTests = if ($Only.Count -eq 0) { $allTests } else { @($Only) }
 foreach ($testName in $selectedTests) {
     Assert-True ($allTests -ccontains $testName) "Unknown test name: $testName"
     & $testName
 }
-Write-Host 'PASS sync-harness contract'
+Write-Host "PASS sync-harness contract ($($selectedTests.Count)/$($selectedTests.Count))"

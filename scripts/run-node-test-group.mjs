@@ -7,6 +7,7 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
 export const TEST_GROUPS = Object.freeze({
   "current-release": Object.freeze([
+    "tests/astra-native-closure.tests.mjs",
     "tests/codex-app-server-collector.tests.mjs",
     "tests/design-vendor-integrity.tests.mjs",
     "tests/joeness-lean-ab-plan.tests.mjs",

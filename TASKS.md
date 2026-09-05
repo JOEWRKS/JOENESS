@@ -1,5 +1,12 @@
 # JOENESS 검증 부채 로드맵
 
+## Astra-native terminal closure
+
+- 상태: `ASTRA_NATIVE_CLOSURE_READY_FOR_PERSONAL_TRANSITION`
+- Target: `gpt-6-astra / xhigh`; active runtime overlay, Common Core, managed runtime files, public skills, default vendors, plugin routing: none
+- Clean Astra는 설치나 Apply가 필요하지 않다. Exact GPT-5.6 Control만 명시적 fail-closed Remove fixture 경로를 지원한다.
+- Astra synthetic evaluation은 종료됐고 새 evaluation queue를 만들지 않는다. Personal installation은 이번 repository closure에서 변경하지 않는다.
+
 이 파일은 현재 검증 작업의 유일한 활성 원장이다. 날짜별 계획·실험·사고 보고서는 역사 증거로만 링크하고 진행 상태를 중복 기록하지 않는다.
 
 - **목표 / 릴리스:** current main `de5b1e0a4dc0a32db9170c5fa10b4f77b9a0ff69`를 기준으로 설치·행동·실프로젝트 효과를 검증한다. 증거가 없는 기능은 `candidate/unvalidated`를 유지하고 고정 fixture의 부분 PASS를 전체 승격으로 확대하지 않는다.
