@@ -1058,7 +1058,7 @@ function Test-SilentRecreatedRemovalTargetFailsFinalVerification {
         $callback = {
             param($operation)
             if (-not $operation.DesiredExists -and $operation.TargetPath -ieq $installedManifestPath) {
-                Write-Bytes $installedManifestPath $recreatedBytes
+                [System.IO.File]::WriteAllBytes($installedManifestPath, $recreatedBytes)
                 $capture.Recreated = $true
             }
         }.GetNewClosure()
