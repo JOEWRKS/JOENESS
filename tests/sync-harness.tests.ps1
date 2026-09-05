@@ -1078,6 +1078,40 @@ function Test-SilentRecreatedRemovalTargetFailsFinalVerification {
     Assert-True (-not (Test-Path -LiteralPath $fixtureRoot)) 'silent recreation fixture cleanup is absent on readback'
 }
 
+function Test-SurvivingRemovalResidueIsUnresolved {
+    $f = New-ControlMigrationFixture
+    $fixtureRoot = $f.Root
+    try {
+        $f.Script = $f.ControlScript
+        Assert-Equal (Invoke-Harness $f Apply).ExitCode 0 'surviving residue Control fixture installs'
+        $f.Script = Join-Path $f.SourceRoot 'scripts\sync-harness.ps1'
+
+        $residueBytes = (New-Object Text.UTF8Encoding($false)).GetBytes('concurrent tombstone residue')
+        $capture = @{ ResiduePath = $null }
+        . $f.Script
+        $callback = {
+            param($operation)
+            if ($operation.TargetPath -ieq $f.State) {
+                $capture.ResiduePath = @($transactionResiduePaths | Where-Object { $_.EndsWith('.delete', [StringComparison]::OrdinalIgnoreCase) })[0]
+                Write-Bytes $capture.ResiduePath $residueBytes
+            }
+        }
+
+        $result = Invoke-JoewrksHarnessSync -Remove -CodexHome $f.CodexHome -AgentsHome $f.AgentsHome -BackupRoot $f.BackupRoot -AfterReplace $callback
+        Assert-True (-not [string]::IsNullOrWhiteSpace($capture.ResiduePath)) 'fixture records an exact transaction tombstone path'
+        Assert-Equal $result.status 'unknown' 'surviving transaction residue remains an existing nonzero failure status'
+        Assert-Equal (Get-HarnessExitCode $result.status) 3 'surviving transaction residue maps to a nonzero exit'
+        Assert-Equal $result.rollback.status 'incomplete' 'rollback is not complete while transaction residue remains'
+        Assert-True (@($result.rollback.unresolvedTargets) -contains $capture.ResiduePath) 'rollback reports the exact surviving residue path'
+        Assert-True (@($result.unresolvedTargets) -contains $capture.ResiduePath) 'public result reports the exact surviving residue path'
+        Assert-BytesEqual ([IO.File]::ReadAllBytes($capture.ResiduePath)) $residueBytes 'rollback preserves concurrent residue bytes'
+        Assert-True (Test-Path -LiteralPath $f.State -PathType Leaf) 'residue failure restores ownership state'
+    } finally {
+        Remove-Fixture $f
+    }
+    Assert-True (-not (Test-Path -LiteralPath $fixtureRoot)) 'surviving residue fixture cleanup is absent on readback'
+}
+
 function Test-EmptyCheckAndApply {
     $f = New-Fixture
     try {
@@ -2647,6 +2681,7 @@ $allTests = @(
     'Test-UncertainHistoricalStateFailsClosed',
     'Test-RemoveRollback',
     'Test-SilentRecreatedRemovalTargetFailsFinalVerification',
+    'Test-SurvivingRemovalResidueIsUnresolved',
     'Test-EmptyDirectoryCleanupDeleteRace',
     'Test-EmptyDirectoryCleanupReparseRace',
     'Test-TargetDirectoryCreationOwnershipRace',

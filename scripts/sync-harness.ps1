@@ -1434,7 +1434,20 @@ function Invoke-JoewrksHarnessSync {
                 }
             }
             foreach ($residuePath in $transactionResiduePaths) {
-                if (Test-Path -LiteralPath $residuePath -ErrorAction Stop) {
+                try {
+                    $residueExists = Test-Path -LiteralPath $residuePath -ErrorAction Stop
+                } catch {
+                    if (-not $unresolvedSeen.ContainsKey($residuePath)) {
+                        $unresolvedSeen[$residuePath] = $true
+                        $null = $unresolved.Add($residuePath)
+                    }
+                    throw "Final removal verification could not confirm transaction residue absence: $residuePath"
+                }
+                if ($residueExists) {
+                    if (-not $unresolvedSeen.ContainsKey($residuePath)) {
+                        $unresolvedSeen[$residuePath] = $true
+                        $null = $unresolved.Add($residuePath)
+                    }
                     throw "Final removal verification found transaction residue: $residuePath"
                 }
             }
