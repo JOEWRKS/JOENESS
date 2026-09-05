@@ -417,7 +417,11 @@ function Remove-HarnessEmptyDirectories {
 }
 
 function Set-HarnessFile {
-    param($Operation, [Collections.Generic.List[string]] $CreatedDirectories)
+    param(
+        $Operation,
+        [Collections.Generic.List[string]] $CreatedDirectories,
+        [Collections.Generic.List[string]] $TransactionResiduePaths
+    )
     $temporaryPath = $null
     $tombstonePath = $null
     try {
@@ -425,6 +429,7 @@ function Set-HarnessFile {
             Assert-HarnessFileSnapshot $Operation.TargetPath $Operation.Snapshot
             $directory = Split-Path -Parent $Operation.TargetPath
             $tombstonePath = Join-Path $directory ('.' + [IO.Path]::GetFileName($Operation.TargetPath) + '.joewrks-' + [guid]::NewGuid().ToString('N') + '.delete')
+            if ($null -ne $TransactionResiduePaths) { $null = $TransactionResiduePaths.Add($tombstonePath) }
             [IO.File]::Move($Operation.TargetPath, $tombstonePath)
             if ((Get-HarnessSha256 ([IO.File]::ReadAllBytes($tombstonePath))) -cne $Operation.Snapshot.Hash) {
                 throw "Moved target changed after preflight: $($Operation.TargetPath)"
@@ -439,6 +444,7 @@ function Set-HarnessFile {
         $directory = Split-Path -Parent $Operation.TargetPath
         New-HarnessTargetDirectory $directory $CreatedDirectories
         $temporaryPath = Join-Path $directory ('.' + [IO.Path]::GetFileName($Operation.TargetPath) + '.joewrks-' + [guid]::NewGuid().ToString('N') + '.tmp')
+        if ($null -ne $TransactionResiduePaths) { $null = $TransactionResiduePaths.Add($temporaryPath) }
         [IO.File]::WriteAllBytes($temporaryPath, $Operation.DesiredBytes)
         if ((Get-HarnessSha256 ([IO.File]::ReadAllBytes($temporaryPath))) -cne $Operation.AppliedHash) {
             throw "Temporary file verification failed: $($Operation.TargetPath)"
@@ -1368,6 +1374,7 @@ function Invoke-JoewrksHarnessSync {
     $unresolved = [Collections.Generic.List[string]]::new()
     $unresolvedSeen = @{}
     $createdDirectories = [Collections.Generic.List[string]]::new()
+    $transactionResiduePaths = [Collections.Generic.List[string]]::new()
     try {
         [IO.Directory]::CreateDirectory($backupPath) | Out-Null
         foreach ($operation in $operations) {
@@ -1382,7 +1389,7 @@ function Invoke-JoewrksHarnessSync {
 
         foreach ($operation in $operations) {
             try {
-                Set-HarnessFile $operation $createdDirectories
+                Set-HarnessFile $operation $createdDirectories $transactionResiduePaths
                 $null = $applied.Add($operation)
                 if ($null -ne $AfterReplace) { & $AfterReplace $operation | Out-Null }
             } catch {
@@ -1413,6 +1420,23 @@ function Invoke-JoewrksHarnessSync {
             if (@($cleanupResult.failed).Count -gt 0) {
                 $failedCleanupTargets = @($cleanupResult.failed | Sort-Object -Unique)
                 throw "Obsolete directory cleanup failed: $($failedCleanupTargets -join ', ')"
+            }
+        }
+        if ($Remove) {
+            foreach ($operation in $operations) {
+                $current = Get-HarnessFileSnapshot $operation.TargetPath
+                if ($operation.DesiredExists) {
+                    if (-not $current.Exists -or $current.Hash -cne $operation.AppliedHash) {
+                        throw "Final removal verification failed for preserved target: $($operation.TargetPath)"
+                    }
+                } elseif ($current.Exists) {
+                    throw "Final removal verification found a removed target: $($operation.TargetPath)"
+                }
+            }
+            foreach ($residuePath in $transactionResiduePaths) {
+                if (Test-Path -LiteralPath $residuePath -ErrorAction Stop) {
+                    throw "Final removal verification found transaction residue: $residuePath"
+                }
             }
         }
         return New-HarnessPublicResult -Status $(if ($Remove) { 'removed' } else { 'current' }) -Mode $mode -AgentsRoot $resolvedAgentsHome -SkillsRoot (Join-Path $resolvedAgentsHome 'skills') -ActiveSkills @($manifestSkillRelativePaths.Keys) -Warnings @($warnings) -ChangesRequired $false -Changes @($changes) -Blockers @() -BackupPath $backupPath -Rollback $null -UnresolvedTargets @()

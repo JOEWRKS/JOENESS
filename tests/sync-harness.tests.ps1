@@ -1043,6 +1043,41 @@ function Test-RemoveRollback {
     } finally { Remove-Fixture $f }
 }
 
+function Test-SilentRecreatedRemovalTargetFailsFinalVerification {
+    $f = New-ControlMigrationFixture
+    $fixtureRoot = $f.Root
+    try {
+        $f.Script = $f.ControlScript
+        Assert-Equal (Invoke-Harness $f Apply).ExitCode 0 'silent recreation Control fixture installs'
+        $f.Script = Join-Path $f.SourceRoot 'scripts\sync-harness.ps1'
+
+        $installedManifestPath = Join-Path $f.AgentsHome 'vendor\source-manifest.json'
+        $recreatedBytes = (New-Object Text.UTF8Encoding($false)).GetBytes('silently recreated after deletion')
+        $capture = @{ Recreated = $false }
+        . $f.Script
+        $callback = {
+            param($operation)
+            if (-not $operation.DesiredExists -and $operation.TargetPath -ieq $installedManifestPath) {
+                Write-Bytes $installedManifestPath $recreatedBytes
+                $capture.Recreated = $true
+            }
+        }.GetNewClosure()
+
+        $result = Invoke-JoewrksHarnessSync -Remove -CodexHome $f.CodexHome -AgentsHome $f.AgentsHome -BackupRoot $f.BackupRoot -AfterReplace $callback
+        Assert-True $capture.Recreated 'fixture silently recreates the already-deleted installed manifest'
+        Assert-Equal $result.status 'unknown' 'silent recreation cannot report removed'
+        Assert-Equal (Get-HarnessExitCode $result.status) 3 'silent recreation maps to a nonzero exit'
+        Assert-Equal $result.rollback.status 'incomplete' 'silent recreation leaves rollback incomplete rather than overwriting concurrent bytes'
+        Assert-True (@($result.unresolvedTargets) -contains $installedManifestPath) 'silent recreation reports the recreated manifest as unresolved'
+        Assert-BytesEqual ([IO.File]::ReadAllBytes($installedManifestPath)) $recreatedBytes 'silent recreation preserves the concurrent bytes'
+        Assert-True (Test-Path -LiteralPath $f.State -PathType Leaf) 'failed removal restores ownership state'
+        Assert-Equal (Read-Result (Invoke-Harness $f Check) 'post-recreation Check').status 'blocked' 'subsequent state is not represented as a completed removal'
+    } finally {
+        Remove-Fixture $f
+    }
+    Assert-True (-not (Test-Path -LiteralPath $fixtureRoot)) 'silent recreation fixture cleanup is absent on readback'
+}
+
 function Test-EmptyCheckAndApply {
     $f = New-Fixture
     try {
@@ -2611,6 +2646,7 @@ $allTests = @(
     'Test-ExactControlNoFinalNewlineRemoval',
     'Test-UncertainHistoricalStateFailsClosed',
     'Test-RemoveRollback',
+    'Test-SilentRecreatedRemovalTargetFailsFinalVerification',
     'Test-EmptyDirectoryCleanupDeleteRace',
     'Test-EmptyDirectoryCleanupReparseRace',
     'Test-TargetDirectoryCreationOwnershipRace',
