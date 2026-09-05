@@ -598,6 +598,7 @@ function Invoke-JoewrksHarnessSync {
     $controlV2ManifestBytes = $null
     $controlV2CorePath = $null
     $controlV2CoreHash = $null
+    $controlV2CoreSource = $null
     $controlV2SkillNames = @()
     $controlV2WholeFileCount = $null
     $controlV2SelectionHash = $null
@@ -661,6 +662,11 @@ function Invoke-JoewrksHarnessSync {
         Assert-HarnessObjectShape $controlV2.activeCommonCore @('path', 'sha256') 'Control V2 Common Core identity'
         $controlV2CorePath = Get-HarnessSafeRelativePath ([string] $controlV2.activeCommonCore.path) 'Control V2 Common Core path'
         $controlV2CoreHash = Get-HarnessValidSha256 $controlV2.activeCommonCore.sha256 'Control V2 Common Core hash'
+        $controlV2CoreSourcePath = Resolve-HarnessSourceFile $sourceRoot $controlV2CorePath
+        if (-not (Test-Path -LiteralPath $controlV2CoreSourcePath -PathType Leaf)) { throw "Missing Control V2 Common Core source: $controlV2CorePath" }
+        $controlV2CoreRead = Read-HarnessUtf8 $controlV2CoreSourcePath
+        if ((Get-HarnessSha256 $controlV2CoreRead.Bytes) -cne $controlV2CoreHash) { throw 'Control V2 Common Core source hash is invalid' }
+        $controlV2CoreSource = $controlV2CoreRead.Text.TrimEnd("`r", "`n")
         Assert-HarnessObjectShape $controlV2.selection @('canonicalization', 'activeSkillNames', 'wholeFileCount', 'sha256') 'Control V2 selection identity'
         if ([string] $controlV2.selection.canonicalization -cne 'ordinal-sorted localPath=sha256 UTF-8 lines joined by LF without trailing LF') {
             throw 'Control V2 selection canonicalization is unsupported'
@@ -990,7 +996,14 @@ function Invoke-JoewrksHarnessSync {
                 }
                 $blockLength = $endOffsets[0] + $endBytes.Length - $beginOffsets[0]
                 $existingBlock = Get-HarnessByteSlice $target.Bytes $beginOffsets[0] $blockLength
-                if ((Get-HarnessSha256 $existingBlock) -cne $stateCoreHash) { throw 'Installed Common Core block drifted from prior state' }
+                $existingBlockHash = Get-HarnessSha256 $existingBlock
+                if ($existingBlockHash -cne $stateCoreHash) { throw 'Installed Common Core block drifted from prior state' }
+                $permittedControlBlockHashes = @(foreach ($newline in @("`n", "`r`n")) {
+                    $normalizedControlCore = $controlV2CoreSource -replace "`r`n|`r|`n", $newline
+                    $controlBlockBytes = [Text.Encoding]::UTF8.GetBytes("$($script:HarnessBeginMarker)$newline$normalizedControlCore$newline$($script:HarnessEndMarker)")
+                    Get-HarnessSha256 $controlBlockBytes
+                })
+                if ($permittedControlBlockHashes -cnotcontains $existingBlockHash) { throw 'Installed Common Core block is not the exact supported Control source' }
                 $prefix = Get-HarnessByteSlice $target.Bytes 0 $beginOffsets[0]
                 $suffixStart = $endOffsets[0] + $endBytes.Length
                 $suffix = Get-HarnessByteSlice $target.Bytes $suffixStart ($target.Bytes.Length - $suffixStart)

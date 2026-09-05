@@ -157,7 +157,7 @@ function New-Fixture {
     [IO.Directory]::CreateDirectory($source) | Out-Null
     $activeCore = Get-ActiveCoreRelativePath $RepositoryRoot
     $sourceManifest = Get-Content -Raw -LiteralPath (Join-Path $RepositoryRoot 'vendor\source-manifest.json') | ConvertFrom-Json
-    $compatibilitySourceFiles = @()
+    $compatibilitySourceFiles = @([string] $sourceManifest.compatibility.installIdentities.controlSixSkill.activeCommonCore.path)
     $compatibilityFiles = Get-ChildItem -LiteralPath (Join-Path $RepositoryRoot 'vendor\compatibility') -File -Recurse |
         ForEach-Object { $_.FullName.Substring($RepositoryRoot.Length).TrimStart('\') }
     foreach ($path in @(@($activeCore, 'evals\candidates\common-core-v1.md', 'evals\candidates\interaction-safety-core-v1.md', 'scripts\sync-harness.ps1', 'vendor\source-manifest.json') + (Get-OptionalFiles $RepositoryRoot) + $compatibilitySourceFiles + $compatibilityFiles | Where-Object { -not [string]::IsNullOrWhiteSpace($_) })) { Copy-RelativeFile $RepositoryRoot $source $path }
@@ -2360,7 +2360,7 @@ function Test-ExactControlLegacyRemovalLifecycle {
         $beforeLegacyAgents = Get-TreeHashes $f.AgentsHome
         $beforeLegacyBackups = Get-TreeHashes $f.BackupRoot
         $check = Read-Result (Invoke-Harness $f Check) 'exact Control legacy Check'
-        Assert-Equal $check.status 'legacy' 'exact Control is reported as removable legacy'
+        Assert-Equal $check.status 'legacy' "exact Control is reported as removable legacy; blockers=$(@($check.blockers) | ConvertTo-Json -Compress -Depth 8)"
         Assert-Equal $check.changesRequired $false 'legacy Check does not direct users to Apply'
         Assert-TreeEqual (Get-TreeHashes $f.CodexHome) $beforeLegacyCodex 'legacy Check preserves Codex bytes'
         Assert-TreeEqual (Get-TreeHashes $f.AgentsHome) $beforeLegacyAgents 'legacy Check preserves Agents bytes'
@@ -2378,15 +2378,20 @@ function Test-ExactControlLegacyRemovalLifecycle {
         foreach ($relative in @($installedState.wholeFileTargets.PSObject.Properties.Name)) {
             $installedOwnedBytes[$relative] = [IO.File]::ReadAllBytes((Join-Path $f.AgentsHome ($relative -replace '/', '\')))
         }
-        $remove = Read-Result (Invoke-Harness $f Remove) 'exact Control Remove'
-        Assert-Equal $remove.status 'removed' 'explicit Remove removes exact Control'
-        Assert-True (Test-Path -LiteralPath $remove.backupPath -PathType Container) 'Remove creates a verified backup'
-        Assert-BytesEqual ([IO.File]::ReadAllBytes((Join-Path $remove.backupPath 'codex\AGENTS.md'))) $installedAgentsBytes 'Remove backup preserves exact installed AGENTS bytes'
-        Assert-BytesEqual ([IO.File]::ReadAllBytes((Join-Path $remove.backupPath 'codex\joewrks-harness-state.json'))) $installedStateBytes 'Remove backup preserves exact ownership state bytes'
+        . $f.Script
+        $orderedTargets = [Collections.Generic.List[string]]::new()
+        $captureOrder = { param($operation) $orderedTargets.Add([string] $operation.TargetPath) }.GetNewClosure()
+        $removeResult = Invoke-JoewrksHarnessSync -Remove -CodexHome $f.CodexHome -AgentsHome $f.AgentsHome -BackupRoot $f.BackupRoot -AfterReplace $captureOrder
+        Assert-Equal $removeResult.status 'removed' 'explicit Remove removes exact Control'
+        Assert-True (Test-Path -LiteralPath $removeResult.backupPath -PathType Container) 'Remove creates a verified backup'
+        Assert-BytesEqual ([IO.File]::ReadAllBytes((Join-Path $removeResult.backupPath 'codex\AGENTS.md'))) $installedAgentsBytes 'Remove backup preserves exact installed AGENTS bytes'
+        Assert-BytesEqual ([IO.File]::ReadAllBytes((Join-Path $removeResult.backupPath 'codex\joewrks-harness-state.json'))) $installedStateBytes 'Remove backup preserves exact ownership state bytes'
         foreach ($relative in @($installedOwnedBytes.Keys)) {
-            Assert-BytesEqual ([IO.File]::ReadAllBytes((Join-Path $remove.backupPath (Join-Path 'agents' ($relative -replace '/', '\'))))) $installedOwnedBytes[$relative] "Remove backup preserves exact managed bytes: $relative"
+            Assert-BytesEqual ([IO.File]::ReadAllBytes((Join-Path $removeResult.backupPath (Join-Path 'agents' ($relative -replace '/', '\'))))) $installedOwnedBytes[$relative] "Remove backup preserves exact managed bytes: $relative"
         }
         Assert-True (-not (Test-Path -LiteralPath $f.State)) 'Remove deletes managed state'
+        Assert-Equal $orderedTargets[$orderedTargets.Count - 1] $f.State 'Remove deletes ownership state last'
+        Assert-Equal $orderedTargets[$orderedTargets.Count - 2] (Join-Path $f.CodexHome 'AGENTS.md') 'Remove strips the verified Common Core after all whole files'
         Assert-BytesEqual ([IO.File]::ReadAllBytes((Join-Path $f.CodexHome 'AGENTS.md'))) $originalAgentsBytes 'Remove restores user-owned AGENTS bytes'
         Assert-BytesEqual ([IO.File]::ReadAllBytes($userRootPath)) $userRootBytes 'Remove preserves unrelated user bytes'
         Assert-BytesEqual ([IO.File]::ReadAllBytes($userSkillPath)) $userSkillBytes 'Remove preserves unmanaged bytes inside a former managed directory'
@@ -2470,13 +2475,101 @@ function Test-AstraLegacyRemovalFailsClosed {
     }
 }
 
+function Test-ForgedManagedBlockFailsClosed {
+    $f = New-ControlMigrationFixture
+    try {
+        $f.Script = $f.ControlScript
+        Assert-Equal (Invoke-Harness $f Apply).ExitCode 0 'forged managed block fixture installs'
+        $f.Script = Join-Path $f.SourceRoot 'scripts\sync-harness.ps1'
+
+        $agentsPath = Join-Path $f.CodexHome 'AGENTS.md'
+        Write-Utf8 $agentsPath "$BeginMarker`nUSER-OWNED CONTENT NOT CONTROL`n$EndMarker"
+        $state = Get-Content -Raw -LiteralPath $f.State | ConvertFrom-Json
+        $state.managedBlocks.'AGENTS.md' = Get-Hash $agentsPath
+        Write-Utf8 $f.State (($state | ConvertTo-Json -Depth 100) + "`n")
+
+        $beforeCodex = Get-TreeHashes $f.CodexHome
+        $beforeAgents = Get-TreeHashes $f.AgentsHome
+        $beforeBackups = Get-TreeHashes $f.BackupRoot
+        foreach ($mode in @('Check', 'Remove')) {
+            $run = Invoke-Harness $f $mode
+            $result = Read-Result $run "self-consistent forged managed block $mode"
+            Assert-True ($run.ExitCode -ne 0) "self-consistent forged managed block $mode exits nonzero"
+            Assert-Equal $result.status 'blocked' "self-consistent forged managed block $mode fails closed"
+            Assert-TreeEqual (Get-TreeHashes $f.CodexHome) $beforeCodex "self-consistent forged managed block $mode preserves Codex bytes"
+            Assert-TreeEqual (Get-TreeHashes $f.AgentsHome) $beforeAgents "self-consistent forged managed block $mode preserves Agents bytes"
+            Assert-TreeEqual (Get-TreeHashes $f.BackupRoot) $beforeBackups "self-consistent forged managed block $mode creates no backup"
+        }
+        Assert-Equal ([IO.File]::ReadAllText($agentsPath)) "$BeginMarker`nUSER-OWNED CONTENT NOT CONTROL`n$EndMarker" 'forged managed block remains byte-owned by the user'
+    } finally { Remove-Fixture $f }
+}
+
+function Test-ExactControlRemovePreflightBlockers {
+    foreach ($case in @(
+        @{ Name = 'missing managed target'; Kind = 'managedDrift'; Prepare = { param($fixture) [IO.File]::Delete((Join-Path $fixture.AgentsHome 'skills\design\SKILL.md')) } },
+        @{ Name = 'missing managed AGENTS'; Kind = 'commonCorePreflight'; Prepare = { param($fixture) [IO.File]::Delete((Join-Path $fixture.CodexHome 'AGENTS.md')) } }
+    )) {
+        $f = New-ControlMigrationFixture
+        try {
+            $f.Script = $f.ControlScript
+            Assert-Equal (Invoke-Harness $f Apply).ExitCode 0 "$($case.Name) fixture installs"
+            $f.Script = Join-Path $f.SourceRoot 'scripts\sync-harness.ps1'
+            & $case.Prepare $f
+            $before = Get-TreeHashes $f.Root
+
+            $run = Invoke-Harness $f Remove
+            $result = Read-Result $run "$($case.Name) Remove"
+            Assert-Equal $run.ExitCode 2 "$($case.Name) Remove exits blocked"
+            Assert-Equal $result.status 'blocked' "$($case.Name) Remove fails closed"
+            Assert-True (@($result.blockers).kind -contains $case.Kind) "$($case.Name) reports $($case.Kind)"
+            Assert-TreeEqual (Get-TreeHashes $f.Root) $before "$($case.Name) Remove performs no writes"
+        } finally { Remove-Fixture $f }
+    }
+
+    $f = New-ControlMigrationFixture
+    try {
+        $f.Script = $f.ControlScript
+        Assert-Equal (Invoke-Harness $f Apply).ExitCode 0 'root identity fixture installs'
+        $f.Script = Join-Path $f.SourceRoot 'scripts\sync-harness.ps1'
+        $originalAgentsHome = $f.AgentsHome
+        $f.AgentsHome = Join-Path $f.Root 'other-agents'
+        $before = Get-TreeHashes $f.Root
+
+        $run = Invoke-Harness $f Remove
+        $result = Read-Result $run 'root identity Remove'
+        Assert-Equal $run.ExitCode 2 'root identity Remove exits blocked'
+        Assert-Equal $result.status 'blocked' 'root identity Remove fails closed'
+        Assert-True (@($result.blockers).kind -contains 'rootIdentity') 'root identity Remove reports rootIdentity'
+        Assert-TreeEqual (Get-TreeHashes $f.Root) $before 'root identity Remove performs no writes'
+        Assert-True (-not (Test-Path -LiteralPath $f.AgentsHome)) 'root identity Remove creates no alternate AgentsHome'
+        Assert-True (Test-Path -LiteralPath $originalAgentsHome -PathType Container) 'root identity Remove preserves installed AgentsHome'
+    } finally { Remove-Fixture $f }
+}
+
+function Test-ExactControlNoFinalNewlineRemoval {
+    $f = New-ControlMigrationFixture
+    try {
+        $agentsPath = Join-Path $f.CodexHome 'AGENTS.md'
+        $originalBytes = [byte[]] @(0x61, 0x62, 0x63)
+        Write-Bytes $agentsPath $originalBytes
+
+        $f.Script = $f.ControlScript
+        Assert-Equal (Invoke-Harness $f Apply).ExitCode 0 'exact Control accepts AGENTS without a final newline'
+        $f.Script = Join-Path $f.SourceRoot 'scripts\sync-harness.ps1'
+
+        $remove = Invoke-Harness $f Remove
+        Assert-Equal $remove.ExitCode 0 'Astra Remove accepts exact Control installed after no-final-newline bytes'
+        Assert-Equal (Read-Result $remove 'exact Control no-final-newline Remove').status 'removed' 'Astra Remove reports removed'
+        Assert-BytesEqual ([IO.File]::ReadAllBytes($agentsPath)) $originalBytes 'Astra Remove restores exact original AGENTS bytes without adding a newline'
+    } finally { Remove-Fixture $f }
+}
+
 $historicalReplayTests = @(
     'Test-PublicHarnessEntry',
     'Test-ReadmeContract',
     'Test-LeanZeroSkillLifecycle',
     'Test-ControlSixSkillToLeanMigration',
     'Test-ControlV2PinnedIdentity',
-    'Test-ModeAndExitContract',
     'Test-RemoveContract',
     'Test-NoFinalNewlineRoundTrip',
     'Test-RemovePreflightBlockers',
@@ -2505,12 +2598,17 @@ $historicalReplayTests = @(
     'Test-MultiTargetRollback'
 )
 
-# These cases exercise retired Apply/update semantics and remain readable above and in Git at
-# Lean Readiness. The current Astra-native gate runs only zero-runtime and exact-Control removal.
+# These entries retain historical setup and retired Apply/update assumptions above and in Git at
+# Lean Readiness. Their still-relevant Remove assertions are adapted into executable exact-Control
+# cases in the current Astra-native gate below.
 $allTests = @(
+    'Test-ModeAndExitContract',
     'Test-AstraNativeCleanAndApplyNoOp',
     'Test-ExactControlLegacyRemovalLifecycle',
     'Test-AstraLegacyRemovalFailsClosed',
+    'Test-ForgedManagedBlockFailsClosed',
+    'Test-ExactControlRemovePreflightBlockers',
+    'Test-ExactControlNoFinalNewlineRemoval',
     'Test-UncertainHistoricalStateFailsClosed',
     'Test-RemoveRollback',
     'Test-EmptyDirectoryCleanupDeleteRace',
