@@ -31,7 +31,9 @@ Examples that stay in their owning system/project:
 
 ## Runtime boundary
 
-This directory does **not** reactivate JOENESS runtime, Common Core, public skills, vendor routing, or any historical behavioral overlay. The repository is only the physical host for these shared documents.
+Reading or referencing this directory does **not** activate, install, or expand JOENESS runtime. These files are shared authority documents only.
+
+JOENESS 0.2 separately has one active behavioral runtime rule, `astra-judgment-core.md` (Independent Judgment). That runtime decision is owned by the JOENESS release manifest and installer, not by this shared-contract directory. Historical broad Common Core, public skills, vendor routing, and plugin routing remain inactive.
 
 ## Loading policy
 
