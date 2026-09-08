@@ -14,6 +14,7 @@
 /astra-judgment-core.md text eol=lf
 /scripts/sync-harness.ps1 text eol=lf
 /tests/sync-harness.tests.ps1 text eol=lf
+/tests/astra-judgment-sync.tests.ps1 text eol=lf
 /evals/candidates/common-core-v1.md text eol=lf
 /evals/candidates/common-core-v2.md text eol=lf
 /evals/candidates/no-common-core.md text eol=lf
