@@ -107,7 +107,11 @@ function Test-CurrentLifecycle {
         Assert-True $agentsText.StartsWith("user prefix`r`nuser suffix") 'Apply preserves user prefix bytes/text'
         Assert-Equal ([regex]::Matches($agentsText, [regex]::Escape($BeginMarker))).Count 1 'Apply writes one begin marker'
         Assert-Equal ([regex]::Matches($agentsText, [regex]::Escape($EndMarker))).Count 1 'Apply writes one end marker'
-        Assert-True $agentsText.Contains('# JOENESS — Independent Judgment') 'Apply installs Independent Judgment only'
+        $coreBytes = [IO.File]::ReadAllBytes((Join-Path $RepoRoot 'astra-judgment-core.md'))
+        $coreText = (New-Object Text.UTF8Encoding($false, $true)).GetString($coreBytes).TrimEnd("`r", "`n")
+        $normalizedCore = $coreText -replace "`r`n|`r|`n", "`r`n"
+        $expectedBlock = "$BeginMarker`r`n$normalizedCore`r`n$EndMarker"
+        Assert-True $agentsText.Contains($expectedBlock) 'Apply installs the exact Independent Judgment source block'
         Assert-True $agentsText.Contains('Do not optimize for agreement.') 'Apply installs non-agreement rule'
 
         $statePath = Join-Path $f.Codex 'joewrks-harness-state.json'
