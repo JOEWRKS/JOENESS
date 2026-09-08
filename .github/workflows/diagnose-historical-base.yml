@@ -1,0 +1,32 @@
+name: Diagnose historical integrity on frozen base
+
+'on':
+  push:
+    branches:
+      - codex/joeness-v0.2-astra-judgment
+
+permissions:
+  contents: read
+
+jobs:
+  base-historical-integrity:
+    runs-on: windows-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out frozen pre-0.2 base
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          ref: 5e7497bd104527d5e6dbfc36011f0f5ee3668ff5
+          persist-credentials: false
+      - name: Set up Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 26.3.0
+          package-manager-cache: false
+      - name: Verify exact base and run historical integrity
+        shell: pwsh
+        run: |
+          $head = (& git rev-parse HEAD).Trim()
+          if ($head -ne '5e7497bd104527d5e6dbfc36011f0f5ee3668ff5') { throw "Unexpected control HEAD: $head" }
+          node .\scripts\run-node-test-group.mjs historical-integrity
