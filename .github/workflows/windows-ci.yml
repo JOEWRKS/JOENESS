@@ -155,13 +155,37 @@ jobs:
           TMP: ${{ env.JOENESS_CI_TEMP }}
         run: node .\scripts\run-node-test-group.mjs historical-integrity
 
-      - name: Run sync harness deterministic tests
+      - name: Run Astra judgment lifecycle tests
         shell: pwsh
         working-directory: ${{ env.JOENESS_CI_REPOSITORY }}
         env:
           TEMP: ${{ env.JOENESS_CI_TEMP }}
           TMP: ${{ env.JOENESS_CI_TEMP }}
-        run: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\tests\sync-harness.tests.ps1
+        run: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\tests\astra-judgment-sync.tests.ps1
+
+      - name: Run retained sync harness fail-closed tests
+        shell: pwsh
+        working-directory: ${{ env.JOENESS_CI_REPOSITORY }}
+        env:
+          TEMP: ${{ env.JOENESS_CI_TEMP }}
+          TMP: ${{ env.JOENESS_CI_TEMP }}
+        run: |
+          $tests = @(
+            'Test-ModeAndExitContract',
+            'Test-AstraLegacyRemovalFailsClosed',
+            'Test-ForgedManagedBlockFailsClosed',
+            'Test-ExactControlRemovePreflightBlockers',
+            'Test-ExactControlNoFinalNewlineRemoval',
+            'Test-UncertainHistoricalStateFailsClosed',
+            'Test-RemoveRollback',
+            'Test-SilentRecreatedRemovalTargetFailsFinalVerification',
+            'Test-SurvivingRemovalResidueIsUnresolved',
+            'Test-EmptyDirectoryCleanupDeleteRace',
+            'Test-EmptyDirectoryCleanupReparseRace',
+            'Test-TargetDirectoryCreationOwnershipRace',
+            'Test-EmptyDirectoryCleanupPathBoundaries'
+          )
+          & .\tests\sync-harness.tests.ps1 -Only $tests
 
       - name: Run project setup deterministic tests
         shell: pwsh
