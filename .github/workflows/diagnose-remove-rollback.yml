@@ -11,13 +11,33 @@ permissions:
 jobs:
   diagnose:
     runs-on: windows-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
           persist-credentials: false
+
+      - name: Run retained Remove rollback alone
+        shell: powershell
+        run: .\tests\sync-harness.tests.ps1 -Only Test-RemoveRollback
+
+      - name: Run retained prefix through Remove rollback
+        shell: powershell
+        run: |
+          $tests = @(
+            'Test-ModeAndExitContract',
+            'Test-AstraLegacyRemovalFailsClosed',
+            'Test-ForgedManagedBlockFailsClosed',
+            'Test-ExactControlRemovePreflightBlockers',
+            'Test-ExactControlNoFinalNewlineRemoval',
+            'Test-UncertainHistoricalStateFailsClosed',
+            'Test-RemoveRollback'
+          )
+          .\tests\sync-harness.tests.ps1 -Only $tests
+
       - name: Reproduce direct Remove rollback
+        if: always()
         shell: powershell
         run: |
           $ErrorActionPreference = 'Stop'
