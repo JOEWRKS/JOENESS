@@ -2,6 +2,7 @@
 
 - The active GPT-6 Astra distribution is `JOENESS 0.2-astra-judgment` and contains exactly one managed behavioral Common Core source: `astra-judgment-core.md`.
 - That active rule is **Independent Judgment** only: user questions, challenges, concerns, and preferences are evidence to evaluate rather than automatic corrections; explicit user decisions remain authoritative where the user owns the decision.
+- Historical `0.1-astra-native`: the active GPT-6 Astra distribution at that release had no runtime behavioral overlay or Common Core. That evidence-based zero-runtime decision remains preserved as release history; 0.2 reopens only the separately observed Independent Judgment failure mode.
 - `vendor/source-manifest.json` is the machine-readable distribution identity. Keep evaluation records out of its active identity.
 - Active runtime must keep `managedRuntimeFiles`, `publicSkills`, and `defaultVendors` empty and `pluginRouting` null unless a separately approved evidence-based release changes that contract.
 - The rejected broad always-on Core remains disabled and preserved as historical evidence; it is not an active pointer or runtime payload. The historical `common-core.md`, 1,690-byte Lean Kernel, candidates, public skills, vendor source, compatibility archives, commits, and experiment reports remain inactive evidence.
