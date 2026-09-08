@@ -261,21 +261,18 @@ Consumers should reference this file/version rather than copying the full contra
 
 ## 10. JOENESS repository boundary
 
-This file is hosted in the former JOENESS repository for shared physical storage only.
+This file is hosted in the JOENESS repository as shared physical storage for cross-system authority boundaries.
 
-It does not:
+Reading, referencing, or revising this contract does not itself:
 
-- reactivate JOENESS runtime;
-- install a Common Core or behavioral overlay;
-- reactivate historical JOENESS skills or vendors;
+- activate, install, remove, or expand JOENESS runtime behavior;
+- activate a Common Core, skill, vendor, or plugin route;
 - make JOENESS a control plane above JOEFLOW;
 - make this repository the owner of Product Definition or visual truth.
 
-Current Astra execution remains:
+JOENESS 0.2 separately has one active behavioral release rule, **Independent Judgment**, identified by `vendor/source-manifest.json` and sourced from `astra-judgment-core.md`. That release decision is independent of this shared contract. Consuming this contract does not inherit or activate that runtime rule.
 
-`Bare Astra + applicable domain system + project-local authority`
-
-Historical JOENESS `skills/**`, `vendor/**`, evals, and compatibility material remain historical/reference evidence unless explicitly reactivated by a separate, evidence-based decision.
+Historical broad JOENESS Core material, `skills/**`, vendor source, evals, and compatibility material remain historical/reference evidence unless explicitly reactivated by a separate evidence-based release decision. The 0.2 release does not reactivate those historical surfaces.
 
 ## 11. Change policy
 
