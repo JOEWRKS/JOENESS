@@ -118,7 +118,7 @@ No stage framework, roadmap framework, reviewer workflow, design policy, or doma
 
 Create a new active source file rather than repurposing the historical broad `common-core.md`.
 
-Proposed active source:
+Active source:
 
 `astra-judgment-core.md`
 
@@ -135,36 +135,35 @@ No whole-file runtime payload is required for the new release beyond the ownersh
 
 Update `vendor/source-manifest.json` so the active distribution is machine-readable and hash-bound.
 
-Required active fields:
+Required active values:
 
-```json
-{
-  "schemaVersion": 2,
-  "release": {
-    "name": "JOENESS",
-    "version": "0.2-astra-judgment",
-    "entrypoint": "JOENESS.ps1"
-  },
-  "target": {
-    "model": "gpt-6-astra",
-    "reasoningEffort": "xhigh"
-  },
-  "runtimeMode": "common-core",
-  "activeCommonCore": {
-    "path": "astra-judgment-core.md",
-    "sha256": "<computed release hash>"
-  },
-  "managedRuntimeFiles": [],
-  "publicSkills": [],
-  "defaultVendors": [],
-  "pluginRouting": null,
-  "compatibility": {
-    "installIdentities": {
-      "controlSixSkill": "<preserve current compatibility identity exactly>"
-    }
-  }
-}
-```
+- `schemaVersion`: `2`
+- `release.name`: `JOENESS`
+- `release.version`: `0.2-astra-judgment`
+- `release.entrypoint`: `JOENESS.ps1`
+- `target.model`: `gpt-6-astra`
+- `target.reasoningEffort`: `xhigh`
+- `runtimeMode`: `common-core`
+- `activeCommonCore.path`: `astra-judgment-core.md`
+- `activeCommonCore.sha256`: exact SHA-256 of the committed `astra-judgment-core.md` bytes used by the release
+- `managedRuntimeFiles`: empty array
+- `publicSkills`: empty array
+- `defaultVendors`: empty array
+- `pluginRouting`: null
+
+The current GPT-5.6 Control compatibility identity must be preserved unchanged in meaning and values:
+
+- compatibility key: `controlSixSkill`
+- commit: `80c79e9f4be91d730b1b3cdc62d7bf51508895e8`
+- distribution manifest path: `vendor/source-manifest.json`
+- distribution manifest bytes: `37845`
+- distribution manifest SHA-256: `f7866fb42f3336e0bd82f01e0f3940ab8b6a5d5b55e4677b9306e461be3c0158`
+- Control active Common Core path: `evals/candidates/interaction-safety-core-v8.md`
+- Control active Common Core SHA-256: `41b3f8435c6077a9289e0c9d3315aa00d68a96e2e9add7168de6bb42f9730aea`
+- active skill names: `design`, `handoff`, `project`, `spec`, `ticket`, `visual-check`
+- whole-file count: `64`
+- selection SHA-256: `f4a3c7fbacd8d6f8cfb1b958c094e73f5ba739a1bb633d3fff5614e34b8a7587`
+- canonicalization string remains exactly: `ordinal-sorted localPath=sha256 UTF-8 lines joined by LF without trailing LF`
 
 Do not mix evaluation result records into the active distribution identity.
 
