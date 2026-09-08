@@ -1,0 +1,1 @@
+This temporary note exists only to produce a distinct branch head for the test-first RED gate and will be removed before release.
