@@ -1,9 +1,9 @@
 # JOENESS 0.2 Astra Judgment — Design Specification
 
-**Date:** 2026-09-08  
-**Status:** APPROVED DESIGN / IMPLEMENTATION NOT STARTED  
-**Target:** GPT-6 Astra / xhigh  
-**Base:** `main` at `5e7497bd104527d5e6dbfc36011f0f5ee3668ff5`  
+**Date:** 2026-09-08
+**Status:** APPROVED DESIGN / IMPLEMENTATION NOT STARTED
+**Target:** GPT-6 Astra / xhigh
+**Base:** `main` at `5e7497bd104527d5e6dbfc36011f0f5ee3668ff5`
 **Working branch:** `codex/joeness-v0.2-astra-judgment`
 
 ## 1. Decision
@@ -97,17 +97,17 @@ No stage framework, roadmap framework, reviewer workflow, design policy, or doma
 
 ### A. Keep `0.1-astra-native` zero runtime
 
-**Benefit:** no runtime complexity, no risk of overcorrection.  
+**Benefit:** no runtime complexity, no risk of overcorrection.
 **Rejected because:** the observed failure is now concrete and cross-domain enough to justify a narrow correction candidate.
 
 ### B. Restore the historical broad Common Core
 
-**Benefit:** reuses previously developed safety/workflow material.  
+**Benefit:** reuses previously developed safety/workflow material.
 **Rejected because:** it recreates the framework overhead that Astra rebaseline failed to justify and would confound whether Independent Judgment itself provides value.
 
 ### C. Add only documentation, no installed behavior
 
-**Benefit:** no installer/runtime changes.  
+**Benefit:** no installer/runtime changes.
 **Rejected because:** a repository note that is not loaded into the model does not address the observed runtime behavior.
 
 ### D. Minimal Independent Judgment overlay

@@ -1,8 +1,8 @@
 # JOENESS 0.2 Astra Judgment — Release Handoff
 
-**Date:** 2026-09-09  
-**Release identity:** `0.2-astra-judgment`  
-**Target:** `gpt-6-astra / xhigh`  
+**Date:** 2026-09-09
+**Release identity:** `0.2-astra-judgment`
+**Target:** `gpt-6-astra / xhigh`
 **PR:** #13 — `JOENESS 0.2 Astra Judgment`
 
 ## 1. Release decision
