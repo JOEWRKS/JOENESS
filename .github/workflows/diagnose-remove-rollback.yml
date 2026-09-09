@@ -11,55 +11,49 @@ permissions:
 jobs:
   diagnose:
     runs-on: windows-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
           persist-credentials: false
 
-      - name: Run retained Remove rollback alone
+      - name: WinPS baseline Remove rollback
         shell: powershell
         run: .\tests\sync-harness.tests.ps1 -Only Test-RemoveRollback
 
-      - name: Run retained prefix through Remove rollback
+      - name: pwsh Remove rollback
+        id: pwsh_only
+        continue-on-error: true
+        shell: pwsh
+        run: .\tests\sync-harness.tests.ps1 -Only Test-RemoveRollback
+
+      - name: WinPS Remove rollback with isolated TEMP
+        id: winps_temp
+        continue-on-error: true
         shell: powershell
         run: |
-          $tests = @(
-            'Test-ModeAndExitContract',
-            'Test-AstraLegacyRemovalFailsClosed',
-            'Test-ForgedManagedBlockFailsClosed',
-            'Test-ExactControlRemovePreflightBlockers',
-            'Test-ExactControlNoFinalNewlineRemoval',
-            'Test-UncertainHistoricalStateFailsClosed',
-            'Test-RemoveRollback'
-          )
-          .\tests\sync-harness.tests.ps1 -Only $tests
+          $isolated = Join-Path $env:RUNNER_TEMP 'joeness-winps-temp'
+          New-Item -ItemType Directory -Path $isolated -Force | Out-Null
+          $env:TEMP = $isolated
+          $env:TMP = $isolated
+          .\tests\sync-harness.tests.ps1 -Only Test-RemoveRollback
 
-      - name: Reproduce direct Remove rollback
+      - name: pwsh Remove rollback with isolated TEMP
+        id: pwsh_temp
+        continue-on-error: true
+        shell: pwsh
+        run: |
+          $isolated = Join-Path $env:RUNNER_TEMP 'joeness-pwsh-temp'
+          New-Item -ItemType Directory -Path $isolated -Force | Out-Null
+          $env:TEMP = $isolated
+          $env:TMP = $isolated
+          .\tests\sync-harness.tests.ps1 -Only Test-RemoveRollback
+
+      - name: Report cross-runtime diagnostic
         if: always()
-        shell: powershell
+        shell: pwsh
         run: |
-          $ErrorActionPreference = 'Stop'
-          $root = Join-Path ([IO.Path]::GetTempPath()) ('joeness-remove-diag-' + [guid]::NewGuid().ToString('N'))
-          $codex = Join-Path $root 'codex'
-          $agents = Join-Path $root 'agents'
-          $backups = Join-Path $root 'backups'
-          $controlZip = Join-Path $root 'control.zip'
-          $controlRoot = Join-Path $root 'control'
-          New-Item -ItemType Directory -Path $root | Out-Null
-          try {
-            & git archive --format=zip --output=$controlZip 80c79e9f4be91d730b1b3cdc62d7bf51508895e8 scripts/sync-harness.ps1 evals/candidates skills vendor
-            if ($LASTEXITCODE -ne 0) { throw 'control archive failed' }
-            Expand-Archive -LiteralPath $controlZip -DestinationPath $controlRoot
-            $controlScript = Join-Path $controlRoot 'scripts\sync-harness.ps1'
-            $controlJson = & powershell.exe -NoProfile -ExecutionPolicy Bypass -File $controlScript -Apply -CodexHome $codex -AgentsHome $agents -BackupRoot $backups
-            Write-Host "CONTROL=$controlJson"
-            if ($LASTEXITCODE -ne 0) { throw 'control apply failed' }
-
-            . .\scripts\sync-harness.ps1
-            $result = Invoke-JoewrksHarnessSync -Remove -CodexHome $codex -AgentsHome $agents -BackupRoot $backups -AfterReplace { param($operation) throw 'mid-remove failure' }
-            Write-Host ('DIRECT=' + ($result | ConvertTo-Json -Compress -Depth 16))
-          } finally {
-            if (Test-Path -LiteralPath $root) { Remove-Item -LiteralPath $root -Recurse -Force }
-          }
+          Write-Host "pwsh_only=${{ steps.pwsh_only.outcome }}"
+          Write-Host "winps_temp=${{ steps.winps_temp.outcome }}"
+          Write-Host "pwsh_temp=${{ steps.pwsh_temp.outcome }}"
