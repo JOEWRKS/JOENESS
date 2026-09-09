@@ -18,7 +18,7 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
 
-      - name: Canonical clone retained prefix
+      - name: Canonical clone direct Control classification
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
@@ -35,21 +35,40 @@ jobs:
             if ($LASTEXITCODE -ne 0) { throw 'canonical diagnostic checkout failed' }
             $env:TEMP = $tmp
             $env:TMP = $tmp
-            Push-Location $repo
-            try {
-              $tests = @(
-                'Test-ModeAndExitContract',
-                'Test-AstraLegacyRemovalFailsClosed',
-                'Test-ForgedManagedBlockFailsClosed',
-                'Test-ExactControlRemovePreflightBlockers',
-                'Test-ExactControlNoFinalNewlineRemoval',
-                'Test-UncertainHistoricalStateFailsClosed',
-                'Test-RemoveRollback'
-              )
-              & .\tests\sync-harness.tests.ps1 -Only $tests
-            } finally {
-              Pop-Location
-            }
+
+            $fixture = Join-Path $tmp ('probe-' + [guid]::NewGuid().ToString('N'))
+            $codex = Join-Path $fixture 'codex'
+            $agents = Join-Path $fixture 'agents'
+            $backups = Join-Path $fixture 'backups'
+            $controlZip = Join-Path $fixture 'control.zip'
+            $controlRoot = Join-Path $fixture 'control'
+            New-Item -ItemType Directory -Path $fixture | Out-Null
+
+            & git -C $repo archive --format=zip --output=$controlZip 80c79e9f4be91d730b1b3cdc62d7bf51508895e8 scripts/sync-harness.ps1 evals/candidates skills vendor
+            if ($LASTEXITCODE -ne 0) { throw 'control archive failed' }
+            Expand-Archive -LiteralPath $controlZip -DestinationPath $controlRoot
+            $controlScript = Join-Path $controlRoot 'scripts\sync-harness.ps1'
+            $currentScript = Join-Path $repo 'scripts\sync-harness.ps1'
+
+            $controlOut = @(& powershell.exe -NoProfile -ExecutionPolicy Bypass -File $controlScript -Apply -CodexHome $codex -AgentsHome $agents -BackupRoot $backups 2>&1)
+            Write-Host ('CONTROL=' + (($controlOut | ForEach-Object { [string]$_ }) -join ' | '))
+            Write-Host "CONTROL_EXIT=$LASTEXITCODE"
+
+            $checkOut = @(& powershell.exe -NoProfile -ExecutionPolicy Bypass -File $currentScript -Check -CodexHome $codex -AgentsHome $agents -BackupRoot $backups 2>&1)
+            Write-Host ('CURRENT_CHECK=' + (($checkOut | ForEach-Object { [string]$_ }) -join ' | '))
+            Write-Host "CURRENT_CHECK_EXIT=$LASTEXITCODE"
+
+            . $currentScript
+            $result = Invoke-JoewrksHarnessSync -Remove -CodexHome $codex -AgentsHome $agents -BackupRoot $backups -AfterReplace { param($operation) throw 'mid-remove failure' }
+            Write-Host ('CURRENT_DIRECT_REMOVE=' + ($result | ConvertTo-Json -Compress -Depth 20))
+
+            $manifestPath = Join-Path $repo 'vendor\source-manifest.json'
+            $compatCorePath = Join-Path $repo 'evals\candidates\interaction-safety-core-v8.md'
+            Write-Host "REPO_LEN=$($repo.Length)"
+            Write-Host "TEMP_LEN=$($tmp.Length)"
+            Write-Host "MANIFEST_HASH=$((Get-FileHash -LiteralPath $manifestPath -Algorithm SHA256).Hash.ToLowerInvariant())"
+            Write-Host "COMPAT_CORE_HASH=$((Get-FileHash -LiteralPath $compatCorePath -Algorithm SHA256).Hash.ToLowerInvariant())"
+            Write-Host "AUTOCRLF=$(& git -C $repo config --get core.autocrlf)"
           } finally {
             if (Test-Path -LiteralPath $root) { Remove-Item -LiteralPath $root -Recurse -Force }
           }
