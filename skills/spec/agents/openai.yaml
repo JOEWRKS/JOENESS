@@ -1,6 +1,0 @@
-interface:
-  display_name: "Spec"
-  short_description: "Deliver decisions after creating or materially revising a persistent specification"
-  default_prompt: "After creating or materially revising a persistent specification, use $spec to inspect the exact current artifact and deliver its decisions in my language without adding a generic review or transition prompt."
-policy:
-  allow_implicit_invocation: true

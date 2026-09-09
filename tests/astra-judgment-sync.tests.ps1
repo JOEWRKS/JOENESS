@@ -2,10 +2,11 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
 $RepoRoot = Split-Path -Parent $PSScriptRoot
-$CurrentScript = Join-Path $RepoRoot 'JOENESS.ps1'
+$EntryPoint = Join-Path $RepoRoot 'JOENESS.ps1'
 $BeginMarker = '<!-- JOEWRKS-HARNESS:BEGIN -->'
 $EndMarker = '<!-- JOEWRKS-HARNESS:END -->'
-$ControlCommit = '80c79e9f4be91d730b1b3cdc62d7bf51508895e8'
+$PreCleanupMain = 'cb1bc9f9032cb8d1cc380369ca2305100e6c332b'
+$HistoricalControl = '80c79e9f4be91d730b1b3cdc62d7bf51508895e8'
 
 function Assert-True {
     param([bool] $Condition, [string] $Message)
@@ -31,15 +32,27 @@ function Assert-BytesEqual {
     }
 }
 
+function Assert-ExactNames {
+    param([string] $Path, [string[]] $Expected, [string] $Message)
+    $actual = @((Get-ChildItem -LiteralPath $Path -Force | Where-Object { $_.Name -ne '.git' } | ForEach-Object { $_.Name }) | Sort-Object -CaseSensitive)
+    $wanted = @($Expected | Sort-Object -CaseSensitive)
+    Assert-Equal ($actual -join "`n") ($wanted -join "`n") $Message
+}
+
+function Get-Sha256 {
+    param([byte[]] $Bytes)
+    $sha = [Security.Cryptography.SHA256]::Create()
+    try { ([BitConverter]::ToString($sha.ComputeHash($Bytes))).Replace('-', '').ToLowerInvariant() }
+    finally { $sha.Dispose() }
+}
+
 function New-TestRoot {
-    $root = Join-Path ([IO.Path]::GetTempPath()) ('joeness-astra-judgment-' + [guid]::NewGuid().ToString('N'))
+    $root = Join-Path ([IO.Path]::GetTempPath()) ('joeness-current-' + [guid]::NewGuid().ToString('N'))
     $null = New-Item -ItemType Directory -Path $root
-    $codex = Join-Path $root 'codex'
-    $agents = Join-Path $root 'agents'
-    $backup = Join-Path $root 'backups'
-    $null = New-Item -ItemType Directory -Path $codex
-    $null = New-Item -ItemType Directory -Path $agents
-    [pscustomobject] @{ Root = $root; Codex = $codex; Agents = $agents; Backup = $backup }
+    [pscustomobject] @{
+        Root = $root
+        Codex = Join-Path $root 'codex'
+    }
 }
 
 function Remove-TestRoot {
@@ -49,26 +62,20 @@ function Remove-TestRoot {
     }
 }
 
-function Invoke-Harness {
-    param(
-        [string] $Script,
-        [ValidateSet('Check', 'Apply', 'Remove')] [string] $Mode,
-        $Fixture
-    )
+function Invoke-JoenessCli {
+    param([ValidateSet('Check', 'Apply', 'Remove')] [string] $Mode, $Fixture)
     $args = @(
         '-NoProfile',
         '-ExecutionPolicy', 'Bypass',
-        '-File', $Script,
+        '-File', $EntryPoint,
         "-$Mode",
-        '-CodexHome', $Fixture.Codex,
-        '-AgentsHome', $Fixture.Agents,
-        '-BackupRoot', $Fixture.Backup
+        '-CodexHome', $Fixture.Codex
     )
     $lines = @(& powershell.exe @args 2>&1)
     $exitCode = $LASTEXITCODE
     $jsonLine = @($lines | ForEach-Object { [string] $_ } | Where-Object { $_.TrimStart().StartsWith('{') } | Select-Object -Last 1)
     if ($jsonLine.Count -ne 1) {
-        throw "Harness returned no parseable JSON for $Mode. Exit=$exitCode Output=$($lines -join ' | ')"
+        throw "JOENESS returned no parseable JSON for $Mode. Exit=$exitCode Output=$($lines -join ' | ')"
     }
     [pscustomobject] @{
         ExitCode = $exitCode
@@ -77,106 +84,173 @@ function Invoke-Harness {
     }
 }
 
-function Write-OriginalAgents {
-    param($Fixture)
-    $bytes = (New-Object Text.UTF8Encoding($false)).GetBytes("user prefix`r`nuser suffix")
-    [IO.File]::WriteAllBytes((Join-Path $Fixture.Codex 'AGENTS.md'), $bytes)
-    $bytes
+function Test-MinimalCurrentTree {
+    Assert-ExactNames $RepoRoot @(
+        '.gitattributes',
+        '.github',
+        '.gitignore',
+        'AGENTS.md',
+        'JOENESS.ps1',
+        'README.md',
+        'astra-judgment-core.md',
+        'evals',
+        'scripts',
+        'tests',
+        'vendor'
+    ) 'root contains only current JOENESS surface'
+
+    Assert-ExactNames (Join-Path $RepoRoot '.github') @('workflows') '.github contains only workflows'
+    Assert-ExactNames (Join-Path $RepoRoot '.github\workflows') @('windows-ci.yml') 'workflow surface is current-only'
+    Assert-ExactNames (Join-Path $RepoRoot 'evals') @('experiments') 'eval surface contains only current experiments'
+    Assert-ExactNames (Join-Path $RepoRoot 'evals\experiments') @('joeness-astra-independent-judgment-ab-plan-v1.json') 'only current behavioral A/B plan remains'
+    Assert-ExactNames (Join-Path $RepoRoot 'scripts') @('sync-harness.ps1') 'script surface is current-only'
+    Assert-ExactNames (Join-Path $RepoRoot 'tests') @('astra-judgment-sync.tests.ps1') 'test surface is current-only'
+    Assert-ExactNames (Join-Path $RepoRoot 'vendor') @('source-manifest.json') 'vendor directory contains only active manifest'
+
+    foreach ($removed in @('JOENESS-0.1.ps1', 'harness.ps1', 'common-core.md', 'TASKS.md', 'docs', 'skills')) {
+        Assert-True (-not (Test-Path -LiteralPath (Join-Path $RepoRoot $removed))) "$removed is absent from current main tree"
+    }
 }
 
-function Test-CurrentLifecycle {
+function Test-HistoryStillOwnsOldFiles {
+    foreach ($commit in @($PreCleanupMain, $HistoricalControl)) {
+        & git -C $RepoRoot cat-file -e "$commit^{commit}"
+        Assert-Equal $LASTEXITCODE 0 "historical commit $commit remains available"
+    }
+
+    & git -C $RepoRoot cat-file -e "$PreCleanupMain`:common-core.md"
+    Assert-Equal $LASTEXITCODE 0 'removed common-core.md remains in pre-cleanup Git history'
+    & git -C $RepoRoot cat-file -e "$PreCleanupMain`:skills/design/SKILL.md"
+    Assert-Equal $LASTEXITCODE 0 'removed public skill remains in pre-cleanup Git history'
+}
+
+function Test-ManifestAndCoreIdentity {
+    $manifestPath = Join-Path $RepoRoot 'vendor\source-manifest.json'
+    $manifest = [IO.File]::ReadAllText($manifestPath) | ConvertFrom-Json
+    Assert-Equal $manifest.schemaVersion 2 'manifest schema is v2'
+    Assert-Equal $manifest.release.name 'JOENESS' 'manifest release name'
+    Assert-Equal $manifest.release.version '0.2-astra-judgment' 'manifest release version'
+    Assert-Equal $manifest.target.model 'gpt-6-astra' 'manifest target model'
+    Assert-Equal $manifest.target.reasoningEffort 'xhigh' 'manifest reasoning effort'
+    Assert-Equal $manifest.runtimeMode 'common-core' 'manifest runtime mode'
+    Assert-Equal $manifest.activeCommonCore.path 'astra-judgment-core.md' 'manifest active core'
+    Assert-Equal @($manifest.managedRuntimeFiles).Count 0 'no managed runtime files'
+    Assert-Equal @($manifest.publicSkills).Count 0 'no public skills'
+    Assert-Equal @($manifest.defaultVendors).Count 0 'no default vendors'
+    Assert-True ($null -eq $manifest.pluginRouting) 'plugin routing remains null'
+    Assert-True ($null -eq $manifest.PSObject.Properties['compatibility']) 'historical compatibility payload is absent'
+
+    $coreBytes = [IO.File]::ReadAllBytes((Join-Path $RepoRoot 'astra-judgment-core.md'))
+    Assert-Equal (Get-Sha256 $coreBytes) 'f360b48be1b4143035f61fa20149a3249c60dea2e7f12cffa8bf1e8918f4f6a9' 'active core remains byte-identical'
+    Assert-Equal $manifest.activeCommonCore.sha256 (Get-Sha256 $coreBytes) 'manifest binds exact core bytes'
+
+    $ab = [IO.File]::ReadAllText((Join-Path $RepoRoot 'evals\experiments\joeness-astra-independent-judgment-ab-plan-v1.json')) | ConvertFrom-Json
+    Assert-Equal $ab.status 'NOT-RUN' 'behavioral A/B remains not run'
+    Assert-True ($null -eq $ab.results) 'behavioral A/B has no results'
+    Assert-True ($null -eq $ab.conclusion) 'behavioral A/B has no conclusion'
+}
+
+function Test-CurrentLifecycleAndUserBytes {
     $f = New-TestRoot
     try {
-        $original = Write-OriginalAgents $f
+        $null = New-Item -ItemType Directory -Path $f.Codex
+        $agentsPath = Join-Path $f.Codex 'AGENTS.md'
+        $original = (New-Object Text.UTF8Encoding($false)).GetBytes("user prefix`r`nuser suffix")
+        [IO.File]::WriteAllBytes($agentsPath, $original)
 
-        $check = Invoke-Harness $CurrentScript Check $f
+        $check = Invoke-JoenessCli Check $f
         Assert-Equal $check.ExitCode 0 'clean Check exits 0'
-        Assert-Equal $check.Result.status 'ready' 'clean v0.2 target is ready for explicit Apply'
-        Assert-Equal $check.Result.changesRequired $true 'clean v0.2 target requires Apply'
-        Assert-Equal @($check.Result.activeSkills).Count 0 'v0.2 exposes no public skills'
-        Assert-True (-not (Test-Path -LiteralPath (Join-Path $f.Codex 'joewrks-harness-state.json'))) 'Check is read-only'
+        Assert-Equal $check.Result.status 'ready' 'clean Check is ready'
+        Assert-Equal $check.Result.changesRequired $true 'clean Check advertises explicit Apply'
+        Assert-BytesEqual ([IO.File]::ReadAllBytes($agentsPath)) $original 'Check is byte-read-only'
+        Assert-True (-not (Test-Path -LiteralPath (Join-Path $f.Codex 'joewrks-harness-state.json'))) 'Check writes no state'
 
-        $apply = Invoke-Harness $CurrentScript Apply $f
+        $apply = Invoke-JoenessCli Apply $f
         Assert-Equal $apply.ExitCode 0 'Apply exits 0'
-        Assert-Equal $apply.Result.status 'current' 'Apply installs current v0.2 state'
-        Assert-Equal $apply.Result.changesRequired $false 'Apply reaches current'
-        Assert-Equal @($apply.Result.activeSkills).Count 0 'Apply still exposes zero skills'
+        Assert-Equal $apply.Result.status 'current' 'Apply reaches current'
+        $installedText = [IO.File]::ReadAllText($agentsPath)
+        Assert-Equal ([regex]::Matches($installedText, [regex]::Escape($BeginMarker))).Count 1 'one begin marker installed'
+        Assert-Equal ([regex]::Matches($installedText, [regex]::Escape($EndMarker))).Count 1 'one end marker installed'
+        Assert-True $installedText.Contains('Do not optimize for agreement.') 'exact Independent Judgment content installed'
 
-        $agentsPath = Join-Path $f.Codex 'AGENTS.md'
-        $agentsText = [IO.File]::ReadAllText($agentsPath)
-        Assert-True $agentsText.StartsWith("user prefix`r`nuser suffix") 'Apply preserves user prefix bytes/text'
-        Assert-Equal ([regex]::Matches($agentsText, [regex]::Escape($BeginMarker))).Count 1 'Apply writes one begin marker'
-        Assert-Equal ([regex]::Matches($agentsText, [regex]::Escape($EndMarker))).Count 1 'Apply writes one end marker'
-        $coreBytes = [IO.File]::ReadAllBytes((Join-Path $RepoRoot 'astra-judgment-core.md'))
-        $coreText = (New-Object Text.UTF8Encoding($false, $true)).GetString($coreBytes).TrimEnd("`r", "`n")
-        $normalizedCore = $coreText -replace "`r`n|`r|`n", "`r`n"
-        $expectedBlock = "$BeginMarker`r`n$normalizedCore`r`n$EndMarker"
-        Assert-True $agentsText.Contains($expectedBlock) 'Apply installs the exact Independent Judgment source block'
-        Assert-True $agentsText.Contains('Do not optimize for agreement.') 'Apply installs non-agreement rule'
+        $post = Invoke-JoenessCli Check $f
+        Assert-Equal $post.Result.status 'current' 'post-Apply Check is current'
+        Assert-Equal $post.Result.changesRequired $false 'current install needs no changes'
 
-        $statePath = Join-Path $f.Codex 'joewrks-harness-state.json'
-        Assert-True (Test-Path -LiteralPath $statePath -PathType Leaf) 'Apply writes ownership state'
-        $state = Get-Content -Raw -LiteralPath $statePath | ConvertFrom-Json
-        Assert-Equal $state.schemaVersion 2 'state schema remains v2'
-        Assert-Equal $state.sourceIdentities.commonCore.path 'astra-judgment-core.md' 'state binds active core source'
-        Assert-Equal @($state.wholeFileTargets.PSObject.Properties.Name).Count 1 'state owns only installed manifest as whole file'
-        Assert-True (@($state.wholeFileTargets.PSObject.Properties.Name) -contains 'vendor/source-manifest.json') 'state owns exact distribution manifest'
-        Assert-True (Test-Path -LiteralPath (Join-Path $f.Agents 'vendor\source-manifest.json') -PathType Leaf) 'Apply materializes owned manifest'
-        Assert-True (-not (Test-Path -LiteralPath (Join-Path $f.Agents 'skills'))) 'Apply installs no skills directory'
+        $beforeRepeat = [IO.File]::ReadAllBytes($agentsPath)
+        $repeat = Invoke-JoenessCli Apply $f
+        Assert-Equal $repeat.Result.status 'current' 'repeat Apply is current'
+        Assert-BytesEqual ([IO.File]::ReadAllBytes($agentsPath)) $beforeRepeat 'repeat Apply is idempotent'
 
-        $post = Invoke-Harness $CurrentScript Check $f
-        Assert-Equal $post.Result.status 'current' 'exact install checks current'
-        Assert-Equal $post.Result.changesRequired $false 'exact install needs no changes'
-
-        $beforeBackups = @($(if (Test-Path -LiteralPath $f.Backup) { Get-ChildItem -LiteralPath $f.Backup -Directory -Force } else { @() })).Count
-        $repeat = Invoke-Harness $CurrentScript Apply $f
-        Assert-Equal $repeat.Result.status 'current' 'repeat Apply is idempotent'
-        Assert-Equal $repeat.Result.changesRequired $false 'repeat Apply makes no changes'
-        $afterBackups = @($(if (Test-Path -LiteralPath $f.Backup) { Get-ChildItem -LiteralPath $f.Backup -Directory -Force } else { @() })).Count
-        Assert-Equal $afterBackups $beforeBackups 'idempotent Apply creates no ceremony backup'
-
-        $remove = Invoke-Harness $CurrentScript Remove $f
+        $edited = $installedText.Replace('user suffix', 'user suffix edited after install')
+        [IO.File]::WriteAllText($agentsPath, $edited, (New-Object Text.UTF8Encoding($false)))
+        $remove = Invoke-JoenessCli Remove $f
         Assert-Equal $remove.ExitCode 0 'Remove exits 0'
-        Assert-Equal $remove.Result.status 'removed' 'exact current install removes cleanly'
-        Assert-BytesEqual ([IO.File]::ReadAllBytes($agentsPath)) $original 'Remove restores exact original AGENTS bytes'
-        Assert-True (-not (Test-Path -LiteralPath $statePath)) 'Remove deletes ownership state'
-        Assert-True (-not (Test-Path -LiteralPath (Join-Path $f.Agents 'vendor\source-manifest.json'))) 'Remove deletes owned installed manifest'
+        Assert-Equal $remove.Result.status 'removed' 'Remove succeeds'
+        $expectedEditedPrefix = (New-Object Text.UTF8Encoding($false)).GetBytes("user prefix`r`nuser suffix edited after install")
+        Assert-BytesEqual ([IO.File]::ReadAllBytes($agentsPath)) $expectedEditedPrefix 'Remove preserves user prefix edits made after install'
+        Assert-True (-not (Test-Path -LiteralPath (Join-Path $f.Codex 'joewrks-harness-state.json'))) 'Remove deletes current ownership state'
 
-        $final = Invoke-Harness $CurrentScript Check $f
-        Assert-Equal $final.Result.status 'ready' 'post-Remove current release is ready for optional reinstall'
-        Assert-Equal $final.Result.changesRequired $true 'post-Remove Check advertises explicit Apply'
+        $final = Invoke-JoenessCli Check $f
+        Assert-Equal $final.Result.status 'ready' 'post-Remove Check is ready'
     } finally {
         Remove-TestRoot $f
     }
 }
 
-function Test-UnownedAndDriftFailClosed {
+function Test-UnownedMarkersFailClosed {
     $f = New-TestRoot
     try {
-        [IO.File]::WriteAllText((Join-Path $f.Codex 'AGENTS.md'), "$BeginMarker`nuser-owned content`n$EndMarker", (New-Object Text.UTF8Encoding($false)))
-        $before = [IO.File]::ReadAllBytes((Join-Path $f.Codex 'AGENTS.md'))
-        $check = Invoke-Harness $CurrentScript Check $f
-        Assert-True ($check.ExitCode -ne 0) 'unowned marker exits nonzero'
-        Assert-Equal $check.Result.status 'blocked' 'unowned marker blocks Check'
-        Assert-BytesEqual ([IO.File]::ReadAllBytes((Join-Path $f.Codex 'AGENTS.md')) ) $before 'blocked Check preserves unowned bytes'
+        $null = New-Item -ItemType Directory -Path $f.Codex
+        $agentsPath = Join-Path $f.Codex 'AGENTS.md'
+        [IO.File]::WriteAllText($agentsPath, "$BeginMarker`nuser-owned content`n$EndMarker", (New-Object Text.UTF8Encoding($false)))
+        $before = [IO.File]::ReadAllBytes($agentsPath)
+        foreach ($mode in @('Check', 'Apply', 'Remove')) {
+            $run = Invoke-JoenessCli $mode $f
+            Assert-True ($run.ExitCode -ne 0) "unowned-marker $mode exits nonzero"
+            Assert-Equal $run.Result.status 'blocked' "unowned-marker $mode is blocked"
+            Assert-BytesEqual ([IO.File]::ReadAllBytes($agentsPath)) $before "blocked $mode preserves bytes"
+        }
     } finally {
         Remove-TestRoot $f
     }
+}
 
+function Test-DriftAndStateTamperFailClosed {
     $f = New-TestRoot
     try {
-        $null = Write-OriginalAgents $f
-        Assert-Equal (Invoke-Harness $CurrentScript Apply $f).Result.status 'current' 'drift fixture installs current'
+        $null = New-Item -ItemType Directory -Path $f.Codex
         $agentsPath = Join-Path $f.Codex 'AGENTS.md'
+        [IO.File]::WriteAllText($agentsPath, 'user', (New-Object Text.UTF8Encoding($false)))
+        Assert-Equal (Invoke-JoenessCli Apply $f).Result.status 'current' 'drift fixture installs current'
         $text = [IO.File]::ReadAllText($agentsPath)
         [IO.File]::WriteAllText($agentsPath, $text.Replace('Do not optimize for agreement.', 'Do not optimize for automatic agreement.'), (New-Object Text.UTF8Encoding($false)))
-        $driftBytes = [IO.File]::ReadAllBytes($agentsPath)
-
+        $drift = [IO.File]::ReadAllBytes($agentsPath)
         foreach ($mode in @('Check', 'Remove')) {
-            $run = Invoke-Harness $CurrentScript $mode $f
-            Assert-True ($run.ExitCode -ne 0) "drifted $mode exits nonzero"
-            Assert-Equal $run.Result.status 'blocked' "drifted owned block blocks $mode"
-            Assert-BytesEqual ([IO.File]::ReadAllBytes($agentsPath)) $driftBytes "drifted $mode performs no repair"
+            $run = Invoke-JoenessCli $mode $f
+            Assert-Equal $run.Result.status 'blocked' "managed drift blocks $mode"
+            Assert-BytesEqual ([IO.File]::ReadAllBytes($agentsPath)) $drift "managed drift $mode does not mutate"
+        }
+    } finally {
+        Remove-TestRoot $f
+    }
+
+    $f = New-TestRoot
+    try {
+        $null = New-Item -ItemType Directory -Path $f.Codex
+        [IO.File]::WriteAllText((Join-Path $f.Codex 'AGENTS.md'), 'user', (New-Object Text.UTF8Encoding($false)))
+        Assert-Equal (Invoke-JoenessCli Apply $f).Result.status 'current' 'state fixture installs current'
+        $statePath = Join-Path $f.Codex 'joewrks-harness-state.json'
+        $state = [IO.File]::ReadAllText($statePath) | ConvertFrom-Json
+        $state.releaseVersion = 'forged'
+        [IO.File]::WriteAllText($statePath, (($state | ConvertTo-Json -Compress) + "`n"), (New-Object Text.UTF8Encoding($false)))
+        $agentsBefore = [IO.File]::ReadAllBytes((Join-Path $f.Codex 'AGENTS.md'))
+        $stateBefore = [IO.File]::ReadAllBytes($statePath)
+        foreach ($mode in @('Check', 'Remove')) {
+            $run = Invoke-JoenessCli $mode $f
+            Assert-Equal $run.Result.status 'blocked' "tampered state blocks $mode"
+            Assert-BytesEqual ([IO.File]::ReadAllBytes((Join-Path $f.Codex 'AGENTS.md'))) $agentsBefore "tampered state $mode preserves AGENTS"
+            Assert-BytesEqual ([IO.File]::ReadAllBytes($statePath)) $stateBefore "tampered state $mode preserves state"
         }
     } finally {
         Remove-TestRoot $f
@@ -186,62 +260,30 @@ function Test-UnownedAndDriftFailClosed {
 function Test-ApplyRollback {
     $f = New-TestRoot
     try {
-        $original = Write-OriginalAgents $f
-        $script = Join-Path $RepoRoot 'scripts\sync-harness.ps1'
-        . $script
-        $result = Invoke-JoewrksHarnessSync -Apply -CodexHome $f.Codex -AgentsHome $f.Agents -BackupRoot $f.Backup -AfterReplace {
-            param($operation)
-            throw "injected failure after $($operation.TargetPath)"
+        $null = New-Item -ItemType Directory -Path $f.Codex
+        $agentsPath = Join-Path $f.Codex 'AGENTS.md'
+        $original = (New-Object Text.UTF8Encoding($false)).GetBytes('rollback-user')
+        [IO.File]::WriteAllBytes($agentsPath, $original)
+
+        . (Join-Path $RepoRoot 'scripts\sync-harness.ps1')
+        $result = Invoke-JoenessHarnessSync -Apply -CodexHome $f.Codex -AfterWrite {
+            param($Stage)
+            if ($Stage -eq 'agents') { throw 'injected failure after AGENTS write' }
         }
-        Assert-Equal $result.status 'failed' 'injected Apply failure rolls back completely'
-        Assert-Equal $result.rollback.status 'complete' 'rollback is complete'
-        Assert-BytesEqual ([IO.File]::ReadAllBytes((Join-Path $f.Codex 'AGENTS.md'))) $original 'rollback restores original AGENTS bytes'
+        Assert-Equal $result.status 'failed' 'injected Apply failure reports failed'
+        Assert-Equal $result.rollback.status 'complete' 'injected Apply failure rolls back completely'
+        Assert-BytesEqual ([IO.File]::ReadAllBytes($agentsPath)) $original 'rollback restores original AGENTS bytes'
         Assert-True (-not (Test-Path -LiteralPath (Join-Path $f.Codex 'joewrks-harness-state.json'))) 'rollback leaves no state'
-        Assert-True (-not (Test-Path -LiteralPath (Join-Path $f.Agents 'vendor\source-manifest.json'))) 'rollback leaves no owned manifest'
     } finally {
         Remove-TestRoot $f
     }
 }
 
-function Test-ExactControlLegacyRemoval {
-    $f = New-TestRoot
-    try {
-        $original = Write-OriginalAgents $f
-        $controlRoot = Join-Path $f.Root 'control-source'
-        $controlZip = Join-Path $f.Root 'control.zip'
-        & git -C $RepoRoot archive --format=zip --output=$controlZip $ControlCommit
-        if ($LASTEXITCODE -ne 0) { throw 'Unable to materialize exact historical Control commit' }
-        Expand-Archive -LiteralPath $controlZip -DestinationPath $controlRoot
-        $controlScript = Join-Path $controlRoot 'JOENESS.ps1'
-        Assert-True (Test-Path -LiteralPath $controlScript -PathType Leaf) 'historical Control entrypoint materialized'
-
-        $controlApply = Invoke-Harness $controlScript Apply $f
-        Assert-Equal $controlApply.ExitCode 0 'historical Control fixture installs'
-        Assert-Equal $controlApply.Result.status 'current' 'historical Control reaches current under its own runtime'
-
-        $legacyCheck = Invoke-Harness $CurrentScript Check $f
-        Assert-Equal $legacyCheck.ExitCode 0 'current Check recognizes exact Control'
-        Assert-Equal $legacyCheck.Result.status 'legacy' 'exact Control is legacy, not auto-migrated'
-        Assert-Equal $legacyCheck.Result.changesRequired $false 'legacy Check does not direct Apply over Control'
-
-        $legacyApply = Invoke-Harness $CurrentScript Apply $f
-        Assert-Equal $legacyApply.Result.status 'legacy' 'current Apply refuses implicit legacy migration'
-
-        $remove = Invoke-Harness $CurrentScript Remove $f
-        Assert-Equal $remove.ExitCode 0 'current Remove handles exact Control'
-        Assert-Equal $remove.Result.status 'removed' 'exact Control removal succeeds'
-        Assert-BytesEqual ([IO.File]::ReadAllBytes((Join-Path $f.Codex 'AGENTS.md'))) $original 'legacy Remove restores original user AGENTS bytes'
-
-        $post = Invoke-Harness $CurrentScript Check $f
-        Assert-Equal $post.Result.status 'ready' 'after legacy removal v0.2 is ready, not silently installed'
-        Assert-Equal $post.Result.changesRequired $true 'after legacy removal explicit Apply is required'
-    } finally {
-        Remove-TestRoot $f
-    }
-}
-
-Test-CurrentLifecycle
-Test-UnownedAndDriftFailClosed
+Test-MinimalCurrentTree
+Test-HistoryStillOwnsOldFiles
+Test-ManifestAndCoreIdentity
+Test-CurrentLifecycleAndUserBytes
+Test-UnownedMarkersFailClosed
+Test-DriftAndStateTamperFailClosed
 Test-ApplyRollback
-Test-ExactControlLegacyRemoval
-Write-Host 'PASS Astra Judgment sync contract'
+Write-Host 'PASS JOENESS current-only release contract'
