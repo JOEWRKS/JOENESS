@@ -755,7 +755,7 @@ function Invoke-JoewrksHarnessSync {
             $stateRead = Read-HarnessUtf8 $statePath
             $stateSnapshot = [pscustomobject] @{ Exists = $true; Hash = Get-HarnessSha256 $stateRead.Bytes; Bytes = $stateRead.Bytes }
             $state = $stateRead.Text | ConvertFrom-Json
-            if ($state.schemaVersion -isnot [int] -or $state.schemaVersion -notin @(1, 2)) { throw 'Unsupported state schemaVersion' }
+            if (($state.schemaVersion -isnot [int] -and $state.schemaVersion -isnot [long]) -or $state.schemaVersion -notin @(1, 2)) { throw 'Unsupported state schemaVersion' }
             if ($state.schemaVersion -eq 1) {
                 Assert-HarnessObjectShape $state @('schemaVersion', 'sourceIdentities', 'managedBlocks', 'wholeFileTargets') 'State'
             } else {
