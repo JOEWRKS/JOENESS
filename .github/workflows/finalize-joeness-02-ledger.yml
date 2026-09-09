@@ -1,0 +1,50 @@
+name: Finalize JOENESS 0.2 release ledger
+
+'on':
+  push:
+    branches:
+      - codex/joeness-v0.2-astra-judgment
+
+permissions:
+  contents: write
+
+jobs:
+  finalize:
+    runs-on: windows-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+
+      - name: Record verified release state
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $path = 'TASKS.md'
+          $text = [IO.File]::ReadAllText($path)
+          $old = '- 상태: `0.2-astra-judgment / IMPLEMENTATION_COMPLETE / RELEASE_VERIFICATION_PENDING`'
+          $new = '- 상태: `0.2-astra-judgment / IMPLEMENTATION_COMPLETE / RELEASE_VERIFICATION_PASS`'
+          $count = ([regex]::Matches($text, [regex]::Escape($old))).Count
+          if ($count -eq 0) {
+            if ($text.Contains($new)) {
+              Write-Host 'Release ledger already finalized.'
+              exit 0
+            }
+            throw 'Expected JOENESS 0.2 release-status anchor not found.'
+          }
+          if ($count -ne 1) { throw "Expected one release-status anchor, found $count" }
+          $updated = $text.Replace($old, $new)
+          [IO.File]::WriteAllText($path, $updated, (New-Object Text.UTF8Encoding($false)))
+          & git diff --check
+          if ($LASTEXITCODE -ne 0) { throw 'git diff --check failed' }
+          $diff = & git diff -- $path
+          Write-Host ($diff -join "`n")
+          if (-not $diff) { throw 'Expected TASKS.md release-status diff' }
+          git config user.name 'JOEWRKS'
+          git config user.email 'actions@users.noreply.github.com'
+          git add -- $path
+          git commit -m 'docs: record JOENESS 0.2 release verification pass'
+          if ($LASTEXITCODE -ne 0) { throw 'release-ledger commit failed' }
+          git push origin HEAD:codex/joeness-v0.2-astra-judgment
+          if ($LASTEXITCODE -ne 0) { throw 'release-ledger push failed' }
