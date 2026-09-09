@@ -18,41 +18,38 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
 
-      - name: WinPS retained prefix through Remove rollback
-        id: winps_prefix
-        continue-on-error: true
-        shell: powershell
-        run: |
-          $tests = @(
-            'Test-ModeAndExitContract',
-            'Test-AstraLegacyRemovalFailsClosed',
-            'Test-ForgedManagedBlockFailsClosed',
-            'Test-ExactControlRemovePreflightBlockers',
-            'Test-ExactControlNoFinalNewlineRemoval',
-            'Test-UncertainHistoricalStateFailsClosed',
-            'Test-RemoveRollback'
-          )
-          .\tests\sync-harness.tests.ps1 -Only $tests
-
-      - name: pwsh retained prefix through Remove rollback
-        id: pwsh_prefix
-        continue-on-error: true
+      - name: Canonical clone retained prefix
         shell: pwsh
         run: |
-          $tests = @(
-            'Test-ModeAndExitContract',
-            'Test-AstraLegacyRemovalFailsClosed',
-            'Test-ForgedManagedBlockFailsClosed',
-            'Test-ExactControlRemovePreflightBlockers',
-            'Test-ExactControlNoFinalNewlineRemoval',
-            'Test-UncertainHistoricalStateFailsClosed',
-            'Test-RemoveRollback'
-          )
-          .\tests\sync-harness.tests.ps1 -Only $tests
-
-      - name: Report prefix diagnostic
-        if: always()
-        shell: pwsh
-        run: |
-          Write-Host "winps_prefix=${{ steps.winps_prefix.outcome }}"
-          Write-Host "pwsh_prefix=${{ steps.pwsh_prefix.outcome }}"
+          $ErrorActionPreference = 'Stop'
+          $root = "C:\joeness-retained-diag-${{ github.run_id }}"
+          $repo = Join-Path $root 'repo'
+          $tmp = Join-Path $root 'tmp'
+          if (Test-Path -LiteralPath $root) { Remove-Item -LiteralPath $root -Recurse -Force }
+          New-Item -ItemType Directory -Path $root | Out-Null
+          New-Item -ItemType Directory -Path $tmp | Out-Null
+          try {
+            & git clone --no-local --no-checkout -- $env:GITHUB_WORKSPACE $repo
+            if ($LASTEXITCODE -ne 0) { throw 'canonical diagnostic clone failed' }
+            & git -C $repo checkout --detach --force $env:GITHUB_SHA
+            if ($LASTEXITCODE -ne 0) { throw 'canonical diagnostic checkout failed' }
+            $env:TEMP = $tmp
+            $env:TMP = $tmp
+            Push-Location $repo
+            try {
+              $tests = @(
+                'Test-ModeAndExitContract',
+                'Test-AstraLegacyRemovalFailsClosed',
+                'Test-ForgedManagedBlockFailsClosed',
+                'Test-ExactControlRemovePreflightBlockers',
+                'Test-ExactControlNoFinalNewlineRemoval',
+                'Test-UncertainHistoricalStateFailsClosed',
+                'Test-RemoveRollback'
+              )
+              & .\tests\sync-harness.tests.ps1 -Only $tests
+            } finally {
+              Pop-Location
+            }
+          } finally {
+            if (Test-Path -LiteralPath $root) { Remove-Item -LiteralPath $root -Recurse -Force }
+          }
