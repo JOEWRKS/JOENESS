@@ -1,0 +1,66 @@
+name: Fix cleanup atomic replace
+
+'on':
+  push:
+    branches:
+      - codex/joeness-current-main-cleanup
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    runs-on: windows-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+      - name: Fix Windows PowerShell atomic replacement and remove diagnostics
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $path = 'scripts/sync-harness.ps1'
+          $text = [IO.File]::ReadAllText($path)
+          $old = @'
+              $temp = "$Path.joeness.$([guid]::NewGuid().ToString('N')).tmp"
+              try {
+                  [IO.File]::WriteAllBytes($temp, $Bytes)
+                  if (Test-Path -LiteralPath $Path -PathType Leaf) {
+                      [IO.File]::Replace($temp, $Path, $null)
+                  } else {
+                      [IO.File]::Move($temp, $Path)
+                  }
+              } finally {
+                  if (Test-Path -LiteralPath $temp) { Remove-Item -LiteralPath $temp -Force }
+              }
+          '@.Trim()
+          $new = @'
+              $token = [guid]::NewGuid().ToString('N')
+              $temp = "$Path.joeness.$token.tmp"
+              $backup = "$Path.joeness.$token.bak"
+              try {
+                  [IO.File]::WriteAllBytes($temp, $Bytes)
+                  if (Test-Path -LiteralPath $Path -PathType Leaf) {
+                      [IO.File]::Replace($temp, $Path, $backup, $true)
+                      if (Test-Path -LiteralPath $backup) { Remove-Item -LiteralPath $backup -Force }
+                  } else {
+                      [IO.File]::Move($temp, $Path)
+                  }
+              } finally {
+                  if (Test-Path -LiteralPath $temp) { Remove-Item -LiteralPath $temp -Force }
+                  if (Test-Path -LiteralPath $backup) { Remove-Item -LiteralPath $backup -Force }
+              }
+          '@.Trim()
+          if (-not $text.Contains($old)) { throw 'Expected atomic replacement anchor not found.' }
+          [IO.File]::WriteAllText($path, $text.Replace($old, $new), (New-Object Text.UTF8Encoding($false)))
+          git rm -- .github/workflows/diagnose-cleanup-installer.yml .github/workflows/fix-cleanup-atomic-replace.yml
+          git config user.name 'JOEWRKS'
+          git config user.email 'actions@users.noreply.github.com'
+          git add -- scripts/sync-harness.ps1
+          git diff --check --cached
+          if ($LASTEXITCODE -ne 0) { throw 'git diff --check failed' }
+          git commit -m 'fix: replace managed files atomically on Windows PowerShell'
+          if ($LASTEXITCODE -ne 0) { throw 'fix commit failed' }
+          git push origin HEAD:codex/joeness-current-main-cleanup
+          if ($LASTEXITCODE -ne 0) { throw 'fix push failed' }
