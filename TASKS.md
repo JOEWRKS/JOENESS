@@ -2,7 +2,7 @@
 
 ## JOENESS 0.2 Astra Judgment
 
-- 상태: `0.2-astra-judgment / IMPLEMENTATION_COMPLETE / RELEASE_VERIFICATION_PENDING`
+- 상태: `0.2-astra-judgment / IMPLEMENTATION_COMPLETE / RELEASE_VERIFICATION_PASS`
 - Target: `gpt-6-astra / xhigh`.
 - Active runtime: `astra-judgment-core.md`의 **Independent Judgment** 하나만 관리 block으로 설치한다.
 - Active public skills: 0; managed whole-file runtime payload: 0; default vendors: 0; plugin routing: none.
