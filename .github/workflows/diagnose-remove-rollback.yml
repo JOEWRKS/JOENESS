@@ -1,4 +1,4 @@
-name: Diagnose retained remove rollback
+name: Patch Astra schema runtime compatibility
 
 'on':
   push:
@@ -6,69 +6,43 @@ name: Diagnose retained remove rollback
       - codex/joeness-v0.2-astra-judgment
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
-  diagnose:
+  patch:
     runs-on: windows-latest
-    timeout-minutes: 15
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
-          persist-credentials: false
 
-      - name: Canonical clone direct Control classification
+      - name: Apply exact cross-runtime schema patch
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
-          $root = "C:\joeness-retained-diag-${{ github.run_id }}"
-          $repo = Join-Path $root 'repo'
-          $tmp = Join-Path $root 'tmp'
-          if (Test-Path -LiteralPath $root) { Remove-Item -LiteralPath $root -Recurse -Force }
-          New-Item -ItemType Directory -Path $root | Out-Null
-          New-Item -ItemType Directory -Path $tmp | Out-Null
-          try {
-            & git clone --no-local --no-checkout -- $env:GITHUB_WORKSPACE $repo
-            if ($LASTEXITCODE -ne 0) { throw 'canonical diagnostic clone failed' }
-            & git -C $repo checkout --detach --force $env:GITHUB_SHA
-            if ($LASTEXITCODE -ne 0) { throw 'canonical diagnostic checkout failed' }
-            $env:TEMP = $tmp
-            $env:TMP = $tmp
-
-            $fixture = Join-Path $tmp ('probe-' + [guid]::NewGuid().ToString('N'))
-            $codex = Join-Path $fixture 'codex'
-            $agents = Join-Path $fixture 'agents'
-            $backups = Join-Path $fixture 'backups'
-            $controlZip = Join-Path $fixture 'control.zip'
-            $controlRoot = Join-Path $fixture 'control'
-            New-Item -ItemType Directory -Path $fixture | Out-Null
-
-            & git -C $repo archive --format=zip --output=$controlZip 80c79e9f4be91d730b1b3cdc62d7bf51508895e8 scripts/sync-harness.ps1 evals/candidates skills vendor
-            if ($LASTEXITCODE -ne 0) { throw 'control archive failed' }
-            Expand-Archive -LiteralPath $controlZip -DestinationPath $controlRoot
-            $controlScript = Join-Path $controlRoot 'scripts\sync-harness.ps1'
-            $currentScript = Join-Path $repo 'scripts\sync-harness.ps1'
-
-            $controlOut = @(& powershell.exe -NoProfile -ExecutionPolicy Bypass -File $controlScript -Apply -CodexHome $codex -AgentsHome $agents -BackupRoot $backups 2>&1)
-            Write-Host ('CONTROL=' + (($controlOut | ForEach-Object { [string]$_ }) -join ' | '))
-            Write-Host "CONTROL_EXIT=$LASTEXITCODE"
-
-            $checkOut = @(& powershell.exe -NoProfile -ExecutionPolicy Bypass -File $currentScript -Check -CodexHome $codex -AgentsHome $agents -BackupRoot $backups 2>&1)
-            Write-Host ('CURRENT_CHECK=' + (($checkOut | ForEach-Object { [string]$_ }) -join ' | '))
-            Write-Host "CURRENT_CHECK_EXIT=$LASTEXITCODE"
-
-            . $currentScript
-            $result = Invoke-JoewrksHarnessSync -Remove -CodexHome $codex -AgentsHome $agents -BackupRoot $backups -AfterReplace { param($operation) throw 'mid-remove failure' }
-            Write-Host ('CURRENT_DIRECT_REMOVE=' + ($result | ConvertTo-Json -Compress -Depth 20))
-
-            $manifestPath = Join-Path $repo 'vendor\source-manifest.json'
-            $compatCorePath = Join-Path $repo 'evals\candidates\interaction-safety-core-v8.md'
-            Write-Host "REPO_LEN=$($repo.Length)"
-            Write-Host "TEMP_LEN=$($tmp.Length)"
-            Write-Host "MANIFEST_HASH=$((Get-FileHash -LiteralPath $manifestPath -Algorithm SHA256).Hash.ToLowerInvariant())"
-            Write-Host "COMPAT_CORE_HASH=$((Get-FileHash -LiteralPath $compatCorePath -Algorithm SHA256).Hash.ToLowerInvariant())"
-            Write-Host "AUTOCRLF=$(& git -C $repo config --get core.autocrlf)"
-          } finally {
-            if (Test-Path -LiteralPath $root) { Remove-Item -LiteralPath $root -Recurse -Force }
+          $path = 'scripts/sync-harness.ps1'
+          $text = [IO.File]::ReadAllText($path)
+          $old = "if (`$state.schemaVersion -isnot [int] -or `$state.schemaVersion -notin @(1, 2)) { throw 'Unsupported state schemaVersion' }"
+          $new = "if ((`$state.schemaVersion -isnot [int] -and `$state.schemaVersion -isnot [long]) -or `$state.schemaVersion -notin @(1, 2)) { throw 'Unsupported state schemaVersion' }"
+          $count = ([regex]::Matches($text, [regex]::Escape($old))).Count
+          if ($count -eq 0) {
+            Write-Host 'Exact schema guard is already patched; no write required.'
+            exit 0
           }
+          if ($count -ne 1) { throw "Expected exactly one schema guard, found $count" }
+          $updated = $text.Replace($old, $new)
+          [IO.File]::WriteAllText($path, $updated, (New-Object Text.UTF8Encoding($false)))
+          & git diff --check
+          if ($LASTEXITCODE -ne 0) { throw 'git diff --check failed after patch' }
+          $diff = & git diff -- $path
+          Write-Host ($diff -join "`n")
+          if (-not $diff) { throw 'Expected one production diff after schema patch' }
+
+          git config user.name 'JOEWRKS'
+          git config user.email 'actions@users.noreply.github.com'
+          git add -- $path
+          git commit -m 'fix: accept JSON integer schema across PowerShell runtimes'
+          if ($LASTEXITCODE -ne 0) { throw 'patch commit failed' }
+          git push origin HEAD:codex/joeness-v0.2-astra-judgment
+          if ($LASTEXITCODE -ne 0) { throw 'patch push failed' }
