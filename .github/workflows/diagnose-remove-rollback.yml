@@ -11,49 +11,48 @@ permissions:
 jobs:
   diagnose:
     runs-on: windows-latest
-    timeout-minutes: 20
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
           persist-credentials: false
 
-      - name: WinPS baseline Remove rollback
-        shell: powershell
-        run: .\tests\sync-harness.tests.ps1 -Only Test-RemoveRollback
-
-      - name: pwsh Remove rollback
-        id: pwsh_only
-        continue-on-error: true
-        shell: pwsh
-        run: .\tests\sync-harness.tests.ps1 -Only Test-RemoveRollback
-
-      - name: WinPS Remove rollback with isolated TEMP
-        id: winps_temp
+      - name: WinPS retained prefix through Remove rollback
+        id: winps_prefix
         continue-on-error: true
         shell: powershell
         run: |
-          $isolated = Join-Path $env:RUNNER_TEMP 'joeness-winps-temp'
-          New-Item -ItemType Directory -Path $isolated -Force | Out-Null
-          $env:TEMP = $isolated
-          $env:TMP = $isolated
-          .\tests\sync-harness.tests.ps1 -Only Test-RemoveRollback
+          $tests = @(
+            'Test-ModeAndExitContract',
+            'Test-AstraLegacyRemovalFailsClosed',
+            'Test-ForgedManagedBlockFailsClosed',
+            'Test-ExactControlRemovePreflightBlockers',
+            'Test-ExactControlNoFinalNewlineRemoval',
+            'Test-UncertainHistoricalStateFailsClosed',
+            'Test-RemoveRollback'
+          )
+          .\tests\sync-harness.tests.ps1 -Only $tests
 
-      - name: pwsh Remove rollback with isolated TEMP
-        id: pwsh_temp
+      - name: pwsh retained prefix through Remove rollback
+        id: pwsh_prefix
         continue-on-error: true
         shell: pwsh
         run: |
-          $isolated = Join-Path $env:RUNNER_TEMP 'joeness-pwsh-temp'
-          New-Item -ItemType Directory -Path $isolated -Force | Out-Null
-          $env:TEMP = $isolated
-          $env:TMP = $isolated
-          .\tests\sync-harness.tests.ps1 -Only Test-RemoveRollback
+          $tests = @(
+            'Test-ModeAndExitContract',
+            'Test-AstraLegacyRemovalFailsClosed',
+            'Test-ForgedManagedBlockFailsClosed',
+            'Test-ExactControlRemovePreflightBlockers',
+            'Test-ExactControlNoFinalNewlineRemoval',
+            'Test-UncertainHistoricalStateFailsClosed',
+            'Test-RemoveRollback'
+          )
+          .\tests\sync-harness.tests.ps1 -Only $tests
 
-      - name: Report cross-runtime diagnostic
+      - name: Report prefix diagnostic
         if: always()
         shell: pwsh
         run: |
-          Write-Host "pwsh_only=${{ steps.pwsh_only.outcome }}"
-          Write-Host "winps_temp=${{ steps.winps_temp.outcome }}"
-          Write-Host "pwsh_temp=${{ steps.pwsh_temp.outcome }}"
+          Write-Host "winps_prefix=${{ steps.winps_prefix.outcome }}"
+          Write-Host "pwsh_prefix=${{ steps.pwsh_prefix.outcome }}"
