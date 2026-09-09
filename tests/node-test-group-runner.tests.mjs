@@ -63,11 +63,13 @@ test("taxonomy rejects unclassified and duplicate test ownership", () => {
   );
 });
 
-test("historical local registry owns exactly the mixed current historical cases", () => {
+test("historical local registry owns exact pass/fail expectations", () => {
   assert.deepEqual(HISTORICAL_LOCAL_CASES, [
     {
       file: "tests/codex-app-server-collector.tests.mjs",
       name: "paired v1 artifacts and blocked controls remain valid after recovery",
+      expectedStatus: "fail",
+      expectedOutputContains: "reviewed pass/fail case lacks complete evidence",
     },
     {
       file: "tests/design-vendor-integrity.tests.mjs",
@@ -133,7 +135,7 @@ test("historical integrity plans the owned group and exact mixed cases without e
   }
 });
 
-test("historical local TAP validation fails closed on missing renamed skip todo or duplicate results", () => {
+test("historical local TAP validation fails closed on missing renamed skip todo duplicate status or reason drift", () => {
   const expectedCases = [
     { file: "tests/example.tests.mjs", name: "expected historical case" },
   ];
@@ -155,25 +157,56 @@ test("historical local TAP validation fails closed on missing renamed skip todo 
       condition,
     );
   }
+
+  assert.throws(
+    () => validateHistoricalLocalTap({
+      file: "tests/example.tests.mjs",
+      expectedCases: [{
+        file: "tests/example.tests.mjs",
+        name: "expected historical failure",
+        expectedStatus: "fail",
+        expectedOutputContains: "specific historical validator rejection",
+      }],
+      tap: "TAP version 13\nnot ok 1 - expected historical failure\n  error: different failure\n1..1\n",
+    }),
+    /expected output marker/iu,
+  );
+  assert.throws(
+    () => validateHistoricalLocalTap({
+      file: "tests/example.tests.mjs",
+      expectedCases: [{
+        file: "tests/example.tests.mjs",
+        name: "expected historical failure",
+        expectedStatus: "fail",
+        expectedOutputContains: "specific historical validator rejection",
+      }],
+      tap: "TAP version 13\nok 1 - expected historical failure\n1..1\n",
+    }),
+    /expected fail.*got pass/iu,
+  );
 });
 
-test("historical local TAP validation accepts every expected identity once as pass", () => {
+test("historical local TAP validation accepts exact expected pass and exact expected failure", () => {
   assert.equal(validateHistoricalLocalTap({
     file: "tests/example.tests.mjs",
     expectedCases: [
       { file: "tests/example.tests.mjs", name: "first historical case" },
-      { file: "tests/example.tests.mjs", name: "second historical case" },
+      {
+        file: "tests/example.tests.mjs",
+        name: "known historical rejection",
+        expectedStatus: "fail",
+        expectedOutputContains: "specific historical validator rejection",
+      },
     ],
     tap: [
       "TAP version 13",
       "ok 1 - first historical case",
-      "ok 2 - second historical case",
+      "not ok 2 - known historical rejection",
+      "  error: specific historical validator rejection",
       "1..2",
       "# tests 2",
-      "# pass 2",
-      "# fail 0",
-      "# skipped 0",
-      "# todo 0",
+      "# pass 1",
+      "# fail 1",
       "",
     ].join("\n"),
   }), 2);

@@ -51,6 +51,8 @@ export const HISTORICAL_LOCAL_CASES = Object.freeze([
   Object.freeze({
     file: "tests/codex-app-server-collector.tests.mjs",
     name: "paired v1 artifacts and blocked controls remain valid after recovery",
+    expectedStatus: "fail",
+    expectedOutputContains: "reviewed pass/fail case lacks complete evidence",
   }),
   Object.freeze({
     file: "tests/design-vendor-integrity.tests.mjs",
@@ -93,6 +95,23 @@ function historicalLocalSelection({ groups, historicalLocalCases }) {
       entry.name.length === 0
     ) {
       throw new Error("invalid historical local case");
+    }
+    const expectedStatus = entry.expectedStatus ?? "pass";
+    if (expectedStatus !== "pass" && expectedStatus !== "fail") {
+      throw new Error(`invalid historical local expected status: ${entry.file} :: ${entry.name}`);
+    }
+    if (
+      expectedStatus === "fail" &&
+      (typeof entry.expectedOutputContains !== "string" ||
+        entry.expectedOutputContains.length === 0)
+    ) {
+      throw new Error(`expected historical failure lacks output marker: ${entry.file} :: ${entry.name}`);
+    }
+    if (
+      expectedStatus === "pass" &&
+      entry.expectedOutputContains !== undefined
+    ) {
+      throw new Error(`passing historical case cannot declare failure output: ${entry.file} :: ${entry.name}`);
     }
     if (!currentReleaseFiles.has(entry.file)) {
       throw new Error(`historical local case file is not current-release: ${entry.file}`);
@@ -137,15 +156,29 @@ export function validateHistoricalLocalTap({ file, expectedCases, tap }) {
   if (typeof file !== "string" || !Array.isArray(expectedCases) || typeof tap !== "string") {
     throw new Error("historical local result validation requires file, cases, and TAP output");
   }
-  const expectedNames = new Set();
+  const expectedByName = new Map();
   for (const expectedCase of expectedCases) {
     if (expectedCase?.file !== file || typeof expectedCase.name !== "string") {
       throw new Error(`historical local result has invalid expected identity for ${file}`);
     }
-    if (expectedNames.has(expectedCase.name)) {
+    if (expectedByName.has(expectedCase.name)) {
       throw new Error(`historical local result has duplicate expected identity for ${file}`);
     }
-    expectedNames.add(expectedCase.name);
+    const expectedStatus = expectedCase.expectedStatus ?? "pass";
+    if (expectedStatus !== "pass" && expectedStatus !== "fail") {
+      throw new Error(`historical local result has invalid expected status for ${file}`);
+    }
+    if (
+      expectedStatus === "fail" &&
+      (typeof expectedCase.expectedOutputContains !== "string" ||
+        expectedCase.expectedOutputContains.length === 0)
+    ) {
+      throw new Error(`historical local expected failure lacks output marker for ${file}`);
+    }
+    expectedByName.set(expectedCase.name, {
+      expectedStatus,
+      expectedOutputContains: expectedCase.expectedOutputContains,
+    });
   }
 
   const results = [];
@@ -159,24 +192,39 @@ export function validateHistoricalLocalTap({ file, expectedCases, tap }) {
 
   const problems = [];
   for (const result of results) {
-    if (!expectedNames.has(result.name)) {
+    if (!expectedByName.has(result.name)) {
       problems.push(`unexpected ${result.status}: ${result.name}`);
     }
   }
-  for (const name of expectedNames) {
+  for (const [name, expectation] of expectedByName) {
     const matches = results.filter((result) => result.name === name);
     if (matches.length === 0) {
       problems.push(`missing: ${name}`);
-    } else if (matches.length !== 1) {
+      continue;
+    }
+    if (matches.length !== 1) {
       problems.push(`duplicate (${matches.length}): ${name}`);
-    } else if (matches[0].status !== "pass") {
-      problems.push(`${matches[0].status}: ${name}`);
+      continue;
+    }
+    const actualStatus = matches[0].status;
+    if (actualStatus !== expectation.expectedStatus) {
+      problems.push(`expected ${expectation.expectedStatus} but got ${actualStatus}: ${name}`);
+      continue;
+    }
+    if (
+      expectation.expectedStatus === "fail" &&
+      !tap.includes(expectation.expectedOutputContains)
+    ) {
+      problems.push(`expected output marker missing: ${name}`);
+    }
+    if (actualStatus === "skip" || actualStatus === "todo") {
+      problems.push(`${actualStatus}: ${name}`);
     }
   }
   if (problems.length > 0) {
     throw new Error(`historical local result invalid for ${file}: ${problems.join("; ")}`);
   }
-  return expectedNames.size;
+  return expectedByName.size;
 }
 
 export function nodeTestArguments(
@@ -317,6 +365,7 @@ async function main() {
         process.stderr.write(`${error.message}\n`);
         return 1;
       }
+      continue;
     }
     if (result.status !== 0) {
       return result.status ?? 1;

@@ -1,11 +1,23 @@
 # JOENESS 검증 부채 로드맵
 
-## Astra-native terminal closure
+## JOENESS 0.2 Astra Judgment
 
-- 상태: `ASTRA_NATIVE_CLOSURE_READY_FOR_PERSONAL_TRANSITION`
-- Target: `gpt-6-astra / xhigh`; active runtime overlay, Common Core, managed runtime files, public skills, default vendors, plugin routing: none
-- Clean Astra는 설치나 Apply가 필요하지 않다. Exact GPT-5.6 Control만 명시적 fail-closed Remove fixture 경로를 지원한다.
-- Astra synthetic evaluation은 종료됐고 새 evaluation queue를 만들지 않는다. Personal installation은 이번 repository closure에서 변경하지 않는다.
+- 상태: `0.2-astra-judgment / IMPLEMENTATION_COMPLETE / RELEASE_VERIFICATION_PASS`
+- Target: `gpt-6-astra / xhigh`.
+- Active runtime: `astra-judgment-core.md`의 **Independent Judgment** 하나만 관리 block으로 설치한다.
+- Active public skills: 0; managed whole-file runtime payload: 0; default vendors: 0; plugin routing: none.
+- 목적: 사용자 질문·반론·우려·취향을 자동 정정으로 취급하지 않고 evidence로 재평가하되, 사용자가 결정권을 가진 범위의 명시적 결정은 그대로 존중한다.
+- Installer contract: clean `Check -> ready`; explicit `Apply -> current`; exact current `Check -> current`; explicit `Remove -> removed`; drift/ownership ambiguity는 fail-closed.
+- Exact GPT-5.6 Control은 계속 `legacy`로 탐지하고 자동 migration하지 않으며, pinned identity에 대해서만 explicit Remove를 지원한다.
+- Behavioral A/B plan: `evals/experiments/joeness-astra-independent-judgment-ab-plan-v1.json` — `NOT-RUN`. Repository lifecycle PASS와 behavioral superiority를 같은 주장으로 취급하지 않는다.
+- 다음 release gate: current-release + historical-integrity + Astra judgment lifecycle + retained fail-closed/legacy tests + project/P0/vendor + diff check 전체 PASS 후 release 상태를 완료로 승격한다.
+
+## 0.1 Astra-native zero-runtime closure — historical
+
+- `0.1-astra-native`의 zero-runtime 종료는 당시 Astra rebaseline/stress evidence 기준으로 유효한 결정이었다.
+- 당시 Target: `gpt-6-astra / xhigh`; active runtime overlay, Common Core, managed runtime files, public skills, default vendors, plugin routing: none.
+- Clean Astra는 설치나 Apply가 필요하지 않았고, exact GPT-5.6 Control만 explicit fail-closed Remove 경로를 지원했다.
+- 0.2는 0.1의 broad Core를 되살리는 변경이 아니라, 이후 별도로 관찰된 Independent Judgment failure에 대한 최소 재개다.
 
 ## 보존된 이전 원장
 

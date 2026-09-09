@@ -213,7 +213,9 @@ function Assert-HarnessObjectShape {
 function Get-HarnessManifestSelections {
     param($Manifest, [string] $Root)
     $selected = [Collections.Generic.List[object]]::new()
-    foreach ($skillProperty in @($Manifest.activeSkills.PSObject.Properties)) {
+    $activeSkillsProperty = $Manifest.PSObject.Properties['activeSkills']
+    if ($null -eq $activeSkillsProperty) { return @() }
+    foreach ($skillProperty in @($activeSkillsProperty.Value.PSObject.Properties)) {
         $skill = $skillProperty.Value
         foreach ($file in @($skill.files)) { $null = $selected.Add($file) }
         foreach ($sourceName in @($skill.sourceDependencies)) {
@@ -609,6 +611,7 @@ function Invoke-JoewrksHarnessSync {
     $controlV2WholeFileCount = $null
     $controlV2SelectionHash = $null
     $isExactControlInstall = $false
+    $isCurrentV2 = $false
     $astraNative = $false
     $sourceCore = $null
     $blockHash = $null
@@ -619,7 +622,7 @@ function Invoke-JoewrksHarnessSync {
     $bundleSelection = 'personal-pilot'
     $warnings = @()
     if ($IncludeDesignFrontend) {
-        $warnings += 'DEPRECATED: -IncludeDesignFrontend is ignored; the current JOENESS bundle already installs all active skills.'
+        $warnings += 'DEPRECATED: -IncludeDesignFrontend is ignored; JOENESS 0.2 Astra Judgment installs no public skills.'
     }
 
     foreach ($target in @(
@@ -644,16 +647,22 @@ function Invoke-JoewrksHarnessSync {
         $manifestRead = Read-HarnessUtf8 $manifestPath
         $manifestHash = Get-HarnessSha256 $manifestRead.Bytes
         $manifest = $manifestRead.Text | ConvertFrom-Json
-        $astraNative = [string] $manifest.runtimeMode -ceq 'none'
-        if (-not $astraNative -or [string] $manifest.target.model -cne 'gpt-6-astra' -or [string] $manifest.target.reasoningEffort -cne 'xhigh') {
-            throw 'Active distribution is not the supported Astra-native identity'
+        $astraNative = [string] $manifest.runtimeMode -ceq 'common-core'
+        if ([int] $manifest.schemaVersion -ne 2 -or
+            [string] $manifest.release.name -cne 'JOENESS' -or
+            [string] $manifest.release.version -cne '0.2-astra-judgment' -or
+            [string] $manifest.release.entrypoint -cne 'JOENESS.ps1' -or
+            -not $astraNative -or
+            [string] $manifest.target.model -cne 'gpt-6-astra' -or
+            [string] $manifest.target.reasoningEffort -cne 'xhigh') {
+            throw 'Active distribution is not the supported JOENESS 0.2 Astra judgment identity'
         }
-        if ($null -ne $manifest.activeCommonCore -or
+        if ($null -eq $manifest.activeCommonCore -or
             @($manifest.managedRuntimeFiles).Count -ne 0 -or
             @($manifest.publicSkills).Count -ne 0 -or
             @($manifest.defaultVendors).Count -ne 0 -or
             $null -ne $manifest.pluginRouting) {
-            throw 'Astra-native distribution must have zero managed runtime payload'
+            throw 'Astra judgment distribution must have exactly one active Common Core and zero whole-file, skill, vendor, or plugin payload'
         }
         $coreEntry = $manifest.activeCommonCore
         $controlV2 = $manifest.compatibility.installIdentities.controlSixSkill
@@ -684,7 +693,20 @@ function Invoke-JoewrksHarnessSync {
         $controlV2WholeFileCount = [long] $controlV2.selection.wholeFileCount
         if ($controlV2WholeFileCount -le 0) { throw 'Control V2 selection count is invalid' }
         $controlV2SelectionHash = Get-HarnessValidSha256 $controlV2.selection.sha256 'Control V2 selection hash'
-        if ($null -ne $coreEntry) { throw 'Astra-native manifest unexpectedly selects a Common Core' }
+        Assert-HarnessObjectShape $coreEntry @('path', 'sha256') 'Astra judgment Common Core identity'
+        $coreRelativePath = Get-HarnessSafeRelativePath ([string] $coreEntry.path) 'Astra judgment Common Core path'
+        if ($coreRelativePath -cne 'astra-judgment-core.md') { throw 'Astra judgment Common Core path is invalid' }
+        $coreSourceHash = Get-HarnessValidSha256 $coreEntry.sha256 'Astra judgment Common Core hash'
+        $coreSourcePath = Resolve-HarnessSourceFile $sourceRoot $coreRelativePath
+        if (-not (Test-Path -LiteralPath $coreSourcePath -PathType Leaf)) { throw "Missing Astra judgment Common Core source: $coreRelativePath" }
+        $coreSourceRead = Read-HarnessUtf8 $coreSourcePath
+        if ((Get-HarnessSha256 $coreSourceRead.Bytes) -cne $coreSourceHash) { throw 'Astra judgment Common Core source hash is invalid' }
+        $sourceCore = $coreSourceRead.Text.TrimEnd("`r", "`n")
+        $null = $optionalEntries.Add([pscustomobject] @{
+            RelativePath = 'vendor/source-manifest.json'
+            Hash = $manifestHash
+            Bytes = $manifestRead.Bytes
+        })
     } catch {
         $null = $blockers.Add([pscustomobject] @{ kind = 'sourceIntegrity'; message = $_.Exception.Message })
     }
@@ -733,7 +755,7 @@ function Invoke-JoewrksHarnessSync {
             $stateRead = Read-HarnessUtf8 $statePath
             $stateSnapshot = [pscustomobject] @{ Exists = $true; Hash = Get-HarnessSha256 $stateRead.Bytes; Bytes = $stateRead.Bytes }
             $state = $stateRead.Text | ConvertFrom-Json
-            if ($state.schemaVersion -isnot [int] -or $state.schemaVersion -notin @(1, 2)) { throw 'Unsupported state schemaVersion' }
+            if (($state.schemaVersion -isnot [int] -and $state.schemaVersion -isnot [long]) -or $state.schemaVersion -notin @(1, 2)) { throw 'Unsupported state schemaVersion' }
             if ($state.schemaVersion -eq 1) {
                 Assert-HarnessObjectShape $state @('schemaVersion', 'sourceIdentities', 'managedBlocks', 'wholeFileTargets') 'State'
             } else {
@@ -815,7 +837,12 @@ function Invoke-JoewrksHarnessSync {
                 if ($stateCommonCoreSourceHash -cne $installedCoreHash) {
                     throw 'State commonCore source identity does not match its installed manifest'
                 }
-                $installedSkillNames = @($installedManifest.activeSkills.PSObject.Properties.Name | Sort-Object -CaseSensitive)
+                $installedActiveSkillsProperty = $installedManifest.PSObject.Properties['activeSkills']
+                $installedSkillNames = if ($null -eq $installedActiveSkillsProperty) {
+                    @($installedManifest.publicSkills | ForEach-Object { [string] $_ } | Sort-Object -CaseSensitive)
+                } else {
+                    @($installedActiveSkillsProperty.Value.PSObject.Properties.Name | Sort-Object -CaseSensitive)
+                }
                 if ($state.schemaVersion -eq 1) {
                     if (($installedSkillNames -join "`n") -cne $historicalV1SkillName) {
                         throw 'V1 installed manifest active skill set is not historical'
@@ -906,8 +933,6 @@ function Invoke-JoewrksHarnessSync {
                         }
                         $isControlV2 = $true
                         $isExactControlInstall = $true
-                    } elseif ($installedSkillNames.Count -eq 0 -and $installedWholeFiles.Count -eq 0) {
-                        $isPriorLeanV2 = $true
                     } else {
                         throw 'V2 installed manifest identity is not trusted'
                     }
@@ -928,7 +953,7 @@ function Invoke-JoewrksHarnessSync {
                     $historicalV1WholeFiles.Clone()
                 } elseif ($isRelease01V2) {
                     $release01WholeFiles.Clone()
-                } elseif ($isCurrentV2 -or $isControlV2 -or $isPriorLeanV2) {
+                } elseif ($isCurrentV2 -or $isControlV2) {
                     $installedWholeFiles
                 } else {
                     throw 'Installed manifest ownership identity was not established'
@@ -955,11 +980,11 @@ function Invoke-JoewrksHarnessSync {
     } else {
         $stateSnapshot = [pscustomobject] @{ Exists = $false; Hash = $null; Bytes = [byte[]] @() }
     }
-    if ($null -ne $state -and -not $isExactControlInstall) {
+    if ($null -ne $state -and -not $isExactControlInstall -and -not $isCurrentV2) {
         $state = $null
         $stateCoreHash = $null
         $stateWholeFiles = @{}
-        $null = $blockers.Add([pscustomobject] @{ kind = 'invalidState'; message = 'Installed JOENESS state is not the exact supported Control identity' })
+        $null = $blockers.Add([pscustomobject] @{ kind = 'invalidState'; message = 'Installed JOENESS state is neither the exact current Astra judgment identity nor the exact supported Control identity' })
     }
     $removeAgentBytes = $null
     if ($Remove -or $isExactControlInstall) {
@@ -1004,12 +1029,21 @@ function Invoke-JoewrksHarnessSync {
                 $existingBlock = Get-HarnessByteSlice $target.Bytes $beginOffsets[0] $blockLength
                 $existingBlockHash = Get-HarnessSha256 $existingBlock
                 if ($existingBlockHash -cne $stateCoreHash) { throw 'Installed Common Core block drifted from prior state' }
-                $permittedControlBlockHashes = @(foreach ($newline in @("`n", "`r`n")) {
-                    $normalizedControlCore = $controlV2CoreSource -replace "`r`n|`r|`n", $newline
-                    $controlBlockBytes = [Text.Encoding]::UTF8.GetBytes("$($script:HarnessBeginMarker)$newline$normalizedControlCore$newline$($script:HarnessEndMarker)")
-                    Get-HarnessSha256 $controlBlockBytes
-                })
-                if ($permittedControlBlockHashes -cnotcontains $existingBlockHash) { throw 'Installed Common Core block is not the exact supported Control source' }
+                if ($isExactControlInstall) {
+                    $permittedControlBlockHashes = @(foreach ($newline in @("`n", "`r`n")) {
+                        $normalizedControlCore = $controlV2CoreSource -replace "`r`n|`r|`n", $newline
+                        $controlBlockBytes = [Text.Encoding]::UTF8.GetBytes("$($script:HarnessBeginMarker)$newline$normalizedControlCore$newline$($script:HarnessEndMarker)")
+                        Get-HarnessSha256 $controlBlockBytes
+                    })
+                    if ($permittedControlBlockHashes -cnotcontains $existingBlockHash) { throw 'Installed Common Core block is not the exact supported Control source' }
+                } else {
+                    $permittedCurrentBlockHashes = @(foreach ($newline in @("`n", "`r`n")) {
+                        $normalizedCurrentCore = $sourceCore -replace "`r`n|`r|`n", $newline
+                        $currentBlockBytes = [Text.Encoding]::UTF8.GetBytes("$($script:HarnessBeginMarker)$newline$normalizedCurrentCore$newline$($script:HarnessEndMarker)")
+                        Get-HarnessSha256 $currentBlockBytes
+                    })
+                    if ($permittedCurrentBlockHashes -cnotcontains $existingBlockHash) { throw 'Installed Common Core block is not the exact current Astra judgment source' }
+                }
                 $prefix = Get-HarnessByteSlice $target.Bytes 0 $beginOffsets[0]
                 $suffixStart = $endOffsets[0] + $endBytes.Length
                 $suffix = Get-HarnessByteSlice $target.Bytes $suffixStart ($target.Bytes.Length - $suffixStart)
@@ -1217,11 +1251,6 @@ function Invoke-JoewrksHarnessSync {
         $warnings += 'Legacy GPT-5.6 Control installation detected. Apply is a no-op; use explicit Remove for the supported safe removal path.'
         return New-HarnessPublicResult -Status 'legacy' -Mode $mode -AgentsRoot $resolvedAgentsHome -SkillsRoot (Join-Path $resolvedAgentsHome 'skills') -ActiveSkills @() -Warnings @($warnings) -ChangesRequired $false -Changes @([pscustomobject] @{ kind = 'legacyInstallation'; action = 'removeAvailable'; target = 'GPT-5.6 Control'; planned = $false }) -Blockers @() -BackupPath $null -Rollback $null -UnresolvedTargets @()
     }
-    if ($blockers.Count -eq 0 -and $Apply) {
-        $warnings += 'Apply is unsupported for the Astra-native zero-runtime distribution; no files were changed.'
-        return New-HarnessPublicResult -Status 'unsupported' -Mode $mode -AgentsRoot $resolvedAgentsHome -SkillsRoot (Join-Path $resolvedAgentsHome 'skills') -ActiveSkills @() -Warnings @($warnings) -ChangesRequired $false -Changes @() -Blockers @() -BackupPath $null -Rollback $null -UnresolvedTargets @()
-    }
-
     $status = if ($blockers.Count -gt 0) {
         'blocked'
     } elseif ($Remove) {
@@ -1554,7 +1583,7 @@ if ($MyInvocation.InvocationName -ne '.') {
     } catch {
         $invocationWarnings = @()
         if ($IncludeDesignFrontend) {
-            $invocationWarnings += 'DEPRECATED: -IncludeDesignFrontend is ignored; the current JOENESS bundle already installs all active skills.'
+            $invocationWarnings += 'DEPRECATED: -IncludeDesignFrontend is ignored; JOENESS 0.2 Astra Judgment installs no public skills.'
         }
         $invocationMode = if ($Check) { 'check' } elseif ($Apply) { 'apply' } else { 'remove' }
         $publicActiveSkills = Get-HarnessPublicActiveSkills (Split-Path -Parent $PSScriptRoot)

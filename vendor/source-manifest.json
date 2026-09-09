@@ -2,15 +2,18 @@
   "schemaVersion": 2,
   "release": {
     "name": "JOENESS",
-    "version": "0.1-astra-native",
+    "version": "0.2-astra-judgment",
     "entrypoint": "JOENESS.ps1"
   },
   "target": {
     "model": "gpt-6-astra",
     "reasoningEffort": "xhigh"
   },
-  "runtimeMode": "none",
-  "activeCommonCore": null,
+  "runtimeMode": "common-core",
+  "activeCommonCore": {
+    "path": "astra-judgment-core.md",
+    "sha256": "f360b48be1b4143035f61fa20149a3249c60dea2e7f12cffa8bf1e8918f4f6a9"
+  },
   "managedRuntimeFiles": [],
   "publicSkills": [],
   "defaultVendors": [],
