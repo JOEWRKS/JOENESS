@@ -164,7 +164,9 @@ function Get-JoenessBlockBytes {
 function Get-JoenessManagedSuffixBytes {
     param($Source, [string] $Newline, [int] $SeparatorCount)
     $block = Get-JoenessBlockBytes $Source $Newline
-    $separator = $script:Utf8NoBom.GetBytes(($Newline * $SeparatorCount))
+    $separatorText = ''
+for ($i = 0; $i -lt $SeparatorCount; $i++) { $separatorText += $Newline }
+$separator = $script:Utf8NoBom.GetBytes($separatorText)
     $bytes = New-Object byte[] ($separator.Length + $block.Length)
     [Array]::Copy($separator, 0, $bytes, 0, $separator.Length)
     [Array]::Copy($block, 0, $bytes, $separator.Length, $block.Length)
