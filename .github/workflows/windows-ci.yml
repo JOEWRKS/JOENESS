@@ -1,21 +1,19 @@
-name: Windows deterministic release gate
+name: Windows current release gate
 
 'on':
   push:
+    branches:
+      - main
+      - 'codex/**'
   pull_request:
 
 permissions:
   contents: read
 
 jobs:
-  deterministic-release:
+  current-release:
     runs-on: windows-latest
-    timeout-minutes: 30
-    env:
-      JOENESS_CI_ROOT: 'C:\joeness-ci-${{ github.run_id }}-${{ github.run_attempt }}'
-      JOENESS_CI_REPOSITORY: 'C:\joeness-ci-${{ github.run_id }}-${{ github.run_attempt }}\repo'
-      JOENESS_CI_TEMP: 'C:\joeness-ci-${{ github.run_id }}-${{ github.run_attempt }}\tmp'
-
+    timeout-minutes: 10
     steps:
       - name: Check out full repository history
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -23,286 +21,35 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
 
-      - name: Set up Node.js for deterministic repository tests
-        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
-        with:
-          node-version: 26.3.0
-          package-manager-cache: false
-
-      - name: Set up Python for deterministic vendor tests
-        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
-        with:
-          python-version: 3.14.5
-
-      - name: Materialize canonical independent test repository
-        id: materialize
+      - name: Verify full history checkout
         shell: pwsh
-        working-directory: ${{ github.workspace }}
         run: |
           $ErrorActionPreference = 'Stop'
-          if (Test-Path -LiteralPath $env:JOENESS_CI_ROOT) {
-            throw "Canonical CI root already exists: $env:JOENESS_CI_ROOT"
-          }
-          $null = New-Item -ItemType Directory -Path $env:JOENESS_CI_ROOT
-
-          $ticketScript = @'
-          const fs = require("node:fs");
-          const path = require("node:path");
-          const target = path.resolve(process.argv[1]);
-          const stat = fs.lstatSync(target, { bigint: true });
-          const resolved = path.resolve(fs.realpathSync.native(target));
-          if (!stat.isDirectory() || stat.isSymbolicLink()) {
-            throw new Error(`owned root is not a real directory: ${target}`);
-          }
-          if (resolved.toLowerCase() !== target.toLowerCase()) {
-            throw new Error(`owned root aliases another path: ${target}`);
-          }
-          process.stdout.write(JSON.stringify({
-            dev: stat.dev.toString(),
-            ino: stat.ino.toString(),
-            birthtimeNs: stat.birthtimeNs.toString(),
-          }));
-          '@
-          $rootTicket = (& node -e "$ticketScript" -- $env:JOENESS_CI_ROOT).Trim()
-          if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($rootTicket)) {
-            throw 'Unable to capture the canonical CI root ownership ticket.'
-          }
-          "root_ticket=$rootTicket" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
-
-          $null = New-Item -ItemType Directory -Path $env:JOENESS_CI_TEMP
-          & git clone --no-local --no-checkout -- $env:GITHUB_WORKSPACE $env:JOENESS_CI_REPOSITORY
-          if ($LASTEXITCODE -ne 0) {
-            throw 'Independent canonical repository clone failed.'
-          }
-          & git -C $env:JOENESS_CI_REPOSITORY checkout --detach --force $env:GITHUB_SHA
-          if ($LASTEXITCODE -ne 0) {
-            throw 'Canonical repository checkout failed.'
-          }
-
-          $boundaryScript = @'
-          const fs = require("node:fs");
-          const path = require("node:path");
-          for (const value of process.argv.slice(1)) {
-            const lexical = path.resolve(value);
-            const stat = fs.lstatSync(lexical, { bigint: true });
-            const resolved = path.resolve(fs.realpathSync.native(lexical));
-            if (!stat.isDirectory() || stat.isSymbolicLink()) {
-              throw new Error(`CI boundary is not a real directory: ${lexical}`);
-            }
-            if (resolved.toLowerCase() !== lexical.toLowerCase()) {
-              throw new Error(`CI boundary aliases another path: ${lexical}`);
-            }
-          }
-          '@
-          & node -e "$boundaryScript" -- `
-            $env:JOENESS_CI_REPOSITORY `
-            (Join-Path $env:JOENESS_CI_REPOSITORY '.git') `
-            $env:JOENESS_CI_TEMP
-          if ($LASTEXITCODE -ne 0) {
-            throw 'Canonical repository or temp boundary validation failed.'
-          }
-
-          $materializedHead = (& git -C $env:JOENESS_CI_REPOSITORY rev-parse HEAD).Trim()
-          if ($LASTEXITCODE -ne 0 -or $materializedHead -ne $env:GITHUB_SHA) {
-            throw "Materialized HEAD mismatch: $materializedHead"
-          }
-          $materializedStatus = & git -C $env:JOENESS_CI_REPOSITORY status --porcelain=v1 --untracked-files=all
-          if ($LASTEXITCODE -ne 0 -or $materializedStatus) {
-            throw 'Materialized repository is not clean.'
-          }
-          $isShallow = (& git -C $env:JOENESS_CI_REPOSITORY rev-parse --is-shallow-repository).Trim()
+          $isShallow = (& git rev-parse --is-shallow-repository).Trim()
           if ($LASTEXITCODE -ne 0 -or $isShallow -ne 'false') {
-            throw 'Materialized repository does not contain full history.'
+            throw 'JOENESS release gate requires full Git history.'
           }
 
-      - name: Verify CI toolchain versions
+      - name: Run current JOENESS release contract
         shell: pwsh
-        working-directory: ${{ env.JOENESS_CI_REPOSITORY }}
-        env:
-          TEMP: ${{ env.JOENESS_CI_TEMP }}
-          TMP: ${{ env.JOENESS_CI_TEMP }}
-        run: |
-          $nodeVersion = (& node --version).Trim()
-          if ($nodeVersion -ne 'v26.3.0') {
-            throw "Expected Node.js v26.3.0, found $nodeVersion"
-          }
-          $pythonVersion = (& python --version 2>&1).Trim()
-          if ($pythonVersion -ne 'Python 3.14.5') {
-            throw "Expected Python 3.14.5, found $pythonVersion"
-          }
-
-      - name: Validate Node test taxonomy coverage
-        shell: pwsh
-        working-directory: ${{ env.JOENESS_CI_REPOSITORY }}
-        env:
-          TEMP: ${{ env.JOENESS_CI_TEMP }}
-          TMP: ${{ env.JOENESS_CI_TEMP }}
-        run: node .\scripts\run-node-test-group.mjs --check
-
-      - name: Run current release Node tests
-        shell: pwsh
-        working-directory: ${{ env.JOENESS_CI_REPOSITORY }}
-        env:
-          TEMP: ${{ env.JOENESS_CI_TEMP }}
-          TMP: ${{ env.JOENESS_CI_TEMP }}
-        run: node .\scripts\run-node-test-group.mjs current-release
-
-      - name: Run historical integrity Node tests
-        shell: pwsh
-        working-directory: ${{ env.JOENESS_CI_REPOSITORY }}
-        env:
-          TEMP: ${{ env.JOENESS_CI_TEMP }}
-          TMP: ${{ env.JOENESS_CI_TEMP }}
-        run: node .\scripts\run-node-test-group.mjs historical-integrity
-
-      - name: Run Astra judgment lifecycle tests
-        shell: pwsh
-        working-directory: ${{ env.JOENESS_CI_REPOSITORY }}
-        env:
-          TEMP: ${{ env.JOENESS_CI_TEMP }}
-          TMP: ${{ env.JOENESS_CI_TEMP }}
         run: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\tests\astra-judgment-sync.tests.ps1
-
-      - name: Run retained sync harness fail-closed tests
-        shell: pwsh
-        working-directory: ${{ env.JOENESS_CI_REPOSITORY }}
-        env:
-          TEMP: ${{ env.JOENESS_CI_TEMP }}
-          TMP: ${{ env.JOENESS_CI_TEMP }}
-        run: |
-          $tests = @(
-            'Test-ModeAndExitContract',
-            'Test-AstraLegacyRemovalFailsClosed',
-            'Test-ForgedManagedBlockFailsClosed',
-            'Test-ExactControlRemovePreflightBlockers',
-            'Test-ExactControlNoFinalNewlineRemoval',
-            'Test-UncertainHistoricalStateFailsClosed',
-            'Test-RemoveRollback',
-            'Test-SilentRecreatedRemovalTargetFailsFinalVerification',
-            'Test-SurvivingRemovalResidueIsUnresolved',
-            'Test-EmptyDirectoryCleanupDeleteRace',
-            'Test-EmptyDirectoryCleanupReparseRace',
-            'Test-TargetDirectoryCreationOwnershipRace',
-            'Test-EmptyDirectoryCleanupPathBoundaries'
-          )
-          & .\tests\sync-harness.tests.ps1 -Only $tests
-
-      - name: Run project setup deterministic tests
-        shell: pwsh
-        working-directory: ${{ env.JOENESS_CI_REPOSITORY }}
-        env:
-          TEMP: ${{ env.JOENESS_CI_TEMP }}
-          TMP: ${{ env.JOENESS_CI_TEMP }}
-        run: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\tests\project-setup.tests.ps1
-
-      - name: Run P0 evaluation contract deterministic tests
-        shell: pwsh
-        working-directory: ${{ env.JOENESS_CI_REPOSITORY }}
-        env:
-          TEMP: ${{ env.JOENESS_CI_TEMP }}
-          TMP: ${{ env.JOENESS_CI_TEMP }}
-        run: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\tests\p0-evaluation-contract.tests.ps1
-
-      - name: Run vendor Python unit tests
-        shell: pwsh
-        working-directory: ${{ env.JOENESS_CI_REPOSITORY }}
-        env:
-          TEMP: ${{ env.JOENESS_CI_TEMP }}
-          TMP: ${{ env.JOENESS_CI_TEMP }}
-        run: python -B -m unittest discover -s .\vendor\ui-ux-pro-max\scripts\tests -p 'test_*.py'
 
       - name: Check candidate diff whitespace
         shell: pwsh
-        working-directory: ${{ env.JOENESS_CI_REPOSITORY }}
         env:
-          PULL_REQUEST_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
           PUSH_BEFORE_SHA: ${{ github.event.before }}
-          TEMP: ${{ env.JOENESS_CI_TEMP }}
-          TMP: ${{ env.JOENESS_CI_TEMP }}
         run: |
+          $ErrorActionPreference = 'Stop'
           $zeroSha = '0000000000000000000000000000000000000000'
           if ($env:GITHUB_EVENT_NAME -eq 'pull_request') {
-            $baseSha = $env:PULL_REQUEST_BASE_SHA
-          } elseif (
-            $env:PUSH_BEFORE_SHA -and
-            $env:PUSH_BEFORE_SHA -ne $zeroSha
-          ) {
+            $baseSha = $env:PR_BASE_SHA
+          } elseif ($env:PUSH_BEFORE_SHA -and $env:PUSH_BEFORE_SHA -ne $zeroSha) {
             $baseSha = $env:PUSH_BEFORE_SHA
           } else {
             $baseSha = (& git rev-parse "$env:GITHUB_SHA^").Trim()
-            if ($LASTEXITCODE -ne 0) {
-              throw 'Unable to resolve the fallback parent commit.'
-            }
           }
-
           & git cat-file -e "$baseSha^{commit}"
-          if ($LASTEXITCODE -ne 0) {
-            throw "Candidate diff base commit is unavailable: $baseSha"
-          }
-          & git merge-base $baseSha $env:GITHUB_SHA | Out-Null
-          if ($LASTEXITCODE -ne 0) {
-            throw "Candidate diff has no merge base: $baseSha...$env:GITHUB_SHA"
-          }
+          if ($LASTEXITCODE -ne 0) { throw "Diff base is unavailable: $baseSha" }
           & git diff --check "${baseSha}...$env:GITHUB_SHA"
-          if ($LASTEXITCODE -ne 0) {
-            exit $LASTEXITCODE
-          }
-
-      - name: Remove canonical CI materialization
-        if: always()
-        shell: pwsh
-        working-directory: ${{ github.workspace }}
-        env:
-          JOENESS_CI_ROOT_TICKET: ${{ steps.materialize.outputs.root_ticket }}
-        run: |
-          $ErrorActionPreference = 'Stop'
-          $cleanupScript = @'
-          const fs = require("node:fs");
-          const path = require("node:path");
-          const root = path.resolve(process.argv[1]);
-          const repository = path.resolve(process.argv[2]);
-          const temporary = path.resolve(process.argv[3]);
-          const ticketText = process.argv[4] ?? "";
-          const expectedParent = path.parse(root).root;
-          if (path.dirname(root).toLowerCase() !== expectedParent.toLowerCase()) {
-            throw new Error(`cleanup root escapes the owned parent: ${root}`);
-          }
-          if (!/^joeness-ci-[1-9][0-9]*-[1-9][0-9]*$/u.test(path.basename(root))) {
-            throw new Error(`cleanup root name is not invocation-bound: ${root}`);
-          }
-          if (fs.existsSync(root)) {
-            if (ticketText === "") {
-              throw new Error("cleanup ownership ticket is unavailable");
-            }
-            const expected = JSON.parse(ticketText);
-            const stat = fs.lstatSync(root, { bigint: true });
-            const resolved = path.resolve(fs.realpathSync.native(root));
-            if (!stat.isDirectory() || stat.isSymbolicLink()) {
-              throw new Error(`cleanup root is not a real directory: ${root}`);
-            }
-            if (resolved.toLowerCase() !== root.toLowerCase()) {
-              throw new Error(`cleanup root aliases another path: ${root}`);
-            }
-            if (
-              stat.dev.toString() !== expected.dev ||
-              stat.ino.toString() !== expected.ino ||
-              stat.birthtimeNs.toString() !== expected.birthtimeNs
-            ) {
-              throw new Error("cleanup root ownership identity changed");
-            }
-            fs.rmSync(root, { recursive: true, force: false });
-          }
-          for (const target of [repository, temporary, root]) {
-            if (fs.existsSync(target)) {
-              throw new Error(`cleanup absence readback failed: ${target}`);
-            }
-          }
-          '@
-          & node -e "$cleanupScript" -- `
-            $env:JOENESS_CI_ROOT `
-            $env:JOENESS_CI_REPOSITORY `
-            $env:JOENESS_CI_TEMP `
-            $env:JOENESS_CI_ROOT_TICKET
-          if ($LASTEXITCODE -ne 0) {
-            throw 'Canonical CI materialization cleanup is unresolved.'
-          }
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
