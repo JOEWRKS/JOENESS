@@ -46,20 +46,29 @@ function ConvertFrom-JoenessUtf8 {
 
 function Write-JoenessBytesAtomic {
     param([string] $Path, [byte[]] $Bytes)
+
     $parent = Split-Path -Parent $Path
     if ($parent -and -not (Test-Path -LiteralPath $parent)) {
         $null = New-Item -ItemType Directory -Path $parent -Force
     }
-    $temp = "$Path.joeness.$([guid]::NewGuid().ToString('N')).tmp"
+
+    $token = [guid]::NewGuid().ToString('N')
+    $temp = "$Path.joeness.$token.tmp"
+    $backup = "$Path.joeness.$token.bak"
+
     try {
         [IO.File]::WriteAllBytes($temp, $Bytes)
         if (Test-Path -LiteralPath $Path -PathType Leaf) {
-            [IO.File]::Replace($temp, $Path, $null)
+            [IO.File]::Replace($temp, $Path, $backup, $true)
+            if (Test-Path -LiteralPath $backup) {
+                Remove-Item -LiteralPath $backup -Force
+            }
         } else {
             [IO.File]::Move($temp, $Path)
         }
     } finally {
         if (Test-Path -LiteralPath $temp) { Remove-Item -LiteralPath $temp -Force }
+        if (Test-Path -LiteralPath $backup) { Remove-Item -LiteralPath $backup -Force }
     }
 }
 
@@ -130,9 +139,7 @@ function Get-JoenessSourceIdentity {
     if ([string] $manifest.activeCommonCore.sha256 -cne $coreHash) { throw 'Active Common Core hash does not match source bytes' }
 
     [pscustomobject] @{
-        ManifestBytes = $manifestBytes
         ManifestHash = Get-JoenessSha256 $manifestBytes
-        CoreBytes = $coreBytes
         CoreHash = $coreHash
         CoreText = $coreText.TrimEnd("`r", "`n")
     }
@@ -163,10 +170,13 @@ function Get-JoenessBlockBytes {
 
 function Get-JoenessManagedSuffixBytes {
     param($Source, [string] $Newline, [int] $SeparatorCount)
+
     $block = Get-JoenessBlockBytes $Source $Newline
     $separatorText = ''
-for ($i = 0; $i -lt $SeparatorCount; $i++) { $separatorText += $Newline }
-$separator = $script:Utf8NoBom.GetBytes($separatorText)
+    for ($i = 0; $i -lt $SeparatorCount; $i++) {
+        $separatorText += $Newline
+    }
+    $separator = $script:Utf8NoBom.GetBytes($separatorText)
     $bytes = New-Object byte[] ($separator.Length + $block.Length)
     [Array]::Copy($separator, 0, $bytes, 0, $separator.Length)
     [Array]::Copy($block, 0, $bytes, $separator.Length, $block.Length)
@@ -195,6 +205,7 @@ function Get-JoenessMarkerCounts {
 function Read-JoenessState {
     param([string] $Path)
     if (-not (Test-Path -LiteralPath $Path -PathType Leaf)) { return $null }
+
     $bytes = [IO.File]::ReadAllBytes($Path)
     $text = ConvertFrom-JoenessUtf8 $bytes 'JOENESS state'
     $state = $text | ConvertFrom-Json
@@ -340,6 +351,7 @@ function Invoke-JoenessHarnessSync {
     }
 
     $observation = Get-JoenessInstallObservation $resolved $source
+
     if ($Check) {
         if ($observation.Status -eq 'ready') {
             return New-JoenessPublicResult 'ready' $mode $resolved $warnings $true @([pscustomobject] @{ kind = 'managedBlock'; action = 'apply'; target = 'AGENTS.md' }) @() $null
@@ -362,9 +374,12 @@ function Invoke-JoenessHarnessSync {
         $statePath = Join-Path $resolved $script:JoenessStateFile
         $agentsSnapshot = Get-JoenessSnapshot $agentsPath
         $stateSnapshot = Get-JoenessSnapshot $statePath
-        $rollback = $null
+
         try {
-            if (-not (Test-Path -LiteralPath $resolved)) { $null = New-Item -ItemType Directory -Path $resolved -Force }
+            if (-not (Test-Path -LiteralPath $resolved)) {
+                $null = New-Item -ItemType Directory -Path $resolved -Force
+            }
+
             $original = [byte[]] $agentsSnapshot.Bytes
             $newline = Get-JoenessNewline $original
             $separatorCount = Get-JoenessSeparatorCount $original
@@ -372,6 +387,7 @@ function Invoke-JoenessHarnessSync {
             $newBytes = New-Object byte[] ($original.Length + $suffix.Length)
             [Array]::Copy($original, 0, $newBytes, 0, $original.Length)
             [Array]::Copy($suffix, 0, $newBytes, $original.Length, $suffix.Length)
+
             Write-JoenessBytesAtomic $agentsPath $newBytes
             if ($null -ne $AfterWrite) { & $AfterWrite 'agents' }
 
@@ -395,12 +411,13 @@ function Invoke-JoenessHarnessSync {
             if ($post.Status -ne 'current') { throw 'Post-Apply verification did not reach current state' }
             return New-JoenessPublicResult 'current' $mode $resolved $warnings $false @([pscustomobject] @{ kind = 'managedBlock'; action = 'installed'; target = 'AGENTS.md' }) @() $null
         } catch {
+            $writeError = $_.Exception.Message
             $rollbackProblems = @()
             try { Restore-JoenessSnapshot $agentsPath $agentsSnapshot } catch { $rollbackProblems += $_.Exception.Message }
             try { Restore-JoenessSnapshot $statePath $stateSnapshot } catch { $rollbackProblems += $_.Exception.Message }
             $rollbackStatus = if ($rollbackProblems.Count -eq 0) { 'complete' } else { 'incomplete' }
             $rollback = [pscustomobject] @{ status = $rollbackStatus; problems = @($rollbackProblems) }
-            return New-JoenessPublicResult 'failed' $mode $resolved $warnings $true @() @([pscustomobject] @{ kind = 'writeFailure'; message = $_.Exception.Message }) $rollback
+            return New-JoenessPublicResult 'failed' $mode $resolved $warnings $true @() @([pscustomobject] @{ kind = 'writeFailure'; message = $writeError }) $rollback
         }
     }
 
@@ -415,13 +432,17 @@ function Invoke-JoenessHarnessSync {
     $statePath = Join-Path $resolved $script:JoenessStateFile
     $agentsSnapshot = Get-JoenessSnapshot $agentsPath
     $stateSnapshot = Get-JoenessSnapshot $statePath
+
     try {
         $suffix = [byte[]] $observation.SuffixBytes
         $currentBytes = [byte[]] $observation.AgentsBytes
         $prefixLength = $currentBytes.Length - $suffix.Length
         if ($prefixLength -lt 0) { throw 'Managed suffix is larger than AGENTS.md' }
+
         $prefix = New-Object byte[] $prefixLength
-        if ($prefixLength -gt 0) { [Array]::Copy($currentBytes, 0, $prefix, 0, $prefixLength) }
+        if ($prefixLength -gt 0) {
+            [Array]::Copy($currentBytes, 0, $prefix, 0, $prefixLength)
+        }
 
         if (-not [bool] $observation.State.originalAgentsExisted -and $prefix.Length -eq 0) {
             Remove-Item -LiteralPath $agentsPath -Force
@@ -429,6 +450,7 @@ function Invoke-JoenessHarnessSync {
             Write-JoenessBytesAtomic $agentsPath $prefix
         }
         if ($null -ne $AfterWrite) { & $AfterWrite 'agents' }
+
         Remove-Item -LiteralPath $statePath -Force
         if ($null -ne $AfterWrite) { & $AfterWrite 'state' }
 
@@ -436,12 +458,13 @@ function Invoke-JoenessHarnessSync {
         if ($post.Status -ne 'ready') { throw 'Post-Remove verification did not reach ready state' }
         return New-JoenessPublicResult 'removed' $mode $resolved $warnings $false @([pscustomobject] @{ kind = 'managedBlock'; action = 'removed'; target = 'AGENTS.md' }) @() $null
     } catch {
+        $writeError = $_.Exception.Message
         $rollbackProblems = @()
         try { Restore-JoenessSnapshot $agentsPath $agentsSnapshot } catch { $rollbackProblems += $_.Exception.Message }
         try { Restore-JoenessSnapshot $statePath $stateSnapshot } catch { $rollbackProblems += $_.Exception.Message }
         $rollbackStatus = if ($rollbackProblems.Count -eq 0) { 'complete' } else { 'incomplete' }
         $rollback = [pscustomobject] @{ status = $rollbackStatus; problems = @($rollbackProblems) }
-        return New-JoenessPublicResult 'failed' $mode $resolved $warnings $true @() @([pscustomobject] @{ kind = 'writeFailure'; message = $_.Exception.Message }) $rollback
+        return New-JoenessPublicResult 'failed' $mode $resolved $warnings $true @() @([pscustomobject] @{ kind = 'writeFailure'; message = $writeError }) $rollback
     }
 }
 
