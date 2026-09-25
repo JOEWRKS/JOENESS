@@ -31,8 +31,8 @@ function Get-JoenessSha256 {
 
 function Read-JoenessBytes {
     param([string] $Path)
-    if (-not (Test-Path -LiteralPath $Path -PathType Leaf)) { return [byte[]] @() }
-    [IO.File]::ReadAllBytes($Path)
+    if (-not (Test-Path -LiteralPath $Path -PathType Leaf)) { return ,([byte[]] @()) }
+    return ,([IO.File]::ReadAllBytes($Path))
 }
 
 function ConvertFrom-JoenessUtf8 {

@@ -198,6 +198,33 @@ function Test-CurrentLifecycleAndUserBytes {
     }
 }
 
+function Test-EmptyExistingAgentsLifecycle {
+    $f = New-TestRoot
+    try {
+        $null = New-Item -ItemType Directory -Path $f.Codex
+        $agentsPath = Join-Path $f.Codex 'AGENTS.md'
+        [IO.File]::WriteAllBytes($agentsPath, [byte[]] @())
+
+        $check = Invoke-JoenessCli Check $f
+        Assert-Equal $check.ExitCode 0 'empty AGENTS Check exits 0'
+        Assert-Equal $check.Result.status 'ready' 'empty AGENTS Check is ready'
+        Assert-Equal (Get-Item -LiteralPath $agentsPath).Length 0 'Check preserves empty user file'
+
+        $apply = Invoke-JoenessCli Apply $f
+        Assert-Equal $apply.ExitCode 0 'empty AGENTS Apply exits 0'
+        Assert-Equal $apply.Result.status 'current' 'empty AGENTS Apply reaches current'
+        Assert-Equal (Invoke-JoenessCli Check $f).Result.status 'current' 'empty AGENTS install checks current'
+
+        $remove = Invoke-JoenessCli Remove $f
+        Assert-Equal $remove.ExitCode 0 'empty AGENTS Remove exits 0'
+        Assert-Equal $remove.Result.status 'removed' 'empty AGENTS Remove succeeds'
+        Assert-Equal (Get-Item -LiteralPath $agentsPath).Length 0 'Remove restores empty user file'
+        Assert-Equal (Invoke-JoenessCli Check $f).Result.status 'ready' 'empty AGENTS post-Remove Check is ready'
+    } finally {
+        Remove-TestRoot $f
+    }
+}
+
 function Test-UnownedMarkersFailClosed {
     $f = New-TestRoot
     try {
@@ -283,6 +310,7 @@ Test-MinimalCurrentTree
 Test-HistoryStillOwnsOldFiles
 Test-ManifestAndCoreIdentity
 Test-CurrentLifecycleAndUserBytes
+Test-EmptyExistingAgentsLifecycle
 Test-UnownedMarkersFailClosed
 Test-DriftAndStateTamperFailClosed
 Test-ApplyRollback
