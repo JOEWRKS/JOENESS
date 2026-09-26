@@ -126,7 +126,7 @@ function Get-JoenessSourceIdentity {
     if ([string] $manifest.activeCommonCore.path -cne 'astra-judgment-core.md') { throw 'Unexpected active Common Core path' }
     if (@($manifest.managedRuntimeFiles).Count -ne 0) { throw 'Managed runtime files must remain empty' }
     if (@($manifest.publicSkills).Count -ne 1 -or $manifest.publicSkills[0].name -cne 'joeness-setup') { throw 'Only joeness-setup may ship' }
-    $expectedFiles=@('SKILL.md','agents/openai.yaml','assets/AGENTS.md','assets/DESIGN.md','assets/ISSUES.md','assets/ROADMAP.md','assets/TASK.md','scripts/project-setup.ps1')
+    $expectedFiles=@('SKILL.md','agents/openai.yaml','assets/AGENTS.md','assets/DESIGN.md','assets/ISSUES.md','assets/ROADMAP.md','assets/TASK.md','references/usage.md','scripts/project-setup.ps1')
     $files=@($manifest.publicSkills[0].files)
     if((@($files.path|Sort-Object)-join ',') -cne (($expectedFiles|Sort-Object)-join ',')){throw 'Unexpected skill source inventory'}
     foreach($file in $files){
@@ -428,10 +428,27 @@ function Get-JoenessExitCode {
     3
 }
 
+function Get-JoenessInstallGuide {
+    param($Result)
+    if ($Result.mode -eq 'apply' -and $Result.status -eq 'current') {
+        $path = Join-Path $Result.codexHome 'skills/joeness-setup/references/usage.md'
+        $script:Utf8Strict.GetString([IO.File]::ReadAllBytes($path))
+    }
+}
+
 if ($MyInvocation.InvocationName -ne '.') {
+    # Keep native stdout machine-readable, including Korean paths.
+    [Console]::OutputEncoding = New-Object Text.UTF8Encoding($false)
     try {
         $result = Invoke-JoenessHarnessSync -Check:$Check -Apply:$Apply -Remove:$Remove -CodexHome $CodexHome
         $result | ConvertTo-Json -Depth 8 -Compress | Write-Output
+        # A display error must not change a completed installation into a failed write.
+        try {
+            $guide = Get-JoenessInstallGuide $result
+            if ($guide) { [Console]::Error.WriteLine($guide) }
+        } catch {
+            [Console]::Error.WriteLine('Installation is current; usage guide could not be displayed. See README.md.')
+        }
         exit (Get-JoenessExitCode $result.status)
     } catch {
         $fallbackHome = Resolve-JoenessCodexHome $CodexHome

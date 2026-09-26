@@ -9,9 +9,11 @@ try {
  $homePath=Join-Path $root codex
  $r=Invoke-JoenessHarnessSync -Check -CodexHome $homePath
  Eq $r.status ready check
+ Eq ($null -eq (Get-JoenessInstallGuide $r)) $true checkHasNoSuccessGuide
  $r=Invoke-JoenessHarnessSync -Apply -CodexHome $homePath
  Eq $r.status current apply
  Eq ($r.activeSkills -join ',') joeness-setup soleSkill
+ Eq ([string](Get-JoenessInstallGuide $r)).Contains('$joeness-setup') $true applyGuide
  $skill=Join-Path $homePath skills/joeness-setup/SKILL.md
  Eq (Test-Path $skill) $true skillExists
  Eq (Invoke-JoenessHarnessSync -Apply -CodexHome $homePath -AfterWrite {throw 'no-op wrote'}).status current noop
@@ -24,6 +26,7 @@ try {
  Eq (Invoke-JoenessHarnessSync -Check -CodexHome $homePath).status ready removedCheck
  $r=Invoke-JoenessHarnessSync -Apply -CodexHome $homePath -AfterWrite {param($s) if($s -eq 'AGENTS.md'){[IO.File]::AppendAllText((Join-Path $homePath AGENTS.md),'USER');throw 'failure'}}
  Eq $r.status partial partial
+ Eq ($null -eq (Get-JoenessInstallGuide $r)) $true partialHasNoSuccessGuide
  Eq ([IO.File]::ReadAllText((Join-Path $homePath AGENTS.md)).EndsWith('USER')) $true rollbackPreserves
  $mismatchHome=Join-Path $root mismatch
  Eq (Invoke-JoenessHarnessSync -Apply -CodexHome $mismatchHome).status current mismatchFixture
@@ -59,6 +62,10 @@ try {
  [IO.File]::WriteAllText((Join-Path $collision skills/joeness-setup/SKILL.md),'user-owned')
  Eq (Invoke-JoenessHarnessSync -Apply -CodexHome $collision).status blocked collision
  Eq (Test-Path (Join-Path $collision AGENTS.md)) $false noPartialCollision
+ $failedHome=Join-Path $root failed
+ $failed=Invoke-JoenessHarnessSync -Apply -CodexHome $failedHome -AfterWrite {throw 'injected write failure'}
+ Eq $failed.status failed failedFixture
+ Eq ($null -eq (Get-JoenessInstallGuide $failed)) $true failedHasNoSuccessGuide
  Write-Host 'PASS install lifecycle, no-op, drift, removal, concurrent-write preservation, mismatched-state rejection, current-only parameters, unowned collision'
 }finally{
  if([IO.Path]::GetFullPath($root).StartsWith([IO.Path]::GetTempPath()) -and (Split-Path $root -Leaf) -like 'joeness-install-test-*'){Remove-Item -LiteralPath $root -Recurse -Force}

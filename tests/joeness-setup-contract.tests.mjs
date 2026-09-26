@@ -1,10 +1,50 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {readFileSync, readdirSync} from 'node:fs';
+import {readFileSync, readdirSync, mkdtempSync, rmSync, appendFileSync} from 'node:fs';
+import {tmpdir} from 'node:os';
+import {spawnSync} from 'node:child_process';
 import {createHash} from 'node:crypto';
 import {relative,join} from 'node:path';
 import {fileURLToPath} from 'node:url';
 const read = p => readFileSync(new URL('../'+p, import.meta.url));
+test('CLI shows usable onboarding only after successful Apply while stdout stays JSON', () => {
+  const root=mkdtempSync(join(tmpdir(),'joeness-onboarding-'));
+  const entry=fileURLToPath(new URL('../JOENESS.ps1',import.meta.url));
+  const run=mode=>{
+    const r=spawnSync('powershell.exe',['-NoProfile','-File',entry,'-'+mode,'-CodexHome',root],{encoding:'utf8'});
+    assert.ifError(r.error);
+    return {...r,result:JSON.parse(r.stdout.trim())};
+  };
+  try {
+    const check=run('Check');
+    assert.equal(check.status,0); assert.equal(check.result.status,'ready');
+    assert.equal(check.stderr,'');
+    for (let i=0;i<2;i++) {
+      const apply=run('Apply');
+      assert.equal(apply.status,0); assert.equal(apply.result.status,'current');
+      assert.ok(apply.stderr.includes('$joeness-setup'),'successful Apply displays the first invocation');
+      for(const name of ['AGENTS','ROADMAP','TASK','ISSUES','DESIGN'])
+        assert.ok(apply.stderr.includes(name+'.md'),name+' role appears in the guide');
+      assert.ok(apply.stderr.includes('자동 생성하지'),'guide separates installation from project document creation');
+      assert.ok(apply.stderr.includes('이번 작업은 문서에 기록하지 마'),'guide includes a no-record request');
+      if(i===1) assert.deepEqual(apply.result.changes,[]);
+    }
+    assert.equal(run('Check').stderr,'');
+    const guide=join(root,'skills/joeness-setup/references/usage.md');
+    const before=readFileSync(guide);
+    appendFileSync(guide,'USER');
+    const blocked=run('Apply');
+    assert.equal(blocked.status,2); assert.equal(blocked.result.status,'blocked');
+    assert.equal(blocked.stderr,'');
+    assert.ok(readFileSync(guide).equals(Buffer.concat([before,Buffer.from('USER')])));
+  } finally { rmSync(root,{recursive:true,force:true}); }
+  const clean=mkdtempSync(join(tmpdir(),'joeness-onboarding-remove-'));
+  try {
+    const removed=spawnSync('powershell.exe',['-NoProfile','-File',entry,'-Remove','-CodexHome',clean],{encoding:'utf8'});
+    assert.equal(removed.status,0); assert.equal(JSON.parse(removed.stdout).status,'removed');
+    assert.equal(removed.stderr,'');
+  } finally { rmSync(clean,{recursive:true,force:true}); }
+});
 test('one self-contained setup skill with real supporting files', () => {
   assert.deepEqual(readdirSync(new URL('../skills/',import.meta.url)), ['joeness-setup']);
   const skill=read('skills/joeness-setup/SKILL.md').toString();
@@ -23,7 +63,7 @@ test('manifest pins exact sole skill inventory and unchanged thin core',()=>{
   const skillRoot=fileURLToPath(new URL('../skills/joeness-setup/',import.meta.url));
   const disk=readdirSync(skillRoot,{recursive:true,withFileTypes:true})
     .filter(e=>e.isFile()).map(e=>relative(skillRoot,join(e.parentPath,e.name)).replaceAll('\\','/'));
-  const expected=['SKILL.md','agents/openai.yaml','scripts/project-setup.ps1',...['AGENTS','TASK','ROADMAP','ISSUES','DESIGN'].map(n=>'assets/'+n+'.md')].sort();
+  const expected=['SKILL.md','agents/openai.yaml','scripts/project-setup.ps1','references/usage.md',...['AGENTS','TASK','ROADMAP','ISSUES','DESIGN'].map(n=>'assets/'+n+'.md')].sort();
   assert.equal(m.publicSkills[0].files.length,expected.length);
   assert.deepEqual(disk.sort(),expected);
   assert.deepEqual(m.publicSkills[0].files.map(f=>f.path).sort(),expected);

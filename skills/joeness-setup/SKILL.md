@@ -55,6 +55,18 @@ semantics are the agent's work, not this helper's job. Keep only actual paths,
 authority roles, and agreed recording rules in AGENTS; never copy this full skill
 or the implementation proposal there.
 
+## Explain the completed setup
+
+After confirmed setup, read [usage.md](references/usage.md) and give a short
+onboarding response in the user's language: actual created/changed files;
+the five document roles mapped to actual reused paths (unused roles marked not
+used); the agreed recording scope; examples for ordinary work, resume, past-issue
+lookup and opting out of recording. Explain that setup is not needed on every
+task. Present this in chat, not as another document or a copy in project AGENTS.
+For a proposal, blocked or partial result, report that actual boundary instead
+of presenting setup as complete. The usage guide's default filenames are role
+examples, not evidence that those files exist.
+
 ## Normal work after setup
 
 Normal sessions use the project's short AGENTS connection without invoking setup

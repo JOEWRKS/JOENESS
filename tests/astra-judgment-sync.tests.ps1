@@ -75,8 +75,27 @@ function Invoke-JoenessCli {
         "-$Mode",
         '-CodexHome', $Fixture.Codex
     )
-    $lines = @(& powershell.exe @args 2>&1)
-    $exitCode = $LASTEXITCODE
+    # Capture native channels separately: human guidance on stderr is not a failed operation.
+    $start = New-Object Diagnostics.ProcessStartInfo
+    $start.FileName = 'powershell.exe'
+    $start.Arguments = ($args | ForEach-Object { '"' + $_ + '"' }) -join ' '
+    $start.UseShellExecute = $false
+    $start.CreateNoWindow = $true
+    $start.RedirectStandardOutput = $true
+    $start.RedirectStandardError = $true
+    $start.StandardOutputEncoding = New-Object Text.UTF8Encoding($false)
+    $start.StandardErrorEncoding = New-Object Text.UTF8Encoding($false)
+    $process = New-Object Diagnostics.Process
+    $process.StartInfo = $start
+    try {
+        $null = $process.Start()
+        $stdout = $process.StandardOutput.ReadToEndAsync()
+        $stderr = $process.StandardError.ReadToEndAsync()
+        $process.WaitForExit()
+        $lines = @($stdout.Result -split "`r?`n" | Where-Object { $_.Length })
+        $guidance = $stderr.Result
+        $exitCode = $process.ExitCode
+    } finally { $process.Dispose() }
     $jsonLine = @($lines | ForEach-Object { [string] $_ } | Where-Object { $_.TrimStart().StartsWith('{') } | Select-Object -Last 1)
     if ($jsonLine.Count -ne 1) {
         throw "JOENESS returned no parseable JSON for $Mode. Exit=$exitCode Output=$($lines -join ' | ')"
@@ -85,6 +104,7 @@ function Invoke-JoenessCli {
         ExitCode = $exitCode
         Result = ($jsonLine[0] | ConvertFrom-Json)
         Output = @($lines)
+        Guidance = $guidance
     }
 }
 
