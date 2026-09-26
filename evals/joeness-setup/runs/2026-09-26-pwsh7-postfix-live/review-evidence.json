@@ -1,0 +1,84 @@
+{
+  "scope": "Post-fix end-to-end revalidation of the installed JOENESS 0.2 setup skill in one isolated temporary Git project; prior failure evidence was not rewritten.",
+  "baseHead": "f139172b0883c42f271fd6dc781285be73f11eb9",
+  "runtime": {
+    "cli": "codex-cli 0.158.0-alpha.2",
+    "invokedModel": "gpt-6-astra",
+    "invokedReasoning": "xhigh",
+    "freshContextPerPhase": true,
+    "fixture": "joeness-postfix-revalidation-8b3877437afe4c2dbb5dbb0f672babae",
+    "fixtureLocation": "local temporary Git repository; not a production project or committed fixture"
+  },
+  "installedIdentity": {
+    "helperSha256": "a70aa1b980a4d9a764047ea74fd87653d96e9ab7246bb10297d7037eafebadee",
+    "sourceManifestHelperSha256Matches": true,
+    "personalInstallCheck": "current",
+    "activeSkills": ["joeness-setup"]
+  },
+  "freshSessions": [
+    {
+      "phase": "natural-language proposal",
+      "threadId": "01a0dd20-5f49-7092-8359-97929515d95f",
+      "result": "Selected and read joeness-setup without the skill name in the request; reused existing work and issue paths, proposed consent scope, made no file changes.",
+      "verification": "All five initial file SHA-256 hashes unchanged; state file absent; helper Check ready; existing empty-list test 1 pass / 1 fail."
+    },
+    {
+      "phase": "authorized apply and onboarding",
+      "threadId": "01a0dd22-4413-7072-b83e-b73c8742b8c8",
+      "result": "Helper Apply current and PowerShell 7 Check current/clean; only AGENTS.md and .joeness/setup-state.json changed. Onboarding mapped five roles to actual reused paths and marked ROADMAP/DESIGN unused.",
+      "verification": "Original AGENTS.md byte prefix SHA-256 aae4921b7fdb494c2994f03a0b306b1d7df0c31afae8537b48f0f60fe7ecc920; four other initial files unchanged."
+    },
+    {
+      "phase": "ordinary authorized work with routine recording",
+      "threadId": "01a0dd24-7853-7ef2-92b5-92a3bb980a8b",
+      "result": "Did not rerun setup. Fixed the empty-list branch; existing test changed from 1 pass / 1 fail to 2 pass / 0 fail. Recorded actual execution and reusable cause/fix in the existing work and issue files, preserving the active refresh workaround.",
+      "verification": "AGENTS.md, setup state, and preview.test.mjs hashes unchanged."
+    },
+    {
+      "phase": "resume with stale handoff and no-record status request",
+      "threadId": "01a0dd25-f4a0-7242-84cc-46f90d19cea4",
+      "result": "Current code and 2/2 passing tests outranked the older incomplete note; no repeated work or inferred refresh scope. Reported the current workaround and exact verification boundary.",
+      "verification": "All seven pre-resume file hashes unchanged."
+    },
+    {
+      "phase": "authorized fix with one-turn no-record request",
+      "threadId": "01a0dd27-588c-7163-bbb7-5563664b7981",
+      "result": "Fixed singular count labeling and passed 2/2 tests while leaving project records and setup unchanged.",
+      "verification": "All eight non-target file hashes unchanged; combined fixture tests 4/4."
+    },
+    {
+      "phase": "persistent automatic-recording stop",
+      "threadId": "01a0dd28-8893-7363-be38-3fbcbc716a17",
+      "result": "Updated the owned body and setup state only; retained document navigation and resume instructions. PowerShell 7 Check remained current/clean.",
+      "verification": "Seven non-managed file hashes unchanged; managed block exterior unchanged."
+    },
+    {
+      "phase": "ordinary work after persistent stop",
+      "threadId": "01a0dd2a-c360-7d42-b795-10ed81aab33b",
+      "result": "Fixed an on-time label without another no-record instruction; test changed from 1 pass / 1 fail to 2 pass / 0 fail; did not update work or issue records.",
+      "verification": "All six non-target file hashes unchanged; combined fixture tests 6/6."
+    },
+    {
+      "phase": "project detach",
+      "threadId": "01a0dd2b-c158-7f81-b234-d90848556ea4",
+      "result": "Fresh Check current/clean, Detach detached, final Check ready/absent. Removed only owned block/separators and setup state; did not uninstall the personal package.",
+      "verification": "AGENTS.md returned to its exact initial SHA-256; nine ordinary files unchanged; final fixture tests 6/6."
+    }
+  ],
+  "postFixDeterministic": {
+    "powershell7ProjectSafety": "21 PASS / 0 FAIL",
+    "windowsPowerShellProjectSafety": "21 PASS / 0 FAIL",
+    "installerLifecycle": "PASS",
+    "nodeContractsAndFixtures": "6 PASS / 0 FAIL",
+    "currentReleaseContract": "PASS",
+    "whitespace": "git diff --check exit 0"
+  },
+  "unresolvedWithinTestedScope": [],
+  "limits": [
+    "The fixture is a local temporary project, not a production project; its files and full CLI rollouts are not committed with this summary.",
+    "The CLI invocations requested gpt-6-astra/xhigh; the CLI event stream did not independently attest a provider-side model identifier.",
+    "The run does not measure human acceptance, broader project compatibility, or baseline-versus-JOENESS behavioral superiority."
+  ],
+  "commitPerformed": false,
+  "pushPerformed": false
+}

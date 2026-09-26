@@ -3,10 +3,7 @@ param(
     [switch] $Check,
     [switch] $Apply,
     [switch] $Remove,
-    [switch] $IncludeDesignFrontend,
-    [string] $CodexHome,
-    [string] $AgentsHome,
-    [string] $BackupRoot
+    [string] $CodexHome
 )
 
 Set-StrictMode -Version Latest
@@ -15,7 +12,7 @@ $ErrorActionPreference = 'Stop'
 $script:JoenessBeginMarker = '<!-- JOEWRKS-HARNESS:BEGIN -->'
 $script:JoenessEndMarker = '<!-- JOEWRKS-HARNESS:END -->'
 $script:JoenessStateFile = 'joewrks-harness-state.json'
-$script:JoenessRelease = '0.2-astra-judgment'
+$script:JoenessRelease = '0.2'
 $script:Utf8Strict = New-Object Text.UTF8Encoding($false, $true)
 $script:Utf8NoBom = New-Object Text.UTF8Encoding($false)
 
@@ -124,14 +121,21 @@ function Get-JoenessSourceIdentity {
     if ([string] $manifest.release.entrypoint -cne 'JOENESS.ps1') { throw 'Unexpected release entrypoint' }
     if ([string] $manifest.target.model -cne 'gpt-6-astra') { throw 'Unexpected target model' }
     if ([string] $manifest.target.reasoningEffort -cne 'xhigh') { throw 'Unexpected reasoning effort' }
-    if ([string] $manifest.runtimeMode -cne 'common-core') { throw 'Unexpected runtime mode' }
+    if ([string] $manifest.runtimeMode -cne 'common-core+setup') { throw 'Unexpected runtime mode' }
     if ($null -eq $manifest.activeCommonCore) { throw 'Missing active Common Core identity' }
     if ([string] $manifest.activeCommonCore.path -cne 'astra-judgment-core.md') { throw 'Unexpected active Common Core path' }
     if (@($manifest.managedRuntimeFiles).Count -ne 0) { throw 'Managed runtime files must remain empty' }
-    if (@($manifest.publicSkills).Count -ne 0) { throw 'Public skills must remain empty' }
+    if (@($manifest.publicSkills).Count -ne 1 -or $manifest.publicSkills[0].name -cne 'joeness-setup') { throw 'Only joeness-setup may ship' }
+    $expectedFiles=@('SKILL.md','agents/openai.yaml','assets/AGENTS.md','assets/DESIGN.md','assets/ISSUES.md','assets/ROADMAP.md','assets/TASK.md','references/usage.md','scripts/project-setup.ps1')
+    $files=@($manifest.publicSkills[0].files)
+    if((@($files.path|Sort-Object)-join ',') -cne (($expectedFiles|Sort-Object)-join ',')){throw 'Unexpected skill source inventory'}
+    foreach($file in $files){
+        $path=Join-Path $SourceRoot ('skills/joeness-setup/'+$file.path)
+        if((Get-JoenessSha256 ([IO.File]::ReadAllBytes($path))) -cne $file.sha256){throw "Skill source hash mismatch: $($file.path)"}
+    }
     if (@($manifest.defaultVendors).Count -ne 0) { throw 'Default vendors must remain empty' }
     if ($null -ne $manifest.pluginRouting) { throw 'Plugin routing must remain null' }
-    if ($null -ne $manifest.PSObject.Properties['compatibility']) { throw 'Historical compatibility payload is not allowed in the current manifest' }
+    if ($null -ne $manifest.PSObject.Properties['compatibility']) { throw 'Unexpected distribution manifest field: compatibility' }
 
     $coreBytes = [IO.File]::ReadAllBytes($corePath)
     $coreText = ConvertFrom-JoenessUtf8 $coreBytes 'Independent Judgment source'
@@ -139,6 +143,7 @@ function Get-JoenessSourceIdentity {
     if ([string] $manifest.activeCommonCore.sha256 -cne $coreHash) { throw 'Active Common Core hash does not match source bytes' }
 
     [pscustomobject] @{
+        Skill = $manifest.publicSkills[0]
         ManifestHash = Get-JoenessSha256 $manifestBytes
         CoreHash = $coreHash
         CoreText = $coreText.TrimEnd("`r", "`n")
@@ -211,7 +216,7 @@ function Read-JoenessState {
     $state = $text | ConvertFrom-Json
 
     if (-not (Test-JoenessJsonInteger $state.schemaVersion) -or [long] $state.schemaVersion -ne 1) { throw 'Unsupported current state schemaVersion' }
-    if ([string] $state.releaseVersion -cne $script:JoenessRelease) { throw 'State release identity mismatch' }
+    if ([string] $state.releaseVersion -cne $script:JoenessRelease) { throw 'State identity does not match this package; existing files were preserved' }
     if ($state.originalAgentsExisted -isnot [bool]) { throw 'State originalAgentsExisted is invalid' }
     if ([string] $state.newline -cnotin @('lf', 'crlf')) { throw 'State newline is invalid' }
     if (-not (Test-JoenessJsonInteger $state.separatorCount) -or [long] $state.separatorCount -lt 0 -or [long] $state.separatorCount -gt 2) { throw 'State separatorCount is invalid' }
@@ -320,152 +325,99 @@ function Get-JoenessInstallObservation {
 }
 
 function Invoke-JoenessHarnessSync {
-    [CmdletBinding()]
-    param(
-        [switch] $Check,
-        [switch] $Apply,
-        [switch] $Remove,
-        [string] $CodexHome,
-        [string] $AgentsHome,
-        [string] $BackupRoot,
-        [switch] $IncludeDesignFrontend,
-        [scriptblock] $AfterWrite
-    )
-
-    $modeCount = [int] [bool] $Check + [int] [bool] $Apply + [int] [bool] $Remove
-    if ($modeCount -eq 0) { $Check = $true; $modeCount = 1 }
-    if ($modeCount -ne 1) { throw 'Choose exactly one of -Check, -Apply, or -Remove' }
-    $mode = if ($Apply) { 'apply' } elseif ($Remove) { 'remove' } else { 'check' }
-
-    $warnings = @()
-    if ($IncludeDesignFrontend) { $warnings += '-IncludeDesignFrontend is ignored; JOENESS 0.2 installs no public skills or design vendors.' }
-    if (-not [string]::IsNullOrWhiteSpace($AgentsHome)) { $warnings += '-AgentsHome is ignored by the current minimal release.' }
-    if (-not [string]::IsNullOrWhiteSpace($BackupRoot)) { $warnings += '-BackupRoot is ignored; current 0.2 owns only an exact suffix and minimal state.' }
-
-    $resolved = Resolve-JoenessCodexHome $CodexHome
-    $sourceRoot = Split-Path -Parent $PSScriptRoot
-    try {
-        $source = Get-JoenessSourceIdentity $sourceRoot
-    } catch {
-        return New-JoenessPublicResult 'blocked' $mode $resolved $warnings $false @() @([pscustomobject] @{ kind = 'sourceIntegrity'; message = $_.Exception.Message }) $null
-    }
-
-    $observation = Get-JoenessInstallObservation $resolved $source
-
-    if ($Check) {
-        if ($observation.Status -eq 'ready') {
-            return New-JoenessPublicResult 'ready' $mode $resolved $warnings $true @([pscustomobject] @{ kind = 'managedBlock'; action = 'apply'; target = 'AGENTS.md' }) @() $null
-        }
-        if ($observation.Status -eq 'current') {
-            return New-JoenessPublicResult 'current' $mode $resolved $warnings $false @() @() $null
-        }
-        return New-JoenessPublicResult 'blocked' $mode $resolved $warnings $false @() $observation.Blockers $null
-    }
-
-    if ($Apply) {
-        if ($observation.Status -eq 'current') {
-            return New-JoenessPublicResult 'current' $mode $resolved $warnings $false @() @() $null
-        }
-        if ($observation.Status -eq 'blocked') {
-            return New-JoenessPublicResult 'blocked' $mode $resolved $warnings $false @() $observation.Blockers $null
-        }
-
-        $agentsPath = Join-Path $resolved 'AGENTS.md'
-        $statePath = Join-Path $resolved $script:JoenessStateFile
-        $agentsSnapshot = Get-JoenessSnapshot $agentsPath
-        $stateSnapshot = Get-JoenessSnapshot $statePath
-
-        try {
-            if (-not (Test-Path -LiteralPath $resolved)) {
-                $null = New-Item -ItemType Directory -Path $resolved -Force
-            }
-
-            $original = [byte[]] $agentsSnapshot.Bytes
-            $newline = Get-JoenessNewline $original
-            $separatorCount = Get-JoenessSeparatorCount $original
-            $suffix = Get-JoenessManagedSuffixBytes $source $newline $separatorCount
-            $newBytes = New-Object byte[] ($original.Length + $suffix.Length)
-            [Array]::Copy($original, 0, $newBytes, 0, $original.Length)
-            [Array]::Copy($suffix, 0, $newBytes, $original.Length, $suffix.Length)
-
-            Write-JoenessBytesAtomic $agentsPath $newBytes
-            if ($null -ne $AfterWrite) { & $AfterWrite 'agents' }
-
-            $newlineName = if ($newline -ceq "`r`n") { 'crlf' } else { 'lf' }
-            $blockHash = Get-JoenessSha256 (Get-JoenessBlockBytes $source $newline)
-            $stateObject = [ordered] @{
-                schemaVersion = 1
-                releaseVersion = $script:JoenessRelease
-                manifestSha256 = $source.ManifestHash
-                coreSha256 = $source.CoreHash
-                originalAgentsExisted = [bool] $agentsSnapshot.Exists
-                newline = $newlineName
-                separatorCount = $separatorCount
-                blockSha256 = $blockHash
-            }
-            $stateJson = ($stateObject | ConvertTo-Json -Depth 4 -Compress) + "`n"
-            Write-JoenessBytesAtomic $statePath ($script:Utf8NoBom.GetBytes($stateJson))
-            if ($null -ne $AfterWrite) { & $AfterWrite 'state' }
-
-            $post = Get-JoenessInstallObservation $resolved $source
-            if ($post.Status -ne 'current') { throw 'Post-Apply verification did not reach current state' }
-            return New-JoenessPublicResult 'current' $mode $resolved $warnings $false @([pscustomobject] @{ kind = 'managedBlock'; action = 'installed'; target = 'AGENTS.md' }) @() $null
-        } catch {
-            $writeError = $_.Exception.Message
-            $rollbackProblems = @()
-            try { Restore-JoenessSnapshot $agentsPath $agentsSnapshot } catch { $rollbackProblems += $_.Exception.Message }
-            try { Restore-JoenessSnapshot $statePath $stateSnapshot } catch { $rollbackProblems += $_.Exception.Message }
-            $rollbackStatus = if ($rollbackProblems.Count -eq 0) { 'complete' } else { 'incomplete' }
-            $rollback = [pscustomobject] @{ status = $rollbackStatus; problems = @($rollbackProblems) }
-            return New-JoenessPublicResult 'failed' $mode $resolved $warnings $true @() @([pscustomobject] @{ kind = 'writeFailure'; message = $writeError }) $rollback
-        }
-    }
-
-    if ($observation.Status -eq 'ready') {
-        return New-JoenessPublicResult 'removed' $mode $resolved $warnings $false @() @() $null
-    }
-    if ($observation.Status -eq 'blocked') {
-        return New-JoenessPublicResult 'blocked' $mode $resolved $warnings $false @() $observation.Blockers $null
-    }
-
-    $agentsPath = Join-Path $resolved 'AGENTS.md'
-    $statePath = Join-Path $resolved $script:JoenessStateFile
-    $agentsSnapshot = Get-JoenessSnapshot $agentsPath
-    $stateSnapshot = Get-JoenessSnapshot $statePath
-
-    try {
-        $suffix = [byte[]] $observation.SuffixBytes
-        $currentBytes = [byte[]] $observation.AgentsBytes
-        $prefixLength = $currentBytes.Length - $suffix.Length
-        if ($prefixLength -lt 0) { throw 'Managed suffix is larger than AGENTS.md' }
-
-        $prefix = New-Object byte[] $prefixLength
-        if ($prefixLength -gt 0) {
-            [Array]::Copy($currentBytes, 0, $prefix, 0, $prefixLength)
-        }
-
-        if (-not [bool] $observation.State.originalAgentsExisted -and $prefix.Length -eq 0) {
-            Remove-Item -LiteralPath $agentsPath -Force
-        } else {
-            Write-JoenessBytesAtomic $agentsPath $prefix
-        }
-        if ($null -ne $AfterWrite) { & $AfterWrite 'agents' }
-
-        Remove-Item -LiteralPath $statePath -Force
-        if ($null -ne $AfterWrite) { & $AfterWrite 'state' }
-
-        $post = Get-JoenessInstallObservation $resolved $source
-        if ($post.Status -ne 'ready') { throw 'Post-Remove verification did not reach ready state' }
-        return New-JoenessPublicResult 'removed' $mode $resolved $warnings $false @([pscustomobject] @{ kind = 'managedBlock'; action = 'removed'; target = 'AGENTS.md' }) @() $null
-    } catch {
-        $writeError = $_.Exception.Message
-        $rollbackProblems = @()
-        try { Restore-JoenessSnapshot $agentsPath $agentsSnapshot } catch { $rollbackProblems += $_.Exception.Message }
-        try { Restore-JoenessSnapshot $statePath $stateSnapshot } catch { $rollbackProblems += $_.Exception.Message }
-        $rollbackStatus = if ($rollbackProblems.Count -eq 0) { 'complete' } else { 'incomplete' }
-        $rollback = [pscustomobject] @{ status = $rollbackStatus; problems = @($rollbackProblems) }
-        return New-JoenessPublicResult 'failed' $mode $resolved $warnings $true @() @([pscustomobject] @{ kind = 'writeFailure'; message = $writeError }) $rollback
-    }
+ [CmdletBinding()]
+ param([switch]$Check,[switch]$Apply,[switch]$Remove,[string]$CodexHome,[scriptblock]$AfterWrite)
+ $mode=if($Apply){'apply'}elseif($Remove){'remove'}else{'check'}
+ $resolved=Resolve-JoenessCodexHome $CodexHome
+ $warnings=@()
+ try {
+  if(([int][bool]$Check+[int][bool]$Apply+[int][bool]$Remove) -gt 1){throw 'Choose one mode'}
+  $sourceRoot=Split-Path -Parent $PSScriptRoot
+  $source=Get-JoenessSourceIdentity $sourceRoot
+  $savedApply=$Apply; $savedRemove=$Remove; $savedCheck=$Check
+  . (Join-Path $sourceRoot 'skills/joeness-setup/scripts/project-setup.ps1')
+  $Apply=$savedApply; $Remove=$savedRemove; $Check=$savedCheck
+  Assert-SetupPath $resolved
+  $agents=Get-SetupSnapshot (Join-Path $resolved 'AGENTS.md')
+  $coreState=Get-SetupSnapshot (Join-Path $resolved $script:JoenessStateFile)
+  $skillState=Get-SetupSnapshot (Join-Path $resolved 'joeness-skills-state.json')
+  $observation=Get-JoenessInstallObservation $resolved $source
+  if($observation.Status -eq 'blocked'){throw (($observation.Blockers|ForEach-Object {$_.message}) -join '; ')}
+  $skillRoot=Join-Path $resolved 'skills/joeness-setup'
+  Assert-SetupPath $skillRoot
+  $files=@($source.Skill.files)
+  $currentFiles=@()
+  if(Test-Path -LiteralPath $skillRoot){
+   foreach($item in Get-ChildItem -LiteralPath $skillRoot -Force -Recurse){
+    Assert-SetupPath $item.FullName
+    if(-not $item.PSIsContainer){$currentFiles+=$item.FullName.Substring($skillRoot.Length+1).Replace('\','/')}
+   }
+  }
+  $owned=$null
+  if($skillState.Hash -ne 'absent'){
+   $owned=$script:Utf8Strict.GetString($skillState.Bytes)|ConvertFrom-Json
+   if($owned.schemaVersion -ne 1 -or $owned.releaseVersion -cne '0.2' -or $owned.manifestSha256 -cne $source.ManifestHash){throw 'Skill ownership does not match this package; existing files were preserved'}
+   if(($owned.files|ConvertTo-Json -Compress) -cne ($files|ConvertTo-Json -Compress)){throw 'Skill ownership inventory mismatch'}
+   if(($currentFiles|Sort-Object)-join ',' -cne (($files.path|Sort-Object)-join ',')){throw 'Owned skill inventory drift'}
+  }elseif($currentFiles.Count){throw 'Unowned skill files; preserve them and resolve explicitly'}
+  $entries=New-Object Collections.Generic.List[object]
+  foreach($file in $files){
+   $target=Get-SetupSnapshot (Join-Path $skillRoot $file.path)
+   if($null -ne $owned -and $target.Hash -cne $file.sha256){throw "Owned skill drift: $($file.path)"}
+   if($Remove){$entries.Add((New-SetupEntry $target @() ('skills/joeness-setup/'+$file.path) -Delete))}
+   else{$entries.Add((New-SetupEntry $target ([IO.File]::ReadAllBytes((Join-Path $sourceRoot ('skills/joeness-setup/'+$file.path)))) ('skills/joeness-setup/'+$file.path)))}
+  }
+  $coreEntries=@()
+  if($Remove){
+   if($observation.Status -eq 'current'){
+    $length=$agents.Bytes.Length-$observation.SuffixBytes.Length
+    $prefix=New-Object byte[] $length
+    [Array]::Copy($agents.Bytes,$prefix,$length)
+    $delete=(-not $observation.State.originalAgentsExisted -and $length -eq 0)
+    $coreEntries+=New-SetupEntry $agents $prefix 'AGENTS.md' -Delete:$delete
+   }
+   $coreEntries+=New-SetupEntry $coreState @() $script:JoenessStateFile -Delete
+   $entries.Add((New-SetupEntry $skillState @() 'joeness-skills-state.json' -Delete))
+  }else{
+   if($observation.Status -eq 'ready'){
+    $newline=Get-JoenessNewline $agents.Bytes
+    $separatorCount=Get-JoenessSeparatorCount $agents.Bytes
+    $suffix=Get-JoenessManagedSuffixBytes $source $newline $separatorCount
+    $newAgents=[byte[]]($agents.Bytes+$suffix)
+    $originalExisted=$agents.Hash -ne 'absent'
+   }else{
+    $newline=if($observation.State.newline -eq 'crlf'){"`r`n"}else{"`n"}
+    $separatorCount=$observation.State.separatorCount
+    $newAgents=$agents.Bytes;$originalExisted=$observation.State.originalAgentsExisted
+   }
+   $stateObject=[ordered]@{
+    schemaVersion=1;releaseVersion='0.2';manifestSha256=$source.ManifestHash;coreSha256=$source.CoreHash;
+    originalAgentsExisted=[bool]$originalExisted;newline=$(if($newline -ceq "`r`n"){'crlf'}else{'lf'});
+    separatorCount=$separatorCount;blockSha256=(Get-JoenessSha256 (Get-JoenessBlockBytes $source $newline))
+   }
+   $coreEntries+=New-SetupEntry $agents $newAgents 'AGENTS.md'
+   $coreEntries+=New-SetupEntry $coreState ($script:Utf8NoBom.GetBytes(($stateObject|ConvertTo-Json -Compress)+"`n")) $script:JoenessStateFile
+   $ss=[ordered]@{schemaVersion=1;releaseVersion='0.2';manifestSha256=$source.ManifestHash;files=$files}
+   $entries.Add((New-SetupEntry $skillState ($script:Utf8NoBom.GetBytes(($ss|ConvertTo-Json -Depth 5 -Compress)+"`n")) 'joeness-skills-state.json'))
+  }
+  $all=@($coreEntries)+$entries.ToArray()
+  $changes=@($all|Where-Object {$_.Before.Hash -cne $_.NewHash}|ForEach-Object {$_.Label})
+  if(-not $Apply -and -not $Remove){
+   $status=if($changes.Count){'ready'}else{'current'}
+   $r=New-JoenessPublicResult $status $mode $resolved $warnings ([bool]$changes.Count) $changes @() $null
+  }else{
+   $guard={Assert-SetupPath $resolved; $verified=Get-JoenessSourceIdentity $sourceRoot; if($verified.ManifestHash -cne $source.ManifestHash){throw 'Source changed during operation'}}
+   $tx=Invoke-SetupTransaction $all $AfterWrite $guard
+   $status=if($tx.Status -eq 'success'){if($Remove){'removed'}else{'current'}}else{$tx.Status}
+   $rollback=if($tx.Rollback){[pscustomobject]@{status=$tx.Rollback;problems=$tx.Unresolved}}else{$null}
+   $blockers=if($tx.Error){@([pscustomobject]@{kind='writeFailure';message=$tx.Error})}else{@()}
+   $r=New-JoenessPublicResult $status $mode $resolved $warnings ($status -in @('failed','partial')) $tx.Changed $blockers $rollback
+  }
+  if($r.status -eq 'current'){$r.activeSkills=@('joeness-setup')}
+  $r
+ }catch{
+  New-JoenessPublicResult 'blocked' $mode $resolved $warnings $false @() @([pscustomobject]@{kind='conflict';message=$_.Exception.Message}) $null
+ }
 }
 
 function Get-JoenessExitCode {
@@ -476,10 +428,27 @@ function Get-JoenessExitCode {
     3
 }
 
+function Get-JoenessInstallGuide {
+    param($Result)
+    if ($Result.mode -eq 'apply' -and $Result.status -eq 'current') {
+        $path = Join-Path $Result.codexHome 'skills/joeness-setup/references/usage.md'
+        $script:Utf8Strict.GetString([IO.File]::ReadAllBytes($path))
+    }
+}
+
 if ($MyInvocation.InvocationName -ne '.') {
+    # Keep native stdout machine-readable, including Korean paths.
+    [Console]::OutputEncoding = New-Object Text.UTF8Encoding($false)
     try {
-        $result = Invoke-JoenessHarnessSync -Check:$Check -Apply:$Apply -Remove:$Remove -CodexHome $CodexHome -AgentsHome $AgentsHome -BackupRoot $BackupRoot -IncludeDesignFrontend:$IncludeDesignFrontend
+        $result = Invoke-JoenessHarnessSync -Check:$Check -Apply:$Apply -Remove:$Remove -CodexHome $CodexHome
         $result | ConvertTo-Json -Depth 8 -Compress | Write-Output
+        # A display error must not change a completed installation into a failed write.
+        try {
+            $guide = Get-JoenessInstallGuide $result
+            if ($guide) { [Console]::Error.WriteLine($guide) }
+        } catch {
+            [Console]::Error.WriteLine('Installation is current; usage guide could not be displayed. See README.md.')
+        }
         exit (Get-JoenessExitCode $result.status)
     } catch {
         $fallbackHome = Resolve-JoenessCodexHome $CodexHome

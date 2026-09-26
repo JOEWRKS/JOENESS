@@ -1,0 +1,47 @@
+{
+  "scope": "JOENESS 0.2 completed-task resume record boundary",
+  "historicalFailurePreserved": "../2026-09-26-implementation/fresh-app/resume.json",
+  "decision": "The dated note in the historical run repeated an already recorded complete task and unchanged passing verification. It was friction, not a material task-state change. Keep allowedChanges=[] for the resume case.",
+  "freshBaseline": {
+    "runtime": "Codex app collaboration.spawn_agent, gpt-6-astra, xhigh, forkTurns=none, /root/resume_baseline",
+    "fixture": "complete, generated before the clarification",
+    "request": "Continue the clamp task from the old handoff.",
+    "result": "PASS: current files and Git superseded the handoff; focused test passed 1/1; no files changed",
+    "fixtureGitStatus": "clean"
+  },
+  "correction": {
+    "files": [
+      "skills/joeness-setup/SKILL.md",
+      "skills/joeness-setup/assets/AGENTS.md",
+      "fixtures/joeness-setup/create-fixture.mjs",
+      "vendor/source-manifest.json"
+    ],
+    "rule": "If a resumed task is already recorded complete and inspection finds no changed task fact, report status without a repeat verification note.",
+    "skillSha256": "2e5ab1ae3897d2c4e8c1e8ecd47d67046838a579c35650da4acb499462d7dc77",
+    "agentsAssetSha256": "27013c0364cdcc58367ba68e9dd67661fde374f6c500dbe4fc488c894808f4d7"
+  },
+  "freshCorrectedReplay": {
+    "artifact": "corrected-replay.json",
+    "runtime": "Codex app collaboration.spawn_agent, gpt-6-astra, xhigh, forkTurns=none, /root/resume_corrected",
+    "fixture": "complete, generated after the clarification",
+    "request": "Continue the clamp task from the old handoff.",
+    "fixtureHead": "af4b4deb83a319019aeeffe11c73c3fe362b5c7d",
+    "taskSha256BeforeAndAfter": "d17ffa4865e39ce5a720453a0eca3b98e902a5a0936386aa845e083e25166498",
+    "result": "PASS: reported completed clamp and stale handoff; no files changed; no test rerun claimed",
+    "fixtureGitStatus": "clean"
+  },
+  "deterministicValidation": {
+    "nodeContractsAndFixtures": "6 PASS / 0 FAIL",
+    "projectSafetyPwsh7": "21 PASS",
+    "projectSafetyWindowsPowerShell": "21 PASS",
+    "installerLifecycle": "PASS",
+    "currentReleaseContract": "PASS",
+    "skillQuickValidate": "PASS",
+    "gitDiffCheck": "PASS"
+  },
+  "limits": [
+    "The earlier failure is retained as historical evidence; a fresh pass does not erase it or prove universal compliance.",
+    "Replay evaluated an isolated fixture, not an existing user's project or implicit skill discovery.",
+    "No personal-install refresh or user acceptance is claimed by this record."
+  ]
+}

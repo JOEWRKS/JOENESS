@@ -1,0 +1,60 @@
+{
+  "sourceHead": "b8d1f494fc70bbee1c6ff3cf43bf5ddaf87c46ec",
+  "scope": "local main integration and authorized personal installation; no push",
+  "preservedFailures": [
+    {
+      "gate": "current tree contract after worktree-container correction",
+      "exitCode": 1,
+      "message": "vendor directory contains only active manifest: unexpected ui-ux-pro-max",
+      "cause": "Five ignored .pyc cache files remained after historical source removal.",
+      "resolution": "Moved the exact cache-only directory to the external installation recovery directory; did not weaken vendor allowlist. An earlier empty-directory removal guard refused because contents existed; it changed nothing."
+    },
+    {
+      "gate": "powershell.exe -NoProfile -File tests/astra-judgment-sync.tests.ps1",
+      "exitCode": 1,
+      "message": "root contains only current JOENESS surface: unexpected .worktrees",
+      "cause": "Existing Git-ignored local worktree container was counted as release payload.",
+      "correction": "Exclude only the root worktree directory from filesystem names; reject tracked worktree payload. Preserve all worktrees."
+    },
+    {
+      "gate": "personal installer Check before replacement",
+      "status": "blocked",
+      "message": "State identity does not match this package; existing files were preserved",
+      "resolution": "Known installed identity checked with its exact historical installer and backed up before separate removal; current installer migration remains disabled."
+    }
+  ],
+  "finalVerification": {
+    "currentReleaseContract": "PASS; exit 0 after bounded test correction and cache separation",
+    "projectSafety": "19 PASS; exit 0",
+    "installerLifecycle": "PASS; exit 0",
+    "nodeContractsAndFixtures": "5 PASS / 0 FAIL; exit 0",
+    "installedHelperCheck": "ready; changedTargets empty",
+    "runtimeSourceChanged": false
+  },
+  "personalInstallation": {
+    "status": "current",
+    "codexHome": "C:/Users/tjdwo/.codex",
+    "activeSkills": ["joeness-setup"],
+    "postCheckChangesRequired": false,
+    "globalAgentsByteIdenticalBeforeAfter": true,
+    "coreSha256": "f360b48be1b4143035f61fa20149a3249c60dea2e7f12cffa8bf1e8918f4f6a9",
+    "skillSha256": "77bd5a50e83ec69b8482ac910ec47a29f6d0d6a8881be8593f639e5ba9bccb7d",
+    "recoveryPath": "C:/Users/tjdwo/AppData/Local/Temp/joeness-install-recovery-c3fc448b3aee4001ba815dca0f5c030c",
+    "preMergeDraftRecoveryStash": "2bf6f8ae03b09efa96f63104b8b3e449579b63dc"
+  },
+  "freshSession": {
+    "status": "BLOCKED_RUNTIME_VERSION",
+    "cliVersion": "0.146.0",
+    "requestedModel": "gpt-6-astra",
+    "requestedReasoning": "xhigh",
+    "threadId": "01a0dcc1-348f-72a1-a5df-2aa4188fe815",
+    "exitCode": 1,
+    "httpStatus": 400,
+    "error": "The 'gpt-6-astra' model requires a newer version of Codex. Please upgrade to the latest app or CLI and try again.",
+    "modelTaskExecuted": false,
+    "automaticSkillDiscoveryVerified": false,
+    "desktopInstructionReloadVerified": false,
+    "runtimeUpdated": false
+  },
+  "pushPerformed": false
+}

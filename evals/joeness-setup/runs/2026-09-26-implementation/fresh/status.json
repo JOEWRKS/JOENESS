@@ -1,0 +1,61 @@
+{
+  "caseId": "status",
+  "requestedRuntime": {
+    "model": "gpt-6-astra",
+    "reasoning": "xhigh",
+    "cli": "codex-cli 0.146.0"
+  },
+  "began": "2026-09-26T07:17:39.983Z",
+  "ended": "2026-09-26T07:17:44.991Z",
+  "exit": 1,
+  "thread": {
+    "type": "thread.started",
+    "thread_id": "01a0dc93-ac45-7543-990c-d1bbc8db091b"
+  },
+  "prompt": "What is the current status? Do not change anything.\nWork only in this temporary fixture. No network, package installation, commits, or changes outside the fixture. Report what actually happened.",
+  "fixture": {
+    "kind": "normal",
+    "archive": "cea5bf09444746c902a01cfa8cc1753701643069",
+    "baselineHashes": {
+      ".joeness/setup-state.json": "da9277adbe4569b2fb1c870917fbe3bea18351a5ac2b45a9833d828afeafab99",
+      "AGENTS.md": "715a721f1f6e0a49950f84e5ccf82b476e176d4af5b5ca86f32c63a16f1b8cb7",
+      "DESIGN.md": "b24a9fafe6798ef71fcdce7b09f9aced827f791c5da6abdd993ccba300d7163f",
+      "HANDOFF.md": "e80b6a331a0e1e5ae623d492a48d9ba9d5f05345244fedb99efa266d8fb11c6c",
+      "ISSUES.md": "14d4a2cadcfa1da3f63570bfd9ab80cf97ada9ee2928b3cc42ab4052ae066f84",
+      "main.mjs": "e32adc278e47096202e5093129238e859ac55aedc82459797e820ae4062b58fa",
+      "main.test.mjs": "a861c4049c290e6fd7f0389bc3c2359d04ae62e5c92cb768e67bf7468bb164f2",
+      "PRODUCT.md": "2f7637f15c305ef7a381673b4e4759ca448acf4b01d417030a1d37a7c5363f70",
+      "ROADMAP.md": "e1343929f7933a4736907d38cd65aa01d94abd7a8ca3588d6fd5a962816f2545",
+      "TASK.md": "3add5a209984c68268641322dd5d658dcfcd7a4f798f7506c7054a21b7262c40"
+    }
+  },
+  "skillSha256": "77bd5a50e83ec69b8482ac910ec47a29f6d0d6a8881be8593f639e5ba9bccb7d",
+  "changed": [],
+  "changes": [],
+  "actions": [
+    {
+      "id": "item_0",
+      "type": "error",
+      "message": "Model metadata for `gpt-6-astra` not found. Defaulting to fallback metadata; this can degrade performance and cause issues."
+    },
+    {
+      "id": "item_1",
+      "type": "error",
+      "message": "Skill descriptions were shortened to fit the 2% skills context budget. Codex can still see every skill, but some descriptions are shorter. Disable unused skills or plugins to leave more room for the rest."
+    }
+  ],
+  "errors": [
+    {
+      "type": "error",
+      "message": "{\"type\":\"error\",\"status\":400,\"error\":{\"type\":\"invalid_request_error\",\"message\":\"The 'gpt-6-astra' model requires a newer version of Codex. Please upgrade to the latest app or CLI and try again.\"}}"
+    },
+    {
+      "type": "turn.failed",
+      "error": {
+        "message": "{\"type\":\"error\",\"status\":400,\"error\":{\"type\":\"invalid_request_error\",\"message\":\"The 'gpt-6-astra' model requires a newer version of Codex. Please upgrade to the latest app or CLI and try again.\"}}"
+      }
+    }
+  ],
+  "stderr": "Reading additional input from stdin...\n2026-09-26T07:17:40.298796Z ERROR codex_models_manager::cache: failed to load models cache: missing field `base_instructions` at line 140 column 5\n2026-09-26T07:17:40.548825Z  WARN codex_models_manager::model_info: Unknown model gpt-6-astra is used. This will use fallback model metadata.\n2026-09-26T07:17:41.103929Z  WARN codex_core::shell_snapshot: Failed to create shell snapshot for powershell: Shell snapshot not supported yet for PowerShell\n2026-09-26T07:17:41.323127Z  WARN codex_models_manager::model_info: Unknown model gpt-6-astra is used. This will use fallback model metadata.\n2026-09-26T07:17:41.358918Z  WARN codex_models_manager::model_info: Unknown model gpt-6-astra is used. This will use fallback model metadata.\n2026-09-26T07:17:43.357900Z  WARN codex_core::session_startup_prewarm: startup websocket prewarm setup failed: {\"type\":\"error\",\"status\":400,\"error\":{\"type\":\"invalid_request_error\",\"message\":\"The 'gpt-6-astra' model requires a newer version of Codex. Please upgrade to the latest app or CLI and try again.\"}}\n",
+  "result": "PENDING_REVIEW"
+}

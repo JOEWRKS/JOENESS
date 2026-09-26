@@ -1,0 +1,142 @@
+{
+  "scope": "Approved bounded onboarding: installation guide, post-setup response, README; no project document bundle, Core change, push or runtime upgrade.",
+  "baseHead": "536041aa77cb9f90e581e49bc0c48b42366842d7",
+  "failuresPreserved": [
+    {
+      "gate": "node --test --test-name-pattern='CLI shows' tests/joeness-setup-contract.tests.mjs",
+      "phase": "RED",
+      "exitCode": 1,
+      "message": "successful Apply displays the first invocation",
+      "cause": "Successful Apply had no human usage output."
+    },
+    {
+      "gate": "powershell.exe -NoProfile -File tests/astra-judgment-sync.tests.ps1",
+      "phase": "integration",
+      "exitCode": 1,
+      "message": "NativeCommandError: # JOENESS 0.2 사용 안내",
+      "cause": "Test merged native stderr into stdout under Windows PowerShell Stop.",
+      "resolution": "Capture both channels independently, retaining exit-code and JSON assertions."
+    },
+    {
+      "gate": "powershell.exe -NoProfile -File tests/joeness-install.tests.ps1",
+      "phase": "test assertion",
+      "exitCode": 1,
+      "message": "checkHasNoSuccessGuide expected= actual=",
+      "cause": "Windows PowerShell cast of an empty pipeline returned null, not empty string.",
+      "resolution": "Assert actual no-output/null for Check, partial and failed results."
+    }
+  ],
+  "deterministic": {
+    "currentReleaseContract": "PASS / exit 0",
+    "projectSafety": "19 PASS / exit 0",
+    "installerLifecycle": "PASS / exit 0; includes failed/partial guide suppression",
+    "node": "6 PASS / 0 FAIL / exit 0",
+    "skillValidator": "Skill is valid! / exit 0",
+    "whitespace": "git diff --check / exit 0",
+    "guideChannels": "Native stdout stays one parseable JSON result; UTF-8 stderr shows guide only for Apply/current, including no-op Apply. Check/blocked/remove emit no guide.",
+    "guideOwnership": "New guide is manifest-hashed; modifying installed guide blocks Apply and preserves bytes."
+  },
+  "semanticReplay": {
+    "method": "Fresh fork_turns=none subagents with explicitly selected gpt-6-astra / xhigh. Synthetic already-executed post-Apply response replay, not live helper execution or automatic skill discovery.",
+    "scenario": "Korean first-time user approved existing-document connections. Supplied result: current; changedTargets AGENTS.md and .joeness/setup-state.json; matching readback; reuse docs/product.md, docs/next.md, notes/work.md, notes/problems.md; no design role; ordinary documents unchanged; factual task and reusable issue recording authorized.",
+    "baselineSkillSha256": "77bd5a50e83ec69b8482ac910ec47a29f6d0d6a8881be8593f639e5ba9bccb7d",
+    "candidateSkillSha256": "e1814b86c36aa0c74a0477af27693e85ac61ca42df60874c217071a3f2707589",
+    "manualCriteria": [
+      "Identify actual changed versus reused files",
+      "Explain five roles, with design unused rather than invented",
+      "State agreed recording scope",
+      "Give work/resume/issue-lookup/no-record examples",
+      "Explain no need to repeat setup each task"
+    ],
+    "baseline": [
+      {
+        "agent": "/root/onboarding_baseline_1",
+        "excerpt": "이제 별도 설정 없이 평소처럼 작업을 요청하면 됩니다.",
+        "observation": "Reused paths and recording scope present; concrete usage examples and unused design role absent."
+      },
+      {
+        "agent": "/root/onboarding_baseline_2",
+        "excerpt": "이제 평소처럼 작업을 요청하면 됩니다.",
+        "observation": "Reused paths and recording scope present; concrete usage examples and unused design role absent."
+      },
+      {
+        "agent": "/root/onboarding_baseline_3",
+        "excerpt": "다음부터는 평소처럼 작업을 요청하면 됩니다.",
+        "observation": "Reused paths and recording scope present; concrete usage examples and unused design role absent."
+      },
+      {
+        "agent": "/root/onboarding_baseline_4",
+        "excerpt": "이제 평소처럼 작업을 요청하면 됩니다.",
+        "observation": "Reused paths and recording scope present; concrete usage examples and unused design role absent."
+      },
+      {
+        "agent": "/root/onboarding_baseline_5",
+        "excerpt": "이제 별도 설정 없이 평소처럼 작업을 요청하시면 됩니다.",
+        "observation": "Reused paths and recording scope present; concrete usage examples and unused design role absent."
+      }
+    ],
+    "candidate": [
+      {
+        "agent": "/root/onboarding_candidate_1",
+        "excerpt": "이번 기록 제외: “코드는 고치되 이번 작업은 문서에 기록하지 마.”",
+        "requiredContent": "PASS"
+      },
+      {
+        "agent": "/root/onboarding_candidate_2",
+        "excerpt": "이번 기록 제외: “코드는 고치되 이번 작업은 문서에 기록하지 마.”",
+        "requiredContent": "PASS"
+      },
+      {
+        "agent": "/root/onboarding_candidate_3",
+        "excerpt": "이번 기록 제외: “코드는 고치되 이번 작업은 문서에 기록하지 마.”",
+        "requiredContent": "PASS"
+      },
+      {
+        "agent": "/root/onboarding_candidate_4",
+        "excerpt": "매 작업마다 setup을 다시 호출할 필요는 없습니다.",
+        "requiredContent": "PASS"
+      },
+      {
+        "agent": "/root/onboarding_candidate_5",
+        "excerpt": "이제 매번 설정할 필요 없이 평소처럼 요청하면 됩니다.",
+        "requiredContent": "PASS"
+      }
+    ],
+    "result": "5/5 candidate responses contained the required onboarding elements; baseline 0/5 contained concrete usage examples.",
+    "partialCase": {
+      "agent": "/root/onboarding_partial",
+      "input": "partial result after concurrent AGENTS edit; current inspection supplied; state absent; ordinary docs unchanged.",
+      "excerpt": "설정은 일부만 적용됐고, 완료되지 않았습니다.",
+      "result": "PASS: exact partial boundary and user content preservation; no completion guide or blind retry."
+    },
+    "limitations": [
+      "Explicit-path replay only; not automatic discovery or desktop reload verification.",
+      "No live project was configured by these agents.",
+      "Synthetic scenario supplied relative file paths only; generated absolute Markdown link targets were not validated.",
+      "This file stores exact excerpts and manual outcomes, not full rollouts; full responses remain in this chat's subagent messages.",
+      "Not evidence of general Bare Astra superiority or user acceptance."
+    ]
+  },
+  "installation": {
+    "status": "current",
+    "codexHome": "C:/Users/tjdwo/.codex",
+    "sourceVersion": "0.2",
+    "activeSkills": [
+      "joeness-setup"
+    ],
+    "guide": "C:/Users/tjdwo/.codex/skills/joeness-setup/references/usage.md",
+    "guideSha256": "1caf4f1a79833cf1cf10de94c2fdb7c9359e3a9feafc8c6992740a417cd54d36",
+    "coreSha256": "f360b48be1b4143035f61fa20149a3249c60dea2e7f12cffa8bf1e8918f4f6a9",
+    "helperSha256": "310e23263a4520ba80ad7e7cef918a1fb785fb56f1984c1beaf47a67d9fc45a6",
+    "globalAgentsByteIdentical": true,
+    "recovery": "C:/Users/tjdwo/AppData/Local/Temp/joeness-guide-install-42b762fd2c6f4736aecaa3809e7c56db/before",
+    "method": "Matched prior installed package using exact Git-archived source, backed up only owned files, removed through that installer, applied new package and checked current. No migration bypass."
+  },
+  "independentReview": {
+    "agent": "/root/onboarding_review",
+    "verdict": "No critical or important findings; ready to proceed within this scope.",
+    "checks": "Read-only contracts 2 PASS; 17 non-success guide combinations suppressed; manifest hashes and whitespace checked.",
+    "boundary": "Reviewer did not rerun mutating installation/rollback suites, inspect actual personal installation or independently re-score full semantic transcripts. Those checks are not claimed as reviewer-verified."
+  },
+  "pushPerformed": false
+}

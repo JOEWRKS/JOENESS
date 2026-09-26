@@ -2,20 +2,62 @@
   "schemaVersion": 2,
   "release": {
     "name": "JOENESS",
-    "version": "0.2-astra-judgment",
+    "version": "0.2",
     "entrypoint": "JOENESS.ps1"
   },
   "target": {
     "model": "gpt-6-astra",
     "reasoningEffort": "xhigh"
   },
-  "runtimeMode": "common-core",
+  "runtimeMode": "common-core+setup",
   "activeCommonCore": {
     "path": "astra-judgment-core.md",
     "sha256": "f360b48be1b4143035f61fa20149a3249c60dea2e7f12cffa8bf1e8918f4f6a9"
   },
   "managedRuntimeFiles": [],
-  "publicSkills": [],
+  "publicSkills": [
+    {
+      "name": "joeness-setup",
+      "files": [
+        {
+          "path": "SKILL.md",
+          "sha256": "2e5ab1ae3897d2c4e8c1e8ecd47d67046838a579c35650da4acb499462d7dc77"
+        },
+        {
+          "path": "agents/openai.yaml",
+          "sha256": "9885686c8cb97e3b8f78d09661423a0a309b713ced11cf25898a10f024be9ae3"
+        },
+        {
+          "path": "assets/AGENTS.md",
+          "sha256": "27013c0364cdcc58367ba68e9dd67661fde374f6c500dbe4fc488c894808f4d7"
+        },
+        {
+          "path": "assets/DESIGN.md",
+          "sha256": "d13b8c5012535edf9868ca4bde9e246c3402743038a80f56524d92573e47e854"
+        },
+        {
+          "path": "assets/ISSUES.md",
+          "sha256": "d27aea944f9e02ec84531cb88fee8b49bc31bce0940b49f3fc5f3bf07d4785d1"
+        },
+        {
+          "path": "assets/ROADMAP.md",
+          "sha256": "2ef1a8a76d8caa7e30b841dec05cfec5816d36c6e3c777dd84744948454c699c"
+        },
+        {
+          "path": "assets/TASK.md",
+          "sha256": "14b406b2f1c4bc8d178f3a9f434244813a3476cfd3720cc34fbbbc51a9a7e347"
+        },
+        {
+          "path": "references/usage.md",
+          "sha256": "1caf4f1a79833cf1cf10de94c2fdb7c9359e3a9feafc8c6992740a417cd54d36"
+        },
+        {
+          "path": "scripts/project-setup.ps1",
+          "sha256": "a70aa1b980a4d9a764047ea74fd87653d96e9ab7246bb10297d7037eafebadee"
+        }
+      ]
+    }
+  ],
   "defaultVendors": [],
   "pluginRouting": null
 }

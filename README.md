@@ -1,139 +1,151 @@
-# JOENESS
+# JOENESS 0.2
 
-> **0.2 Astra Judgment — GPT-6 Astra / xhigh — minimal current tree**
+**얇은 Independent Judgment Core + `joeness-setup` 하나.**
 
-JOENESS 0.2는 GPT-6 Astra 위에 큰 작업 하네스를 다시 얹는 릴리스가 아니다. 현재 active runtime은 **Independent Judgment**라는 작은 행동 규칙 하나뿐이다.
+Core는 사용자 반론을 무조건 정답으로 받아들이지 않고 근거와 권한을
+다시 평가하게 한다. 설정 스킬은 프로젝트의 기존 원본·작업 기록·이슈
+위치를 짧게 연결한다. 단계 라우터, vendor, 상시 작업 엔진은 포함하지 않는다.
 
-이 규칙은 사용자가 질문하거나 반박했다는 이유만으로 에이전트가 기존 판단을 자동으로 뒤집는 현상을 줄인다. 반론을 받으면 목표, evidence, constraints, authority, trade-offs를 다시 검토하고, 기존 판단이 여전히 타당하면 유지하며 이유를 설명한다. 사용자가 결정권을 가진 범위에서 명시적으로 방향을 결정한 경우에는 그 결정을 따른다.
+## 빠른 시작
 
-## Active release
-
-Machine-readable identity: `vendor/source-manifest.json`
-
-- release: `0.2-astra-judgment`
-- model: `gpt-6-astra`
-- reasoning effort: `xhigh`
-- runtime mode: `common-core`
-- active Common Core: `astra-judgment-core.md`
-- managed whole-file runtime payload: 0
-- public skills: 0
-- default vendors: 0
-- plugin routing: none
-
-현재 active source는 `astra-judgment-core.md` 하나다.
-
-## 왜 main이 작아졌나
-
-이 저장소는 이전 JOENESS 개발 과정에서 broad Common Core, public skills, design vendors, compatibility material, 여러 세대의 A/B 실험, evaluator, handoff/spec/plan, 대규모 historical test를 main에 함께 보관해 왔다.
-
-0.2의 실제 active surface가 하나의 규칙으로 축소된 뒤에도 그 역사 자료가 현재 제품처럼 보이는 문제가 남았다. 그래서 current main은 **현재 릴리스에 실제로 필요한 파일만** 보관한다.
-
-다음 자료는 current main에서 제거되었다.
-
-- historical `common-core.md`
-- `skills/**`
-- old design/vendor payloads
-- GPT-5.6 compatibility payloads와 current-tree migration/removal logic
-- superseded evals, candidates, fixtures, collectors
-- superseded tests
-- superseded docs / handoffs / specs / plans / task ledgers
-- `JOENESS-0.1.ps1`, `harness.ps1` 같은 old entrypoint aliases
-
-이 자료는 삭제된 역사가 아니다. **Git commit history에 그대로 남아 있으며**, 과거 버전 확인이 필요하면 해당 commit을 조회하거나 checkout한다. 현재 main에 archive 복사본을 다시 만들지 않는다.
-
-## Current repository layout
-
-```text
-JOENESS/
-├─ .github/
-│  └─ workflows/
-│     └─ windows-ci.yml
-├─ evals/
-│  └─ experiments/
-│     └─ joeness-astra-independent-judgment-ab-plan-v1.json
-├─ scripts/
-│  └─ sync-harness.ps1
-├─ tests/
-│  └─ astra-judgment-sync.tests.ps1
-├─ vendor/
-│  └─ source-manifest.json
-├─ .gitattributes
-├─ .gitignore
-├─ AGENTS.md
-├─ JOENESS.ps1
-├─ README.md
-└─ astra-judgment-core.md
-```
-
-## 설치와 상태 확인
-
-읽기 전용 확인:
+Windows PowerShell, Git, Codex를 사용하는 환경에서 저장소 경로를 연다.
+먼저 읽기 전용 확인:
 
 ```powershell
 powershell.exe -NoProfile -File .\JOENESS.ps1 -Check
 ```
 
-깨끗한 환경이면 `ready`와 `changesRequired: true`를 반환한다. `Check`는 관리 파일을 만들거나 수정하지 않는다.
-
-명시적 설치:
+설치를 원할 때만:
 
 ```powershell
 powershell.exe -NoProfile -File .\JOENESS.ps1 -Apply
-```
-
-`Apply`는 Codex 사용자 `AGENTS.md` 끝에 JOENESS 관리 marker로 감싼 exact Independent Judgment block 하나만 추가하고, 같은 Codex home에 최소 ownership state를 기록한다. 사용자 bytes는 관리 suffix 밖에서 그대로 보존된다.
-
-설치 후:
-
-```powershell
 powershell.exe -NoProfile -File .\JOENESS.ps1 -Check
 ```
 
-정확한 current install이면 `current`를 반환한다. 반복 `Apply`는 idempotent다.
+기본 대상은 `CODEX_HOME` 또는 사용자 `.codex`다.
+다른 대상을 시험하려면 **매 명령에** `-CodexHome <명시 경로>`를 붙인다.
+설치기는 사용자 AGENTS의 소유 구역, 단일 스킬 폴더,
+`joewrks-harness-state.json`과 `joeness-skills-state.json`만 관리한다.
+프로젝트를 탐색하거나 프로젝트 문서를 자동 변경하지 않는다.
 
-제거:
+`ready`는 변경 가능, `current`는 정확한 현재 설치,
+`blocked`는 변경 없이 충돌, `failed/partial`은 실패/미복구 대상이 있음을 뜻한다.
+반복 Apply는 쓰기 없는 no-op이다. source hash와 소유 기준을 검증한다.
+설치된 관리 파일을 편집했거나 이름만 같은 스킬이 있으면 덮어쓰지 않는다.
+설치 상태가 현재 패키지와 일치하지 않으면 파일을 보존하고 충돌을 보고한다.
+상태 파일을 지우거나 강제 덮어쓰기로 우회하지 말고 소유 범위를 먼저 확인한다.
+
+설치 후 새 세션에서 프로젝트를 열고 말하면 된다.
+
+> 이 프로젝트 작업 방식을 정리해줘. 기존 문서를 우선 쓰고 변경안부터 보여줘.
+
+명시 호출 대안:
+
+> `$joeness-setup`으로 이 프로젝트의 설정안을 만들어줘.
+
+파일 목록과 기록 범위를 확인하고 적용을 승인하면 짧은 프로젝트 AGENTS
+연결이 생긴다. 다섯 문서를 일괄 만들지 않으며 기존 경로가 우선이다.
+현재 자동 적용 helper는 **Git root + UTF-8(선택적 BOM)**를 지원한다.
+non-Git 폴더를 임의로 git init하지 않고 제안/수동 전달까지 제공한다.
+
+## 설치·설정 후 표시되는 사용 안내
+
+설치가 성공하면 터미널에 [한국어 사용 안내](skills/joeness-setup/references/usage.md)가
+표시된다. 첫 호출 방법, 다섯 문서의 역할, 평소 요청 예시와 기록 중지·해제의
+차이를 설명한다. `-Check`, `-Remove`, 실패·충돌 결과에는 설치 완료 안내를
+표시하지 않는다. 반복 `-Apply`는 파일을 다시 쓰지 않고 안내를 다시 보여준다.
+
+자동화에서는 stdout의 JSON만 파싱한다. 사람이 읽는 안내는 stderr에 출력하며
+오류 여부는 stderr의 유무가 아닌 **종료 코드와 JSON status**로 판단한다.
+PowerShell에서 스트림을 합치는 `2>&1`은 안내와 JSON을 섞으므로 피한다.
+
+프로젝트 설정까지 끝나면 에이전트가 **실제 경로와 상태에 맞춘 안내**를 대화로
+보여준다. AGENTS는 작업 안내판, ROADMAP은 방향, TASK는 현재 작업,
+ISSUES는 문제 해결 기록, DESIGN은 디자인 원본·승인 연결 역할이다.
+기존 문서의 이름이 다르면 그 경로를 사용하며, 생성·수정 여부와 사용하지 않은
+역할도 구분한다. 사용 설명을 프로젝트 AGENTS에 통째로 복사하지 않는다.
+
+처음에는 `$joeness-setup으로 이 프로젝트 설정안을 보여줘.`라고 요청하고,
+경로와 기록 범위를 확인한 뒤 `이대로 적용해줘.`라고 승인하면 된다.
+설정 후에는 아래처럼 평소 작업을 요청하면 된다.
+
+## 평소에는 그냥 작업을 요청한다
+
+> 로그인 오류 고쳐줘.
+>
+> 어디까지 끝났는지 알려줘.
+>
+> 이전에 해결한 재접속 문제를 찾아봐.
+
+매번 setup을 호출할 필요는 없다. 새 세션은 프로젝트의 짧은 연결과 현재
+파일을 따른다. TASK 역할에는 수행/검증, ISSUES 역할에는 원인·해결·남은
+우회책을 기록한다. 실제 파일명은 프로젝트에서 선택한 것을 쓴다.
+방향은 명시적 결정 때만 바꾸고 Product/승인 Design은 별도 권한을 유지한다.
+
+질문·의견·설명 요청을 새 결정이나 기록 동의로 취급하지 않는다.
+
+> 이건 의견만 줘. 파일은 수정하지 마.
+>
+> 코드는 고치되 이번 작업은 프로젝트 문서에 기록하지 마.
+>
+> 방금 기록의 원인은 추측이야. 확인된 사실로 교정해줘.
+
+기록 금지는 별도로 허용된 코드 수정을 취소하지 않는다. 필요한 원본이
+없거나 기록 쓰기가 실패하면 그 경계를 알리고 독립적으로 가능한 작업은
+진행한다. 실패한 기록을 저장했다고 보고하지 않는다.
+
+## 재개와 과거 조회
+
+현재 코드/Git/실제 대상이 오래된 handoff보다 우선이다. 완료한 일을
+다시 수행하거나 오래된 계획에서 새 작업 범위를 만들지 않는다.
+
+버전 정리를 요청하면 해결 항목의 최신 상세가 실제로 읽히는
+`commit:path`와 항목을 남길 수 있다. 커밋 후 추가한 미보존 상세,
+활성 이슈와 유효한 우회책은 유지한다. ZIP/얕은 이력/잘못된 참조는
+보존 증거가 아니다. 상세를 임의 삭제하거나 별도 아카이브 엔진을 만들지 않는다.
+
+## 기록 중지 / 프로젝트 해제 / 도구 제거
+
+- **“자동 기록만 중지해줘”**: 원본 위치 안내는 남기고 기록 규칙을 갱신한다.
+- **“이 프로젝트에서 JOENESS 연결을 해제해줘”**: 변경되지 않은 관리 구역과
+  일치하는 소유 구분자만 제거한다. TASK/ISSUES 등 일반 문서와 빈 AGENTS도 남긴다.
+- **패키지 제거**:
 
 ```powershell
 powershell.exe -NoProfile -File .\JOENESS.ps1 -Remove
 ```
 
-정확한 현재 JOENESS managed suffix만 제거한다. 설치 후 사용자가 managed block 앞쪽의 자기 내용을 수정했다면 그 변경도 보존한다. marker drift, forged/unknown state, source mismatch 등은 자동 복구하지 않고 `blocked`로 실패한다.
+패키지 제거는 프로젝트 연결을 일괄 해제하지 않는다. 필요한 프로젝트는
+먼저 별도로 해제한다. 설치/해제 후 이미 열려 있던 세션은 지침을 다시
+읽지 않을 수 있으므로 새 세션에서 확인한다.
 
-## Historical installs
+관리 구역 내부에 사용자가 편집한 문장이 있으면 새 Check를 실행해도
+덮어쓰기 권한이 생기지 않는다. 상태 파일을 지워 우회하지 말고, 보존할
+문장과 수정 범위를 확인한 뒤 별도 교정안을 검토한다. 부분 실패 뒤에도
+현재 두 파일을 먼저 확인하며 무조건 재시도하지 않는다.
 
-Current 0.2 main은 과거 GPT-5.6 / broad-harness install을 감지하거나 마이그레이션하거나 제거하기 위한 historical payload를 더 이상 싣지 않는다.
+설정된 프로젝트를 clone할 때는 AGENTS와 `.joeness/setup-state.json`을 함께
+보존한다. Git checkout의 LF/CRLF 변환은 커밋된 두 파일이 같은 적용 본문을
+뒷받침할 때만 재결합한다. 실제 문장 변경이나 확인할 수 없는 적용 기준은
+여전히 충돌이다. 구역 밖 사용자 내용은 현재 bytes 그대로 보존한다.
 
-옛 설치를 다뤄야 한다면 **그 설치가 만들어진 historical commit의 installer와 source identity를 사용한다.** 이는 current main을 역사 호환 코드 저장소로 다시 키우지 않기 위한 의도적인 경계다.
+## 구현과 검증
 
-대표적인 과거 commit도 Git history에서 계속 조회 가능하다.
+- 배포 identity/hash: `vendor/source-manifest.json`
+- Core: `astra-judgment-core.md` (기존 bytes 유지)
+- 단일 skill: `skills/joeness-setup/`
+- C1–C4 설계/계획: `docs/superpowers/{specs,plans}/2026-09-26-joeness-0.2-project-setup*.md`
+- bounded evidence: `evals/joeness-setup/runs/2026-09-26-implementation/`
 
-- pre-cleanup JOENESS 0.2 main: `cb1bc9f9032cb8d1cc380369ca2305100e6c332b`
-- historical GPT-5.6 Control identity: `80c79e9f4be91d730b1b3cdc62d7bf51508895e8`
+```powershell
+powershell.exe -NoProfile -File tests/astra-judgment-sync.tests.ps1
+powershell.exe -NoProfile -File tests/joeness-project-setup.tests.ps1
+powershell.exe -NoProfile -File tests/joeness-install.tests.ps1
+node --test tests/joeness-setup-contract.tests.mjs tests/joeness-setup-fixtures.tests.mjs
+```
 
-## Behavioral evidence boundary
-
-`evals/experiments/joeness-astra-independent-judgment-ab-plan-v1.json`은 현재 행동 비교 계획이다.
-
-현재 상태:
-
-- status: `NOT-RUN`
-- results: `null`
-- conclusion: `null`
-
-따라서 이 저장소의 installer/CI가 통과한다는 사실은 **Independent Judgment가 Bare Astra보다 행동적으로 우월하다는 증거가 아니다.** 그 주장은 별도의 실제 A/B 실행과 결과 검토가 있어야 한다.
-
-## Release verification
-
-현재 release gate는 Windows에서 다음만 검증한다.
-
-- checkout에 full Git history가 존재하는지
-- current main surface가 허용된 최소 파일 집합과 정확히 일치하는지
-- current manifest/core identity가 정확한지
-- historical commits가 Git history에서 계속 조회 가능한지
-- clean `Check → Apply → Check → repeat Apply → Remove → Check` lifecycle
-- user bytes 보존
-- unowned marker / drift / state tamper fail-closed
-- injected write failure rollback
-- base-wide `git diff --check`
-
-과거 기능의 runtime regression suite는 current main release gate가 아니다. 과거 기능은 historical commit에서 재현한다.
+정적/파일 안전 테스트와 fresh 모델 행동 검증은 별개다. 실제 검증 결과와
+미검증 범위는 evidence에 기록한다. implicit discovery, 데스크톱 지침 재로딩,
+처음 쓰는 사람의 이해와 사용자 수용을 자동 테스트만으로 보증하지 않는다.
+기존 Independent Judgment의 Bare Astra 대비 우월성 A/B는 여전히
+`NOT-RUN`이며, 이 구현으로 그 결과를 만들었다고 주장하지 않는다.
