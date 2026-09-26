@@ -1,0 +1,57 @@
+{
+  "schemaVersion": 1,
+  "status": "SAVED_PROJECT_HANDOFF_CONNECTION_VERIFIED",
+  "dateLocal": "2026-09-27",
+  "scope": "Existing saved test project only; one human-handoff rule added to its owned JOENESS-SETUP block. No product code, task record, or production project changed.",
+  "project": {
+    "path": "D:\\JOEWRKS\\JOEWRKS-TestProject-01",
+    "branch": "codex/full-baseline-common-core-pair",
+    "head": "6b25fa9431176f736c69e6bfd8f4544b8043c30a",
+    "preExistingDirtyPaths": ["AGENTS.md", ".codex/", ".joeness/", "Artifacts/"],
+    "changedByThisRun": ["AGENTS.md", ".joeness/setup-state.json"],
+    "committedOrPushed": false
+  },
+  "managedConnection": {
+    "helper": "installed joeness-setup/scripts/project-setup.ps1",
+    "preCheck": "current/clean",
+    "apply": "current",
+    "postCheck": "current/clean",
+    "outsideBlockPrefixUnchanged": true,
+    "outsideBlockSuffixUnchanged": true,
+    "targetSha256Before": "b7c1877bfef9c0fc5bd1a550db8eea9add8f4c2d5e0b9f1de0221ba3b2491a4c",
+    "targetSha256After": "fe9edeb6c41a70cda37e19ad88da52bc841b44e5b1bb3441985cbb9daac970d1",
+    "stateSha256Before": "91eb0b18000c68aed7dd1390e9ad89f37090b3a9248d07b4ac83cbaf3fc4d9bc",
+    "stateSha256After": "63375b07973fb7671a65f42fad5d6eabed4acd7214fb26add18bfaf78f5aad58",
+    "addedRule": "For a requested human handoff, open in everyday language with what is done, what remains, and the recipient's next action or decision. Put task IDs, test counts, paths, and detailed proof after that opening. Keep technical completion, user acceptance, and unverified work distinct. Do not impose this format on ordinary replies."
+  },
+  "freshSavedProjectChat": {
+    "threadId": "01a0dedb-b314-70e3-93d1-32cb95b7f7d6",
+    "hostId": "local",
+    "projectId": "60e4b3c0-e68b-4280-92d9-b65ac1611362",
+    "prompt": "이 저장된 테스트 프로젝트를 처음 맡는 동료에게 현재 상태를 인수인계해줘. 실제 파일과 기록에서 확인한 것만 말하고, 어떤 파일도 수정하지 마. 진행 상태를 확인하지 못하면 추측하지 마.",
+    "result": "Completed. The answer opened in everyday Korean with the approved static art, remaining environment assets/runtime integration, and the next user/PM decision. Technical ticket IDs, hashes, paths, and test boundaries followed the opening. It distinguished exact image approval from incomplete overall TICKET-081 and did not claim fresh runtime or visual verification.",
+    "opening": "게임의 주요 화면·도메인 코드와 저장 구조가 마련되어 있고, 최근 작업은 폐광 전투 화면에 사용할 픽셀 아트입니다. 플레이어와 동굴 박쥐의 정지 이미지 두 쌍은 승인 기록이 있지만, 배경 자산과 게임 화면 통합은 남아 있습니다. 인수자는 승인된 이미지와 현재 계약을 먼저 확인하고, 다음 제작·통합 범위를 사용자/PM에게 확정받아야 합니다.",
+    "fileMutationBoundary": "No new Git status paths appeared and the owned AGENTS/state hashes remained unchanged after the chat. The prompt forbade writes; pre-existing untracked .codex/ and Artifacts/ contents were not independently hashed before the chat.",
+    "runtimeModel": "Not independently confirmed from the app thread result"
+  },
+  "freshNoReadInstructionDeliveryChat": {
+    "threadId": "01a0dee2-31a1-7c31-b03f-d826d283c229",
+    "hostId": "local",
+    "projectId": "60e4b3c0-e68b-4280-92d9-b65ac1611362",
+    "prompt": "파일이나 도구를 열지 말고, 이 새 채팅이 시작될 때 자동으로 받은 프로젝트 지침만 근거로 답해줘. 이 프로젝트에서 사람에게 인수인계를 요청받으면 답변 첫 부분에 무엇을 어떤 순서로 적어야 해? 일반 질문에도 같은 형식을 적용해야 해? 자동으로 받은 지침에서 확인되지 않으면 모른다고 답해.",
+    "result": "Completed in 10.978 seconds without any commandExecution or file-read item. It stated the three-part everyday-language opening, technical details after the opening, separate technical completion/user acceptance/unverified states, and no format imposed on ordinary questions.",
+    "automaticDeliveryBoundary": "The no-read response matches the managed AGENTS rule in a fresh chat under the saved project. This directly checks instruction delivery without a manual AGENTS read; it does not prove perfect future compliance.",
+    "runtimeModel": "Not independently confirmed from the app thread result"
+  },
+  "postValidation": {
+    "projectSetupCheck": "current/clean",
+    "gitDiffCheck": "PASS",
+    "projectStatus": "Same path set as before the fresh chat: M AGENTS.md; ?? .codex/; ?? .joeness/; ?? Artifacts/",
+    "ponytailReview": "Attempted once. Ponytail skill unavailable in local CLI. The first CLI invocation failed because codex-cli 0.146.0 does not support its configured gpt-6-astra model. A single gpt-5.6-sol read-only fallback ran but both its Windows sandbox file reads failed; its review cannot verify the local diff. Main agent directly inspected the actual git diff, confirmed the sole added owned-block bullet and preserved outside-block bytes, and ran git diff --check successfully.",
+    "limitations": [
+      "One real saved-project fresh-chat sample verifies this handoff behavior, not all future tasks or long-term reliability.",
+      "The test project's JOENESS connection remains local and uncommitted; a new environment will not inherit it until separately transferred.",
+      "No user acceptance of the actual game work is inferred from this handoff test."
+    ]
+  }
+}
