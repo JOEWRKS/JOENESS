@@ -102,6 +102,11 @@ powershell.exe -NoProfile -File .\JOENESS.ps1 -Remove
 문장과 수정 범위를 확인한 뒤 별도 교정안을 검토한다. 부분 실패 뒤에도
 현재 두 파일을 먼저 확인하며 무조건 재시도하지 않는다.
 
+설정된 프로젝트를 clone할 때는 AGENTS와 `.joeness/setup-state.json`을 함께
+보존한다. Git checkout의 LF/CRLF 변환은 커밋된 두 파일이 같은 적용 본문을
+뒷받침할 때만 재결합한다. 실제 문장 변경이나 확인할 수 없는 적용 기준은
+여전히 충돌이다. 구역 밖 사용자 내용은 현재 bytes 그대로 보존한다.
+
 ## 이전 버전
 
 0.1 소스와 실패 자료는 원격 Git 이력에 보존되어 있다. 현재 경로에

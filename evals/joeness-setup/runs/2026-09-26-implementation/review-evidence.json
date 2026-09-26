@@ -1,5 +1,5 @@
 {
-  "status": "IMPLEMENTED_PENDING_FINAL_REVIEW_NOT_RELEASE_VERIFIED",
+  "status": "IMPLEMENTED_REVIEW_FIX_VERIFIED_NOT_RELEASE_VERIFIED",
   "base": "ab3460fd28952baa5c2ad472eed1dd6196054d8e",
   "preservedFailures": [
     {"phase":"current baseline","result":"FAIL","reason":"Exact-tree gate rejected newly approved docs and ignored execution workspace; no runtime failure."},
@@ -11,7 +11,7 @@
   ],
   "deterministic": {
     "currentReleaseContract": "PASS (8 named checks)",
-    "projectSafety": "18 PASS / 0 FAIL",
+    "projectSafety": "19 PASS / 0 FAIL",
     "installation": "PASS lifecycle, no-op, drift, remove, partial rollback, exact predecessor upgrade and unowned collision",
     "nodeContractsAndFixtures": "5 PASS / 0 FAIL",
     "skillQuickValidate": "PASS",
@@ -32,6 +32,22 @@
     "coreSha256": "f360b48be1b4143035f61fa20149a3249c60dea2e7f12cffa8bf1e8918f4f6a9",
     "skillSha256": "77bd5a50e83ec69b8482ac910ec47a29f6d0d6a8881be8593f639e5ba9bccb7d",
     "packageFileHashes": "../../../../vendor/source-manifest.json"
+  },
+  "finalReview": {
+    "surface": "fresh gpt-6-astra / xhigh subagent /root/setup_final_review",
+    "reviewedHead": "8fd0876be9ec4de7f002e5f831b86e1c40e2f848",
+    "critical": 0,
+    "important": [{"finding":"Windows autocrlf Git clone was treated as internal block edit","originalVerdict":"With fixes","red":"RealGitCloneRebindsCheckoutEolButNotContentEdits: expected current, actual blocked","fix":"Accept only LF/CRLF-equivalent blocks corroborated by committed AGENTS and exact normalized committed state. Outside user bytes preserved; semantic edits still blocked.","green":"19/19 project safety cases"}],
+    "deferredMinors": [],
+    "noSecondReviewer": "Fix verified through RED/GREEN and final suites, not a second opinion.",
+    "freshEvidenceReuse": "SKILL.md/assets/metadata unchanged; only deterministic helper clone handling changed after behavioral runs. Original helper remains retrievable at reviewedHead; final hash is in manifest.",
+    "declinedToJudgeRulings": [
+      "Implicit discovery/desktop reload: remain unverified, not advertised as passed.",
+      "CLI Astra: runtime version rejection preserved; app-context behavior does not establish CLI support.",
+      "Human comprehension/acceptance: not run, no user-accepted claim.",
+      "0.1 migration/other OS/non-Git initial Apply: explicitly unsupported; lossless fail-closed boundary retained.",
+      "Superiority over Bare Astra: independent A/B remains NOT-RUN."
+    ]
   },
   "personalInstallChanged": false,
   "realProjectsChanged": false,

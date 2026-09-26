@@ -151,4 +151,29 @@ Case 'ReparseAndNonGitFailClosed' {
   Eq (Invoke-JoenessProjectSetup -Check -ProjectPath $child).status blocked nonRoot
  }finally{Remove-Item -LiteralPath $other -Recurse -Force}
 }
+Case 'RealGitCloneRebindsCheckoutEolButNotContentEdits' {
+ param($p)
+ & git -C $p config core.autocrlf false
+ [IO.File]::WriteAllText((Join-Path $p AGENTS.md),"user prefix`n",$utf8)
+ $null=Apply $p
+ & git -C $p add AGENTS.md .joeness/setup-state.json
+ & git -C $p -c user.name=Fixture -c user.email=fixture@example.invalid commit -qm baseline
+ $clone=Join-Path ([IO.Path]::GetTempPath()) ('joeness-project-test-'+[guid]::NewGuid().ToString('N'))
+ try {
+  & git -c core.autocrlf=true clone -q $p $clone
+  Eq $LASTEXITCODE 0 clone
+  & git -C $clone config core.autocrlf true
+  Eq ((& git -C $clone status --porcelain) -join '') '' cleanCheckout
+  Eq ([IO.File]::ReadAllText((Join-Path $clone AGENTS.md)).Contains("`r`n")) $true checkoutCRLF
+  Eq (Invoke-JoenessProjectSetup -Check -ProjectPath $clone).status current eolRebound
+  [IO.File]::AppendAllText((Join-Path $clone AGENTS.md),'outside',$utf8)
+  Eq (Invoke-JoenessProjectSetup -Check -ProjectPath $clone).status current outsideAllowed
+  Eq (Detach $clone).status detached cloneDetach
+  Eq ([IO.File]::ReadAllText((Join-Path $clone AGENTS.md))) "user prefix`r`noutside" preservedClonePrefix
+ }finally{if(Test-Path $clone){Remove-Item -LiteralPath $clone -Recurse -Force}}
+ $null=Apply $p
+ [IO.File]::WriteAllText((Join-Path $p AGENTS.md),[IO.File]::ReadAllText((Join-Path $p AGENTS.md)).Replace("`n","`r`n").Replace('Read TASK.md.','USER EDIT'),$utf8)
+ Eq (Invoke-JoenessProjectSetup -Check -ProjectPath $p).blockState edited realContentDrift
+ Eq (Detach $p).status blocked protectRealEdit
+}
 Write-Host "PASS $script:passed project safety cases"

@@ -100,11 +100,43 @@ function Resolve-SetupRoot([string]$Value) {
  if(Test-Path -LiteralPath (Join-Path $root 'AGENTS.override.md')){throw 'AGENTS.override.md takes precedence; resolve it explicitly'}
  $root
 }
+function Get-SetupCommittedText([string]$Root,[string]$RelativePath) {
+ # Read raw Git blob bytes, without shell pipelines or checkout/textconv filters.
+ $info=New-Object Diagnostics.ProcessStartInfo
+ $info.FileName='git';$info.Arguments='-C "'+$Root+'" cat-file blob "HEAD:'+$RelativePath+'"'
+ $info.UseShellExecute=$false;$info.CreateNoWindow=$true
+ $info.RedirectStandardOutput=$true;$info.RedirectStandardError=$true
+ $proc=New-Object Diagnostics.Process;$proc.StartInfo=$info
+ $buffer=New-Object IO.MemoryStream
+ try {
+  $null=$proc.Start();$proc.StandardOutput.BaseStream.CopyTo($buffer)
+  $errorText=$proc.StandardError.ReadToEnd();$proc.WaitForExit()
+  if($proc.ExitCode -ne 0){throw "Committed setup baseline unavailable: $errorText"}
+  $script:SetupUtf8.GetString($buffer.ToArray())
+ }finally{$buffer.Dispose();$proc.Dispose()}
+}
+function Test-SetupEolRebind([string]$Root,[string]$CurrentBlock,[string]$AppliedBlock,[string]$StateText) {
+ # Only LF/CRLF-equivalent content, corroborated by committed AGENTS AND state.
+ # Outside user edits do not need to match HEAD. Semantic internal edits still block.
+ $currentLf=$CurrentBlock.Replace("`r`n","`n")
+ $appliedLf=$AppliedBlock.Replace("`r`n","`n")
+ if($currentLf.Contains("`r") -or $appliedLf.Contains("`r") -or $currentLf -cne $appliedLf){return $false}
+ try {
+  $committedState=Get-SetupCommittedText $Root '.joeness/setup-state.json'
+  if($committedState.Replace("`r`n","`n") -cne $StateText.Replace("`r`n","`n")){return $false}
+  $committed=Get-SetupCommittedText $Root 'AGENTS.md'
+  if([regex]::Matches($committed,[regex]::Escape($script:SetupBegin)).Count -ne 1 -or [regex]::Matches($committed,[regex]::Escape($script:SetupEnd)).Count -ne 1){return $false}
+  $start=$committed.IndexOf($script:SetupBegin,[StringComparison]::Ordinal)
+  $end=$committed.IndexOf($script:SetupEnd,[StringComparison]::Ordinal)
+  if($end -lt $start){return $false}
+  $committed.Substring($start,$end+$script:SetupEnd.Length-$start).Replace("`r`n","`n") -ceq $appliedLf
+ }catch{return $false}
+}
 function Read-SetupObservation([string]$Root) {
  $target=Get-SetupSnapshot (Join-Path $Root 'AGENTS.md')
  $state=Get-SetupSnapshot (Join-Path $Root '.joeness/setup-state.json')
  $text=$script:SetupUtf8.GetString($target.Bytes)
- $blockState='absent';$record=$null;$start=-1;$length=0
+ $blockState='absent';$record=$null;$start=-1;$length=0;$eolRebound=$false
  if($text.Contains('JOEWRKS-PROJECT:')){throw 'legacy: historical project markers require explicit migration'}
  $bc=[regex]::Matches($text,[regex]::Escape($script:SetupBegin)).Count
  $ec=[regex]::Matches($text,[regex]::Escape($script:SetupEnd)).Count
@@ -117,7 +149,8 @@ function Read-SetupObservation([string]$Root) {
   $blockState='unowned'
  }
  if($state.Hash -ne 'absent') {
-  $record=$script:SetupUtf8.GetString($state.Bytes)|ConvertFrom-Json
+  $stateText=$script:SetupUtf8.GetString($state.Bytes)
+  $record=$stateText|ConvertFrom-Json
   $keys=@($record.PSObject.Properties.Name|Sort-Object)
   if(($keys -join ',') -cne 'appliedBlockBase64,appliedBlockSha256,ownedBoundary,schemaVersion,targetRelativePath,toolVersion'){throw 'malformed: state schema fields'}
   if($record.schemaVersion -isnot [int] -or $record.schemaVersion -ne 1 -or $record.toolVersion -cne '0.2' -or $record.targetRelativePath -cne 'AGENTS.md'){throw 'malformed: state identity'}
@@ -133,9 +166,12 @@ function Read-SetupObservation([string]$Root) {
   if($bc -ne 1){throw 'malformed: state exists without managed block'}
   $current=$script:SetupUtf8.GetBytes($text.Substring($start,$length))
   $blockState=if((Get-SetupHash $current) -ceq $record.appliedBlockSha256){'clean'}else{'edited'}
+  if($blockState -eq 'edited' -and (Test-SetupEolRebind $Root ($script:SetupUtf8.GetString($current)) $bt $stateText)){
+   $blockState='clean';$eolRebound=$true
+  }
  }
  if($blockState -eq 'unowned'){throw 'unowned: existing markers have no applied baseline'}
- [pscustomobject]@{Target=$target;State=$state;Text=$text;Record=$record;Start=$start;Length=$length;BlockState=$blockState}
+ [pscustomobject]@{Target=$target;State=$state;Text=$text;Record=$record;Start=$start;Length=$length;BlockState=$blockState;EolRebound=$eolRebound}
 }
 function Invoke-JoenessProjectSetup {
  [CmdletBinding()]
@@ -165,6 +201,10 @@ function Invoke-JoenessProjectSetup {
   if($o.BlockState -eq 'clean'){
    $prefix=$script:SetupUtf8.GetString([Convert]::FromBase64String($o.Record.ownedBoundary.prefixBase64))
    $suffix=$script:SetupUtf8.GetString([Convert]::FromBase64String($o.Record.ownedBoundary.suffixBase64))
+   if($o.EolRebound){
+    $nl=if($before.Substring($o.Start,$o.Length).Contains("`r`n")){"`r`n"}else{"`n"}
+    $prefix=$prefix -replace "\r\n|\n",$nl;$suffix=$suffix -replace "\r\n|\n",$nl
+   }
   }else{
    $nl=if($before.Contains("`r`n")){"`r`n"}else{"`n"}
    if($before.Length){$prefix=if($before.EndsWith("`n")){$nl}else{$nl+$nl}}
