@@ -37,6 +37,8 @@ jobs:
       - name: Verify setup safety and package contracts
         shell: pwsh
         run: |
+          pwsh -NoProfile -File .\tests\joeness-project-setup.tests.ps1
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\tests\joeness-project-setup.tests.ps1
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\tests\joeness-install.tests.ps1

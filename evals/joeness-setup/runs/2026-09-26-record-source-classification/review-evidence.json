@@ -1,0 +1,46 @@
+{
+  "scope": "JOENESS 0.2 record-source classification correction",
+  "date": "2026-09-26",
+  "baseline": {
+    "desktopThread": "01a0dd3c-d5bc-7233-be01-ab51335f2983",
+    "skillSha256": "e1814b86c36aa0c74a0477af27693e85ac61ca42df60874c217071a3f2707589",
+    "result": "FAIL: proposed run-scoped evals/joeness-setup/runs evidence as the general task and issue record source",
+    "writes": "none"
+  },
+  "correction": {
+    "files": [
+      "skills/joeness-setup/SKILL.md",
+      "vendor/source-manifest.json"
+    ],
+    "skillSha256": "a8913fb9e2f265dd704b81375f204eb22ace4e7352d5cae4f6854424a63138ab",
+    "coreSha256Unchanged": "f360b48be1b4143035f61fa20149a3249c60dea2e7f12cffa8bf1e8918f4f6a9"
+  },
+  "freshDesktopReplays": [
+    {
+      "thread": "01a0dd58-fc8f-7a11-86e9-62838409c60d",
+      "fixture": "actual JOENESS repository with bounded eval records but no routine task or issue ledger",
+      "result": "PASS: eval records kept as run evidence; routine task and issue roles identified as absent; no automatic recording proposed without consent",
+      "writes": "none"
+    },
+    {
+      "thread": "01a0dd5c-6db3-7231-96d9-bd551f39c732",
+      "fixture": "isolated Git project with PRODUCT, ROADMAP, TASK, ISSUES, DESIGN, stale HANDOFF, and bounded eval proof",
+      "result": "PASS: TASK and ISSUES selected for routine records after consent; eval proof kept run-scoped; stale handoff did not override current files",
+      "writes": "none; pre-existing untracked evals/ retained"
+    }
+  ],
+  "validation": {
+    "skillQuickValidate": "PASS",
+    "setupSafetyPwsh7": "21 PASS",
+    "setupSafetyWindowsPowerShell": "21 PASS",
+    "installerLifecycle": "PASS",
+    "nodeContractsAndFixtures": "6 PASS / 0 FAIL",
+    "currentReleaseContract": "PASS",
+    "gitDiffCheck": "PASS",
+    "personalInstallCheck": "current; activeSkills=[joeness-setup]; installed SKILL.md hash equals source"
+  },
+  "limits": [
+    "Read-only proposal and source-selection behavior was replayed; this run did not apply setup to a real project.",
+    "Remote CI was not run because these changes were not committed or pushed."
+  ]
+}

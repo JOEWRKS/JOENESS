@@ -29,6 +29,24 @@ function Case($name,[scriptblock]$body) {
         Remove-Item -LiteralPath $resolved -Recurse -Force
     }
 }
+Case 'StateIdentityRoundTripAcrossPowerShellVersions' {
+    param($p)
+    Eq (Apply $p).status current apply
+    $c=Invoke-JoenessProjectSetup -Check -ProjectPath $p
+    Eq $c.status current check
+    Eq $c.blockState clean block
+    Eq (Detach $p).status detached detach
+}
+Case 'InvalidStateIdentityStillFailsClosed' {
+    param($p)
+    Eq (Apply $p).status current apply
+    $s=Join-Path $p .joeness/setup-state.json
+    $original=[IO.File]::ReadAllText($s)
+    foreach($replacement in @('"schemaVersion":"1"','"schemaVersion":1.0','"schemaVersion":2')) {
+        [IO.File]::WriteAllText($s,$original.Replace('"schemaVersion":1',$replacement),$utf8)
+        Eq (Invoke-JoenessProjectSetup -Check -ProjectPath $p).status blocked identity
+    }
+}
 Case 'InitialApplyAndNoOp' {
     param($p)
     Eq (Invoke-JoenessProjectSetup -Check -ProjectPath $p).status ready check

@@ -153,7 +153,7 @@ function Read-SetupObservation([string]$Root) {
   $record=$stateText|ConvertFrom-Json
   $keys=@($record.PSObject.Properties.Name|Sort-Object)
   if(($keys -join ',') -cne 'appliedBlockBase64,appliedBlockSha256,ownedBoundary,schemaVersion,targetRelativePath,toolVersion'){throw 'malformed: state schema fields'}
-  if($record.schemaVersion -isnot [int] -or $record.schemaVersion -ne 1 -or $record.toolVersion -cne '0.2' -or $record.targetRelativePath -cne 'AGENTS.md'){throw 'malformed: state identity'}
+  if(($record.schemaVersion -isnot [int] -and $record.schemaVersion -isnot [long]) -or $record.schemaVersion -ne 1 -or $record.toolVersion -cne '0.2' -or $record.targetRelativePath -cne 'AGENTS.md'){throw 'malformed: state identity'}
   $base=[Convert]::FromBase64String($record.appliedBlockBase64)
   if([Convert]::ToBase64String($base) -cne $record.appliedBlockBase64 -or (Get-SetupHash $base) -cne $record.appliedBlockSha256){throw 'malformed: state block hash'}
   $bt=$script:SetupUtf8.GetString($base)

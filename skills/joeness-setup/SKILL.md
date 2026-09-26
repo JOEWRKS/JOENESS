@@ -21,6 +21,12 @@ when a concrete recurring need has no existing home. The small
 [ISSUES](assets/ISSUES.md) and [DESIGN](assets/DESIGN.md) assets are adaptable
 writing references, not a batch-copy instruction.
 
+Classify a candidate record source by its stated purpose and actual use.
+Run-scoped evaluation or proof artifacts are evidence for those runs, not a
+general task or issue ledger merely because they contain work or failures.
+If agreed routine recording has no suitable home, propose one small source
+or mark the role unused; do not silently repurpose evidence artifacts.
+
 Show a short change proposal: paths reused/created, the actual short AGENTS
 connection, recording scope, and what stays unchanged. Include consent for
 routine factual recording in that proposal. Once authorized, do not request
