@@ -1,8 +1,0 @@
-{
-  "schemaVersion": 1,
-  "routerPath": "skills/joewrks-design-frontend/SKILL.md",
-  "testPath": "tests/design-frontend-routing.tests.mjs",
-  "casesSha256": "8a940cd84b4f2cbf265154c060941734ad6e983d0f49cb7dd5d06fc3df5ee1f7",
-  "modelRun": false,
-  "result": "router_absent"
-}

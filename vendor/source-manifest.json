@@ -1,171 +1,21 @@
 {
-  "schemaVersion": 1,
-  "release": {"name":"JOENESS","version":"0.1","entrypoint":"JOENESS-0.1.ps1"},
-  "activeCommonCore": {"path":"evals/candidates/interaction-safety-core-v1.md","sha256":"e7a3c02d4c147eaadde2c00a0452c7de21b3e0f51fa02cf7bd7085c43d97ac4d"},
-  "evaluation": {
-    "state": "candidate",
-    "tests": ["tests/design-vendor-integrity.tests.mjs", "tests/thin-hybrid-core.tests.mjs", "vendor/ui-ux-pro-max/scripts/validate_data.py", "vendor/ui-ux-pro-max/scripts/tests/test_core.py"],
-    "current": {
-      "mode": "run-hybrid-v1",
-      "version": 1,
-      "artifact": {"path":"evals/design-frontend/router-hybrid-v1.json","sha256":"10ddbd6d14bf3153e53561314245607d36c7d950af231585a8b5ae78fc590554"},
-      "collector": {"path":"evals/design-frontend/collect-hybrid-router-evaluation.mjs","sha256":"24e04d090c5c7535718878d0e9cd40a2c8324e1bd52c362ba292e68585e9ac12"},
-      "validator": {"path":"evals/design-frontend/validate-hybrid-router-evidence.mjs","sha256":"4ae8a2fd461456af9568bd8f6c33a1697620ac90d5e5a501a304c3f9775e134d"},
-      "validation": {
-        "state": "retained-evidence-validated",
-        "scope": "Retained output claims, runtime isolation and inventory, repository and materialized-root snapshots.",
-        "limitation": "V1 retains no normalized command, file, or tool events; event-only failures are rejected as unsubstantiated, so this is not event-level certification."
-      },
-      "cases": {"path":"evals/design-frontend/cases.json","sha256":"8a940cd84b4f2cbf265154c060941734ad6e983d0f49cb7dd5d06fc3df5ee1f7"},
-      "router": {"path":"evals/candidates/design-frontend-router-hybrid-v1.md","sha256":"0694f0d0880c079ab50b2af2621ef37f9745eae356f0c9ebc5a1351cd0d8a67d"},
-      "commonCore": {"path":"evals/candidates/common-core-v1.md","sha256":"5aebc74bc795891c43bf785d9b34ae4d35d4a40bf46eddef3f6246d75919a495"},
-      "classification": "implicit-unverified",
-      "hardGate": "pass",
-      "outcomeReview": "human-review-required",
-      "semanticImprovement": "not-asserted",
-      "promotionPass": false
-    }
+  "schemaVersion": 2,
+  "release": {
+    "name": "JOENESS",
+    "version": "0.2-astra-judgment",
+    "entrypoint": "JOENESS.ps1"
   },
-  "activeSkills": {
-    "handoff": {
-      "authorship": "upstream-adapted",
-      "evaluationState": "candidate",
-      "activationPolicy": "explicit-only",
-      "sourceDependencies": [],
-      "upstream": {
-        "repository": "mattpocock/skills",
-        "url": "https://github.com/mattpocock/skills",
-        "commit": "2ab958093e83e0ec752e6c1c5932da465bf23e0c",
-        "upstreamPath": "skills/productivity/handoff",
-        "license": {"name":"MIT","upstreamPath":"LICENSE","localPath":"skills/handoff/LICENSE","sha256":"0e7ac423bf2c6e223b7c5b156f8cf72da49d748e56a1641402c31f22ad07dbb5"}
-      },
-      "intentionalDifferences": ["Removed unsupported argument-hint and disable-model-invocation frontmatter; agents/openai.yaml preserves explicit-only activation.", "Relocated the skill and included the exact repository license beside it.", "Added compact evidence and cost receipts, target-root binding, current-state revalidation, handoff-bound authorization checks, and material-failure classification."],
-      "validatorSha256": "5347a0a09cfb546bba1c0d1a30dae0a233d9a05f57bd4e7877155c588bcdabf7",
-      "files": [
-        {"localPath":"skills/handoff/SKILL.md","bytes":3700,"sha256":"5c49bbe372921e95530d566359670f760cc25da95efe38a4d16c5125a1ca30b4","exactUpstreamCopy":false},
-        {"localPath":"skills/handoff/agents/openai.yaml","bytes":141,"sha256":"5c479fd562c691851690e8b18c8501045bef0943c10743d636b2fae26add1d28","exactUpstreamCopy":true},
-        {"localPath":"skills/handoff/LICENSE","bytes":1068,"sha256":"0e7ac423bf2c6e223b7c5b156f8cf72da49d748e56a1641402c31f22ad07dbb5","exactUpstreamCopy":true}
-      ]
-    },
-    "joewrks-design-frontend": {
-      "authorship": "joewrks-canonical",
-      "evaluationState": "candidate",
-      "activationPolicy": "hybrid-personal-pilot",
-      "sourceDependencies": ["ui-ux-pro-max", "apple-design"],
-      "intentionalDifferences": ["Local activation and routing contract.", "Local OpenAI product metadata."],
-      "validatorSha256": "5347a0a09cfb546bba1c0d1a30dae0a233d9a05f57bd4e7877155c588bcdabf7",
-      "files": [
-        {"localPath":"skills/joewrks-design-frontend/SKILL.md","bytes":3335,"sha256":"a5a0c3c64b94b8565a53e19e10d15fa96dcc995bd152da6c1886ed938261a05e","exactUpstreamCopy":false},
-        {"localPath":"skills/joewrks-design-frontend/agents/openai.yaml","bytes":263,"sha256":"3d0bc6bf72b93b3bd185852f080b19caeb17aed45f582df339d61c2633f81892","exactUpstreamCopy":false}
-      ]
-    },
-    "joewrks-project-setup": {
-      "authorship": "joewrks-canonical",
-      "evaluationState": "candidate",
-      "activationPolicy": "hybrid-offer-explicit-write",
-      "sourceDependencies": [],
-      "intentionalDifferences": ["Conditional long-project planning offer with explicit writes, bounded discovery, single-ledger reuse, and snapshot-guarded AGENTS.md updates."],
-      "validatorSha256": "5347a0a09cfb546bba1c0d1a30dae0a233d9a05f57bd4e7877155c588bcdabf7",
-      "files": [
-        {"localPath":"skills/joewrks-project-setup/SKILL.md","bytes":5764,"sha256":"777eecb563479f813015548284b43a2a94b2fa0fd10b2ee0f55198396fe9173c","exactUpstreamCopy":false},
-        {"localPath":"skills/joewrks-project-setup/agents/openai.yaml","bytes":353,"sha256":"1581633a8cea5dce3dd33a49bc8fb593169deddc01e496347190928a23cfeffc","exactUpstreamCopy":false},
-        {"localPath":"skills/joewrks-project-setup/scripts/project-setup.ps1","bytes":17495,"sha256":"4ffc548078a5c87357fd0e4e63538567ea2666f118243a0558bff29278d13105","exactUpstreamCopy":false}
-      ]
-    }
+  "target": {
+    "model": "gpt-6-astra",
+    "reasoningEffort": "xhigh"
   },
-  "behaviorEvidenceHistory": [
-    {
-      "pairVersion": 1,
-      "mode": "run-pair-v1",
-      "resultPath": "evals/design-frontend/router-pair-v1.json",
-      "sha256": "bd37c7a245e5705be555e9b759f8d5fee0e20d6a55c72943e76fedad1c2b4042",
-      "promotionPass": false
-    },
-    {
-      "pairVersion": 2,
-      "mode": "run-pair-v2",
-      "resultPath": "evals/design-frontend/router-pair-v2.json",
-      "sha256": "0d2129bdaceb8ad858cb7a19c9c041a25f2d955834c94565e4ef4a73dbc4a610",
-      "promotionPass": false
-    },
-    {
-      "pairVersion": 3,
-      "mode": "run-pair-v3",
-      "resultPath": "evals/design-frontend/router-pair-v3.json",
-      "sha256": "3646ca28cfab0a6ec1ccec5bb7600715275388410d6661c031cbabcb548e2327",
-      "promotionPass": false
-    }
-  ],
-  "behaviorEvidence": {
-    "pairVersion": 3,
-    "mode": "run-pair-v3",
-    "resultPath": "evals/design-frontend/router-pair-v3.json",
-    "runIds": {"control":"design-router-control-v3","candidate":"design-router-candidate-v3"},
-    "evaluator": {"path":"evals/design-frontend/collect-router-evaluation.mjs","sha256":"f2f13c00e22ac12dac83c91a116ee9d5de4a3530be54142b1eccf312585690b6"},
-    "cases": {"path":"evals/design-frontend/cases.json","sha256":"8a940cd84b4f2cbf265154c060941734ad6e983d0f49cb7dd5d06fc3df5ee1f7"},
-    "router": {"path":"evals/candidates/design-frontend-router-pair-v3.md","sha256":"d641c0210e02ca10cc70f1f3219eafbff99c480fb4e0f7ccca5348e6d2e14dfa"},
-    "p0Baseline": {"path":"evals/p0/common-core-v5.json","sha256":"05631b136be55626987f7deed16ec8bf4c34b38880e4764b2375051f42249316"},
-    "syntheticLimitation": "Selection evidence only; no live Figma connection or browser result is proven."
+  "runtimeMode": "common-core",
+  "activeCommonCore": {
+    "path": "astra-judgment-core.md",
+    "sha256": "f360b48be1b4143035f61fa20149a3249c60dea2e7f12cffa8bf1e8918f4f6a9"
   },
-  "sources": {
-    "ui-ux-pro-max": {
-      "repository": "nextlevelbuilder/ui-ux-pro-max-skill", "url": "https://github.com/nextlevelbuilder/ui-ux-pro-max-skill", "commit": "3b5df7547964f0cb3424de74cff55b69039250d3", "upstreamPath": ".claude/skills/ui-ux-pro-max/**", "archiveSha256": "ba29a4e0e380a0017f833a1041f558972a55fbad81d056c3d9a549e1609f0841", "activationMode": "non-discoverable-router-only", "evaluationStatus": "validated", "enforcingTests": ["tests/design-vendor-integrity.tests.mjs", "vendor/ui-ux-pro-max/scripts/validate_data.py", "vendor/ui-ux-pro-max/scripts/tests/test_core.py"],
-      "upstreamAuditNotes": ["SKILL.md reports 98 UX and 104 icon rows; the pinned data contains 99 and 105.", "styles.csv omits No=54; search behavior is unaffected."],
-      "license": { "name": "MIT", "upstreamPath": "LICENSE", "sha256": "738f69dfa83db5c347c678fb9d90e560877059f0de93a327c39001bff92dc014" },
-      "files": [
-        {"localPath":"vendor/ui-ux-pro-max/data/app-interface.csv","bytes":9743,"sha256":"2a17ef810dab715ce1f339861817a8fbe3ccc38142b70517301e874803e838ac","exactUpstreamCopy":true},
-        {"localPath":"vendor/ui-ux-pro-max/data/charts.csv","bytes":19365,"sha256":"a70ef7460b0eaaea8614f86a0d09a4bc38b467804179762464b5ca45b491baac","exactUpstreamCopy":true},
-        {"localPath":"vendor/ui-ux-pro-max/data/colors.csv","bytes":38668,"sha256":"cb26759805217edaaa31b09836aec09eab0fe245c58f5884e9a16ef802c6e26a","exactUpstreamCopy":true},
-        {"localPath":"vendor/ui-ux-pro-max/data/google-fonts.csv","bytes":743272,"sha256":"3fd2898fb0fdd31ba758bf05cfcd2b58cd0f038a20cf08e417d09e5a8a4a509e","exactUpstreamCopy":true},
-        {"localPath":"vendor/ui-ux-pro-max/data/icons.csv","bytes":20637,"sha256":"f376c29fb4df37b4bdb366a5aa70cb211ba3dd8b435390aaa03152a64b07d2e8","exactUpstreamCopy":true},
-        {"localPath":"vendor/ui-ux-pro-max/data/landing.csv","bytes":16685,"sha256":"121a2cac7cf21050234b5f80e7b4e182f10123536032e0f9ad862ad3aec9677d","exactUpstreamCopy":true},
-        {"localPath":"vendor/ui-ux-pro-max/data/motion.csv","bytes":10500,"sha256":"6452fbd8028ab71d52993775340e1bc40a150d92be8d4b4cb8710620fd1a7512","exactUpstreamCopy":true},
-        {"localPath":"vendor/ui-ux-pro-max/data/products.csv","bytes":73485,"sha256":"e9749e4fd8f7d4c94919c25ebd347a4adaddb671e7b01d33fbc2c87d447e6667","exactUpstreamCopy":true},
-        {"localPath":"vendor/ui-ux-pro-max/data/react-performance.csv","bytes":14822,"sha256":"904c8afcda229629545912dde0e8ac37503757131f0169f80b016f1f58c4fd3f","exactUpstreamCopy":true},
-        {"localPath":"vendor/ui-ux-pro-max/data/stacks/angular.csv","bytes":18137,"sha256":"9de35bbda536ced9af7642d88b7675cefa3e18c370ab40c0875f75ab473f0fd6","exactUpstreamCopy":true},
-        {"localPath":"vendor/ui-ux-pro-max/data/stacks/astro.csv","bytes":11870,"sha256":"6b587e32df201b6e5e7b2ed187b65eee8e6d55dcd6cc16bde29fc25e0f911dae","exactUpstreamCopy":true},
-        {"localPath":"vendor/ui-ux-pro-max/data/stacks/avalonia.csv","bytes":25626,"sha256":"6bfa40ec6609fcb59e52a38281edcc3a3e5b5e56341304fe5628b32cb9b1f875","exactUpstreamCopy":true},
-        {"localPath":"vendor/ui-ux-pro-max/data/stacks/flutter.csv","bytes":10416,"sha256":"fe36d404c799781e8ba6e9a8179b45799ed5126a545528550cd2eb0f2346e8c5","exactUpstreamCopy":true},
-        {"localPath":"vendor/ui-ux-pro-max/data/stacks/html-tailwind.csv","bytes":11305,"sha256":"7aef38e75c53559470afcfa91580a9917ca8b7dbf8b92110389e23e93703ac52","exactUpstreamCopy":true},
-        {"localPath":"vendor/ui-ux-pro-max/data/stacks/javafx.csv","bytes":30871,"sha256":"5545e331b2479eb431ca45203799ce1b0ab1e369045ab7735d5a9f85ec78f956","exactUpstreamCopy":true},
-        {"localPath":"vendor/ui-ux-pro-max/data/stacks/jetpack-compose.csv","bytes":8195,"sha256":"6c8fd4b0391c342c12b0af15610cd5becbeccaef0bbe8dcfc01d928c3195d93e","exactUpstreamCopy":true},
-        {"localPath":"vendor/ui-ux-pro-max/data/stacks/laravel.csv","bytes":18519,"sha256":"3e9f551b5232136f7b5ce1304c5e1bf5a83bd63c0dc02afb37502b238772d145","exactUpstreamCopy":true},
-        {"localPath":"vendor/ui-ux-pro-max/data/stacks/nextjs.csv","bytes":12493,"sha256":"e828ccc04843742f52f545a068e8a9ab0d2b97c0e771f7e93bf0cef74da05554","exactUpstreamCopy":true},
-        {"localPath":"vendor/ui-ux-pro-max/data/stacks/nuxtjs.csv","bytes":16539,"sha256":"f7a3f2d9542856d00199f85c6c023b7c284cc698e2e6e12d61afce2edacb24d6","exactUpstreamCopy":true},
-        {"localPath":"vendor/ui-ux-pro-max/data/stacks/nuxt-ui.csv","bytes":21230,"sha256":"b9972b31e721faabc667ee2b4e93ba2af29e1df86f186c2ff608b68370f0e3a5","exactUpstreamCopy":true},
-        {"localPath":"vendor/ui-ux-pro-max/data/stacks/react.csv","bytes":12962,"sha256":"e5624ab41d33427d88e41d07581ce4eca59b37b36ab72a6ad43a9c8e2d0a1c72","exactUpstreamCopy":true},
-        {"localPath":"vendor/ui-ux-pro-max/data/stacks/react-native.csv","bytes":9983,"sha256":"077aefc81d194895ecf7936b3ed298b978e36961f183e3a275f8acda19b5f621","exactUpstreamCopy":true},
-        {"localPath":"vendor/ui-ux-pro-max/data/stacks/shadcn.csv","bytes":15921,"sha256":"395c2e415ef6f48a474acccdc8eb2c7258a6ed751a5037ba171a2d8823e02ded","exactUpstreamCopy":true},
-        {"localPath":"vendor/ui-ux-pro-max/data/stacks/svelte.csv","bytes":11009,"sha256":"71af52d64f266c88070b91dbbaa900c2f8074b6baae9f35eaea6ba9cec6fd803","exactUpstreamCopy":true},
-        {"localPath":"vendor/ui-ux-pro-max/data/stacks/swiftui.csv","bytes":10821,"sha256":"c9c2d2510f8e66281a2514e8dd0125a6b653b9ef53a71281b5e7dfe003d5b569","exactUpstreamCopy":true},
-        {"localPath":"vendor/ui-ux-pro-max/data/stacks/threejs.csv","bytes":44860,"sha256":"c74d6ba76021f8d72c0ed12c559caecfeb6961829242acf6bcb9e99926b1a396","exactUpstreamCopy":true},
-        {"localPath":"vendor/ui-ux-pro-max/data/stacks/uno.csv","bytes":27471,"sha256":"5d2e0f396bb9dc5a2661204264cc0eda7cc4fa3d78152dec89d668704a41b8fc","exactUpstreamCopy":true},
-        {"localPath":"vendor/ui-ux-pro-max/data/stacks/uwp.csv","bytes":22867,"sha256":"debf669928871261ced9333788d5afd5784377ea1fa1b4f53993dd8f1574c0fc","exactUpstreamCopy":true},
-        {"localPath":"vendor/ui-ux-pro-max/data/stacks/vue.csv","bytes":11006,"sha256":"c2724915d3c11cd67263f25896cff721f787a0fdd8326002d31e9f5806dfd8f8","exactUpstreamCopy":true},
-        {"localPath":"vendor/ui-ux-pro-max/data/stacks/winui.csv","bytes":25152,"sha256":"2d970b08e44509d7afa53ce7feb446930b2d5e0667fa637df9aeeed65c42bbbe","exactUpstreamCopy":true},
-        {"localPath":"vendor/ui-ux-pro-max/data/stacks/wpf.csv","bytes":22538,"sha256":"ca78b5f28dc50d66900548d602d74856400097284c73e076fcfbb5a38ae5083c","exactUpstreamCopy":true},
-        {"localPath":"vendor/ui-ux-pro-max/data/styles.csv","bytes":142602,"sha256":"1bf9c1d8484a0a7a54fb67555902380446865b604c8449e47a449cb3d9c1ef88","exactUpstreamCopy":true},
-        {"localPath":"vendor/ui-ux-pro-max/data/typography.csv","bytes":49830,"sha256":"7abead73de0e43e09544f164cb60cd431674e411f1e063e555a8b44d51273328","exactUpstreamCopy":true},
-        {"localPath":"vendor/ui-ux-pro-max/data/ui-reasoning.csv","bytes":52908,"sha256":"06e4369445388ba9b7a57347510b125b7a2145bbf8546a327ba50292503b204a","exactUpstreamCopy":true},
-        {"localPath":"vendor/ui-ux-pro-max/data/ux-guidelines.csv","bytes":18667,"sha256":"e01943c433b2cad3040f19389b3b0455673758a569b7a927b5bedf65c989cb96","exactUpstreamCopy":true},
-        {"localPath":"vendor/ui-ux-pro-max/references/pro-rules.md","bytes":9585,"sha256":"bc56db7cb40c5f4d8d4f6229f5c7072865278488fe5b97c76d3a38eb596da4fc","exactUpstreamCopy":true},
-        {"localPath":"vendor/ui-ux-pro-max/references/quick-reference.md","bytes":21637,"sha256":"b01ad594cc069d18786d5e8865356cc511226ba6f48d328fd975d31aae8e5781","exactUpstreamCopy":true},
-        {"localPath":"vendor/ui-ux-pro-max/scripts/core.py","bytes":18801,"sha256":"64c149019196ee24647464a27278eb96d3b4638ded73ebfc35ccd2bc99c083a9","exactUpstreamCopy":true},
-        {"localPath":"vendor/ui-ux-pro-max/scripts/design_system.py","bytes":59417,"sha256":"fcdb279eb9691dffd6c80c333d29a4e5567368e38d724520c60013c8b1aaf242","exactUpstreamCopy":true},
-        {"localPath":"vendor/ui-ux-pro-max/scripts/search.py","bytes":8687,"sha256":"69a349d69543f35f45a12c0c82922c550d1b0a16a2b37f6b1406afb2ad2919c8","exactUpstreamCopy":true},
-        {"localPath":"vendor/ui-ux-pro-max/scripts/tests/test_core.py","bytes":5901,"sha256":"ce60ac571164cf35e8c866550ad989fa686706a56fa48df4fdf76444b94fdd8d","exactUpstreamCopy":true},
-        {"localPath":"vendor/ui-ux-pro-max/scripts/validate_data.py","bytes":4185,"sha256":"f1b5e0916f3c2f8271416f93f6ff9ebf3311a68a943a19c1b83f16823cbb05a7","exactUpstreamCopy":true},
-        {"localPath":"vendor/ui-ux-pro-max/SKILL.md","bytes":13577,"sha256":"305a7527fcb2f5b6e4129ab22cd839b5172d26df7f14d3324bfdec8fc1763560","exactUpstreamCopy":true},
-        {"localPath":"vendor/notices/ui-ux-pro-max-LICENSE","bytes":1075,"sha256":"738f69dfa83db5c347c678fb9d90e560877059f0de93a327c39001bff92dc014","exactUpstreamCopy":true}
-      ]
-    },
-    "apple-design": {
-      "repository": "emilkowalski/skills", "url": "https://github.com/emilkowalski/skills", "commit": "e695d13cb298db0f46d5ef05be2ad13fa12908a6", "upstreamPath": "skills/apple-design/SKILL.md", "archiveSha256": "870b5b75ddc1763b5f8bb19cbac2c2478b54e12c8a42ec8627c189f95c286670", "activationMode": "non-discoverable-router-only", "evaluationStatus": "validated", "enforcingTests": ["tests/design-vendor-integrity.tests.mjs"],
-      "license": { "name": "MIT", "upstreamPath": "LICENSE", "sha256": "4ff5bdb7887ec1435c9cab0e8d1a7caee704d894d65c2a008ccc68b1cc2f260b" },
-      "files": [
-        {"localPath":"vendor/apple-design/SKILL.md","bytes":22715,"sha256":"11840b24a11d7f94f39c6aaab074750ae4e4de4ef54ee4b1dd97e16ebd485e61","exactUpstreamCopy":true},
-        {"localPath":"vendor/notices/apple-design-LICENSE","bytes":1070,"sha256":"4ff5bdb7887ec1435c9cab0e8d1a7caee704d894d65c2a008ccc68b1cc2f260b","exactUpstreamCopy":true}
-      ]
-    }
-  }
+  "managedRuntimeFiles": [],
+  "publicSkills": [],
+  "defaultVendors": [],
+  "pluginRouting": null
 }
