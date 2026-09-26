@@ -97,7 +97,14 @@
     "materialSafetyOrCompletionDifference": "None observed. Both arms completed R1/R2, maintained role and acceptance boundaries, and handed off the current state accurately.",
     "boundedOperationalDifference": "JOENESS did not append a repeated S5 verification note; Bare did. Bare's final documentation diff had 295 insertions/10 deletions across six tracked files; JOENESS had 188 insertions/9 deletions across six tracked files plus the expected setup-state directory. These are observed writing/friction differences, not proof of general superiority.",
     "uniqueSetupValue": "JOENESS installed a short, durable managed AGENTS completion gate and reusable setup state in S0. Bare independently created effective work instructions. The immediate task outcomes were materially equivalent.",
-    "humanReadability": "UNVERIFIED: no blinded user rating of the two S6 handoffs was obtained."
+    "humanReadability": "At the initial report, no human rating had been obtained. In a subsequent blind A/B follow-up, the user preferred B (JOENESS) as somewhat easier to understand, while saying both remained confusing for a nontechnical reader. This is one qualitative preference, not product acceptance or general performance proof."
+  },
+  "humanReadabilityFollowup": {
+    "dateLocal": "2026-09-27",
+    "prompt": "After reading the path-normalized A/B successor handoffs, which better explains completed work, remaining work, causes, and next action to a first-time reader?",
+    "userResponse": "B가 낫긴 하네. 여전히 비전공자가 보기엔 헷갈리긴 한데 대강 알아먹기 더 쉬움",
+    "blindMapping": {"A": "Bare", "B": "JOENESS"},
+    "interpretation": "JOENESS was preferred in this one readability comparison, but did not meet a clear nontechnical-usability standard. No change to the shipped skill or project documents follows automatically from this preference."
   },
   "limitations": [
     "One fictional project and one run per arm/stage cannot establish statistical performance superiority or reliability across other repositories, models, restarts, or longer histories.",
