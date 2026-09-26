@@ -91,8 +91,8 @@ Stage 1, not a claim that it had rerun them in Stage 2.
   `01a0df46-fb88-7e62-83cd-338db87cb9c2`.
 - Both app chats started in projectless parent folders and explicitly found
   and read `work/AGENTS.md`. This proves the rules were available and used
-  during the task, **not** automatic injection of a saved project's AGENTS at
-  chat creation. That separate product path remains unverified.
+  during the task, **not by itself** automatic injection of a saved project's
+  AGENTS at chat creation. That separate product path was checked below.
 - The shared fixture's `README.md`/`TASK.md` already described recording,
   handoff, and acceptance boundaries, and the matched prompt requested a work
   record and handoff. This narrows what extra behavior the short Setup block
@@ -105,5 +105,22 @@ Stage 1, not a claim that it had rerun them in Stage 2.
 **Decision boundary:** the desktop comparison is valid for this bounded case;
 it does not justify a production skill/Core change or a claim that JOENESS
 improves material outcomes. Preserve the setup and CLI failure history, and
-keep saved-project automatic instruction delivery and broader usefulness
-separate from this result.
+keep saved-project instruction delivery and broader usefulness separate from
+this A/B outcome.
+
+## Separate saved-project automatic delivery check
+
+- The existing, user-authorized saved project `JOEWRKS-TestProject-01` had a
+  `current`/clean `JOENESS-SETUP` helper check before and after this probe.
+  Its pre-existing Git status was `M AGENTS.md` and untracked `.codex/`,
+  `.joeness/`, and `Artifacts/`; those states were identical afterward.
+- A new Codex desktop project chat, thread
+  `01a0df56-2f48-7122-9c62-e7370cc0915d`, ran at verified
+  `gpt-6-astra / xhigh` with cwd `D:/JOEWRKS/JOEWRKS-TestProject-01`.
+  The prompt forbade file and tool reads. The turn had no command or file-change
+  events, yet identified the injected `JOENESS-SETUP` block, the exact existing
+  `TASKS.md` / Diagnostic Events and `DECISIONS.md` roles, and the rule to tell
+  the user which document received what fact after a real record write.
+- This confirms **automatic instruction delivery to a new saved-project
+  desktop chat** in that project. It does not prove routine performance across
+  other projects, or that the skill self-activates on unrelated tasks.
