@@ -79,6 +79,8 @@ Normal sessions use the project's short AGENTS connection without invoking setup
 again. Put current task execution/results in its task source; reusable failure
 cause, fix, verification and remaining workaround in its issue source. Change a
 roadmap only for an explicit decision, and design only within its own authority.
+If a resumed task is already recorded complete and inspection finds no changed
+task fact, report its status without appending a repeat verification note.
 Questions, opinions, explanations and no-record requests are not facts to append.
 If a required source is inaccessible or a record write fails, finish independent
 authorized work and report the exact missing/read/write boundary.

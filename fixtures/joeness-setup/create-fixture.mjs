@@ -31,7 +31,7 @@ export function createFixture(kind='normal'){
  if(kind==='bad-ref')write('ISSUES.md','# Issues\nR-1 archived at deadbeefdeadbeefdeadbeefdeadbeefdeadbeef:ISSUES.md\n'+activeDetail);
  if(kind!=='plain'){
   let body='Sources: Product PRODUCT.md; task TASK.md; issues ISSUES.md; direction ROADMAP.md; design DESIGN.md.\n'+
-  'On resume current files/Git/target outrank old handoff plans. Completed work stays complete; infer no new scope.\n'+
+  'On resume current files/Git/target outrank old handoff plans. Completed work stays complete; infer no new scope. If inspection finds no changed task fact, report completion without a repeat verification note.\n'+
   'Recording consent: after authorized work, record material execution and verification in TASK.md, reusable cause/fix/verification and workarounds in ISSUES.md. Do not duplicate prose.\n'+
   'Questions, opinions, explanation-only and no-record requests cause no document writes. No-record does not cancel separately authorized code work. Only explicit direction decisions update ROADMAP.md. Preserve Product and approved design.\n'+
   'If a source or record write is unavailable, report the exact boundary and continue independent authorized work.\n'+

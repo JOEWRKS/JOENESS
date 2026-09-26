@@ -4,7 +4,8 @@ Adapt this body to actual existing paths before applying; omit unused roles.
 - Sources: product <canonical path>; current work <task path>; issues <issue path>;
   design <design path, if relevant>; direction <roadmap path, if relevant>.
 - On resume use current files/Git/target state; old notes locate sources, not new
-  scope. Do not repeat work that is already complete.
+  scope. Do not repeat work that is already complete. If inspection finds no changed
+  task fact, report its completed status without a repeat verification note.
 - Recording consent: <agreed scope>. After authorized work, record material facts
   in the task source; reusable causes/fixes/workarounds in issues. Avoid duplicate
   prose. Questions, opinions, explanation-only and no-record requests cause no
