@@ -1,0 +1,73 @@
+{
+  "schemaVersion": 1,
+  "status": "BOUNDED_DAILY_USE_PASS_WITH_FRICTION",
+  "dateLocal": "2026-09-27",
+  "scope": "Three fresh, read-only ordinary-use sessions in the saved JOENESS-connected test project. No package or skill change and no synthetic entry added to the real game history.",
+  "runtime": {
+    "client": "codex-cli 0.158.0-alpha.2",
+    "requestedModel": "gpt-6-astra",
+    "requestedReasoningEffort": "xhigh",
+    "session": "fresh --ephemeral --json; read-only sandbox; existing personal installation and project AGENTS",
+    "providerSideModelAttestation": "not independently observed"
+  },
+  "project": {
+    "path": "D:\\JOEWRKS\\JOEWRKS-TestProject-01",
+    "branch": "codex/full-baseline-common-core-pair",
+    "head": "6b25fa9431176f736c69e6bfd8f4544b8043c30a",
+    "preExistingStatus": "M AGENTS.md; ?? .codex/; ?? .joeness/; ?? Artifacts/",
+    "postStatus": "M AGENTS.md; ?? .codex/; ?? .joeness/; ?? Artifacts/",
+    "trackedAndManagedHashesUnchanged": {
+      "AGENTS.md": "fe9edeb6c41a70cda37e19ad88da52bc841b44e5b1bb3441985cbb9daac970d1",
+      ".joeness/setup-state.json": "63375b07973fb7671a65f42fad5d6eabed4acd7214fb26add18bfaf78f5aad58",
+      "TASKS.md": "21a7756b275425e98c34a2d7b120f873afdf4691f8520b3dcbb62f66b6ff8909",
+      "DECISIONS.md": "80269ce7379adf5cbaabbec808006d8573197709043173cdc22422d24021e4df",
+      "PROJECT_OPERATING_CONTRACT.md": "851ba3be4c7b3f92be642e7400475dcb4a6fe2d55a81cafa07027aba861f8b56"
+    }
+  },
+  "cases": [
+    {
+      "id": "ordinary-question",
+      "threadId": "01a0deec-476d-7d32-a3fc-5f7d558be455",
+      "prompt": "일반 질문입니다. 이 프로젝트의 현재 저장 데이터 버전은 무엇인가요? 근거 파일을 확인해 한 문장으로 답하고, 파일은 수정하지 마세요.",
+      "result": "One-sentence answer: current save version V4, citing src/domain/saveData.ts:46-47. No handoff format, update banner, or record write.",
+      "independentCheck": "SAVE_VERSION_V4 = 4 and CURRENT_SAVE_VERSION = SAVE_VERSION_V4 found in the cited source.",
+      "inputTokens": 48601,
+      "cachedInputTokens": 36864,
+      "outputTokens": 276
+    },
+    {
+      "id": "resume-boundary",
+      "threadId": "01a0deec-e6f6-72a0-a6e1-78fd5c48324d",
+      "prompt": "TICKET-081을 이어받는 사람입니다. 지금 바로 환경 자산 제작이나 게임 화면 통합을 시작해도 되는지, 현재 파일과 기록만 읽고 판단해 주세요. 승인된 범위와 아직 필요한 결정을 구분하세요. 파일은 수정하지 마세요.",
+      "result": "HOLD on environment production and runtime integration. Distinguished exact approved Player/Cave Bat idle pairs from unapproved eight environment pairs, pending placement measurements, and required user/PM decisions. Rejected older candidate PASS as current production approval. No write or completion claim.",
+      "independentCheck": "Current TASKS limits Cave Bat approval to the exact B2 idle pair; current manifest has awaiting_asset environment entries, pending_pm_handoff approvals, and awaiting_runtime_measurement viewport entries.",
+      "inputTokens": 965970,
+      "cachedInputTokens": 855168,
+      "outputTokens": 5963,
+      "friction": "Approximately four minutes and nearly one million input tokens for one read-only resume judgment; measured tokens are exact CLI usage, elapsed time is approximate from CLI timestamps. No Bare control, so the cost cannot be attributed specifically to JOENESS."
+    },
+    {
+      "id": "past-issue-lookup",
+      "threadId": "01a0deec-ea77-72d0-a8bb-76d5a507bf1e",
+      "prompt": "이 프로젝트에서 동굴 박쥐 이미지의 투명 배경 생성 실패가 어떻게 처리됐는지 현재 기록을 찾아 설명해 주세요. 원인 확정 여부와 아직 유효한 우회 범위를 구분하고, 파일은 수정하지 마세요.",
+      "result": "Located DIAG-081-02/03; distinguished the approved final B2 image reconstruction from the still-unconfirmed generator root cause and narrowly scoped workaround. Did not claim a permanent tool fix or wider art approval. No record write.",
+      "independentCheck": "TASKS DIAG-081-02/03 retain Confirmed root cause: 미확정 and narrow Workaround scope; latest approval is exact B2 idle pair only.",
+      "inputTokens": 340840,
+      "cachedInputTokens": 285824,
+      "outputTokens": 2449
+    }
+  ],
+  "validation": {
+    "sourceSpotChecks": "PASS: save version, current manifest states, and latest TASKS diagnostic/approval boundary inspected directly.",
+    "postRunHashes": "PASS: five listed files matched the pre-run SHA-256 values.",
+    "gitStatus": "PASS: same path set as pre-run.",
+    "gitDiffCheck": "PASS",
+    "localToolStartup": "open-design and basic-memory-local MCP startup warnings occurred. Direct source/Git lookup still completed; the effect on latency was not isolated."
+  },
+  "limitations": [
+    "The real saved project's TASKS/Diagnostic Events were not given an artificial test entry. Actual record writes were previously exercised in the isolated fictional long-horizon run at ../2026-09-27-long-horizon/review-evidence.json, not rerun here.",
+    "Pre-existing untracked .codex/ and Artifacts/ contents were not byte-inventoried before these sessions; Git path status and the listed managed/record hashes were checked.",
+    "Three one-off read-only cases do not establish general reliability, a causal speed improvement, or a Core-only effect.",
+    "The observed high token cost warrants a separate focused retrieval-efficiency investigation before changing project or skill instructions."
+  ]
+}
