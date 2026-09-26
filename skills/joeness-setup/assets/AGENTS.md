@@ -19,6 +19,10 @@ Adapt this body to actual existing paths before applying; omit unused roles.
 - A finished task does not finish its milestone or release. Use the approved
   roadmap's required-item checks and evidence for that completion claim;
   scope changes or deferrals need an explicit authorized decision.
+- For a requested human handoff, start in everyday language with what is done,
+  what remains, and the next action or decision. Put IDs, test counts, paths,
+  and detailed evidence after that opening; keep technical completion and
+  user acceptance distinct. This does not set a format for ordinary replies.
 - If a source/write is unavailable, report the exact boundary and continue independent
   authorized work. Never pretend a failed record was saved.
 - Historical detail: follow recorded exact Git commit:path references when needed.

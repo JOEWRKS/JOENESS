@@ -1,0 +1,69 @@
+{
+  "schemaVersion": 1,
+  "status": "TECHNICAL_PROBE_COMPLETE_HUMAN_READABILITY_UNVERIFIED",
+  "dateLocal": "2026-09-27",
+  "preregisteredPlanHead": "fac7ae4d2a8358219c9434839745b3e976542f61",
+  "runtime": {
+    "client": "codex-cli 0.158.0-alpha.2",
+    "model": "gpt-6-astra",
+    "reasoningEffort": "xhigh",
+    "sessionMode": "fresh --ephemeral --json; same prompt; isolated fictional local Git copies",
+    "candidateSourceManifestSha256": "9a283103088cd959775e3aa481c6ed817c3b73ccdfd19ef726fa9de3811f69f6",
+    "thinCoreSha256": "f360b48be1b4143035f61fa20149a3249c60dea2e7f12cffa8bf1e8918f4f6a9"
+  },
+  "control": {
+    "baselineAgentsSha256": "98171d945596b09a2c14b277e30b6ffdbd9c1f12737c5a95d00e15e930c15555",
+    "candidateAgentsSha256": "368866fd1686d483e77278c507edbaac7ff2a994f6859fb0470fffb4d28a9772",
+    "candidateSetupStateSha256": "fc6e479e4168c25852986bd57676a8a76ec9d4d125545879bc04c075a7a3bc17",
+    "otherProjectFiles": "PRODUCT.md, DESIGN.md, ROADMAP.md, TASKS.md, ISSUES.md, HANDOFF.md, source, and tests matched byte-for-byte before the comparison. Candidate AGENTS and setup-state were revised via the official helper, which returned current/clean."
+  },
+  "baseline": [
+    {"sample": 0, "threadId": "01a0deac-212d-70d3-9a68-40ac5814b168", "seconds": 73.06, "inputTokens": 76492, "outputTokens": 1896, "opening": "M1 기술 구현·검증은 완료됐고, 사용자 인수 승인은 대기 중입니다.", "plainFirstScreen": false, "source": "Previous long-horizon S6 JOENESS run and direct user readability feedback."},
+    {"sample": 1, "threadId": "01a0debe-0c60-74b2-ae58-5482f31af5ae", "seconds": 66.54, "inputTokens": 76621, "outputTokens": 1690, "opening": "M1 기술 작업은 완료됐고, 사용자 승인은 아직 PENDING입니다. 현재 코드와 기록을 대조하고 npm test를 실행해 10/10 통과를 확인했습니다.", "plainFirstScreen": false, "filesUnchanged": true},
+    {"sample": 2, "threadId": "01a0debf-12d9-7a80-ade3-06847ea39703", "seconds": 68.43, "inputTokens": 76184, "outputTokens": 1559, "opening": "M1은 기술적으로 완료됐고, 사용자 승인은 대기 중입니다. 현재 코드와 기록을 대조했으며, 이번에 실행한 npm test도 10/10 통과했습니다.", "plainFirstScreen": false, "filesUnchanged": true},
+    {"sample": 3, "threadId": "01a0dec0-21d9-7e71-b9b2-fccf59afe4bf", "seconds": 55.54, "inputTokens": 76194, "outputTokens": 1408, "opening": "M1 기술 작업은 완료됐고, 사용자 승인은 대기 중입니다. 현재 코드와 기록을 대조했고, npm test에서 10/10 통과를 확인했습니다.", "plainFirstScreen": false, "filesUnchanged": true},
+    {"sample": 4, "threadId": "01a0dec0-ffa5-7a02-9cda-60cfe0a80c00", "seconds": 70.77, "inputTokens": 80482, "outputTokens": 1406, "opening": "M1 기술 구현은 완료됐고, 사용자 승인은 대기 중입니다. 현재 코드·기록을 대조하고 npm test를 실행해 10/10 통과를 확인했습니다.", "plainFirstScreen": false, "filesUnchanged": true}
+  ],
+  "candidate": [
+    {"sample": 1, "threadId": "01a0dec3-ada1-7263-9da8-d91a3e2d55d0", "seconds": 85.98, "inputTokens": 77785, "outputTokens": 2134, "opening": "책 추가와 제목 검색에 필요한 구현·검증은 끝났고, 필수 개발 작업은 남아 있지 않습니다. 아직 남은 것은 사용자 승인입니다. 다음으로 필요한 한 가지는 사용자가 현재 동작을 검토하고 수락 여부를 명시적으로 결정하는 것입니다.", "plainFirstScreen": true, "filesUnchanged": true},
+    {"sample": 2, "threadId": "01a0dec4-f478-7722-a367-00b0a20b2b4e", "seconds": 64.62, "inputTokens": 77348, "outputTokens": 1513, "opening": "책 추가와 제목 검색에 필요한 구현·검증은 끝났고, 사용자 승인은 아직 남아 있습니다. 다음으로 필요한 한 가지는 사용자가 현재 동작을 검토하고 수락 여부를 명시적으로 결정하는 것입니다.", "plainFirstScreen": true, "filesUnchanged": true},
+    {"sample": 3, "threadId": "01a0dec5-f846-7942-8758-bc0ff4be00ef", "seconds": 70.44, "inputTokens": 77288, "outputTokens": 1670, "opening": "책 추가 시 정보 보존·중복 차단과 제목 검색은 구현과 검증이 끝났습니다. 승인된 필수 개발 작업은 남아 있지 않고, 사용자 수락이 대기 중입니다. 다음으로 필요한 한 가지는 사용자가 현재 결과를 검토하고 수락 여부를 명시적으로 결정하는 것입니다.", "plainFirstScreen": true, "filesUnchanged": true},
+    {"sample": 4, "threadId": "01a0dec7-1592-7341-8c71-c731a9be7ef1", "seconds": 75.12, "inputTokens": 78832, "outputTokens": 1796, "opening": "책 추가와 제목 검색에 필요한 구현은 끝났습니다. 필수 개발 작업은 남아 있지 않지만, 사용자의 최종 승인은 아직 대기 중입니다. 다음으로 필요한 한 가지는 사용자가 완성된 동작을 검토하고 승인 여부를 명시적으로 결정하는 것입니다.", "plainFirstScreen": true, "filesUnchanged": true},
+    {"sample": 5, "threadId": "01a0dec8-4095-7430-bacc-0e721e20d136", "seconds": 66.53, "inputTokens": 77244, "outputTokens": 1747, "opening": "책 추가와 검색 기능의 구현·검증은 끝났으며, 필수 개발 작업은 남아 있지 않습니다. 아직 사용자 승인은 대기 중입니다. 다음으로 필요한 한 가지는 사용자가 완성된 동작을 검토하고 수락 여부를 명시적으로 결정하는 것입니다.", "plainFirstScreen": true, "filesUnchanged": true}
+  ],
+  "manualAssessment": {
+    "firstScreenRubric": "Baseline 0/5, candidate 5/5. All final responses retained technical evidence after the opening, separated implementation from user acceptance, rejected stale HANDOFF.md, and did not edit project files.",
+    "friction": "Observed means: baseline 66.87 s / 77,195 input / 1,592 output tokens; candidate 72.54 s / 77,699 input / 1,772 output tokens. Candidate took about 5.67 s and 180 output tokens more per response in this small probe. This is not a causal performance estimate; the rule applies only to requested handoffs.",
+    "humanReadability": "UNVERIFIED for the new candidate; the previous user feedback motivated the change, but the user has not rated a candidate response."
+  },
+  "freshSetupIntegration": {
+    "threadId": "01a0deca-26b4-7313-955e-2422c80f289c",
+    "result": "Fresh natural-language setup selected joeness-setup, returned current/clean, and wrote a short Korean managed-body sentence: 사람에게 인계할 때는 완료한 일, 남은 일, 다음 행동·결정을 쉬운 말로 먼저 설명한다. 기술 완료·사용자 수락·미검증 상태를 구분하고 상세 근거는 뒤에 둔다.",
+    "changedTargets": ["AGENTS.md", "TASKS.md", ".joeness/setup-state.json"],
+    "scriptedEnglishRegexResult": false,
+    "regexCorrection": "The ad-hoc detector looked for English phrasing and returned false on the correct Korean sentence. Direct managed-block inspection confirms the clause; no model rerun or result deletion was used."
+  },
+  "ordinaryQuestionNegativeControl": {
+    "threadId": "01a0dece-7732-73c1-be42-d6fcdb9181bb",
+    "prompt": "PRODUCT.md에서 이 제품이 네트워크에 의존하는지만 한 문장으로 답해. 파일은 수정하지 마.",
+    "result": "One-sentence answer that the local-memory library does not depend on a network; no handoff banner or done/remaining/next-action format.",
+    "agentsUnchanged": true,
+    "exitCode": 0
+  },
+  "deterministicAndInstallChecks": {
+    "astraJudgmentSync": "PASS",
+    "projectSetupSafety": "21 PASS / 0 FAIL",
+    "installerLifecycle": "PASS",
+    "nodeContractsAndFixtures": "6 PASS / 0 FAIL",
+    "skillQuickValidate": "Skill is valid!",
+    "jsonAndDiffCheck": "PASS",
+    "personalMigration": "Prior manifest 4285839d19259f27639c9da7c63bf5e221fbae353a6358e85de4f81805394573 checked current with its archived installer, then Remove/removed; new package Check/ready, Apply/current, Check/current. Active public skill remains joeness-setup and installed changed skill files match source SHA-256.",
+    "existingProjectConnectionsChanged": false
+  },
+  "limitations": [
+    "The ten fresh responses are a controlled wording probe in one fictional project, not proof of general readability or performance in every domain.",
+    "The five candidate responses used the newly proposed managed AGENTS clause with the same previously installed package; the fresh setup integration separately tested that the revised source skill generates the clause.",
+    "The isolated projects and CODEX_HOME directories are under a local temp root. No real saved project or production project connection was changed during the probe.",
+    "No product acceptance follows from tests or the prior relative A/B readability preference."
+  ]
+}

@@ -21,7 +21,7 @@
       "files": [
         {
           "path": "SKILL.md",
-          "sha256": "70215cfcc262c20dff94db992230e8d13b7f90dbb5c3dd8ee754cc8ff674ad54"
+          "sha256": "6060916f763c7de28f7b3b7a4c2f8a6f752597a3012be0d518f3e86320df09cf"
         },
         {
           "path": "agents/openai.yaml",
@@ -29,7 +29,7 @@
         },
         {
           "path": "assets/AGENTS.md",
-          "sha256": "971d05223717057f8bf1c35be63b248706a4d146b2fce81e4f87e12dd537d02a"
+          "sha256": "e7d9708a148dbd20914c7e10c522c8fde88f3efef16e6d03c58347b723e54e27"
         },
         {
           "path": "assets/DESIGN.md",
@@ -49,7 +49,7 @@
         },
         {
           "path": "references/usage.md",
-          "sha256": "a3a384a7d3a6830117b3fa2c687e9aa3ff8d6805c6dc6944942867c11a1934fd"
+          "sha256": "3926df9b84bcdd4b225256f7c7011cf8725d488f1488f6e747739062041bf7e1"
         },
         {
           "path": "scripts/project-setup.ps1",

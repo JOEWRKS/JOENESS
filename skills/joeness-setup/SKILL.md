@@ -46,6 +46,11 @@ If an existing roadmap defines approved milestones or release scope, connect its
 required-item completion gate briefly: a finished task does not finish its
 milestone or release. Keep the actual checklist and evidence in the roadmap,
 not a copied list in AGENTS.
+For a requested handoff to a person, the short connection should call for an
+everyday-language opening: what is done, what remains, and the recipient's next
+action or decision. Put IDs, test counts, paths, and detailed proof after that
+opening. Preserve the distinction between technical completion, user acceptance,
+and unverified work. This is for handoffs, not a format for ordinary replies.
 
 ## Apply the short connection
 
