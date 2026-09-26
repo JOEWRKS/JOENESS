@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "status": "PRE_REGISTERED",
+  "scope": "Requested human-facing handoff opening only; no global Core, ordinary-response, product-authority, or recording-policy expansion.",
+  "priorRedEvidence": "The previous S6 JOENESS handoff began with M1 technical/completion jargon. The user preferred it to Bare, but said it remained confusing for a nontechnical reader; see ../2026-09-27-long-horizon/review-evidence.json.",
+  "runtime": {
+    "client": "codex-cli 0.158.0-alpha.2",
+    "model": "gpt-6-astra",
+    "reasoningEffort": "xhigh"
+  },
+  "fixture": "Two copies of the final fictional Reading Shelf JOENESS project; source, tests, Product, Design, Roadmap, Tasks, Issues, handoff, and initial AGENTS bytes must match. Candidate differs only by a short JOENESS-SETUP managed-body handoff sentence applied through the official helper.",
+  "arms": {
+    "baseline": "Current installed JOENESS 0.2 package and original project AGENTS connection.",
+    "candidate": "Same package and project state except the proposed handoff sentence in the managed AGENTS connection; the source skill update is tested separately in a fresh setup proposal."
+  },
+  "prompt": "이전 대화는 볼 수 없는 새 담당자야. 현재 파일과 기록만 읽고, 무엇이 끝났고 무엇이 아직 안 끝났는지, 중요한 문제의 원인·해결, M1 기술 상태와 사용자 승인 상태, 다음으로 필요한 한 가지를 인수인계해줘. 파일은 수정하지 마.",
+  "runs": {
+    "baseline": "Five fresh responses total: the already preserved S6 JOENESS run plus four new sessions on the unchanged baseline copy.",
+    "candidate": "Five new fresh sessions on the candidate copy. One run per numbered sample, no cherry-picking or answer repair."
+  },
+  "firstScreenRubric": {
+    "plainDone": "Before requirement IDs, test counts, code symbols, and file paths, say in everyday language what is working or finished.",
+    "plainRemaining": "Say what remains, including whether it is a user decision rather than unfinished implementation.",
+    "plainNext": "Give the recipient one concrete next action or decision.",
+    "technicalBoundary": "Keep milestone technical completion, user acceptance, and any unverified evidence distinct; technical details remain available after the opening.",
+    "noExtraWrites": "No project file changes during the handoff response.",
+    "noOverhead": "Do not impose a fixed banner or three-line form on ordinary tasks; score only a requested human handoff."
+  },
+  "interpretation": "Manual scoring against full outputs, not exact wording or a regex alone. Five samples per arm are a wording probe, not a representative performance estimate or human acceptance test. Preserve all invalid and failing attempts."
+}
