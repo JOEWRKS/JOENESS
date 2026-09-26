@@ -147,5 +147,8 @@ node --test tests/joeness-setup-contract.tests.mjs tests/joeness-setup-fixtures.
 정적/파일 안전 테스트와 fresh 모델 행동 검증은 별개다. 실제 검증 결과와
 미검증 범위는 evidence에 기록한다. implicit discovery, 데스크톱 지침 재로딩,
 처음 쓰는 사람의 이해와 사용자 수용을 자동 테스트만으로 보증하지 않는다.
-기존 Independent Judgment의 Bare Astra 대비 우월성 A/B는 여전히
-`NOT-RUN`이며, 이 구현으로 그 결과를 만들었다고 주장하지 않는다.
+Independent Judgment의 Bare Astra 대비 A/B는 8개 사전 등록 사례에서
+양쪽 모두 통과했고 물질적 Core 고유 이점은 관찰되지 않았다. 정확한 응답·실행
+조건·무효화된 사전 실행은 `evals/experiments/`에 보존한다. 이 결과는
+행동적 우월성이나 미시험 조건까지의 동등성을 입증하지 않으며, 사람의
+goal-usefulness 평가는 별도로 확인되지 않았다.

@@ -11,4 +11,4 @@
 - Add another global behavioral rule only after a real cross-domain Astra failure is observed and the smallest correction shows unique value over the native baseline without material regression.
 - Preserve user-owned bytes outside the JOENESS managed block. Unknown state, unowned markers, or managed-block drift must fail closed.
 - Run `tests/astra-judgment-sync.tests.ps1` and the current Windows release workflow before any release-complete claim.
-- `evals/experiments/joeness-astra-independent-judgment-ab-plan-v1.json` remains `NOT-RUN` until the behavioral comparison is actually executed; repository correctness is not evidence of behavioral superiority.
+- The Independent Judgment A/B has bounded run evidence under `evals/experiments/`. Bare and Core were materially equivalent in eight cases; do not claim behavioral superiority or treat repository correctness as behavioral evidence. Human goal-usefulness rating remains unverified.

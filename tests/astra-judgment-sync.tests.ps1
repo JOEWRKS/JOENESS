@@ -132,7 +132,12 @@ function Test-MinimalCurrentTree {
     Assert-ExactNames (Join-Path $RepoRoot '.github') @('workflows') '.github contains only workflows'
     Assert-ExactNames (Join-Path $RepoRoot '.github\workflows') @('windows-ci.yml') 'workflow surface is current-only'
     Assert-ExactNames (Join-Path $RepoRoot 'evals') @('experiments','joeness-setup') 'eval surface contains only current experiments'
-    Assert-ExactNames (Join-Path $RepoRoot 'evals\experiments') @('joeness-astra-independent-judgment-ab-plan-v1.json') 'only current behavioral A/B plan remains'
+    Assert-ExactNames (Join-Path $RepoRoot 'evals\experiments') @(
+        'joeness-astra-independent-judgment-ab-plan-v1.json',
+        'joeness-astra-independent-judgment-ab-run-2026-09-26.json',
+        'joeness-astra-independent-judgment-ab-invalid-preflight-2026-09-26.json',
+        'joeness-astra-independent-judgment-ab-results-2026-09-26.json'
+    ) 'current behavioral A/B plan and bounded run evidence'
     Assert-ExactNames (Join-Path $RepoRoot 'scripts') @('sync-harness.ps1') 'script surface is current-only'
     Assert-ExactNames (Join-Path $RepoRoot 'tests') @('astra-judgment-sync.tests.ps1','joeness-install.tests.ps1','joeness-project-setup.tests.ps1','joeness-setup-contract.tests.mjs','joeness-setup-fixtures.tests.mjs') 'test surface is current-only'
     Assert-ExactNames (Join-Path $RepoRoot 'vendor') @('source-manifest.json') 'vendor directory contains only active manifest'
@@ -175,9 +180,37 @@ function Test-ManifestAndCoreIdentity {
     Assert-Equal $manifest.activeCommonCore.sha256 (Get-Sha256 $coreBytes) 'manifest binds exact core bytes'
 
     $ab = [IO.File]::ReadAllText((Join-Path $RepoRoot 'evals\experiments\joeness-astra-independent-judgment-ab-plan-v1.json')) | ConvertFrom-Json
-    Assert-Equal $ab.status 'NOT-RUN' 'behavioral A/B remains not run'
-    Assert-True ($null -eq $ab.results) 'behavioral A/B has no results'
-    Assert-True ($null -eq $ab.conclusion) 'behavioral A/B has no conclusion'
+    Assert-Equal $ab.status 'COMPLETED' 'behavioral A/B was actually run'
+    Assert-Equal $ab.results.validRuns 16 'behavioral A/B has sixteen valid runs'
+    Assert-Equal $ab.conclusion 'BARE-EQUIVALENT-OBSERVED' 'A/B conclusion stays bounded'
+
+    $protocol = [IO.File]::ReadAllText((Join-Path $RepoRoot 'evals\experiments\joeness-astra-independent-judgment-ab-run-2026-09-26.json')) | ConvertFrom-Json
+    Assert-Equal $protocol.status 'PRE_REGISTERED' 'exact prompts were frozen before valid runs'
+    Assert-Equal @($protocol.cases).Count 8 'protocol retains eight cases'
+
+    $invalid = [IO.File]::ReadAllText((Join-Path $RepoRoot 'evals\experiments\joeness-astra-independent-judgment-ab-invalid-preflight-2026-09-26.json')) | ConvertFrom-Json
+    Assert-Equal $invalid.status 'INVALIDATED_PREFLIGHT' 'contaminated run remains as failure evidence'
+    Assert-Equal @($invalid.runs).Count 16 'invalidated runs are preserved'
+
+    $result = [IO.File]::ReadAllText((Join-Path $RepoRoot 'evals\experiments\joeness-astra-independent-judgment-ab-results-2026-09-26.json')) | ConvertFrom-Json
+    Assert-Equal $result.status 'COMPLETED' 'valid A/B result is complete'
+    Assert-Equal $result.preregisteredProtocolSha256 (Get-Sha256 ([IO.File]::ReadAllBytes((Join-Path $RepoRoot 'evals\experiments\joeness-astra-independent-judgment-ab-run-2026-09-26.json')))) 'valid runs bind frozen prompt bytes'
+    Assert-Equal @($result.runs).Count 16 'valid A/B result has sixteen runs'
+    Assert-Equal @($result.caseScores).Count 8 'all eight paired cases are scored'
+    foreach ($case in $protocol.cases) {
+        $pair = @($result.runs | Where-Object { $_.caseId -ceq $case.id })
+        Assert-Equal $pair.Count 2 "paired runs for $($case.id)"
+        Assert-Equal (($pair.arm | Sort-Object) -join ',') 'Bare,Core' "exact arms for $($case.id)"
+    }
+    foreach ($run in $result.runs) {
+        Assert-Equal @($run.context).Count 2 "two verified turns for $($run.caseId) $($run.arm)"
+        Assert-Equal $run.toolEvents 0 "no tools used in $($run.caseId) $($run.arm)"
+        foreach ($context in $run.context) {
+            Assert-Equal $context.cwd $result.runtime.sameFixture 'no cross-arm project-context drift'
+            Assert-Equal $context.model 'gpt-6-astra' 'exact evaluated model'
+            Assert-Equal $context.effort 'xhigh' 'exact evaluated reasoning effort'
+        }
+    }
 }
 
 function Test-CurrentLifecycleAndUserBytes {
