@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "status": "TECHNICAL_PROBE_COMPLETE_HUMAN_READABILITY_UNVERIFIED",
+  "status": "TECHNICAL_PROBE_COMPLETE_RELATIVE_HUMAN_IMPROVEMENT_REPORTED",
   "dateLocal": "2026-09-27",
   "preregisteredPlanHead": "fac7ae4d2a8358219c9434839745b3e976542f61",
   "runtime": {
@@ -34,7 +34,13 @@
   "manualAssessment": {
     "firstScreenRubric": "Baseline 0/5, candidate 5/5. All final responses retained technical evidence after the opening, separated implementation from user acceptance, rejected stale HANDOFF.md, and did not edit project files.",
     "friction": "Observed means: baseline 66.87 s / 77,195 input / 1,592 output tokens; candidate 72.54 s / 77,699 input / 1,772 output tokens. Candidate took about 5.67 s and 180 output tokens more per response in this small probe. This is not a causal performance estimate; the rule applies only to requested handoffs.",
-    "humanReadability": "UNVERIFIED for the new candidate; the previous user feedback motivated the change, but the user has not rated a candidate response."
+    "humanReadability": "After the technical probe, the user read a representative new first-screen summary and answered that it was easier to understand than the previous B. This is relative qualitative feedback, not an unrestricted nontechnical-usability or product-acceptance claim."
+  },
+  "humanReadabilityFollowup": {
+    "dateLocal": "2026-09-27",
+    "shownOpening": "책 추가와 제목 검색에 필요한 구현·검증은 끝났고, 필수 개발 작업은 남아 있지 않습니다. 아직 남은 것은 사용자 승인입니다. 다음은 사용자가 현재 동작을 검토하고 수락 여부를 결정하는 것입니다.",
+    "userResponse": "이전보다 이해 쉬움",
+    "interpretation": "One user judged this representative opening easier than the previous JOENESS B handoff. The user did not rate every full handoff, other domains, or long-term use."
   },
   "freshSetupIntegration": {
     "threadId": "01a0deca-26b4-7313-955e-2422c80f289c",
