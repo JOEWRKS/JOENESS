@@ -3,10 +3,7 @@ param(
     [switch] $Check,
     [switch] $Apply,
     [switch] $Remove,
-    [switch] $IncludeDesignFrontend,
-    [string] $CodexHome,
-    [string] $AgentsHome,
-    [string] $BackupRoot
+    [string] $CodexHome
 )
 
 Set-StrictMode -Version Latest
@@ -138,7 +135,7 @@ function Get-JoenessSourceIdentity {
     }
     if (@($manifest.defaultVendors).Count -ne 0) { throw 'Default vendors must remain empty' }
     if ($null -ne $manifest.pluginRouting) { throw 'Plugin routing must remain null' }
-    if ($null -ne $manifest.PSObject.Properties['compatibility']) { throw 'Historical compatibility payload is not allowed in the current manifest' }
+    if ($null -ne $manifest.PSObject.Properties['compatibility']) { throw 'Unexpected distribution manifest field: compatibility' }
 
     $coreBytes = [IO.File]::ReadAllBytes($corePath)
     $coreText = ConvertFrom-JoenessUtf8 $coreBytes 'Independent Judgment source'
@@ -219,7 +216,7 @@ function Read-JoenessState {
     $state = $text | ConvertFrom-Json
 
     if (-not (Test-JoenessJsonInteger $state.schemaVersion) -or [long] $state.schemaVersion -ne 1) { throw 'Unsupported current state schemaVersion' }
-    if ([string] $state.releaseVersion -cnotin @($script:JoenessRelease, '0.2-astra-judgment')) { throw 'State release identity mismatch' }
+    if ([string] $state.releaseVersion -cne $script:JoenessRelease) { throw 'State identity does not match this package; existing files were preserved' }
     if ($state.originalAgentsExisted -isnot [bool]) { throw 'State originalAgentsExisted is invalid' }
     if ([string] $state.newline -cnotin @('lf', 'crlf')) { throw 'State newline is invalid' }
     if (-not (Test-JoenessJsonInteger $state.separatorCount) -or [long] $state.separatorCount -lt 0 -or [long] $state.separatorCount -gt 2) { throw 'State separatorCount is invalid' }
@@ -286,8 +283,7 @@ function Get-JoenessInstallObservation {
     }
 
     if ($blockers.Count -eq 0) {
-        $knownPredecessor = $state.releaseVersion -ceq '0.2-astra-judgment' -and $state.manifestSha256 -ceq '70997d6447a45b41b3f3f54816bbed6dd1543d7ad6e4d1b2f6a79c6f955c3888'
-        if ([string] $state.manifestSha256 -cne $Source.ManifestHash -and -not $knownPredecessor) {
+        if ([string] $state.manifestSha256 -cne $Source.ManifestHash) {
             $blockers += [pscustomobject] @{ kind = 'sourceDrift'; message = 'State manifest identity does not match current source' }
         }
         if ([string] $state.coreSha256 -cne $Source.CoreHash) {
@@ -330,13 +326,10 @@ function Get-JoenessInstallObservation {
 
 function Invoke-JoenessHarnessSync {
  [CmdletBinding()]
- param([switch]$Check,[switch]$Apply,[switch]$Remove,[string]$CodexHome,[string]$AgentsHome,[string]$BackupRoot,[switch]$IncludeDesignFrontend,[scriptblock]$AfterWrite)
+ param([switch]$Check,[switch]$Apply,[switch]$Remove,[string]$CodexHome,[scriptblock]$AfterWrite)
  $mode=if($Apply){'apply'}elseif($Remove){'remove'}else{'check'}
  $resolved=Resolve-JoenessCodexHome $CodexHome
  $warnings=@()
- if($AgentsHome){$warnings+='AgentsHome is unused; the sole skill installs under CodexHome/skills.'}
- if($BackupRoot){$warnings+='BackupRoot is unused; conditional in-process rollback owns only listed targets.'}
- if($IncludeDesignFrontend){$warnings+='No design vendors are installed.'}
  try {
   if(([int][bool]$Check+[int][bool]$Apply+[int][bool]$Remove) -gt 1){throw 'Choose one mode'}
   $sourceRoot=Split-Path -Parent $PSScriptRoot
@@ -363,7 +356,7 @@ function Invoke-JoenessHarnessSync {
   $owned=$null
   if($skillState.Hash -ne 'absent'){
    $owned=$script:Utf8Strict.GetString($skillState.Bytes)|ConvertFrom-Json
-   if($owned.schemaVersion -ne 1 -or $owned.releaseVersion -cne '0.2' -or $owned.manifestSha256 -cne $source.ManifestHash){throw 'Unknown skill ownership; inspect installed version'}
+   if($owned.schemaVersion -ne 1 -or $owned.releaseVersion -cne '0.2' -or $owned.manifestSha256 -cne $source.ManifestHash){throw 'Skill ownership does not match this package; existing files were preserved'}
    if(($owned.files|ConvertTo-Json -Compress) -cne ($files|ConvertTo-Json -Compress)){throw 'Skill ownership inventory mismatch'}
    if(($currentFiles|Sort-Object)-join ',' -cne (($files.path|Sort-Object)-join ',')){throw 'Owned skill inventory drift'}
   }elseif($currentFiles.Count){throw 'Unowned skill files; preserve them and resolve explicitly'}
@@ -437,7 +430,7 @@ function Get-JoenessExitCode {
 
 if ($MyInvocation.InvocationName -ne '.') {
     try {
-        $result = Invoke-JoenessHarnessSync -Check:$Check -Apply:$Apply -Remove:$Remove -CodexHome $CodexHome -AgentsHome $AgentsHome -BackupRoot $BackupRoot -IncludeDesignFrontend:$IncludeDesignFrontend
+        $result = Invoke-JoenessHarnessSync -Check:$Check -Apply:$Apply -Remove:$Remove -CodexHome $CodexHome
         $result | ConvertTo-Json -Depth 8 -Compress | Write-Output
         exit (Get-JoenessExitCode $result.status)
     } catch {

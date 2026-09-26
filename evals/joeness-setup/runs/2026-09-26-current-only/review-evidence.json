@@ -1,0 +1,28 @@
+{
+  "status": "CURRENT_ONLY_SEPARATION_VERIFIED",
+  "base": "7464fd1e15cce6c5639fb5326db6ff19aa692a4b",
+  "scope": "Current package installation only; remove predecessor migration and ignored compatibility options. Current user guide contains no previous-release section or comparison.",
+  "tdd": {
+    "red": "joeness-install.tests.ps1: mismatched identity Check expected=blocked actual=ready",
+    "green": "Known noncurrent identity, unrecognized identity and wrong manifest hash all block Check/Apply/Remove while preserving every file. Removed parameters fail binding without writes."
+  },
+  "verification": {
+    "installationSuite": "PASS",
+    "currentReleaseSuite": "PASS",
+    "projectSafetySuite": "19 PASS / 0 FAIL",
+    "nodeContractsAndFixtures": "5 PASS / 0 FAIL",
+    "gitDiffCheck": "PASS",
+    "readmeAndInstallerPriorReleaseReferenceScan": "No matches",
+    "coreSkillManifestAndPriorEvidence": "Byte-identical to base, verified by git diff --exit-code"
+  },
+  "behavioralEvidence": {
+    "rerun": false,
+    "reason": "No shipped skill, helper, template, metadata or Core bytes changed. Only installer admission and user documentation changed; installation behavior was retested directly.",
+    "priorRun": "../2026-09-26-implementation/review-evidence.json",
+    "retainedLimitations": "Prior resume record friction, CLI version rejection, unverified implicit discovery/reloading and user acceptance remain; this is not a release-ready certification."
+  },
+  "historicalEvidenceRewritten": false,
+  "personalInstallationChanged": false,
+  "realProjectsChanged": false,
+  "mergePushOrDeploymentPerformed": false
+}

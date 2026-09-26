@@ -25,30 +25,41 @@ try {
  $r=Invoke-JoenessHarnessSync -Apply -CodexHome $homePath -AfterWrite {param($s) if($s -eq 'AGENTS.md'){[IO.File]::AppendAllText((Join-Path $homePath AGENTS.md),'USER');throw 'failure'}}
  Eq $r.status partial partial
  Eq ([IO.File]::ReadAllText((Join-Path $homePath AGENTS.md)).EndsWith('USER')) $true rollbackPreserves
- $previous=Join-Path $root previous
- $null=New-Item -ItemType Directory -Path (Join-Path $previous scripts) -Force
- $null=New-Item -ItemType Directory -Path (Join-Path $previous vendor) -Force
- foreach($path in @('scripts/sync-harness.ps1','vendor/source-manifest.json','astra-judgment-core.md')){
-  $lines=@(& git -C $repo show "ab3460fd28952baa5c2ad472eed1dd6196054d8e:$path")
-  if($LASTEXITCODE -ne 0){throw 'historical source unavailable'}
-  [IO.File]::WriteAllText((Join-Path $previous $path),(($lines -join "`n")+"`n"),(New-Object Text.UTF8Encoding($false)))
+ $mismatchHome=Join-Path $root mismatch
+ Eq (Invoke-JoenessHarnessSync -Apply -CodexHome $mismatchHome).status current mismatchFixture
+ $statePath=Join-Path $mismatchHome joewrks-harness-state.json
+ $validState=[IO.File]::ReadAllText($statePath)
+ foreach($identity in @(
+  @{version='0.2-astra-judgment';hash='70997d6447a45b41b3f3f54816bbed6dd1543d7ad6e4d1b2f6a79c6f955c3888'},
+  @{version='unrecognized-package';hash=('0'*64)},
+  @{version='0.2';hash=('0'*64)}
+ )){
+  $state=$validState|ConvertFrom-Json
+  $state.releaseVersion=$identity.version; $state.manifestSha256=$identity.hash
+  [IO.File]::WriteAllText($statePath,($state|ConvertTo-Json -Compress),(New-Object Text.UTF8Encoding($false)))
+  $before=@(Get-ChildItem -LiteralPath $mismatchHome -File -Recurse|Sort-Object FullName|ForEach-Object {$_.FullName+'='+(Get-FileHash -LiteralPath $_.FullName).Hash})
+  foreach($mode in @('Check','Apply','Remove')){
+   $options=@{CodexHome=$mismatchHome};$options[$mode]=$true
+   $r=Invoke-JoenessHarnessSync @options
+   Eq $r.status blocked "mismatched identity $mode"
+   $after=@(Get-ChildItem -LiteralPath $mismatchHome -File -Recurse|Sort-Object FullName|ForEach-Object {$_.FullName+'='+(Get-FileHash -LiteralPath $_.FullName).Hash})
+   Eq ($after -join ';') ($before -join ';') "mismatched identity $mode preserves every file"
+  }
  }
- $upgradeHome=Join-Path $root upgrade
- . (Join-Path $previous scripts/sync-harness.ps1)
- Eq (Invoke-JoenessHarnessSync -Apply -CodexHome $upgradeHome).status current predecessor
- $coreBefore=[Convert]::ToBase64String([IO.File]::ReadAllBytes((Join-Path $upgradeHome AGENTS.md)))
- . (Join-Path $repo scripts/sync-harness.ps1)
- Eq (Invoke-JoenessHarnessSync -Check -CodexHome $upgradeHome).status ready upgradeCheck
- Eq (Invoke-JoenessHarnessSync -Apply -CodexHome $upgradeHome).status current upgrade
- Eq ([Convert]::ToBase64String([IO.File]::ReadAllBytes((Join-Path $upgradeHome AGENTS.md)))) $coreBefore coreUnchanged
- Eq (Test-Path (Join-Path $upgradeHome skills/joeness-setup/SKILL.md)) $true upgradedSkill
- Eq (Invoke-JoenessHarnessSync -Remove -CodexHome $upgradeHome).status removed upgradedRemove
+ foreach($unsupported in @('AgentsHome','BackupRoot','IncludeDesignFrontend')){
+  $options=@{Check=$true;CodexHome=(Join-Path $root unsupported)}
+  $options[$unsupported]=if($unsupported -eq 'IncludeDesignFrontend'){$true}else{Join-Path $root unused}
+  $rejected=$false
+  try { $null=Invoke-JoenessHarnessSync @options }catch [System.Management.Automation.ParameterBindingException]{$rejected=$true}
+  Eq $rejected $true "$unsupported is not a current interface"
+  Eq (Test-Path (Join-Path $root unsupported)) $false unsupportedNoWrite
+ }
  $collision=Join-Path $root collision
  $null=New-Item -ItemType Directory -Path (Join-Path $collision skills/joeness-setup) -Force
  [IO.File]::WriteAllText((Join-Path $collision skills/joeness-setup/SKILL.md),'user-owned')
  Eq (Invoke-JoenessHarnessSync -Apply -CodexHome $collision).status blocked collision
  Eq (Test-Path (Join-Path $collision AGENTS.md)) $false noPartialCollision
- Write-Host 'PASS install lifecycle, no-op, drift, removal, concurrent-write preservation, exact predecessor upgrade, unowned collision'
+ Write-Host 'PASS install lifecycle, no-op, drift, removal, concurrent-write preservation, mismatched-state rejection, current-only parameters, unowned collision'
 }finally{
  if([IO.Path]::GetFullPath($root).StartsWith([IO.Path]::GetTempPath()) -and (Split-Path $root -Leaf) -like 'joeness-install-test-*'){Remove-Item -LiteralPath $root -Recurse -Force}
 }
