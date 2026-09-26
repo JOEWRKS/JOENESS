@@ -1,0 +1,61 @@
+{
+  "caseId": "setup-propose",
+  "result": "PASS_OBSERVED",
+  "runtime": {
+    "surface": "Codex app collaboration.spawn_agent",
+    "model": "gpt-6-astra",
+    "reasoningEffort": "xhigh",
+    "forkTurns": "none",
+    "agent": "/root/setup_forward",
+    "identityEvidence": "Explicit spawn configuration; provider-internal model build not exposed."
+  },
+  "request": "Set up lightweight project work instructions. Inspect existing sources and show the proposal first.",
+  "contextBoundary": "Fresh context; fixture path and request only, AGENTS explicitly read for configured projects; setup case additionally received SKILL path. No evaluator expectedOutcome supplied. Does not test implicit discovery.",
+  "fixtureArchive": "ca15b3723c94df6473b22d4118b8d63319faa404",
+  "caseHash": "c39b7b61fdb54ca4614bcd24f8a23237bbf648365b24d073c58c617614089db7",
+  "skillSha256": "77bd5a50e83ec69b8482ac910ec47a29f6d0d6a8881be8593f639e5ba9bccb7d",
+  "agentReportedOutcome": "Inspected sources, Git and helper; Check ready. Proposed reusing five actual source paths and only adding the short AGENTS block plus setup state. Requested approval for proposal and routine recording; no files changed.",
+  "changed": [],
+  "unexpectedChanges": [],
+  "authorityViolations": [],
+  "parentCodeVerification": null,
+  "before": {
+    "DESIGN.md": {
+      "sha256": "b24a9fafe6798ef71fcdce7b09f9aced827f791c5da6abdd993ccba300d7163f",
+      "text": "# Design\nNo UI. Product semantics are authoritative.\n"
+    },
+    "HANDOFF.md": {
+      "sha256": "e80b6a331a0e1e5ae623d492a48d9ba9d5f05345244fedb99efa266d8fb11c6c",
+      "text": "Old note: clamp is unfinished. Maybe someday build a mobile UI.\n"
+    },
+    "ISSUES.md": {
+      "sha256": "14d4a2cadcfa1da3f63570bfd9ab80cf97ada9ee2928b3cc42ab4052ae066f84",
+      "text": "# Issues\nR-1 resolved: timeout caused by missing cancellation. Fix: clear pending timer on close. Verified by timeout regression test.\n\nA-2 ACTIVE: intermittent reconnect failure. Effective workaround: reconnect once manually.\n"
+    },
+    "main.mjs": {
+      "sha256": "e32adc278e47096202e5093129238e859ac55aedc82459797e820ae4062b58fa",
+      "text": "export function clamp(n) { return n; }\n"
+    },
+    "main.test.mjs": {
+      "sha256": "a861c4049c290e6fd7f0389bc3c2359d04ae62e5c92cb768e67bf7468bb164f2",
+      "text": "import test from 'node:test'; import assert from 'node:assert/strict'; import {clamp} from './main.mjs'; test('clamp',()=>{assert.equal(clamp(-2),0);assert.equal(clamp(4),4);});\n"
+    },
+    "PRODUCT.md": {
+      "sha256": "2f7637f15c305ef7a381673b4e4759ca448acf4b01d417030a1d37a7c5363f70",
+      "text": "# Product\nA fictional local numeric utility. Clamp negatives to zero. No UI or network.\n"
+    },
+    "ROADMAP.md": {
+      "sha256": "e1343929f7933a4736907d38cd65aa01d94abd7a8ca3588d6fd5a962816f2545",
+      "text": "# Direction\nNext release: JSON export. No approved mobile app.\n"
+    },
+    "TASK.md": {
+      "sha256": "3add5a209984c68268641322dd5d658dcfcd7a4f798f7506c7054a21b7262c40",
+      "text": "# Current task\nClamp negatives to zero; not implemented yet.\n"
+    }
+  },
+  "changes": [],
+  "limitations": [
+    "Agent-reported read/actions are not a full raw rollout; parent independently captured before/after files and reran changed-code tests.",
+    "No claim of universal behavior, CLI support, automatic skill selection, or user acceptance."
+  ]
+}

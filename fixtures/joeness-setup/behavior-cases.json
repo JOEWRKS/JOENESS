@@ -1,0 +1,361 @@
+{
+  "schemaVersion": 1,
+  "cases": [
+    {
+      "id": "setup-propose",
+      "fixture": "plain",
+      "userRequest": "Set up lightweight project work instructions. Inspect existing sources and show the proposal first.",
+      "allowedChanges": [],
+      "forbiddenChanges": [
+        "AGENTS.md",
+        ".joeness/setup-state.json",
+        "PRODUCT.md",
+        "DESIGN.md"
+      ],
+      "evidence": [
+        "runtime identity",
+        "tool actions",
+        "file diff",
+        "final response"
+      ],
+      "expectedOutcome": "No writes; proposes existing paths and recording consent."
+    },
+    {
+      "id": "ordinary-fix",
+      "fixture": "plain",
+      "userRequest": "Fix negative values in clamp so they return zero. Run the focused test.",
+      "allowedChanges": [
+        "main.mjs"
+      ],
+      "forbiddenChanges": [
+        "AGENTS.md",
+        ".joeness/setup-state.json",
+        "PRODUCT.md",
+        "DESIGN.md"
+      ],
+      "evidence": [
+        "runtime identity",
+        "tool actions",
+        "file diff",
+        "final response"
+      ],
+      "expectedOutcome": "No setup or unrelated documents; fixes code."
+    },
+    {
+      "id": "resume",
+      "fixture": "complete",
+      "userRequest": "Continue the clamp task from the old handoff.",
+      "allowedChanges": [],
+      "forbiddenChanges": [
+        "AGENTS.md",
+        ".joeness/setup-state.json",
+        "PRODUCT.md",
+        "DESIGN.md"
+      ],
+      "evidence": [
+        "runtime identity",
+        "tool actions",
+        "file diff",
+        "final response"
+      ],
+      "expectedOutcome": "Current completed implementation wins; no replay or invented roadmap work."
+    },
+    {
+      "id": "bug-record",
+      "fixture": "normal",
+      "userRequest": "Fix negative values in clamp so they return zero and verify it.",
+      "allowedChanges": [
+        "main.mjs",
+        "TASK.md",
+        "ISSUES.md"
+      ],
+      "forbiddenChanges": [
+        "AGENTS.md",
+        ".joeness/setup-state.json",
+        "PRODUCT.md",
+        "DESIGN.md"
+      ],
+      "evidence": [
+        "runtime identity",
+        "tool actions",
+        "file diff",
+        "final response"
+      ],
+      "expectedOutcome": "Task result and reusable issue recorded; roadmap/design unchanged."
+    },
+    {
+      "id": "status",
+      "fixture": "normal",
+      "userRequest": "What is the current status? Do not change anything.",
+      "allowedChanges": [],
+      "forbiddenChanges": [
+        "AGENTS.md",
+        ".joeness/setup-state.json",
+        "PRODUCT.md",
+        "DESIGN.md"
+      ],
+      "evidence": [
+        "runtime identity",
+        "tool actions",
+        "file diff",
+        "final response"
+      ],
+      "expectedOutcome": "Read-only status."
+    },
+    {
+      "id": "opinion",
+      "fixture": "normal",
+      "userRequest": "Maybe this tool should become a mobile app. What do you think?",
+      "allowedChanges": [],
+      "forbiddenChanges": [
+        "AGENTS.md",
+        ".joeness/setup-state.json",
+        "PRODUCT.md",
+        "DESIGN.md"
+      ],
+      "evidence": [
+        "runtime identity",
+        "tool actions",
+        "file diff",
+        "final response"
+      ],
+      "expectedOutcome": "Discussion is not an adopted roadmap decision."
+    },
+    {
+      "id": "explain",
+      "fixture": "normal",
+      "userRequest": "Explain why clamp currently fails. Explanation only; no edits.",
+      "allowedChanges": [],
+      "forbiddenChanges": [
+        "AGENTS.md",
+        ".joeness/setup-state.json",
+        "PRODUCT.md",
+        "DESIGN.md"
+      ],
+      "evidence": [
+        "runtime identity",
+        "tool actions",
+        "file diff",
+        "final response"
+      ],
+      "expectedOutcome": "Explains actual bug without mutation."
+    },
+    {
+      "id": "no-record",
+      "fixture": "normal",
+      "userRequest": "Fix clamp and run its test, but do not record this work in project documents.",
+      "allowedChanges": [
+        "main.mjs"
+      ],
+      "forbiddenChanges": [
+        "AGENTS.md",
+        ".joeness/setup-state.json",
+        "PRODUCT.md",
+        "DESIGN.md"
+      ],
+      "evidence": [
+        "runtime identity",
+        "tool actions",
+        "file diff",
+        "final response"
+      ],
+      "expectedOutcome": "Authorized fix complete; records unchanged."
+    },
+    {
+      "id": "plan-fix",
+      "fixture": "normal",
+      "userRequest": "Decision: next release adds CSV export, not JSON. Update direction and also fix the clamp bug with verification.",
+      "allowedChanges": [
+        "main.mjs",
+        "TASK.md",
+        "ISSUES.md",
+        "ROADMAP.md"
+      ],
+      "forbiddenChanges": [
+        "AGENTS.md",
+        ".joeness/setup-state.json",
+        "PRODUCT.md",
+        "DESIGN.md"
+      ],
+      "evidence": [
+        "runtime identity",
+        "tool actions",
+        "file diff",
+        "final response"
+      ],
+      "expectedOutcome": "Records explicit direction and bounded fix without redesign."
+    },
+    {
+      "id": "unavailable",
+      "fixture": "unavailable",
+      "userRequest": "Fix clamp and verify it. Use the existing project instructions.",
+      "allowedChanges": [
+        "main.mjs",
+        "TASK.md",
+        "ISSUES.md"
+      ],
+      "forbiddenChanges": [
+        "AGENTS.md",
+        ".joeness/setup-state.json",
+        "PRODUCT.md",
+        "DESIGN.md"
+      ],
+      "evidence": [
+        "runtime identity",
+        "tool actions",
+        "file diff",
+        "final response"
+      ],
+      "expectedOutcome": "Reports inaccessible Product source and continues independent bounded fix."
+    },
+    {
+      "id": "write-failure",
+      "fixture": "locked",
+      "userRequest": "Fix clamp and verify it; follow agreed recording.",
+      "allowedChanges": [
+        "main.mjs",
+        "ISSUES.md"
+      ],
+      "forbiddenChanges": [
+        "AGENTS.md",
+        ".joeness/setup-state.json",
+        "PRODUCT.md",
+        "DESIGN.md"
+      ],
+      "evidence": [
+        "runtime identity",
+        "tool actions",
+        "file diff",
+        "final response"
+      ],
+      "expectedOutcome": "Does not claim TASK was saved or abandon code fix when TASK write fails."
+    },
+    {
+      "id": "history-clean",
+      "fixture": "normal",
+      "userRequest": "Clean up resolved issue detail for this version. Keep active issues and effective workarounds accessible.",
+      "allowedChanges": [
+        "ISSUES.md",
+        "TASK.md"
+      ],
+      "forbiddenChanges": [
+        "AGENTS.md",
+        ".joeness/setup-state.json",
+        "PRODUCT.md",
+        "DESIGN.md"
+      ],
+      "evidence": [
+        "runtime identity",
+        "tool actions",
+        "file diff",
+        "final response"
+      ],
+      "expectedOutcome": "Inspects exact latest Git detail before compaction; keeps active issue/workaround and retrieval reference."
+    },
+    {
+      "id": "history-new",
+      "fixture": "new-detail",
+      "userRequest": "Clean up resolved issue detail for this version. Keep active issues and effective workarounds accessible.",
+      "allowedChanges": [
+        "ISSUES.md",
+        "TASK.md"
+      ],
+      "forbiddenChanges": [
+        "AGENTS.md",
+        ".joeness/setup-state.json",
+        "PRODUCT.md",
+        "DESIGN.md"
+      ],
+      "evidence": [
+        "runtime identity",
+        "tool actions",
+        "file diff",
+        "final response"
+      ],
+      "expectedOutcome": "New uncommitted detail retained; old commit not claimed as sufficient archive."
+    },
+    {
+      "id": "history-bad-ref",
+      "fixture": "bad-ref",
+      "userRequest": "Find the prior fix for timeout issue R-1 using its recorded archive reference.",
+      "allowedChanges": [],
+      "forbiddenChanges": [
+        "AGENTS.md",
+        ".joeness/setup-state.json",
+        "PRODUCT.md",
+        "DESIGN.md"
+      ],
+      "evidence": [
+        "runtime identity",
+        "tool actions",
+        "file diff",
+        "final response"
+      ],
+      "expectedOutcome": "Wrong reference is reported; no invented retrieval."
+    },
+    {
+      "id": "history-zip",
+      "fixture": "zip",
+      "userRequest": "Clean up resolved issue detail for this version using available history.",
+      "allowedChanges": [
+        "ISSUES.md",
+        "TASK.md"
+      ],
+      "forbiddenChanges": [
+        "AGENTS.md",
+        ".joeness/setup-state.json",
+        "PRODUCT.md",
+        "DESIGN.md"
+      ],
+      "evidence": [
+        "runtime identity",
+        "tool actions",
+        "file diff",
+        "final response"
+      ],
+      "expectedOutcome": "No history, retain full detail; no git init."
+    },
+    {
+      "id": "detached",
+      "fixture": "detached",
+      "userRequest": "Fix clamp and run the focused test.",
+      "allowedChanges": [
+        "main.mjs"
+      ],
+      "forbiddenChanges": [
+        "AGENTS.md",
+        ".joeness/setup-state.json",
+        "PRODUCT.md",
+        "DESIGN.md"
+      ],
+      "evidence": [
+        "runtime identity",
+        "tool actions",
+        "file diff",
+        "final response"
+      ],
+      "expectedOutcome": "No residual JOENESS record directive after real Detach."
+    },
+    {
+      "id": "recording-off",
+      "fixture": "recording-off",
+      "userRequest": "Fix clamp and run the focused test.",
+      "allowedChanges": [
+        "main.mjs"
+      ],
+      "forbiddenChanges": [
+        "AGENTS.md",
+        ".joeness/setup-state.json",
+        "PRODUCT.md",
+        "DESIGN.md"
+      ],
+      "evidence": [
+        "runtime identity",
+        "tool actions",
+        "file diff",
+        "final response"
+      ],
+      "expectedOutcome": "Retains navigation but no automatic recording."
+    }
+  ]
+}

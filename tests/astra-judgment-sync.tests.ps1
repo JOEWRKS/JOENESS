@@ -34,7 +34,7 @@ function Assert-BytesEqual {
 
 function Assert-ExactNames {
     param([string] $Path, [string[]] $Expected, [string] $Message)
-    $actual = @((Get-ChildItem -LiteralPath $Path -Force | Where-Object { $_.Name -ne '.git' } | ForEach-Object { $_.Name }) | Sort-Object -CaseSensitive)
+    $actual = @((Get-ChildItem -LiteralPath $Path -Force | Where-Object { $_.Name -notin @('.git','.superpowers') } | ForEach-Object { $_.Name }) | Sort-Object -CaseSensitive)
     $wanted = @($Expected | Sort-Object -CaseSensitive)
     Assert-Equal ($actual -join "`n") ($wanted -join "`n") $Message
 }
@@ -93,6 +93,9 @@ function Test-MinimalCurrentTree {
         'JOENESS.ps1',
         'README.md',
         'astra-judgment-core.md',
+        'docs',
+        'fixtures',
+        'skills',
         'evals',
         'scripts',
         'tests',
@@ -101,13 +104,13 @@ function Test-MinimalCurrentTree {
 
     Assert-ExactNames (Join-Path $RepoRoot '.github') @('workflows') '.github contains only workflows'
     Assert-ExactNames (Join-Path $RepoRoot '.github\workflows') @('windows-ci.yml') 'workflow surface is current-only'
-    Assert-ExactNames (Join-Path $RepoRoot 'evals') @('experiments') 'eval surface contains only current experiments'
+    Assert-ExactNames (Join-Path $RepoRoot 'evals') @('experiments','joeness-setup') 'eval surface contains only current experiments'
     Assert-ExactNames (Join-Path $RepoRoot 'evals\experiments') @('joeness-astra-independent-judgment-ab-plan-v1.json') 'only current behavioral A/B plan remains'
     Assert-ExactNames (Join-Path $RepoRoot 'scripts') @('sync-harness.ps1') 'script surface is current-only'
-    Assert-ExactNames (Join-Path $RepoRoot 'tests') @('astra-judgment-sync.tests.ps1') 'test surface is current-only'
+    Assert-ExactNames (Join-Path $RepoRoot 'tests') @('astra-judgment-sync.tests.ps1','joeness-install.tests.ps1','joeness-project-setup.tests.ps1','joeness-setup-contract.tests.mjs','joeness-setup-fixtures.tests.mjs') 'test surface is current-only'
     Assert-ExactNames (Join-Path $RepoRoot 'vendor') @('source-manifest.json') 'vendor directory contains only active manifest'
 
-    foreach ($removed in @('JOENESS-0.1.ps1', 'harness.ps1', 'common-core.md', 'TASKS.md', 'docs', 'skills')) {
+    foreach ($removed in @('JOENESS-0.1.ps1', 'harness.ps1', 'common-core.md', 'TASKS.md')) {
         Assert-True (-not (Test-Path -LiteralPath (Join-Path $RepoRoot $removed))) "$removed is absent from current main tree"
     }
 }
@@ -129,13 +132,13 @@ function Test-ManifestAndCoreIdentity {
     $manifest = [IO.File]::ReadAllText($manifestPath) | ConvertFrom-Json
     Assert-Equal $manifest.schemaVersion 2 'manifest schema is v2'
     Assert-Equal $manifest.release.name 'JOENESS' 'manifest release name'
-    Assert-Equal $manifest.release.version '0.2-astra-judgment' 'manifest release version'
+    Assert-Equal $manifest.release.version '0.2' 'manifest release version'
     Assert-Equal $manifest.target.model 'gpt-6-astra' 'manifest target model'
     Assert-Equal $manifest.target.reasoningEffort 'xhigh' 'manifest reasoning effort'
-    Assert-Equal $manifest.runtimeMode 'common-core' 'manifest runtime mode'
+    Assert-Equal $manifest.runtimeMode 'common-core+setup' 'manifest runtime mode'
     Assert-Equal $manifest.activeCommonCore.path 'astra-judgment-core.md' 'manifest active core'
     Assert-Equal @($manifest.managedRuntimeFiles).Count 0 'no managed runtime files'
-    Assert-Equal @($manifest.publicSkills).Count 0 'no public skills'
+    Assert-Equal ($manifest.publicSkills.name -join ',') 'joeness-setup' 'sole approved setup skill'
     Assert-Equal @($manifest.defaultVendors).Count 0 'no default vendors'
     Assert-True ($null -eq $manifest.pluginRouting) 'plugin routing remains null'
     Assert-True ($null -eq $manifest.PSObject.Properties['compatibility']) 'historical compatibility payload is absent'
@@ -295,7 +298,7 @@ function Test-ApplyRollback {
         . (Join-Path $RepoRoot 'scripts\sync-harness.ps1')
         $result = Invoke-JoenessHarnessSync -Apply -CodexHome $f.Codex -AfterWrite {
             param($Stage)
-            if ($Stage -eq 'agents') { throw 'injected failure after AGENTS write' }
+            if ($Stage -eq 'AGENTS.md') { throw 'injected failure after AGENTS write' }
         }
         Assert-Equal $result.status 'failed' 'injected Apply failure reports failed'
         Assert-Equal $result.rollback.status 'complete' 'injected Apply failure rolls back completely'

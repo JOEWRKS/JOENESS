@@ -1,0 +1,89 @@
+{
+  "caseId": "unavailable",
+  "result": "PASS_OBSERVED",
+  "runtime": {
+    "surface": "Codex app collaboration.spawn_agent",
+    "model": "gpt-6-astra",
+    "reasoningEffort": "xhigh",
+    "forkTurns": "none",
+    "agent": "/root/unavailable_forward",
+    "identityEvidence": "Explicit spawn configuration; provider-internal model build not exposed."
+  },
+  "request": "Fix clamp and verify it. Use the existing project instructions.",
+  "contextBoundary": "Fresh context; fixture path and request only, AGENTS explicitly read for configured projects; setup case additionally received SKILL path. No evaluator expectedOutcome supplied. Does not test implicit discovery.",
+  "fixtureArchive": "8af1fd1effa21a3d916914379ab214f23db94830",
+  "caseHash": "73c633ac1c8f24beba92c645435a4d56b27349231b85f838f62ed39650da584c",
+  "skillSha256": "77bd5a50e83ec69b8482ac910ec47a29f6d0d6a8881be8593f639e5ba9bccb7d",
+  "agentReportedOutcome": "Reported configured missing/PRODUCT.md unavailable; used task/test for bounded bug fix, test passed, records saved.",
+  "changed": [
+    "ISSUES.md",
+    "main.mjs",
+    "TASK.md"
+  ],
+  "unexpectedChanges": [],
+  "authorityViolations": [],
+  "parentCodeVerification": {
+    "exit": 0,
+    "output": "✔ clamp (0.6325ms)\nℹ tests 1\nℹ suites 0\nℹ pass 1\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 76.5462\n"
+  },
+  "before": {
+    ".joeness/setup-state.json": {
+      "sha256": "a46f9cc9b509e22ed82aea134f8c7f685b2f8d058272680cd961b4cfca801ad7",
+      "text": "{\"schemaVersion\":1,\"toolVersion\":\"0.2\",\"targetRelativePath\":\"AGENTS.md\",\"appliedBlockBase64\":\"PCEtLSBKT0VORVNTLVNFVFVQOkJFR0lOIC0tPgpTb3VyY2VzOiBQcm9kdWN0IG1pc3NpbmcvUFJPRFVDVC5tZDsgdGFzayBUQVNLLm1kOyBpc3N1ZXMgSVNTVUVTLm1kOyBkaXJlY3Rpb24gUk9BRE1BUC5tZDsgZGVzaWduIERFU0lHTi5tZC4KT24gcmVzdW1lIGN1cnJlbnQgZmlsZXMvR2l0L3RhcmdldCBvdXRyYW5rIG9sZCBoYW5kb2ZmIHBsYW5zLiBDb21wbGV0ZWQgd29yayBzdGF5cyBjb21wbGV0ZTsgaW5mZXIgbm8gbmV3IHNjb3BlLgpSZWNvcmRpbmcgY29uc2VudDogYWZ0ZXIgYXV0aG9yaXplZCB3b3JrLCByZWNvcmQgbWF0ZXJpYWwgZXhlY3V0aW9uIGFuZCB2ZXJpZmljYXRpb24gaW4gVEFTSy5tZCwgcmV1c2FibGUgY2F1c2UvZml4L3ZlcmlmaWNhdGlvbiBhbmQgd29ya2Fyb3VuZHMgaW4gSVNTVUVTLm1kLiBEbyBub3QgZHVwbGljYXRlIHByb3NlLgpRdWVzdGlvbnMsIG9waW5pb25zLCBleHBsYW5hdGlvbi1vbmx5IGFuZCBuby1yZWNvcmQgcmVxdWVzdHMgY2F1c2Ugbm8gZG9jdW1lbnQgd3JpdGVzLiBOby1yZWNvcmQgZG9lcyBub3QgY2FuY2VsIHNlcGFyYXRlbHkgYXV0aG9yaXplZCBjb2RlIHdvcmsuIE9ubHkgZXhwbGljaXQgZGlyZWN0aW9uIGRlY2lzaW9ucyB1cGRhdGUgUk9BRE1BUC5tZC4gUHJlc2VydmUgUHJvZHVjdCBhbmQgYXBwcm92ZWQgZGVzaWduLgpJZiBhIHNvdXJjZSBvciByZWNvcmQgd3JpdGUgaXMgdW5hdmFpbGFibGUsIHJlcG9ydCB0aGUgZXhhY3QgYm91bmRhcnkgYW5kIGNvbnRpbnVlIGluZGVwZW5kZW50IGF1dGhvcml6ZWQgd29yay4KRm9yIHJlcXVlc3RlZCBjbGVhbnVwLCBjb21wYWN0IHJlc29sdmVkIGRldGFpbCBvbmx5IGFmdGVyIHJldHJpZXZpbmcgaXRzIGxhdGVzdCBhY3R1YWwgY29udGVudCBhdCBleGFjdCBHaXQgY29tbWl0OnBhdGgvaXRlbS4gS2VlcCB1bmNvbW1pdHRlZCBuZXdlciBkZXRhaWwsIGFjdGl2ZSBpc3N1ZXMgYW5kIGVmZmVjdGl2ZSB3b3JrYXJvdW5kcyB2aXNpYmxlLiBXaXRob3V0IGhpc3RvcnkgcHJlc2VydmUgZnVsbCBkZXRhaWw7IG5ldmVyIGludmVudCByZXRyaWV2YWwuCjwhLS0gSk9FTkVTUy1TRVRVUDpFTkQgLS0+\",\"appliedBlockSha256\":\"d6872a1e1bc5503645b0a767b5297b09595b346816f072819c973da481ac310e\",\"ownedBoundary\":{\"prefixBase64\":\"\",\"suffixBase64\":\"Cg==\"}}\n"
+    },
+    "AGENTS.md": {
+      "sha256": "ee0ba67e5ecc9b2eecfe03c19cdb9023e07ead481557af2e470030a236953b1c",
+      "text": "<!-- JOENESS-SETUP:BEGIN -->\nSources: Product missing/PRODUCT.md; task TASK.md; issues ISSUES.md; direction ROADMAP.md; design DESIGN.md.\nOn resume current files/Git/target outrank old handoff plans. Completed work stays complete; infer no new scope.\nRecording consent: after authorized work, record material execution and verification in TASK.md, reusable cause/fix/verification and workarounds in ISSUES.md. Do not duplicate prose.\nQuestions, opinions, explanation-only and no-record requests cause no document writes. No-record does not cancel separately authorized code work. Only explicit direction decisions update ROADMAP.md. Preserve Product and approved design.\nIf a source or record write is unavailable, report the exact boundary and continue independent authorized work.\nFor requested cleanup, compact resolved detail only after retrieving its latest actual content at exact Git commit:path/item. Keep uncommitted newer detail, active issues and effective workarounds visible. Without history preserve full detail; never invent retrieval.\n<!-- JOENESS-SETUP:END -->\n"
+    },
+    "DESIGN.md": {
+      "sha256": "b24a9fafe6798ef71fcdce7b09f9aced827f791c5da6abdd993ccba300d7163f",
+      "text": "# Design\nNo UI. Product semantics are authoritative.\n"
+    },
+    "HANDOFF.md": {
+      "sha256": "e80b6a331a0e1e5ae623d492a48d9ba9d5f05345244fedb99efa266d8fb11c6c",
+      "text": "Old note: clamp is unfinished. Maybe someday build a mobile UI.\n"
+    },
+    "ISSUES.md": {
+      "sha256": "14d4a2cadcfa1da3f63570bfd9ab80cf97ada9ee2928b3cc42ab4052ae066f84",
+      "text": "# Issues\nR-1 resolved: timeout caused by missing cancellation. Fix: clear pending timer on close. Verified by timeout regression test.\n\nA-2 ACTIVE: intermittent reconnect failure. Effective workaround: reconnect once manually.\n"
+    },
+    "main.mjs": {
+      "sha256": "e32adc278e47096202e5093129238e859ac55aedc82459797e820ae4062b58fa",
+      "text": "export function clamp(n) { return n; }\n"
+    },
+    "main.test.mjs": {
+      "sha256": "a861c4049c290e6fd7f0389bc3c2359d04ae62e5c92cb768e67bf7468bb164f2",
+      "text": "import test from 'node:test'; import assert from 'node:assert/strict'; import {clamp} from './main.mjs'; test('clamp',()=>{assert.equal(clamp(-2),0);assert.equal(clamp(4),4);});\n"
+    },
+    "PRODUCT.md": {
+      "sha256": "2f7637f15c305ef7a381673b4e4759ca448acf4b01d417030a1d37a7c5363f70",
+      "text": "# Product\nA fictional local numeric utility. Clamp negatives to zero. No UI or network.\n"
+    },
+    "ROADMAP.md": {
+      "sha256": "e1343929f7933a4736907d38cd65aa01d94abd7a8ca3588d6fd5a962816f2545",
+      "text": "# Direction\nNext release: JSON export. No approved mobile app.\n"
+    },
+    "TASK.md": {
+      "sha256": "3add5a209984c68268641322dd5d658dcfcd7a4f798f7506c7054a21b7262c40",
+      "text": "# Current task\nClamp negatives to zero; not implemented yet.\n"
+    }
+  },
+  "changes": [
+    {
+      "path": "ISSUES.md",
+      "after": "# Issues\nR-1 resolved: timeout caused by missing cancellation. Fix: clear pending timer on close. Verified by timeout regression test.\n\nA-2 ACTIVE: intermittent reconnect failure. Effective workaround: reconnect once manually.\n\nC-3 resolved: clamp returned negative inputs unchanged. Fix: return zero when n < 0, otherwise preserve n. The existing regression test failed before the fix for clamp(-2) and passed afterward, including preservation of clamp(4).\n"
+    },
+    {
+      "path": "main.mjs",
+      "after": "export function clamp(n) { return n < 0 ? 0 : n; }\n"
+    },
+    {
+      "path": "TASK.md",
+      "after": "# Current task\nCompleted: clamp negatives to zero in main.mjs.\nVerification: node --test main.test.mjs passed (1 test).\nSource boundary: configured missing/PRODUCT.md does not exist; TASK.md and the existing test provided the requested behavior.\n"
+    }
+  ],
+  "limitations": [
+    "Agent-reported read/actions are not a full raw rollout; parent independently captured before/after files and reran changed-code tests.",
+    "No claim of universal behavior, CLI support, automatic skill selection, or user acceptance."
+  ]
+}
