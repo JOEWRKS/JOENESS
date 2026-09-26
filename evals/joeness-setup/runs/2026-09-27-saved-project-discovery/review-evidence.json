@@ -1,0 +1,87 @@
+{
+  "schemaVersion": 1,
+  "dateLocal": "2026-09-27",
+  "scope": "Fresh CLI checks in saved projects plus one fresh desktop-app chat in a separately authorized saved test project; product repository self-setup was detached after its fixed-root contract rejected .joeness/.",
+  "project": {
+    "projectId": "70f3febb-f02c-403b-a96f-d7ff19752695",
+    "path": "D:/JOEWRKS/작업하네스",
+    "branch": "codex/joeness-independent-judgment-ab-20260926",
+    "headBefore": "3e4b3d4a2df653602f5b3bdc554a24633a8535cd",
+    "agentsSha256": "d03f57e68408cbcc1a79ef5b9789c17f4604cd4ea05c511af36b3124b1c06a3f"
+  },
+  "runtime": {
+    "client": "codex-cli 0.158.0-alpha.2",
+    "requestedModel": "gpt-6-astra",
+    "requestedReasoningEffort": "xhigh",
+    "personalInstallCheck": "current; activeSkills=[joeness-setup]"
+  },
+  "automaticProjectInstruction": {
+    "method": "Fresh CLI exec in saved project root, prompt forbade tools and file reads and supplied no expected release or skill name.",
+    "result": "PASS: response identified JOENESS 0.2 / gpt-6-astra xhigh and publicSkills=[joeness-setup] from start context; a second fresh run identified astra-judgment-core.md and rejected extra global harness.",
+    "secondThreadId": "01a0de40-77e7-7132-ac5d-740e18df25c7",
+    "secondResponse": "추가 전역 작업 하네스는 허용하지 않습니다; Core 파일 astra-judgment-core.md; 유일한 public skill joeness-setup.",
+    "exitCode": 0,
+    "toolEvents": 0
+  },
+  "naturalLanguageSkillSelection": {
+    "threadId": "01a0de41-48a2-7d43-8a2a-87b9e504b847",
+    "prompt": "이 저장된 프로젝트의 작업 문서와 기록 위치를 정리하려면 무엇을 연결해야 할지 제안만 해줘. 아직 파일은 수정하지 마. 기존 원본을 우선해.",
+    "result": "PASS: agent named and read the installed joeness-setup skill without its name in the prompt; proposed existing README, manifest, design, plan and bounded evidence as separate roles; did not repurpose evals as the routine task/issue ledger; left routine recording unapproved and files unchanged.",
+    "exitCode": 0
+  },
+  "authorizedProjectConnection": {
+    "authorization": "User selected 작업하네스 and approved a bounded AGENTS connection with routine TASK/ISSUES recording and DESIGN connection unused.",
+    "precheck": "ready/absent; targetHash=d03f57e68408cbcc1a79ef5b9789c17f4604cd4ea05c511af36b3124b1c06a3f; stateHash=absent",
+    "apply": "current/clean; changedTargets=[AGENTS.md,.joeness/setup-state.json]; no blockers or unresolved targets",
+    "postcheck": "current/clean; targetHash=c3c46a16afad3e4c577b2f23b8603f514bd603cd7014d8de2c7e4b814b168710; stateHash=9e0a5b18989d949ea00dab5fa789e3758a6be8151ea95b2d01370ebd4de0748d",
+    "outsideManagedBlock": "git diff showed only an appended JOENESS-SETUP managed block and separators; pre-existing AGENTS text was unchanged.",
+    "freshCliThreadId": "01a0de48-c8fb-73f2-a24a-9a58a536b7b7",
+    "freshCliPrompt": "파일·도구를 사용하지 마. 새 세션 시작 때 자동 제공된 현재 프로젝트 지침만 근거로, 이 저장소에서 일반 TASK/ISSUES 기록이 승인되어 있는지와 evals/의 역할을 답해줘. 모르면 추측하지 마.",
+    "freshCliResult": "PASS: without tools or file reads, correctly said routine TASK/ISSUES recording was not approved and the named evals paths were run-scoped evidence, not a routine ledger.",
+    "freshCliExitCode": 0,
+    "freshCliNonAgentItems": 0,
+    "releaseContractFailure": "FAIL: tests/astra-judgment-sync.tests.ps1 exact-root gate rejected newly created .joeness/ directory. This repository's release layout does not permit persistent self-setup state; the test was not weakened.",
+    "detach": "Official helper Detach returned detached with no unresolved targets. Subsequent Check returned ready/absent and original AGENTS SHA-256 d03f57e68408cbcc1a79ef5b9789c17f4604cd4ea05c511af36b3124b1c06a3f. The helper left an empty .joeness directory, which was verified empty, within the repository, and removed non-recursively.",
+    "finalProjectConnection": "absent; this was a bounded temporary verification, not a permanent connection"
+  },
+  "separateSavedTestProject": {
+    "projectId": "60e4b3c0-e68b-4280-92d9-b65ac1611362",
+    "path": "D:/JOEWRKS/JOEWRKS-TestProject-01",
+    "authorization": "User selected a separate test project and approved adding only a JOENESS-SETUP location block and state while preserving its existing rules and pre-existing untracked .codex/ and Artifacts/.",
+    "branch": "codex/full-baseline-common-core-pair",
+    "head": "6b25fa9431176f736c69e6bfd8f4544b8043c30a",
+    "baselineAgentsSha256": "ace756788f216315946e6fa83323871b0fdedc381bdf07b7ac5a47eb7b203758",
+    "apply": "current/clean; changedTargets=[AGENTS.md,.joeness/setup-state.json]; no blockers or unresolved targets",
+    "postApplyTargetSha256": "539f5e0929d1c86065d9e1ff219e8ff93f429989bbcc67b6d63f9ed9391ba958",
+    "postApplyStateSha256": "c50d051c99a7ee028a7aff9f8b1121bc444f0e209a010ad44ab41cd7a2ba8f2a",
+    "outsideManagedBlock": "Original AGENTS byte prefix SHA-256 remained ace756788f216315946e6fa83323871b0fdedc381bdf07b7ac5a47eb7b203758; git diff showed only an appended managed block and separators.",
+    "freshCliThreadId": "01a0de4e-7aab-7bf3-bfe5-14c42a39315b",
+    "freshCliResult": "PASS: with no tools or file reads, named TASKS.md and Diagnostic Events for current work/issues, DECISIONS.md for decisions, and no new write or approval authority.",
+    "freshCliExitCode": 0,
+    "freshCliNonAgentItems": 0,
+    "freshDesktopThreadId": "01a0de4e-f869-7373-9321-8c87755af0ce",
+    "freshDesktopResult": "PASS: in a newly created local Codex project chat, final answer named TASKS.md and Diagnostic Events, DECISIONS.md, and no new write, exception or approval authority. wait_threads reported a completed turn and latestToolMarker=null; read_thread showed only the create_thread handoff output, reasoning and final message, with no model-initiated file or tool calls.",
+    "unchangedExistingDocuments": {
+      "TASKS.md": "21a7756b275425e98c34a2d7b120f873afdf4691f8520b3dcbb62f66b6ff8909",
+      "DECISIONS.md": "80269ce7379adf5cbaabbec808006d8573197709043173cdc22422d24021e4df",
+      "PROJECT_OPERATING_CONTRACT.md": "851ba3be4c7b3f92be642e7400475dcb4a6fe2d55a81cafa07027aba861f8b56",
+      "TOOL_ORCHESTRATION_POLICY.md": "f3f626d64f8401aa1e2ab5f6cef2c9a2bd8e06ff56de9932acea23776b97f8fb"
+    },
+    "finalProjectConnection": "current/clean in local working tree; not committed or pushed to the test project's Git branch"
+  },
+  "warnings": [
+    "Unrelated MCP startup warnings were emitted by the personal CLI configuration; the selected read-only behavior completed.",
+    "CLI warned that rollout flush failed after terminal event. This record relies on the observed JSON event stream, not a persisted full rollout."
+  ],
+  "humanFeedback": {
+    "reportedExperience": "User said the broad 0.1 harness often did not invoke or coordinate its then-bundled design skill without explicit prompting. The current thin 0.2 Independent Judgment setup has not felt notably confusing or uncomfortable to them.",
+    "nextStepPreference": "User finds next-step recommendations unclear, but does not want a mandatory recommendation that could add friction. README now offers an optional, evidence-based one-step prompt; no runtime rule or router was added.",
+    "ratingBoundary": "This is direct qualitative user feedback, not a blinded Bare-versus-Core M5 score or a task-based acceptance test of joeness-setup."
+  },
+  "limitations": [
+    "The first two CLI checks preceded project Apply; the third fresh CLI check followed Apply. The check proves start-context instruction delivery in this CLI surface, not every future session or project.",
+    "The applied connection was deliberately detached after the release contract failure; the original repository AGENTS bytes were restored.",
+    "The new desktop-app chat was created separately in the saved test project. One successful fresh chat does not establish reliability across all projects, app restarts, or model versions.",
+    "No human comprehension or blind Bare-versus-Core usefulness score was collected in this run."
+  ]
+}

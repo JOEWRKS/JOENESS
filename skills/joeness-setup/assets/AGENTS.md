@@ -10,6 +10,8 @@ Adapt this body to actual existing paths before applying; omit unused roles.
   in the task source; reusable causes/fixes/workarounds in issues. Avoid duplicate
   prose. Questions, opinions, explanation-only and no-record requests cause no
   record writes; no-record does not cancel separately authorized implementation.
+- After an actual record write, briefly tell the user which document received
+  what fact. Do not claim a record was updated when nothing was written.
 - Only explicit direction changes update roadmap. Preserve product/design authority;
   proposed changes, observed verification, and user acceptance are distinct.
 - If a source/write is unavailable, report the exact boundary and continue independent

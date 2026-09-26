@@ -1,0 +1,65 @@
+{
+  "schemaVersion": 1,
+  "dateLocal": "2026-09-27",
+  "scope": "Plain-language setup and actual-record receipts; no new background updater, router, or always-on status banner.",
+  "priorEvidence": "../2026-09-27-saved-project-discovery/review-evidence.json",
+  "userFeedback": {
+    "observedProblem": "The user said the technical wording was confusing to non-specialists and wanted to be told what the tool classified or actually did when it operates.",
+    "approvedChange": "Notify only when joeness-setup is used or a setup/record file is actually changed; do not add a mandatory status banner to every task or a background updater.",
+    "postChangeHumanFeedback": "The user said the short proposal-only excerpt still omitted needed onboarding information. After the actual completed-setup role map was presented, they said its structure matched their intent, and asked whether PRODUCT.md belonged to the original five-document plan. PRODUCT.md was clarified as an extra pre-existing source in the fictional fixture, not a JOENESS-installed document. Long-term usability is not proven."
+  },
+  "baseline": {
+    "runtime": "codex-cli 0.158.0-alpha.2; requested gpt-6-astra xhigh",
+    "naturalSelectionThreadId": "01a0de41-48a2-7d43-8a2a-87b9e504b847",
+    "naturalSelectionResult": "The installed setup skill was selected, but the final proposal was long and used technical terms without a plain-language outcome at the beginning.",
+    "readOnlyStatusThreadId": "01a0de57-28e6-7450-9c55-02deda2324fc",
+    "readOnlyStatusResult": "The agent correctly reported current/unchanged status when specifically prompted for novice wording, but mixed that with technical installation, Git, and unrelated hook detail. The user reported the wording remained confusing."
+  },
+  "candidate": {
+    "naturalSelectionIntermediateThreadId": "01a0de5c-e47f-79e3-a8b7-f7631ecbd604",
+    "intermediateObservation": "The result explicitly said it only investigated and proposed, with no file changes, but placed the receipt at the end.",
+    "naturalSelectionFinalThreadId": "01a0de60-15ab-70a1-8dcf-a1e2b2d8b015",
+    "finalOpening": "기존 README·배포 manifest·설계·계획·검증 기록을 확인했습니다. 기존 원본의 위치만 연결하고, 일반 작업·이슈 기록은 우선 미사용으로 두는 안을 추천합니다. 파일은 수정하지 않았습니다.",
+    "finalResult": "PASS for visible proposal-only outcome in the opening and correct no-write boundary; detailed body still contains project-specific technical filenames and is not claimed to be universally novice-readable.",
+    "recordWriteThreadId": "01a0de65-6eae-7ca1-a66d-9ad77b0991e5",
+    "recordWriteFixture": "Isolated temporary Git project with AGENTS.md and TASKS.md; no real project task or production record was changed.",
+    "recordWriteResult": "PASS: after inspecting AGENTS.md, the agent replaced the fixture's placeholder with the verified JOENESS-SETUP fact in TASKS.md and told the user which document received which fact. The task output did not claim any other file modification.",
+    "savedProjectFreshStartThreadId": "01a0de6c-18db-7951-a423-f652faf9a3af",
+    "savedProjectFreshStartResult": "PASS: in a new CLI session in the authorized saved test project, with no file/tool reads, the agent stated the managed rule to report which existing document received what fact after a real write and not to claim a write when none occurred.",
+    "actualApplyThreadId": "01a0de68-9bad-77f1-a5ed-4d45149bc451",
+    "actualApplyFixture": "Separate isolated temporary Git project with six existing Markdown sources: AGENTS, PRODUCT, ROADMAP, TASKS, ISSUES, DESIGN. The prompt authorized setup and factual recording in TASKS/ISSUES, preserved Product/Design authority, and prohibited new project documents.",
+    "actualApplyResult": "PASS: helper Apply and fresh Check were current/clean, the original AGENTS text and PRODUCT/DESIGN/ROADMAP/ISSUES bytes were preserved, and a factual setup record was written to TASKS. The completion response named changed files, mapped every actual document to its role, gave ordinary work/resume/issue/no-record examples, and explained there is no background process.",
+    "actualApplyBoundary": "The prior short proposal-only excerpt could not truthfully claim installation or five documents created; this completed-setup run tests the distinct onboarding situation the user asked about."
+  },
+  "installation": {
+    "method": "For each source identity change, an exact previous-source snapshot was matched to the owned manifest, installed files were backed up, the prior installer removed only its owned package, and the current installer applied it. No state deletion or force overwrite was used.",
+    "finalPersonalCheck": "current; activeSkills=[joeness-setup]",
+    "skillSha256": "1972a915243a3de046c4248df6068bb367b193e78401a80a4a64d8cb912d3006",
+    "agentsAssetSha256": "17c73d48527e49d80054d92523a5933313ae936b0937ee75f20f66ee29cf998c",
+    "usageSha256": "0f81383f9c79a14a20f98450e8970f8ad81fd84b96d5f0a45c15b842e7851bb7",
+    "commonCoreSha256": "f360b48be1b4143035f61fa20149a3249c60dea2e7f12cffa8bf1e8918f4f6a9"
+  },
+  "savedTestProject": {
+    "path": "D:/JOEWRKS/JOEWRKS-TestProject-01",
+    "scope": "The authorized short JOENESS-SETUP block gained only a record receipt sentence; existing project authorities and pre-existing untracked directories were preserved. No routine project record was written in this project.",
+    "finalHelperCheck": "current/clean",
+    "targetSha256": "b7c1877bfef9c0fc5bd1a550db8eea9add8f4c2d5e0b9f1de0221ba3b2491a4c",
+    "stateSha256": "91eb0b18000c68aed7dd1390e9ad89f37090b3a9248d07b4ac83cbaf3fc4d9bc",
+    "commitOrPush": "NONE: connection remains only in the local test project's working tree."
+  },
+  "verification": {
+    "releaseContract": "PASS",
+    "projectSafety": "21 PASS",
+    "installerLifecycle": "PASS",
+    "nodeContractsAndFixtures": "6 PASS / 0 FAIL",
+    "preservedIntermediateFailure": "During a wording edit, the Node guide contract reported 5 PASS / 1 FAIL because the guide no longer contained the checked phrase '자동 생성하지'. The guide was revised to keep that accurate phrase in a simpler sentence; the same suite then returned 6 PASS / 0 FAIL. The failure was not hidden or treated as release-ready.",
+    "manifestHashes": "PASS",
+    "gitDiffCheck": "PASS"
+  },
+  "limitations": [
+    "One fresh natural-language proposal, one isolated actual record write, and one isolated completed setup do not establish reliability for all models, projects, or sessions.",
+    "The user accepted the completed-setup information structure, not every possible wording or future live-project outcome.",
+    "The saved test project's own full task workflow was not run; its previously approved location connection was checked current/clean.",
+    "No new Bare-versus-Core file-work A/B was run; the prior 8/8 conversational A/B remains limited to independent judgment under user pushback."
+  ]
+}

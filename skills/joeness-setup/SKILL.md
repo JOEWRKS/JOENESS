@@ -33,6 +33,16 @@ routine factual recording in that proposal. Once authorized, do not request
 approval for each routine record. A request to inspect or propose is not approval
 to apply. Preserve code changes authorized alongside a request not to record.
 
+When using this skill, lead with a one- or two-sentence plain-language result:
+what project sources you checked or classified, and whether this turn only
+proposed changes or actually changed files. Give technical paths and details
+after that summary if useful. Name only relevant files, not internal helper
+states or hashes, unless those details explain a conflict. Do not imply that
+checking a connection activates a background process.
+If routine recording is agreed, include a short receipt rule in the proposed
+project connection: after an actual record write, tell the user which document
+received what fact. Do not add a status banner to unrelated or read-only work.
+
 ## Apply the short connection
 
 Use [project-setup.ps1](scripts/project-setup.ps1) for the owned AGENTS block.
@@ -84,6 +94,10 @@ task fact, report its status without appending a repeat verification note.
 Questions, opinions, explanations and no-record requests are not facts to append.
 If a required source is inaccessible or a record write fails, finish independent
 authorized work and report the exact missing/read/write boundary.
+When a routine record was actually written, mention its destination and the
+fact recorded in the normal work summary. Do not claim a record was updated
+when no write occurred. This is a receipt for actual work, not a mandatory
+JOENESS status banner on every task.
 
 When a user requests version cleanup, keep active issues and effective workarounds
 visible. Compact resolved details only after retrieving the *latest actual detail*
