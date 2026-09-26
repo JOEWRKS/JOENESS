@@ -34,7 +34,11 @@ function Assert-BytesEqual {
 
 function Assert-ExactNames {
     param([string] $Path, [string[]] $Expected, [string] $Message)
-    $actual = @((Get-ChildItem -LiteralPath $Path -Force | Where-Object { $_.Name -notin @('.git','.superpowers') } | ForEach-Object { $_.Name }) | Sort-Object -CaseSensitive)
+    # Local worktrees are not shipped payload; do not ignore this name in package subdirectories.
+    $actual = @((Get-ChildItem -LiteralPath $Path -Force | Where-Object {
+        $_.Name -notin @('.git','.superpowers') -and
+        -not ($Path -eq $RepoRoot -and $_.PSIsContainer -and $_.Name -eq '.worktrees')
+    } | ForEach-Object { $_.Name }) | Sort-Object -CaseSensitive)
     $wanted = @($Expected | Sort-Object -CaseSensitive)
     Assert-Equal ($actual -join "`n") ($wanted -join "`n") $Message
 }
@@ -85,6 +89,9 @@ function Invoke-JoenessCli {
 }
 
 function Test-MinimalCurrentTree {
+    $trackedWorktrees = @(& git -C $RepoRoot ls-files -- .worktrees)
+    Assert-Equal $LASTEXITCODE 0 'worktree payload check succeeds'
+    Assert-Equal $trackedWorktrees.Count 0 'local worktrees must not become tracked release payload'
     Assert-ExactNames $RepoRoot @(
         '.gitattributes',
         '.github',
