@@ -42,6 +42,10 @@ checking a connection activates a background process.
 If routine recording is agreed, include a short receipt rule in the proposed
 project connection: after an actual record write, tell the user which document
 received what fact. Do not add a status banner to unrelated or read-only work.
+If an existing roadmap defines approved milestones or release scope, connect its
+required-item completion gate briefly: a finished task does not finish its
+milestone or release. Keep the actual checklist and evidence in the roadmap,
+not a copied list in AGENTS.
 
 ## Apply the short connection
 
@@ -87,8 +91,14 @@ examples, not evidence that those files exist.
 
 Normal sessions use the project's short AGENTS connection without invoking setup
 again. Put current task execution/results in its task source; reusable failure
-cause, fix, verification and remaining workaround in its issue source. Change a
-roadmap only for an explicit decision, and design only within its own authority.
+cause, fix, verification and remaining workaround in its issue source. Change
+roadmap direction or scope only for an explicit decision; update a required
+item's check/evidence state only from actual verification. Change design only
+within its own authority.
+For an approved milestone or release, report completion only when its required
+roadmap items meet their stated checks, or an authorized decision explicitly
+changes that scope. Optional or later ideas are not automatic blockers. A task
+can finish while its milestone remains incomplete; keep both states visible.
 If a resumed task is already recorded complete and inspection finds no changed
 task fact, report its status without appending a repeat verification note.
 Questions, opinions, explanations and no-record requests are not facts to append.

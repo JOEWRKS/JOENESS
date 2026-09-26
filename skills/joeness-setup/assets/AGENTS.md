@@ -14,6 +14,11 @@ Adapt this body to actual existing paths before applying; omit unused roles.
   what fact. Do not claim a record was updated when nothing was written.
 - Only explicit direction changes update roadmap. Preserve product/design authority;
   proposed changes, observed verification, and user acceptance are distinct.
+- Update an approved required roadmap item's check/evidence state from actual
+  verification; this is not permission to change its scope or priority.
+- A finished task does not finish its milestone or release. Use the approved
+  roadmap's required-item checks and evidence for that completion claim;
+  scope changes or deferrals need an explicit authorized decision.
 - If a source/write is unavailable, report the exact boundary and continue independent
   authorized work. Never pretend a failed record was saved.
 - Historical detail: follow recorded exact Git commit:path references when needed.

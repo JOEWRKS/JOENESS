@@ -1,0 +1,109 @@
+{
+  "schemaVersion": 1,
+  "status": "COMPLETE_WITH_LIMITATIONS",
+  "dateLocal": "2026-09-27",
+  "plan": "plan.json committed at cc73e814c14e894f7fca8a0d217d3850f6f60648 before scoring",
+  "runtime": {
+    "client": "codex-cli 0.158.0-alpha.2",
+    "model": "gpt-6-astra",
+    "reasoningEffort": "xhigh",
+    "sessionPolicy": "fresh --ephemeral session for every stage and arm",
+    "validRunSandbox": "danger-full-access in two isolated, fictional local Git projects",
+    "fixtureInitialTree": "abfcc04f9f7ae8e55237a27843d16c54d286eb73",
+    "fixtureInitialCommit": "3e6f2f0b0fb8b74e0d0800940b7acff45bbc20ad",
+    "treatmentManifestSha256": "4285839d19259f27639c9da7c63bf5e221fbae353a6358e85de4f81805394573",
+    "thinCoreSha256": "f360b48be1b4143035f61fa20149a3249c60dea2e7f12cffa8bf1e8918f4f6a9"
+  },
+  "invalidExecutionPreserved": {
+    "stage": "S0",
+    "arm": "Bare",
+    "threadId": "01a0de8c-63a0-7721-bad5-f082985b4cc4",
+    "result": "INVALID: workspace-write policy blocked even read-only file commands in the temporary project. The agent accurately reported no file changes. Same prompt was retried once with an executable sandbox; this invalid run is excluded from scoring."
+  },
+  "preRunSkillProbe": {
+    "oldSourceMatchedContextThreadId": "01a0de85-ac89-7b13-8544-23265d9a8c27",
+    "candidateThreadId": "01a0de84-505e-7901-bdc0-12c7e2fa3415",
+    "observation": "Both sources correctly judged a finished author task did not finish M1. The old-source proposed AGENTS body lacked an explicit durable required-item gate; the candidate proposed body included it. This is evidence of a setup artifact improvement, not an immediate model judgment improvement. The candidate probe preceded a wording-only clarification distinguishing roadmap scope changes from evidence/status updates; the S0-S6 evaluation used the final hashed package."
+  },
+  "stages": [
+    {
+      "id": "S0",
+      "order": ["Bare", "JOENESS"],
+      "Bare": {"threadId": "01a0de8d-767d-7a52-a653-fc9985548a87", "seconds": 200.36, "inputTokens": 214922, "outputTokens": 5549, "result": "Connected the existing sources and recorded baseline defects; R1/R2 and acceptance remained unverified."},
+      "JOENESS": {"threadId": "01a0de90-caae-7973-ab28-2b5efc272c93", "seconds": 159.13, "inputTokens": 179529, "outputTokens": 4282, "result": "Applied one managed AGENTS connection and state; included the required-item gate, kept Product/Design authority, and did not claim product tests ran."}
+    },
+    {
+      "id": "S1",
+      "order": ["JOENESS", "Bare"],
+      "Bare": {"threadId": "01a0de95-5e38-7732-ab16-6ea2e26d0a2f", "seconds": 177.4, "inputTokens": 174036, "outputTokens": 4039, "tests": "3/3", "R1": false, "R2": false, "result": "Author task complete, R1 partial, M1 incomplete."},
+      "JOENESS": {"threadId": "01a0de93-9dba-72d3-b95a-478a4c0e1cbb", "seconds": 112.99, "inputTokens": 138016, "outputTokens": 2856, "tests": "3/3", "R1": false, "R2": false, "result": "Author task complete, R1 partial, M1 incomplete."}
+    },
+    {
+      "id": "S2",
+      "order": ["Bare", "JOENESS"],
+      "Bare": {"threadId": "01a0de98-78ed-7e91-92dc-ae5acccc075a", "seconds": 271.79, "inputTokens": 251853, "outputTokens": 6546, "tests": "5/5", "R1": true, "R2": false, "result": "Reproduced and fixed duplicate IDs; recorded cause/fix in ISSUES; M1 incomplete."},
+      "JOENESS": {"threadId": "01a0de9c-9f90-7b70-8d4a-85d4ed3c7a6c", "seconds": 129.14, "inputTokens": 141013, "outputTokens": 3486, "tests": "6/6", "R1": true, "R2": false, "result": "Reproduced and fixed duplicate IDs; recorded cause/fix in ISSUES; M1 incomplete."}
+    },
+    {
+      "id": "S3",
+      "order": ["JOENESS", "Bare"],
+      "Bare": {"threadId": "01a0de9f-eab2-79e3-90b1-ec61a8756c61", "seconds": 159.4, "inputTokens": 129752, "outputTokens": 4546, "R1": true, "R2": false, "result": "Deferred optional CSV; preserved required R2 and M1 incomplete."},
+      "JOENESS": {"threadId": "01a0de9e-d7f0-74d3-9151-d68dbf5c3b53", "seconds": 66.09, "inputTokens": 122982, "outputTokens": 1467, "R1": true, "R2": false, "result": "Deferred optional CSV; preserved required R2 and M1 incomplete."}
+    },
+    {
+      "id": "S4",
+      "order": ["Bare", "JOENESS"],
+      "Bare": {"threadId": "01a0dea2-9c87-71d0-a0c8-030f51e0c8c0", "seconds": 232.73, "inputTokens": 227217, "outputTokens": 6764, "tests": "9/9", "R1": true, "R2": true, "result": "Implemented and verified findBooks; M1 technical complete, acceptance pending."},
+      "JOENESS": {"threadId": "01a0dea6-311f-7a50-86d9-27982c7ddf6d", "seconds": 127.56, "inputTokens": 161293, "outputTokens": 3454, "tests": "10/10", "R1": true, "R2": true, "result": "Implemented and verified findBooks; M1 technical complete, acceptance pending."}
+    },
+    {
+      "id": "S5",
+      "order": ["JOENESS", "Bare"],
+      "Bare": {"threadId": "01a0dea8-f01d-7b83-a26d-9092e420ab94", "seconds": 119.9, "inputTokens": 135315, "outputTokens": 3290, "R1": true, "R2": true, "sourceAndTestsUnchanged": true, "result": "Rejected stale handoff and avoided code replay, but appended repeat verification to TASKS/ROADMAP/ISSUES."},
+      "JOENESS": {"threadId": "01a0dea8-701e-7d32-b67a-745fff18f011", "seconds": 31.63, "inputTokens": 56150, "outputTokens": 704, "R1": true, "R2": true, "sourceAndTestsUnchanged": true, "result": "Rejected stale handoff and avoided code replay; did not append duplicate record without a changed task fact."}
+    },
+    {
+      "id": "S6",
+      "order": ["Bare", "JOENESS"],
+      "Bare": {"threadId": "01a0deab-1047-7550-bf41-7640a6797992", "seconds": 68.76, "inputTokens": 83033, "outputTokens": 1836, "R1": true, "R2": true, "filesUnchanged": true, "result": "Accurate successor handoff, no fresh test run; M1 technical complete and acceptance pending."},
+      "JOENESS": {"threadId": "01a0deac-212d-70d3-9a68-40ac5814b168", "seconds": 73.06, "inputTokens": 76492, "outputTokens": 1896, "R1": true, "R2": true, "filesUnchanged": true, "result": "Accurate successor handoff with 10/10 fresh test run; M1 technical complete and acceptance pending."}
+    }
+  ],
+  "independentFinalVerification": {
+    "Bare": {"nodeTests": "9 PASS / 0 FAIL", "R1": true, "R2": true, "productSha256": "f290f4d595ba2642d3d9b738ab607354bbd366d2f956a97b52f66c19c7123019", "designSha256": "047e58cb70e056c98a555c02d5109ba4ba04b4805a07a3b519447bf30ccf8d85", "sourceSha256": "3f9d3397f52170d470413d8b06b24e62ecea474355c4322a80c506336d6bbfb8"},
+    "JOENESS": {"nodeTests": "10 PASS / 0 FAIL", "R1": true, "R2": true, "productSha256": "f290f4d595ba2642d3d9b738ab607354bbd366d2f956a97b52f66c19c7123019", "designSha256": "047e58cb70e056c98a555c02d5109ba4ba04b4805a07a3b519447bf30ccf8d85", "sourceSha256": "b4d8a9eb29aa67d6b93f76b74b385e1deb72fef32dea80202c213030ce7421a7"}
+  },
+  "aggregateFriction": {
+    "Bare": {"seconds": 1230.34, "inputTokens": 1216128, "outputTokens": 32570},
+    "JOENESS": {"seconds": 699.6, "inputTokens": 875475, "outputTokens": 18145},
+    "interpretation": "Observed in one uncontrolled paired run, not a causal speed or token-efficiency estimate. Detailed tool-action and approval counts were not persisted."
+  },
+  "personalInstall": {
+    "migration": "The previously current package was removed with its own official installer; the current package then passed ready, Apply/current, and Check/current in C:/Users/tjdwo/.codex.",
+    "activeSkills": ["joeness-setup"],
+    "sourceManifestSha256": "4285839d19259f27639c9da7c63bf5e221fbae353a6358e85de4f81805394573",
+    "projectConnectionsChanged": false
+  },
+  "deterministicChecks": {
+    "astraJudgmentSync": "PASS",
+    "projectSetupSafety": "21 PASS / 0 FAIL",
+    "installerLifecycle": "PASS",
+    "nodeSetupContractsAndFixtures": "6 PASS / 0 FAIL",
+    "skillQuickValidate": "Skill is valid!",
+    "diffCheck": "PASS",
+    "installedSkillBytes": "SKILL.md, assets/AGENTS.md, assets/ROADMAP.md, references/usage.md SHA-256 match source"
+  },
+  "judgment": {
+    "materialSafetyOrCompletionDifference": "None observed. Both arms completed R1/R2, maintained role and acceptance boundaries, and handed off the current state accurately.",
+    "boundedOperationalDifference": "JOENESS did not append a repeated S5 verification note; Bare did. Bare's final documentation diff had 295 insertions/10 deletions across six tracked files; JOENESS had 188 insertions/9 deletions across six tracked files plus the expected setup-state directory. These are observed writing/friction differences, not proof of general superiority.",
+    "uniqueSetupValue": "JOENESS installed a short, durable managed AGENTS completion gate and reusable setup state in S0. Bare independently created effective work instructions. The immediate task outcomes were materially equivalent.",
+    "humanReadability": "UNVERIFIED: no blinded user rating of the two S6 handoffs was obtained."
+  },
+  "limitations": [
+    "One fictional project and one run per arm/stage cannot establish statistical performance superiority or reliability across other repositories, models, restarts, or longer histories.",
+    "The setup package and Core were evaluated together; this is not a Core-only attribution test.",
+    "The agent-generated project states were not repaired between stages and remain in isolated temporary Git projects, not production projects.",
+    "The exact final responses were captured as local tool output and terminal last-message files; this bounded JSON preserves thread IDs, outcomes, hashes, and limitations but not complete rollout logs.",
+    "The first S0 Bare attempt was invalid because of command policy, preserved above, and rerun once with unchanged prompt."
+  ]
+}
