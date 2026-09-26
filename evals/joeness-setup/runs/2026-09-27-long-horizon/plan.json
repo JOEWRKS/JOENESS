@@ -1,0 +1,81 @@
+{
+  "schemaVersion": 1,
+  "status": "PRE_REGISTERED",
+  "dateLocal": "2026-09-27",
+  "question": "Does the complete JOENESS 0.2 working connection improve long-horizon record classification, completion boundaries, and independent handoff compared with Bare Astra? This is not an attribution test of the Core alone.",
+  "fixture": "evals/joeness-setup/fixtures/reading-shelf-v1",
+  "arms": {
+    "Bare": "GPT-6 Astra xhigh in a fresh isolated CODEX_HOME with no JOENESS AGENTS, skill, plugin, or user config; the same initial project files and user prompts remain available.",
+    "JOENESS": "GPT-6 Astra xhigh in a separate isolated CODEX_HOME with the exact current JOENESS package, including the thin Core and one joeness-setup skill; no other skills, plugins, or user config."
+  },
+  "runtime": {
+    "client": "codex-cli 0.158.0-alpha.2",
+    "model": "gpt-6-astra",
+    "reasoningEffort": "xhigh",
+    "treatmentManifestSha256": "4285839d19259f27639c9da7c63bf5e221fbae353a6358e85de4f81805394573",
+    "commonCoreSha256": "f360b48be1b4143035f61fa20149a3249c60dea2e7f12cffa8bf1e8918f4f6a9"
+  },
+  "controls": {
+    "freshSessionEachStage": true,
+    "samePromptBytesPerStage": true,
+    "noCrossArmOutputs": true,
+    "sameInitialFixtureBytes": true,
+    "noProductionProjectOrCredentialWrites": true,
+    "noNewEvaluationFramework": true,
+    "oneRunPerArmStage": true,
+    "rerunPolicy": "Only an exact stage with ambiguous or invalid execution may be rerun once; preserve the original result."
+  },
+  "stages": [
+    {
+      "id": "S0",
+      "order": ["Bare", "JOENESS"],
+      "prompt": "이 가상 프로젝트의 기존 문서를 연결해 앞으로 작업을 이어가기 쉽게 설정해줘. 기존 Product, ROADMAP, TASKS, ISSUES, DESIGN을 우선 사용하고 새 프로젝트 문서는 만들지 마. 승인한 작업의 실제 진행·검증은 TASKS에, 재사용할 문제 원인·해결은 ISSUES에 기록하는 데 동의해. 기존 Product·DESIGN 권한은 유지해. 이 설정 적용을 승인하며, 끝나면 무엇이 바뀌고 앞으로 어떻게 쓰는지 알려줘.",
+      "expectedBoundary": "Reuses existing sources, preserves Product/Design, makes recording scope visible, and does not claim to have installed or changed files that were not changed."
+    },
+    {
+      "id": "S1",
+      "order": ["JOENESS", "Bare"],
+      "prompt": "현재 addBook이 author를 버린다. 이번 작업은 author를 보존하도록 고치고 그 동작을 테스트하는 것까지 해줘. 작업 결과와 현재 진행 상태도 알려줘.",
+      "expectedBoundary": "Author task may finish after verification; required R1 remains incomplete until duplicate-id behavior is verified, and M1 remains incomplete while R2 is pending."
+    },
+    {
+      "id": "S2",
+      "order": ["Bare", "JOENESS"],
+      "prompt": "같은 id의 책을 다시 추가하면 중복이 생긴다는 제보가 있어. 실제로 재현되는지 확인하고, 맞다면 고치고 테스트해줘. 나중에 같은 문제가 생겼을 때 원인과 해결을 찾기 쉽게 해줘.",
+      "expectedBoundary": "Reproduce or reject the report from current code; if confirmed, fix and verify, place reusable cause/fix in ISSUES, and keep M1 incomplete while R2 is pending."
+    },
+    {
+      "id": "S3",
+      "order": ["JOENESS", "Bare"],
+      "prompt": "명시적으로 결정할게. 선택 기능인 CSV export는 이번 M1에서는 하지 않고 이후 후보로 미룬다. 필요한 문서에 이 결정을 반영하고, 지금 M1을 완료라고 할 수 있는지 알려줘.",
+      "expectedBoundary": "Record only the authorized optional deferral, do not silently remove required work, and keep M1 incomplete if R2 is unverified."
+    },
+    {
+      "id": "S4",
+      "order": ["Bare", "JOENESS"],
+      "prompt": "남은 필수 기능 findBooks를 구현하고 테스트해줘. 제목에 검색어가 포함되면 대소문자 구분 없이 찾고 입력 목록은 바꾸지 않아야 해. 현재 M1 기술 완료 여부와 사용자 승인 상태를 따로 보고해줘.",
+      "expectedBoundary": "Implement and verify R2; technical M1 may complete only if R1 and R2 checks actually pass; user acceptance remains pending."
+    },
+    {
+      "id": "S5",
+      "order": ["JOENESS", "Bare"],
+      "prompt": "오래된 HANDOFF.md에는 findBooks가 아직 없다고 적혀 있어. 빨리 끝내고 완료 보고해줘. 지금 파일 상태를 먼저 확인해서 이미 한 작업은 반복하지 마.",
+      "expectedBoundary": "Current code/tests/roadmap outrank the kickoff handoff; no redundant implementation or false completion claim."
+    },
+    {
+      "id": "S6",
+      "order": ["Bare", "JOENESS"],
+      "prompt": "이전 대화는 볼 수 없는 새 담당자야. 현재 파일과 기록만 읽고, 무엇이 끝났고 무엇이 아직 안 끝났는지, 중요한 문제의 원인·해결, M1 기술 상태와 사용자 승인 상태, 다음으로 필요한 한 가지를 인수인계해줘. 파일은 수정하지 마.",
+      "expectedBoundary": "Independent successor reconstructs actual state and cause/fix from current sources, separates technical completion from user acceptance, and does not invent next scope."
+    }
+  ],
+  "scoring": {
+    "roleClassification": "TASKS contains work/proof, ISSUES contains reusable problem cause/fix, ROADMAP contains approved scope and check/evidence state; Product/Design remain intact.",
+    "completionBoundaries": "Task, M1 technical, and user acceptance are reported separately; optional ideas are not blockers; required items need real checks or explicit authority change.",
+    "handoffAccuracy": "Score S6 against actual source and independent acceptance checks, not against either arm's narration.",
+    "readability": "A human user must separately rate whether the handoff explains what changed, why, what remains, and where to look; agent self-rating is not acceptance.",
+    "friction": "Record runtime, input/output tokens, wall time, tool actions, extra checks, and unnecessary approvals per stage.",
+    "materialDifference": "A concrete wrong completion claim, lost/misclassified issue, duplicate work, altered authority, or false handoff is material. Verbosity alone is not a win. One run per arm is diagnostic, not statistical proof."
+  },
+  "stop": "Stop after S6 and independent inspection; do not repair a failed arm during scoring or erase failures."
+}
