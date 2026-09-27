@@ -1,0 +1,128 @@
+{
+  "packageIdentity": {
+    "core": "f360b48be1b4143035f61fa20149a3249c60dea2e7f12cffa8bf1e8918f4f6a9",
+    "skill": "9a36f42f0094c5e60bd039be64fc199e983a591c51063767165efb80103647aa"
+  },
+  "inventory": [
+    {
+      "id": "invalid-visual-set-write-r1-bare",
+      "caseId": "invalid-visual-set-write",
+      "baseCommit": "9e3ad5158b247e8047698d969c9087644237bca3",
+      "arm": "bare",
+      "project": "D:\\JOEWRKS\\JOENESS-Performance-AB-20260928\\runs\\invalid-visual-set-write-r1-bare\\project",
+      "home": "D:\\JOEWRKS\\JOENESS-Performance-AB-20260928\\runs\\invalid-visual-set-write-r1-bare\\home",
+      "head": "c7f211e642307970577ed9849e1ff1ddd80eea11",
+      "agentsSha256": "37f46b801552e99aed0d7cdfd1da77dc9c1f5b6953424aee4c8ce2c18c37c13a"
+    },
+    {
+      "id": "invalid-visual-set-write-r1-joeness",
+      "caseId": "invalid-visual-set-write",
+      "baseCommit": "9e3ad5158b247e8047698d969c9087644237bca3",
+      "arm": "joeness",
+      "project": "D:\\JOEWRKS\\JOENESS-Performance-AB-20260928\\runs\\invalid-visual-set-write-r1-joeness\\project",
+      "home": "D:\\JOEWRKS\\JOENESS-Performance-AB-20260928\\runs\\invalid-visual-set-write-r1-joeness\\home",
+      "head": "989e346117002031c28d664598764ded84025045",
+      "agentsSha256": "bcaf194050f651911f8f6e975cd913ad1fc195b8e138fc589c50b91d90a366d2"
+    },
+    {
+      "id": "deferred-ranking-auth-r1-joeness",
+      "caseId": "deferred-ranking-auth",
+      "baseCommit": "72fab347a4b6519a5216731e4700bcf0ddd4d8c5",
+      "arm": "joeness",
+      "project": "D:\\JOEWRKS\\JOENESS-Performance-AB-20260928\\runs\\deferred-ranking-auth-r1-joeness\\project",
+      "home": "D:\\JOEWRKS\\JOENESS-Performance-AB-20260928\\runs\\deferred-ranking-auth-r1-joeness\\home",
+      "head": "79b2854809edc387d9c0b30827993f29f7b365bb",
+      "agentsSha256": "bcaf194050f651911f8f6e975cd913ad1fc195b8e138fc589c50b91d90a366d2"
+    },
+    {
+      "id": "deferred-ranking-auth-r1-bare",
+      "caseId": "deferred-ranking-auth",
+      "baseCommit": "72fab347a4b6519a5216731e4700bcf0ddd4d8c5",
+      "arm": "bare",
+      "project": "D:\\JOEWRKS\\JOENESS-Performance-AB-20260928\\runs\\deferred-ranking-auth-r1-bare\\project",
+      "home": "D:\\JOEWRKS\\JOENESS-Performance-AB-20260928\\runs\\deferred-ranking-auth-r1-bare\\home",
+      "head": "d2191fef01216d82d042e1b1670b4419cecedf7e",
+      "agentsSha256": "37f46b801552e99aed0d7cdfd1da77dc9c1f5b6953424aee4c8ce2c18c37c13a"
+    },
+    {
+      "id": "complete-ranking-rows-r1-bare",
+      "caseId": "complete-ranking-rows",
+      "baseCommit": "5010b0365cb3b25b0a92490f3ff9d7ddf6377316",
+      "arm": "bare",
+      "project": "D:\\JOEWRKS\\JOENESS-Performance-AB-20260928\\runs\\complete-ranking-rows-r1-bare\\project",
+      "home": "D:\\JOEWRKS\\JOENESS-Performance-AB-20260928\\runs\\complete-ranking-rows-r1-bare\\home",
+      "head": "cbc2b86c2220f35e1dc19cd7bfe1b1d3e8e3fad7",
+      "agentsSha256": "37f46b801552e99aed0d7cdfd1da77dc9c1f5b6953424aee4c8ce2c18c37c13a"
+    },
+    {
+      "id": "complete-ranking-rows-r1-joeness",
+      "caseId": "complete-ranking-rows",
+      "baseCommit": "5010b0365cb3b25b0a92490f3ff9d7ddf6377316",
+      "arm": "joeness",
+      "project": "D:\\JOEWRKS\\JOENESS-Performance-AB-20260928\\runs\\complete-ranking-rows-r1-joeness\\project",
+      "home": "D:\\JOEWRKS\\JOENESS-Performance-AB-20260928\\runs\\complete-ranking-rows-r1-joeness\\home",
+      "head": "649e21464b67e8ac5ff84e70175460e9282a937c",
+      "agentsSha256": "bcaf194050f651911f8f6e975cd913ad1fc195b8e138fc589c50b91d90a366d2"
+    },
+    {
+      "id": "invalid-visual-set-write-r2-joeness",
+      "caseId": "invalid-visual-set-write",
+      "baseCommit": "9e3ad5158b247e8047698d969c9087644237bca3",
+      "arm": "joeness",
+      "project": "D:\\JOEWRKS\\JOENESS-Performance-AB-20260928\\runs\\invalid-visual-set-write-r2-joeness\\project",
+      "home": "D:\\JOEWRKS\\JOENESS-Performance-AB-20260928\\runs\\invalid-visual-set-write-r2-joeness\\home",
+      "head": "f388b2b5f5231e66b26bb67d8156d27fa1c0e84f",
+      "agentsSha256": "bcaf194050f651911f8f6e975cd913ad1fc195b8e138fc589c50b91d90a366d2"
+    },
+    {
+      "id": "invalid-visual-set-write-r2-bare",
+      "caseId": "invalid-visual-set-write",
+      "baseCommit": "9e3ad5158b247e8047698d969c9087644237bca3",
+      "arm": "bare",
+      "project": "D:\\JOEWRKS\\JOENESS-Performance-AB-20260928\\runs\\invalid-visual-set-write-r2-bare\\project",
+      "home": "D:\\JOEWRKS\\JOENESS-Performance-AB-20260928\\runs\\invalid-visual-set-write-r2-bare\\home",
+      "head": "0eb4541392cf571c14a3cec6554fa29861b1eadf",
+      "agentsSha256": "37f46b801552e99aed0d7cdfd1da77dc9c1f5b6953424aee4c8ce2c18c37c13a"
+    },
+    {
+      "id": "deferred-ranking-auth-r2-bare",
+      "caseId": "deferred-ranking-auth",
+      "baseCommit": "72fab347a4b6519a5216731e4700bcf0ddd4d8c5",
+      "arm": "bare",
+      "project": "D:\\JOEWRKS\\JOENESS-Performance-AB-20260928\\runs\\deferred-ranking-auth-r2-bare\\project",
+      "home": "D:\\JOEWRKS\\JOENESS-Performance-AB-20260928\\runs\\deferred-ranking-auth-r2-bare\\home",
+      "head": "82bdcc160daa5cb14e723091cc568a220944883b",
+      "agentsSha256": "37f46b801552e99aed0d7cdfd1da77dc9c1f5b6953424aee4c8ce2c18c37c13a"
+    },
+    {
+      "id": "deferred-ranking-auth-r2-joeness",
+      "caseId": "deferred-ranking-auth",
+      "baseCommit": "72fab347a4b6519a5216731e4700bcf0ddd4d8c5",
+      "arm": "joeness",
+      "project": "D:\\JOEWRKS\\JOENESS-Performance-AB-20260928\\runs\\deferred-ranking-auth-r2-joeness\\project",
+      "home": "D:\\JOEWRKS\\JOENESS-Performance-AB-20260928\\runs\\deferred-ranking-auth-r2-joeness\\home",
+      "head": "36f70e4a0b71088cab0906c695af7ff6b671088f",
+      "agentsSha256": "bcaf194050f651911f8f6e975cd913ad1fc195b8e138fc589c50b91d90a366d2"
+    },
+    {
+      "id": "complete-ranking-rows-r2-joeness",
+      "caseId": "complete-ranking-rows",
+      "baseCommit": "5010b0365cb3b25b0a92490f3ff9d7ddf6377316",
+      "arm": "joeness",
+      "project": "D:\\JOEWRKS\\JOENESS-Performance-AB-20260928\\runs\\complete-ranking-rows-r2-joeness\\project",
+      "home": "D:\\JOEWRKS\\JOENESS-Performance-AB-20260928\\runs\\complete-ranking-rows-r2-joeness\\home",
+      "head": "cda3a59c31c347abfad9a676cb155afc4aa9ccf2",
+      "agentsSha256": "bcaf194050f651911f8f6e975cd913ad1fc195b8e138fc589c50b91d90a366d2"
+    },
+    {
+      "id": "complete-ranking-rows-r2-bare",
+      "caseId": "complete-ranking-rows",
+      "baseCommit": "5010b0365cb3b25b0a92490f3ff9d7ddf6377316",
+      "arm": "bare",
+      "project": "D:\\JOEWRKS\\JOENESS-Performance-AB-20260928\\runs\\complete-ranking-rows-r2-bare\\project",
+      "home": "D:\\JOEWRKS\\JOENESS-Performance-AB-20260928\\runs\\complete-ranking-rows-r2-bare\\home",
+      "head": "f6a8366035c9157af759882a51c597d45c95944a",
+      "agentsSha256": "37f46b801552e99aed0d7cdfd1da77dc9c1f5b6953424aee4c8ce2c18c37c13a"
+    }
+  ]
+}
