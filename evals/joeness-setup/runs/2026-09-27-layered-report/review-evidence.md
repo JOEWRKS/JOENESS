@@ -7,6 +7,9 @@ the unchanged Setup project at
 process exited 0. The project's Git worktree remained clean. The exact
 [response](response.md) is retained; no skill source, installed skill, project
 record or code was changed.
+The raw response uses two trailing spaces on each of its first five lines for
+Markdown line breaks; `git diff --check` flags those five evidence lines. They
+are preserved to keep the generated response exact, not a source-code change.
 
 ## Pre-registered information check
 
