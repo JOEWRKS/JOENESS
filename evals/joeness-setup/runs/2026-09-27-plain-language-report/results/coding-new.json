@@ -1,0 +1,37 @@
+{
+  "id": "coding-new",
+  "startedAt": "2026-09-27T13:55:26.598Z",
+  "wallMs": 143693,
+  "exitCode": 0,
+  "fixture": "reading-shelf",
+  "arm": "new",
+  "baselineTree": "0f642c0140667224c9d5f2896cde2fb588adce9a",
+  "runtime": {
+    "binary": "C:\\Users\\tjdwo\\AppData\\Local\\OpenAI\\Codex\\bin\\d23520d1e41bfb24\\codex.exe",
+    "model": "gpt-6-astra",
+    "reasoningEffort": "xhigh",
+    "threadId": "01a0e326-33c3-7413-9707-4cc46bf367d6"
+  },
+  "promptSha256": "9f9bcb5997c131fe8ee41f77913af16de9d469eb844db3dba0d45ee02f20ba6c",
+  "guidanceSha256": "b6a27b1da2994a653b472fefb17af90ae095309f0fe24c125fb29c5994ef4a14",
+  "responseSha256": "762db92e22c185ae43d79e1f6df992e1613e7b74219119c2a6802cb9366a11aa",
+  "usage": {
+    "input_tokens": 114285,
+    "cached_input_tokens": 102144,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 4026,
+    "reasoning_output_tokens": 1329
+  },
+  "testCommandCount": 2,
+  "eventCounts": {
+    "thread.started": 1,
+    "turn.started": 1,
+    "item.completed": 14,
+    "item.started": 10,
+    "turn.completed": 1
+  },
+  "lastError": null,
+  "statusBefore": "",
+  "statusAfter": "M HANDOFF.md\n M ISSUES.md\n M ROADMAP.md\n M src/shelf.mjs\n M tests/shelf.test.mjs\n?? artifacts/attempt-01/local-check.md",
+  "diffStat": "HANDOFF.md           | 13 ++++++++++---\n ISSUES.md            |  3 ++-\n ROADMAP.md           |  4 +++-\n src/shelf.mjs        |  3 ++-\n tests/shelf.test.mjs | 34 ++++++++++++++++++++++++++++++++++\n 5 files changed, 51 insertions(+), 6 deletions(-)"
+}
