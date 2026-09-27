@@ -37,11 +37,10 @@ routine factual recording in that proposal. Once authorized, do not request
 approval for each routine record. A request to inspect or propose is not approval
 to apply. Preserve code changes authorized alongside a request not to record.
 
-When using this skill, lead with a one- or two-sentence plain-language result:
-what project sources you checked or classified, and whether this turn only
-proposed changes or actually changed files. Give technical paths and details
-after that summary if useful. Name only relevant files, not internal helper
-states or hashes, unless those details explain a conflict. Do not imply that
+When using this skill for substantive work, lead with the terse work report
+defined below. Say whether this turn only proposed changes or changed files.
+Give technical paths and details after the report if useful; omit internal
+helper states or hashes unless they explain a conflict. Do not imply that
 checking a connection activates a background process.
 If routine recording is agreed, include a concise work-receipt rule in the
 proposed project connection; no status banner for unrelated questions.
@@ -49,11 +48,10 @@ If an existing roadmap defines approved milestones or release scope, connect its
 required-item completion gate briefly: a finished task does not finish its
 milestone or release. Keep the actual checklist and evidence in the roadmap,
 not a copied list in AGENTS.
-For a requested handoff to a person, the short connection should call for an
-everyday-language opening: what is done, what remains, and the recipient's next
-action or decision. Put IDs, test counts, paths, and detailed proof after that
-opening. Preserve the distinction between technical completion, user acceptance,
-and unverified work. Ordinary work receipts are shorter and need no fixed headings.
+For a requested handoff to a person, start with the same terse work report:
+what was done, changed, unresolved, resolved, and the recipient's next action.
+Put IDs, test counts, paths, and detailed proof after it. Preserve the distinction
+between technical completion, user acceptance, and unverified work.
 
 ## Apply the short connection
 
@@ -112,12 +110,18 @@ task fact, report its status without appending a repeat verification note.
 Questions, opinions, explanations and no-record requests are not facts to append.
 If a required source is inaccessible or a record write fails, finish independent
 authorized work and report the exact missing/read/write boundary.
-After substantive work, briefly report from already-checked facts: outcome,
-changed files, records written and where, unresolved problems or verification,
-and one next action if any. State when nothing changed. Preserve required gaps,
-scope decisions and separate user acceptance; keep exact evidence available.
-Do not invent a next task, rerun checks or reread sources solely to format the
-reply. Simple questions need no receipt; never claim a write that did not occur.
+After substantive work, lead with five short hyphen bullets in the user's
+language (Korean labels: `작업`, `업데이트 파일`, `이슈`, `해결`, `다음 작업`). Use plain words,
+not paragraphs, acronyms, requirement IDs or milestone codes in these five lines;
+say `이번 목표` or the actual user-facing task instead. Name only files actually changed; write `없음`
+where a field has no fact. An unresolved issue is not a resolution: say `미해결`
+and state the needed action. Take the next task only from current authorized
+scope or the roadmap, otherwise say `없음`. Add `상세 보고` only for material context
+or requested proof, below the five lines. Put IDs, test counts and exact paths
+there when useful, without hiding required verification gaps, scope decisions or
+separate user acceptance. Use already-checked facts; do not add a translation
+pass, invent a next task, rerun checks or reread sources just to format the reply.
+Simple questions need no receipt; never claim a write that did not occur.
 
 When a user requests version cleanup, keep active issues and effective workarounds
 visible. Compact resolved details only after retrieving the *latest actual detail*

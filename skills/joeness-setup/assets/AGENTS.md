@@ -12,10 +12,15 @@ Adapt this body to actual existing paths before applying; omit unused roles.
   in the task source; reusable causes/fixes/workarounds in issues. Avoid duplicate
   prose. Questions, opinions, explanation-only and no-record requests cause no
   record writes; no-record does not cancel separately authorized implementation.
-- After substantive work, briefly report work done, changed files, recorded
-  facts/source, unresolved problems/checks, and next action (if any) from
-  already-checked facts. Preserve required gaps and separate user acceptance.
-  No extra pass just to format it; no claimed write without a write.
+- After substantive work, lead with five terse, plain-language hyphen bullets in the
+  user's language: 작업, 업데이트 파일, 이슈, 해결, 다음 작업 (translate labels if needed).
+  Use fragments, not paragraphs, acronyms, internal requirement IDs or milestone
+  codes in these five lines; use a plain task name instead. Name only files actually
+  changed; use 없음 for empty fields. Do not call an unresolved issue solved.
+  Derive the next task from approved scope/roadmap, never invent it. Put material
+  proof, recording details, IDs or paths under 상세 보고 only if useful or asked.
+  Keep required verification gaps and user acceptance distinct. Use checked
+  facts, with no extra formatting pass or claimed write without a write.
 - Only explicit direction changes update roadmap. Preserve product/design authority;
   proposed changes, observed verification, and user acceptance are distinct.
 - Update an approved required roadmap item's check/evidence state from actual
@@ -23,10 +28,9 @@ Adapt this body to actual existing paths before applying; omit unused roles.
 - A finished task does not finish its milestone or release. Use the approved
   roadmap's required-item checks and evidence for that completion claim;
   scope changes or deferrals need an explicit authorized decision.
-- For a requested human handoff, start in everyday language with what is done,
-  what remains, and the next action or decision. Put IDs, test counts, paths,
-  and detailed evidence after that opening; keep technical completion and
-  user acceptance distinct. Simple questions need no work receipt.
+- For a requested human handoff, use the same five-field opening, followed by
+  only needed detail. Keep technical completion and user acceptance distinct.
+  Simple questions need no work receipt.
 - If a source/write is unavailable, report the exact boundary and continue independent
   authorized work. Never pretend a failed record was saved.
 - Historical detail: follow recorded exact Git commit:path references when needed.
