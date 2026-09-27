@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="utf-8"?>
+<test-run id="2" testcasecount="28" result="Failed(Child)" total="28" passed="27" failed="1" inconclusive="0" skipped="0" asserts="0" engine-version="3.5.0.0" clr-version="4.0.30319.42000" start-time="2026-09-27 20:47:59Z" end-time="2026-09-27 20:48:01Z" duration="2.2889037">
+  <test-suite type="TestSuite" id="1000" name="game" fullname="game" runstate="Runnable" testcasecount="28" result="Failed" site="Child" start-time="2026-09-27 20:47:59Z" end-time="2026-09-27 20:48:01Z" duration="2.288904" total="28" passed="27" failed="1" inconclusive="0" skipped="0" asserts="0">
+    <properties>
+      <property name="platform" value="EditMode" />
+    </properties>
+    <failure>
+      <message><![CDATA[One or more child tests had errors]]></message>
+    </failure>
+    <test-suite type="Assembly" id="1035" name="MergeDrop.EditModeTests.dll" fullname="D:/JOEWRKS/JOENESS-Interaction-AB-20260928/runs/restart-danger-r2-bare/project/game/Library/ScriptAssemblies/MergeDrop.EditModeTests.dll" runstate="Runnable" testcasecount="28" result="Failed" site="Child" start-time="2026-09-27 20:47:59Z" end-time="2026-09-27 20:48:01Z" duration="2.213310" total="28" passed="27" failed="1" inconclusive="0" skipped="0" asserts="0">
+      <properties>
+        <property name="_PID" value="39100" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+        <property name="platform" value="EditMode" />
+        <property name="EditorOnly" value="True" />
+      </properties>
+      <failure>
+        <message><![CDATA[One or more child tests had errors]]></message>
+      </failure>
+      <test-suite type="TestFixture" id="1001" name="HighScoreStoreTests" fullname="HighScoreStoreTests" classname="HighScoreStoreTests" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-09-27 20:47:45Z" end-time="2026-09-27 20:47:45Z" duration="0.033956" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <test-case id="1002" name="Load_NormalizesMissingAndNegativeValuesToZero" fullname="HighScoreStoreTests.Load_NormalizesMissingAndNegativeValuesToZero" methodname="Load_NormalizesMissingAndNegativeValuesToZero" classname="HighScoreStoreTests" runstate="Runnable" seed="11048882" result="Passed" start-time="2026-09-27 20:47:45Z" end-time="2026-09-27 20:47:45Z" duration="0.019247" asserts="0">
+          <properties />
+        </test-case>
+        <test-case id="1003" name="SaveIfHigher_PreservesTheMaximum" fullname="HighScoreStoreTests.SaveIfHigher_PreservesTheMaximum" methodname="SaveIfHigher_PreservesTheMaximum" classname="HighScoreStoreTests" runstate="Runnable" seed="286383770" result="Passed" start-time="2026-09-27 20:47:45Z" end-time="2026-09-27 20:47:45Z" duration="0.001210" asserts="0">
+          <properties />
+        </test-case>
+      </test-suite>
+      <test-suite type="TestFixture" id="1004" name="MergeRulesTests" fullname="MergeRulesTests" classname="MergeRulesTests" runstate="Runnable" testcasecount="20" result="Passed" start-time="2026-09-27 20:47:45Z" end-time="2026-09-27 20:47:45Z" duration="0.010098" total="20" passed="20" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <test-suite type="ParameterizedMethod" id="1014" name="EqualAvailableFruit_AdvancesOneTierAndReturnsResultScore" fullname="MergeRulesTests.EqualAvailableFruit_AdvancesOneTierAndReturnsResultScore" classname="MergeRulesTests" runstate="Runnable" testcasecount="9" result="Passed" start-time="2026-09-27 20:47:45Z" end-time="2026-09-27 20:47:45Z" duration="0.005160" total="9" passed="9" failed="0" inconclusive="0" skipped="0" asserts="0">
+          <properties />
+          <test-case id="1005" name="EqualAvailableFruit_AdvancesOneTierAndReturnsResultScore(Blueberry,Cherry,2)" fullname="MergeRulesTests.EqualAvailableFruit_AdvancesOneTierAndReturnsResultScore(Blueberry,Cherry,2)" methodname="EqualAvailableFruit_AdvancesOneTierAndReturnsResultScore" classname="MergeRulesTests" runstate="Runnable" seed="940287937" result="Passed" start-time="2026-09-27 20:47:45Z" end-time="2026-09-27 20:47:45Z" duration="0.002878" asserts="0">
+            <properties />
+          </test-case>
+          <test-case id="1006" name="EqualAvailableFruit_AdvancesOneTierAndReturnsResultScore(Cherry,Strawberry,4)" fullname="MergeRulesTests.EqualAvailableFruit_AdvancesOneTierAndReturnsResultScore(Cherry,Strawberry,4)" methodname="EqualAvailableFruit_AdvancesOneTierAndReturnsResultScore" classname="MergeRulesTests" runstate="Runnable" seed="846177495" result="Passed" start-time="2026-09-27 20:47:45Z" end-time="2026-09-27 20:47:45Z" duration="0.000215" asserts="0">
+            <properties />
+          </test-case>
+          <test-case id="1007" name="EqualAvailableFruit_AdvancesOneTierAndReturnsResultScore(Strawberry,Plum,8)" fullname="MergeRulesTests.EqualAvailableFruit_AdvancesOneTierAndReturnsResultScore(Strawberry,Plum,8)" methodname="EqualAvailableFruit_AdvancesOneTierAndReturnsResultScore" classname="MergeRulesTests" runstate="Runnable" seed="1483813674" result="Passed" start-time="2026-09-27 20:47:45Z" end-time="2026-09-27 20:47:45Z" duration="0.000097" asserts="0">
+            <properties />
+          </test-case>
+          <test-case id="1008" name="EqualAvailableFruit_AdvancesOneTierAndReturnsResultScore(Plum,Tangerine,16)" fullname="MergeRulesTests.EqualAvailableFruit_AdvancesOneTierAndReturnsResultScore(Plum,Tangerine,16)" methodname="EqualAvailableFruit_AdvancesOneTierAndReturnsResultScore" classname="MergeRulesTests" runstate="Runnable" seed="1737157718" result="Passed" start-time="2026-09-27 20:47:45Z" end-time="2026-09-27 20:47:45Z" duration="0.000092" asserts="0">
+            <properties />
+          </test-case>
+          <test-case id="1009" name="EqualAvailableFruit_AdvancesOneTierAndReturnsResultScore(Tangerine,Apple,32)" fullname="MergeRulesTests.EqualAvailableFruit_AdvancesOneTierAndReturnsResultScore(Tangerine,Apple,32)" methodname="EqualAvailableFruit_AdvancesOneTierAndReturnsResultScore" classname="MergeRulesTests" runstate="Runnable" seed="1196674052" result="Passed" start-time="2026-09-27 20:47:45Z" end-time="2026-09-27 20:47:45Z" duration="0.000088" asserts="0">
+            <properties />
+          </test-case>
+          <test-case id="1010" name="EqualAvailableFruit_AdvancesOneTierAndReturnsResultScore(Apple,Peach,64)" fullname="MergeRulesTests.EqualAvailableFruit_AdvancesOneTierAndReturnsResultScore(Apple,Peach,64)" methodname="EqualAvailableFruit_AdvancesOneTierAndReturnsResultScore" classname="MergeRulesTests" runstate="Runnable" seed="1176405795" result="Passed" start-time="2026-09-27 20:47:45Z" end-time="2026-09-27 20:47:45Z" duration="0.000088" asserts="0">
+            <properties />
+          </test-case>
+          <test-case id="1011" name="EqualAvailableFruit_AdvancesOneTierAndReturnsResultScore(Peach,Grapefruit,128)" fullname="MergeRulesTests.EqualAvailableFruit_AdvancesOneTierAndReturnsResultScore(Peach,Grapefruit,128)" methodname="EqualAvailableFruit_AdvancesOneTierAndReturnsResultScore" classname="MergeRulesTests" runstate="Runnable" seed="285447223" result="Passed" start-time="2026-09-27 20:47:45Z" end-time="2026-09-27 20:47:45Z" duration="0.000243" asserts="0">
+            <properties />
+          </test-case>
+          <test-case id="1012" name="EqualAvailableFruit_AdvancesOneTierAndReturnsResultScore(Grapefruit,Melon,256)" fullname="MergeRulesTests.EqualAvailableFruit_AdvancesOneTierAndReturnsResultScore(Grapefruit,Melon,256)" methodname="EqualAvailableFruit_AdvancesOneTierAndReturnsResultScore" classname="MergeRulesTests" runstate="Runnable" seed="1672392338" result="Passed" start-time="2026-09-27 20:47:45Z" end-time="2026-09-27 20:47:45Z" duration="0.000106" asserts="0">
+            <properties />
+          </test-case>
+          <test-case id="1013" name="EqualAvailableFruit_AdvancesOneTierAndReturnsResultScore(Melon,Watermelon,512)" fullname="MergeRulesTests.EqualAvailableFruit_AdvancesOneTierAndReturnsResultScore(Melon,Watermelon,512)" methodname="EqualAvailableFruit_AdvancesOneTierAndReturnsResultScore" classname="MergeRulesTests" runstate="Runnable" seed="1817482839" result="Passed" start-time="2026-09-27 20:47:45Z" end-time="2026-09-27 20:47:45Z" duration="0.000090" asserts="0">
+            <properties />
+          </test-case>
+        </test-suite>
+        <test-case id="1015" name="Watermelon_UnequalOrConsumedFruit_CannotMerge" fullname="MergeRulesTests.Watermelon_UnequalOrConsumedFruit_CannotMerge" methodname="Watermelon_UnequalOrConsumedFruit_CannotMerge" classname="MergeRulesTests" runstate="Runnable" seed="1056866566" result="Passed" start-time="2026-09-27 20:47:45Z" end-time="2026-09-27 20:47:45Z" duration="0.000212" asserts="0">
+          <properties />
+        </test-case>
+        <test-suite type="ParameterizedMethod" id="1026" name="WeightedRoll_UsesApprovedBoundaries" fullname="MergeRulesTests.WeightedRoll_UsesApprovedBoundaries" classname="MergeRulesTests" runstate="Runnable" testcasecount="10" result="Passed" start-time="2026-09-27 20:47:45Z" end-time="2026-09-27 20:47:45Z" duration="0.002195" total="10" passed="10" failed="0" inconclusive="0" skipped="0" asserts="0">
+          <properties />
+          <test-case id="1016" name="WeightedRoll_UsesApprovedBoundaries(0,Blueberry)" fullname="MergeRulesTests.WeightedRoll_UsesApprovedBoundaries(0,Blueberry)" methodname="WeightedRoll_UsesApprovedBoundaries" classname="MergeRulesTests" runstate="Runnable" seed="2057509225" result="Passed" start-time="2026-09-27 20:47:45Z" end-time="2026-09-27 20:47:45Z" duration="0.000430" asserts="0">
+            <properties />
+          </test-case>
+          <test-case id="1017" name="WeightedRoll_UsesApprovedBoundaries(34,Blueberry)" fullname="MergeRulesTests.WeightedRoll_UsesApprovedBoundaries(34,Blueberry)" methodname="WeightedRoll_UsesApprovedBoundaries" classname="MergeRulesTests" runstate="Runnable" seed="786215729" result="Passed" start-time="2026-09-27 20:47:45Z" end-time="2026-09-27 20:47:45Z" duration="0.000078" asserts="0">
+            <properties />
+          </test-case>
+          <test-case id="1018" name="WeightedRoll_UsesApprovedBoundaries(35,Cherry)" fullname="MergeRulesTests.WeightedRoll_UsesApprovedBoundaries(35,Cherry)" methodname="WeightedRoll_UsesApprovedBoundaries" classname="MergeRulesTests" runstate="Runnable" seed="1087024296" result="Passed" start-time="2026-09-27 20:47:45Z" end-time="2026-09-27 20:47:45Z" duration="0.000071" asserts="0">
+            <properties />
+          </test-case>
+          <test-case id="1019" name="WeightedRoll_UsesApprovedBoundaries(62,Cherry)" fullname="MergeRulesTests.WeightedRoll_UsesApprovedBoundaries(62,Cherry)" methodname="WeightedRoll_UsesApprovedBoundaries" classname="MergeRulesTests" runstate="Runnable" seed="258942247" result="Passed" start-time="2026-09-27 20:47:45Z" end-time="2026-09-27 20:47:45Z" duration="0.000068" asserts="0">
+            <properties />
+          </test-case>
+          <test-case id="1020" name="WeightedRoll_UsesApprovedBoundaries(63,Strawberry)" fullname="MergeRulesTests.WeightedRoll_UsesApprovedBoundaries(63,Strawberry)" methodname="WeightedRoll_UsesApprovedBoundaries" classname="MergeRulesTests" runstate="Runnable" seed="71098486" result="Passed" start-time="2026-09-27 20:47:45Z" end-time="2026-09-27 20:47:45Z" duration="0.000068" asserts="0">
+            <properties />
+          </test-case>
+          <test-case id="1021" name="WeightedRoll_UsesApprovedBoundaries(82,Strawberry)" fullname="MergeRulesTests.WeightedRoll_UsesApprovedBoundaries(82,Strawberry)" methodname="WeightedRoll_UsesApprovedBoundaries" classname="MergeRulesTests" runstate="Runnable" seed="1708613137" result="Passed" start-time="2026-09-27 20:47:45Z" end-time="2026-09-27 20:47:45Z" duration="0.000069" asserts="0">
+            <properties />
+          </test-case>
+          <test-case id="1022" name="WeightedRoll_UsesApprovedBoundaries(83,Plum)" fullname="MergeRulesTests.WeightedRoll_UsesApprovedBoundaries(83,Plum)" methodname="WeightedRoll_UsesApprovedBoundaries" classname="MergeRulesTests" runstate="Runnable" seed="1487505515" result="Passed" start-time="2026-09-27 20:47:45Z" end-time="2026-09-27 20:47:45Z" duration="0.000074" asserts="0">
+            <properties />
+          </test-case>
+          <test-case id="1023" name="WeightedRoll_UsesApprovedBoundaries(94,Plum)" fullname="MergeRulesTests.WeightedRoll_UsesApprovedBoundaries(94,Plum)" methodname="WeightedRoll_UsesApprovedBoundaries" classname="MergeRulesTests" runstate="Runnable" seed="2005452893" result="Passed" start-time="2026-09-27 20:47:45Z" end-time="2026-09-27 20:47:45Z" duration="0.000070" asserts="0">
+            <properties />
+          </test-case>
+          <test-case id="1024" name="WeightedRoll_UsesApprovedBoundaries(95,Tangerine)" fullname="MergeRulesTests.WeightedRoll_UsesApprovedBoundaries(95,Tangerine)" methodname="WeightedRoll_UsesApprovedBoundaries" classname="MergeRulesTests" runstate="Runnable" seed="1859074034" result="Passed" start-time="2026-09-27 20:47:45Z" end-time="2026-09-27 20:47:45Z" duration="0.000071" asserts="0">
+            <properties />
+          </test-case>
+          <test-case id="1025" name="WeightedRoll_UsesApprovedBoundaries(99,Tangerine)" fullname="MergeRulesTests.WeightedRoll_UsesApprovedBoundaries(99,Tangerine)" methodname="WeightedRoll_UsesApprovedBoundaries" classname="MergeRulesTests" runstate="Runnable" seed="119513938" result="Passed" start-time="2026-09-27 20:47:45Z" end-time="2026-09-27 20:47:45Z" duration="0.000103" asserts="0">
+            <properties />
+          </test-case>
+        </test-suite>
+      </test-suite>
+      <test-suite type="TestFixture" id="1027" name="PieceCatalogTests" fullname="PieceCatalogTests" classname="PieceCatalogTests" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-09-27 20:47:45Z" end-time="2026-09-27 20:47:45Z" duration="0.007767" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <test-case id="1029" name="CompleteCatalog_ReturnsDefinitionsAndUsesWeightedSpawnBoundaries" fullname="PieceCatalogTests.CompleteCatalog_ReturnsDefinitionsAndUsesWeightedSpawnBoundaries" methodname="CompleteCatalog_ReturnsDefinitionsAndUsesWeightedSpawnBoundaries" classname="PieceCatalogTests" runstate="Runnable" seed="689268059" result="Passed" start-time="2026-09-27 20:47:45Z" end-time="2026-09-27 20:47:45Z" duration="0.005710" asserts="0">
+          <properties />
+        </test-case>
+        <test-case id="1028" name="RuntimeAssembly_ContainsPieceCatalog" fullname="PieceCatalogTests.RuntimeAssembly_ContainsPieceCatalog" methodname="RuntimeAssembly_ContainsPieceCatalog" classname="PieceCatalogTests" runstate="Runnable" seed="1029420864" result="Passed" start-time="2026-09-27 20:47:45Z" end-time="2026-09-27 20:47:45Z" duration="0.001011" asserts="0">
+          <properties />
+        </test-case>
+      </test-suite>
+      <test-suite type="TestFixture" id="1030" name="WarningZoneTests" fullname="WarningZoneTests" classname="WarningZoneTests" runstate="Runnable" testcasecount="4" result="Failed" site="Child" start-time="2026-09-27 20:47:59Z" end-time="2026-09-27 20:48:01Z" duration="2.199054" total="4" passed="3" failed="1" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <failure>
+          <message><![CDATA[One or more child tests had errors]]></message>
+        </failure>
+        <test-case id="1033" name="ContinuousDanger_EndsRunAfterConfiguredDuration" fullname="WarningZoneTests.ContinuousDanger_EndsRunAfterConfiguredDuration" methodname="ContinuousDanger_EndsRunAfterConfiguredDuration" classname="WarningZoneTests" runstate="Runnable" seed="496471270" result="Passed" start-time="2026-09-27 20:47:45Z" end-time="2026-09-27 20:47:49Z" duration="3.927659" asserts="0">
+          <properties>
+            <property name="_JOINTYPE" value="UnityCombinatorial" />
+          </properties>
+        </test-case>
+        <test-case id="1034" name="LeavingDanger_ResetsTheContinuousInterval" fullname="WarningZoneTests.LeavingDanger_ResetsTheContinuousInterval" methodname="LeavingDanger_ResetsTheContinuousInterval" classname="WarningZoneTests" runstate="Runnable" seed="859194712" result="Failed" start-time="2026-09-27 20:47:49Z" end-time="2026-09-27 20:47:52Z" duration="2.828115" asserts="0">
+          <properties>
+            <property name="_JOINTYPE" value="UnityCombinatorial" />
+          </properties>
+          <failure>
+            <message><![CDATA[  Expected: 0
+  But was:  1.00107801f
+]]></message>
+            <stack-trace><![CDATA[at WarningZoneTests+<LeavingDanger_ResetsTheContinuousInterval>d__13.MoveNext () [0x000af] in D:\JOEWRKS\JOENESS-Interaction-AB-20260928\runs\restart-danger-r2-bare\project\game\Assets\MergeDrop\Tests\EditMode\WarningZoneTests.cs:97
+at UnityEngine.TestTools.TestEnumerator+<Execute>d__7.MoveNext () [0x0003a] in .\Library\PackageCache\com.unity.test-framework@bd7f943e9647\UnityEngine.TestRunner\NUnitExtensions\Attributes\TestEnumerator.cs:44
+]]></stack-trace>
+          </failure>
+        </test-case>
+        <test-case id="1032" name="RestartAfterGameOver_NewDangerGetsFullDuration" fullname="WarningZoneTests.RestartAfterGameOver_NewDangerGetsFullDuration" methodname="RestartAfterGameOver_NewDangerGetsFullDuration" classname="WarningZoneTests" runstate="Runnable" seed="1748574263" result="Passed" start-time="2026-09-27 20:47:52Z" end-time="2026-09-27 20:47:58Z" duration="5.865976" asserts="0">
+          <properties>
+            <property name="_JOINTYPE" value="UnityCombinatorial" />
+          </properties>
+        </test-case>
+        <test-case id="1031" name="RestartDuringDanger_ClearsTimerAndContactsBeforeOldFruitIsDestroyed" fullname="WarningZoneTests.RestartDuringDanger_ClearsTimerAndContactsBeforeOldFruitIsDestroyed" methodname="RestartDuringDanger_ClearsTimerAndContactsBeforeOldFruitIsDestroyed" classname="WarningZoneTests" runstate="Runnable" seed="1390175415" result="Passed" start-time="2026-09-27 20:47:58Z" end-time="2026-09-27 20:48:01Z" duration="3.884948" asserts="0">
+          <properties>
+            <property name="_JOINTYPE" value="UnityCombinatorial" />
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+          <output><![CDATA[Saving results to: D:\JOEWRKS\JOENESS-Interaction-AB-20260928\grades\restart-danger-r2-bare\full-editmode.xml
+]]></output>
+        </test-case>
+      </test-suite>
+    </test-suite>
+  </test-suite>
+</test-run>

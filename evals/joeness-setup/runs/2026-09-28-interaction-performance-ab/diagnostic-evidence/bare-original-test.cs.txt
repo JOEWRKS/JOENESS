@@ -1,0 +1,145 @@
+using System.Collections;
+using System.Collections.Generic;
+using System.Reflection;
+using NUnit.Framework;
+using UnityEditor.SceneManagement;
+using UnityEngine;
+using UnityEngine.SceneManagement;
+using UnityEngine.TestTools;
+
+public sealed class WarningZoneTests
+{
+    private const BindingFlags PrivateInstance = BindingFlags.Instance | BindingFlags.NonPublic;
+    private GameController _game;
+    private WarningZone _zone;
+    private GameObject _gameOverOverlay;
+
+    private float DangerTime => Field<float>(_zone, "_dangerTime");
+    private float DangerDuration => Field<float>(_zone, "_dangerDuration");
+
+    [UnitySetUp]
+    public IEnumerator SetUp()
+    {
+        yield return new EnterPlayMode();
+        yield return EditorSceneManager.LoadSceneAsyncInPlayMode(
+            "Assets/MergeDrop/Scenes/Game.unity", new LoadSceneParameters(LoadSceneMode.Single));
+        yield return null;
+
+        _game = Object.FindFirstObjectByType<GameController>();
+        _zone = Object.FindFirstObjectByType<WarningZone>();
+        Assert.That(Field<WarningZone>(_game, "_warningZone"), Is.SameAs(_zone));
+        _gameOverOverlay = Field<GameObject>(Field<GameHud>(_game, "_hud"), "_gameOverOverlay");
+        Assert.That(DangerDuration, Is.EqualTo(2f));
+        Assert.That(_gameOverOverlay.activeSelf, Is.False);
+    }
+
+    [UnityTearDown]
+    public IEnumerator TearDown()
+    {
+        yield return new ExitPlayMode();
+    }
+
+    [UnityTest]
+    public IEnumerator RestartDuringDanger_ClearsTimerAndContactsBeforeOldFruitIsDestroyed()
+    {
+        for (var run = 0; run < 2; run++)
+        {
+            var oldFruit = SpawnDangerFruit();
+            yield return WaitForDangerTime(1f);
+            Assert.That(_gameOverOverlay.activeSelf, Is.False);
+
+            _game.Restart();
+
+            // Destroy is deferred until the end of the frame; reset must be immediate.
+            Assert.That(oldFruit != null, Is.True);
+            Assert.That(DangerTime, Is.Zero);
+            Assert.That(Field<HashSet<MergePiece>>(_zone, "_pieces"), Is.Empty);
+            Assert.That(_gameOverOverlay.activeSelf, Is.False);
+
+            yield return null;
+            Assert.That(oldFruit == null, Is.True);
+            Assert.That(DangerTime, Is.Zero);
+        }
+    }
+
+    [UnityTest]
+    public IEnumerator RestartAfterGameOver_NewDangerGetsFullDuration()
+    {
+        SpawnDangerFruit();
+        yield return AssertFullDangerInterval();
+        yield return null;
+
+        _game.Restart();
+        Assert.That(DangerTime, Is.Zero);
+        Assert.That(Field<HashSet<MergePiece>>(_zone, "_pieces"), Is.Empty);
+        Assert.That(_gameOverOverlay.activeSelf, Is.False);
+
+        SpawnDangerFruit();
+        yield return AssertFullDangerInterval();
+    }
+
+    [UnityTest]
+    public IEnumerator ContinuousDanger_EndsRunAfterConfiguredDuration()
+    {
+        SpawnDangerFruit();
+        yield return AssertFullDangerInterval();
+    }
+
+    [UnityTest]
+    public IEnumerator LeavingDanger_ResetsTheContinuousInterval()
+    {
+        var fruit = SpawnDangerFruit();
+        yield return WaitForDangerTime(1f);
+
+        fruit.Body.position = new Vector2(0f, BoardLayout.WarningY - 2f);
+        yield return new WaitForFixedUpdate();
+        yield return null;
+        Assert.That(DangerTime, Is.Zero);
+        Assert.That(_gameOverOverlay.activeSelf, Is.False);
+
+        fruit.Body.position = new Vector2(0f, BoardLayout.WarningY + 0.5f);
+        yield return AssertFullDangerInterval();
+    }
+
+    private MergePiece SpawnDangerFruit()
+    {
+        var fruit = (MergePiece)typeof(GameController).GetMethod("Spawn", PrivateInstance).Invoke(
+            _game, new object[] { FruitTier.Blueberry, new Vector2(0f, BoardLayout.WarningY + 0.5f), false });
+        // Keep a real collider settled above the line without needing a whole fruit pile.
+        fruit.Body.constraints = RigidbodyConstraints2D.FreezeAll;
+        return fruit;
+    }
+
+    private IEnumerator WaitForDangerTime(float minimum)
+    {
+        var timeout = Time.realtimeSinceStartup + 5f;
+        while (DangerTime < minimum)
+        {
+            Assert.That(Time.realtimeSinceStartup, Is.LessThan(timeout), "Danger did not accumulate.");
+            yield return null;
+        }
+    }
+
+    private IEnumerator AssertFullDangerInterval()
+    {
+        yield return WaitForDangerTime(float.Epsilon);
+        Assert.That(_gameOverOverlay.activeSelf, Is.False);
+        // The test runner may resume after more than one frame of danger.
+        var dangerStarted = Time.time - DangerTime;
+        var timeout = Time.realtimeSinceStartup + 5f;
+
+        while (!_gameOverOverlay.activeSelf)
+        {
+            Assert.That(Time.realtimeSinceStartup, Is.LessThan(timeout), "Continuous danger did not end the run.");
+            Assert.That(Time.time - dangerStarted, Is.LessThan(DangerDuration + Time.deltaTime + 0.001f));
+            yield return null;
+        }
+
+        Assert.That(Time.time - dangerStarted,
+            Is.InRange(DangerDuration - 0.001f, DangerDuration + Time.deltaTime + 0.001f),
+            "Game over must occur after one complete danger interval.");
+    }
+
+    private static T Field<T>(object target, string name) =>
+        (T)target.GetType().GetField(name, PrivateInstance).GetValue(target);
+}
