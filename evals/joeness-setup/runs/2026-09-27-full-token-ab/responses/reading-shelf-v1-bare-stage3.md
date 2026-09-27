@@ -1,0 +1,8 @@
+현재 **필수 M1 기능(R1·R2)은 구현·검증 완료**, **사용자 수락은 PENDING**입니다. 현재 코드·Git diff·테스트를 기준으로 확인했으며, `HANDOFF.md`의 초기 미구현 설명은 과거 상태입니다. 이번 점검에서는 파일을 수정하지 않았습니다.
+
+- **Git 상태:** `master`, HEAD `607aeaa` (`Baseline fixture`). 변경 파일 6개가 모두 미스테이징·미커밋 상태이며, 신규 파일은 없습니다.
+- **구현 및 문제 해결:** [src/shelf.mjs](D:/JOEWRKS/JOENESS-Token-AB-20260927/projects/reading-shelf-v1-bare/src/shelf.mjs)에서 `addBook`의 저자 누락과 중복 ID 허용을 수정했습니다. `id/title/author`를 보존하고 중복을 거부하며 원본 배열을 유지합니다. 예외만 던지던 `findBooks`는 대소문자를 무시하는 제목 부분 검색으로 구현됐습니다. 빈 검색어는 전체, 일치 항목이 없으면 빈 배열을 반환합니다.
+- **테스트 변경·실제 확인:** [tests/shelf.test.mjs](D:/JOEWRKS/JOENESS-Token-AB-20260927/projects/reading-shelf-v1-bare/tests/shelf.test.mjs)에 요구사항·경계 테스트 6개가 추가됐습니다. 이번에 Windows / Node `v26.3.0` / npm `11.16.0`에서 `npm test`를 실행해 **8개 모두 통과**, 실패·건너뜀 0개를 확인했습니다. `git diff --check`도 통과했으며 LF→CRLF 변환 경고만 있습니다.
+- **문서 변경:** [AGENTS.md](D:/JOEWRKS/JOENESS-Token-AB-20260927/projects/reading-shelf-v1-bare/AGENTS.md)는 문서 위치와 기록 규칙, [ROADMAP.md](D:/JOEWRKS/JOENESS-Token-AB-20260927/projects/reading-shelf-v1-bare/ROADMAP.md)는 R1·R2 검증 및 M1 기술 완료, [TASKS.md](D:/JOEWRKS/JOENESS-Token-AB-20260927/projects/reading-shelf-v1-bare/TASKS.md)는 작업·검증 이력, [ISSUES.md](D:/JOEWRKS/JOENESS-Token-AB-20260927/projects/reading-shelf-v1-bare/ISSUES.md)는 위 결함의 원인·해결·회귀 검증을 기록합니다.
+- **남은 사항:** 승인된 필수 범위에서 확인된 미구현 기능이나 실패 테스트는 없습니다. 검증은 로컬 자동 테스트 범위입니다. 사용자 수락은 별도로 남아 있으며, 선택 항목 CSV 내보내기는 아이디어 단계입니다. UI·네트워크·저장은 범위 밖입니다.
+- **다음 행동:** 기존 6개 파일의 diff를 검토해 커밋을 준비하고, M1 결과에 대한 사용자 수락을 확인하면 됩니다. 후속 기능은 범위 결정 후 진행해야 합니다.

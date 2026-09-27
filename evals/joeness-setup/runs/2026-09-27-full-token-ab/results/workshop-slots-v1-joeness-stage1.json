@@ -1,0 +1,39 @@
+{
+  "id": "workshop-slots-v1-joeness-stage1",
+  "fixture": "workshop-slots-v1",
+  "arm": "joeness",
+  "stage": 1,
+  "startedAt": "2026-09-27T11:36:25.960Z",
+  "wallMs": 139997,
+  "exitCode": 0,
+  "runtime": {
+    "binary": "C:\\Users\\tjdwo\\AppData\\Local\\OpenAI\\Codex\\bin\\d23520d1e41bfb24\\codex.exe",
+    "model": "gpt-6-astra",
+    "reasoningEffort": "xhigh",
+    "threadId": "01a0e2a6-f0bf-7752-9d72-7ad4687cd1c7"
+  },
+  "promptSha256": "25dfdfa6f5bce602d3cc06008e6c6f24b92b444a9cc73a59be860dd75c1962c0",
+  "responseSha256": "2daaec17b43127a5299a5788b79ff9232d8cfa52ae95791224c2b26d140a9006",
+  "usage": {
+    "input_tokens": 194551,
+    "cached_input_tokens": 175872,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 3799,
+    "reasoning_output_tokens": 1499
+  },
+  "derived": {
+    "noncachedInputTokens": 18679,
+    "inputPlusOutputTokens": 198350,
+    "noncachedInputPlusOutputTokens": 22478
+  },
+  "eventCounts": {
+    "thread.started": 1,
+    "turn.started": 1,
+    "item.completed": 14,
+    "item.started": 11,
+    "turn.completed": 1
+  },
+  "lastError": null,
+  "statusBefore": "",
+  "statusAfter": "M AGENTS.md\n M TASKS.md\n?? .joeness/setup-state.json"
+}

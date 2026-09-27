@@ -1,0 +1,39 @@
+{
+  "id": "reading-shelf-v1-bare-stage1",
+  "fixture": "reading-shelf-v1",
+  "arm": "bare",
+  "stage": 1,
+  "startedAt": "2026-09-27T11:25:22.809Z",
+  "wallMs": 72705,
+  "exitCode": 0,
+  "runtime": {
+    "binary": "C:\\Users\\tjdwo\\AppData\\Local\\OpenAI\\Codex\\bin\\d23520d1e41bfb24\\codex.exe",
+    "model": "gpt-6-astra",
+    "reasoningEffort": "xhigh",
+    "threadId": "01a0e29c-d3f3-7c33-b200-c65a46421d4e"
+  },
+  "promptSha256": "25dfdfa6f5bce602d3cc06008e6c6f24b92b444a9cc73a59be860dd75c1962c0",
+  "responseSha256": "e39c229852fa4fd46c866f8bc20fe1753534c18bbe9dfa65ad178d253043981e",
+  "usage": {
+    "input_tokens": 82915,
+    "cached_input_tokens": 76416,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 1934,
+    "reasoning_output_tokens": 583
+  },
+  "derived": {
+    "noncachedInputTokens": 6499,
+    "inputPlusOutputTokens": 84849,
+    "noncachedInputPlusOutputTokens": 8433
+  },
+  "eventCounts": {
+    "thread.started": 1,
+    "turn.started": 1,
+    "item.completed": 10,
+    "item.started": 7,
+    "turn.completed": 1
+  },
+  "lastError": null,
+  "statusBefore": "",
+  "statusAfter": "M AGENTS.md\n M TASKS.md"
+}
