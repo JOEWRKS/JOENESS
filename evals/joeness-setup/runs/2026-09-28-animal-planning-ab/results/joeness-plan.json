@@ -1,0 +1,39 @@
+{
+  "id": "joeness-plan",
+  "startedAt": "2026-09-27T15:33:00.195Z",
+  "wallMs": 63832,
+  "exitCode": 0,
+  "runtime": {
+    "binary": "C:\\Users\\tjdwo\\AppData\\Local\\OpenAI\\Codex\\bin\\d23520d1e41bfb24\\codex.exe",
+    "model": "gpt-6-astra",
+    "reasoningEffort": "xhigh",
+    "threadId": "01a0e37f-902f-7b83-8063-f6aebb498d57"
+  },
+  "promptSha256": "0739caa5b398f58c47f286f6ce319fdb06b080cd6472fa9d2bd534fd78b7ec5a",
+  "responseSha256": "21560b5239a8b4f2fcba3a0c84d91b279a2f7eedb962c61865dd8bfafcd3c938",
+  "usage": {
+    "input_tokens": 108679,
+    "cached_input_tokens": 81792,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 1638,
+    "reasoning_output_tokens": 671
+  },
+  "derived": {
+    "noncachedInput": 26887,
+    "inputPlusOutput": 110317,
+    "noncachedInputPlusOutput": 28525
+  },
+  "eventCounts": {
+    "thread.started": 1,
+    "turn.started": 1,
+    "item.completed": 4,
+    "item.started": 2,
+    "turn.completed": 1
+  },
+  "itemTypeCounts": {
+    "mcp_tool_call": 2
+  },
+  "lastError": null,
+  "statusBefore": "",
+  "statusAfter": ""
+}

@@ -1,0 +1,39 @@
+{
+  "id": "bare-handoff",
+  "startedAt": "2026-09-27T15:34:59.506Z",
+  "wallMs": 53348,
+  "exitCode": 0,
+  "runtime": {
+    "binary": "C:\\Users\\tjdwo\\AppData\\Local\\OpenAI\\Codex\\bin\\d23520d1e41bfb24\\codex.exe",
+    "model": "gpt-6-astra",
+    "reasoningEffort": "xhigh",
+    "threadId": "01a0e381-5ae3-74b1-b2fe-072d2ea21791"
+  },
+  "promptSha256": "7b13d68f50b85c78bf15aa1188b3e5bc633ef855e4dcae86d39c526225fa0b8e",
+  "responseSha256": "5b26c7660342cd269d1a140839360c8d33fceed6fd3ad27bf0b49ab9d622500e",
+  "usage": {
+    "input_tokens": 159607,
+    "cached_input_tokens": 132992,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 1234,
+    "reasoning_output_tokens": 429
+  },
+  "derived": {
+    "noncachedInput": 26615,
+    "inputPlusOutput": 160841,
+    "noncachedInputPlusOutput": 27849
+  },
+  "eventCounts": {
+    "thread.started": 1,
+    "turn.started": 1,
+    "item.completed": 5,
+    "item.started": 2,
+    "turn.completed": 1
+  },
+  "itemTypeCounts": {
+    "mcp_tool_call": 2
+  },
+  "lastError": null,
+  "statusBefore": "",
+  "statusAfter": ""
+}

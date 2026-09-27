@@ -1,0 +1,39 @@
+{
+  "id": "joeness-handoff",
+  "startedAt": "2026-09-27T15:47:46.586Z",
+  "wallMs": 65948,
+  "exitCode": 0,
+  "runtime": {
+    "binary": "C:\\Users\\tjdwo\\AppData\\Local\\OpenAI\\Codex\\bin\\d23520d1e41bfb24\\codex.exe",
+    "model": "gpt-6-astra",
+    "reasoningEffort": "xhigh",
+    "threadId": "01a0e38d-0eb4-79d2-8da0-a93096278c9c"
+  },
+  "promptSha256": "7b13d68f50b85c78bf15aa1188b3e5bc633ef855e4dcae86d39c526225fa0b8e",
+  "responseSha256": "1035e50b1e12814d58cf59b792f5b7a1ee41b6f7a0409eeda51ec03ded55773a",
+  "usage": {
+    "input_tokens": 96782,
+    "cached_input_tokens": 69376,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 1739,
+    "reasoning_output_tokens": 547
+  },
+  "derived": {
+    "noncachedInput": 27406,
+    "inputPlusOutput": 98521,
+    "noncachedInputPlusOutput": 29145
+  },
+  "eventCounts": {
+    "thread.started": 1,
+    "turn.started": 1,
+    "item.completed": 8,
+    "item.started": 6,
+    "turn.completed": 1
+  },
+  "itemTypeCounts": {
+    "command_execution": 6
+  },
+  "lastError": null,
+  "statusBefore": "M TASK.md",
+  "statusAfter": "M TASK.md"
+}

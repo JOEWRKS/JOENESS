@@ -1,0 +1,39 @@
+{
+  "id": "bare-plan",
+  "startedAt": "2026-09-27T15:31:59.069Z",
+  "wallMs": 60967,
+  "exitCode": 0,
+  "runtime": {
+    "binary": "C:\\Users\\tjdwo\\AppData\\Local\\OpenAI\\Codex\\bin\\d23520d1e41bfb24\\codex.exe",
+    "model": "gpt-6-astra",
+    "reasoningEffort": "xhigh",
+    "threadId": "01a0e37e-a0e5-7810-acdb-832c65300b1d"
+  },
+  "promptSha256": "0739caa5b398f58c47f286f6ce319fdb06b080cd6472fa9d2bd534fd78b7ec5a",
+  "responseSha256": "356adf3e8f0b95beed166e1b0c7a8206037079384cabd09d0222de3eaf86d530",
+  "usage": {
+    "input_tokens": 141480,
+    "cached_input_tokens": 112256,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 1412,
+    "reasoning_output_tokens": 611
+  },
+  "derived": {
+    "noncachedInput": 29224,
+    "inputPlusOutput": 142892,
+    "noncachedInputPlusOutput": 30636
+  },
+  "eventCounts": {
+    "thread.started": 1,
+    "turn.started": 1,
+    "item.completed": 5,
+    "item.started": 2,
+    "turn.completed": 1
+  },
+  "itemTypeCounts": {
+    "mcp_tool_call": 2
+  },
+  "lastError": null,
+  "statusBefore": "",
+  "statusAfter": ""
+}

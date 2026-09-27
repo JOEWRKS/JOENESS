@@ -1,0 +1,40 @@
+{
+  "id": "bare-plan",
+  "startedAt": "2026-09-27T15:37:03.970Z",
+  "wallMs": 306362,
+  "exitCode": 0,
+  "runtime": {
+    "binary": "C:\\Users\\tjdwo\\AppData\\Local\\OpenAI\\Codex\\bin\\d23520d1e41bfb24\\codex.exe",
+    "model": "gpt-6-astra",
+    "reasoningEffort": "xhigh",
+    "threadId": "01a0e383-4b38-7c83-86ca-356bac9b74d7"
+  },
+  "promptSha256": "0739caa5b398f58c47f286f6ce319fdb06b080cd6472fa9d2bd534fd78b7ec5a",
+  "responseSha256": "53b669ee3a394040a63892ce6f90a6ad5a210b331c6cf92994fad6f17a2c5a86",
+  "usage": {
+    "input_tokens": 483128,
+    "cached_input_tokens": 409728,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 9051,
+    "reasoning_output_tokens": 2919
+  },
+  "derived": {
+    "noncachedInput": 73400,
+    "inputPlusOutput": 492179,
+    "noncachedInputPlusOutput": 82451
+  },
+  "eventCounts": {
+    "thread.started": 1,
+    "turn.started": 1,
+    "item.completed": 26,
+    "item.started": 22,
+    "turn.completed": 1
+  },
+  "itemTypeCounts": {
+    "command_execution": 21,
+    "file_change": 1
+  },
+  "lastError": null,
+  "statusBefore": "",
+  "statusAfter": "M TASK.md"
+}

@@ -1,0 +1,148 @@
+{
+  "trialRoot": "D:\\JOEWRKS\\JOENESS-Animal-Planning-AB-20260928-attempt-2",
+  "sourceRoot": "D:\\JOEWRKS\\MergeDrop\\.worktrees\\mergedrop-v1",
+  "inventory": [
+    {
+      "arm": "bare",
+      "path": "AGENTS.md",
+      "sourceSha256": "2b5b4058a7681ab98d12178a311cbcf6e850f4261c23be15921095d447c0bba8",
+      "fixtureSha256": "9f8411525ffd3c6845684ed2d9ab91b8f3bb4f847852f8ce1c054f19f2e82ecb"
+    },
+    {
+      "arm": "bare",
+      "path": "TASK.md",
+      "sourceSha256": "d6bc6e84beff1470bd041345065b571d9d3ff2ef8225ff774644217d9c07b0ba",
+      "fixtureSha256": "3fc04200de7f5adeee3e6707284545590fe3efa0da4f09fa74f3521e4aab7753"
+    },
+    {
+      "arm": "bare",
+      "path": "docs/superpowers/specs/2026-08-04-mergedrop-v1-design.md",
+      "sourceSha256": "1b76a6794ddc534bedf69590523cbbaaa6d1ecf2d1200ae82a379b36c3c9c96d",
+      "fixtureSha256": "1b76a6794ddc534bedf69590523cbbaaa6d1ecf2d1200ae82a379b36c3c9c96d"
+    },
+    {
+      "arm": "bare",
+      "path": "docs/superpowers/specs/2026-08-10-mergedrop-visual-sets-design.md",
+      "sourceSha256": "ddca6274e670f2245432371e11f849e5b14519391c3f2b2ab905b0aa5ae2f639",
+      "fixtureSha256": "ddca6274e670f2245432371e11f849e5b14519391c3f2b2ab905b0aa5ae2f639"
+    },
+    {
+      "arm": "bare",
+      "path": "game/Assets/MergeDrop/Scripts/Domain/VisualSetId.cs",
+      "sourceSha256": "97c1a020bb300770d5548db9fe6e732416d40413049eedc43cbbb0e88890ce17",
+      "fixtureSha256": "97c1a020bb300770d5548db9fe6e732416d40413049eedc43cbbb0e88890ce17"
+    },
+    {
+      "arm": "bare",
+      "path": "game/Assets/MergeDrop/Scripts/Domain/VisualSetDefinition.cs",
+      "sourceSha256": "fd4c795ccf59db31695468e702f1980e11e1c33bb835514ca190ea899f658452",
+      "fixtureSha256": "fd4c795ccf59db31695468e702f1980e11e1c33bb835514ca190ea899f658452"
+    },
+    {
+      "arm": "bare",
+      "path": "game/Assets/MergeDrop/Scripts/Domain/FruitAppearanceDefinition.cs",
+      "sourceSha256": "fba9f77e879bd3b08253e3ded3406b302533d5828e1545db2994845420a7a073",
+      "fixtureSha256": "fba9f77e879bd3b08253e3ded3406b302533d5828e1545db2994845420a7a073"
+    },
+    {
+      "arm": "bare",
+      "path": "game/Assets/MergeDrop/Scripts/Runtime/VisualSetCatalog.cs",
+      "sourceSha256": "5c592a8c6085425c978564dc10b2070107e87eff341f190fb6b99a989f293924",
+      "fixtureSha256": "5c592a8c6085425c978564dc10b2070107e87eff341f190fb6b99a989f293924"
+    },
+    {
+      "arm": "bare",
+      "path": "game/Assets/MergeDrop/Scripts/Runtime/VisualSetProgressStore.cs",
+      "sourceSha256": "7e5082d9066fa96eeaa811ab1ad52fd0bac24b0f863539107eacc75244e7270e",
+      "fixtureSha256": "7e5082d9066fa96eeaa811ab1ad52fd0bac24b0f863539107eacc75244e7270e"
+    },
+    {
+      "arm": "bare",
+      "path": "game/Assets/MergeDrop/Scripts/Runtime/VisualSetUnlockEvaluator.cs",
+      "sourceSha256": "127b213d0e5992873c244228c42a0c04f55bb702753a7135e3d0a777385d185c",
+      "fixtureSha256": "127b213d0e5992873c244228c42a0c04f55bb702753a7135e3d0a777385d185c"
+    },
+    {
+      "arm": "bare",
+      "path": "game/Assets/MergeDrop/Data/VisualSetCatalog.asset",
+      "sourceSha256": "984e0982cf3dfa5895d0cf79eae7f82eb8488bfbe63ee587e9b6386f9d4a420b",
+      "fixtureSha256": "984e0982cf3dfa5895d0cf79eae7f82eb8488bfbe63ee587e9b6386f9d4a420b"
+    },
+    {
+      "arm": "joeness",
+      "path": "AGENTS.md",
+      "sourceSha256": "2b5b4058a7681ab98d12178a311cbcf6e850f4261c23be15921095d447c0bba8",
+      "fixtureSha256": "13576ed058f58bd052eabbb52c536a9d831d2cf8b30e1e64b6090b64d5a2e82c"
+    },
+    {
+      "arm": "joeness",
+      "path": "TASK.md",
+      "sourceSha256": "d6bc6e84beff1470bd041345065b571d9d3ff2ef8225ff774644217d9c07b0ba",
+      "fixtureSha256": "3fc04200de7f5adeee3e6707284545590fe3efa0da4f09fa74f3521e4aab7753"
+    },
+    {
+      "arm": "joeness",
+      "path": "docs/superpowers/specs/2026-08-04-mergedrop-v1-design.md",
+      "sourceSha256": "1b76a6794ddc534bedf69590523cbbaaa6d1ecf2d1200ae82a379b36c3c9c96d",
+      "fixtureSha256": "1b76a6794ddc534bedf69590523cbbaaa6d1ecf2d1200ae82a379b36c3c9c96d"
+    },
+    {
+      "arm": "joeness",
+      "path": "docs/superpowers/specs/2026-08-10-mergedrop-visual-sets-design.md",
+      "sourceSha256": "ddca6274e670f2245432371e11f849e5b14519391c3f2b2ab905b0aa5ae2f639",
+      "fixtureSha256": "ddca6274e670f2245432371e11f849e5b14519391c3f2b2ab905b0aa5ae2f639"
+    },
+    {
+      "arm": "joeness",
+      "path": "game/Assets/MergeDrop/Scripts/Domain/VisualSetId.cs",
+      "sourceSha256": "97c1a020bb300770d5548db9fe6e732416d40413049eedc43cbbb0e88890ce17",
+      "fixtureSha256": "97c1a020bb300770d5548db9fe6e732416d40413049eedc43cbbb0e88890ce17"
+    },
+    {
+      "arm": "joeness",
+      "path": "game/Assets/MergeDrop/Scripts/Domain/VisualSetDefinition.cs",
+      "sourceSha256": "fd4c795ccf59db31695468e702f1980e11e1c33bb835514ca190ea899f658452",
+      "fixtureSha256": "fd4c795ccf59db31695468e702f1980e11e1c33bb835514ca190ea899f658452"
+    },
+    {
+      "arm": "joeness",
+      "path": "game/Assets/MergeDrop/Scripts/Domain/FruitAppearanceDefinition.cs",
+      "sourceSha256": "fba9f77e879bd3b08253e3ded3406b302533d5828e1545db2994845420a7a073",
+      "fixtureSha256": "fba9f77e879bd3b08253e3ded3406b302533d5828e1545db2994845420a7a073"
+    },
+    {
+      "arm": "joeness",
+      "path": "game/Assets/MergeDrop/Scripts/Runtime/VisualSetCatalog.cs",
+      "sourceSha256": "5c592a8c6085425c978564dc10b2070107e87eff341f190fb6b99a989f293924",
+      "fixtureSha256": "5c592a8c6085425c978564dc10b2070107e87eff341f190fb6b99a989f293924"
+    },
+    {
+      "arm": "joeness",
+      "path": "game/Assets/MergeDrop/Scripts/Runtime/VisualSetProgressStore.cs",
+      "sourceSha256": "7e5082d9066fa96eeaa811ab1ad52fd0bac24b0f863539107eacc75244e7270e",
+      "fixtureSha256": "7e5082d9066fa96eeaa811ab1ad52fd0bac24b0f863539107eacc75244e7270e"
+    },
+    {
+      "arm": "joeness",
+      "path": "game/Assets/MergeDrop/Scripts/Runtime/VisualSetUnlockEvaluator.cs",
+      "sourceSha256": "127b213d0e5992873c244228c42a0c04f55bb702753a7135e3d0a777385d185c",
+      "fixtureSha256": "127b213d0e5992873c244228c42a0c04f55bb702753a7135e3d0a777385d185c"
+    },
+    {
+      "arm": "joeness",
+      "path": "game/Assets/MergeDrop/Data/VisualSetCatalog.asset",
+      "sourceSha256": "984e0982cf3dfa5895d0cf79eae7f82eb8488bfbe63ee587e9b6386f9d4a420b",
+      "fixtureSha256": "984e0982cf3dfa5895d0cf79eae7f82eb8488bfbe63ee587e9b6386f9d4a420b"
+    },
+    {
+      "arm": "joeness",
+      "path": ".joeness/setup-state.json",
+      "sourceSha256": "83bb365adbb8e1ff9fff1fec01b6711d16c19752e1209f332fc2946668666fa7",
+      "fixtureSha256": "83bb365adbb8e1ff9fff1fec01b6711d16c19752e1209f332fc2946668666fa7"
+    }
+  ],
+  "installation": {
+    "apply": "{\"status\":\"current\",\"mode\":\"apply\",\"codexHome\":\"D:\\\\JOEWRKS\\\\JOENESS-Animal-Planning-AB-20260928-attempt-2\\\\homes\\\\joeness\",\"activeSkills\":[\"joeness-setup\"],\"warnings\":[],\"changesRequired\":false,\"changes\":[\"AGENTS.md\",\"joewrks-harness-state.json\",\"skills/joeness-setup/SKILL.md\",\"skills/joeness-setup/agents/openai.yaml\",\"skills/joeness-setup/assets/AGENTS.md\",\"skills/joeness-setup/assets/DESIGN.md\",\"skills/joeness-setup/assets/ISSUES.md\",\"skills/joeness-setup/assets/ROADMAP.md\",\"skills/joeness-setup/assets/TASK.md\",\"skills/joeness-setup/references/usage.md\",\"skills/joeness-setup/scripts/project-setup.ps1\",\"joeness-skills-state.json\"],\"blockers\":[null],\"rollback\":null}\r\n# JOENESS 0.2 사용 안내\n\n설치하면 두 가지가 준비됩니다. 하나는 답변할 때 근거를 다시 따지게 하는\n공통 지침이고, 다른 하나는 프로젝트 문서의 위치를 연결하는\n`joeness-setup` 도구입니다. 프로젝트 문서 5개는 설치만으로 자동 생성하지\n않습니다.\n\nJOENESS는 보이지 않는 곳에서 계속 일하는 프로그램이 아닙니다. 프로젝트를\n정리해 달라고 하면 기존 문서를 살펴보고 연결할 내용을 제안합니다. 사용자가\n적용을 승인하면 그때 설정 파일을 바꿉니다. 평소 작업 기록도 동의한 범위에서\n실제 작업을 할 때만 남깁니다.\n\n핵심은 보고서 모양이 아니라 **프로젝트 사실을 맞는 문서에 남겨** 다음 담당자가\n목적·진행 상황·문제·다음 일을 찾을 수 있게 하는 것입니다.\n\n## 처음 사용하기\n\n1. 작업할 프로젝트를 Codex에서 열고 새 세션을 시작합니다.\n2. `$joeness-setup으로 이 프로젝트 설정안을 보여줘.`라고 요청합니다.\n3. 연결할 기존 문서, 필요한 새 문서, 기록 범위를 확인한 뒤\n   `이대로 적용하고, 작업 결과와 문제 해결 내용을 기록해줘.`라고 승인합니다.\n\n## 문서 5개의 역할\n\n아래 이름은 역할별 기본 예시입니다. 기존 문서가 있으면 이름과 경로를 그대로\n사용하고, 필요한 역할에 문서가 없을 때만 생성안을 제안합니다.\n\n| 문서 | 역할 | 언제 사용하는가 |\n|---|---|---|\n| AGENTS.md | 작업 규칙, 원본 문서 위치, 동의한 기록 범위를 연결하는 안내판 | 작업 시작·재개 때 에이전트가 참고 |\n| ROADMAP.md | 목표·우선순위와 승인된 마일스톤/출시의 필수 항목·완료 기준 | 방향을 결정하거나 필수 항목의 검증 근거를 확인할 때; Product 원본을 대체하지 않음 |\n| TASK.md | 현재 승인된 작업 범위·진행·실제 검증 결과·남은 일 | 진행 상황 확인과 이어서 작업할 때 |\n| ISSUES.md | 문제 증상·확인된 원인·해결·검증·유효한 우회책 | 같은 문제가 재발하거나 과거 해결책을 찾을 때 |\n| DESIGN.md | 디자인 원본과 승인 사항의 연결 | 디자인 관련 작업이 있을 때; 제안·검증·사용자 승인은 구분 |\n\n`PRODUCT.md`는 이 기본 다섯 문서에 포함되지 않습니다. 프로젝트에 이미\n제품 기준 문서가 있다면 그 실제 이름과 위치를 연결할 수 있지만, JOENESS가\n새로 설치하는 문서는 아닙니다.\n\n작업 하나가 끝났다는 것과 마일스톤·출시가 끝났다는 것은 다릅니다. TASK에는\n그 작업의 결과와 검증을 남기고, ROADMAP의 승인된 필수 항목이 모두 검증돼야\n해당 마일스톤·출시를 완료로 안내합니다. 선택 항목이나 나중 아이디어는 자동으로\n완료를 막지 않으며, 필수 항목을 제외·연기하려면 권한 있는 명시적 결정과\n이유를 남깁니다.\n\n설정이 끝나면 실제 연결·생성·수정한 경로와 각 역할, 사용하지 않은 역할을\n알려줍니다. 원래 문서와 새로 만든 문서는 구분하며, 디자인 작업이 없으면\nDESIGN.md를 억지로 만들지 않습니다.\n\n실제 작업 뒤에는 먼저 짧은 여섯 줄 보고체로 알립니다. 첫 여섯 줄과 뒤의\n상세 보고 모두 비전공자도 이해할 자연어로 씁니다. 긴 문장이나 설명 없는\n약어·내부 작업 번호 대신 사용자가 아는 작업 이름으로 말합니다.\n예를 들어 오류는 고쳤지만 현장 확인이 남았다면:\n\n- 작업: 예약할 때 이름이 빠지고 취소하면 기록이 사라지던 오류를 고침.\n- 업데이트 파일: 예약 기능, 자동 검사, 작업·문제 기록.\n- 이슈: 이전 검사는 두 오류를 찾아내지 못했음.\n- 해결: 기능을 고치고 새 검사를 모두 통과함.\n- 남은 문제: 실제 행사장 기기에서는 아직 확인하지 못해 전체 완료 전.\n- 다음 작업: 행사장 기기에서 예약과 취소를 확인하고 결과를 기록.\n\n상세 보고도 짧게 씁니다. 예: “예약을 만들 때 이름을 빠뜨렸고, 취소할 때\n기록을 지웠습니다. 예약 기능(`src/slots.mjs`)을 고친 뒤 자동 검사 6개를\n모두 통과했습니다(`tests/slots.test.mjs`). 현장 기기 검증과 사용자 수락은\n아직 없습니다.” 쉬운 말은 긴 풀이가 아니라 익숙한 단어 선택입니다.\n\n`이슈`는 작업 중 발견·확인한 문제, `해결`은 실제로 고쳐 검증한 내용,\n`남은 문제`는 작업 뒤에도 미해결이거나 검증되지 않은 부분입니다. 없으면\n`남은 문제: 없음`이라고 씁니다. 문제 원인, 검사 결과, 정확한 파일 위치 등\n필요한 근거는 그 아래 `상세 보고`에 둡니다. 상세 보고에서도 쉬운 단어와\n짧은 문장을 쓰고, 필요한 정확한 이름과 수치를 해당 사실 옆에 적습니다.\n실제로 바꾼 파일만 적고, 문제가 없으면\n`이슈: 없음`이라고 씁니다. 해결하지 못한 일을 해결했다고 쓰거나 계획에 없는\n다음 일을 만들어 내지 않습니다. 인계에서 원인·검증·승인 범위나 오래된 기록을\n물었다면, 여섯 줄을 늘리는 대신 그 정확한 사실과 출처를 `상세 보고`에 남깁니다.\n보고를 위해 파일을 다시 읽거나 검사를 한 번 더 돌리지 않습니다. 질문만\n받은 경우에는 이 형식을 강제하지 않습니다.\n\n## 설정 후에는 평소처럼 요청하기\n\n- 작업: `로그인 오류 고쳐줘.`\n- 재개·현황: `어디까지 했는지 알려주고, 남은 작업을 이어서 진행해.`\n- 새 담당자 인계: `처음 보는 사람도 알 수 있게 끝난 일·남은 일·다음 행동부터 알려줘.`\n- 과거 해결 조회: `이전에 이 오류를 어떻게 해결했는지 찾아봐.`\n- 이번 작업 기록 제외: `코드는 고치되 이번 작업은 문서에 기록하지 마.`\n- 지속적인 기록 중지: `자동 기록만 중지하고, 문서 위치 연결은 남겨줘.`\n- 프로젝트 해제: `이 프로젝트에서 JOENESS 연결을 해제해줘.`\n\n매 작업마다 setup을 다시 호출할 필요는 없습니다. 에이전트가 작업하면서\n동의한 범위의 사실을 기록하는 것이며, 별도 백그라운드 기록기는 없습니다.\n질문·의견만으로 문서를 갱신하지 않습니다. 기록 중지, 프로젝트 연결 해제,\n패키지 제거는 서로 다릅니다. 연결을 해제해도 일반 프로젝트 문서는 남습니다.\n인계 답변도 위 여섯 항목을 먼저 쓰고, 작업 번호와 검증 근거는 뒤에 둡니다.",
+    "check": "{\"status\":\"current\",\"mode\":\"check\",\"codexHome\":\"D:\\\\JOEWRKS\\\\JOENESS-Animal-Planning-AB-20260928-attempt-2\\\\homes\\\\joeness\",\"activeSkills\":[\"joeness-setup\"],\"warnings\":[],\"changesRequired\":false,\"changes\":[],\"blockers\":[],\"rollback\":null}"
+  }
+}
