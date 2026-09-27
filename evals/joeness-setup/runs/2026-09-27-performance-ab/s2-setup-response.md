@@ -1,0 +1,5 @@
+- **작업:** 예약 삭제 현상을 재현하고 수정·검증했습니다.
+- **업데이트 파일:** [소스](D:/JOEWRKS/JOENESS-Performance-Setup-20260927/src/slots.mjs), [테스트](D:/JOEWRKS/JOENESS-Performance-Setup-20260927/tests/slots.test.mjs), [ROADMAP.md](D:/JOEWRKS/JOENESS-Performance-Setup-20260927/ROADMAP.md), [TASKS.md](D:/JOEWRKS/JOENESS-Performance-Setup-20260927/TASKS.md), [ISSUES.md](D:/JOEWRKS/JOENESS-Performance-Setup-20260927/ISSUES.md).
+- **이슈:** 취소 함수의 `filter`가 해당 예약을 결과에서 제거했습니다. 기존 테스트에는 취소 검증이 없었습니다.
+- **해결:** 예약 정보는 보존하고 상태만 `cancelled`로 변경합니다. 원본과 다른 예약도 유지됩니다. 수정 전 새 테스트 2개 실패, 수정 후 전체 **5개 통과**. 원인·해결·재현 명령을 기록했습니다.
+- **다음 작업:** 실제 키오스크 검증(R3)이 남아 있어 M1은 미완료입니다.

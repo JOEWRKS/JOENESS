@@ -1,0 +1,5 @@
+- **작업:** 제품 기준에 맞춰 예약 결과의 참석자 이름 누락을 수정했습니다.
+- **업데이트 파일:** [예약 코드](D:/JOEWRKS/JOENESS-Performance-Setup-20260927/src/slots.mjs), [테스트](D:/JOEWRKS/JOENESS-Performance-Setup-20260927/tests/slots.test.mjs), [ROADMAP.md](D:/JOEWRKS/JOENESS-Performance-Setup-20260927/ROADMAP.md), [TASKS.md](D:/JOEWRKS/JOENESS-Performance-Setup-20260927/TASKS.md), [ISSUES.md](D:/JOEWRKS/JOENESS-Performance-Setup-20260927/ISSUES.md).
+- **이슈:** 예약 생성 시 `attendee` 복사가 빠져 있었습니다. 별도로 취소 시 예약이 삭제되는 문제도 확인해 기록했습니다.
+- **해결:** 회귀 테스트로 수정 전 오류를 재현했고, 수정 후 `npm test` **3개 모두 통과**했습니다. 필수 값 보존과 입력 불변성을 확인했습니다.
+- **다음 작업:** 취소 동작 수정·검증(R2), 실제 현장 키오스크 검증(R3)이 남았습니다. R1은 완료했지만 M1은 미완료이며 사용자 수락도 별도입니다.
