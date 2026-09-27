@@ -1,0 +1,42 @@
+{
+  "id": "deferred-ranking-auth-r2-bare",
+  "caseId": "deferred-ranking-auth",
+  "agentResultSha256": "5dbd4f40139492ff004e2f304a84eb88b9f42e086efc4b573ad127a1738e38b4",
+  "oracleSourceSha256": "723373e14a6ab0ea915065c9d62c0d001e2c3fdba6167a3c09da9386dc195a56",
+  "originalOracleFileSha256": "6d39e38d22aa4144a49a7c64e1cce022871aa165f9d12c2460ae823be293b0d5",
+  "baselineFullResultSha256": "700dcc9e233703bba99933055770adbbd3b38335777521be50ac539ccc56ad08",
+  "oracleNames": [
+    "GameControllerStateTests.Awake_DoesNotStartLeaderboardAuthenticationBeforeRankingAction"
+  ],
+  "focused": {
+    "exitCode": 2,
+    "wallMs": 11868,
+    "xmlExists": true,
+    "resultSha256": "d7b2ef1ce1fe8fe9cab876a48279eb3ce5785bdda8345d4c754d711a318ae7ad",
+    "cases": 1
+  },
+  "full": {
+    "exitCode": 2,
+    "wallMs": 15521,
+    "xmlExists": true,
+    "resultSha256": "9b0cb49666aae7a98875dcf673b2cfe02b1dae27060399ddec51b64f91c8e256",
+    "cases": 231,
+    "passed": 216,
+    "failed": 15
+  },
+  "outcome": {
+    "pass": false,
+    "oraclePass": false,
+    "focusedFailures": [
+      "GameControllerStateTests.Awake_DoesNotStartLeaderboardAuthenticationBeforeRankingAction"
+    ],
+    "missingTests": [],
+    "newFailures": [
+      "GameControllerStateTests.Awake_DoesNotStartLeaderboardAuthenticationBeforeRankingAction"
+    ]
+  },
+  "meaningfulStateRestored": true,
+  "statusBefore": "M docs/superpowers/specs/2026-08-04-mergedrop-v1-design.md\n M game/Assets/MergeDrop/Scripts/Platform/PlayGamesLeaderboard.cs\n M game/Assets/MergeDrop/Scripts/Runtime/GameController.cs\n M game/Assets/MergeDrop/Tests/EditMode/GameControllerStateTests.cs\n M game/Assets/MergeDrop/Tests/EditMode/PlayGamesLeaderboardTests.cs",
+  "statusAfter": "M docs/superpowers/specs/2026-08-04-mergedrop-v1-design.md\n M game/Assets/MergeDrop/Art/UI/SettingsIcon.png.meta\n M game/Assets/MergeDrop/Scripts/Platform/PlayGamesLeaderboard.cs\n M game/Assets/MergeDrop/Scripts/Runtime/GameController.cs\n M game/Assets/MergeDrop/Tests/EditMode/GameControllerStateTests.cs\n M game/Assets/MergeDrop/Tests/EditMode/PlayGamesLeaderboardTests.cs\n M game/ProjectSettings/TimeManager.asset",
+  "unityMetadataNormalizationOnly": true
+}

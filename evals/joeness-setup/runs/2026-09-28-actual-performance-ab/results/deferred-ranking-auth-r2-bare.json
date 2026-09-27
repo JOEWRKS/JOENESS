@@ -1,0 +1,72 @@
+{
+  "id": "deferred-ranking-auth-r2-bare",
+  "identity": {
+    "caseId": "deferred-ranking-auth",
+    "repetition": 2,
+    "arm": "bare"
+  },
+  "startedAt": "2026-09-27T17:46:23.468Z",
+  "wallMs": 291551,
+  "exitCode": 0,
+  "timedOut": false,
+  "runtime": {
+    "cli": "C:\\Users\\tjdwo\\AppData\\Local\\OpenAI\\Codex\\bin\\d23520d1e41bfb24\\codex.exe",
+    "model": "gpt-6-astra",
+    "reasoningEffort": "xhigh",
+    "threadId": "01a0e3f9-b046-7dc1-9764-9fe30e15cb81"
+  },
+  "promptSha256": "a9088851b64d1a61323d0f458f29448036e64834e476ceec009ed8ef0626631d",
+  "responseSha256": "d424318933eba92658601c67b8130ca795d945256bae1b756becb3f4ed0b4b9a",
+  "usage": {
+    "input_tokens": 825107,
+    "cached_input_tokens": 769536,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 6912,
+    "reasoning_output_tokens": 2068
+  },
+  "derived": {
+    "input": 825107,
+    "cachedInput": 769536,
+    "output": 6912,
+    "noncachedInputPlusOutput": 62483
+  },
+  "eventCounts": {
+    "thread.started": 1,
+    "turn.started": 1,
+    "item.completed": 27,
+    "item.started": 22,
+    "turn.completed": 1
+  },
+  "itemTypeCounts": {
+    "command_execution": 20,
+    "file_change": 2
+  },
+  "commands": [
+    "\"C:\\\\Users\\\\tjdwo\\\\.cache\\\\codex-runtimes\\\\codex-primary-runtime\\\\dependencies\\\\native\\\\powershell\\\\pwsh.exe\" -Command \"Get-Location; rg --files -g AGENTS.md -g '*Leaderboard*' -g '*Ranking*' -g '*PlayGames*' -g '*Tests*' -g '*.md' -g 'manifest.json' -g 'ProjectVersion.txt' -g '*.sln' -g '*.csproj' -g '*test*' -g '*Test*'; git status --short\"",
+    "\"C:\\\\Users\\\\tjdwo\\\\.cache\\\\codex-runtimes\\\\codex-primary-runtime\\\\dependencies\\\\native\\\\powershell\\\\pwsh.exe\" -Command \"Get-Content game/Assets/MergeDrop/Scripts/Platform/PlayGamesLeaderboard.cs; Get-Content game/Assets/MergeDrop/Tests/EditMode/PlayGamesLeaderboardTests.cs; rg -n 'Authenticate|Initialize|ShowLeaderboard|ShowRanking|RequestLeaderboard|PlayGamesLeaderboard' game/Assets/MergeDrop/Scripts game/Assets/MergeDrop/Tests/EditMode\"",
+    "\"C:\\\\Users\\\\tjdwo\\\\.cache\\\\codex-runtimes\\\\codex-primary-runtime\\\\dependencies\\\\native\\\\powershell\\\\pwsh.exe\" -Command 'Get-Content AGENTS.md; Get-Content docs/superpowers/specs/2026-08-04-mergedrop-v1-design.md; Get-Content docs/DEVELOPMENT.md; Get-Content game/ProjectSettings/ProjectVersion.txt; Get-Content game/Packages/manifest.json; Get-Content .gitignore; rg --files scripts'",
+    "\"C:\\\\Users\\\\tjdwo\\\\.cache\\\\codex-runtimes\\\\codex-primary-runtime\\\\dependencies\\\\native\\\\powershell\\\\pwsh.exe\" -Command 'Get-Content game/Assets/MergeDrop/Scripts/Runtime/GameController.cs; Get-Content game/Assets/MergeDrop/Tests/EditMode/GameControllerStateTests.cs'",
+    "\"C:\\\\Users\\\\tjdwo\\\\.cache\\\\codex-runtimes\\\\codex-primary-runtime\\\\dependencies\\\\native\\\\powershell\\\\pwsh.exe\" -Command \"Get-Content docs/DEVELOPMENT.md -TotalCount 28; Get-Content game/ProjectSettings/ProjectVersion.txt; Get-Content game/Assets/MergeDrop/Tests/EditMode/MergeDrop.EditModeTests.asmdef; rg -n 'Authenticate|InitializeOnLoad|RuntimeInitializeOnLoad|Awake\\\\(|Start\\\\(' game/Assets/GooglePlayGames/com.google.play.games/Runtime/Scripts/PlayGamesSettings.cs game/Assets/GooglePlayGames/com.google.play.games/Runtime/Scripts/ISocialPlatform/PlayGamesPlatform.cs game/Assets/GooglePlayGames/com.google.play.games/Runtime/Scripts/Platforms; Get-ChildItem -Force -Name; Test-Path 'C:\\\\Program Files\\\\Unity\\\\Hub\\\\Editor\\\\6000.3.21f1\\\\Editor\\\\Unity.exe'; Get-Process Unity -ErrorAction SilentlyContinue | Select-Object Id,Path\"",
+    "\"C:\\\\Users\\\\tjdwo\\\\.cache\\\\codex-runtimes\\\\codex-primary-runtime\\\\dependencies\\\\native\\\\powershell\\\\pwsh.exe\" -Command \"Get-Content game/Assets/MergeDrop/Tests/EditMode/GameControllerStateTests.cs | Select-Object -Skip 275 -First 155; Get-Content game/Assets/MergeDrop/Tests/EditMode/GameControllerStateTests.cs | Select-Object -Skip 510 -First 255; Get-Content game/Assets/MergeDrop/Scripts/Runtime/DropController.cs -TotalCount 100; Get-ChildItem game -Force -Name; rg -n 'InitializeOnLoad|DidReloadScripts|Process.Start|OpenURL' game/Assets/MergeDrop/Editor; Get-Content game/Packages/manifest.json -TotalCount 26\"",
+    "\"C:\\\\Users\\\\tjdwo\\\\.cache\\\\codex-runtimes\\\\codex-primary-runtime\\\\dependencies\\\\native\\\\powershell\\\\pwsh.exe\" -Command 'New-Item -ItemType Directory -Force Logs,TestResults | Out-Null\n$projectPath = (Resolve-Path game).Path\n$testResultsPath = Join-Path (Get-Location).Path '\"'TestResults\\\\editmode-before.xml'\n\"'$testLogPath = Join-Path (Get-Location).Path '\"'Logs\\\\editmode-before.log'\n& 'C:\\\\Program Files\\\\Unity\\\\Hub\\\\Editor\\\\6000.3.21f1\\\\Editor\\\\Unity.exe' -batchmode -nographics -projectPath \"'$projectPath -runTests -testPlatform EditMode -runSynchronously -testResults $testResultsPath -logFile $testLogPath'",
+    "\"C:\\\\Users\\\\tjdwo\\\\.cache\\\\codex-runtimes\\\\codex-primary-runtime\\\\dependencies\\\\native\\\\powershell\\\\pwsh.exe\" -Command 'Get-Process Unity -ErrorAction SilentlyContinue | Select-Object Id,CPU,StartTime; if (Test-Path Logs/editmode-before.log) { Get-Content Logs/editmode-before.log -Tail 45 }; if (Test-Path TestResults/editmode-before.xml) { [xml]$result = Get-Content TestResults/editmode-before.xml; $result.'\"'test-run' | Select-Object total,passed,failed,skipped,result }\"",
+    "\"C:\\\\Users\\\\tjdwo\\\\.cache\\\\codex-runtimes\\\\codex-primary-runtime\\\\dependencies\\\\native\\\\powershell\\\\pwsh.exe\" -Command \"rg -n 'AuthenticateOnce|_authenticationStarted|ManuallyAuthenticate|PlayGamesPlatform\\\\.Instance|Social\\\\.localUser\\\\.Authenticate' game/Assets/MergeDrop game/Assets/Plugins; Get-Content game/Assets/MergeDrop/Tests/EditMode/VisualSetControllerTests.cs -TotalCount 90; rg -n 'CreateFixture|CreateController|StartRun|Create.*Catalog' game/Assets/MergeDrop/Tests/EditMode/VisualSetControllerTests.cs\"",
+    "\"C:\\\\Users\\\\tjdwo\\\\.cache\\\\codex-runtimes\\\\codex-primary-runtime\\\\dependencies\\\\native\\\\powershell\\\\pwsh.exe\" -Command 'if (Test-Path TestResults/editmode-before.xml) { [xml]$result = Get-Content TestResults/editmode-before.xml; $result.'\"'test-run' | Select-Object total,passed,failed,skipped,result; \"'$result.SelectNodes('\"'//test-case[@result=\\\"Failed\\\"]') | Select-Object fullname }; Get-Content Logs/editmode-before.log -Tail 12\"",
+    "\"C:\\\\Users\\\\tjdwo\\\\.cache\\\\codex-runtimes\\\\codex-primary-runtime\\\\dependencies\\\\native\\\\powershell\\\\pwsh.exe\" -Command 'git diff --stat; Get-Process Unity -ErrorAction SilentlyContinue | Select-Object Id'",
+    "\"C:\\\\Users\\\\tjdwo\\\\.cache\\\\codex-runtimes\\\\codex-primary-runtime\\\\dependencies\\\\native\\\\powershell\\\\pwsh.exe\" -Command '$projectPath = (Resolve-Path game).Path\n$testResultsPath = Join-Path (Get-Location).Path '\"'TestResults\\\\ranking-red.xml'\n\"'$testLogPath = Join-Path (Get-Location).Path '\"'Logs\\\\ranking-red.log'\n\"'$unityProcess = Start-Process -FilePath '\"'C:\\\\Program Files\\\\Unity\\\\Hub\\\\Editor\\\\6000.3.21f1\\\\Editor\\\\Unity.exe' -ArgumentList @('-batchmode', '-nographics', '-projectPath', \"'$projectPath, '\"'-runTests', '-testPlatform', 'EditMode', '-runSynchronously', '-testFilter', 'GameControllerStateTests;PlayGamesLeaderboardTests', '-testResults', \"'$testResultsPath, '\"'-logFile', \"'$testLogPath) -WindowStyle Hidden -Wait -PassThru\nWrite-Output \"Unity exit code: $($unityProcess.ExitCode)\"'",
+    "\"C:\\\\Users\\\\tjdwo\\\\.cache\\\\codex-runtimes\\\\codex-primary-runtime\\\\dependencies\\\\native\\\\powershell\\\\pwsh.exe\" -Command \"git diff -- game/Assets/MergeDrop/Tests/EditMode/GameControllerStateTests.cs game/Assets/MergeDrop/Tests/EditMode/PlayGamesLeaderboardTests.cs; rg -n 'ManuallyAuthenticate|Authenticate|SignIn|signIn' game/Assets/Plugins game/Assets/MergeDrop -g '*.xml' -g '*.java' -g '*.cs' -g '*.unity' -g '*.prefab'\"",
+    "\"C:\\\\Users\\\\tjdwo\\\\.cache\\\\codex-runtimes\\\\codex-primary-runtime\\\\dependencies\\\\native\\\\powershell\\\\pwsh.exe\" -Command 'if (Test-Path TestResults/ranking-red.xml) { [xml]$result = Get-Content TestResults/ranking-red.xml; $result.'\"'test-run' | Select-Object total,passed,failed,skipped,result; \"'$result.SelectNodes('\"'//test-case[@result=\\\"Failed\\\"]') | ForEach-Object { \"'$_.fullname; $_.failure.message } } else { Get-Content Logs/ranking-red.log -Tail 8 }'",
+    "\"C:\\\\Users\\\\tjdwo\\\\.cache\\\\codex-runtimes\\\\codex-primary-runtime\\\\dependencies\\\\native\\\\powershell\\\\pwsh.exe\" -Command '$projectPath = (Resolve-Path game).Path\n$testResultsPath = Join-Path (Get-Location).Path '\"'TestResults\\\\ranking-green.xml'\n\"'$testLogPath = Join-Path (Get-Location).Path '\"'Logs\\\\ranking-green.log'\n\"'$unityProcess = Start-Process -FilePath '\"'C:\\\\Program Files\\\\Unity\\\\Hub\\\\Editor\\\\6000.3.21f1\\\\Editor\\\\Unity.exe' -ArgumentList @('-batchmode', '-nographics', '-projectPath', \"'$projectPath, '\"'-runTests', '-testPlatform', 'EditMode', '-runSynchronously', '-testFilter', 'GameControllerStateTests;PlayGamesLeaderboardTests;LeaderboardResultFactoryTests;LeaderboardScoreTagTests', '-testResults', \"'$testResultsPath, '\"'-logFile', \"'$testLogPath) -WindowStyle Hidden -Wait -PassThru\nWrite-Output \"Unity exit code: $($unityProcess.ExitCode)\"'",
+    "\"C:\\\\Users\\\\tjdwo\\\\.cache\\\\codex-runtimes\\\\codex-primary-runtime\\\\dependencies\\\\native\\\\powershell\\\\pwsh.exe\" -Command 'git diff --check; git diff --numstat; git status --short; git diff -- game/Assets/MergeDrop/Scripts/Runtime/GameController.cs game/Assets/MergeDrop/Scripts/Platform/PlayGamesLeaderboard.cs docs/superpowers/specs/2026-08-04-mergedrop-v1-design.md'",
+    "\"C:\\\\Users\\\\tjdwo\\\\.cache\\\\codex-runtimes\\\\codex-primary-runtime\\\\dependencies\\\\native\\\\powershell\\\\pwsh.exe\" -Command 'if (Test-Path TestResults/ranking-green.xml) { [xml]$result = Get-Content TestResults/ranking-green.xml; $result.'\"'test-run' | Select-Object total,passed,failed,skipped,result; \"'$result.SelectNodes('\"'//test-case[@result=\\\"Failed\\\"]') | Select-Object fullname } else { Get-Content Logs/ranking-green.log -Tail 10 }\"",
+    "\"C:\\\\Users\\\\tjdwo\\\\.cache\\\\codex-runtimes\\\\codex-primary-runtime\\\\dependencies\\\\native\\\\powershell\\\\pwsh.exe\" -Command '$projectPath = (Resolve-Path game).Path\n$testResultsPath = Join-Path (Get-Location).Path '\"'TestResults\\\\editmode-after.xml'\n\"'$testLogPath = Join-Path (Get-Location).Path '\"'Logs\\\\editmode-after.log'\n\"'$unityProcess = Start-Process -FilePath '\"'C:\\\\Program Files\\\\Unity\\\\Hub\\\\Editor\\\\6000.3.21f1\\\\Editor\\\\Unity.exe' -ArgumentList @('-batchmode', '-nographics', '-projectPath', \"'$projectPath, '\"'-runTests', '-testPlatform', 'EditMode', '-runSynchronously', '-testResults', \"'$testResultsPath, '\"'-logFile', \"'$testLogPath) -WindowStyle Hidden -Wait -PassThru\nWrite-Output \"Unity exit code: $($unityProcess.ExitCode)\"'",
+    "\"C:\\\\Users\\\\tjdwo\\\\.cache\\\\codex-runtimes\\\\codex-primary-runtime\\\\dependencies\\\\native\\\\powershell\\\\pwsh.exe\" -Command 'if (Test-Path TestResults/editmode-after.xml) {\n    [xml]$before = Get-Content TestResults/editmode-before.xml\n    [xml]$after = Get-Content TestResults/editmode-after.xml\n    $after.'\"'test-run' | Select-Object total,passed,failed,skipped,result\n    \"'$beforeFailed = @($before.SelectNodes('\"'//test-case[@result=\\\"Failed\\\"]') | ForEach-Object { \"'$_.fullname } | Sort-Object)\n    $afterFailed = @($after.SelectNodes('\"'//test-case[@result=\\\"Failed\\\"]') | ForEach-Object { \"'$_.fullname } | Sort-Object)\n    $differences = @(Compare-Object $beforeFailed $afterFailed)\n    Write-Output \"Changed failure names: $($differences.Count)\"\n    $differences\n    $messageChanges = @($after.SelectNodes('\"'//test-case[@result=\\\"Failed\\\"]') | Where-Object { \"'$testName = $_.fullname; $oldTest = $before.SelectNodes('\"'//test-case[@result=\\\"Failed\\\"]') | Where-Object { \"'$_.fullname -eq $testName }; $_.failure.message.InnerText -ne $oldTest.failure.message.InnerText })\n    Write-Output \"Changed failure messages: $($messageChanges.Count)\"\n} else { Get-Content Logs/editmode-after.log -Tail 10 }'",
+    "\"C:\\\\Users\\\\tjdwo\\\\.cache\\\\codex-runtimes\\\\codex-primary-runtime\\\\dependencies\\\\native\\\\powershell\\\\pwsh.exe\" -Command \"git restore -- game/Assets/MergeDrop/Art/UI/SettingsIcon.png.meta game/ProjectSettings/TimeManager.asset\ngit -c core.safecrlf=false diff --check\ngit -c core.safecrlf=false diff --stat\ngit status --short\nrg -n 'AuthenticateOnce|ManuallyAuthenticate|\\\\.Authenticate\\\\(' game/Assets/MergeDrop/Scripts\nrg -n 'Awake_ConfiguresGameplayWithoutAccessingLeaderboard|Authentication_HasNoSeparateStartupEntryPoint|RankingRequests_ReuseTheSavedRecord' game/Assets/MergeDrop/Tests/EditMode/GameControllerStateTests.cs game/Assets/MergeDrop/Tests/EditMode/PlayGamesLeaderboardTests.cs\""
+  ],
+  "lastError": null,
+  "statusBefore": "",
+  "statusAfter": "M docs/superpowers/specs/2026-08-04-mergedrop-v1-design.md\n M game/Assets/MergeDrop/Scripts/Platform/PlayGamesLeaderboard.cs\n M game/Assets/MergeDrop/Scripts/Runtime/GameController.cs\n M game/Assets/MergeDrop/Tests/EditMode/GameControllerStateTests.cs\n M game/Assets/MergeDrop/Tests/EditMode/PlayGamesLeaderboardTests.cs",
+  "headBefore": "82bdcc160daa5cb14e723091cc568a220944883b",
+  "headAfter": "82bdcc160daa5cb14e723091cc568a220944883b",
+  "authCopyRemoved": true
+}

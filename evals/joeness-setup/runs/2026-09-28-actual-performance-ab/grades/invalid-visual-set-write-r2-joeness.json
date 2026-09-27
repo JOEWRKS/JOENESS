@@ -1,0 +1,48 @@
+{
+  "id": "invalid-visual-set-write-r2-joeness",
+  "caseId": "invalid-visual-set-write",
+  "agentResultSha256": "6ab11a76e26b42b167d674be533c4365af3139f0433a1553d598464264412eb0",
+  "oracleSourceSha256": "6d91958b39c28fed3d5c0c7a49d6b7aff18ca931255e53aec84de3782a88190f",
+  "originalOracleFileSha256": "d8399d2c88918156afdced169b93458a2051b041edd67adb17ac95afeceb8db7",
+  "baselineFullResultSha256": "ac8cdfce5c91323880140700100fe0f53fee24a51a594ff18bf327091218c38e",
+  "oracleNames": [
+    "VisualSetProgressStoreTests.Bit_InvalidIdThrowsInsteadOfAliasingAValidBit",
+    "VisualSetProgressStoreTests.LoadSelected_NormalizesMissingNegativeAndUnknownValuesToDefault",
+    "VisualSetProgressStoreTests.LoadUnlockedMask_NormalizesMissingNegativeAndMissingDefaultBit",
+    "VisualSetProgressStoreTests.Progress_PersistsAcrossColdReload",
+    "VisualSetProgressStoreTests.SaveSelected_InvalidIdDoesNotReplaceAnExistingValidSelection",
+    "VisualSetProgressStoreTests.SaveSelected_OnlyWritesAndReportsWhenTheSelectionChanges",
+    "VisualSetProgressStoreTests.Unlock_OnlyWritesAndReportsWhenTheBitChanges"
+  ],
+  "focused": {
+    "exitCode": 2,
+    "wallMs": 21120,
+    "xmlExists": true,
+    "resultSha256": "be10ad9860e49957c86e04d55137029dafcd62cbfa8a602f571563b3d6512ecd",
+    "cases": 7
+  },
+  "full": {
+    "exitCode": 2,
+    "wallMs": 10985,
+    "xmlExists": true,
+    "resultSha256": "1bd63d60aa926d7e927962ff70f74fe269ca7cb548a4eb4b3d3502601bb620f7",
+    "cases": 135,
+    "passed": 134,
+    "failed": 1
+  },
+  "outcome": {
+    "pass": false,
+    "oraclePass": false,
+    "focusedFailures": [
+      "VisualSetProgressStoreTests.Bit_InvalidIdThrowsInsteadOfAliasingAValidBit"
+    ],
+    "missingTests": [],
+    "newFailures": [
+      "VisualSetProgressStoreTests.Bit_InvalidIdThrowsInsteadOfAliasingAValidBit"
+    ]
+  },
+  "meaningfulStateRestored": true,
+  "statusBefore": "M TASK.md\n M game/Assets/MergeDrop/Scripts/Runtime/VisualSetProgressStore.cs\n M game/Assets/MergeDrop/Tests/EditMode/VisualSetProgressStoreTests.cs",
+  "statusAfter": "M TASK.md\n M game/Assets/MergeDrop/Art/UI/SettingsIcon.png.meta\n M game/Assets/MergeDrop/Scripts/Runtime/VisualSetProgressStore.cs\n M game/Assets/MergeDrop/Tests/EditMode/VisualSetProgressStoreTests.cs\n M game/ProjectSettings/TimeManager.asset",
+  "unityMetadataNormalizationOnly": true
+}

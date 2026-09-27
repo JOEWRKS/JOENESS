@@ -1,0 +1,42 @@
+{
+  "id": "deferred-ranking-auth-r1-joeness",
+  "caseId": "deferred-ranking-auth",
+  "agentResultSha256": "1d74296622ea60d4773e2fba5f6657cfaa1e1169f1fb7d15ca2e9f23094c135f",
+  "oracleSourceSha256": "723373e14a6ab0ea915065c9d62c0d001e2c3fdba6167a3c09da9386dc195a56",
+  "originalOracleFileSha256": "01295a04fa3525a58b5d1c0e1918e7e08c7b4a758d9255d68c43906341fb9c60",
+  "baselineFullResultSha256": "700dcc9e233703bba99933055770adbbd3b38335777521be50ac539ccc56ad08",
+  "oracleNames": [
+    "GameControllerStateTests.Awake_DoesNotStartLeaderboardAuthenticationBeforeRankingAction"
+  ],
+  "focused": {
+    "exitCode": 2,
+    "wallMs": 11214,
+    "xmlExists": true,
+    "resultSha256": "96b6fe03f6954843a78dd0592e4c3aac6368d2b3ffba1bc762d56ce79328ea33",
+    "cases": 1
+  },
+  "full": {
+    "exitCode": 2,
+    "wallMs": 12336,
+    "xmlExists": true,
+    "resultSha256": "53dad5d56b5da74c01b3c05fdc6366c9fda16bfe897584811018f0cb68aa71f8",
+    "cases": 231,
+    "passed": 216,
+    "failed": 15
+  },
+  "outcome": {
+    "pass": false,
+    "oraclePass": false,
+    "focusedFailures": [
+      "GameControllerStateTests.Awake_DoesNotStartLeaderboardAuthenticationBeforeRankingAction"
+    ],
+    "missingTests": [],
+    "newFailures": [
+      "GameControllerStateTests.Awake_DoesNotStartLeaderboardAuthenticationBeforeRankingAction"
+    ]
+  },
+  "meaningfulStateRestored": true,
+  "statusBefore": "M TASK.md\n M game/Assets/MergeDrop/Scripts/Platform/PlayGamesLeaderboard.cs\n M game/Assets/MergeDrop/Scripts/Runtime/GameController.cs\n M game/Assets/MergeDrop/Tests/EditMode/GameControllerStateTests.cs\n M game/Assets/MergeDrop/Tests/EditMode/PlayGamesLeaderboardTests.cs",
+  "statusAfter": "M TASK.md\n M game/Assets/MergeDrop/Art/UI/SettingsIcon.png.meta\n M game/Assets/MergeDrop/Scripts/Platform/PlayGamesLeaderboard.cs\n M game/Assets/MergeDrop/Scripts/Runtime/GameController.cs\n M game/Assets/MergeDrop/Tests/EditMode/GameControllerStateTests.cs\n M game/Assets/MergeDrop/Tests/EditMode/PlayGamesLeaderboardTests.cs\n M game/ProjectSettings/TimeManager.asset",
+  "unityMetadataNormalizationOnly": true
+}

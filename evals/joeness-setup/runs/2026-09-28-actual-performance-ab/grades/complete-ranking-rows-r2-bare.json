@@ -1,0 +1,38 @@
+{
+  "id": "complete-ranking-rows-r2-bare",
+  "caseId": "complete-ranking-rows",
+  "agentResultSha256": "b555c87b895de3ba74bd059838525f0b4bd290c3167c6c295b57a425ee201eee",
+  "oracleSourceSha256": "abc03461034177adb1d7de8a858aa7ddb3b2fd64221e393af6eaf6079d679545",
+  "originalOracleFileSha256": "2c3138a6b7e53f6f5d7efd35624e40702b12d8d5479213460a4d339051acafd4",
+  "baselineFullResultSha256": "dff2f5ca8133fd5eda5aeb047895df3afb256b2b27f8b7bfb1809f447db18114",
+  "oracleNames": [
+    "SkinLeaderboardUiTests.RankingViewport_ShowsFourCompleteRowsWithoutPartialFifth"
+  ],
+  "focused": {
+    "exitCode": 0,
+    "wallMs": 10912,
+    "xmlExists": true,
+    "resultSha256": "0df1f739715c67905880235db50e3f0a265c5633e66e52e0142bcd83ce2f28cf",
+    "cases": 1
+  },
+  "full": {
+    "exitCode": 2,
+    "wallMs": 12623,
+    "xmlExists": true,
+    "resultSha256": "64ac4c7839e35f95d00db8e8e080cf7ffa3b4c988ca9c4a052ba990c419236b1",
+    "cases": 231,
+    "passed": 217,
+    "failed": 14
+  },
+  "outcome": {
+    "pass": true,
+    "oraclePass": true,
+    "focusedFailures": [],
+    "missingTests": [],
+    "newFailures": []
+  },
+  "meaningfulStateRestored": true,
+  "statusBefore": "M game/Assets/MergeDrop/Editor/SkinLeaderboardUiMigration.cs\n M game/Assets/MergeDrop/Scenes/Game.unity\n M game/Assets/MergeDrop/Tests/EditMode/SkinLeaderboardUiTests.cs",
+  "statusAfter": "M game/Assets/MergeDrop/Art/UI/SettingsIcon.png.meta\n M game/Assets/MergeDrop/Editor/SkinLeaderboardUiMigration.cs\n M game/Assets/MergeDrop/Scenes/Game.unity\n M game/Assets/MergeDrop/Tests/EditMode/SkinLeaderboardUiTests.cs\n M game/ProjectSettings/TimeManager.asset",
+  "unityMetadataNormalizationOnly": true
+}

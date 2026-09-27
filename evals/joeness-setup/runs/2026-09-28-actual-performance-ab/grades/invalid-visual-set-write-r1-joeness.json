@@ -1,0 +1,51 @@
+{
+  "id": "invalid-visual-set-write-r1-joeness",
+  "caseId": "invalid-visual-set-write",
+  "agentResultSha256": "a336e2420b5959985f62084eec9533935981be913940b7e2743095a23054a062",
+  "oracleSourceSha256": "6d91958b39c28fed3d5c0c7a49d6b7aff18ca931255e53aec84de3782a88190f",
+  "originalOracleFileSha256": "6f5588bcbd3541ff4bd91caac1102751ff8f1d18e3d68d029525e0a9ab94b104",
+  "baselineFullResultSha256": "ac8cdfce5c91323880140700100fe0f53fee24a51a594ff18bf327091218c38e",
+  "oracleNames": [
+    "VisualSetProgressStoreTests.Bit_InvalidIdThrowsInsteadOfAliasingAValidBit",
+    "VisualSetProgressStoreTests.LoadSelected_NormalizesMissingNegativeAndUnknownValuesToDefault",
+    "VisualSetProgressStoreTests.LoadUnlockedMask_NormalizesMissingNegativeAndMissingDefaultBit",
+    "VisualSetProgressStoreTests.Progress_PersistsAcrossColdReload",
+    "VisualSetProgressStoreTests.SaveSelected_InvalidIdDoesNotReplaceAnExistingValidSelection",
+    "VisualSetProgressStoreTests.SaveSelected_OnlyWritesAndReportsWhenTheSelectionChanges",
+    "VisualSetProgressStoreTests.Unlock_OnlyWritesAndReportsWhenTheBitChanges"
+  ],
+  "focused": {
+    "exitCode": 2,
+    "wallMs": 16109,
+    "xmlExists": true,
+    "resultSha256": "9438011b5ba4fe8cd36058dfb0217f7392d7f5f0d3ee06788f4c8a702f0f14db",
+    "cases": 7
+  },
+  "full": {
+    "exitCode": 2,
+    "wallMs": 11573,
+    "xmlExists": true,
+    "resultSha256": "78eea34375d842fb9648e24098d78a1dc9ed4322144241b3faca69fd262d3bfd",
+    "cases": 135,
+    "passed": 131,
+    "failed": 4
+  },
+  "outcome": {
+    "pass": false,
+    "oraclePass": false,
+    "focusedFailures": [
+      "VisualSetProgressStoreTests.Bit_InvalidIdThrowsInsteadOfAliasingAValidBit"
+    ],
+    "missingTests": [],
+    "newFailures": [
+      "AudioAssetTests.CoreGameplayVerifier_PublicEntryPointRejectsInvalidAudioListenerScene",
+      "AudioAssetTests.GameScene_SerializesSingleGameAudioWithEveryApprovedClip",
+      "IllustratedUiReferenceStyleTests.ModalBackdrop_DismissesOnlyOutsideReversibleModals",
+      "VisualSetProgressStoreTests.Bit_InvalidIdThrowsInsteadOfAliasingAValidBit"
+    ]
+  },
+  "meaningfulStateRestored": true,
+  "statusBefore": "M TASK.md\n M game/Assets/MergeDrop/Scripts/Runtime/VisualSetProgressStore.cs\n M game/Assets/MergeDrop/Tests/EditMode/VisualSetProgressStoreTests.cs",
+  "statusAfter": "M TASK.md\n M game/Assets/MergeDrop/Art/UI/SettingsIcon.png.meta\n M game/Assets/MergeDrop/Scripts/Runtime/VisualSetProgressStore.cs\n M game/Assets/MergeDrop/Tests/EditMode/VisualSetProgressStoreTests.cs\n M game/ProjectSettings/TimeManager.asset",
+  "unityMetadataNormalizationOnly": true
+}

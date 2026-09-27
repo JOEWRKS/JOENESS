@@ -1,0 +1,42 @@
+{
+  "id": "deferred-ranking-auth-r1-bare",
+  "caseId": "deferred-ranking-auth",
+  "agentResultSha256": "dc4ec3b98c6010901539b9ecc9de830253324b4ea57368d7b52bb68ca3d68026",
+  "oracleSourceSha256": "723373e14a6ab0ea915065c9d62c0d001e2c3fdba6167a3c09da9386dc195a56",
+  "originalOracleFileSha256": "35d3bdcb4dab715004d59d3ea50bde0daa77758249e35b2af93ec05967f0314d",
+  "baselineFullResultSha256": "700dcc9e233703bba99933055770adbbd3b38335777521be50ac539ccc56ad08",
+  "oracleNames": [
+    "GameControllerStateTests.Awake_DoesNotStartLeaderboardAuthenticationBeforeRankingAction"
+  ],
+  "focused": {
+    "exitCode": 2,
+    "wallMs": 10809,
+    "xmlExists": true,
+    "resultSha256": "cc1fcd753c6bc641b0f4a7ed81b8b1d359ba69956093bc6d5e15bc23fbaf2562",
+    "cases": 1
+  },
+  "full": {
+    "exitCode": 2,
+    "wallMs": 12373,
+    "xmlExists": true,
+    "resultSha256": "a5309a05de368409903aac7fdf753d232a0a4bd65c01152e36edc23c96b2b627",
+    "cases": 231,
+    "passed": 216,
+    "failed": 15
+  },
+  "outcome": {
+    "pass": false,
+    "oraclePass": false,
+    "focusedFailures": [
+      "GameControllerStateTests.Awake_DoesNotStartLeaderboardAuthenticationBeforeRankingAction"
+    ],
+    "missingTests": [],
+    "newFailures": [
+      "GameControllerStateTests.Awake_DoesNotStartLeaderboardAuthenticationBeforeRankingAction"
+    ]
+  },
+  "meaningfulStateRestored": true,
+  "statusBefore": "M game/Assets/MergeDrop/Scripts/Platform/PlayGamesLeaderboard.cs\n M game/Assets/MergeDrop/Scripts/Runtime/GameController.cs\n M game/Assets/MergeDrop/Tests/EditMode/GameControllerStateTests.cs\n M game/Assets/MergeDrop/Tests/EditMode/PlayGamesLeaderboardTests.cs",
+  "statusAfter": "M game/Assets/MergeDrop/Art/UI/SettingsIcon.png.meta\n M game/Assets/MergeDrop/Scripts/Platform/PlayGamesLeaderboard.cs\n M game/Assets/MergeDrop/Scripts/Runtime/GameController.cs\n M game/Assets/MergeDrop/Tests/EditMode/GameControllerStateTests.cs\n M game/Assets/MergeDrop/Tests/EditMode/PlayGamesLeaderboardTests.cs\n M game/ProjectSettings/TimeManager.asset",
+  "unityMetadataNormalizationOnly": true
+}
