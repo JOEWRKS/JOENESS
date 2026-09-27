@@ -26,6 +26,7 @@ test('CLI shows usable onboarding only after successful Apply while stdout stays
       for(const name of ['AGENTS','ROADMAP','TASK','ISSUES','DESIGN'])
         assert.ok(apply.stderr.includes(name+'.md'),name+' role appears in the guide');
       assert.ok(apply.stderr.includes('자동 생성하지'),'guide separates installation from project document creation');
+      assert.ok(apply.stderr.includes('남은 문제: 없음'),'guide distinguishes unresolved problems from resolved issues');
       assert.ok(apply.stderr.includes('이번 작업은 문서에 기록하지 마'),'guide includes a no-record request');
       if(i===1) assert.deepEqual(apply.result.changes,[]);
     }

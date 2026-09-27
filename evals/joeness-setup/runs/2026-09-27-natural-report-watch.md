@@ -52,3 +52,9 @@ universal readability.
 Current decision: existing `joeness-setup` source and personal installation
 unchanged. No background watcher is running. Future observations require an
 actual qualifying report to occur or be supplied by the user.
+
+Historical note (2026-09-27): this five-field observation plan was overtaken
+by the user's explicit six-field decision. Its 0/3 status remains as-is; it
+must not be presented as current validation. The bounded six-field replay and
+its limitations are recorded in
+[`2026-09-27-six-field-report/review-evidence.md`](2026-09-27-six-field-report/review-evidence.md).
