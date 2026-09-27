@@ -80,6 +80,8 @@ async function runSession(fixture, arm, stage) {
     env: { ...process.env, CODEX_HOME: home },
     windowsHide: true,
   });
+  // `codex exec` also reads stdin; signal EOF or it waits without starting a turn.
+  child.stdin.end();
   child.stdout.on('data', chunk => {
     buffer += chunk.toString();
     let index;
