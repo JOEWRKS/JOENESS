@@ -1,0 +1,29 @@
+{
+  "runtime": "codex-cli 0.158.0-alpha.2",
+  "model": "gpt-6-astra",
+  "reasoningEffort": "xhigh",
+  "sessionMode": "fresh ephemeral per arm",
+  "userConfig": "ignored in both arms",
+  "order": ["Bare", "Setup"],
+  "bare": {
+    "exitCode": 0,
+    "wallMs": 86890,
+    "inputTokens": 159170,
+    "cachedInputTokens": 145792,
+    "uncachedInputTokensDerived": 13378,
+    "outputTokens": 1955,
+    "reasoningOutputTokens": 411,
+    "head": "6d1f965975e349d0d2fa72eab40bab67a8a4a859"
+  },
+  "setup": {
+    "exitCode": 0,
+    "wallMs": 72953,
+    "inputTokens": 107119,
+    "cachedInputTokens": 93184,
+    "uncachedInputTokensDerived": 13935,
+    "outputTokens": 1873,
+    "reasoningOutputTokens": 273,
+    "head": "156f5399542669c4c6af89680a6d4d2c66a5dd5a"
+  },
+  "provenance": "CLI --json turn.completed usage; wall time from PowerShell Stopwatch around each CLI invocation. Derived uncached input is input minus cached input."
+}
