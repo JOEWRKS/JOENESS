@@ -1,0 +1,35 @@
+{
+  "status": "PRE_REGISTERED_PREFLIGHT",
+  "purpose": "Test actual MergeDrop code-task performance, not report readability",
+  "sourceRepository": "D:/JOEWRKS/MergeDrop/.worktrees/mergedrop-v1",
+  "runtime": { "model": "gpt-6-astra", "reasoningEffort": "xhigh", "unityEditor": "C:/Program Files/Unity/Hub/Editor/6000.3.21f1/Editor/Unity.exe" },
+  "cases": [
+    {
+      "id": "invalid-visual-set-write",
+      "fixCommit": "71ada1a33bf2a5e7f1b311bf133c17edd37de7a8",
+      "baseRef": "71ada1a^",
+      "oracleFile": "game/Assets/MergeDrop/Tests/EditMode/VisualSetProgressStoreTests.cs",
+      "oracleFilter": "VisualSetProgressStoreTests.Bit_InvalidIdThrowsInsteadOfAliasingAValidBit;VisualSetProgressStoreTests.SaveSelected_InvalidIdDoesNotReplaceAnExistingValidSelection"
+    },
+    {
+      "id": "deferred-ranking-auth",
+      "fixCommit": "5010b03",
+      "baseRef": "5010b03^",
+      "oracleFile": "game/Assets/MergeDrop/Tests/EditMode/GameControllerStateTests.cs",
+      "oracleFilter": "GameControllerStateTests.Awake_DoesNotStartLeaderboardAuthenticationBeforeRankingAction"
+    },
+    {
+      "id": "complete-ranking-rows",
+      "fixCommit": "565b08f",
+      "baseRef": "565b08f^",
+      "oracleFile": "game/Assets/MergeDrop/Tests/EditMode/SkinLeaderboardUiTests.cs",
+      "oracleFilter": "SkinLeaderboardUiTests.RankingViewport_ShowsFourCompleteRowsWithoutPartialFifth"
+    }
+  ],
+  "admissionRule": "For each case, isolated full Unity source at baseRef with only the oracle test file overlaid must fail for the intended assertion, and the fixCommit archive must pass the same filter. If not, preserve evidence and exclude the case before model runs. Do not silently replace a case.",
+  "modelRunRule": "Only admitted cases: two fresh trials per arm, counterbalanced order. Same symptom prompt and frozen source per pair. Bare has no active JOENESS 0.2 package or setup block; JOENESS has exact current Core and setup package. Hidden oracle tests remain outside model-visible fixture until evaluation. One correction pass with identical test feedback is allowed only after an initial failure.",
+  "primaryOutcome": "Independent hidden regression and existing EditMode tests pass, no material out-of-scope or compatibility regression, no false completion claim",
+  "secondaryOutcomes": ["first-pass success", "success after one correction", "wall time to verified result", "noncached input plus output tokens to verified result", "test reruns and tool calls", "changed-file scope"],
+  "excluded": ["readability rating", "report format score", "human A/B preference", "production project writes", "Play or account writes"],
+  "inferenceLimit": "A few historical tasks can show bounded task-performance differences, not universal superiority or equivalence. Compare costs only among successful matched pairs. Preserve infrastructure failures separately."
+}
