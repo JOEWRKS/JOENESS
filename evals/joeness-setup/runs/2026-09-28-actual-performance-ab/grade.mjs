@@ -25,17 +25,18 @@ async function processRun(file, args, cwd, capture = false) {
   return await new Promise((done, fail) => {
     const child = spawn(file, args, { cwd, windowsHide: true });
     child.stdin.end();
-    const chunks = [];
-    child.stdout.on('data', chunk => { if (capture) chunks.push(chunk); });
-    child.stderr.on('data', chunk => { if (capture) chunks.push(chunk); });
+    const stdout = [];
+    const stderr = [];
+    child.stdout.on('data', chunk => { if (capture) stdout.push(chunk); });
+    child.stderr.on('data', chunk => { if (capture) stderr.push(chunk); });
     child.on('error', fail);
-    child.on('close', code => done({ code, output: Buffer.concat(chunks) }));
+    child.on('close', code => done({ code, output: Buffer.concat(stdout), error: Buffer.concat(stderr) }));
   });
 }
 
 async function gitText(project, args) {
   const run = await processRun('git', args, project, true);
-  if (run.code !== 0) throw new Error(`git failed: ${args.join(' ')} ${run.output.toString('utf8').slice(-500)}`);
+  if (run.code !== 0) throw new Error(`git failed: ${args.join(' ')} ${run.error.toString('utf8').slice(-500)}`);
   return run.output.toString('utf8');
 }
 
@@ -57,14 +58,20 @@ async function grade(id) {
   const game = underTrial(join(project, 'game'));
   const resultPath = join(evidenceRoot, 'results', `${id}.json`);
   const gradePath = join(evidenceRoot, 'grades', `${id}.json`);
-  const gradeRoot = underTrial(join(trialRoot, 'grades', id));
+  const gradeBase = underTrial(join(trialRoot, 'grades', id));
+  const gradeRoot = existsSync(gradeBase) ? underTrial(join(gradeBase, 'attempt-02')) : gradeBase;
   if (!existsSync(resultPath) || existsSync(gradePath) || existsSync(gradeRoot)) throw new Error('Run absent or grade already started');
   const result = JSON.parse(readFileSync(resultPath, 'utf8'));
   if (result.exitCode !== 0 || result.timedOut || !result.usage || !result.authCopyRemoved) throw new Error('Agent run incomplete');
   const head = (await gitText(project, ['rev-parse', 'HEAD'])).trim();
   if (head !== result.headAfter) throw new Error('Agent fixture HEAD drift');
   const status = (await gitText(project, ['status', '--porcelain=v1', '--untracked-files=all'])).trim();
-  if (status !== result.statusAfter) throw new Error('Agent fixture status drift');
+  const diffBefore = await gitText(project, ['diff', '--binary', '--no-ext-diff', '--no-color']);
+  const untrackedBefore = await gitText(project, ['ls-files', '--others', '--exclude-standard']);
+  const meaningfulPaths = (await gitText(project, ['diff', '--name-only'])).trim().split(/\r?\n/).filter(Boolean).sort();
+  const agentPaths = result.statusAfter.split(/\r?\n/).filter(Boolean)
+    .map(line => line.trimStart().replace(/^[A-Z?]{1,2} /, '')).sort();
+  if (meaningfulPaths.some(path => !agentPaths.includes(path))) throw new Error('Agent fixture has a new meaningful change before verification');
   const greenFull = underTrial(join(trialRoot, 'preflight', caseId, 'green-full-results.xml'));
   const greenBytes = readFileSync(greenFull);
   if (sha256(greenBytes) !== item.baselineFullResultSha256) throw new Error('Baseline XML hash drift');
@@ -88,8 +95,11 @@ async function grade(id) {
     if (original === null) rmSync(oraclePath);
     else writeFileSync(oraclePath, original);
   }
-  const statusRestored = (await gitText(project, ['status', '--porcelain=v1', '--untracked-files=all'])).trim() === status;
-  if (!focusedRun.xmlExists || !fullRun.xmlExists || !statusRestored) throw new Error('Verification infrastructure failed; inspect external grade artifacts');
+  const statusAfter = (await gitText(project, ['status', '--porcelain=v1', '--untracked-files=all'])).trim();
+  const diffAfter = await gitText(project, ['diff', '--binary', '--no-ext-diff', '--no-color']);
+  const untrackedAfter = await gitText(project, ['ls-files', '--others', '--exclude-standard']);
+  const meaningfulStateRestored = diffBefore === diffAfter && untrackedBefore === untrackedAfter;
+  if (!focusedRun.xmlExists || !fullRun.xmlExists || !meaningfulStateRestored) throw new Error('Verification infrastructure failed; inspect external grade artifacts');
   const focusedBytes = readFileSync(focusedXml);
   const fullBytes = readFileSync(fullXml);
   const focusedCases = parseNUnitCases(focusedBytes.toString('utf8'));
@@ -101,7 +111,8 @@ async function grade(id) {
     oracleNames, focused: { ...focusedRun, resultSha256: sha256(focusedBytes), cases: focusedCases.length },
     full: { ...fullRun, resultSha256: sha256(fullBytes), cases: fullCases.length,
       passed: fullCases.filter(test => test.result === 'Passed').length, failed: fullCases.filter(test => test.result === 'Failed').length },
-    outcome, statusRestored };
+    outcome, meaningfulStateRestored, statusBefore: status, statusAfter,
+    unityMetadataNormalizationOnly: status !== statusAfter && meaningfulStateRestored };
   mkdirSync(dirname(gradePath), { recursive: true });
   writeFileSync(gradePath, JSON.stringify(record, null, 2) + '\n');
   console.log(`GRADE ${id} ${outcome.pass ? 'PASS' : 'FAIL'} focused=${focusedCases.length} full=${record.full.passed}/${fullCases.length} newFailures=${outcome.newFailures.length}`);
