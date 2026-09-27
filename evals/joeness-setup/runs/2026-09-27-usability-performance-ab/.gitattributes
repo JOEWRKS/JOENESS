@@ -1,0 +1,2 @@
+# Preserve the hashed raw model response, including its Markdown hard break.
+responses/reading-shelf-joeness-S3.md -whitespace

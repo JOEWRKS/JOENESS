@@ -1,0 +1,35 @@
+{
+  "id": "reading-shelf-old",
+  "fixture": "reading-shelf",
+  "arm": "old",
+  "startedAt": "2026-09-27T13:31:19.956Z",
+  "wallMs": 126706,
+  "exitCode": 0,
+  "runtime": {
+    "binary": "C:\\Users\\tjdwo\\AppData\\Local\\OpenAI\\Codex\\bin\\d23520d1e41bfb24\\codex.exe",
+    "model": "gpt-6-astra",
+    "reasoningEffort": "xhigh",
+    "threadId": "01a0e310-20cc-7d31-b970-5ae96a4aea3a"
+  },
+  "promptSha256": "757bc2255543f0a79ba5ea7bddf5700b2a28550f22249beaffb4efb9600e219f",
+  "guidanceSha256": "dd39b2ab4a80a3f2b22737a71d39a524b301d288056b5b7617f96e6f6359c898",
+  "responseSha256": "e153e2d3315a1868a89eaf324453a8262e09deb89cd3a31dc7dd5919f96a3522",
+  "usage": {
+    "input_tokens": 379093,
+    "cached_input_tokens": 345088,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 3009,
+    "reasoning_output_tokens": 1286
+  },
+  "testCommandCount": 0,
+  "eventCounts": {
+    "thread.started": 1,
+    "turn.started": 1,
+    "item.completed": 7,
+    "item.started": 4,
+    "turn.completed": 1
+  },
+  "lastError": null,
+  "statusBefore": "M AGENTS.md\n M ISSUES.md\n M ROADMAP.md\n M src/shelf.mjs\n M tests/shelf.test.mjs\n?? .joeness/setup-state.json\n?? TASK.md",
+  "statusAfter": "M AGENTS.md\n M ISSUES.md\n M ROADMAP.md\n M src/shelf.mjs\n M tests/shelf.test.mjs\n?? .joeness/setup-state.json\n?? TASK.md"
+}

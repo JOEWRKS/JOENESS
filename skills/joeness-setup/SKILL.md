@@ -111,23 +111,28 @@ task fact, report its status without appending a repeat verification note.
 Questions, opinions, explanations and no-record requests are not facts to append.
 If a required source is inaccessible or a record write fails, finish independent
 authorized work and report the exact missing/read/write boundary.
-After substantive work, lead with six short hyphen bullets in the user's
-language (Korean labels: `작업`, `업데이트 파일`, `이슈`, `해결`, `남은 문제`, `다음 작업`). Use plain words,
-not paragraphs, acronyms, requirement IDs or milestone codes in these six lines;
-say `이번 목표` or the actual user-facing task instead. Name only files actually changed; write `없음`
-where a field has no fact. `이슈` names a problem encountered or confirmed;
-`해결` names only a correction actually made and verified; `남은 문제` names what
-is still unresolved or unverified at the end. Do not hide an open problem under
-`해결` or invent one to fill `남은 문제`. Take the next task only from current authorized
-scope or the roadmap, otherwise say `없음`. Add `상세 보고` only for material context
-or requested proof, below the six lines. Put IDs, test counts and exact paths
-there when useful, without hiding required verification gaps, scope decisions or
-separate user acceptance. Use already-checked facts; do not add a translation
-pass, invent a next task, rerun checks or reread sources just to format the reply.
-For a human handoff, keep the six bullets as a scan layer; when the request asks
-for cause, verification, scope, acceptance or stale-record differences, retain
-those exact facts and source pointers under `상세 보고` rather than squeezing them
-into the bullets or dropping them for brevity.
+After substantive work, lead with six brief hyphen bullets in the user's
+language (Korean labels: `작업`, `업데이트 파일`, `이슈`, `해결`, `남은 문제`, `다음 작업`).
+Write each as a non-developer would describe the result: one clear point in
+ordinary words, not a paragraph, unexplained acronym, requirement ID or
+milestone code. Name the work and changed files by their purpose in this opening;
+give exact filenames below when needed. Name only files actually changed and use
+`없음` for an empty field. `이슈` is a problem encountered or confirmed; `해결`
+is only a correction actually made and verified; `남은 문제` is what remains
+unresolved or unverified. Do not hide an open problem under `해결` or invent one
+to fill `남은 문제`. Take the next task only from current authorized scope or the
+roadmap, otherwise say `없음`.
+
+Add `상세 보고` only for material context or requested proof. Keep it concise too:
+state the result in everyday words, then the necessary cause, evidence and next
+boundary. Use one point per short sentence; replace jargon with a familiar word
+instead of expanding every term into a lesson. Put an exact identifier, path or
+test count beside the fact it supports when needed. Do not repeat the opening,
+add background or list every inspected file merely to sound accessible. Retain
+required verification gaps, scope decisions, cause/fix evidence and separate
+user acceptance; a handoff needing them keeps them here, not in long opening
+bullets. Compose directly from facts already checked; do not add a translation
+pass, invent a next task, rerun checks or reread sources merely to format the reply.
 Simple questions need no receipt; never claim a write that did not occur.
 
 When a user requests version cleanup, keep active issues and effective workarounds
