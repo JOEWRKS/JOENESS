@@ -4,8 +4,11 @@ Arm A was the new five-field connection at test-project commit
 `873ecd39f3c76fee4d32afb6f1cc7aa1272cbc54`; Arm B was the prior free-form
 connection at `122be46c5232d39b17a5d1c2d458817847e60266`. The user saw
 only [blind-samples.md](blind-samples.md) and replied `A — 이유를 적겠습니다`.
-No reason was supplied. This is one blind preference for the new form, not a
-general readability estimate.
+No reason was supplied in that initial reply. Later, after the mapping was
+revealed, the user clarified that A was definitely easier to read because its
+core facts felt more organized, while noting it still did not feel sufficiently
+accessible to a nontechnical reader. This is one preference and follow-up
+reaction, not a general readability estimate or a request to remove detail.
 
 Both agents correctly kept the milestone incomplete, identified the missing
 actual-device result, rejected the stale handoff and pre-repair diagnostic as
