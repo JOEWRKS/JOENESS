@@ -1,0 +1,6 @@
+requested=1440x900
+actual=1440x900
+renderMode=offscreen-screen-space-camera
+beforeBytes=278649
+afterBytes=284627
+state=PIXEL FRUIT

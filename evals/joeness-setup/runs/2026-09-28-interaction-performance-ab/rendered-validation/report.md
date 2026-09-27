@@ -24,3 +24,5 @@ An isolated Windows player build with an explicit Game scene completed with zero
 - A real rendered interaction is visible at a common, non-target Editor viewport in both arms. No material visual difference was established there.
 - Exact desktop 1440×900 rendering, mobile 390×844 rendering, touch-device behavior, and release-player visuals remain **unverified**.
 - This supplemental work does **not** establish a JOENESS accuracy, performance, or visual-quality advantage over Bare. The original score and flaky-test adjudication remain unchanged.
+
+A later, explicitly non-native [`offscreen-probe/report.md`](offscreen-probe/report.md) obtained readable 1440×900 and 390×844 diagnostic renders in both arms by temporarily routing the Canvas through a camera. It does not turn the failed native-size tests above into passes.
