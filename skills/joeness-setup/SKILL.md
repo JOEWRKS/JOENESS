@@ -5,6 +5,10 @@ description: Set up, revise, or detach a project's lightweight working instructi
 
 # JOENESS Setup
 
+First principle: classify project facts by role so successors can recover purpose,
+current work, decisions, problems and next action. Chat summaries support, not
+replace, those sources.
+
 Connect this project to its existing sources of truth; do not install a work harness.
 The global Independent Judgment Core remains separate. No stages, vendor routing,
 background process, or mandatory five-document bundle.
@@ -39,9 +43,8 @@ proposed changes or actually changed files. Give technical paths and details
 after that summary if useful. Name only relevant files, not internal helper
 states or hashes, unless those details explain a conflict. Do not imply that
 checking a connection activates a background process.
-If routine recording is agreed, include a short receipt rule in the proposed
-project connection: after an actual record write, tell the user which document
-received what fact. Do not add a status banner to unrelated or read-only work.
+If routine recording is agreed, include a concise work-receipt rule in the
+proposed project connection; no status banner for unrelated questions.
 If an existing roadmap defines approved milestones or release scope, connect its
 required-item completion gate briefly: a finished task does not finish its
 milestone or release. Keep the actual checklist and evidence in the roadmap,
@@ -50,7 +53,7 @@ For a requested handoff to a person, the short connection should call for an
 everyday-language opening: what is done, what remains, and the recipient's next
 action or decision. Put IDs, test counts, paths, and detailed proof after that
 opening. Preserve the distinction between technical completion, user acceptance,
-and unverified work. This is for handoffs, not a format for ordinary replies.
+and unverified work. Ordinary work receipts are shorter and need no fixed headings.
 
 ## Apply the short connection
 
@@ -109,10 +112,12 @@ task fact, report its status without appending a repeat verification note.
 Questions, opinions, explanations and no-record requests are not facts to append.
 If a required source is inaccessible or a record write fails, finish independent
 authorized work and report the exact missing/read/write boundary.
-When a routine record was actually written, mention its destination and the
-fact recorded in the normal work summary. Do not claim a record was updated
-when no write occurred. This is a receipt for actual work, not a mandatory
-JOENESS status banner on every task.
+After substantive work, briefly report from already-checked facts: outcome,
+changed files, records written and where, unresolved problems or verification,
+and one next action if any. State when nothing changed. Preserve required gaps,
+scope decisions and separate user acceptance; keep exact evidence available.
+Do not invent a next task, rerun checks or reread sources solely to format the
+reply. Simple questions need no receipt; never claim a write that did not occur.
 
 When a user requests version cleanup, keep active issues and effective workarounds
 visible. Compact resolved details only after retrieving the *latest actual detail*
