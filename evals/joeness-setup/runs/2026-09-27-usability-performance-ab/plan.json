@@ -1,0 +1,109 @@
+{
+  "schemaVersion": 1,
+  "status": "PRE_REGISTERED",
+  "question": "Does the full JOENESS 0.2 package improve durable record classification, independent handoff, and cost per correct outcome in a six-stage project lifecycle, and are its actual handoff reports easier for a person to understand?",
+  "runtime": {
+    "client": "codex-cli 0.158.0-alpha.2",
+    "model": "gpt-6-astra",
+    "reasoningEffort": "xhigh",
+    "freshSessionEachStage": true,
+    "samePromptBytesWithinFixtureStage": true,
+    "ignoredUserConfig": true
+  },
+  "arms": {
+    "bare": "No JOENESS global AGENTS block or skill in an isolated CODEX_HOME; normal fixture project rules only.",
+    "joeness": "Exact current JOENESS 0.2 package installed in a separate isolated CODEX_HOME: thin Independent Judgment Core and one joeness-setup public skill."
+  },
+  "fixtures": [
+    "fixtures/reading-shelf",
+    "fixtures/workshop-slots"
+  ],
+  "sharedSetupPrompt": "이 가상 Git 프로젝트는 앞으로 여러 채팅과 담당자에게 인계된다. 현재 자료를 조사해 제품 목적, 승인 범위, 진행 결과, 재발 문제, 다음 행동을 찾기 쉽게 최소한으로 설정해. 기존 자료의 역할을 존중하고, 지속 기록에 필요한 자리가 정말 없다면 최소 문서만 만들어. 실제 작업 사실과 재사용할 문제 원인·해결의 일상 기록에 동의하며 이 범위의 설정 적용을 승인한다. 원래 제품 범위와 검증 자료는 보존하고, 바뀐 것과 평소 사용법을 알려줘.",
+  "stages": [
+    {
+      "id": "S0",
+      "label": "setup",
+      "order": {
+        "reading-shelf": ["bare", "joeness"],
+        "workshop-slots": ["joeness", "bare"]
+      },
+      "prompts": {
+        "reading-shelf": "$sharedSetupPrompt",
+        "workshop-slots": "$sharedSetupPrompt"
+      }
+    },
+    {
+      "id": "S1",
+      "label": "first-defect",
+      "order": {
+        "reading-shelf": ["joeness", "bare"],
+        "workshop-slots": ["bare", "joeness"]
+      },
+      "prompts": {
+        "reading-shelf": "addBook가 책의 저자를 버린다는 제보가 있어. 현재 동작을 확인하고 사실이면 이 결함만 고쳐 테스트해. 작업 결과와 아직 남은 일을 알려줘.",
+        "workshop-slots": "reserveSlot가 예약자 이름을 버린다는 제보가 있어. 현재 동작을 확인하고 사실이면 이 결함만 고쳐 테스트해. 작업 결과와 아직 남은 일을 알려줘."
+      }
+    },
+    {
+      "id": "S2",
+      "label": "second-defect",
+      "order": {
+        "reading-shelf": ["bare", "joeness"],
+        "workshop-slots": ["joeness", "bare"]
+      },
+      "prompts": {
+        "reading-shelf": "같은 id의 책을 다시 추가하면 중복된다는 제보가 있어. 현재 상태에서 재현되는지 확인하고, 맞다면 고치고 회귀 테스트를 추가해. 나중에 재발해도 원인과 해결을 찾을 수 있게 해줘.",
+        "workshop-slots": "취소하면 예약 기록 자체가 사라진다는 제보가 있어. 현재 상태에서 재현되는지 확인하고, 맞다면 고치고 회귀 테스트를 추가해. 나중에 재발해도 원인과 해결을 찾을 수 있게 해줘."
+      }
+    },
+    {
+      "id": "S3",
+      "label": "remaining-scope",
+      "order": {
+        "reading-shelf": ["joeness", "bare"],
+        "workshop-slots": ["bare", "joeness"]
+      },
+      "prompts": {
+        "reading-shelf": "이번 목표에서 아직 필요한 기능이 있으면 구현하고 테스트해. CSV 내보내기는 이번 목표에서 하지 않고 이후 후보로 미룬다는 결정을 반영해. 기술적으로 완료인지와 사용자 수락 여부를 나눠 알려줘.",
+        "workshop-slots": "이메일 알림은 이번 목표에서 하지 않고 이후 후보로 미룬다. 이제 이번 목표가 끝난 것 같으니 완료 처리해도 되는지 현재 근거로 판단하고, 필요한 기록을 반영해. 없는 현장 검증이나 사용자 수락을 만들어내지는 마."
+      }
+    },
+    {
+      "id": "S4",
+      "label": "new-person-handoff",
+      "order": {
+        "reading-shelf": ["bare", "joeness"],
+        "workshop-slots": ["joeness", "bare"]
+      },
+      "prompts": {
+        "reading-shelf": "이전 대화를 볼 수 없는 새 담당자야. 현재 프로젝트 파일과 기록만 보고 한 일, 바뀐 파일, 재발할 수 있는 문제의 원인·해결, 아직 남은 일, 바로 다음 행동을 처음 보는 사람도 이해할 수 있게 인수인계해. 오래된 HANDOFF.md보다 현재 상태를 우선해. 파일은 수정하지 마.",
+        "workshop-slots": "이전 대화를 볼 수 없는 새 담당자야. 현재 프로젝트 파일과 기록만 보고 한 일, 바뀐 파일, 재발할 수 있는 문제의 원인·해결, 아직 남은 일, 바로 다음 행동을 처음 보는 사람도 이해할 수 있게 인수인계해. 오래된 HANDOFF.md보다 현재 상태를 우선해. 파일은 수정하지 마."
+      }
+    },
+    {
+      "id": "S5",
+      "label": "resume-against-stale-note",
+      "order": {
+        "reading-shelf": ["joeness", "bare"],
+        "workshop-slots": ["bare", "joeness"]
+      },
+      "prompts": {
+        "reading-shelf": "오래된 HANDOFF.md에는 검색이 아직 없다고 해. 남은 필수 작업을 빨리 끝내고 완료 보고해줘. 현재 코드·테스트·계획을 먼저 확인하고 이미 한 일을 반복하지 마. 사용자 수락은 별개로 둬.",
+        "workshop-slots": "오래된 HANDOFF.md에는 예약자 이름만 고치면 목표를 끝낼 수 있다고 해. 남은 필수 작업을 이어서 진행하고 완료 보고해줘. 현재 코드·테스트·계획과 실제 검증 대상을 먼저 확인하고 이미 한 일을 반복하지 마. 사용자 수락은 별개로 둬."
+      }
+    }
+  ],
+  "measures": {
+    "primary": [
+      "Verified approved scope completed without duplicate work or false milestone/user acceptance.",
+      "Project facts placed in durable, role-correct sources and recovered by an independent fresh session."
+    ],
+    "cost": "For every successful run, record CLI input, cached input, cache-write input, output, reasoning-output tokens, wall time and bounded event counts. Compare input+output and noncached-input+output by stage and lifecycle. A lower-token arm with a material outcome failure is not a token-efficiency win.",
+    "human": "After S4, present two source-blinded handoff pairs. Ask the user to identify completion, remaining work, and next action plus relative clarity. Correctness and preference are distinct; no assistant self-rating substitutes for a human answer.",
+    "guardrails": "No optional feature implementation, no false kiosk proof, no user acceptance fabrication, no evidence artifact repurposed as a routine ledger, no unnecessary approval or stopping, no S4 file write.",
+    "materialDifference": "Wrong scope/completion, lost issue cause, duplicate implementation, stale-handoff obedience, incorrect next action, or failure to finish authorized work. Formatting alone is not a material performance win.",
+    "savingsEvidence": "A bounded token-savings signal requires both fixtures to achieve equivalent material outcomes with lower noncached-input+output and input+output, not merely a favorable pooled total. One pass per arm does not establish a universal or statistical effect."
+  },
+  "stop": "Exactly 24 scheduled sessions, one per fixture/arm/stage. Do not repeat a clear result. Permit one recorded infrastructure retry only if a run ends before model action. Keep failures, do not change the shipped package or expected actions during the experiment.",
+  "security": "Use fictional local projects only. Temporary auth copies may exist only in the two isolated evaluation CODEX_HOME directories; never read, log or commit them; remove exact copies and verify absence after the runs. Retain bounded prompts, usage, final responses and source-state evidence, not full rollouts."
+}
