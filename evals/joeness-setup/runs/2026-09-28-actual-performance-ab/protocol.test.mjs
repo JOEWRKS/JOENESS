@@ -49,3 +49,12 @@ test('grade allows only exact pre-existing failures and catches new regressions'
   assert.equal(result.pass, false);
   assert.deepEqual(result.newFailures, ['C.NewFailure']);
 });
+
+test('grade treats a newly skipped baseline test as an unverified regression', () => {
+  const oracle = [{ fullname: 'A.Oracle', result: 'Passed' }];
+  const baseline = [{ fullname: 'A.Oracle', result: 'Passed' }, { fullname: 'B.Existing', result: 'Passed' }];
+  const current = [{ fullname: 'A.Oracle', result: 'Passed' }, { fullname: 'B.Existing', result: 'Skipped' }];
+  const result = gradeTestResults(oracle, current, baseline, ['A.Oracle']);
+  assert.equal(result.pass, false);
+  assert.deepEqual(result.newFailures, ['B.Existing']);
+});

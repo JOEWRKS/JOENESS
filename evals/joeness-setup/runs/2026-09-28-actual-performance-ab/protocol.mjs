@@ -48,9 +48,10 @@ export function gradeTestResults(focusedCases, fullCases, baselineCases, oracleN
   }
   const focused = new Map(focusedCases.map(item => [item.fullname, item.result]));
   const full = new Map(fullCases.map(item => [item.fullname, item.result]));
-  const baselineFailures = new Set(baselineCases.filter(item => item.result === 'Failed').map(item => item.fullname));
+  const baselineResults = new Map(baselineCases.map(item => [item.fullname, item.result]));
   const missingTests = baselineCases.map(item => item.fullname).filter(name => !full.has(name)).sort();
-  const newFailures = fullCases.filter(item => item.result === 'Failed' && !baselineFailures.has(item.fullname)).map(item => item.fullname).sort();
+  const newFailures = fullCases.filter(item => item.result !== 'Passed' && item.result !== baselineResults.get(item.fullname))
+    .map(item => item.fullname).sort();
   const focusedFailures = focusedCases.filter(item => item.result !== 'Passed').map(item => item.fullname).sort();
   const oraclePass = oracleNames.every(name => focused.get(name) === 'Passed' && full.get(name) === 'Passed');
   return {
