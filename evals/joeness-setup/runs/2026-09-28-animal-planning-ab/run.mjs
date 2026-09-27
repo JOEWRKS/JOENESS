@@ -6,8 +6,11 @@ import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const evidenceRoot = dirname(fileURLToPath(import.meta.url));
+const attempt = process.env.JOENESS_EVAL_ATTEMPT;
+const outputRoot = attempt === 'attempt-2' ? join(evidenceRoot, 'attempt-2') : evidenceRoot;
 const plan = JSON.parse(readFileSync(join(evidenceRoot, 'plan.json'), 'utf8'));
-const trialRoot = resolve('D:/JOEWRKS/JOENESS-Animal-Planning-AB-20260928');
+const trialRoot = resolve(attempt === 'attempt-2' ? 'D:/JOEWRKS/JOENESS-Animal-Planning-AB-20260928-attempt-2' : 'D:/JOEWRKS/JOENESS-Animal-Planning-AB-20260928');
+const sandboxMode = attempt === 'attempt-2' ? 'danger-full-access' : 'workspace-write';
 const sourceRoot = resolve(plan.snapshotSource);
 const harnessRoot = resolve('D:/JOEWRKS/작업하네스');
 const binary = process.env.JOENESS_EVAL_CODEX_BIN;
@@ -72,7 +75,7 @@ async function prepare() {
   mkdirSync(join(trialRoot, 'homes', 'joeness'), { recursive: true });
   const apply = await command('pwsh', ['-NoProfile', '-File', join(harnessRoot, 'JOENESS.ps1'), '-Apply', '-CodexHome', join(trialRoot, 'homes', 'joeness')], harnessRoot);
   const check = await command('pwsh', ['-NoProfile', '-File', join(harnessRoot, 'JOENESS.ps1'), '-Check', '-CodexHome', join(trialRoot, 'homes', 'joeness')], harnessRoot);
-  writeFileSync(join(evidenceRoot, 'fixture-inventory.json'), JSON.stringify({ trialRoot, sourceRoot, inventory, installation: { apply: apply.trim(), check: check.trim() } }, null, 2) + '\n');
+  writeFileSync(join(outputRoot, 'fixture-inventory.json'), JSON.stringify({ trialRoot, sourceRoot, inventory, installation: { apply: apply.trim(), check: check.trim() } }, null, 2) + '\n');
   for (const arm of ['bare', 'joeness']) copyFileSync(authSource, join(trialRoot, 'homes', arm, 'auth.json'));
 }
 
@@ -81,11 +84,11 @@ async function runOne(id) {
   const project = join(trialRoot, 'projects', arm);
   const home = join(trialRoot, 'homes', arm);
   const prompt = plan.prompts[stage];
-  const responsePath = join(evidenceRoot, 'responses', `${id}.md`);
-  const resultPath = join(evidenceRoot, 'results', `${id}.json`);
+  const responsePath = join(outputRoot, 'responses', `${id}.md`);
+  const resultPath = join(outputRoot, 'results', `${id}.json`);
   if (existsSync(responsePath) || existsSync(resultPath)) throw new Error(`Refusing rerun ${id}`);
   const statusBefore = (await command('git', ['status', '--porcelain=v1', '--untracked-files=all'], project)).trim();
-  const args = ['exec', '--ephemeral', '--ignore-user-config', '-m', 'gpt-6-astra', '-c', 'model_reasoning_effort="xhigh"', '-c', 'approval_policy="never"', '-s', 'workspace-write', '-C', project, '--json', '-o', responsePath, '--', prompt];
+  const args = ['exec', '--ephemeral', '--ignore-user-config', '-m', 'gpt-6-astra', '-c', 'model_reasoning_effort="xhigh"', '-c', 'approval_policy="never"', '-s', sandboxMode, '-C', project, '--json', '-o', responsePath, '--', prompt];
   let buffer = '';
   let threadId = null;
   let usage = null;
@@ -125,8 +128,8 @@ async function runOne(id) {
   if (exitCode !== 0 || !usage || !response) throw new Error(`Incomplete run ${id}; preserve evidence`);
 }
 
-mkdirSync(join(evidenceRoot, 'responses'), { recursive: true });
-mkdirSync(join(evidenceRoot, 'results'), { recursive: true });
+mkdirSync(join(outputRoot, 'responses'), { recursive: true });
+mkdirSync(join(outputRoot, 'results'), { recursive: true });
 let prepared = false;
 try {
   await prepare();
@@ -139,5 +142,5 @@ try {
     if (!target.startsWith(join(trialRoot, 'homes') + '\\')) throw new Error('Unsafe cleanup target');
     if (existsSync(target)) rmSync(target);
   }
-  writeFileSync(join(evidenceRoot, 'cleanup.json'), JSON.stringify({ prepared, sourceAuthExists: existsSync(authSource), bareCopyExists: existsSync(join(trialRoot, 'homes', 'bare', 'auth.json')), joenessCopyExists: existsSync(join(trialRoot, 'homes', 'joeness', 'auth.json')) }, null, 2) + '\n');
+  writeFileSync(join(outputRoot, 'cleanup.json'), JSON.stringify({ prepared, sourceAuthExists: existsSync(authSource), bareCopyExists: existsSync(join(trialRoot, 'homes', 'bare', 'auth.json')), joenessCopyExists: existsSync(join(trialRoot, 'homes', 'joeness', 'auth.json')) }, null, 2) + '\n');
 }

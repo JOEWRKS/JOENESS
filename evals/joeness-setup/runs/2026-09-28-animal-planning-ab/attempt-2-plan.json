@@ -1,0 +1,8 @@
+{
+  "status": "PRE_REGISTERED_INFRASTRUCTURE_RETRY",
+  "reason": "Attempt 1 could not read or write fixture files in either arm because Windows workspace-write sandbox blocked shell operations. All four sessions were invalid for the preregistered task; preserve their outputs and metrics as failure evidence, not model-quality evidence.",
+  "unchanged": "Same source snapshot, project arms, prompts, rubric, run order, runtime, fresh-session requirement, stop rule, and cost metrics as plan.json.",
+  "onlyChange": "Use danger-full-access for the two disposable copied project folders, because workspace-write denied the basic file operations. Verify live project source hashes before and after, and remove exact temporary auth copies in finally.",
+  "trialRoot": "D:/JOEWRKS/JOENESS-Animal-Planning-AB-20260928-attempt-2",
+  "evidenceSubdirectory": "attempt-2"
+}
