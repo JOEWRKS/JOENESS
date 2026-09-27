@@ -6,15 +6,20 @@ This is a bounded observation, not an automated monitor or a performance claim.
 
 ## Sampling boundary
 
-- Take the next three substantive work or handoff reports naturally produced
-  under a JOENESS-connected project and visible in this conversation, or
-  explicitly brought here by the user. Do not search unrelated chats, trigger
-  extra work, rerun checks, or rewrite a report for this sample.
+- Take the next three substantive work or handoff reports visible in this
+  conversation or explicitly brought here by the user. A report from a
+  JOENESS-connected project can assess both readability and connection use.
+  By the user's subsequent direction, a real maintenance task chosen and
+  performed in this JOENESS source repository may count for readability only;
+  it does not prove project-setup activation. Do not search unrelated chats,
+  invent a disposable task, rerun checks, or rewrite a report for this sample.
 - Record the original response and its actual project/task context. Do not copy
   private project contents into this repository merely to preserve a sample;
   use a safe pointer or a short non-sensitive observation instead.
 - Do not count simple questions, proposed setup without applied work, synthetic
-  A/B responses, or a report prompted with extra style instructions.
+  A/B responses, or a report prompted with extra style instructions. A genuine
+  source-repository documentation or code correction is real work even if the
+  agent selected it, but record its narrower evaluation meaning.
 
 ## Score each report
 
@@ -38,7 +43,9 @@ universal readability.
 
 ## Observations
 
-1. Pending.
+1. Candidate pending: real JOENESS source-repository README evidence-status
+   correction. Assess its unprompted final work report after it is delivered;
+   readability only, not project-setup activation.
 2. Pending.
 3. Pending.
 
