@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<test-run id="2" testcasecount="1" result="Failed(Child)" total="1" passed="0" failed="1" inconclusive="0" skipped="0" asserts="0" engine-version="3.5.0.0" clr-version="4.0.30319.42000" start-time="2026-09-27 21:37:36Z" end-time="2026-09-27 21:37:37Z" duration="0.8518277">
+  <test-suite type="TestSuite" id="1000" name="MergeDrop" fullname="MergeDrop" runstate="Runnable" testcasecount="193" result="Failed" site="Child" start-time="2026-09-27 21:37:36Z" end-time="2026-09-27 21:37:37Z" duration="0.851828" total="1" passed="0" failed="1" inconclusive="0" skipped="0" asserts="0">
+    <properties>
+      <property name="platform" value="EditMode" />
+    </properties>
+    <failure>
+      <message><![CDATA[One or more child tests had errors]]></message>
+    </failure>
+    <test-suite type="Assembly" id="1229" name="MergeDrop.EditModeTests.dll" fullname="D:/JOEWRKS/JOENESS-Interaction-AB-20260928/diagnostics/rendered-swipe-bare/game/Library/ScriptAssemblies/MergeDrop.EditModeTests.dll" runstate="Runnable" testcasecount="193" result="Failed" site="Child" start-time="2026-09-27 21:37:36Z" end-time="2026-09-27 21:37:37Z" duration="0.776888" total="1" passed="0" failed="1" inconclusive="0" skipped="0" asserts="0">
+      <properties>
+        <property name="_PID" value="63404" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+        <property name="platform" value="EditMode" />
+        <property name="EditorOnly" value="True" />
+      </properties>
+      <failure>
+        <message><![CDATA[One or more child tests had errors]]></message>
+      </failure>
+      <test-suite type="TestFixture" id="1043" name="CollectionRenderedSmokeTests" fullname="CollectionRenderedSmokeTests" classname="CollectionRenderedSmokeTests" runstate="Runnable" testcasecount="2" result="Failed" site="Child" start-time="2026-09-27 21:37:36Z" end-time="2026-09-27 21:37:37Z" duration="0.769259" total="1" passed="0" failed="1" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <failure>
+          <message><![CDATA[One or more child tests had errors]]></message>
+        </failure>
+        <test-case id="1045" name="MobileSizedCollectionDragRenders" fullname="CollectionRenderedSmokeTests.MobileSizedCollectionDragRenders" methodname="MobileSizedCollectionDragRenders" classname="CollectionRenderedSmokeTests" runstate="Runnable" seed="600383913" result="Failed" start-time="2026-09-27 21:37:32Z" end-time="2026-09-27 21:37:37Z" duration="4.854154" asserts="0">
+          <properties>
+            <property name="_JOINTYPE" value="UnityCombinatorial" />
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+          <failure>
+            <message><![CDATA[  Expected: 390
+  But was:  1101
+
+TearDown : Unhandled log message: '[Error] Coroutine couldn't be started because the the game object 'GameController' is inactive!'. Use UnityEngine.TestTools.LogAssert.Expect]]></message>
+            <stack-trace><![CDATA[UnityEngine.MonoBehaviour:StartCoroutine (System.Collections.IEnumerator)
+GameAudio:FadeBgmTo (single,single) (at D:/JOEWRKS/JOENESS-Interaction-AB-20260928/runs/collection-swipe-r2-bare/project/game/Assets/MergeDrop/Scripts/Runtime/GameAudio.cs:257)
+GameAudio:ApplyBgmTarget (single) (at D:/JOEWRKS/JOENESS-Interaction-AB-20260928/runs/collection-swipe-r2-bare/project/game/Assets/MergeDrop/Scripts/Runtime/GameAudio.cs:199)
+GameAudio:SetPaused (bool) (at D:/JOEWRKS/JOENESS-Interaction-AB-20260928/runs/collection-swipe-r2-bare/project/game/Assets/MergeDrop/Scripts/Runtime/GameAudio.cs:73)
+GameController:SetPaused (bool) (at D:/JOEWRKS/JOENESS-Interaction-AB-20260928/runs/collection-swipe-r2-bare/project/game/Assets/MergeDrop/Scripts/Runtime/GameController.cs:502)
+GameController:OnDisable () (at D:/JOEWRKS/JOENESS-Interaction-AB-20260928/runs/collection-swipe-r2-bare/project/game/Assets/MergeDrop/Scripts/Runtime/GameController.cs:495)
+
+]]></stack-trace>
+          </failure>
+          <output><![CDATA[Coroutine couldn't be started because the the game object 'GameController' is inactive!
+Saving results to: D:\JOEWRKS\JOENESS-Interaction-AB-20260928\diagnostics\rendered-swipe-bare\rendered-mobile-nonbatch.xml
+]]></output>
+        </test-case>
+      </test-suite>
+    </test-suite>
+  </test-suite>
+</test-run>

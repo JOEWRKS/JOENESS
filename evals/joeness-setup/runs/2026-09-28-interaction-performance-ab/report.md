@@ -39,3 +39,5 @@ Pairwise direction varied: JOENESS was faster for collection swipe 1 and restart
 - Independent grader scripts passed 12/12 Node tests. The Bare test failure is attributable to an unverified movement precondition in that test; no corresponding product regression was observed. The diagnostic is separate from the preregistered score and does not retrospectively erase its failed record. No actual touch-device interaction, visual inspection, release build, or production deployment was tested.
 
 Conclusion: JOENESS did not show a demonstrated target-interaction accuracy improvement over Bare in this bounded A/B. It also did not show a stable token or time penalty or saving. The original strict-grade advantage was caused by an unreliable agent-authored test and must not be treated as product superiority.
+
+Post-run supplement: [`rendered-validation/report.md`](rendered-validation/report.md) retains actual Bare/JOENESS collection before/after screen pixels at 1101×510, alongside failed exact-size test results. This does not change the original grades; target desktop/mobile visual proof remains unverified.

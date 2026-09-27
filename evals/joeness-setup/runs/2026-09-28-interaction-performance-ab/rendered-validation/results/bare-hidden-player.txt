@@ -1,0 +1,5 @@
+requested=1440x900
+actual=1440x900
+beforeBytes=17062
+afterBytes=17062
+state=PIXEL FRUIT
