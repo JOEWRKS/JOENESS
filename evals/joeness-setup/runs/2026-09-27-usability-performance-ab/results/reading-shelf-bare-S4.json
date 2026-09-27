@@ -1,0 +1,43 @@
+{
+  "id": "reading-shelf-bare-S4",
+  "fixture": "reading-shelf",
+  "arm": "bare",
+  "stage": "S4",
+  "label": "new-person-handoff",
+  "startedAt": "2026-09-27T13:02:51.028Z",
+  "wallMs": 104388,
+  "exitCode": 0,
+  "runtime": {
+    "binary": "C:\\Users\\tjdwo\\AppData\\Local\\OpenAI\\Codex\\bin\\d23520d1e41bfb24\\codex.exe",
+    "model": "gpt-6-astra",
+    "reasoningEffort": "xhigh",
+    "threadId": "01a0e2f6-0f97-7342-8eaf-a3826ad8774f"
+  },
+  "promptSha256": "fd2bd0a60b31e8cbf5f1198ee3b44dbe049061b161aef033f371519a7d107c86",
+  "responseSha256": "d2bee5ff1e690f1a5bcaa60f49b9ac8d81c47bceb643ffb95fd9e871a6e33f37",
+  "usage": {
+    "input_tokens": 84473,
+    "cached_input_tokens": 70656,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 2756,
+    "reasoning_output_tokens": 857
+  },
+  "derived": {
+    "noncachedInput": 13817,
+    "inputPlusOutput": 87229,
+    "noncachedInputPlusOutput": 16573
+  },
+  "eventCounts": {
+    "thread.started": 1,
+    "turn.started": 1,
+    "item.completed": 8,
+    "item.started": 5,
+    "turn.completed": 1
+  },
+  "itemTypeCounts": {
+    "command_execution": 5
+  },
+  "lastError": null,
+  "statusBefore": "M AGENTS.md\n M HANDOFF.md\n M ISSUES.md\n M ROADMAP.md\n M src/shelf.mjs\n M tests/shelf.test.mjs",
+  "statusAfter": "M AGENTS.md\n M HANDOFF.md\n M ISSUES.md\n M ROADMAP.md\n M src/shelf.mjs\n M tests/shelf.test.mjs"
+}

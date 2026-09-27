@@ -1,0 +1,6 @@
+- **작업:** 현재 코드에서 중복을 재현했고, 수정과 회귀 테스트 2개를 추가했습니다.
+- **업데이트 파일:** [소스](D:/JOEWRKS/JOENESS-Usability-Performance-AB-20260927/projects/reading-shelf-joeness/src/shelf.mjs), [테스트](D:/JOEWRKS/JOENESS-Usability-Performance-AB-20260927/projects/reading-shelf-joeness/tests/shelf.test.mjs), ROADMAP.md, TASK.md, [ISSUES.md](D:/JOEWRKS/JOENESS-Usability-Performance-AB-20260927/projects/reading-shelf-joeness/ISSUES.md).
+- **이슈:** 기존 id 검사 누락이 원인이었습니다. 재발 시 참고하도록 원인·재현 명령·해결·검증 결과를 기록했습니다.
+- **해결:** 같은 id는 `duplicate id` 오류로 거부합니다. 제목·저자가 달라도 거부하고 입력을 보존합니다. 새 테스트 2개는 수정 전 실패했으며, 수정 후 **전체 5개가 통과**했습니다.
+- **남은 문제:** 이번 결함은 해결됐습니다. R2 검색은 미구현·미검증이며, M1 기술 완료와 사용자 수락은 아직 남아 있습니다.
+- **다음 작업:** 승인 범위에 남은 R2 검색 구현·검증입니다.

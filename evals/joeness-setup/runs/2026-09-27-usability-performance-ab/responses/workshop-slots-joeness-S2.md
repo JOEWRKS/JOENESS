@@ -1,0 +1,6 @@
+- 작업: 현재 코드에서 예약 삭제를 재현하고 수정했습니다. 회귀 테스트 3개를 추가했습니다.
+- 업데이트 파일: `src/slots.mjs`, `tests/slots.test.mjs`, `ROADMAP.md`, `TASKS.md`, `ISSUES.md`.
+- 이슈: `filter`가 취소 대상 예약을 제거했습니다. 원인과 재검증 방법을 [ISSUES.md](/D:/JOEWRKS/JOENESS-Usability-Performance-AB-20260927/projects/workshop-slots-joeness/ISSUES.md:16)에 기록했습니다.
+- 해결: 원래 필드를 보존하고 상태만 `cancelled`로 변경합니다. 입력·다른 예약 보존도 검증했으며, 수정 전 실패한 테스트를 포함해 **6/6 통과**했습니다.
+- 남은 문제: 실제 키오스크 검증(R3)은 미완료여서 M1은 미완료입니다. 사용자 수락도 별도입니다.
+- 다음 작업: 키오스크가 준비되면 실제 검증 결과를 기록합니다.

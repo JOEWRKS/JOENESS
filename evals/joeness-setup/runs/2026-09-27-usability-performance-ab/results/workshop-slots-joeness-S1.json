@@ -1,0 +1,44 @@
+{
+  "id": "workshop-slots-joeness-S1",
+  "fixture": "workshop-slots",
+  "arm": "joeness",
+  "stage": "S1",
+  "label": "first-defect",
+  "startedAt": "2026-09-27T12:42:25.809Z",
+  "wallMs": 94140,
+  "exitCode": 0,
+  "runtime": {
+    "binary": "C:\\Users\\tjdwo\\AppData\\Local\\OpenAI\\Codex\\bin\\d23520d1e41bfb24\\codex.exe",
+    "model": "gpt-6-astra",
+    "reasoningEffort": "xhigh",
+    "threadId": "01a0e2e3-5ec8-7fa2-85c1-6c27926fd478"
+  },
+  "promptSha256": "77040112b2694db9378e0fa7bc19cf3862adefc37e5f905aa0fc75658e213c3d",
+  "responseSha256": "09b9b7163ced27834603b6b8041c7a1507b4bc68322d18f059d2d8354f9efe47",
+  "usage": {
+    "input_tokens": 119709,
+    "cached_input_tokens": 98432,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 2456,
+    "reasoning_output_tokens": 337
+  },
+  "derived": {
+    "noncachedInput": 21277,
+    "inputPlusOutput": 122165,
+    "noncachedInputPlusOutput": 23733
+  },
+  "eventCounts": {
+    "thread.started": 1,
+    "turn.started": 1,
+    "item.completed": 13,
+    "item.started": 10,
+    "turn.completed": 1
+  },
+  "itemTypeCounts": {
+    "command_execution": 7,
+    "file_change": 3
+  },
+  "lastError": null,
+  "statusBefore": "M AGENTS.md\n M ISSUES.md\n M TASKS.md\n?? .joeness/setup-state.json",
+  "statusAfter": "M AGENTS.md\n M ISSUES.md\n M ROADMAP.md\n M TASKS.md\n M src/slots.mjs\n M tests/slots.test.mjs\n?? .joeness/setup-state.json"
+}

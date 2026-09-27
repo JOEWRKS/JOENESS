@@ -1,0 +1,44 @@
+{
+  "id": "workshop-slots-bare-S2",
+  "fixture": "workshop-slots",
+  "arm": "bare",
+  "stage": "S2",
+  "label": "second-defect",
+  "startedAt": "2026-09-27T12:51:10.085Z",
+  "wallMs": 132791,
+  "exitCode": 0,
+  "runtime": {
+    "binary": "C:\\Users\\tjdwo\\AppData\\Local\\OpenAI\\Codex\\bin\\d23520d1e41bfb24\\codex.exe",
+    "model": "gpt-6-astra",
+    "reasoningEffort": "xhigh",
+    "threadId": "01a0e2eb-6265-7132-9c24-d6455cb5c8ad"
+  },
+  "promptSha256": "9ea08fcbce1d50499d70387fbd1c566fa7269477e82bc94bbde0f1637b9799db",
+  "responseSha256": "f44e7160e9fae31409b4aa7035c062bc713b189186ea2ecf5c5a1dc5ecde7789",
+  "usage": {
+    "input_tokens": 128107,
+    "cached_input_tokens": 100096,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 3675,
+    "reasoning_output_tokens": 534
+  },
+  "derived": {
+    "noncachedInput": 28011,
+    "inputPlusOutput": 131782,
+    "noncachedInputPlusOutput": 31686
+  },
+  "eventCounts": {
+    "thread.started": 1,
+    "turn.started": 1,
+    "item.completed": 13,
+    "item.started": 10,
+    "turn.completed": 1
+  },
+  "itemTypeCounts": {
+    "command_execution": 7,
+    "file_change": 3
+  },
+  "lastError": null,
+  "statusBefore": "M AGENTS.md\n M HANDOFF.md\n M ISSUES.md\n M ROADMAP.md\n M TASKS.md\n M src/slots.mjs\n M tests/slots.test.mjs",
+  "statusAfter": "M AGENTS.md\n M HANDOFF.md\n M ISSUES.md\n M ROADMAP.md\n M TASKS.md\n M src/slots.mjs\n M tests/slots.test.mjs"
+}

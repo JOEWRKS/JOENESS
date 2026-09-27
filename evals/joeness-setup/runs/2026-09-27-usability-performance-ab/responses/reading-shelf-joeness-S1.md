@@ -1,0 +1,6 @@
+- **작업:** 제보를 재현했고, `addBook`의 저자 누락 결함만 수정했습니다.
+- **업데이트 파일:** [소스](D:/JOEWRKS/JOENESS-Usability-Performance-AB-20260927/projects/reading-shelf-joeness/src/shelf.mjs), [테스트](D:/JOEWRKS/JOENESS-Usability-Performance-AB-20260927/projects/reading-shelf-joeness/tests/shelf.test.mjs), `ROADMAP.md`, `TASK.md`, `ISSUES.md`.
+- **이슈:** 새 책의 반환 객체를 만들 때 `author`를 복사하지 않았습니다.
+- **해결:** `author` 복사를 추가했습니다. 회귀 테스트는 수정 전 실패했고, 수정 후 `npm test`는 **3개 통과·0개 실패**했습니다. 필드 보존과 입력 목록 불변성도 확인했습니다.
+- **남은 문제:** 중복 ID 거부와 `findBooks` 검색은 미구현·미검증입니다. M1 기술 완료는 미달성이며 사용자 수락은 별도 대기 상태입니다.
+- **다음 작업:** 이번 요청은 완료했습니다. 로드맵의 후속 작업은 중복 ID 거부와 검색 구현·검증입니다.

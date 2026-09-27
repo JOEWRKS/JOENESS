@@ -1,0 +1,6 @@
+- 작업: 이름 누락을 재현하고, 요청한 결함만 수정했습니다.
+- 업데이트 파일: [구현](D:/JOEWRKS/JOENESS-Usability-Performance-AB-20260927/projects/workshop-slots-joeness/src/slots.mjs), [테스트](D:/JOEWRKS/JOENESS-Usability-Performance-AB-20260927/projects/workshop-slots-joeness/tests/slots.test.mjs), `ROADMAP.md`, `TASKS.md`, `ISSUES.md`.
+- 이슈: 새 예약 생성 시 `attendee`를 복사하지 않았습니다.
+- 해결: 이름 보존을 추가했습니다. 회귀 테스트는 수정 전 실패, 수정 후 전체 **3/3 통과**했습니다. 필수 필드 보존과 입력 불변성도 확인했습니다.
+- 남은 문제: 취소 시 예약을 삭제하는 R2 결함과 실제 키오스크 검증 R3가 남아 있습니다. M1은 미완료이며 사용자 수락도 별도입니다.
+- 다음 작업: 후속 범위는 R2 수정·테스트와 실제 키오스크 검증 결과 확보입니다.
