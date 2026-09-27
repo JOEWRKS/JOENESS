@@ -1,0 +1,3 @@
+# Keep the model's original Markdown hard line breaks as exact response evidence.
+response.md whitespace=-trailing-space
+post-*/response.md whitespace=-trailing-space

@@ -1,0 +1,45 @@
+{
+  "caseId": "post-audit",
+  "startedAt": "2026-09-27T14:52:43.627Z",
+  "wallMs": 88375,
+  "exitCode": 0,
+  "runtime": {
+    "binary": "C:\\Users\\tjdwo\\AppData\\Local\\OpenAI\\Codex\\bin\\d23520d1e41bfb24\\codex.exe",
+    "model": "gpt-6-astra",
+    "reasoningEffort": "xhigh",
+    "threadId": "01a0e35a-a5ae-7ac2-a772-a92e6a685e20"
+  },
+  "promptSha256": "5eb8a9cabdc32b1f3c8c07784c38812e4c5e825afa69ce4e4b7a66c0a7b647fb",
+  "responseSha256": "cb527c3c8162e49295b835b9bcf2386e3fa808d1f0efd7edc4af35216cb50106",
+  "before": {
+    "head": "80d527fd5133c788a9fdc0c781ed9a206199cee5",
+    "branch": "feature/mergedrop-v1",
+    "statusSha256": "90e7c28543dfcde00e3be4be8ce02588d244ebd03fc953ac043460158c17eb72",
+    "agentsSha256": "555530effc652bde5f14558b3e8b7c905ee954eb34605a1ddc903e205b09b0e6",
+    "setupStateSha256": "a9589e8bb7240e1cef3adcf8bdaabe1b8b196c494d1dfb52ffd01594667f6155",
+    "taskSha256": "d6bc6e84beff1470bd041345065b571d9d3ff2ef8225ff774644217d9c07b0ba"
+  },
+  "after": {
+    "head": "80d527fd5133c788a9fdc0c781ed9a206199cee5",
+    "branch": "feature/mergedrop-v1",
+    "statusSha256": "90e7c28543dfcde00e3be4be8ce02588d244ebd03fc953ac043460158c17eb72",
+    "agentsSha256": "555530effc652bde5f14558b3e8b7c905ee954eb34605a1ddc903e205b09b0e6",
+    "setupStateSha256": "a9589e8bb7240e1cef3adcf8bdaabe1b8b196c494d1dfb52ffd01594667f6155",
+    "taskSha256": "d6bc6e84beff1470bd041345065b571d9d3ff2ef8225ff774644217d9c07b0ba"
+  },
+  "usage": {
+    "input_tokens": 162013,
+    "cached_input_tokens": 101504,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 2063,
+    "reasoning_output_tokens": 526
+  },
+  "eventCounts": {
+    "thread.started": 1,
+    "turn.started": 1,
+    "item.completed": 10,
+    "item.started": 8,
+    "turn.completed": 1
+  },
+  "lastError": null
+}
