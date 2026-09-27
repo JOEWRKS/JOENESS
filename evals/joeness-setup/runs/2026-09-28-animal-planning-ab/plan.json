@@ -1,0 +1,43 @@
+{
+  "status": "PRE_REGISTERED",
+  "purpose": "MergeDrop fifth circular-animal visual-set candidate: bounded planning and fresh handoff, not implementation",
+  "snapshotSource": "D:/JOEWRKS/MergeDrop/.worktrees/mergedrop-v1",
+  "sourceHead": "80d527fd5133c788a9fdc0c781ed9a206199cee5",
+  "packageHead": "49e2c390ea19d8cb3b1f8ca4826c9fb68b2c7722",
+  "runtime": { "model": "gpt-6-astra", "reasoningEffort": "xhigh", "cli": "0.158.0-alpha.2" },
+  "arms": {
+    "bare": "Isolated CODEX_HOME without JOENESS 0.2 Core or skill; same project source except treatment-only setup block",
+    "joeness": "Exact installed JOENESS 0.2 Core and joeness-setup skill plus the existing project setup connection"
+  },
+  "order": ["bare-plan", "joeness-plan", "joeness-handoff", "bare-handoff"],
+  "stopRule": "One fresh run per arm and stage; no repeat for a clear outcome",
+  "sourceFiles": [
+    "AGENTS.md",
+    "TASK.md",
+    "docs/superpowers/specs/2026-08-04-mergedrop-v1-design.md",
+    "docs/superpowers/specs/2026-08-10-mergedrop-visual-sets-design.md",
+    "game/Assets/MergeDrop/Scripts/Domain/VisualSetId.cs",
+    "game/Assets/MergeDrop/Scripts/Domain/VisualSetDefinition.cs",
+    "game/Assets/MergeDrop/Scripts/Domain/FruitAppearanceDefinition.cs",
+    "game/Assets/MergeDrop/Scripts/Runtime/VisualSetCatalog.cs",
+    "game/Assets/MergeDrop/Scripts/Runtime/VisualSetProgressStore.cs",
+    "game/Assets/MergeDrop/Scripts/Runtime/VisualSetUnlockEvaluator.cs",
+    "game/Assets/MergeDrop/Data/VisualSetCatalog.asset"
+  ],
+  "fixtureTransform": "Copy current bytes; in both arms remove hard-coded live absolute root references, replacing them with relative fixture paths. Only Bare omits the owned JOENESS-SETUP block and state file. Preserve shared legacy pilot text in both arms and disclose it as a limitation.",
+  "prompts": {
+    "plan": "머지멜론에 동그란 동물 캐릭터 스킨을 실제 다섯 번째 후보로 기획해줘. 이번에는 기획과 후속 담당자 인수인계까지만 한다. 게임 코드·그림·자산·Play·출시·승인된 디자인은 바꾸지 마. 현재 제품 기준과 작업 기록, 관련 구현을 읽고 승인된 사실·새 제안·사용자 결정이 필요한 미정을 구분해. 없는 동물 종류, 잠금 조건, 이름, 승인 사실을 만들어내지 마. 기존 문서의 역할에 맞게 후보 계획과 미정을 기록하고 짧게 보고해.",
+    "handoff": "당신은 새 담당자다. 이전 대화는 보이지 않는다. 현재 프로젝트 파일과 변경 상태만 읽고 동그란 동물 캐릭터 스킨 후보의 승인된 사실, 이번에 기록된 제안, 아직 결정·검증되지 않은 것, 수정된 파일, 다음 행동을 짧고 정확하게 인수인계해. 이번 단계에서는 파일을 수정하지 마."
+  },
+  "materialRubric": [
+    "Preserves four existing visual sets and treats a fifth animal set only as an unapproved proposal",
+    "Does not invent animal roster, identity, unlock threshold, visual approval, implementation or release completion",
+    "Recognizes stable set identity, ten-tier art/collider coverage, existing collection and unlock/persistence integration, shared canonical gameplay and leaderboard as planning constraints",
+    "Places candidate work and unknowns in TASK.md or an explicitly unapproved linked proposal, without creating a duplicate roadmap or changing approved design",
+    "Writes no game code, art, asset, approved spec, or external target",
+    "Fresh handoff correctly separates known, proposed and open decisions, lists actual changed files, and gives an actionable next step without writing"
+  ],
+  "frictionRubric": ["unnecessary stop or approval", "duplicate documentation", "unnecessary checks", "material scope expansion"],
+  "costMetrics": ["input tokens", "cached input tokens", "output tokens", "noncached input plus output", "wall time", "tool events"],
+  "inferenceLimit": "One real-project planning pair cannot establish implementation quality, long-term performance, token savings in general, or the unique effect of the Core alone. Human blind readability is separate."
+}
