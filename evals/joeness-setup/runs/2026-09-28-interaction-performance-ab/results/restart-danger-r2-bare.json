@@ -1,0 +1,75 @@
+{
+  "id": "restart-danger-r2-bare",
+  "identity": {
+    "caseId": "restart-danger",
+    "repetition": 2,
+    "arm": "bare"
+  },
+  "startedAt": "2026-09-27T20:36:43.001Z",
+  "wallMs": 633678,
+  "exitCode": 0,
+  "timedOut": false,
+  "runtime": {
+    "cli": "C:\\Users\\tjdwo\\AppData\\Local\\OpenAI\\Codex\\bin\\d23520d1e41bfb24\\codex.exe",
+    "model": "gpt-6-astra",
+    "reasoningEffort": "xhigh",
+    "threadId": "01a0e495-a093-7020-a33a-86654e3dc68c"
+  },
+  "promptSha256": "d9d36ed14394465ca6b7d508cd68746244b68fc7d1b128fb9f9d18c2699f2380",
+  "responseSha256": "7b7f9fd89a331a5b1b2c930e927a12428624479290878cdfdef270a71680311e",
+  "usage": {
+    "input_tokens": 1030059,
+    "cached_input_tokens": 966784,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 18254,
+    "reasoning_output_tokens": 8022
+  },
+  "derived": {
+    "input": 1030059,
+    "cachedInput": 966784,
+    "output": 18254,
+    "noncachedInputPlusOutput": 81529
+  },
+  "eventCounts": {
+    "thread.started": 1,
+    "turn.started": 1,
+    "item.completed": 34,
+    "item.started": 28,
+    "turn.completed": 1
+  },
+  "itemTypeCounts": {
+    "command_execution": 23,
+    "file_change": 5
+  },
+  "commands": [
+    "\"C:\\\\Users\\\\tjdwo\\\\.cache\\\\codex-runtimes\\\\codex-primary-runtime\\\\dependencies\\\\native\\\\powershell\\\\pwsh.exe\" -Command \"Get-Location; rg --files -g AGENTS.md -g '*.cs' -g '*.asmdef' -g '*.md' -g 'manifest.json' -g 'ProjectVersion.txt' -g '*.sln' -g '*.csproj' -g '*.ps1' -g '*.sh' -g '*.yml' -g '*.yaml' -g '*.json' -g '\"'!Library/**'\"' -g '\"'!Temp/**'\"' -g '\"'!obj/**'\"' -g '\"'!Logs/**'\"'; git status --short\"",
+    "\"C:\\\\Users\\\\tjdwo\\\\.cache\\\\codex-runtimes\\\\codex-primary-runtime\\\\dependencies\\\\native\\\\powershell\\\\pwsh.exe\" -Command \"Get-Content -LiteralPath 'AGENTS.md'; Get-Content -LiteralPath 'docs/superpowers/specs/2026-08-04-mergedrop-v1-design.md'; Get-Content -LiteralPath 'docs/DEVELOPMENT.md'\"",
+    "\"C:\\\\Users\\\\tjdwo\\\\.cache\\\\codex-runtimes\\\\codex-primary-runtime\\\\dependencies\\\\native\\\\powershell\\\\pwsh.exe\" -Command \"Get-Content -LiteralPath 'game/Assets/MergeDrop/Scripts/Runtime/WarningZone.cs'; Get-Content -LiteralPath 'game/Assets/MergeDrop/Scripts/Runtime/GameController.cs'; Get-Content -LiteralPath 'game/Assets/MergeDrop/Scripts/Runtime/MergePiece.cs'; Get-Content -LiteralPath 'game/Assets/MergeDrop/Tests/EditMode/MergeRulesTests.cs'; Get-Content -LiteralPath 'game/Assets/MergeDrop/Tests/EditMode/MergeDrop.EditModeTests.asmdef'; Get-Content -LiteralPath 'game/Assets/MergeDrop/Scripts/MergeDrop.Runtime.asmdef'; Get-Content -LiteralPath 'game/Packages/manifest.json'; Get-Content -LiteralPath 'game/ProjectSettings/ProjectVersion.txt'\"",
+    "\"C:\\\\Users\\\\tjdwo\\\\.cache\\\\codex-runtimes\\\\codex-primary-runtime\\\\dependencies\\\\native\\\\powershell\\\\pwsh.exe\" -Command \"rg --files game/Assets game/ProjectSettings -g '\"'!**/Art/**'\"'; Get-Content -LiteralPath 'game/Assets/MergeDrop/Scripts/Runtime/DropController.cs'; Get-Content -LiteralPath 'game/Assets/MergeDrop/Scripts/Runtime/GameHud.cs'; Get-Content -LiteralPath 'game/Assets/MergeDrop/Scripts/Runtime/BoardLayout.cs'; Get-Content -LiteralPath 'game/Assets/MergeDrop/Tests/EditMode/PieceCatalogTests.cs'; Get-Content -LiteralPath 'game/Assets/MergeDrop/Tests/EditMode/HighScoreStoreTests.cs'; Get-Content -LiteralPath '.gitignore'\"",
+    "\"C:\\\\Users\\\\tjdwo\\\\.cache\\\\codex-runtimes\\\\codex-primary-runtime\\\\dependencies\\\\native\\\\powershell\\\\pwsh.exe\" -Command \"rg -n --glob '\"'!JOENESS-PILOT-EVALUATION.md'\"' --glob '\"'!**/Library/**'\"' --glob '\"'!**/Temp/**'\"' --glob '\"'!**/Logs/**'\"' 'WarningZone|_dangerTime|_dangerDuration|_dropController|StartRun|Restart' game docs/DEVELOPMENT.md; Get-Command Unity,Unity.exe,dotnet,csc,mcs,python -ErrorAction SilentlyContinue | Select-Object Name,Source; Test-Path -LiteralPath 'C:\\\\Program Files\\\\Unity\\\\Hub\\\\Editor\\\\6000.3.21f1\\\\Editor\\\\Unity.exe'; Get-ChildItem -LiteralPath '.' -Force | Select-Object Mode,Name; Get-ChildItem -LiteralPath 'game' -Force | Select-Object Mode,Name\"",
+    "\"C:\\\\Users\\\\tjdwo\\\\.cache\\\\codex-runtimes\\\\codex-primary-runtime\\\\dependencies\\\\native\\\\powershell\\\\pwsh.exe\" -Command '$scene = Get-Content -LiteralPath '\"'game/Assets/MergeDrop/Scenes/Game.unity'; \"'$scene[150..220]; $scene[420..500]; Get-Content -LiteralPath '\"'game/Assets/MergeDrop/Tests/EditMode/PieceCatalogTests.cs.meta'; Get-Content -LiteralPath 'game/Assets/MergeDrop/Scripts/Runtime/HighScoreStore.cs'; Get-Content -LiteralPath 'game/Assets/MergeDrop/Scripts/Runtime/PieceCatalog.cs'; Get-Content -LiteralPath 'game/Assets/MergeDrop/Scripts/Domain/FruitDefinition.cs'; Get-Content -LiteralPath 'game/Assets/MergeDrop/Scripts/Domain/FruitTier.cs'; Get-ChildItem -LiteralPath 'game/Library' -Name | Select-Object -First 30\"",
+    "\"C:\\\\Users\\\\tjdwo\\\\.cache\\\\codex-runtimes\\\\codex-primary-runtime\\\\dependencies\\\\native\\\\powershell\\\\pwsh.exe\" -Command '$projectPath = (Resolve-Path -LiteralPath '\"'game').Path; New-Item -ItemType Directory -Path 'TestResults','Logs' -Force | Out-Null; & 'C:\\\\Program Files\\\\Unity\\\\Hub\\\\Editor\\\\6000.3.21f1\\\\Editor\\\\Unity.exe' -batchmode -nographics -noUpm -projectPath \"'$projectPath -runTests -testPlatform EditMode -runSynchronously -testResults \"$($PWD.Path)'\"\\\\TestResults\\\\editmode-baseline.xml\\\" -logFile \\\"\"'$($PWD.Path)'\"\\\\Logs\\\\editmode-baseline.log\\\"; exit \"'$LASTEXITCODE'",
+    "\"C:\\\\Users\\\\tjdwo\\\\.cache\\\\codex-runtimes\\\\codex-primary-runtime\\\\dependencies\\\\native\\\\powershell\\\\pwsh.exe\" -Command \"Get-Process -Name Unity -ErrorAction SilentlyContinue | Select-Object Id,StartTime; if (Test-Path -LiteralPath 'Logs/editmode-baseline.log') { Get-Content -LiteralPath 'Logs/editmode-baseline.log' -Tail 70 }; if (Test-Path -LiteralPath 'TestResults/editmode-baseline.xml') { [xml]\"'$results = Get-Content -LiteralPath '\"'TestResults/editmode-baseline.xml'; \"'$results.'\"'test-run' | Select-Object result,total,passed,failed,skipped,duration }\"",
+    "\"C:\\\\Users\\\\tjdwo\\\\.cache\\\\codex-runtimes\\\\codex-primary-runtime\\\\dependencies\\\\native\\\\powershell\\\\pwsh.exe\" -Command \"Get-Content -LiteralPath 'game/ProjectSettings/EditorBuildSettings.asset'; Get-Content -LiteralPath 'game/ProjectSettings/TimeManager.asset'; Get-Content -LiteralPath 'game/ProjectSettings/Physics2DSettings.asset' -TotalCount 95; rg --files game/Library/PackageCache -g 'Unity.ugui.asmdef' -g '*Test*Runner*.asmdef' -g 'NUnit*.dll'; git status --short\"",
+    "\"C:\\\\Users\\\\tjdwo\\\\.cache\\\\codex-runtimes\\\\codex-primary-runtime\\\\dependencies\\\\native\\\\powershell\\\\pwsh.exe\" -Command '$projectPath = (Resolve-Path -LiteralPath '\"'game').Path; \"'$unityArgs = @('\"'-batchmode', '-nographics', '-noUpm', '-projectPath', ('\\\"' + \"'$projectPath + '\"'\\\"'), '-runTests', '-testPlatform', 'EditMode', '-testFilter', 'WarningZoneTests', '-testResults', ('\\\"' + \"'$PWD.Path + '\"'\\\\TestResults\\\\warningzone-before.xml\\\"'), '-logFile', ('\\\"' + \"'$PWD.Path + '\"'\\\\Logs\\\\warningzone-before.log\\\"')); \"'$unityProcess = Start-Process -FilePath '\"'C:\\\\Program Files\\\\Unity\\\\Hub\\\\Editor\\\\6000.3.21f1\\\\Editor\\\\Unity.exe' -ArgumentList \"'$unityArgs -WindowStyle Hidden -Wait -PassThru; exit $unityProcess.ExitCode'",
+    "\"C:\\\\Users\\\\tjdwo\\\\.cache\\\\codex-runtimes\\\\codex-primary-runtime\\\\dependencies\\\\native\\\\powershell\\\\pwsh.exe\" -Command \"Get-Content -LiteralPath 'Logs/warningzone-before.log' -Tail 65; git diff --stat; git status --short\"",
+    "\"C:\\\\Users\\\\tjdwo\\\\.cache\\\\codex-runtimes\\\\codex-primary-runtime\\\\dependencies\\\\native\\\\powershell\\\\pwsh.exe\" -Command \"rg --files game/Library/PackageCache -g '*UI*.asmdef' -g '*ugui*' -g '*uGUI*'; rg -n 'Unity.ugui|Assembly|references|error' 'Logs/warningzone-before.log' | Select-Object -First 16; Get-Content -LiteralPath 'game/Packages/packages-lock.json' -TotalCount 150; Get-ChildItem -LiteralPath 'game/Library/PackageCache' -Name\"",
+    "\"C:\\\\Users\\\\tjdwo\\\\.cache\\\\codex-runtimes\\\\codex-primary-runtime\\\\dependencies\\\\native\\\\powershell\\\\pwsh.exe\" -Command \"Get-Content -LiteralPath 'game/Library/PackageCache/com.unity.ugui@e20f1880fa04/Runtime/UGUI/UnityEngine.UI.asmdef' -TotalCount 30\"",
+    "\"C:\\\\Users\\\\tjdwo\\\\.cache\\\\codex-runtimes\\\\codex-primary-runtime\\\\dependencies\\\\native\\\\powershell\\\\pwsh.exe\" -Command '$projectPath = (Resolve-Path -LiteralPath '\"'game').Path; \"'$unityArgs = @('\"'-batchmode', '-nographics', '-noUpm', '-projectPath', ('\\\"' + \"'$projectPath + '\"'\\\"'), '-runTests', '-testPlatform', 'EditMode', '-testFilter', 'WarningZoneTests', '-testResults', ('\\\"' + \"'$PWD.Path + '\"'\\\\TestResults\\\\warningzone-before.xml\\\"'), '-logFile', ('\\\"' + \"'$PWD.Path + '\"'\\\\Logs\\\\warningzone-before.log\\\"')); \"'$unityProcess = Start-Process -FilePath '\"'C:\\\\Program Files\\\\Unity\\\\Hub\\\\Editor\\\\6000.3.21f1\\\\Editor\\\\Unity.exe' -ArgumentList \"'$unityArgs -WindowStyle Hidden -Wait -PassThru; exit $unityProcess.ExitCode'",
+    "\"C:\\\\Users\\\\tjdwo\\\\.cache\\\\codex-runtimes\\\\codex-primary-runtime\\\\dependencies\\\\native\\\\powershell\\\\pwsh.exe\" -Command \"Get-Content -LiteralPath 'Logs/warningzone-before.log' -Tail 80; if (Test-Path -LiteralPath 'TestResults/warningzone-before.xml') { [xml]\"'$results = Get-Content -LiteralPath '\"'TestResults/warningzone-before.xml'; \"'$results.'\"'test-run' | Select-Object result,total,passed,failed,skipped,duration; \"'$results.SelectNodes('\"'//test-case') | ForEach-Object { [pscustomobject]@{Name=\"'$_.name; Result=$_.result; Message=$_.failure.message} } }'",
+    "\"C:\\\\Users\\\\tjdwo\\\\.cache\\\\codex-runtimes\\\\codex-primary-runtime\\\\dependencies\\\\native\\\\powershell\\\\pwsh.exe\" -Command \"Get-Content -LiteralPath 'Logs/warningzone-before.log' -TotalCount 190; rg -n -F 'UnityEngine.UI' 'game/Library/Bee/artifacts/1900b0aE.dag/MergeDrop.Runtime.rsp'; Get-ChildItem -LiteralPath 'game/Library/ScriptAssemblies' -Filter '*UI*' | Select-Object Name,Length; Get-ChildItem -LiteralPath 'game/Library/PackageManager' -Name\"",
+    "\"C:\\\\Users\\\\tjdwo\\\\.cache\\\\codex-runtimes\\\\codex-primary-runtime\\\\dependencies\\\\native\\\\powershell\\\\pwsh.exe\" -Command \"dotnet --list-sdks; git diff --check; Get-Content -LiteralPath 'game/Library/PackageManager/projectResolution.json' -TotalCount 35\"",
+    "\"C:\\\\Users\\\\tjdwo\\\\.cache\\\\codex-runtimes\\\\codex-primary-runtime\\\\dependencies\\\\native\\\\powershell\\\\pwsh.exe\" -Command \"rg --files 'game/Library/PackageCache/com.unity.ext.nunit@d8c07649098d' -g '*.dll'; Get-Content -LiteralPath 'game/Assets/MergeDrop/Scripts/Domain/MergeRules.cs'; Get-Content -LiteralPath 'game/Library/PackageManager/ProjectCache' -TotalCount 5\"",
+    "\"C:\\\\Users\\\\tjdwo\\\\.cache\\\\codex-runtimes\\\\codex-primary-runtime\\\\dependencies\\\\native\\\\powershell\\\\pwsh.exe\" -Command \"Get-ChildItem -LiteralPath 'game/Library/ScriptAssemblies' -Name; Get-Content -LiteralPath 'game/Assets/MergeDrop/Tests/EditMode/WarningZoneTests.cs' -TotalCount 45; git diff -- game/Assets/MergeDrop/Scripts/Runtime/WarningZone.cs game/Assets/MergeDrop/Scripts/Runtime/GameController.cs game/Assets/MergeDrop/Scenes/Game.unity\"",
+    "\"C:\\\\Users\\\\tjdwo\\\\.cache\\\\codex-runtimes\\\\codex-primary-runtime\\\\dependencies\\\\native\\\\powershell\\\\pwsh.exe\" -Command \"New-Item -ItemType Directory -Path '.tools/offline-checks/baseline' -Force | Out-Null; git show HEAD:game/Assets/MergeDrop/Scripts/Runtime/GameController.cs | Set-Content -LiteralPath '.tools/offline-checks/baseline/GameController.cs'; git show HEAD:game/Assets/MergeDrop/Scripts/Runtime/WarningZone.cs | Set-Content -LiteralPath '.tools/offline-checks/baseline/WarningZone.cs'; dotnet restore '.tools/offline-checks/OfflineChecks.csproj' --configfile '.tools/offline-checks/NuGet.Config' --ignore-failed-sources\"",
+    "\"C:\\\\Users\\\\tjdwo\\\\.cache\\\\codex-runtimes\\\\codex-primary-runtime\\\\dependencies\\\\native\\\\powershell\\\\pwsh.exe\" -Command \"dotnet run --project '.tools/offline-checks/OfflineChecks.csproj' --no-restore -p:UseBaseline=true 2>&1 | Tee-Object -FilePath 'TestResults/offline-before.txt'; exit \"'$LASTEXITCODE'",
+    "\"C:\\\\Users\\\\tjdwo\\\\.cache\\\\codex-runtimes\\\\codex-primary-runtime\\\\dependencies\\\\native\\\\powershell\\\\pwsh.exe\" -Command \"dotnet run --project '.tools/offline-checks/OfflineChecks.csproj' --no-restore -p:UseBaseline=false 2>&1 | Tee-Object -FilePath 'TestResults/offline-after.txt'; exit \"'$LASTEXITCODE'",
+    "\"C:\\\\Users\\\\tjdwo\\\\.cache\\\\codex-runtimes\\\\codex-primary-runtime\\\\dependencies\\\\native\\\\powershell\\\\pwsh.exe\" -Command \"@'\nfrom pathlib import Path\nimport re\nimport subprocess\nroot = Path.cwd()\nscene = (root / 'game/Assets/MergeDrop/Scenes/Game.unity').read_text()\ncontroller_id = re.search(r'_game: \\\\{fileID: (\\\\d+)\\\\}', scene).group(1)\nzone_id = re.search(r'_warningZone: \\\\{fileID: (\\\\d+)\\\\}', scene).group(1)\nsections = dict(re.findall(r'--- \"'!u!'\"\\\\d+ &(\\\\d+)\\\\n(.*?)(?=--- \"'!u!|'\"\\\\Z)', scene, re.S))\nassert 'MergeDrop.Runtime::GameController' in sections[controller_id]\nassert 'MergeDrop.Runtime::WarningZone' in sections[zone_id]\nassert f'_game: {{fileID: {controller_id}}}' in sections[zone_id]\nassert '_dangerDuration: 2' in sections[zone_id]\nzone = (root / 'game/Assets/MergeDrop/Scripts/Runtime/WarningZone.cs').read_text()\nbefore = subprocess.check_output(['git', 'show', 'HEAD:game/Assets/MergeDrop/Scripts/Runtime/WarningZone.cs'], text=True)\nassert zone[zone.index('    private void Update()'):] == before[before.index('    private void Update()'):]\nprint('PASS: scene controller/zone references point to the correct components')\nprint('PASS: danger duration remains 2 seconds; Update and trigger rules are unchanged')\nmeta = (root / 'game/Assets/MergeDrop/Tests/EditMode/WarningZoneTests.cs.meta').read_text()\nassert re.search(r'guid: [0-9a-f]{32}', meta)\nprint('PASS: regression test asset has a Unity metadata GUID')\n'@ | python -; git diff --check; git diff --stat; git status --short\""
+  ],
+  "lastError": null,
+  "statusBefore": "",
+  "statusAfter": "M docs/DEVELOPMENT.md\n M game/Assets/MergeDrop/Scenes/Game.unity\n M game/Assets/MergeDrop/Scripts/MergeDrop.Runtime.asmdef\n M game/Assets/MergeDrop/Scripts/Runtime/GameController.cs\n M game/Assets/MergeDrop/Scripts/Runtime/WarningZone.cs\n?? game/Assets/MergeDrop/Tests/EditMode/WarningZoneTests.cs\n?? game/Assets/MergeDrop/Tests/EditMode/WarningZoneTests.cs.meta",
+  "headBefore": "ce2297a65b329462313b9f65231b54585618afd7",
+  "headAfter": "ce2297a65b329462313b9f65231b54585618afd7",
+  "authCopyRemoved": true
+}

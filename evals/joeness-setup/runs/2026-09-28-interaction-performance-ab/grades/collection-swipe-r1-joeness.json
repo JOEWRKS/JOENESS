@@ -1,0 +1,33 @@
+{
+  "id": "collection-swipe-r1-joeness",
+  "caseId": "collection-swipe",
+  "agentResultSha256": "1d4002f3debf10abf9eb4bf25357ee19a4561e560b287b401c146ece2d8e16fc",
+  "oracleSha256": "565495eb1d7d0356b353527612fbbe24f889e706b4d51d97e5f0f0c8ac646ca8",
+  "baselineEditModeSha256": "2fb8222f433d7dd3e503f8a5696e0cc263399911b929bad362fd39eb52286492",
+  "oracleNames": [
+    "CollectionSwipeBehaviorOracleTests.PlayerDragShowsTheNextCollectionPage"
+  ],
+  "focused": {
+    "exitCode": 0,
+    "wallMs": 19730,
+    "xmlExists": true,
+    "resultSha256": "b395b2359e3b09f8d13961153bc28c66352bf747828bf2238857ef85a8593d2d",
+    "passed": 1,
+    "failed": 0
+  },
+  "fullEditMode": {
+    "exitCode": 0,
+    "wallMs": 15874,
+    "xmlExists": true,
+    "resultSha256": "705a36d82cbd07f4ca921d0cf488c2a4385ca484a4cd2245eb008b0a97e2dd9b",
+    "passed": 196,
+    "failed": 0
+  },
+  "outcome": {
+    "pass": true,
+    "oraclePass": true,
+    "missingBaseline": [],
+    "newFailures": []
+  },
+  "restored": true
+}

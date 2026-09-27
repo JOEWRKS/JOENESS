@@ -1,0 +1,39 @@
+{
+  "id": "collection-swipe-r1-bare",
+  "identity": {
+    "caseId": "collection-swipe",
+    "repetition": 1,
+    "arm": "bare"
+  },
+  "startedAt": "2026-09-27T19:15:11.448Z",
+  "wallMs": 6179,
+  "exitCode": 1,
+  "timedOut": false,
+  "runtime": {
+    "cli": "C:\\Users\\tjdwo\\AppData\\Local\\Programs\\OpenAI\\Codex\\bin\\codex.exe",
+    "model": "gpt-6-astra",
+    "reasoningEffort": "xhigh",
+    "threadId": "01a0e44a-fa53-73b3-85e7-d7351500970d"
+  },
+  "promptSha256": "138ffb1ce5f74e830d9fec3e6d9a73dea4445148be055d44f286c68b56b2b31f",
+  "responseSha256": null,
+  "usage": null,
+  "derived": null,
+  "eventCounts": {
+    "thread.started": 1,
+    "item.completed": 1,
+    "turn.started": 1,
+    "error": 1,
+    "turn.failed": 1
+  },
+  "itemTypeCounts": {},
+  "commands": [],
+  "lastError": {
+    "message": "{\"type\":\"error\",\"status\":400,\"error\":{\"type\":\"invalid_request_error\",\"message\":\"The 'gpt-6-astra' model requires a newer version of Codex. Please upgrade to the latest app or CLI and try again.\"}}"
+  },
+  "statusBefore": "",
+  "statusAfter": "",
+  "headBefore": "ad4827d1a00bf4d0334772e63f48d5441c787d47",
+  "headAfter": "ad4827d1a00bf4d0334772e63f48d5441c787d47",
+  "authCopyRemoved": true
+}

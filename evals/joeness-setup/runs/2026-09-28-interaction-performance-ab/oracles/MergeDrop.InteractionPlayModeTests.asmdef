@@ -1,0 +1,10 @@
+{
+  "name": "MergeDrop.InteractionPlayModeTests",
+  "references": [
+    "MergeDrop.Runtime"
+  ],
+  "includePlatforms": [],
+  "optionalUnityReferences": [
+    "TestAssemblies"
+  ]
+}

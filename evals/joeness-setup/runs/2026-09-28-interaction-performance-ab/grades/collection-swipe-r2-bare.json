@@ -1,0 +1,34 @@
+{
+  "id": "collection-swipe-r2-bare",
+  "caseId": "collection-swipe",
+  "agentResultSha256": "379b43e673cedf8e1202facb2bf3f6381ff219a602a6e3780504b18b9f9fb1ad",
+  "oracleSha256": "565495eb1d7d0356b353527612fbbe24f889e706b4d51d97e5f0f0c8ac646ca8",
+  "baselineEditModeSha256": "2fb8222f433d7dd3e503f8a5696e0cc263399911b929bad362fd39eb52286492",
+  "oracleNames": [
+    "CollectionSwipeBehaviorOracleTests.PlayerDragShowsTheNextCollectionPage"
+  ],
+  "focused": {
+    "exitCode": 0,
+    "wallMs": 11771,
+    "xmlExists": true,
+    "resultSha256": "a3c75365815c79e98cb9db328124b91faa9f7832e52c18a8825557ace627fa24",
+    "passed": 1,
+    "failed": 0
+  },
+  "fullEditMode": {
+    "exitCode": 0,
+    "wallMs": 12931,
+    "xmlExists": true,
+    "resultSha256": "d441a2ee09eff164eac1d3b989fee16d8006b9f3233bfe4e0b06a7c94eb2db8b",
+    "passed": 192,
+    "failed": 0
+  },
+  "outcome": {
+    "pass": true,
+    "oraclePass": true,
+    "missingBaseline": [],
+    "newFailures": []
+  },
+  "restored": true,
+  "statusOnlyDrift": false
+}

@@ -1,0 +1,56 @@
+{
+  "status": "PRE_REGISTERED_MODEL_RUNS",
+  "purpose": "Bare versus JOENESS 0.2 on bounded actual Unity UI/gameplay interaction repairs; measure coding outcome and agent cost separately",
+  "trialRoot": "D:/JOEWRKS/JOENESS-Interaction-AB-20260928",
+  "sourceRepository": "D:/JOEWRKS/MergeDrop/.worktrees/mergedrop-v1",
+  "harnessRepository": "D:/JOEWRKS/작업하네스",
+  "runtime": {
+    "cli": "codex-cli 0.158.0-alpha.2",
+    "model": "gpt-6-astra",
+    "reasoningEffort": "xhigh",
+    "sessionTimeoutMs": 900000
+  },
+  "stripLegacyMarkers": true,
+  "useSetupHelper": true,
+  "commonPrompt": "이 저장소는 격리된 머지멜론 과거 소스다. 현재 폴더의 제품 규칙과 코드를 확인하고 아래 오류를 실제 코드와 가능한 검사로 고쳐라. 현재 폴더 밖의 원본 저장소, 다른 시험 폴더, 평가 자료, 외부 서비스는 열거나 수정하지 마라. 승인된 게임 기능을 확장하지 말고 필요한 파일만 변경하라. 해당 검사와 가능한 기존 검사를 실행하고, 실제로 확인한 것과 미확인을 구분해 보고하라. commit·push·Play 배포는 하지 마라.",
+  "cases": [
+    {
+      "id": "collection-swipe",
+      "baseCommit": "ae377e7607daf5d96c823da0fb5cbbc451d42fc5",
+      "fixCommit": "398755fb8b79de4558411f62014ca3d65159f4b8",
+      "prompt": "컬렉션 화면에서 좌우 버튼은 동작하지만, 플레이어가 스킨 미리보기 영역을 왼쪽으로 스와이프해도 다음 스킨이 보이지 않는다. 실제 Unity UI 드래그 입력으로 다음 페이지가 표시되게 고치고, 반대 방향과 기존 버튼 동작을 보존해라. 화면 구조나 스킨 기능은 확장하지 마라.",
+      "oracleFile": "game/Assets/MergeDrop/Tests/EditMode/CollectionSwipeBehaviorOracleTests.cs",
+      "oracleSha256": "565495eb1d7d0356b353527612fbbe24f889e706b4d51d97e5f0f0c8ac646ca8",
+      "preflightGreenSha256": "156761d4911e287e5b1b6bde523376b5f42da109046b79af7fa9db2c65f8f0f5",
+      "baselineEditModeSha256": "2fb8222f433d7dd3e503f8a5696e0cc263399911b929bad362fd39eb52286492",
+      "oraclePlatform": "EditMode",
+      "oracleFilter": "CollectionSwipeBehaviorOracleTests"
+    },
+    {
+      "id": "restart-danger",
+      "baseCommit": "fa00b874b1cab3cc71f2ab12b6524fb841ee303c",
+      "fixCommit": "8813351eb03623a43277775b673a78d9d59a3671",
+      "prompt": "위험 구역에 과일이 머물다 게임을 재시작하면 새 판이 이전 판의 위험 누적 시간을 이어받아 너무 빨리 게임오버될 수 있다. 재시작한 판은 새 위험 구간을 온전히 받도록 고치고, 실제 위험이 계속되면 정상적으로 게임오버되는 동작은 보존해라. 다른 게임 규칙이나 화면은 바꾸지 마라.",
+      "oracleFile": "game/Assets/MergeDrop/Tests/PlayMode/RestartDangerBehaviorOracleTests.cs",
+      "oracleAssemblyFile": "game/Assets/MergeDrop/Tests/PlayMode/MergeDrop.InteractionPlayModeTests.asmdef",
+      "oracleSha256": "6eb4d1e7b5064bb15d28dfec87c89550f033532563474b08e0e7d9bbdc1e6341",
+      "preflightGreenSha256": "79dc9271600365fb8a954ea7e984bc1df0c1f31ad9a8384e4819d7b3a2753a39",
+      "baselineEditModeSha256": "bf395d884d26b763a7fcfe85c494ec793d9f8cfbeeb59c6287183d169d0d39b7",
+      "oraclePlatform": "PlayMode",
+      "oracleFilter": "RestartDangerBehaviorOracleTests"
+    }
+  ],
+  "runOrder": [
+    "collection-swipe-r1-bare",
+    "collection-swipe-r1-joeness",
+    "restart-danger-r1-joeness",
+    "restart-danger-r1-bare",
+    "collection-swipe-r2-joeness",
+    "collection-swipe-r2-bare",
+    "restart-danger-r2-bare",
+    "restart-danger-r2-joeness"
+  ],
+  "primaryOutcome": "Hidden interaction oracle passes on a fresh isolated project without new unrelated failures",
+  "costOutcome": "Agent wall time, total input tokens, noncached input plus output tokens, and command executions; Unity grading cost reported separately",
+  "interpretation": "Do not claim JOENESS accuracy or efficiency superiority from equal successes or from a task whose oracle becomes invalid; retain all failed and ambiguous evidence"
+}

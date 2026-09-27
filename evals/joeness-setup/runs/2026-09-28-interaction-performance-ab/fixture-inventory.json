@@ -1,0 +1,88 @@
+{
+  "packageIdentity": {
+    "core": "f360b48be1b4143035f61fa20149a3249c60dea2e7f12cffa8bf1e8918f4f6a9",
+    "skill": "9a36f42f0094c5e60bd039be64fc199e983a591c51063767165efb80103647aa"
+  },
+  "inventory": [
+    {
+      "id": "collection-swipe-r1-bare",
+      "caseId": "collection-swipe",
+      "baseCommit": "ae377e7607daf5d96c823da0fb5cbbc451d42fc5",
+      "arm": "bare",
+      "project": "D:\\JOEWRKS\\JOENESS-Interaction-AB-20260928\\runs\\collection-swipe-r1-bare\\project",
+      "home": "D:\\JOEWRKS\\JOENESS-Interaction-AB-20260928\\runs\\collection-swipe-r1-bare\\home",
+      "head": "ad4827d1a00bf4d0334772e63f48d5441c787d47",
+      "agentsSha256": "1c3537316f948532492709d90b05458a0c262ff28fe2f3803cf5bce2c19a6080"
+    },
+    {
+      "id": "collection-swipe-r1-joeness",
+      "caseId": "collection-swipe",
+      "baseCommit": "ae377e7607daf5d96c823da0fb5cbbc451d42fc5",
+      "arm": "joeness",
+      "project": "D:\\JOEWRKS\\JOENESS-Interaction-AB-20260928\\runs\\collection-swipe-r1-joeness\\project",
+      "home": "D:\\JOEWRKS\\JOENESS-Interaction-AB-20260928\\runs\\collection-swipe-r1-joeness\\home",
+      "head": "958ad4a65f7ff82c906e35f69b68caad74120cb5",
+      "agentsSha256": "4ac3f1a4f166c01588af5459df1a3e3fd3c7c0eb07a5de5703d9b105bb29a9d8"
+    },
+    {
+      "id": "restart-danger-r1-joeness",
+      "caseId": "restart-danger",
+      "baseCommit": "fa00b874b1cab3cc71f2ab12b6524fb841ee303c",
+      "arm": "joeness",
+      "project": "D:\\JOEWRKS\\JOENESS-Interaction-AB-20260928\\runs\\restart-danger-r1-joeness\\project",
+      "home": "D:\\JOEWRKS\\JOENESS-Interaction-AB-20260928\\runs\\restart-danger-r1-joeness\\home",
+      "head": "5dcf3fe7ff6fa2f5793817687c43585510f857c8",
+      "agentsSha256": "0e9268704ebe74a14cfdf590826fa6a0fa693dfc42ed0af40bf12dc114505683"
+    },
+    {
+      "id": "restart-danger-r1-bare",
+      "caseId": "restart-danger",
+      "baseCommit": "fa00b874b1cab3cc71f2ab12b6524fb841ee303c",
+      "arm": "bare",
+      "project": "D:\\JOEWRKS\\JOENESS-Interaction-AB-20260928\\runs\\restart-danger-r1-bare\\project",
+      "home": "D:\\JOEWRKS\\JOENESS-Interaction-AB-20260928\\runs\\restart-danger-r1-bare\\home",
+      "head": "ed9798c15f33198b03a75746cb64bca6e9fc495e",
+      "agentsSha256": "e4314f97cd1c52802c84de21ecd5ae27c477ca1690cc1998ff693162af4887cb"
+    },
+    {
+      "id": "collection-swipe-r2-joeness",
+      "caseId": "collection-swipe",
+      "baseCommit": "ae377e7607daf5d96c823da0fb5cbbc451d42fc5",
+      "arm": "joeness",
+      "project": "D:\\JOEWRKS\\JOENESS-Interaction-AB-20260928\\runs\\collection-swipe-r2-joeness\\project",
+      "home": "D:\\JOEWRKS\\JOENESS-Interaction-AB-20260928\\runs\\collection-swipe-r2-joeness\\home",
+      "head": "26f762808bab97a54b4b6964cd249aad3d38f3a8",
+      "agentsSha256": "4ac3f1a4f166c01588af5459df1a3e3fd3c7c0eb07a5de5703d9b105bb29a9d8"
+    },
+    {
+      "id": "collection-swipe-r2-bare",
+      "caseId": "collection-swipe",
+      "baseCommit": "ae377e7607daf5d96c823da0fb5cbbc451d42fc5",
+      "arm": "bare",
+      "project": "D:\\JOEWRKS\\JOENESS-Interaction-AB-20260928\\runs\\collection-swipe-r2-bare\\project",
+      "home": "D:\\JOEWRKS\\JOENESS-Interaction-AB-20260928\\runs\\collection-swipe-r2-bare\\home",
+      "head": "39c489c39c3b922b859873282e91db4086cbb42d",
+      "agentsSha256": "1c3537316f948532492709d90b05458a0c262ff28fe2f3803cf5bce2c19a6080"
+    },
+    {
+      "id": "restart-danger-r2-bare",
+      "caseId": "restart-danger",
+      "baseCommit": "fa00b874b1cab3cc71f2ab12b6524fb841ee303c",
+      "arm": "bare",
+      "project": "D:\\JOEWRKS\\JOENESS-Interaction-AB-20260928\\runs\\restart-danger-r2-bare\\project",
+      "home": "D:\\JOEWRKS\\JOENESS-Interaction-AB-20260928\\runs\\restart-danger-r2-bare\\home",
+      "head": "ce2297a65b329462313b9f65231b54585618afd7",
+      "agentsSha256": "e4314f97cd1c52802c84de21ecd5ae27c477ca1690cc1998ff693162af4887cb"
+    },
+    {
+      "id": "restart-danger-r2-joeness",
+      "caseId": "restart-danger",
+      "baseCommit": "fa00b874b1cab3cc71f2ab12b6524fb841ee303c",
+      "arm": "joeness",
+      "project": "D:\\JOEWRKS\\JOENESS-Interaction-AB-20260928\\runs\\restart-danger-r2-joeness\\project",
+      "home": "D:\\JOEWRKS\\JOENESS-Interaction-AB-20260928\\runs\\restart-danger-r2-joeness\\home",
+      "head": "2fbcbf242ad9252dab49bea95f0db1c47a9d68b9",
+      "agentsSha256": "0e9268704ebe74a14cfdf590826fa6a0fa693dfc42ed0af40bf12dc114505683"
+    }
+  ]
+}

@@ -7,7 +7,7 @@ import { dirname, extname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { normalizeHistoricalInstructions, parseRunId, tallyUsage } from './protocol.mjs';
 
-const evidenceRoot = dirname(fileURLToPath(import.meta.url));
+const evidenceRoot = resolve(process.env.JOENESS_EVAL_EVIDENCE_ROOT || dirname(fileURLToPath(import.meta.url)));
 const plan = JSON.parse(readFileSync(join(evidenceRoot, 'plan.json'), 'utf8'));
 const trialRoot = resolve(plan.trialRoot);
 const sourceRoot = resolve(plan.sourceRepository);
@@ -49,7 +49,13 @@ function neutralizeTemplate(root) {
     const raw = readFileSync(path);
     if (raw.includes(0)) return;
     let text = raw.toString('utf8');
-    if (path === join(root, 'AGENTS.md')) text = normalizeHistoricalInstructions(text);
+    if (path === join(root, 'AGENTS.md')) {
+      text = normalizeHistoricalInstructions(text);
+      if (plan.stripLegacyMarkers) {
+        text = text.replaceAll('<!-- JOEWRKS-PROJECT:BEGIN -->', '')
+          .replaceAll('<!-- JOEWRKS-PROJECT:END -->', '');
+      }
+    }
     else text = text.replaceAll('D:\\JOEWRKS\\MergeDrop', '.').replaceAll('D:/JOEWRKS/MergeDrop', '.');
     if (text !== raw.toString('utf8')) writeFileSync(path, text);
   });
@@ -90,6 +96,21 @@ function setupBlock() {
   return { block: match[0], stateBytes };
 }
 
+async function applyProjectSetup(project, block) {
+  const helper = join(harnessRoot, 'skills/joeness-setup/scripts/project-setup.ps1');
+  const check = JSON.parse(await command('pwsh', ['-NoProfile', '-File', helper, '-Check', '-ProjectPath', project], harnessRoot));
+  if (check.status !== 'ready' || check.blockState !== 'absent') throw new Error(`Setup fixture not ready: ${check.status}/${check.blockState}`);
+  const body = block.replace(/^<!-- JOENESS-SETUP:BEGIN -->\r?\n/, '')
+    .replace(/\r?\n<!-- JOENESS-SETUP:END -->$/, '');
+  const apply = JSON.parse(await command('pwsh', ['-NoProfile', '-File', helper, '-Apply',
+    '-ProjectPath', project, '-ExpectedRoot', check.projectRoot,
+    '-ExpectedTargetHash', check.targetHash, '-ExpectedStateHash', check.stateHash,
+    '-ManagedBodyBase64', Buffer.from(body, 'utf8').toString('base64')], harnessRoot));
+  if (apply.status !== 'current') throw new Error(`Setup fixture apply not current: ${apply.status}`);
+  const verify = JSON.parse(await command('pwsh', ['-NoProfile', '-File', helper, '-Check', '-ProjectPath', project], harnessRoot));
+  if (verify.status !== 'current' || verify.blockState !== 'clean') throw new Error(`Setup fixture verification failed: ${verify.status}/${verify.blockState}`);
+}
+
 async function prepareRuns() {
   const runsRoot = insideTrial(join(trialRoot, 'runs'));
   if (existsSync(runsRoot)) throw new Error('Runs already exist; refusing overwrite');
@@ -109,16 +130,20 @@ async function prepareRuns() {
     mkdirSync(runRoot, { recursive: true });
     cpSync(template, project, { recursive: true });
     mkdirSync(home, { recursive: true });
+    if (plan.useSetupHelper) await command('git', ['init', '-q'], project);
     if (identity.arm === 'joeness') {
-      const agents = join(project, 'AGENTS.md');
-      writeFileSync(agents, readFileSync(agents, 'utf8').trimEnd() + '\n\n' + block + '\n');
-      mkdirSync(join(project, '.joeness'), { recursive: true });
-      writeFileSync(join(project, '.joeness/setup-state.json'), stateBytes);
+      if (plan.useSetupHelper) await applyProjectSetup(project, block);
+      else {
+        const agents = join(project, 'AGENTS.md');
+        writeFileSync(agents, readFileSync(agents, 'utf8').trimEnd() + '\n\n' + block + '\n');
+        mkdirSync(join(project, '.joeness'), { recursive: true });
+        writeFileSync(join(project, '.joeness/setup-state.json'), stateBytes);
+      }
       const apply = await command('pwsh', ['-NoProfile', '-File', join(harnessRoot, 'JOENESS.ps1'), '-Apply', '-CodexHome', home], harnessRoot);
       const check = await command('pwsh', ['-NoProfile', '-File', join(harnessRoot, 'JOENESS.ps1'), '-Check', '-CodexHome', home], harnessRoot);
       if (!apply.includes('"status":"current"') || !check.includes('"status":"current"')) throw new Error(`JOENESS install not current: ${id}`);
     }
-    await command('git', ['init', '-q'], project);
+    if (!plan.useSetupHelper) await command('git', ['init', '-q'], project);
     await command('git', ['add', '.'], project);
     await command('git', ['-c', 'user.name=JOENESS Eval', '-c', 'user.email=eval@invalid.local', 'commit', '-qm', 'Frozen historical task fixture'], project);
     const head = (await command('git', ['rev-parse', 'HEAD'], project)).trim();

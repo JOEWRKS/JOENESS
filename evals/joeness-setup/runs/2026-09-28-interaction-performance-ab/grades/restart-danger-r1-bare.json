@@ -1,0 +1,35 @@
+{
+  "id": "restart-danger-r1-bare",
+  "caseId": "restart-danger",
+  "agentResultSha256": "9a9e9b5945db494a5c5d45d3c6f2b5088731fe17d6819d40f57c0efd3231ffac",
+  "oracleSha256": "6eb4d1e7b5064bb15d28dfec87c89550f033532563474b08e0e7d9bbdc1e6341",
+  "baselineEditModeSha256": "bf395d884d26b763a7fcfe85c494ec793d9f8cfbeeb59c6287183d169d0d39b7",
+  "oracleNames": [
+    "RestartDangerBehaviorOracleTests.RestartDoesNotInheritThePreviousRunsDanger",
+    "RestartDangerBehaviorOracleTests.StationaryDangerEndsAnUninterruptedRun"
+  ],
+  "focused": {
+    "exitCode": 0,
+    "wallMs": 16498,
+    "xmlExists": true,
+    "resultSha256": "6365354d535b41daf8463510464eaaacdabc9a9ea4d5f7e4dcb1f3fe1fb6a128",
+    "passed": 2,
+    "failed": 0
+  },
+  "fullEditMode": {
+    "exitCode": 0,
+    "wallMs": 17240,
+    "xmlExists": true,
+    "resultSha256": "bd0760dd527ae390ccb7927579c50cbd3d8be47dd8695baca193e730909fdd83",
+    "passed": 27,
+    "failed": 0
+  },
+  "outcome": {
+    "pass": true,
+    "oraclePass": true,
+    "missingBaseline": [],
+    "newFailures": []
+  },
+  "restored": true,
+  "statusOnlyDrift": false
+}
