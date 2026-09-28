@@ -1,0 +1,30 @@
+{
+  "coreHash": "f360b48be1b4143035f61fa20149a3249c60dea2e7f12cffa8bf1e8918f4f6a9",
+  "skillHash": "9a36f42f0094c5e60bd039be64fc199e983a591c51063767165efb80103647aa",
+  "inventory": [
+    {
+      "arm": "bare",
+      "source": "D:\\JOEWRKS\\JOENESS-Performance-AB-20260928\\runs\\deferred-ranking-auth-r1-bare\\project",
+      "priorThreadId": "01a0e3dc-fb3f-7673-b622-fd166e94f640",
+      "priorHead": "d2191fef01216d82d042e1b1670b4419cecedf7e",
+      "frozenHead": "84f8bdb08c072941c77e3c100a6d69a4dda52e4f",
+      "priorResponseSha256": "a6a351d4a1e93734d3f0ef3fc91d08df70c0427961bb7c590d4be6e5e94509c4",
+      "agentsSha256": "37f46b801552e99aed0d7cdfd1da77dc9c1f5b6953424aee4c8ce2c18c37c13a",
+      "setupStatus": "absent",
+      "setupHash": null,
+      "baselineStatus": "M game/Assets/MergeDrop/Art/UI/SettingsIcon.png.meta\n M game/ProjectSettings/TimeManager.asset"
+    },
+    {
+      "arm": "joeness",
+      "source": "D:\\JOEWRKS\\JOENESS-Performance-AB-20260928\\runs\\deferred-ranking-auth-r1-joeness\\project",
+      "priorThreadId": "01a0e3d6-83df-7272-a7cf-eeffaf062930",
+      "priorHead": "79b2854809edc387d9c0b30827993f29f7b365bb",
+      "frozenHead": "72abb8d773390214ec518037ede6a46972706e72",
+      "priorResponseSha256": "37f5a8a693fe68dd0bd23f1917dcf424d9a45e7126ccd7313efe5b4ca3b6e3cc",
+      "agentsSha256": "bcaf194050f651911f8f6e975cd913ad1fc195b8e138fc589c50b91d90a366d2",
+      "setupStatus": "copied-block-matches-state",
+      "setupHash": "a96d8545c6a6cbc7c127a38ea4e348ea07b0f1059faa2cbc3dcd066a8eee89a5",
+      "baselineStatus": "M game/Assets/MergeDrop/Art/UI/SettingsIcon.png.meta\n M game/ProjectSettings/TimeManager.asset"
+    }
+  ]
+}

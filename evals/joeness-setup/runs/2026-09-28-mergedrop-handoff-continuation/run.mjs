@@ -1,7 +1,7 @@
 // Frozen continuation of the prior real-code A/B. Raw rollouts and credentials are not retained.
 import { spawn } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { copyFileSync, cpSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { copyFileSync, cpSync, existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -28,15 +28,24 @@ async function command(file, args, cwd, env = process.env) {
     const process = spawn(file, args, { cwd, env, windowsHide: true });
     process.stdin.end();
     let output = '';
+    let error = '';
     process.stdout.on('data', chunk => { output += chunk.toString(); });
-    process.stderr.on('data', chunk => { output += chunk.toString(); });
+    process.stderr.on('data', chunk => { error += chunk.toString(); });
     process.on('error', fail);
-    process.on('close', code => code === 0 ? done(output) : fail(new Error(`${file} exited ${code}: ${output.slice(-1500)}`)));
+    process.on('close', code => code === 0 ? done(output) : fail(new Error(`${file} exited ${code}: ${(output + error).slice(-1500)}`)));
   });
 }
 
 async function prepare() {
-  if (existsSync(trial)) throw new Error(`Trial already exists; refusing overwrite: ${trial}`);
+  // A pre-model prepare attempt left only an untouched Bare copy after Git printed line-ending warnings.
+  // Permit that exact partial state once; never overwrite a completed fixture or model output.
+  if (existsSync(trial)) {
+    const children = readdirSync(trial).sort();
+    const bareChildren = existsSync(childPath('bare')) ? readdirSync(childPath('bare')).sort() : [];
+    if (children.join(',') !== 'bare' || bareChildren.join(',') !== 'home,project' || existsSync(join(root, 'inventory.json'))) {
+      throw new Error(`Trial already exists outside recorded pre-model partial state: ${trial}`);
+    }
+  }
   if (plan.status !== 'PRE_REGISTERED') throw new Error('Plan is not preregistered');
   const manifest = JSON.parse(readFileSync(join(harness, 'vendor/source-manifest.json'), 'utf8'));
   const coreHash = hash(readFileSync(join(harness, 'astra-judgment-core.md')));
@@ -52,7 +61,7 @@ async function prepare() {
     const project = childPath(arm, 'project');
     const home = childPath(arm, 'home');
     mkdirSync(dirname(project), { recursive: true });
-    cpSync(source, project, { recursive: true });
+    if (!existsSync(project)) cpSync(source, project, { recursive: true });
     mkdirSync(home, { recursive: true });
     const priorHead = (await command('git', ['rev-parse', 'HEAD'], project)).trim();
     if (priorHead !== sourceResult.headAfter) throw new Error(`Prior HEAD drift: ${arm}`);
@@ -74,14 +83,50 @@ async function prepare() {
       const check = await command('pwsh', ['-NoProfile', '-File', join(harness, 'JOENESS.ps1'), '-Check', '-CodexHome', home], harness);
       if (!apply.includes('"status":"current"') || !check.includes('"status":"current"')) throw new Error('Isolated JOENESS install failed');
     }
-    const setupState = arm === 'joeness' ? JSON.parse(await command('pwsh', ['-NoProfile', '-File', join(harness, 'skills/joeness-setup/scripts/project-setup.ps1'), '-Check', '-ProjectPath', project], harness)) : null;
-    if (arm === 'joeness' && (setupState.status !== 'current' || setupState.blockState !== 'clean')) throw new Error('Copied setup state not clean');
+    const setupState = arm === 'joeness' ? verifyCopiedBlock(project) : null;
     inventory.push({ arm, source, priorThreadId: sourceResult.runtime.threadId, priorHead, frozenHead: (await command('git', ['rev-parse', 'HEAD'], project)).trim(),
       priorResponseSha256: sourceResult.responseSha256, agentsSha256: hash(readFileSync(join(project, 'AGENTS.md'))), setupStatus: setupState?.status || 'absent',
       baselineStatus: (await command('git', ['status', '--porcelain=v1'], project)).trim() });
     console.log(`PREPARED ${arm}`);
   }
   writeFileSync(join(root, 'inventory.json'), JSON.stringify({ coreHash, skillHash, inventory }, null, 2) + '\n');
+}
+
+function verifyCopiedBlock(project) {
+  const state = JSON.parse(readFileSync(join(project, '.joeness/setup-state.json'), 'utf8'));
+  const block = Buffer.from(state.appliedBlockBase64, 'base64');
+  const agents = readFileSync(join(project, 'AGENTS.md'));
+  if (hash(block) !== state.appliedBlockSha256 || agents.indexOf(block) < 0) throw new Error('Copied setup block/state drift');
+  return { status: 'copied-block-matches-state', hash: state.appliedBlockSha256 };
+}
+
+async function finalizePrepared() {
+  if (!existsSync(trial) || existsSync(join(root, 'inventory.json'))) throw new Error('Missing partial trial or inventory already exists');
+  const manifest = JSON.parse(readFileSync(join(harness, 'vendor/source-manifest.json'), 'utf8'));
+  const coreHash = hash(readFileSync(join(harness, 'astra-judgment-core.md')));
+  const skillHash = hash(readFileSync(join(harness, 'skills/joeness-setup/SKILL.md')));
+  const expectedSkill = manifest.publicSkills.find(item => item.name === 'joeness-setup')?.files.find(item => item.path === 'SKILL.md')?.sha256;
+  if (coreHash !== manifest.activeCommonCore.sha256 || skillHash !== expectedSkill) throw new Error('Package hash drift');
+  const inventory = [];
+  for (const arm of ['bare', 'joeness']) {
+    const project = childPath(arm, 'project');
+    const home = childPath(arm, 'home');
+    const source = join(prior, 'runs', `deferred-ranking-auth-r1-${arm}`, 'project');
+    const priorResult = JSON.parse(readFileSync(join(harness, 'evals/joeness-setup/runs/2026-09-28-actual-performance-ab/results', `deferred-ranking-auth-r1-${arm}.json`), 'utf8'));
+    if (!existsSync(project) || !existsSync(home) || existsSync(join(home, 'auth.json'))) throw new Error(`Fixture or auth state invalid: ${arm}`);
+    const frozenHead = (await command('git', ['rev-parse', 'HEAD'], project)).trim();
+    const subject = (await command('git', ['log', '-1', '--format=%s'], project)).trim();
+    if (subject !== 'Freeze previous authentication repair for independent continuation') throw new Error(`Unfrozen prior repair: ${arm}`);
+    const check = arm === 'joeness' ? await command('pwsh', ['-NoProfile', '-File', join(harness, 'JOENESS.ps1'), '-Check', '-CodexHome', home], harness) : null;
+    if (arm === 'joeness' && !check.includes('"status":"current"')) throw new Error('Isolated JOENESS install not current');
+    const setupState = arm === 'joeness' ? verifyCopiedBlock(project) : null;
+    inventory.push({ arm, source, priorThreadId: priorResult.runtime.threadId, priorHead: priorResult.headAfter, frozenHead,
+      priorResponseSha256: priorResult.responseSha256, agentsSha256: hash(readFileSync(join(project, 'AGENTS.md'))),
+      setupStatus: setupState?.status || 'absent', setupHash: setupState?.hash || null,
+      baselineStatus: (await command('git', ['status', '--porcelain=v1'], project)).trim() });
+  }
+  writeFileSync(join(root, 'inventory.json'), JSON.stringify({ coreHash, skillHash, inventory }, null, 2) + '\n');
+  console.log('PREPARED both arms; copied JOENESS block matches saved state');
 }
 
 async function run(id) {
@@ -152,5 +197,6 @@ async function run(id) {
 }
 
 if (process.argv[2] === 'prepare') await prepare();
+else if (process.argv[2] === 'finalize-prepared') await finalizePrepared();
 else if (process.argv[2] === 'one') await run(process.argv[3]);
-else throw new Error('Usage: node run.mjs prepare|one <stage-arm>');
+else throw new Error('Usage: node run.mjs prepare|finalize-prepared|one <stage-arm>');
