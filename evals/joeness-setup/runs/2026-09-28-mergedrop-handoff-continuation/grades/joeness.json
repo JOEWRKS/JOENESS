@@ -1,0 +1,36 @@
+{
+  "arm": "joeness",
+  "agentRecordSha256": "ae3c282523ae9725d476d4c8cd915384291f244823310c0818dbc2d33ec6ca84",
+  "gradeRoot": "D:\\JOEWRKS\\JOENESS-Handoff-Continuation-AB-20260928\\grades\\joeness",
+  "oracleSourceSha256": "abc03461034177adb1d7de8a858aa7ddb3b2fd64221e393af6eaf6079d679545",
+  "originalOracleSha256": "659074f557ef21f32e928ac25d3d7bee82161751f770540713ae5224d783633c",
+  "baselineFullSha256": "dff2f5ca8133fd5eda5aeb047895df3afb256b2b27f8b7bfb1809f447db18114",
+  "oracleNames": [
+    "SkinLeaderboardUiTests.RankingViewport_ShowsFourCompleteRowsWithoutPartialFifth"
+  ],
+  "focused": {
+    "exitCode": 0,
+    "wallMs": 18573,
+    "xmlSha256": "06b68016cd0e7c34d364a7330380b37e42831ef20c898a2db55edc4ce451fc90",
+    "total": 1,
+    "passed": 1
+  },
+  "full": {
+    "exitCode": 2,
+    "wallMs": 14393,
+    "xmlSha256": "4147438dc1ff2e3d7c03df3d361a823986c27293bb9fdb950ffe47469593c987",
+    "total": 232,
+    "passed": 218,
+    "failed": 14
+  },
+  "outcome": {
+    "pass": false,
+    "oraclePass": true,
+    "focusedFailures": [],
+    "missingTests": [
+      "GameControllerStateTests.Awake_DoesNotStartLeaderboardAuthenticationBeforeRankingAction"
+    ],
+    "newFailures": []
+  },
+  "limitation": "EditMode source/layout oracle only; no Android device, live Play authentication, or visual acceptance."
+}

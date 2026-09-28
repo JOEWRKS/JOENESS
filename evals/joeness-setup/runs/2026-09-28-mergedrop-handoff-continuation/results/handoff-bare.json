@@ -1,0 +1,34 @@
+{
+  "id": "handoff-bare",
+  "arm": "bare",
+  "stage": "handoff",
+  "startedAt": "2026-09-28T09:40:56.664Z",
+  "wallMs": 119286,
+  "exitCode": 0,
+  "timedOut": false,
+  "runtime": {
+    "cli": "C:\\Users\\tjdwo\\AppData\\Local\\OpenAI\\Codex\\bin\\d23520d1e41bfb24\\codex.exe",
+    "model": "gpt-6-astra",
+    "reasoningEffort": "xhigh",
+    "threadId": "01a0e763-936c-7971-8d80-2fae1d4ffc72"
+  },
+  "promptSha256": "e708d419f6697b6278b7616f60db3cdc7bafd807c699343aeafe74938026cbff",
+  "responseSha256": "90406e083ee8f29cdd488fcc6a79419d6fe19a77ce0a9e218c4d5d0f37ee45b8",
+  "usage": {
+    "input_tokens": 186902,
+    "cached_input_tokens": 149888,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 3205,
+    "reasoning_output_tokens": 819
+  },
+  "noncachedInputPlusOutput": 40219,
+  "itemTypes": {
+    "command_execution": 12
+  },
+  "lastError": null,
+  "statusBefore": "M TASK.md\n M docs/DEVELOPMENT.md\n M game/Assets/MergeDrop/Art/UI/SettingsIcon.png.meta\n M game/Assets/MergeDrop/Editor/SkinLeaderboardUiMigration.cs\n M game/Assets/MergeDrop/Scenes/Game.unity\n M game/Assets/MergeDrop/Tests/EditMode/SkinLeaderboardUiTests.cs\n M game/ProjectSettings/TimeManager.asset",
+  "statusAfter": "M TASK.md\n M docs/DEVELOPMENT.md\n M game/Assets/MergeDrop/Art/UI/SettingsIcon.png.meta\n M game/Assets/MergeDrop/Editor/SkinLeaderboardUiMigration.cs\n M game/Assets/MergeDrop/Scenes/Game.unity\n M game/Assets/MergeDrop/Tests/EditMode/SkinLeaderboardUiTests.cs\n M game/ProjectSettings/TimeManager.asset",
+  "headBefore": "84f8bdb08c072941c77e3c100a6d69a4dda52e4f",
+  "headAfter": "84f8bdb08c072941c77e3c100a6d69a4dda52e4f",
+  "authCopyRemoved": true
+}

@@ -1,0 +1,8 @@
+**인증 수리는 커밋되어 있고, 랭킹 창 수리는 미커밋 상태입니다.** 이번에는 파일과 기존 검사 결과만 읽었으며 수정·검사 재실행은 하지 않았습니다.
+
+- **인증 수리 — `84f8bdb`:** `GameController.Awake`의 인증 호출과 `PlayGamesLeaderboard.AuthenticateOnce`를 제거했습니다. 일시정지 메뉴에서 랭킹을 명시적으로 열면 `Load`가 필요한 경우 `ManuallyAuthenticate`를 호출합니다. 변경 파일은 `GameController.cs`, `PlayGamesLeaderboard.cs`, `GameControllerStateTests.cs`, `PlayGamesLeaderboardTests.cs`입니다. 이후 창 수리에서는 이 변경을 보존했습니다.
+- **랭킹 창 수리:** 다섯째 행이 일부 보이던 뷰포트를 상단 고정 **388 = 4×88 + 3×12**로 바꿨습니다. 콘텐츠 영역 532, 스크롤 밖 내 점수 행 높이 88·y=44이며 마스크와 세로 스크롤은 유지합니다. 수치는 Canvas 기준 단위입니다. 5/25행의 처음·끝 네 행 표시, 추가 행 노출 방지, 내 점수 고정, 마이그레이션 재적용을 검사하는 3개 사례를 추가했습니다.
+- **현재 실제 내용 변경 5개:** `SkinLeaderboardUiMigration.cs`, `Game.unity`, `SkinLeaderboardUiTests.cs`, `TASK.md`, [docs/DEVELOPMENT.md](D:/JOEWRKS/JOENESS-Handoff-Continuation-AB-20260928/bare/project/docs/DEVELOPMENT.md:219). Git 상태에는 기존 `SettingsIcon.png.meta`, `TimeManager.asset`도 표시되지만 두 파일의 내용 diff는 없습니다.
+- **저장된 검사 결과:** 인증 집중 검사 **20/20** 통과. 창 회귀 3개는 수정 전 모두 실패했고 수정 후 통과했습니다. 최신 집중 검사는 **54/54**, 전체 EditMode는 **216/230 → 219/233**입니다. `git diff --check` 통과는 문서에 기록된 결과입니다.
+- **남은 기존 실패:** 전후 14개의 이름·메시지가 일치합니다. `VisualSetControllerTests` 12개는 기본 visual set 누락/불완전 예외, `VisualSetUiTests` 2개는 기대값 false에 실제 true입니다. **전체 검사는 아직 실패 상태입니다.** 초기 `-noUpm` 실행도 uGUI 해석 실패로 검사 자체를 수행하지 못했습니다.
+- **미검증과 바로 다음 행동:** 현재 수정본의 Android 인증 화면·취소·오프라인·점수 서비스, 랭킹 표시·터치 스크롤, APK/AAB 동작과 사용자 수락은 확인되지 않았습니다. 다음 작업은 현재 소스의 개발 APK로 이 항목들을 실기기에서 확인하는 것입니다. 과거 기기 확인·수락 기록이나 Ticket 11 진입점은 이번 수정본의 검증 또는 Play 작업 재개 근거가 아닙니다.
