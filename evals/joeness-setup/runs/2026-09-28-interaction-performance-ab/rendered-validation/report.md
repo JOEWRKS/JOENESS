@@ -26,3 +26,5 @@ An isolated Windows player build with an explicit Game scene completed with zero
 - This supplemental work does **not** establish a JOENESS accuracy, performance, or visual-quality advantage over Bare. The original score and flaky-test adjudication remain unchanged.
 
 A later, explicitly non-native [`offscreen-probe/report.md`](offscreen-probe/report.md) obtained readable 1440×900 and 390×844 diagnostic renders in both arms by temporarily routing the Canvas through a camera. It does not turn the failed native-size tests above into passes.
+
+A further [`native-probe/report.md`](native-probe/report.md) then captured the unchanged overlay mode in a visible Windows player at both sizes. This new evidence does not erase the earlier failed hidden-window or Editor attempts.

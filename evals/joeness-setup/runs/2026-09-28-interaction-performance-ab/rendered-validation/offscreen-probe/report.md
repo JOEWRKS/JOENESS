@@ -26,3 +26,5 @@ The [`../check-capture.mjs`](../check-capture.mjs) sanity check rejected the pre
 - **Passed, supplemental:** offscreen target-size capture and scripted collection interaction in both arms, with no black frames.
 - **Still blocked for native visual acceptance:** original overlay-mode target-size screenshot, physical mobile touch, device-specific scaling/safe-area behavior, and release-player UI.
 - **A/B interpretation unchanged:** no demonstrated JOENESS visual, accuracy, time, or token advantage. The preregistered grades and flaky-test adjudication remain authoritative for the original experiment.
+
+Subsequent native Windows player evidence is recorded separately in [`../native-probe/report.md`](../native-probe/report.md). The offscreen images here remain explicitly diagnostic approximations.
