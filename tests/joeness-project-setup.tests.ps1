@@ -63,19 +63,47 @@ Case 'InitialApplyAndNoOp' {
     Eq $r.status current noop; Eq (Bytes $a) $b bytes; Eq (Get-Item $a).LastWriteTimeUtc.Ticks $t timestamp; Eq (Get-Item $s).LastWriteTimeUtc.Ticks $st stateTimestamp
     Eq @( $r.changedTargets ).Count 0 targets
 }
-Case 'LongAgentsApplyKeepsManagedInstructionsInInitialWindow' {
+Case 'LongAgentsApplyCannotDisplaceExistingInstructions' {
     param($p)
     $a=Join-Path $p AGENTS.md
     $original="# User project`n"+('가'*12000)+"`n"
     [IO.File]::WriteAllText($a,$original,$utf8)
     $before=Bytes $a
-    Eq (Apply $p).status current apply
-    $text=[IO.File]::ReadAllText($a)
-    Eq $text.StartsWith('<!-- JOENESS-SETUP:BEGIN -->') $true earlyBlock
-    $end=$text.IndexOf('<!-- JOENESS-SETUP:END -->')+'<!-- JOENESS-SETUP:END -->'.Length
-    Eq ([Text.Encoding]::UTF8.GetByteCount($text.Substring(0,$end)) -le 32768) $true initialWindow
-    Eq (Detach $p).status detached detach
+    $check=Invoke-JoenessProjectSetup -Check -ProjectPath $p
+    Eq $check.status blocked preflight
+    Eq (Apply $p).status blocked apply
     Eq (Bytes $a) $before userBytes
+    Eq (Test-Path (Join-Path $p .joeness/setup-state.json)) $false noState
+}
+Case 'InitialWindowExactBoundary' {
+    param($p)
+    $a=Join-Path $p AGENTS.md
+    [IO.File]::WriteAllText($a,'a',$utf8)
+    Eq (Apply $p).status current measure
+    $overhead=(Get-Item $a).Length-1
+    Eq (Detach $p).status detached reset
+    [IO.File]::WriteAllText($a,('a'*(32768-$overhead)),$utf8)
+    Eq (Apply $p).status current exactFit
+    Eq (Get-Item $a).Length 32768 exactBytes
+    Eq (Invoke-JoenessProjectSetup -Check -ProjectPath $p).status current exactCheck
+    [IO.File]::AppendAllText($a,'x',$utf8)
+    Eq (Invoke-JoenessProjectSetup -Check -ProjectPath $p).status blocked oneByteOver
+    Eq (Detach $p).status detached detach
+}
+Case 'ExistingFrontBlockReportsDisplacementAndCanDetach' {
+    param($p)
+    Eq (Apply $p).status current shortApply
+    $a=Join-Path $p AGENTS.md
+    [IO.File]::AppendAllText($a,('가'*12000),$utf8)
+    $before=Bytes $a
+    $check=Invoke-JoenessProjectSetup -Check -ProjectPath $p
+    Eq $check.status blocked displaced
+    Eq $check.blockState clean owned
+    Eq (Apply $p).status blocked update
+    Eq (Relocate $p).status blocked relocateNoOp
+    Eq (Bytes $a) $before noRewrite
+    Eq (Detach $p).status detached detach
+    Eq ([IO.File]::ReadAllText($a)) ('가'*12000) outsidePreserved
 }
 Case 'ExistingCleanTailRelocatesAndRestoresOutsideBytes' {
     param($p)
@@ -96,10 +124,8 @@ Case 'ExistingCleanTailRelocatesAndRestoresOutsideBytes' {
     $stale=Invoke-JoenessProjectSetup -Relocate -ProjectPath $p -ExpectedRoot $c.projectRoot -ExpectedTargetHash ('0'*64) -ExpectedStateHash $c.stateHash
     Eq $stale.status blocked staleSnapshot
     Eq (Bytes $a) $beforeRelocate stalePreservesBytes
-    Eq (Relocate $p).status current relocate
-    Eq (Invoke-JoenessProjectSetup -Check -ProjectPath $p).status current visible
-    Eq ([IO.File]::ReadAllText($a).StartsWith('<!-- JOENESS-SETUP:BEGIN -->')) $true earlyBlock
-    Eq @( (Relocate $p).changedTargets ).Count 0 relocateNoop
+    Eq (Relocate $p).status blocked displacingRelocation
+    Eq (Bytes $a) $beforeRelocate noRewrite
     Eq (Detach $p).status detached detach
     Eq ([IO.File]::ReadAllText($a)) ($original+$tail) outsideBytes
 }

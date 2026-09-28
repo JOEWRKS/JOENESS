@@ -61,17 +61,18 @@ Use [project-setup.ps1](scripts/project-setup.ps1) for the owned AGENTS block.
 It supports Windows PowerShell and an explicit Git root; never run git init for
 a non-Git project. Explain the boundary and offer a proposed text/manual handoff.
 
-1. Run `-Check -ProjectPath <root>`. A clean block beyond the observed
-   initial `AGENTS.md` instruction window reports `blocked`; clean ownership
-   alone does not prove that a new chat received the rule.
+1. Run `-Check -ProjectPath <root>`. A block beyond the observed initial
+   `AGENTS.md` window, or a file too long to fit with the front block,
+   reports `blocked`. Do not shorten user-owned instructions without approval;
+   clean ownership alone does not prove that a new chat received the rule.
 2. For an authorized proposal call `-Apply`, with `-ExpectedRoot`,
    `-ExpectedTargetHash`, `-ExpectedStateHash` from that Check and
    `-ManagedBodyBase64` containing UTF-8 body text, without markers.
    New connections go near the beginning of `AGENTS.md`.
 3. If an existing clean block is beyond that window, propose the placement
-   change and, once authorized, call `-Relocate` with the same three fresh
-   expected values. This moves only the owned block and its owned separators;
-   it does not rewrite the other project instructions.
+   change only when the entire resulting file fits. Once authorized, call
+   `-Relocate` with the same three fresh expected values. This moves only the
+   owned block and its owned separators; it does not rewrite other instructions.
 4. Read the JSON result. Only `current` confirms Apply or Relocate; `partial`
    names unresolved files, not success. Inspect targets before any retry.
    Recheck and use a fresh project chat to verify actual instruction delivery.

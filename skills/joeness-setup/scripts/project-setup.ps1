@@ -14,6 +14,9 @@ $script:SetupInitialWindowBytes=32768
 function Test-SetupInitialWindow([string]$Text,[int]$Start,[int]$Length) {
  $Start -ge 0 -and $script:SetupUtf8.GetByteCount($Text.Substring(0,$Start+$Length)) -le $script:SetupInitialWindowBytes
 }
+function Test-SetupWindowCapacity([string]$Text) {
+ $script:SetupUtf8.GetByteCount($Text) -le $script:SetupInitialWindowBytes
+}
 function Get-SetupHash([byte[]]$Bytes) {
  $h=[Security.Cryptography.SHA256]::Create()
  try { ([BitConverter]::ToString($h.ComputeHash($Bytes))).Replace('-','').ToLowerInvariant() } finally {$h.Dispose()}
@@ -200,6 +203,10 @@ function Invoke-JoenessProjectSetup {
   $r.targetHash=$o.Target.Hash; $r.stateHash=$o.State.Hash; $r.blockState=$o.BlockState
   if($o.BlockState -eq 'edited'){throw 'Managed block edited since last application; preserve and review a scoped correction'}
   if($Check){
+   if(-not(Test-SetupWindowCapacity $o.Text)){
+    $r.blockers=@('AGENTS.md exceeds the observed 32 KiB initial window; a front JOENESS block would displace existing instructions. Preserve user text and resolve the project instructions before applying or relying on this connection')
+    return [pscustomobject]$r
+   }
    if($o.BlockState -eq 'clean' -and -not(Test-SetupInitialWindow $o.Text $o.Start $o.Length)){
     $r.blockers=@('Managed block is beyond the observed 32 KiB initial AGENTS.md window; relocate before relying on automatic delivery')
     return [pscustomobject]$r
@@ -211,6 +218,7 @@ function Invoke-JoenessProjectSetup {
   if($ExpectedTargetHash -cne $o.Target.Hash -or $ExpectedStateHash -cne $o.State.Hash){throw 'Snapshot mismatch; inspect current targets'}
   if($Detach -and $o.BlockState -eq 'absent'){$r.status='detached';return [pscustomobject]$r}
   if($Relocate -and $o.BlockState -ne 'clean'){throw 'Relocate requires one clean managed block'}
+  if($Relocate -and -not(Test-SetupWindowCapacity $o.Text)){throw 'AGENTS.md exceeds the observed 32 KiB initial window; JOENESS relocation cannot preserve delivery of existing instructions'}
   if($Relocate -and (Test-SetupInitialWindow $o.Text $o.Start $o.Length)){$r.status='current';return [pscustomobject]$r}
   if($Apply -and $o.BlockState -eq 'clean' -and -not(Test-SetupInitialWindow $o.Text $o.Start $o.Length)){throw 'Managed block is outside initial AGENTS.md window; use Relocate first'}
   $before=$o.Text; $prefix='';$suffix=''
@@ -242,6 +250,7 @@ function Invoke-JoenessProjectSetup {
     $prefix='';$suffix=if($content.Length){$nl+$nl}else{$nl}
     $newText=$bom+$block+$suffix+$content
     if(-not(Test-SetupInitialWindow $newText $bom.Length $block.Length)){throw 'Managed block exceeds the observed initial AGENTS.md window'}
+    if(-not(Test-SetupWindowCapacity $newText)){throw 'JOENESS relocation would displace existing instructions beyond the observed 32 KiB initial AGENTS.md window'}
     $blockBytes=$script:SetupUtf8.GetBytes($block)
     $record=[ordered]@{schemaVersion=1;toolVersion='0.2';targetRelativePath='AGENTS.md';appliedBlockBase64=[Convert]::ToBase64String($blockBytes);appliedBlockSha256=Get-SetupHash $blockBytes;ownedBoundary=[ordered]@{prefixBase64=[Convert]::ToBase64String($script:SetupUtf8.GetBytes($prefix));suffixBase64=[Convert]::ToBase64String($script:SetupUtf8.GetBytes($suffix))}}
     $stateEntry=New-SetupEntry $o.State ($script:SetupUtf8.GetBytes(($record|ConvertTo-Json -Depth 5 -Compress)+"`n")) '.joeness/setup-state.json'
@@ -262,6 +271,7 @@ function Invoke-JoenessProjectSetup {
    }
    $newStart=$newText.IndexOf($script:SetupBegin,[StringComparison]::Ordinal)
    if(-not(Test-SetupInitialWindow $newText $newStart $block.Length)){throw 'Managed block exceeds the observed initial AGENTS.md window'}
+   if(-not(Test-SetupWindowCapacity $newText)){throw 'JOENESS application would displace existing instructions beyond the observed 32 KiB initial AGENTS.md window'}
    $record=[ordered]@{schemaVersion=1;toolVersion='0.2';targetRelativePath='AGENTS.md';appliedBlockBase64=[Convert]::ToBase64String($blockBytes);appliedBlockSha256=Get-SetupHash $blockBytes;ownedBoundary=[ordered]@{prefixBase64=[Convert]::ToBase64String($script:SetupUtf8.GetBytes($prefix));suffixBase64=[Convert]::ToBase64String($script:SetupUtf8.GetBytes($suffix))}}
    $stateBytes=$script:SetupUtf8.GetBytes(($record|ConvertTo-Json -Depth 5 -Compress)+"`n")
    $stateEntry=New-SetupEntry $o.State $stateBytes '.joeness/setup-state.json'
