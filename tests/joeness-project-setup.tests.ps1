@@ -20,6 +20,10 @@ function Detach($p) {
     $c=Invoke-JoenessProjectSetup -Check -ProjectPath $p
     Invoke-JoenessProjectSetup -Detach -ProjectPath $p -ExpectedRoot $c.projectRoot -ExpectedTargetHash $c.targetHash -ExpectedStateHash $c.stateHash
 }
+function Relocate($p) {
+    $c=Invoke-JoenessProjectSetup -Check -ProjectPath $p
+    Invoke-JoenessProjectSetup -Relocate -ProjectPath $p -ExpectedRoot $c.projectRoot -ExpectedTargetHash $c.targetHash -ExpectedStateHash $c.stateHash
+}
 function Case($name,[scriptblock]$body) {
     $p=Fixture
     try { & $body $p; $script:passed++; Write-Host "PASS $name" }
@@ -31,7 +35,8 @@ function Case($name,[scriptblock]$body) {
 }
 Case 'StateIdentityRoundTripAcrossPowerShellVersions' {
     param($p)
-    Eq (Apply $p).status current apply
+    $applied=Apply $p
+    if($applied.status -cne 'current'){throw "apply status=$($applied.status) blockers=$($applied.blockers -join '; ')"}
     $c=Invoke-JoenessProjectSetup -Check -ProjectPath $p
     Eq $c.status current check
     Eq $c.blockState clean block
@@ -57,6 +62,46 @@ Case 'InitialApplyAndNoOp' {
     $r=Invoke-JoenessProjectSetup -Apply -ProjectPath $p -ExpectedRoot $c.projectRoot -ExpectedTargetHash $c.targetHash -ExpectedStateHash $c.stateHash -ManagedBodyBase64 ([Convert]::ToBase64String($utf8.GetBytes('Read TASK.md. Record authorized work.'))) -AfterWrite { throw 'no-op writer called' }
     Eq $r.status current noop; Eq (Bytes $a) $b bytes; Eq (Get-Item $a).LastWriteTimeUtc.Ticks $t timestamp; Eq (Get-Item $s).LastWriteTimeUtc.Ticks $st stateTimestamp
     Eq @( $r.changedTargets ).Count 0 targets
+}
+Case 'LongAgentsApplyKeepsManagedInstructionsInInitialWindow' {
+    param($p)
+    $a=Join-Path $p AGENTS.md
+    $original="# User project`n"+('가'*12000)+"`n"
+    [IO.File]::WriteAllText($a,$original,$utf8)
+    $before=Bytes $a
+    Eq (Apply $p).status current apply
+    $text=[IO.File]::ReadAllText($a)
+    Eq $text.StartsWith('<!-- JOENESS-SETUP:BEGIN -->') $true earlyBlock
+    $end=$text.IndexOf('<!-- JOENESS-SETUP:END -->')+'<!-- JOENESS-SETUP:END -->'.Length
+    Eq ([Text.Encoding]::UTF8.GetByteCount($text.Substring(0,$end)) -le 32768) $true initialWindow
+    Eq (Detach $p).status detached detach
+    Eq (Bytes $a) $before userBytes
+}
+Case 'ExistingCleanTailRelocatesAndRestoresOutsideBytes' {
+    param($p)
+    $a=Join-Path $p AGENTS.md
+    $statePath=Join-Path $p .joeness/setup-state.json
+    $null=New-Item -ItemType Directory -Path (Split-Path $statePath -Parent)
+    $original="# User project`n"+('가'*12000)+"`n"
+    $block="<!-- JOENESS-SETUP:BEGIN -->`nRead TASK.md.`n<!-- JOENESS-SETUP:END -->"
+    $prefix="`n"; $suffix="`n"; $tail='USER TAIL'
+    [IO.File]::WriteAllText($a,$original+$prefix+$block+$suffix+$tail,$utf8)
+    $blockBytes=$utf8.GetBytes($block)
+    $state=[ordered]@{schemaVersion=1;toolVersion='0.2';targetRelativePath='AGENTS.md';appliedBlockBase64=[Convert]::ToBase64String($blockBytes);appliedBlockSha256=Get-SetupHash $blockBytes;ownedBoundary=[ordered]@{prefixBase64=[Convert]::ToBase64String($utf8.GetBytes($prefix));suffixBase64=[Convert]::ToBase64String($utf8.GetBytes($suffix))}}
+    [IO.File]::WriteAllText($statePath,($state|ConvertTo-Json -Depth 5 -Compress)+"`n",$utf8)
+    $c=Invoke-JoenessProjectSetup -Check -ProjectPath $p
+    Eq $c.status blocked outsideWindow
+    Eq $c.blockState clean ownedBlock
+    $beforeRelocate=Bytes $a
+    $stale=Invoke-JoenessProjectSetup -Relocate -ProjectPath $p -ExpectedRoot $c.projectRoot -ExpectedTargetHash ('0'*64) -ExpectedStateHash $c.stateHash
+    Eq $stale.status blocked staleSnapshot
+    Eq (Bytes $a) $beforeRelocate stalePreservesBytes
+    Eq (Relocate $p).status current relocate
+    Eq (Invoke-JoenessProjectSetup -Check -ProjectPath $p).status current visible
+    Eq ([IO.File]::ReadAllText($a).StartsWith('<!-- JOENESS-SETUP:BEGIN -->')) $true earlyBlock
+    Eq @( (Relocate $p).changedTargets ).Count 0 relocateNoop
+    Eq (Detach $p).status detached detach
+    Eq ([IO.File]::ReadAllText($a)) ($original+$tail) outsideBytes
 }
 Case 'InsideEditSurvivesFreshCheck' {
     param($p)

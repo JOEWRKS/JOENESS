@@ -60,12 +60,20 @@ Use [project-setup.ps1](scripts/project-setup.ps1) for the owned AGENTS block.
 It supports Windows PowerShell and an explicit Git root; never run git init for
 a non-Git project. Explain the boundary and offer a proposed text/manual handoff.
 
-1. Run `-Check -ProjectPath <root>`.
+1. Run `-Check -ProjectPath <root>`. A clean block beyond the observed
+   initial `AGENTS.md` instruction window reports `blocked`; clean ownership
+   alone does not prove that a new chat received the rule.
 2. For an authorized proposal call `-Apply`, with `-ExpectedRoot`,
    `-ExpectedTargetHash`, `-ExpectedStateHash` from that Check and
    `-ManagedBodyBase64` containing UTF-8 body text, without markers.
-3. Read the JSON result. Only `current` confirms Apply; `partial` names unresolved
-   files, not success. Inspect targets before any retry.
+   New connections go near the beginning of `AGENTS.md`.
+3. If an existing clean block is beyond that window, propose the placement
+   change and, once authorized, call `-Relocate` with the same three fresh
+   expected values. This moves only the owned block and its owned separators;
+   it does not rewrite the other project instructions.
+4. Read the JSON result. Only `current` confirms Apply or Relocate; `partial`
+   names unresolved files, not success. Inspect targets before any retry.
+   Recheck and use a fresh project chat to verify actual instruction delivery.
 
 Hash inputs are lower-case SHA-256 or `absent`. The helper owns only
 `JOENESS-SETUP` markers and `.joeness/setup-state.json`. State is an applied-block
@@ -73,8 +81,8 @@ baseline, not task memory or proof of approval. It travels with the project; do
 not put absolute machine paths in it. Do not include secrets in records.
 
 `edited`, `unowned`, `legacy`, malformed state, or source/root drift require
-inspection and a scoped correction proposal. Do not delete/reseed state, move
-markers, or replace the whole file to bypass a conflict. The helper does not
+inspection and a scoped correction proposal. Do not manually move markers,
+delete/reseed state, or replace the whole file to bypass a conflict. The helper does not
 automatically merge internal user edits. Preserve outside bytes.
 
 Create/update other project documents only within the approved proposal. Their

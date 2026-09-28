@@ -1,6 +1,6 @@
 [CmdletBinding()]
 param(
- [switch]$Check, [switch]$Apply, [switch]$Detach, [string]$ProjectPath,
+ [switch]$Check, [switch]$Apply, [switch]$Detach, [switch]$Relocate, [string]$ProjectPath,
  [string]$ExpectedRoot, [string]$ExpectedTargetHash, [string]$ExpectedStateHash,
  [string]$ManagedBodyBase64
 )
@@ -9,6 +9,11 @@ $ErrorActionPreference='Stop'
 $script:SetupUtf8=New-Object Text.UTF8Encoding($false,$true)
 $script:SetupBegin='<!-- JOENESS-SETUP:BEGIN -->'
 $script:SetupEnd='<!-- JOENESS-SETUP:END -->'
+# Two observed saved-project chats received only the first 32 KiB of AGENTS.md.
+$script:SetupInitialWindowBytes=32768
+function Test-SetupInitialWindow([string]$Text,[int]$Start,[int]$Length) {
+ $Start -ge 0 -and $script:SetupUtf8.GetByteCount($Text.Substring(0,$Start+$Length)) -le $script:SetupInitialWindowBytes
+}
 function Get-SetupHash([byte[]]$Bytes) {
  $h=[Security.Cryptography.SHA256]::Create()
  try { ([BitConverter]::ToString($h.ComputeHash($Bytes))).Replace('-','').ToLowerInvariant() } finally {$h.Dispose()}
@@ -179,24 +184,35 @@ function Invoke-JoenessProjectSetup {
   [Parameter(Mandatory,ParameterSetName='Check')][switch]$Check,
   [Parameter(Mandatory,ParameterSetName='Apply')][switch]$Apply,
   [Parameter(Mandatory,ParameterSetName='Detach')][switch]$Detach,
+  [Parameter(Mandatory,ParameterSetName='Relocate')][switch]$Relocate,
   [Parameter(Mandatory)][string]$ProjectPath,
-  [Parameter(Mandatory,ParameterSetName='Apply')][Parameter(Mandatory,ParameterSetName='Detach')][string]$ExpectedRoot,
-  [Parameter(Mandatory,ParameterSetName='Apply')][Parameter(Mandatory,ParameterSetName='Detach')][ValidatePattern('^(absent|[a-f0-9]{64})$')][string]$ExpectedTargetHash,
-  [Parameter(Mandatory,ParameterSetName='Apply')][Parameter(Mandatory,ParameterSetName='Detach')][ValidatePattern('^(absent|[a-f0-9]{64})$')][string]$ExpectedStateHash,
+  [Parameter(Mandatory,ParameterSetName='Apply')][Parameter(Mandatory,ParameterSetName='Detach')][Parameter(Mandatory,ParameterSetName='Relocate')][string]$ExpectedRoot,
+  [Parameter(Mandatory,ParameterSetName='Apply')][Parameter(Mandatory,ParameterSetName='Detach')][Parameter(Mandatory,ParameterSetName='Relocate')][ValidatePattern('^(absent|[a-f0-9]{64})$')][string]$ExpectedTargetHash,
+  [Parameter(Mandatory,ParameterSetName='Apply')][Parameter(Mandatory,ParameterSetName='Detach')][Parameter(Mandatory,ParameterSetName='Relocate')][ValidatePattern('^(absent|[a-f0-9]{64})$')][string]$ExpectedStateHash,
   [Parameter(Mandatory,ParameterSetName='Apply')][string]$ManagedBodyBase64,
   [scriptblock]$AfterWrite
  )
- $action=if($Apply){'apply'}elseif($Detach){'detach'}else{'check'}
+ $action=if($Apply){'apply'}elseif($Detach){'detach'}elseif($Relocate){'relocate'}else{'check'}
  $r=[ordered]@{action=$action;status='blocked';projectRoot=$null;target='AGENTS.md';targetHash='absent';statePath='.joeness/setup-state.json';stateHash='absent';blockState='malformed';changedTargets=@();blockers=@();rollback=$null;unresolvedTargets=@()}
  try {
   $root=Resolve-SetupRoot $ProjectPath; $r.projectRoot=$root
   $o=Read-SetupObservation $root
   $r.targetHash=$o.Target.Hash; $r.stateHash=$o.State.Hash; $r.blockState=$o.BlockState
   if($o.BlockState -eq 'edited'){throw 'Managed block edited since last application; preserve and review a scoped correction'}
-  if($Check){$r.status=if($o.BlockState -eq 'clean'){'current'}else{'ready'};return [pscustomobject]$r}
+  if($Check){
+   if($o.BlockState -eq 'clean' -and -not(Test-SetupInitialWindow $o.Text $o.Start $o.Length)){
+    $r.blockers=@('Managed block is beyond the observed 32 KiB initial AGENTS.md window; relocate before relying on automatic delivery')
+    return [pscustomobject]$r
+   }
+   $r.status=if($o.BlockState -eq 'clean'){'current'}else{'ready'}
+   return [pscustomobject]$r
+  }
   if([IO.Path]::GetFullPath($ExpectedRoot).TrimEnd('\','/') -ine $root){throw 'ExpectedRoot mismatch'}
   if($ExpectedTargetHash -cne $o.Target.Hash -or $ExpectedStateHash -cne $o.State.Hash){throw 'Snapshot mismatch; inspect current targets'}
   if($Detach -and $o.BlockState -eq 'absent'){$r.status='detached';return [pscustomobject]$r}
+  if($Relocate -and $o.BlockState -ne 'clean'){throw 'Relocate requires one clean managed block'}
+  if($Relocate -and (Test-SetupInitialWindow $o.Text $o.Start $o.Length)){$r.status='current';return [pscustomobject]$r}
+  if($Apply -and $o.BlockState -eq 'clean' -and -not(Test-SetupInitialWindow $o.Text $o.Start $o.Length)){throw 'Managed block is outside initial AGENTS.md window; use Relocate first'}
   $before=$o.Text; $prefix='';$suffix=''
   if($o.BlockState -eq 'clean'){
    $prefix=$script:SetupUtf8.GetString([Convert]::FromBase64String($o.Record.ownedBoundary.prefixBase64))
@@ -207,15 +223,29 @@ function Invoke-JoenessProjectSetup {
    }
   }else{
    $nl=if($before.Contains("`r`n")){"`r`n"}else{"`n"}
-   if($before.Length){$prefix=if($before.EndsWith("`n")){$nl}else{$nl+$nl}}
-   $suffix=$nl
+   $suffix=if($before.Length){$nl+$nl}else{$nl}
   }
-  if($Detach){
+  if($Detach -or $Relocate){
    $left=$before.Substring(0,$o.Start);$right=$before.Substring($o.Start+$o.Length)
    if($prefix.Length -and $left.EndsWith($prefix)){$left=$left.Substring(0,$left.Length-$prefix.Length)}
    if($suffix.Length -and $right.StartsWith($suffix)){$right=$right.Substring($suffix.Length)}
-   $newText=$left+$right
-   $stateEntry=New-SetupEntry $o.State @() '.joeness/setup-state.json' -Delete
+   $outside=$left+$right
+   if($Detach){
+    $newText=$outside
+    $stateEntry=New-SetupEntry $o.State @() '.joeness/setup-state.json' -Delete
+   }else{
+    $block=$before.Substring($o.Start,$o.Length)
+    $bomChar=[string][char]0xFEFF
+    $bom=if($outside.StartsWith($bomChar,[StringComparison]::Ordinal)){$bomChar}else{''}
+    $content=$outside.Substring($bom.Length)
+    $nl=if($before.Contains("`r`n")){"`r`n"}else{"`n"}
+    $prefix='';$suffix=if($content.Length){$nl+$nl}else{$nl}
+    $newText=$bom+$block+$suffix+$content
+    if(-not(Test-SetupInitialWindow $newText $bom.Length $block.Length)){throw 'Managed block exceeds the observed initial AGENTS.md window'}
+    $blockBytes=$script:SetupUtf8.GetBytes($block)
+    $record=[ordered]@{schemaVersion=1;toolVersion='0.2';targetRelativePath='AGENTS.md';appliedBlockBase64=[Convert]::ToBase64String($blockBytes);appliedBlockSha256=Get-SetupHash $blockBytes;ownedBoundary=[ordered]@{prefixBase64=[Convert]::ToBase64String($script:SetupUtf8.GetBytes($prefix));suffixBase64=[Convert]::ToBase64String($script:SetupUtf8.GetBytes($suffix))}}
+    $stateEntry=New-SetupEntry $o.State ($script:SetupUtf8.GetBytes(($record|ConvertTo-Json -Depth 5 -Compress)+"`n")) '.joeness/setup-state.json'
+   }
   }else{
    $body=$script:SetupUtf8.GetString([Convert]::FromBase64String($ManagedBodyBase64))
    if([string]::IsNullOrWhiteSpace($body) -or $body.Contains('JOENESS-SETUP:') -or $body.Contains('JOEWRKS-PROJECT:') -or $body.Contains([char]0)){throw 'Invalid managed body'}
@@ -224,7 +254,14 @@ function Invoke-JoenessProjectSetup {
    $block=$script:SetupBegin+$nl+$body.TrimEnd("`r","`n")+$nl+$script:SetupEnd
    $blockBytes=$script:SetupUtf8.GetBytes($block)
    if($o.BlockState -eq 'clean'){$newText=$before.Substring(0,$o.Start)+$block+$before.Substring($o.Start+$o.Length)}
-   else{$newText=$before+$prefix+$block+$suffix}
+   else{
+    $bomChar=[string][char]0xFEFF
+    $bom=if($before.StartsWith($bomChar,[StringComparison]::Ordinal)){$bomChar}else{''}
+    $content=$before.Substring($bom.Length)
+    $newText=$bom+$block+$suffix+$content
+   }
+   $newStart=$newText.IndexOf($script:SetupBegin,[StringComparison]::Ordinal)
+   if(-not(Test-SetupInitialWindow $newText $newStart $block.Length)){throw 'Managed block exceeds the observed initial AGENTS.md window'}
    $record=[ordered]@{schemaVersion=1;toolVersion='0.2';targetRelativePath='AGENTS.md';appliedBlockBase64=[Convert]::ToBase64String($blockBytes);appliedBlockSha256=Get-SetupHash $blockBytes;ownedBoundary=[ordered]@{prefixBase64=[Convert]::ToBase64String($script:SetupUtf8.GetBytes($prefix));suffixBase64=[Convert]::ToBase64String($script:SetupUtf8.GetBytes($suffix))}}
    $stateBytes=$script:SetupUtf8.GetBytes(($record|ConvertTo-Json -Depth 5 -Compress)+"`n")
    $stateEntry=New-SetupEntry $o.State $stateBytes '.joeness/setup-state.json'
@@ -246,11 +283,13 @@ function Invoke-JoenessProjectSetup {
 if($MyInvocation.InvocationName -ne '.'){
  try{
   $argsMap=@{ProjectPath=$ProjectPath}
-  if($Apply -or $Detach){
+  if($Apply -or $Detach -or $Relocate){
    $argsMap.ExpectedRoot=$ExpectedRoot;$argsMap.ExpectedTargetHash=$ExpectedTargetHash;$argsMap.ExpectedStateHash=$ExpectedStateHash
-   if($Apply){$argsMap.Apply=$true;$argsMap.ManagedBodyBase64=$ManagedBodyBase64}else{$argsMap.Detach=$true}
+   if($Apply){$argsMap.Apply=$true;$argsMap.ManagedBodyBase64=$ManagedBodyBase64}
+   elseif($Detach){$argsMap.Detach=$true}
+   else{$argsMap.Relocate=$true}
   }else{$argsMap.Check=$true}
-  if(([int][bool]$Check+[int][bool]$Apply+[int][bool]$Detach) -gt 1){throw 'Choose one mode'}
+  if(([int][bool]$Check+[int][bool]$Apply+[int][bool]$Detach+[int][bool]$Relocate) -gt 1){throw 'Choose one mode'}
   $result=Invoke-JoenessProjectSetup @argsMap
   $result|ConvertTo-Json -Depth 6 -Compress
   if($result.status -in @('ready','current','detached')){exit 0}else{exit 2}

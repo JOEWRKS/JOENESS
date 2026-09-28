@@ -92,6 +92,9 @@ non-Git 폴더를 임의로 git init하지 않고 제안/수동 전달까지 제
 - 프로젝트 연결은 별개다. 이 JOENESS 저장소 루트에서
   `powershell.exe -NoProfile -File .\skills\joeness-setup\scripts\project-setup.ps1 -Check -ProjectPath <프로젝트 루트>`의
   `current/clean`이면 연결돼 있고, `ready/absent`면 아직 연결되지 않았다.
+  긴 `AGENTS.md`에서 연결 구역이 첫 지침 범위 밖에 있으면, 파일 자체가
+  손상되지 않았더라도 `blocked/clean`으로 표시한다. 승인된 연결 구역만
+  `-Relocate`로 앞에 옮긴 뒤 새 채팅에서 실제 전달 여부를 확인한다.
 - 백그라운드 갱신기는 없다. 승인된 평소 작업 중 실제로 쓴 TASK/ISSUES 등의
   경로와 변경 내용은 작업 결과와 `git diff`로 확인한다. 연결이나 기록 동의가
   없으면 설치만으로 프로젝트 기록이 갱신되지 않는다.
