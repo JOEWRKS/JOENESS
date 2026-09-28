@@ -1,0 +1,45 @@
+{
+  "status": "PRE_REGISTERED",
+  "question": "After a real historical MergeDrop repair, does JOENESS 0.2 improve the next fresh agent's bounded repair and a further fresh agent's factual handoff over Bare Astra?",
+  "sourceEvidence": "../2026-09-28-actual-performance-ab/results/deferred-ranking-auth-r1-{arm}.json",
+  "trialRoot": "D:/JOEWRKS/JOENESS-Handoff-Continuation-AB-20260928",
+  "sourceTrialRoot": "D:/JOEWRKS/JOENESS-Performance-AB-20260928",
+  "sourceRepository": "D:/JOEWRKS/MergeDrop/.worktrees/mergedrop-v1",
+  "runtime": {
+    "client": "codex-cli 0.158.0-alpha.2",
+    "model": "gpt-6-astra",
+    "reasoningEffort": "xhigh",
+    "sessionTimeoutMs": 900000,
+    "freshEphemeralSessionPerStage": true
+  },
+  "arms": {
+    "bare": "Frozen Bare output from the prior authentication repair, with a fresh isolated CODEX_HOME and no JOENESS package.",
+    "joeness": "Frozen JOENESS output from the same prior authentication repair, with a fresh isolated CODEX_HOME containing the unchanged JOENESS 0.2 Core and joeness-setup skill."
+  },
+  "sequence": [
+    "continue-bare",
+    "continue-joeness",
+    "handoff-joeness",
+    "handoff-bare"
+  ],
+  "prompts": {
+    "continue": "이 저장소는 격리된 머지멜론 과거 작업본이다. 이전 대화는 볼 수 없다. 현재 폴더의 지침, Git 변경과 실제 코드를 확인해 이미 처리된 랭킹 인증 작업은 반복하지 마라. 다음 실제 결함만 고쳐라: 랭킹 창에서 다섯 번째 스크롤 행 일부가 잘린 채 보인다. 기존 승인 레이아웃의 88px 행, 12px 간격, 532px 내용 영역에서 완전한 4개 스크롤 행과 별도 고정된 내 점수 행을 보여라. 스크롤 영역은 위쪽 기준 높이 388px(4×88+3×12), 내 점수 행은 높이 88px·위치 y=44를 유지하고 나머지 행은 세로 스크롤하게 고쳐라. 관련 검사와 가능한 기존 검사를 실행하고 현재 인증 작업과 새 레이아웃 작업의 완료·미검증 경계를 구분해 기록·보고하라. 이 과거 소스의 전체 EditMode 검사에는 별도 기존 실패 14개가 있다. 현재 폴더 밖의 원본 저장소, 다른 시험 폴더, 평가 자료, 외부 서비스는 열거나 수정하지 마라. 새 화면·기능 추가, commit·push·Play 작업은 하지 마라.",
+    "handoff": "당신은 이전 대화를 볼 수 없는 새 담당자다. 현재 저장소의 지침·Git 상태·코드·기록만 읽고 랭킹 인증과 랭킹 창 수리에 관해 한 일, 실제 변경 파일, 현재 확인된 검사, 기존 실패와 남은 미검증, 바로 다음 행동을 짧고 정확히 인수인계해라. 두 작업을 다시 구현하지 말고 파일을 수정하거나 검사를 재실행하지 마라. 사용자 수락이나 Android 실기기 확인을 만들어내지 마라. 현재 파일이 오래된 기록보다 우선이다."
+  },
+  "oracle": {
+    "fixCommit": "565b08f79834a860b1cc889d542cd665aee347fd",
+    "file": "game/Assets/MergeDrop/Tests/EditMode/SkinLeaderboardUiTests.cs",
+    "filter": "SkinLeaderboardUiTests.RankingViewport_ShowsFourCompleteRowsWithoutPartialFifth",
+    "baselineFullXml": "D:/JOEWRKS/JOENESS-Performance-AB-20260928/preflight/complete-ranking-rows/green-full-results.xml"
+  },
+  "materialRubric": [
+    "Fresh continuation fixes the ranking row layout without redoing or undoing the previous authentication repair.",
+    "Independent behavior-level ranking oracle passes and no new full-suite failure appears beyond baseline, or the exact failure is retained.",
+    "Fresh handoff correctly separates implemented/auth tests from Android live authentication unverified; distinguishes new ranking repair and pre-existing 14 EditMode failures; does not invent acceptance.",
+    "No duplicate implementation, unrelated scope expansion, or read-only handoff file write."
+  ],
+  "cost": ["total input", "cached input", "output", "noncached input plus output", "agent wall time", "command count"],
+  "decision": "Material JOENESS advantage only if Bare has a real continuation or handoff failure that JOENESS prevents, without a corresponding JOENESS regression. Formatting preference or one cost direction alone is not an accuracy win. One pair cannot establish a stable time/token effect.",
+  "stop": "Exactly one fresh continuation and one fresh read-only handoff per arm. Do not rerun a clear outcome. One infrastructure retry may be recorded only if a run failed before model work. Prior invalid authentication oracle remains invalid; do not silently count it as pass or fail.",
+  "security": "Use only isolated local project copies. Copy authentication only to each isolated temporary CODEX_HOME for the duration of that run; never read, log or commit it. Remove the exact copy and verify absence. Do not change live MergeDrop, personal JOENESS installation, or shipped skill bytes."
+}
