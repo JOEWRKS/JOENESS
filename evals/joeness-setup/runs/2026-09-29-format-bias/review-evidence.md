@@ -1,5 +1,7 @@
 # Six-field report framing probe — observed evidence
 
+Later [proposed-connection consumer checks](proposal-consumer-evidence.md) used the actual installed-skill proposal text in two fresh cases. `이슈/해결` remained accurate and granted visual acceptance did not substitute for required tablet verification. In the no-acceptance case, acceptance appeared beside the technical check in `남은 문제`, so a strict placement criterion is partial, not a universal pass. No material factual error was observed in these two cases; product instructions were not expanded for display placement alone. Human readability and general accuracy remain unverified.
+
 Later [actual project-connection testing](project-connection-evidence.md) found a material `해결` misclassification that these prompt-injected text pairs did not expose. Keep the 0/3 result below scoped to this probe; it is not an all-context pass.
 
 ## Runtime and boundary
