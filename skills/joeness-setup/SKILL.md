@@ -10,8 +10,8 @@ current work, decisions, problems and next action. Chat summaries support, not
 replace, those sources.
 
 Connect this project to its existing sources of truth; do not install a work harness.
-The global Independent Judgment Core remains separate. No stages, vendor routing,
-background process, or mandatory five-document bundle.
+The global Independent Judgment Core remains separate. No stage engine, vendor
+routing, background process, or mandatory five-document bundle.
 
 ## Inspect and propose
 
@@ -44,10 +44,10 @@ helper states or hashes unless they explain a conflict. Do not imply that
 checking a connection activates a background process.
 If routine recording is agreed, include a concise work-receipt rule in the
 proposed project connection; no status banner for unrelated questions.
-If an existing roadmap defines approved milestones or release scope, connect its
-required-item completion gate briefly: a finished task does not finish its
-milestone or release. Keep the actual checklist and evidence in the roadmap,
-not a copied list in AGENTS.
+If an existing roadmap defines approved ordered stages, milestones or release
+scope, connect its current-stage lookup and required-item completion gate
+briefly. A finished task does not finish its stage or release. Keep the actual
+checklist, item states and evidence in the roadmap, not a copied list in AGENTS.
 For a requested handoff to a person, start with the same terse work report:
 what was done, changed, encountered, resolved, still open, and the recipient's
 next action.
@@ -97,15 +97,26 @@ examples, not evidence that those files exist.
 ## Normal work after setup
 
 Normal sessions use the project's short AGENTS connection without invoking setup
-again. Put current task execution/results in its task source; reusable failure
+again. Before substantive new or resumed work, use the connected roadmap, if
+one exists, to locate the current approved stage, required checks and the
+request's place in that order. Verify progress against current files/Git/target
+state; an old roadmap status or handoff is not proof of present completion.
+If a request would skip an unmet dependency or change approved scope, explain
+the conflict and seek an explicit direction decision. Independent authorized
+work can proceed without falsely advancing the stage. Do not invent stages for
+projects without them or silently reorder a roadmap in response to a proposal.
+Put current task execution/results in its task source; reusable failure
 cause, fix, verification and remaining workaround in its issue source. Change
 roadmap direction or scope only for an explicit decision; update a required
 item's check/evidence state only from actual verification. Change design only
 within its own authority.
-For an approved milestone or release, report completion only when its required
-roadmap items meet their stated checks, or an authorized decision explicitly
-changes that scope. Optional or later ideas are not automatic blockers. A task
-can finish while its milestone remains incomplete; keep both states visible.
+Before declaring an approved stage, milestone or release complete, review every
+required roadmap item and its actual check/evidence. Not started, in progress,
+verification pending and on hold remain open. Scope removal is a recorded
+authorized decision with a reason, not deletion or a completed check. Report
+the current stage, open items and next eligible work. Optional or later ideas
+are not automatic blockers. A task can finish while its stage remains open;
+keep both states visible and user acceptance separate.
 If a resumed task is already recorded complete and inspection finds no changed
 task fact, report its status without appending a repeat verification note.
 Questions, opinions, explanations and no-record requests are not facts to append.

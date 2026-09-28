@@ -12,7 +12,7 @@ $ErrorActionPreference = 'Stop'
 $script:JoenessBeginMarker = '<!-- JOEWRKS-HARNESS:BEGIN -->'
 $script:JoenessEndMarker = '<!-- JOEWRKS-HARNESS:END -->'
 $script:JoenessStateFile = 'joewrks-harness-state.json'
-$script:JoenessRelease = '0.3.0-beta.1'
+$script:JoenessRelease = '0.3.0-beta.2-dev'
 $script:Utf8Strict = New-Object Text.UTF8Encoding($false, $true)
 $script:Utf8NoBom = New-Object Text.UTF8Encoding($false)
 
