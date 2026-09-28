@@ -1,5 +1,7 @@
 # Follow-up observed evidence
 
+Later [actual project-connection testing](project-connection-evidence.md) found a material failure when the installed six-field connection lacked field meanings. The 0/5 statement below applies only to the prompt-injected text pairs, not actual project delivery.
+
 Protocol and scoring were fixed in [follow-up-preregistered-cases.md](follow-up-preregistered-cases.md). The responses below are the first completed answer from each fresh `gpt-6-astra` / `xhigh` CLI thread. Runtime was `codex-cli 0.158.0-alpha.2`, ephemeral and read-only. The same personal global Core and fixture directory were present in both arms; the work-report rule was included only in Structured. The setup skill was not loaded. Both arms received the same facts and question. CLI flags disabled plugins, apps, shell tool, skill search and host skill discovery, so this is a text-format probe, not project-operation testing.
 
 ## U — unknown cause, no fix, no retry authority

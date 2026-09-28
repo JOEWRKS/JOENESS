@@ -43,7 +43,8 @@ Give technical paths and details after the report if useful; omit internal
 helper states or hashes unless they explain a conflict. Do not imply that
 checking a connection activates a background process.
 If routine recording is agreed, include a concise work-receipt rule in the
-proposed project connection; no status banner for unrelated questions.
+proposed project connection, preserving the field meanings below (especially
+`해결` = verified fix, not a passing check); no status banner for unrelated questions.
 If an existing roadmap defines approved ordered stages, milestones or release
 scope, connect its current-stage lookup and required-item completion gate
 briefly. A finished task does not finish its stage or release. Keep the actual

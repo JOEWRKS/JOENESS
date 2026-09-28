@@ -1,5 +1,7 @@
 # Six-field report framing probe — observed evidence
 
+Later [actual project-connection testing](project-connection-evidence.md) found a material `해결` misclassification that these prompt-injected text pairs did not expose. Keep the 0/3 result below scoped to this probe; it is not an all-context pass.
+
 ## Runtime and boundary
 
 - Runtime: `codex-cli 0.158.0-alpha.2`, `gpt-6-astra`, `model_reasoning_effort="xhigh"`, six fresh ephemeral threads.

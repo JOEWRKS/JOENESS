@@ -20,7 +20,8 @@ Adapt this body to actual existing paths before applying; omit unused roles.
   업데이트 파일, 이슈, 해결, 남은 문제, 다음 작업 (translate labels if needed).
   Each line is one concrete fact in everyday words: a noun phrase or short
   sentence. Name only changed files, by purpose; use 없음 for empty fields.
-  이슈 is a problem, 해결 a verified fix, and 남은 문제 unresolved or unverified work.
+  이슈 is a problem, 해결 a verified fix (not a passing check), and 남은 문제
+  unresolved or unverified work.
   Take 다음 작업 from approved scope/roadmap. Put necessary cause, proof, exact paths
   and the separate user-acceptance boundary under 상세 보고 in short sentences.
   Keep required facts; omit repetition and optional background. Do not add a
