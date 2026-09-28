@@ -32,6 +32,9 @@ Adapt this body to actual existing paths before applying; omit unused roles.
   proposed changes, observed verification, and user acceptance are distinct.
 - Update an approved required roadmap item's check/evidence state from actual
   verification; this is not permission to change its scope or priority.
+- When an item or stage status changes, also refresh the roadmap's current-stage
+  and next-priority summary from open items. Never leave completed work as the
+  next action; this does not change approved order or scope.
 - A finished task does not finish its stage or release. Before claiming stage
   completion, review every required item's status and actual check/evidence;
   report open items and the next eligible work. Pending checks and holds stay

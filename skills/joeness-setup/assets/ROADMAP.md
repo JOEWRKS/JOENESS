@@ -23,7 +23,9 @@ Before claiming a stage, milestone or release complete, inspect every required
 item's current check and evidence. Report what is complete, what remains, and
 the next eligible work. Do not advance a dependent stage while its prerequisite
 is open unless an authorized decision changes that dependency; independent
-authorized work may proceed. Record explicit direction
+authorized work may proceed. When an item or stage status changes, refresh any
+current-stage or next-priority summary from open items in this same roadmap;
+completed work must not remain the next action. Record explicit direction
 decisions, scope changes and remaining priorities. Updating check evidence does
 not itself change scope. Put individual task execution in its task source;
 task completion alone does not complete a stage. Routine fixes and discussion

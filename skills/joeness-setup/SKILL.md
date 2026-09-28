@@ -110,6 +110,10 @@ cause, fix, verification and remaining workaround in its issue source. Change
 roadmap direction or scope only for an explicit decision; update a required
 item's check/evidence state only from actual verification. Change design only
 within its own authority.
+When a roadmap item or stage status changes, refresh its current-stage and
+next-priority summary in the same document from the remaining open items.
+Do not leave completed work listed as the next action; this status sync does
+not authorize changing approved order or scope.
 Before declaring an approved stage, milestone or release complete, review every
 required roadmap item and its actual check/evidence. Not started, in progress,
 verification pending and on hold remain open. Scope removal is a recorded
