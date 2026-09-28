@@ -1,4 +1,4 @@
-# JOENESS 0.2 정식 출시 로드맵
+# JOENESS 0.3 정식 출시 로드맵
 
 기준: 2026-09-27. 이 문서는 **JOENESS 제품의 출시 준비**를 다룬다. `skills/joeness-setup/assets/ROADMAP.md`는 사용자의 *각 프로젝트*에 쓰는 참고 서식이며 이 문서와 다르다.
 

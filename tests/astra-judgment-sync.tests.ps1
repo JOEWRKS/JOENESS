@@ -164,7 +164,7 @@ function Test-ManifestAndCoreIdentity {
     $manifest = [IO.File]::ReadAllText($manifestPath) | ConvertFrom-Json
     Assert-Equal $manifest.schemaVersion 2 'manifest schema is v2'
     Assert-Equal $manifest.release.name 'JOENESS' 'manifest release name'
-    Assert-Equal $manifest.release.version '0.2' 'manifest release version'
+    Assert-Equal $manifest.release.version '0.3.0-beta.1' 'manifest release version'
     Assert-Equal $manifest.target.model 'gpt-6-astra' 'manifest target model'
     Assert-Equal $manifest.target.reasoningEffort 'xhigh' 'manifest reasoning effort'
     Assert-Equal $manifest.runtimeMode 'common-core+setup' 'manifest runtime mode'

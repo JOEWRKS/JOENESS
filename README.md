@@ -1,4 +1,4 @@
-# JOENESS 0.2
+# JOENESS 0.3.0-beta.1
 
 정식 출시까지 남은 일: [제품 로드맵](docs/ROADMAP.md).
 

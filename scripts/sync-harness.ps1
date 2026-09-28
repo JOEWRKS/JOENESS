@@ -12,7 +12,7 @@ $ErrorActionPreference = 'Stop'
 $script:JoenessBeginMarker = '<!-- JOEWRKS-HARNESS:BEGIN -->'
 $script:JoenessEndMarker = '<!-- JOEWRKS-HARNESS:END -->'
 $script:JoenessStateFile = 'joewrks-harness-state.json'
-$script:JoenessRelease = '0.2'
+$script:JoenessRelease = '0.3.0-beta.1'
 $script:Utf8Strict = New-Object Text.UTF8Encoding($false, $true)
 $script:Utf8NoBom = New-Object Text.UTF8Encoding($false)
 
@@ -356,7 +356,7 @@ function Invoke-JoenessHarnessSync {
   $owned=$null
   if($skillState.Hash -ne 'absent'){
    $owned=$script:Utf8Strict.GetString($skillState.Bytes)|ConvertFrom-Json
-   if($owned.schemaVersion -ne 1 -or $owned.releaseVersion -cne '0.2' -or $owned.manifestSha256 -cne $source.ManifestHash){throw 'Skill ownership does not match this package; existing files were preserved'}
+   if($owned.schemaVersion -ne 1 -or $owned.releaseVersion -cne $script:JoenessRelease -or $owned.manifestSha256 -cne $source.ManifestHash){throw 'Skill ownership does not match this package; existing files were preserved'}
    if(($owned.files|ConvertTo-Json -Compress) -cne ($files|ConvertTo-Json -Compress)){throw 'Skill ownership inventory mismatch'}
    if(($currentFiles|Sort-Object)-join ',' -cne (($files.path|Sort-Object)-join ',')){throw 'Owned skill inventory drift'}
   }elseif($currentFiles.Count){throw 'Unowned skill files; preserve them and resolve explicitly'}
@@ -391,13 +391,13 @@ function Invoke-JoenessHarnessSync {
     $newAgents=$agents.Bytes;$originalExisted=$observation.State.originalAgentsExisted
    }
    $stateObject=[ordered]@{
-    schemaVersion=1;releaseVersion='0.2';manifestSha256=$source.ManifestHash;coreSha256=$source.CoreHash;
+    schemaVersion=1;releaseVersion=$script:JoenessRelease;manifestSha256=$source.ManifestHash;coreSha256=$source.CoreHash;
     originalAgentsExisted=[bool]$originalExisted;newline=$(if($newline -ceq "`r`n"){'crlf'}else{'lf'});
     separatorCount=$separatorCount;blockSha256=(Get-JoenessSha256 (Get-JoenessBlockBytes $source $newline))
    }
    $coreEntries+=New-SetupEntry $agents $newAgents 'AGENTS.md'
    $coreEntries+=New-SetupEntry $coreState ($script:Utf8NoBom.GetBytes(($stateObject|ConvertTo-Json -Compress)+"`n")) $script:JoenessStateFile
-   $ss=[ordered]@{schemaVersion=1;releaseVersion='0.2';manifestSha256=$source.ManifestHash;files=$files}
+   $ss=[ordered]@{schemaVersion=1;releaseVersion=$script:JoenessRelease;manifestSha256=$source.ManifestHash;files=$files}
    $entries.Add((New-SetupEntry $skillState ($script:Utf8NoBom.GetBytes(($ss|ConvertTo-Json -Depth 5 -Compress)+"`n")) 'joeness-skills-state.json'))
   }
   $all=@($coreEntries)+$entries.ToArray()

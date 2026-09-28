@@ -2,7 +2,7 @@
   "schemaVersion": 2,
   "release": {
     "name": "JOENESS",
-    "version": "0.2",
+    "version": "0.3.0-beta.1",
     "entrypoint": "JOENESS.ps1"
   },
   "target": {
@@ -49,7 +49,7 @@
         },
         {
           "path": "references/usage.md",
-          "sha256": "0e39de1d74aac715897e192fc1cb7157c239b68a4f6f4f8643333ec22bd66b50"
+          "sha256": "1933596397bf1c23e7382d559477c94706c12bcf12a0f2de54aa842827068800"
         },
         {
           "path": "scripts/project-setup.ps1",

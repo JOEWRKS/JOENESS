@@ -1,6 +1,6 @@
 # JOENESS Repository
 
-- Active release: `JOENESS 0.2` for `gpt-6-astra / xhigh`.
+- Active release candidate: `JOENESS 0.3.0-beta.1` for `gpt-6-astra / xhigh`.
 - Always-on payload: `astra-judgment-core.md` only (**Independent Judgment**). The sole public skill, `joeness-setup`, is project-scoped setup, not another global harness.
 - `vendor/source-manifest.json` is the machine-readable active release identity.
 - Keep current sources, setup spec/plan, bounded fixtures/evidence, installer/tests/CI and the Independent Judgment A/B plan. Historical 0.1 sources remain in Git history.

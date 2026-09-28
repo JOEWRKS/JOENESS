@@ -58,7 +58,7 @@ test('one self-contained setup skill with real supporting files', () => {
 });
 test('manifest pins exact sole skill inventory and unchanged thin core',()=>{
   const m=JSON.parse(read('vendor/source-manifest.json'));
-  assert.equal(m.release.version,'0.2');
+  assert.equal(m.release.version,'0.3.0-beta.1');
   assert.equal(m.release.entrypoint,'JOENESS.ps1');
   assert.deepEqual(m.publicSkills.map(s=>s.name),['joeness-setup']);
   const skillRoot=fileURLToPath(new URL('../skills/joeness-setup/',import.meta.url));

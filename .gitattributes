@@ -5,3 +5,5 @@
 *.ps1 text eol=lf
 *.yml text eol=lf
 *.yaml text eol=lf
+# Preserve raw evaluation outputs exactly; Markdown hard breaks and XML formatting are evidence.
+evals/joeness-setup/runs/** whitespace=-blank-at-eol,-blank-at-eof
