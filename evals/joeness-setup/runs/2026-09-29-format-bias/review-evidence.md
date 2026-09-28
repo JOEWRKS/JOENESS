@@ -2,6 +2,8 @@
 
 Later [proposed-connection consumer checks](proposal-consumer-evidence.md) used the actual installed-skill proposal text in two fresh cases. `이슈/해결` remained accurate and granted visual acceptance did not substitute for required tablet verification. In the no-acceptance case, acceptance appeared beside the technical check in `남은 문제`, so a strict placement criterion is partial, not a universal pass. No material factual error was observed in these two cases; product instructions were not expanded for display placement alone. Human readability and general accuracy remain unverified.
 
+A further [fresh project-context handoff](project-autoload-evidence.md) used the existing front-of-file project AGENTS connection rather than pasting the report rule into the prompt. It produced the six-field opening and correct problem/fix/verification boundaries without file tools. The stage-incomplete phrase was implicit rather than explicit; strict scoring remains partial. This is one bounded behavior check, not proof of universal instruction delivery or JOENESS-only benefit.
+
 Later [actual project-connection testing](project-connection-evidence.md) found a material `해결` misclassification that these prompt-injected text pairs did not expose. Keep the 0/3 result below scoped to this probe; it is not an all-context pass.
 
 ## Runtime and boundary
