@@ -56,11 +56,41 @@ visual acceptance.
   No model answer was produced, so automatic new-session instruction delivery
   and handoff accuracy were **not scored**. Unreachable local MCP warnings
   also occurred; they are not evidence about the model's handoff behavior.
+- A separate Codex-app chat was dispatched with the exact worktree path and a
+  read-only handoff request. Before reading its result, the minimum accuracy
+  checks are: keep Ticket 13's completed local audit separate from its open
+  Play Console/installed-version check; keep animal visual-set work distinct
+  from Play release; report the 26-drop tablet check
+  as bounded, not all-tier/game-over proof; leave user visual acceptance and
+  publication ungranted; avoid a duplicate audit or invented task. Because the
+  actual worktree is not a saved Codex project, this projectless chat tests
+  handoff with an explicit root path, **not automatic saved-project AGENTS
+  delivery**. Its runtime and result must be inspected separately.
+- Fresh chat: `codex://threads/01a0e8b6-2cc5-76c0-ad08-e6ef307d4fa0`.
+  It completed one read-only turn. The app did not expose its exact model or
+  reasoning effort in the thread result; do not label this an Astra-xhigh
+  replay. The visible command list used only file/Git reads and no target
+  edits, device actions, test reruns, commit or push.
+- Result against the fixed checks: **5/5 factual boundaries met**. It kept
+  the local audit separate from the open Play/installed-version check, kept
+  animal visual-set work separate from release, described the 26-drop test as
+  bounded, left user visual acceptance and upload permission open, and did
+  not direct a blind audit repeat or upload. It located current code, prior
+  721-pass XML, AAB/screenshot hashes and task records rather than accepting
+  the TASK summary alone.
+- Additional handoff issue: the first six lines used developer-facing terms
+  equivalent to “uncommitted changes” and “release artifacts.” They were
+  factually useful but less accessible than the user's requested plain-language
+  opening. The longer detail contained exact counts and a potential conflict
+  between AGENTS' older audio exclusion and TASK's later approved audio scope;
+  current authority and cause of that conflict were not resolved in this
+  read-only handoff. Do not score human readability as accepted or silently
+  change project scope based on that observation.
 - This run has no Bare/control arm, token or time comparison, broad device
   matrix, all-tier/game-over proof, or user acceptance. It does not close the
   real-project or fresh-handoff release gates in `docs/ROADMAP.md`.
-- The JOENESS repository's user-owned root `AGENTS.md` project description
-  still labels the active release `0.2`, while the manifest and README describe
-  the `0.3` beta line. That line was not changed outside the installer's owned
-  block. It remains a potential handoff ambiguity pending an explicit owner
-  decision.
+- A stale `0.2` label appeared in AGENTS instructions pasted into the chat,
+  but the actual repository `AGENTS.md` already says the active release
+  candidate is `0.3.0-beta.1`. The manifest identifies the `beta.2-dev` source
+  candidate and README identifies the personal pilot installation. No root
+  AGENTS file correction was needed or made.
