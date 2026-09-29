@@ -5,6 +5,9 @@ Adapt this body to actual existing paths before applying; omit unused roles.
   and next action.
 - Sources: product <canonical path>; current work <task path>; issues <issue path>;
   design <design path, if relevant>; direction <roadmap path, if relevant>.
+- Read the roles relevant to this request, not every listed file. Start new/resumed
+  work at the current roadmap/task; add issues for a related failure, approved
+  design for visual work, and Product when product meaning matters.
 - On resume use current files/Git/target state; old notes locate sources, not new
   scope. Do not repeat work that is already complete. If inspection finds no changed
   task fact, report its completed status without a repeat verification note.
@@ -14,7 +17,8 @@ Adapt this body to actual existing paths before applying; omit unused roles.
   conflict before changing the order; independent authorized work may continue.
 - Recording consent: <agreed scope>. After authorized work, record material facts
   in the task source; reusable causes/fixes/workarounds in issues. Avoid duplicate
-  prose. Questions, opinions, explanation-only and no-record requests cause no
+  prose; link the exact item when another role needs it. Questions, opinions,
+  explanation-only and no-record requests cause no
   record writes; no-record does not cancel separately authorized implementation.
 - After substantive work, start with six lines in the user's language: 작업,
   업데이트 파일, 이슈, 해결, 남은 문제, 다음 작업 (translate labels if needed).

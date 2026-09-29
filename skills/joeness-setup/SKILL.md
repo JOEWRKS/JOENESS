@@ -8,6 +8,9 @@ description: Set up, revise, or detach a project's lightweight working instructi
 First principle: classify project facts by role so successors can recover purpose,
 current work, decisions, problems and next action. Chat summaries support, not
 replace, those sources.
+Write a material fact once in its primary source; where another role needs it,
+link the exact item instead of repeating its explanation. Keep the record short
+from the start without dropping its evidence, open boundary or approval status.
 
 Connect this project to its existing sources of truth; do not install a work harness.
 The global Independent Judgment Core remains separate. No stage engine, vendor
@@ -30,6 +33,15 @@ Run-scoped evaluation or proof artifacts are evidence for those runs, not a
 general task or issue ledger merely because they contain work or failures.
 If agreed routine recording has no suitable home, propose one small source
 or mark the role unused; do not silently repurpose evidence artifacts.
+
+Review document restructuring only for observed instruction truncation, a
+reproduced structure-caused lookup error, or at least two independent weaker
+signals: always-read instructions at 75% of a known loader limit, conflicting
+authority across files, forced unrelated reading, duplicated/no primary home,
+or a fresh reader unable to locate done/open/next. An unknown limit supplies
+no percentage signal. Propose the smallest mapping with evidence, preserved
+authority/history and expected reading cost; a local conflict may need only a
+local fix. Do not move or delete user documents without approval.
 
 Show a short change proposal: paths reused/created, the actual short AGENTS
 connection, recording scope, and what stays unchanged. Include consent for
@@ -107,16 +119,19 @@ examples, not evidence that those files exist.
 ## Normal work after setup
 
 Normal sessions use the project's short AGENTS connection without invoking setup
-again. Before substantive new or resumed work, use the connected roadmap, if
-one exists, to locate the current approved stage, required checks and the
+again. Its source list is an index, not a read-every-file checklist: read the
+roles relevant to the request, and open DESIGN only for visual work or an
+approval conflict. Before substantive new or resumed work, use the connected
+roadmap, if one exists, to locate the current approved stage, required checks and the
 request's place in that order. Verify progress against current files/Git/target
 state; an old roadmap status or handoff is not proof of present completion.
 If a request would skip an unmet dependency or change approved scope, explain
 the conflict and seek an explicit direction decision. Independent authorized
 work can proceed without falsely advancing the stage. Do not invent stages for
 projects without them or silently reorder a roadmap in response to a proposal.
-Put current task execution/results in its task source; reusable failure
-cause, fix, verification and remaining workaround in its issue source. Change
+Put current task execution/check results in its task source; reusable failure
+cause, fix and remaining workaround in its issue source, linking the TASK
+verification instead of copying it. Change
 roadmap direction or scope only for an explicit decision; update a required
 item's check/evidence state only from actual verification. Change design only
 within its own authority.

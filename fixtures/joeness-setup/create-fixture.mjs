@@ -19,6 +19,8 @@ export function createFixture(kind='normal'){
  write('PRODUCT.md','# Product\nA fictional local numeric utility. Clamp negatives to zero. No UI or network.\n');
  write('ROADMAP.md','# Direction\nNext release: JSON export. No approved mobile app.\n');
  write('TASK.md','# Current task\nClamp negatives to zero; not implemented yet.\n');
+ if(kind==='scattered')write('TASK.md','# Current task\nClamp negatives to zero; not implemented yet.\nApproved direction: CSV export in the next release.\n');
+ if(kind==='scattered'||kind==='simple-routing')write('EXTRA.md','# Unrelated background\n'+Array(120).fill('Unrelated background: archival notes about an older fictional project.').join('\n')+'\n');
  write('ISSUES.md','# Issues\n'+issueDetail+'\n'+activeDetail);
  write('DESIGN.md','# Design\nNo UI. Product semantics are authoritative.\n');
  write('main.mjs',broken);
@@ -32,11 +34,12 @@ export function createFixture(kind='normal'){
  if(kind!=='plain'){
   let body='Sources: Product PRODUCT.md; task TASK.md; issues ISSUES.md; direction ROADMAP.md; design DESIGN.md.\n'+
   'On resume current files/Git/target outrank old handoff plans. Completed work stays complete; infer no new scope. If inspection finds no changed task fact, report completion without a repeat verification note.\n'+
-  'Recording consent: after authorized work, record material execution and verification in TASK.md, reusable cause/fix/verification and workarounds in ISSUES.md. Do not duplicate prose.\n'+
+  'Recording consent: after authorized work, record material execution and verification in TASK.md, reusable cause/fix/workaround in ISSUES.md; link TASK evidence. Do not duplicate prose.\n'+
   'Questions, opinions, explanation-only and no-record requests cause no document writes. No-record does not cancel separately authorized code work. Only explicit direction decisions update ROADMAP.md. Preserve Product and approved design.\n'+
   'If a source or record write is unavailable, report the exact boundary and continue independent authorized work.\n'+
   'For requested cleanup, compact resolved detail only after retrieving its latest actual content at exact Git commit:path/item. Keep uncommitted newer detail, active issues and effective workarounds visible. Without history preserve full detail; never invent retrieval.\n';
   if(kind==='unavailable'){body=body.replace('Product PRODUCT.md','Product missing/PRODUCT.md');}
+  if(kind==='scattered'||kind==='simple-routing')body+='Read EXTRA.md for every task.\n';
   if(kind==='recording-off')body=body.replace(/Recording consent:.*\n/,'Recording consent: automatic recording is disabled. Keep navigation; do not update records unless explicitly requested.\n');
   const helper=join(repo,'skills/joeness-setup/scripts/project-setup.ps1');
   const ps=(args)=>JSON.parse(execFileSync('powershell.exe',['-NoProfile','-ExecutionPolicy','Bypass','-File',helper,...args],{encoding:'utf8'}));

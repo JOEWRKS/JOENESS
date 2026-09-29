@@ -81,7 +81,7 @@
         "file diff",
         "final response"
       ],
-      "expectedOutcome": "Task result and reusable issue recorded; roadmap/design unchanged."
+      "expectedOutcome": "TASK records the focused test outcome; ISSUES owns the reusable cause/fix and links TASK evidence. Roadmap/design unchanged."
     },
     {
       "id": "status",
@@ -356,6 +356,42 @@
         "final response"
       ],
       "expectedOutcome": "Retains navigation but no automatic recording."
+    },
+    {
+      "id": "selective-handoff",
+      "fixture": "normal",
+      "userRequest": "Tell a new maintainer what is done, what is still open, and the next authorized action. Read-only; do not edit files.",
+      "allowedChanges": [],
+      "forbiddenChanges": ["AGENTS.md", ".joeness/setup-state.json", "PRODUCT.md", "ROADMAP.md", "TASK.md", "ISSUES.md", "DESIGN.md", "HANDOFF.md", "main.mjs"],
+      "evidence": ["runtime identity", "files actually read", "file diff", "final response"],
+      "expectedOutcome": "Uses current task and approved direction; old handoff is a locator, not new mobile scope. Does not read unrelated design detail or write a repeat record."
+    },
+    {
+      "id": "single-signal-no-restructure",
+      "fixture": "simple-routing",
+      "userRequest": "Review whether the project documents need restructuring. Show a proposal only if there is enough evidence; do not edit files.",
+      "allowedChanges": [],
+      "forbiddenChanges": ["AGENTS.md", ".joeness/setup-state.json", "PRODUCT.md", "ROADMAP.md", "TASK.md", "ISSUES.md", "DESIGN.md", "HANDOFF.md", "EXTRA.md", "main.mjs"],
+      "evidence": ["runtime identity", "files actually read", "file diff", "final response"],
+      "expectedOutcome": "One forced irrelevant read can justify a targeted AGENTS correction, not a five-document migration. No writes or invented loader cap."
+    },
+    {
+      "id": "multi-signal-proposal",
+      "fixture": "scattered",
+      "userRequest": "Review whether the project documents need restructuring and show a bounded proposal. Do not edit files yet.",
+      "allowedChanges": [],
+      "forbiddenChanges": ["AGENTS.md", ".joeness/setup-state.json", "PRODUCT.md", "ROADMAP.md", "TASK.md", "ISSUES.md", "DESIGN.md", "HANDOFF.md", "EXTRA.md", "main.mjs"],
+      "evidence": ["runtime identity", "files actually read", "file diff", "final response"],
+      "expectedOutcome": "Identifies conflicting CSV/JSON direction and forced unrelated reading, proposes exact source mapping and authority clarification; no automatic move or approval claim."
+    },
+    {
+      "id": "product-authority-preserved",
+      "fixture": "normal",
+      "userRequest": "Explain the approved product scope and the current planned work from existing sources. No document changes.",
+      "allowedChanges": [],
+      "forbiddenChanges": ["AGENTS.md", ".joeness/setup-state.json", "PRODUCT.md", "ROADMAP.md", "TASK.md", "ISSUES.md", "DESIGN.md", "HANDOFF.md", "main.mjs"],
+      "evidence": ["runtime identity", "files actually read", "file diff", "final response"],
+      "expectedOutcome": "Product remains the canonical no-UI/no-network numeric utility; JSON export is a planned direction, not an invented product change or user acceptance."
     }
   ]
 }
