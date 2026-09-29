@@ -117,7 +117,7 @@
 ### 4. 출시본 고정과 배포 — 미완
 
 - [x] **소스 변경 완료:** 개발 후보에서 전역 Independent Judgment Core 주입을 제거하고 manifest·설치/해제·릴리스 검사·README/AGENTS의 활성 구성 설명을 setup-only로 맞췄다. 이 항목은 **제품 소스만** 의미한다.
-- [ ] **부분 완료:** 개인 설치의 기존 Core를 정확한 이전 패키지의 소유 경계에 따라 안전하게 해제하고 setup-only 후보를 설치해 `-Check: current`를 확인했다. 전역 AGENTS는 원래의 빈 파일로 남고 Core 상태는 없다. 새 채팅에서 스킬 발견과 이미 연결된 중립 프로젝트의 읽기 동작은 확인했다. 새 연결 적용·기록은 아직 재검증하지 않았다. [증거](../evals/joeness-setup/runs/2026-09-30-setup-only-migration/review-evidence.md).
+- [ ] **부분 완료:** 개인 설치의 기존 Core를 정확한 이전 패키지의 소유 경계에 따라 안전하게 해제하고 setup-only 후보를 설치해 `-Check: current`를 확인했다. 전역 AGENTS는 원래의 빈 파일로 남고 Core 상태는 없다. 새 채팅에서 스킬 발견·기존 연결 읽기, 별도 새 중립 Git fixture의 연결 적용, 저장된 중립 프로젝트의 TASK 기록을 각각 확인했다. 새로 연결한 같은 fixture의 앱 새 채팅 자동 전달은 미확인이다. [설치 증거](../evals/joeness-setup/runs/2026-09-30-setup-only-migration/review-evidence.md), [연결·기록 증거](../evals/joeness-setup/runs/2026-09-30-post-migration-project-route/review-evidence.md).
 - [x] **완료(개인 설치 충돌 해소):** 이전 Core 설치가 manifest 불일치로 `-Check: blocked`였던 원인을 확인했다. 해당 이전 패키지에서 `-Check: current` 확인 후 `-Remove`, 새 후보에서 `ready → Apply → current`를 확인했다. 소유하지 않은 파일을 덮어쓰지 않았다. 이 전환을 모든 프로젝트의 성공으로 대체하지 않는다.
 - [ ] **미완:** 출시할 정확한 commit과 `vendor/source-manifest.json`의 파일 hash를 고정한다. 깨끗한 checkout에서 `tests/joeness-release.tests.ps1`, Windows CI 및 설치·설정·해제 검사를 통과시키고 실패 증거를 보존한다. 지원 범위와 알려진 제한을 README에 맞춘다.
 - [ ] **미완:** 변경 내용을 리뷰한 뒤 제품 브랜치를 원격에 올리고 기본 브랜치에 반영한다. 현재 작업 브랜치에만 있는 변경을 정식 배포라고 부르지 않는다.
