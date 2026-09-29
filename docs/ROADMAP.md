@@ -124,6 +124,8 @@
 - [x] **완료(개인 설치·중립 연결 경로):** 이전 Core를 정확한 패키지의 소유 경계에 따라 해제하고 setup-only 후보를 설치해 `-Check: current`를 확인했다. 전역 AGENTS는 원래의 빈 파일로 남고 Core 상태는 없다. 중립 Git fixture의 새 연결 적용·`Check current`, 저장된 중립 프로젝트의 TASK 기록, 새로 연결한 fixture의 앱 새 채팅 읽기를 확인했다. 앱이 주입한 초기 지침 bytes는 직접 열람할 수 없어 자동 전달은 실행 경로와 행동으로 판정한다. 이 로컬 확인은 출시본/원격 CI/일반 사용자 수락을 대체하지 않는다. [설치 증거](../evals/joeness-setup/runs/2026-09-30-setup-only-migration/review-evidence.md), [연결·기록 증거](../evals/joeness-setup/runs/2026-09-30-post-migration-project-route/review-evidence.md).
 - [x] **완료(개인 설치 충돌 해소):** 이전 Core 설치가 manifest 불일치로 `-Check: blocked`였던 원인을 확인했다. 해당 이전 패키지에서 `-Check: current` 확인 후 `-Remove`, 새 후보에서 `ready → Apply → current`를 확인했다. 소유하지 않은 파일을 덮어쓰지 않았다. 이 전환을 모든 프로젝트의 성공으로 대체하지 않는다.
 - [ ] **미완:** 출시할 정확한 commit과 `vendor/source-manifest.json`의 파일 hash를 고정한다. 깨끗한 checkout에서 `tests/joeness-release.tests.ps1`, Windows CI 및 설치·설정·해제 검사를 통과시키고 실패 증거를 보존한다. 지원 범위와 알려진 제한을 README에 맞춘다.
+
+2026-09-30 [출시 검사 기록](../evals/joeness-setup/runs/2026-09-30-release-gate/review-evidence.md): `e30f1fd` 개발 후보에서 로컬 Windows 전체 검사와 원격의 깨끗한 checkout CI가 통과했다. Manifest의 단일 스킬 파일 9개 해시도 일치했다. 이는 테스트한 `-dev` 후보의 결과이며 정식 출시 버전·최종 commit 고정, 리뷰·기본 브랜치 반영·사용자 승인은 여전히 남아 있다.
 - [ ] **미완:** 변경 내용을 리뷰한 뒤 제품 브랜치를 원격에 올리고 기본 브랜치에 반영한다. 현재 작업 브랜치에만 있는 변경을 정식 배포라고 부르지 않는다.
 - [ ] **미완:** 반영된 출시본에서 새 설치 또는 안전한 갱신을 실행하고 `-Check: current`, 스킬 발견, 실제 프로젝트 연결 확인을 다시 수행한다. 출시 식별자(태그 또는 고정 commit)와 되돌리기·해제 방법을 사용자에게 전달한다.
 - [ ] **미완:** 위 증거와 남은 제한을 한 페이지로 보고하고 **사용자의 최종 출시 승인**을 받는다. 그전 상태는 `실사용 가능/출시 전`으로 유지한다.
