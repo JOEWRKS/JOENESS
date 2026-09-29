@@ -23,6 +23,7 @@ test('CLI shows usable onboarding only after successful Apply while stdout stays
       const apply=run('Apply');
       assert.equal(apply.status,0); assert.equal(apply.result.status,'current');
       assert.ok(apply.stderr.includes('$joeness-setup'),'successful Apply displays the first invocation');
+      assert.ok(apply.stderr.includes('전역 판단 지침은 설치하지 않습니다'),'onboarding describes the actual setup-only payload');
       for(const name of ['AGENTS','ROADMAP','TASK','ISSUES','DESIGN'])
         assert.ok(apply.stderr.includes(name+'.md'),name+' role appears in the guide');
       assert.ok(apply.stderr.includes('자동 생성하지'),'guide separates installation from project document creation');
