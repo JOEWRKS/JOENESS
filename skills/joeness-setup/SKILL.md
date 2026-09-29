@@ -162,11 +162,10 @@ use `없음` when a field is empty. `이슈` names a problem, `해결` a verifie
 and `남은 문제` unresolved or unverified work. Derive `다음 작업` from authorized
 scope or the roadmap. Keep codes and exact paths out of the opening.
 
-Add `상세 보고` only when a material cause, proof, verification limit, scope
-decision or user-acceptance boundary needs explanation. Use short everyday
-sentences and place exact identifiers beside the facts they support. Keep all
-required facts; remove repetition and optional background, not evidence. Compose
-from facts already checked, without a separate rewrite or verification pass.
+Add `상세 보고` only when the six lines cannot carry a material cause, proof,
+verification limit, scope or acceptance boundary. State checked facts and
+their sources briefly in everyday words; do not repeat the six lines or add a
+separate rewrite or verification pass.
 Simple questions need no work report; never claim a write that did not occur.
 
 When a user requests version cleanup, keep active issues and effective workarounds
