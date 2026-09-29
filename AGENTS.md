@@ -1,6 +1,6 @@
 # JOENESS Repository
 
-- Active source candidate: `JOENESS 0.3.0-beta.3-dev` for `gpt-6-astra / xhigh`; the personal setup-only package is installed, and a read-only fresh chat found it. Fresh project setup, recording, and formal release remain unverified.
+- Active source candidate: `JOENESS 0.3.0-beta.3-dev` for `gpt-6-astra / xhigh`; personal setup-only installation, neutral project setup, routine recording, and a fresh chat in the newly connected project have bounded local evidence. Formal release remains unverified.
 - Distribution mode: `setup-only`. The sole public skill, `joeness-setup`, is project-scoped setup; the package has no always-on global payload and does not write global `AGENTS.md`.
 - `vendor/source-manifest.json` is the machine-readable active release identity.
 - Keep current sources, setup spec/plan, bounded fixtures/evidence, installer/tests/CI and the Independent Judgment A/B plan. Historical 0.1 sources remain in Git history.
