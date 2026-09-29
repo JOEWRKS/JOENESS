@@ -1,6 +1,6 @@
 ---
 name: joeness-setup
-description: Set up, revise, or detach a project's lightweight working instructions and record locations when the user asks to organize project work. Ordinary coding, questions, and status updates do not require setup.
+description: Use when the user asks to install or connect JOENESS in a project, organize its working documents, or revise or detach its project setup. Ordinary coding, questions, and status updates do not require setup.
 ---
 
 # JOENESS Setup
@@ -12,7 +12,10 @@ Write a material fact once in its primary source; where another role needs it,
 link the exact item instead of repeating its explanation. Keep the record short
 from the start without dropping its evidence, open boundary or approval status.
 
-Connect this project to its existing sources of truth; do not install a work harness.
+Treat "install JOENESS in this project" as a project-connection request: show
+the proposed file changes and recording scope before applying them. It is not
+permission to install or replace the personal package. Connect this project to
+its existing sources of truth; do not install a work harness.
 The global Independent Judgment Core remains separate. No stage engine, vendor
 routing, background process, or mandatory five-document bundle.
 
