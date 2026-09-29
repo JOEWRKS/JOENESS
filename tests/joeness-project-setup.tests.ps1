@@ -75,6 +75,17 @@ Case 'LongAgentsApplyCannotDisplaceExistingInstructions' {
     Eq (Bytes $a) $before userBytes
     Eq (Test-Path (Join-Path $p .joeness/setup-state.json)) $false noState
 }
+Case 'UnconnectedExactWindowCannotAcceptManagedBlock' {
+    param($p)
+    $a=Join-Path $p AGENTS.md
+    [IO.File]::WriteAllText($a,('a'*32768),$utf8)
+    $before=Bytes $a
+    $check=Invoke-JoenessProjectSetup -Check -ProjectPath $p
+    Eq $check.status blocked noCapacityForBlock
+    Eq (Apply $p).status blocked apply
+    Eq (Bytes $a) $before userBytes
+    Eq (Test-Path (Join-Path $p .joeness/setup-state.json)) $false noState
+}
 Case 'InitialWindowExactBoundary' {
     param($p)
     $a=Join-Path $p AGENTS.md
@@ -105,7 +116,7 @@ Case 'ExistingFrontBlockReportsDisplacementAndCanDetach' {
     Eq (Detach $p).status detached detach
     Eq ([IO.File]::ReadAllText($a)) ('가'*12000) outsidePreserved
 }
-Case 'ExistingCleanTailRelocatesAndRestoresOutsideBytes' {
+Case 'ExistingCleanTailBlocksRelocationAndRestoresOutsideBytes' {
     param($p)
     $a=Join-Path $p AGENTS.md
     $statePath=Join-Path $p .joeness/setup-state.json

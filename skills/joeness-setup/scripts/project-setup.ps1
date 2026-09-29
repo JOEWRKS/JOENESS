@@ -207,6 +207,15 @@ function Invoke-JoenessProjectSetup {
     $r.blockers=@('AGENTS.md exceeds the observed 32 KiB initial window; a front JOENESS block would displace existing instructions. Preserve user text and resolve the project instructions before applying or relying on this connection')
     return [pscustomobject]$r
    }
+   if($o.BlockState -eq 'absent'){
+    $nl=if($o.Text.Contains("`r`n")){"`r`n"}else{"`n"}
+    $suffix=if($o.Text.Length){$nl+$nl}else{$nl}
+    $minimumBlock=$script:SetupBegin+$nl+'x'+$nl+$script:SetupEnd+$suffix
+    if($script:SetupUtf8.GetByteCount($o.Text)+$script:SetupUtf8.GetByteCount($minimumBlock) -gt $script:SetupInitialWindowBytes){
+     $r.blockers=@('AGENTS.md has no room for even the smallest front JOENESS block within the observed 32 KiB initial window. Preserve user text and resolve the project instructions before applying')
+     return [pscustomobject]$r
+    }
+   }
    if($o.BlockState -eq 'clean' -and -not(Test-SetupInitialWindow $o.Text $o.Start $o.Length)){
     $r.blockers=@('Managed block is beyond the observed 32 KiB initial AGENTS.md window; relocate before relying on automatic delivery')
     return [pscustomobject]$r
@@ -220,7 +229,7 @@ function Invoke-JoenessProjectSetup {
   if($Relocate -and $o.BlockState -ne 'clean'){throw 'Relocate requires one clean managed block'}
   if($Relocate -and -not(Test-SetupWindowCapacity $o.Text)){throw 'AGENTS.md exceeds the observed 32 KiB initial window; JOENESS relocation cannot preserve delivery of existing instructions'}
   if($Relocate -and (Test-SetupInitialWindow $o.Text $o.Start $o.Length)){$r.status='current';return [pscustomobject]$r}
-  if($Apply -and $o.BlockState -eq 'clean' -and -not(Test-SetupInitialWindow $o.Text $o.Start $o.Length)){throw 'Managed block is outside initial AGENTS.md window; use Relocate first'}
+  if($Apply -and $o.BlockState -eq 'clean' -and -not(Test-SetupInitialWindow $o.Text $o.Start $o.Length)){throw 'Managed block is outside initial AGENTS.md window; moving it forward would displace user instructions. Review or detach the connection'}
   $before=$o.Text; $prefix='';$suffix=''
   if($o.BlockState -eq 'clean'){
    $prefix=$script:SetupUtf8.GetString([Convert]::FromBase64String($o.Record.ownedBoundary.prefixBase64))

@@ -84,11 +84,11 @@ a non-Git project. Explain the boundary and offer a proposed text/manual handoff
    `-ExpectedTargetHash`, `-ExpectedStateHash` from that Check and
    `-ManagedBodyBase64` containing UTF-8 body text, without markers.
    New connections go near the beginning of `AGENTS.md`.
-3. If an existing clean block is beyond that window, propose the placement
-   change only when the entire resulting file fits. Once authorized, call
-   `-Relocate` with the same three fresh expected values. This moves only the
-   owned block and its owned separators; it does not rewrite other instructions.
-4. Read the JSON result. Only `current` confirms Apply or Relocate; `partial`
+3. A clean block beyond the window means the file cannot fit in that window.
+   Do not offer automatic relocation: moving it forward would displace other
+   instructions. Propose a user-approved reduction of those instructions or
+   inspect and detach the connection. Then recheck the actual target.
+4. Read the JSON result. Only `current` confirms Apply; `partial`
    names unresolved files, not success. Inspect targets before any retry.
    Recheck and use a fresh project chat to verify actual instruction delivery.
 
