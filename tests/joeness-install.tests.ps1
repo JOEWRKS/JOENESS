@@ -66,29 +66,36 @@ try {
     }
 
     # Either half of an old global Core installation blocks all modes.
-    $markerHome = Join-Path $root marker
-    $null = New-Item -ItemType Directory -Path $markerHome
-    [IO.File]::WriteAllText((Join-Path $markerHome AGENTS.md), "user`n<!-- JOEWRKS-HARNESS:BEGIN -->", $utf8)
-    BlockedWithoutMutation $markerHome markerOnly
+    $markerText = "user`n<!-- JOEWRKS-HARNESS:BEGIN -->"
+    foreach ($encoding in @(
+        [pscustomobject]@{ Name = 'utf8'; Value = $utf8 },
+        [pscustomobject]@{ Name = 'utf16le'; Value = [Text.UnicodeEncoding]::new($false, $false) },
+        [pscustomobject]@{ Name = 'utf16be'; Value = [Text.UnicodeEncoding]::new($true, $false) }
+    )) {
+        $markerHome = Join-Path $root ('marker-' + $encoding.Name)
+        $null = New-Item -ItemType Directory -Path $markerHome
+        [IO.File]::WriteAllBytes((Join-Path $markerHome AGENTS.md), $encoding.Value.GetBytes($markerText))
+        BlockedWithoutMutation $markerHome ('markerOnly-' + $encoding.Name)
+    }
     $stateHome = Join-Path $root legacyState
     $null = New-Item -ItemType Directory -Path $stateHome
     [IO.File]::WriteAllText((Join-Path $stateHome joewrks-harness-state.json), '{"legacy":true}', $utf8)
     BlockedWithoutMutation $stateHome stateOnly
 
     # A Core state arriving after the first skill write is not silently bypassed.
-    $late = Join-Path $root lateLegacy
-    $lateState = Join-Path $late joewrks-harness-state.json
-    $lateResult = Invoke-JoenessHarnessSync -Apply -CodexHome $late -AfterWrite {
-        param($stage)
-        if ($stage -like 'skills/joeness-setup/*') {
-            [IO.File]::WriteAllText($lateState, '{"arrived":"concurrently"}', $utf8)
+    foreach ($kind in @('state', 'marker')) {
+        $late = Join-Path $root ('late-' + $kind)
+        $latePath = if ($kind -eq 'state') { Join-Path $late joewrks-harness-state.json } else { Join-Path $late AGENTS.md }
+        $lateBytes = if ($kind -eq 'state') { $utf8.GetBytes('{"arrived":"concurrently"}') } else { $utf8.GetBytes('<!-- JOEWRKS-HARNESS:BEGIN -->') }
+        $lateResult = Invoke-JoenessHarnessSync -Apply -CodexHome $late -AfterWrite {
+            param($stage)
+            if ($stage -like 'skills/joeness-setup/*') { [IO.File]::WriteAllBytes($latePath, $lateBytes) }
         }
+        Eq $lateResult.status failed "late $kind failure"
+        Eq $lateResult.rollback.status complete "late $kind rollback"
+        BytesEqual ([IO.File]::ReadAllBytes($latePath)) $lateBytes "late $kind preserved exactly"
+        Eq (Snapshot $late) (('/' + (Split-Path $latePath -Leaf) + '=' + (Get-FileHash -LiteralPath $latePath -Algorithm SHA256).Hash).Replace('/', '\')) "late $kind leaves only external file"
     }
-    Eq $lateResult.status failed lateLegacyFailure
-    Eq $lateResult.rollback.status complete lateLegacyRollback
-    Eq (Test-Path $lateState) $true lateLegacyPreserved
-    Eq (Test-Path (Join-Path $late skills/joeness-setup/SKILL.md)) $false lateSkillRolledBack
-    Eq (Test-Path (Join-Path $late joeness-skills-state.json)) $false lateSkillStateAbsent
 
     # Foreign files and owned drift are never overwritten or removed.
     $collision = Join-Path $root collision

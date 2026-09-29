@@ -13,6 +13,7 @@ $script:LegacyStateName = 'joewrks-harness-state.json'
 $script:LegacyMarkers = @('<!-- JOEWRKS-HARNESS:BEGIN -->', '<!-- JOEWRKS-HARNESS:END -->')
 $script:Utf8Strict = New-Object Text.UTF8Encoding($false, $true)
 $script:Utf8NoBom = New-Object Text.UTF8Encoding($false)
+$script:LegacyMarkerEncodings = @($script:Utf8NoBom, [Text.Encoding]::Unicode, [Text.Encoding]::BigEndianUnicode)
 
 function Get-JoenessSha256 {
     param([byte[]] $Bytes)
@@ -97,8 +98,10 @@ function Get-JoenessLegacyObservation {
     if (Test-Path -LiteralPath $agentsPath -PathType Leaf) {
         $bytes = [IO.File]::ReadAllBytes($agentsPath)
         foreach ($marker in $script:LegacyMarkers) {
-            if (Test-JoenessContainsBytes $bytes ($script:Utf8NoBom.GetBytes($marker))) {
-                return [pscustomobject]@{ Status = 'blocked'; Message = 'Legacy Core marker exists without current package ownership' }
+            foreach ($encoding in $script:LegacyMarkerEncodings) {
+                if (Test-JoenessContainsBytes $bytes ($encoding.GetBytes($marker))) {
+                    return [pscustomobject]@{ Status = 'blocked'; Message = 'Legacy Core marker exists without current package ownership' }
+                }
             }
         }
     }
