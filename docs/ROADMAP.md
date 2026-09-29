@@ -29,13 +29,13 @@
 
 ## 맥락 저장·조회 후보 후속 시험 — 순서대로
 
-기준 소스: `codex/joeness-context-routing`의 `52b128c`. [구현 검증](../evals/joeness-setup/runs/2026-09-29-context-routing/review-evidence.md)은 Windows 계약·설정 안전성 통과와 **스킬을 직접 읽게 한** 가상 행동 시험을 증명한다. [시험 1 결과](../evals/joeness-setup/runs/2026-09-29-context-routing-follow-up/phase1-result.md): 연결 적용은 통과했지만 새 실행의 파일 읽기가 환경 정책에 차단되어 **시험 1 보류**다. 성공·실패·실행 불가·미검증을 섞지 않는다.
+기준 소스: `codex/joeness-context-routing`의 `52b128c`. [구현 검증](../evals/joeness-setup/runs/2026-09-29-context-routing/review-evidence.md)은 Windows 계약·설정 안전성 통과와 **스킬을 직접 읽게 한** 가상 행동 시험을 증명한다. [CLI 시험 1 실패](../evals/joeness-setup/runs/2026-09-29-context-routing-follow-up/phase1-result.md)는 파일 읽기 정책 때문에 보존하고, 별도 [앱 새 채팅의 시험 1 통과](../evals/joeness-setup/runs/2026-09-29-context-routing-follow-up/phase1-app-result.md)로 한 시험 프로젝트의 운영 행동을 확인했다. 현재 다음 단계는 **시험 2 지정 모델 행동**이다. 성공·실패·실행 불가·미검증을 섞지 않는다.
 
-### 시험 1. 새 프로젝트의 자동 연결 — 보류
+### 시험 1. 새 프로젝트의 자동 연결 — 완료(한 시험 채팅의 관찰 범위)
 
 - [x] **완료:** 별도 중립 Git 시험 프로젝트에 이번 후보의 짧은 `AGENTS.md` 연결을 설정 도구로 적용했다. 기존 사용자 프로젝트, 개인 설치, Product/승인 Design은 변경하지 않았다. 적용 전후 파일·상태·hash와 32 KiB 지침 경계를 확인했다. [증거](../evals/joeness-setup/runs/2026-09-29-context-routing-follow-up/phase1-result.md).
-- [ ] **보류:** 새 세션의 요청에는 JOENESS·스킬 경로·읽기 순서·보고 형식을 넣지 않았다. 응답은 여섯 항목을 사용했지만 읽기 명령이 정책에 차단되어 현재 ROADMAP/TASK와 관련 원본을 대조하지 못했다. 파일 읽기가 가능한 새 실행에서 최신 상태 우선·선택적 조회·불필요한 쓰기 없음까지 확인해야 한다. 이는 자동 전달과 **일치하는 행동 증거**이지 주입 내부의 직접 증명이나 일반 성공률은 아니다.
-- [x] **완료:** 실패 경계와 재실행 조건을 보존했다. 연결 상태는 `current/clean`, 파일 변경은 없었다. 읽기 정책을 우회하지 않고 정상적인 읽기 권한을 가진 새 프로젝트 세션이 필요하다. 시험 1이 완료되기 전 시험 2의 결과를 제품 연결 성공으로 해석하지 않는다.
+- [x] **완료:** 새 앱 채팅의 요청에는 JOENESS·스킬 경로·읽기 순서·보고 형식을 넣지 않았다. 현재 ROADMAP/TASK·Product·코드·관련 Issue와 오래된 HANDOFF를 읽고 최신 상태·승인 범위·다음 행동을 구분했다. 무관한 DESIGN은 읽지 않았고 파일을 쓰지 않았다. 이는 [자동 연결과 일치하는 한 채팅의 행동 증거](../evals/joeness-setup/runs/2026-09-29-context-routing-follow-up/phase1-app-result.md)이지 주입 내부의 직접 증명이나 일반 성공률은 아니다.
+- [x] **완료:** 앞선 CLI의 읽기 차단과 앱 시험의 통과를 모두 보존했다. 시험용 연결문에 평가자가 남긴 서식 안내·중복 문구가 있었으므로 정상 설정 제안의 간결함은 이 시험으로 판정하지 않는다. 시험 2는 이 범위를 유지하고 진행한다.
 
 ### 시험 2. 지정 모델 행동 — 검증 대기
 
