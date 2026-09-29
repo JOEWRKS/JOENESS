@@ -21,7 +21,7 @@ The package manifest pins `astra-judgment-core.md` SHA-256 `f360b48be1b4143035f6
 
 ## Fresh behavior cases
 
-The case catalog is `fixtures/joeness-setup/behavior-cases.json`. Expected outcomes stayed outside the agents' user requests. Evaluators inspected fixture files, answers and changed-file sets; read-only cases had empty diffs. Fresh subagent runs did not expose their actual runtime model identifier, so these observations are behavior evidence, **not** independently attested GPT-6 Astra xhigh results. Two extra subagents were explicitly requested as `gpt-6-astra` / `xhigh` for single-signal and multi-signal cases, but their replies likewise did not attest the runtime identity.
+The case catalog is `fixtures/joeness-setup/behavior-cases.json`. Expected outcomes stayed outside the agents' user requests. Evaluators inspected fixture files, answers and changed-file sets; read-only cases had empty diffs. Delivery mode: explicit SKILL read. Changed-source agents were directed to read this worktree's candidate `skills/joeness-setup/SKILL.md`; fixture AGENTS connections were not regenerated from the changed asset. Automatic daily-session delivery: untested. Fresh subagent runs did not expose their actual runtime model identifier, so these observations are behavior evidence, **not** independently attested GPT-6 Astra xhigh results. Two extra subagents were explicitly requested as `gpt-6-astra` / `xhigh` for single-signal and multi-signal cases, but their replies likewise did not attest the runtime identity.
 
 | Case / disposable fixture | Observed read, action and diff | Judgment |
 | --- | --- | --- |
@@ -33,7 +33,7 @@ The case catalog is `fixtures/joeness-setup/behavior-cases.json`. Expected outco
 | `history-new` / `bKuQty` | Used exact `git show <commit>:ISSUES.md` to verify old R-1; compacted only that old line to a Git reference. Preserved latest uncommitted detail and active A-2 workaround. Diff inspected. | PASS. |
 | `write-failure` / `BRS23f` | Fixture's TASK was actually read-only after a RED→GREEN fixture correction. Agent fixed source, passed focused test 1/1, attempted TASK write and received write failure, reread unchanged TASK, and reported unsaved record separately from completed code. | PASS; no false completion or abandoned authorized fix. |
 
-The old baseline bug-record run `AZf34K` read all five role documents plus handoff and edited HANDOFF unnecessarily, although TASK/ISSUES placement was correct. The changed-source rerun avoided the unrelated Design and handoff work. This is a bounded routing improvement, not proof of general token savings or performance superiority.
+The old baseline bug-record run `AZf34K` read all five role documents plus handoff and edited HANDOFF unnecessarily, although TASK/ISSUES placement was correct. The changed-source pressure-test rerun, after an explicit SKILL read, avoided the unrelated Design and handoff work. This is a bounded improvement under that input mode, not proof of automatic project-connected routing, general token savings, or performance superiority.
 
 ## Limits and state
 
