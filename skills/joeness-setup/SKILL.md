@@ -16,8 +16,8 @@ Treat "install JOENESS in this project" as a project-connection request: show
 the proposed file changes and recording scope before applying them. It is not
 permission to install or replace the personal package. Connect this project to
 its existing sources of truth; do not install a work harness.
-The global Independent Judgment Core remains separate. No stage engine, vendor
-routing, background process, or mandatory five-document bundle.
+No stage engine, vendor routing, background process, or mandatory
+five-document bundle.
 
 ## Inspect and propose
 

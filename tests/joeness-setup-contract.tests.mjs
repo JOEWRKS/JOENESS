@@ -56,10 +56,13 @@ test('one self-contained setup skill with real supporting files', () => {
   assert.match(yaml,/allow_implicit_invocation: true/);
   assert.ok(yaml.includes('$joeness-setup'));
 });
-test('manifest pins exact sole skill inventory and unchanged thin core',()=>{
+test('manifest pins exact sole setup skill without global runtime',()=>{
   const m=JSON.parse(read('vendor/source-manifest.json'));
-  assert.equal(m.release.version,'0.3.0-beta.2-dev');
+  assert.equal(m.schemaVersion,3);
+  assert.equal(m.release.version,'0.3.0-beta.3-dev');
   assert.equal(m.release.entrypoint,'JOENESS.ps1');
+  assert.equal(m.runtimeMode,'setup-only');
+  assert.equal(Object.hasOwn(m,'activeCommonCore'),false);
   assert.deepEqual(m.publicSkills.map(s=>s.name),['joeness-setup']);
   const skillRoot=fileURLToPath(new URL('../skills/joeness-setup/',import.meta.url));
   const disk=readdirSync(skillRoot,{recursive:true,withFileTypes:true})
@@ -70,7 +73,6 @@ test('manifest pins exact sole skill inventory and unchanged thin core',()=>{
   assert.deepEqual(m.publicSkills[0].files.map(f=>f.path).sort(),expected);
   for(const f of m.publicSkills[0].files)
     assert.equal(createHash('sha256').update(read('skills/joeness-setup/'+f.path)).digest('hex'),f.sha256);
-  assert.equal(createHash('sha256').update(read(m.activeCommonCore.path)).digest('hex'),'f360b48be1b4143035f61fa20149a3249c60dea2e7f12cffa8bf1e8918f4f6a9');
   assert.deepEqual(m.defaultVendors,[]); assert.equal(m.pluginRouting,null);
   assert.deepEqual(m.managedRuntimeFiles,[]);
 });
