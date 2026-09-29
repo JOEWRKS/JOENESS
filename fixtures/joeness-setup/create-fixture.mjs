@@ -1,4 +1,4 @@
-import {mkdtempSync,writeFileSync,readFileSync,mkdirSync,rmSync} from 'node:fs';
+import {mkdtempSync,writeFileSync,readFileSync,mkdirSync,rmSync,chmodSync} from 'node:fs';
 import {tmpdir} from 'node:os';
 import {join,resolve} from 'node:path';
 import {execFileSync} from 'node:child_process';
@@ -50,5 +50,6 @@ export function createFixture(kind='normal'){
   git(root,'commit','-qm','project connection');
  }
  if(kind==='zip')rmSync(join(root,'.git'),{recursive:true,force:true});
+ if(kind==='locked')chmodSync(join(root,'TASK.md'),0o444);
  return {root,archive,kind};
 }

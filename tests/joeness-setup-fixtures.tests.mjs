@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {readFileSync,rmSync,existsSync} from 'node:fs';
+import {readFileSync,writeFileSync,chmodSync,rmSync,existsSync} from 'node:fs';
 import {join} from 'node:path';
 import {createFixture,git,issueDetail,newerDetail,activeDetail} from '../fixtures/joeness-setup/create-fixture.mjs';
 test('fresh cases keep expectations outside user requests',()=>{
@@ -35,6 +35,14 @@ test('recording fixture locates task checks in TASK and reusable causes in ISSUE
   assert.match(agents,/reusable cause\/fix\/workaround in ISSUES\.md/i);
   assert.match(agents,/link TASK evidence/i);
  }finally{rmSync(f.root,{recursive:true,force:true});}
+});
+test('locked fixture makes TASK record writes fail without hiding its current text',()=>{
+ const f=createFixture('locked');const task=join(f.root,'TASK.md');
+ try{
+  const current=readFileSync(task);
+  assert.match(current.toString(),/Clamp negatives to zero/);
+  assert.throws(()=>writeFileSync(task,current),e=>['EPERM','EACCES'].includes(e.code));
+ }finally{chmodSync(task,0o666);rmSync(f.root,{recursive:true,force:true});}
 });
 test('actual Git archive predates the latest uncommitted detail',()=>{
  const f=createFixture('new-detail');

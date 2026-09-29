@@ -49,7 +49,7 @@
         },
         {
           "path": "references/usage.md",
-          "sha256": "8098e7771fc920b1a526213b0a3deb5781c4beb5e4f5375468a6394c0b524ef6"
+          "sha256": "379fc232346c6aeb58c9bafa2c09ee57754dc97c7cd990775b6420e15a207fa9"
         },
         {
           "path": "scripts/project-setup.ps1",
