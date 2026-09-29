@@ -1,17 +1,17 @@
 # JOENESS 0.3
 
-현재 소스: `0.3.0-beta.2-dev` 작업 브랜치의 후속 시험 후보. 개인 설치는 이전 후보의 바이트이므로 이 소스의 `-Check`는 manifest 불일치로 `blocked`를 반환한다(2026-09-29 확인). 이번 변경은 개인 설치를 갱신하지 않는다. 원격 배포나 정식 출시는 아니며 [정식 출시의 남은 항목](docs/ROADMAP.md)은 완료되지 않았다.
+현재 소스: `0.3.0-beta.3-dev`의 **setup-only 개발 후보**. 개인 설치에는 이전 Core 패키지가 남아 있으며, 새 소스의 `-Check`는 이를 `blocked`로 보고한다. 이번 변경은 개인 설치를 갱신하지 않는다. 원격 배포나 정식 출시는 아니며 [정식 출시의 남은 항목](docs/ROADMAP.md)은 완료되지 않았다.
 
 **한눈에 보기**
 
 - **목적:** 프로젝트의 목표·한 일·문제·다음 일을 알맞은 기존 문서에 남겨 사람과 다음 AI가 쉽게 이어받게 한다.
-- **설치:** 근거를 다시 살피는 판단 지침 하나와 프로젝트 문서를 연결하는 `joeness-setup` 하나. 설치만으로 프로젝트 문서를 만들거나 바꾸지 않는다.
+- **설치:** 프로젝트 문서를 연결하는 `joeness-setup` 스킬 하나. 전역 판단 지침은 설치하지 않는다. 설치만으로 프로젝트 문서를 만들거나 바꾸지 않는다.
 - **사용:** 프로젝트를 열고 `이 프로젝트에 JOENESS 설치해줘`라고 말한다. 바뀔 파일과 기록 범위를 먼저 확인·승인하면 연결된다. 적용 후 실제로 만든·수정한 파일을 보고받고, 그다음에는 평소처럼 작업을 요청한다.
 - **기록:** AGENTS는 작업 안내, ROADMAP은 구현 순서·현재 단계·필수 항목의 상태와 완료 기준, TASK는 진행·검증, ISSUES는 문제·해결, DESIGN은 디자인 원본·승인 연결이다. 기존 문서를 우선 쓰고 다섯 문서를 일괄 생성하지 않는다.
 - **확인:** 개인 설치와 프로젝트 연결은 별개다. 각각 확인하는 방법은 [아래](#현재-어디서-작동하는지-확인)에 있다. 백그라운드 갱신기는 없다.
-- **한계:** 정식 출시 승인, 모든 환경의 안정성, 토큰 절감, 판단 지침만의 성능 개선은 확인된 사실로 주장하지 않는다.
+- **한계:** 정식 출시 승인, 모든 환경의 안정성, 토큰 절감, 프로젝트 연결만의 성능 개선은 확인된 사실로 주장하지 않는다.
 
-기존 0.2 사용자는 [안전한 갱신 순서](#기존-02에서-03으로-갱신)를 먼저 읽는다. 자세한 문서별 역할과 요청 예시는 [설치 후 사용 안내](skills/joeness-setup/references/usage.md)에 있다.
+기존 설치가 있다면 [안전한 갱신 경계](#기존-설치에서-새-후보로-갱신)를 먼저 읽는다. 자세한 문서별 역할과 요청 예시는 [설치 후 사용 안내](skills/joeness-setup/references/usage.md)에 있다.
 
 ## 빠른 시작
 
@@ -31,15 +31,15 @@ powershell.exe -NoProfile -File .\JOENESS.ps1 -Check
 
 기본 대상은 `CODEX_HOME` 또는 사용자 `.codex`다.
 다른 대상을 시험하려면 **매 명령에** `-CodexHome <명시 경로>`를 붙인다.
-설치기는 사용자 AGENTS의 소유 구역, 단일 스킬 폴더,
-`joewrks-harness-state.json`과 `joeness-skills-state.json`만 관리한다.
+새 설치기는 단일 스킬 폴더와 `joeness-skills-state.json`만 관리한다.
+전역 `AGENTS.md`와 이전 `joewrks-harness-state.json`은 만들거나 바꾸지 않는다.
 프로젝트를 탐색하거나 프로젝트 문서를 자동 변경하지 않는다.
 
 `ready`는 변경 가능, `current`는 정확한 현재 설치,
 `blocked`는 변경 없이 충돌, `failed/partial`은 실패/미복구 대상이 있음을 뜻한다.
 반복 Apply는 쓰기 없는 no-op이다. source hash와 소유 기준을 검증한다.
 설치된 관리 파일을 편집했거나 이름만 같은 스킬이 있으면 덮어쓰지 않는다.
-설치 상태가 현재 패키지와 일치하지 않으면 파일을 보존하고 충돌을 보고한다.
+이전 Core의 상태·표식 또는 현재 패키지와 다른 스킬 상태가 있으면 파일을 보존하고 충돌을 보고한다.
 상태 파일을 지우거나 강제 덮어쓰기로 우회하지 말고 소유 범위를 먼저 확인한다.
 
 설치 후 새 채팅에서 프로젝트를 열고 말하면 된다.
@@ -60,21 +60,25 @@ powershell.exe -NoProfile -File .\JOENESS.ps1 -Check
 현재 자동 적용 helper는 **Git root + UTF-8(선택적 BOM)**를 지원한다.
 non-Git 폴더를 임의로 git init하지 않고 제안/수동 전달까지 제공한다.
 
-## 기존 0.2에서 0.3으로 갱신
+## 기존 설치에서 새 후보로 갱신
 
-새 설치기는 다른 버전의 설치를 임의로 덮어쓰지 않는다. 기존 0.2가 있으면
-새 `-Check`는 `blocked`를 보고하고 파일을 보존한다. 이때 새 `-Apply`를
+새 설치기는 이전 Core 설치를 임의로 덮어쓰거나 지우지 않는다. 이전 설치가 있으면
+새 `-Check`·`-Apply`·`-Remove`는 모두 `blocked`를 보고하고 파일을 보존한다. 새 `-Apply`를
 반복하거나 상태 파일을 직접 지우지 않는다.
 
-1. **기존 0.2를 설치했던 소스 폴더**에서 아래 명령을 실행한다. `-Check`가
-   `current`일 때만 같은 폴더의 `-Remove`를 실행하고 `removed`를 확인한다.
+이번 소스 작업에서는 아래 이전 절차를 **실행하지 않았다**. 추후 별도 승인 후:
+
+1. 기존 개인 설치와 정확히 대응하는 이전 소스(확인된 Git commit:
+   `089dd6cc17eafc05e46ed66b457e4e0072936f59`)에서 `-Check`가
+   `current`인지 재확인한다. 일치할 때만 **그 같은 패키지**의 `-Remove`를
+   실행하고 `removed`를 확인한다.
 
    ```powershell
    powershell.exe -NoProfile -File .\JOENESS.ps1 -Check
    powershell.exe -NoProfile -File .\JOENESS.ps1 -Remove
    ```
 
-2. **새 0.3 소스 폴더**에서 `-Check`의 `ready`를 확인한 뒤 설치한다. 마지막
+2. **새 setup-only 소스 폴더**에서 `-Check`의 `ready`를 확인한 뒤 설치한다. 마지막
    `-Check`가 `current`인지 확인한다.
 
    ```powershell
@@ -182,14 +186,14 @@ ISSUES는 문제 해결 기록, DESIGN은 디자인 원본·승인 연결 역할
 powershell.exe -NoProfile -File .\JOENESS.ps1 -Remove
 ```
 
-패키지 제거는 프로젝트 연결을 일괄 해제하지 않는다. 필요한 프로젝트는
+새 패키지 제거는 설치된 스킬만 해제하며 프로젝트 연결을 일괄 해제하지 않는다. 필요한 프로젝트는
 먼저 별도로 해제한다. 설치/해제 후 이미 열려 있던 세션은 지침을 다시
 읽지 않을 수 있으므로 새 세션에서 확인한다.
 
-관리 구역 내부에 사용자가 편집한 문장이 있으면 새 Check를 실행해도
+프로젝트의 JOENESS-SETUP 관리 구역 내부에 사용자가 편집한 문장이 있으면 새 Check를 실행해도
 덮어쓰기 권한이 생기지 않는다. 상태 파일을 지워 우회하지 말고, 보존할
 문장과 수정 범위를 확인한 뒤 별도 교정안을 검토한다. 부분 실패 뒤에도
-현재 두 파일을 먼저 확인하며 무조건 재시도하지 않는다.
+현재 대상 파일과 상태를 먼저 확인하며 무조건 재시도하지 않는다.
 
 설정된 프로젝트를 clone할 때는 AGENTS와 `.joeness/setup-state.json`을 함께
 보존한다. Git checkout의 LF/CRLF 변환은 커밋된 두 파일이 같은 적용 본문을
@@ -198,21 +202,22 @@ powershell.exe -NoProfile -File .\JOENESS.ps1 -Remove
 
 ## 구현과 검증
 
-판단 지침은 사용자 반론을 자동 정답으로 보지 않고 근거와 권한을 다시 평가한다.
-설정 도구는 문서의 위치와 동의한 기록 범위만 연결한다. 별도 디자인 스킬 자동
+현재 배포 후보는 전역 판단 지침을 포함하지 않는다. 설정 도구는 문서의 위치와
+동의한 기록 범위만 연결한다. 별도 디자인 스킬 자동
 호출, 단계 라우터, 외부 vendor, 상시 작업 엔진은 포함하지 않는다. 짧은 자연어
 보고는 문서 기록을 확인하는 보조 수단이다.
 
 - 배포 identity/hash: `vendor/source-manifest.json`
-- Core: `astra-judgment-core.md` (기존 bytes 유지)
 - 단일 skill: `skills/joeness-setup/`
 - C1–C4 설계/계획: `docs/superpowers/{specs,plans}/2026-09-26-joeness-0.2-project-setup*.md`
 - bounded evidence: `evals/joeness-setup/runs/2026-09-26-implementation/`
 
 ```powershell
-powershell.exe -NoProfile -File tests/astra-judgment-sync.tests.ps1
+powershell.exe -NoProfile -File tests/joeness-release.tests.ps1
 powershell.exe -NoProfile -File tests/joeness-project-setup.tests.ps1
+pwsh -NoProfile -File tests/joeness-project-setup.tests.ps1
 powershell.exe -NoProfile -File tests/joeness-install.tests.ps1
+pwsh -NoProfile -File tests/joeness-install.tests.ps1
 node --test tests/joeness-setup-contract.tests.mjs tests/joeness-setup-fixtures.tests.mjs
 ```
 
