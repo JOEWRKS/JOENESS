@@ -12,7 +12,7 @@ JOENESS는 프로젝트의 목표, 진행 상황, 문제와 다음 일을 알맞
 - 작업의 실제 결과, 로드맵의 단계 완료, 사용자 수락을 구분합니다. 현재 코드·Git·실제 대상은 오래된 작업 설명보다 현재 상태의 근거가 되지만, 승인된 목표나 디자인을 자동 변경하지는 않습니다.
 - 전역 판단 지침이나 상시 작업 엔진을 설치하지 않습니다. 프로젝트 설정은 변경안을 먼저 보여주고 승인받은 범위에만 적용합니다.
 
-[Superpowers](https://github.com/obra/superpowers)는 설계·계획·테스트 등 개발 절차 전반을 다루는 하네스입니다. JOENESS는 그런 절차를 강제하지 않고 프로젝트 문서의 기록 위치와 인수인계에 범위를 좁힙니다. [Codex 스킬](https://developers.openai.com/plugins/concepts/skills), [Claude Code 메모리](https://code.claude.com/docs/en/memory), [Cursor 규칙](https://cursor.com/docs), [Copilot 저장소 지침](https://docs.github.com/en/copilot/how-tos/configure-custom-instructions-in-your-ide/add-repository-instructions-in-your-ide?tool=vscode)에도 관련 기능이 있으므로, JOENESS를 유일한 기억·지침 도구로 소개하지 않습니다. **기존 원본과 승인 경계를 프로젝트별로 연결하는 사용 방식**이 이 패키지의 특징이며, 다른 도구보다 정확하거나 빠르다는 비교 결과는 없습니다.
+[Superpowers](https://github.com/obra/superpowers)등의 스킬은 설계·계획·테스트 등 개발 절차 전반을 다루는 하네스입니다. JOENESS는 그런 절차를 강제하지 않고 프로젝트 문서의 기록 위치와 인수인계에 범위를 좁힙니다. [Codex 스킬](https://developers.openai.com/plugins/concepts/skills), [Claude Code 메모리](https://code.claude.com/docs/en/memory), [Cursor 규칙](https://cursor.com/docs), [Copilot 저장소 지침](https://docs.github.com/en/copilot/how-tos/configure-custom-instructions-in-your-ide/add-repository-instructions-in-your-ide?tool=vscode)에도 관련 기능이 있으므로, JOENESS를 유일한 기억·지침 도구로 소개하지 않습니다. **기존 원본과 승인 경계를 프로젝트별로 연결하는 사용 방식**이 이 패키지의 특징이며, 다른 도구보다 정확하거나 빠르다는 비교 결과는 없습니다.
 
 ## 사용법
 
