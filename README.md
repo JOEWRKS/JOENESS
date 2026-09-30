@@ -2,17 +2,19 @@
 
 현재 설치 대상 버전은 `0.3.0`입니다. 지원 범위는 Windows PowerShell·Git 프로젝트·Codex입니다. 설치·프로젝트 연결·새 채팅은 제한된 사례에서 확인했으며, 보편적인 성능 향상이나 토큰 절감은 주장하지 않습니다. [출시 범위와 검증 기록](docs/ROADMAP.md)을 별도로 관리합니다.
 
-## 핵심
+## 핵심 — 세줄요약
 
-JOENESS는 프로젝트의 목표, 진행 상황, 문제와 다음 일을 알맞은 문서에 연결하고 기록하도록 돕습니다. 목적은 사용자와 다음 담당자가 현재 상태를 찾아 이어받기 쉽게 하는 것입니다. 설치되는 공개 도구는 프로젝트 설정용 `joeness-setup` 하나입니다.
+1. 프로젝트의 목표와 승인된 구현 단계·완료 기준을 단계별 로드맵으로 정리합니다.
+2. 문서를 역할별로 나누되 작업별 읽기 우선순위로 연결해, 정보 단절과 기준 혼동을 줄입니다.
+3. 작업 결과를 여섯 항목으로 먼저 보고해, 핵심 누락과 중언부언을 줄이도록 설계했습니다.
+
+설치되는 공개 도구는 프로젝트 설정용 `joeness-setup` 하나입니다.
 
 ## 설계 목적
 
-- 기존 문서와 제품 기준을 우선 사용합니다. 같은 사실은 주된 원본 한 곳에 남기고, 다른 문서에는 필요한 위치만 연결합니다.
-- 작업의 실제 결과, 로드맵의 단계 완료, 사용자 수락을 구분합니다. 현재 코드·Git·실제 대상은 오래된 작업 설명보다 현재 상태의 근거가 되지만, 승인된 목표나 디자인을 자동 변경하지는 않습니다.
-- 전역 판단 지침이나 상시 작업 엔진을 설치하지 않습니다. 프로젝트 설정은 변경안을 먼저 보여주고 승인받은 범위에만 적용합니다.
+프로젝트가 길어지면 목표와 완료 기준이 개별 작업에 묻히고, 같은 사실이 여러 문서에 중복되거나 오래된 인수인계가 현재 상태처럼 읽히기 쉽습니다. 작업 하나를 마쳤다는 이유로 필수 검증이나 사용자 수락이 남은 단계까지 완료로 오해할 수도 있습니다. 긴 작업 설명은 사용자와 다음 담당자가 **무엇을 했고 무엇이 남았는지** 다시 찾아야 하는 부담을 만듭니다.
 
-[Superpowers](https://github.com/obra/superpowers)등의 스킬은 설계·계획·테스트 등 개발 절차 전반을 다루는 하네스입니다. JOENESS는 그런 절차를 강제하지 않고 프로젝트 문서의 기록 위치와 인수인계에 범위를 좁힙니다. [Codex 스킬](https://developers.openai.com/plugins/concepts/skills), [Claude Code 메모리](https://code.claude.com/docs/en/memory), [Cursor 규칙](https://cursor.com/docs), [Copilot 저장소 지침](https://docs.github.com/en/copilot/how-tos/configure-custom-instructions-in-your-ide/add-repository-instructions-in-your-ide?tool=vscode)에도 관련 기능이 있으므로, JOENESS를 유일한 기억·지침 도구로 소개하지 않습니다. **기존 원본과 승인 경계를 프로젝트별로 연결하는 사용 방식**이 이 패키지의 특징이며, 다른 도구보다 정확하거나 빠르다는 비교 결과는 없습니다.
+JOENESS는 기존 문서와 제품 기준을 우선 사용하고, 같은 사실은 주된 원본 한 곳에 남긴 뒤 다른 문서에는 위치만 연결합니다. 승인된 단계가 있다면 로드맵의 필수 항목과 실제 근거를 대조해 작업 완료·단계 완료·사용자 수락을 구분합니다. 보고는 여섯 항목으로 핵심을 먼저 전하고, 판단에 필요한 원인과 검증 한계만 뒤에 설명합니다. 현재 코드·Git·실제 대상은 오래된 진행 설명보다 현재 상태의 근거가 되지만, 승인된 목표나 디자인을 자동으로 바꾸지는 않습니다.
 
 ## 사용법
 
@@ -98,6 +100,8 @@ powershell.exe -NoProfile -File .\skills\joeness-setup\scripts\project-setup.ps1
 ### 지원·검증 범위
 
 JOENESS는 백그라운드 감시·자동 갱신기, 강제 정책 엔진, 디자인 스킬 호출기, 제품 계획 생성기가 아닙니다. 설치만으로 프로젝트의 다섯 문서가 생기지 않으며, 기존 자료를 무단 이동·삭제하지 않습니다. 현재 확인한 경로는 Windows PowerShell·Git·Codex 중심입니다. 모든 환경의 안정성이나 토큰 절감·일반 성능 향상은 입증되지 않았습니다.
+
+[Superpowers](https://github.com/obra/superpowers)등의 스킬은 설계·계획·테스트 등 개발 절차 전반을 다루는 하네스입니다. JOENESS는 그런 절차를 강제하지 않고 프로젝트 문서의 기록 위치와 인수인계에 범위를 좁힙니다. [Codex 스킬](https://developers.openai.com/plugins/concepts/skills), [Claude Code 메모리](https://code.claude.com/docs/en/memory), [Cursor 규칙](https://cursor.com/docs), [Copilot 저장소 지침](https://docs.github.com/en/copilot/how-tos/configure-custom-instructions-in-your-ide/add-repository-instructions-in-your-ide?tool=vscode)에도 관련 기능이 있으므로, JOENESS를 유일한 기억·지침 도구로 소개하지 않습니다. **기존 원본과 승인 경계를 프로젝트별로 연결하는 사용 방식**이 이 패키지의 특징이며, 다른 도구보다 정확하거나 빠르다는 비교 결과는 없습니다.
 
 설치기의 JSON 결과는 stdout, 사람용 사용 안내는 stderr에 나옵니다. 자동화에서는 종료 코드와 JSON 상태를 확인합니다. 안내가 stderr에 있다는 이유만으로 실패로 판단하지 않습니다.
 
