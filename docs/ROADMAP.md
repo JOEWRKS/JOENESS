@@ -128,8 +128,8 @@
 2026-09-30 [출시 검사 기록](../evals/joeness-setup/runs/2026-09-30-release-gate/review-evidence.md): `e30f1fd` 개발 후보에서 로컬 Windows 전체 검사와 원격의 깨끗한 checkout CI가 통과했다. Manifest의 단일 스킬 파일 9개 해시도 일치했다. 이는 테스트한 `-dev` 후보의 결과이며 정식 출시 버전·최종 commit 고정, 리뷰·기본 브랜치 반영·사용자 승인은 여전히 남아 있다.
 
 2026-09-30 [독립 리뷰와 경계 수정](../evals/joeness-setup/runs/2026-09-30-release-review/review-evidence.md): Critical 0건, 기존 32 KiB 파일의 `ready` 오판과 불가능한 자동 재배치 안내를 발견했다. 실패 테스트를 보존하고 최소 수정 뒤 로컬 전체 검사를 통과했다. 수정 후 커밋의 원격 CI·통합·출시 승인은 아직 미완이다.
-- [ ] **미완:** 변경 내용을 리뷰한 뒤 제품 브랜치를 원격에 올리고 기본 브랜치에 반영한다. 현재 작업 브랜치에만 있는 변경을 정식 배포라고 부르지 않는다.
-- [ ] **미완:** 반영된 출시본에서 새 설치 또는 안전한 갱신을 실행하고 `-Check: current`, 스킬 발견, 실제 프로젝트 연결 확인을 다시 수행한다. 출시 식별자(태그 또는 고정 commit)와 되돌리기·해제 방법을 사용자에게 전달한다.
+- [x] **완료(개발 후보 통합):** 독립 리뷰에서 발견한 README의 설치 검증 범위 표현을 수정하고, 로컬 전체 검사와 정확한 커밋 `0d7503b`의 원격 Windows 검사를 통과한 뒤 기본 브랜치 `main`에 반영했다. 이것은 정식 출시나 사용자 최종 승인이 아니다. [통합 증거](../evals/joeness-setup/runs/2026-09-30-release-integration/review-evidence.md).
+- [ ] **부분 확인(개발 후보):** 이전 설치의 정확한 소스에서 `Check: current → Remove`, 통합 후보에서 `ready → Apply → current`를 확인했다. 설치 파일 9개와 manifest 해시가 일치하고 기존 중립 프로젝트 연결은 `current/clean`이었다. 그러나 이 커밋의 새 채팅 전달, 정식 출시 식별자·되돌리기 안내와 최종 사용 승인은 아직 확인하지 않았다. [통합 증거](../evals/joeness-setup/runs/2026-09-30-release-integration/review-evidence.md).
 - [ ] **미완:** 위 증거와 남은 제한을 한 페이지로 보고하고 **사용자의 최종 출시 승인**을 받는다. 그전 상태는 `실사용 가능/출시 전`으로 유지한다.
 
 ## 이번 출시의 비목표
