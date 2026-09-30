@@ -1,6 +1,6 @@
 # JOENESS 0.3
 
-현재 소스는 `0.3.0-beta.3-dev` 개발 후보입니다. 이전 setup-only 후보의 로컬 설치와 제한된 프로젝트 연결·새 채팅은 확인했습니다. 이 소스와 동일한 개인 설치 상태 및 정식 출시 여부는 [남은 출시 작업](docs/ROADMAP.md)에서 별도로 확인합니다.
+현재 설치 대상 버전은 `0.3.0`입니다. 지원 범위는 Windows PowerShell·Git 프로젝트·Codex입니다. 설치·프로젝트 연결·새 채팅은 제한된 사례에서 확인했으며, 보편적인 성능 향상이나 토큰 절감은 주장하지 않습니다. [출시 범위와 검증 기록](docs/ROADMAP.md)을 별도로 관리합니다.
 
 ## 핵심
 
@@ -101,4 +101,4 @@ JOENESS는 백그라운드 감시·자동 갱신기, 강제 정책 엔진, 디�
 
 설치기의 JSON 결과는 stdout, 사람용 사용 안내는 stderr에 나옵니다. 자동화에서는 종료 코드와 JSON 상태를 확인합니다. 안내가 stderr에 있다는 이유만으로 실패로 판단하지 않습니다.
 
-정식 출시를 주장하기 전에는 `tests/joeness-release.tests.ps1`와 [Windows 릴리스 검사](.github/workflows/windows-ci.yml), 설치·연결·해제 확인이 필요합니다. 지금은 개발 후보입니다. 실제 검증과 남은 항목은 [로드맵](docs/ROADMAP.md)과 `evals/joeness-setup/`에 남아 있습니다.
+`0.3.0` 출시 결과는 [Windows 릴리스 검사](.github/workflows/windows-ci.yml), 설치 상태와 Git 태그로 확인합니다. 검증 근거와 알려진 한계는 [로드맵](docs/ROADMAP.md)과 `evals/joeness-setup/`에 남아 있습니다.
