@@ -29,4 +29,15 @@ Fresh-chat evidence is reused for unchanged skill bytes. It demonstrates readbac
 
 Local release preparation passed: Windows release contract; 27 project safety cases on Windows PowerShell and PowerShell 7 each; installation lifecycle on both shells; Node contracts/fixtures 9 passed, 0 failed; `git diff --check`; all nine manifest hashes. New evidence totals approximately 215 KB, without credentials, full rollouts or Codex-home copies; credential-pattern scan found no matches. Other installed skills: 428 files, sorted absolute-path/hash aggregate SHA-256 `79a26cd5d2cd18f89d7ac2f8e9c00e41c439c265b8735fd1a4d0b6364d95a402` before migration.
 
-Pending exact release commit, remote Windows workflow, main/tag publication and personal `Check: current`. Do not infer deployment completion from this preparatory record. Confirmed results will be appended in a documentation-only follow-up without changing the frozen runtime package.
+## Confirmed deployment
+
+- Release commit: `67a9823edc12f18e2858ba8cf2a6bcbdb6317e9a`.
+- The Windows release contract was rerun after commit and passed. The full local matrix above tested identical package bytes before commit.
+- [Windows current release gate, run 37203792706](https://github.com/JOEWRKS/JOENESS/actions/runs/37203792706): completed/success on exactly that SHA. It includes the full two-shell safety/lifecycle matrix, Node tests and diff check in a fresh checkout.
+- Main was fast-forwarded from `7ff231df7b9aa449ca587b2c1847341c71ed58a9` to the tested release commit without rewriting history. Annotated tag `JOENESS-v0.3.1` was pushed to that same commit.
+- Personal transition: exact old package `Check current → Remove removed`; new package `Check ready → Apply current → Check current`, all exit 0. Removed only the prior nine managed files and their state, then installed their replacements. The prior tagged package remains available for recovery.
+- Personal state: releaseVersion `0.3.1`, manifest hash matching the frozen package above; installed skill files 9/9 hash matches.
+- Global AGENTS remains the same empty-file hash. Other 428 installed skill files retain the aggregate hash above. No game/project file was changed by this release operation.
+- Existing projects do not automatically receive a changed connection block. New settings should be read in a fresh chat; approved updates to existing project connections remain project-specific.
+
+This completion record and the roadmap status are documentation-only follow-up changes, not changes to the tagged runtime package. A later main documentation SHA is not the release tag SHA. Release completion is limited to the stated Windows/setup-only scope; the behavioral limits above remain open.
