@@ -1,0 +1,74 @@
+{
+  "date": "2026-10-05",
+  "releaseCommit": "af9fc62c0534223bf09faf3fac84943edfe4597a",
+  "releaseTree": "baa18f2f8afea2fd1f59a69a0254674452a811e6",
+  "tag": "JOENESS-v0.3.2",
+  "remoteGate": {
+    "id": 37220093687,
+    "conclusion": "success",
+    "url": "https://github.com/JOEWRKS/JOENESS/actions/runs/37220093687"
+  },
+  "installation": {
+    "before": {
+      "otherSkillFileCount": 428,
+      "otherSkillAggregate": "e1425c0db42c6738aeb7a3621386e532e064be32019d36c71546ef31865668c9",
+      "globalAgents": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "manifest": "67FB65F498A857CB6985C3E2F737D08889459EDE9A41BD68CC51B2238B24BD10"
+    },
+    "after": {
+      "otherSkillFileCount": 428,
+      "otherSkillAggregate": "e1425c0db42c6738aeb7a3621386e532e064be32019d36c71546ef31865668c9",
+      "globalAgents": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "manifest": "67FB65F498A857CB6985C3E2F737D08889459EDE9A41BD68CC51B2238B24BD10",
+      "installedVersion": "0.3.2",
+      "installedManifest": "67fb65f498a857cb6985c3e2f737d08889459ede9a41bd68cc51b2238b24bd10",
+      "matches": [
+        {
+          "path": "SKILL.md",
+          "matches": true
+        },
+        {
+          "path": "agents/openai.yaml",
+          "matches": true
+        },
+        {
+          "path": "assets/AGENTS.md",
+          "matches": true
+        },
+        {
+          "path": "assets/DESIGN.md",
+          "matches": true
+        },
+        {
+          "path": "assets/ISSUES.md",
+          "matches": true
+        },
+        {
+          "path": "assets/ROADMAP.md",
+          "matches": true
+        },
+        {
+          "path": "assets/TASK.md",
+          "matches": true
+        },
+        {
+          "path": "references/usage.md",
+          "matches": true
+        },
+        {
+          "path": "scripts/project-setup.ps1",
+          "matches": true
+        }
+      ]
+    },
+    "sequence": [
+      "0.3.1 Check current",
+      "0.3.1 Remove removed",
+      "0.3.2 Check ready",
+      "0.3.2 Apply current",
+      "0.3.2 Check current"
+    ],
+    "diagnostic": "Initial PowerShell orchestration assigned result to $check, colliding case-insensitively with dot-sourced switch $Check. Assignment failed after read-only Check, before any Remove/Apply. Distinct variable names and fresh Check resolved it. Not an installer product change."
+  },
+  "scope": "Nine owned skill files plus ownership state replaced. Global AGENTS and other skill files unchanged. No project migration."
+}

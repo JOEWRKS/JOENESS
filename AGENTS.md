@@ -1,6 +1,6 @@
 # JOENESS Repository
 
-- Released: `JOENESS 0.3.1`; release candidate: `0.3.2` (not yet deployed) for `gpt-6-astra / xhigh`. Earlier releases remain in Git tags. Roadmap creation, existing-document reuse and a fresh project chat have bounded evidence. Revalidate changed behavior; do not claim release completion before the exact release commit passes the Windows gate and installation check.
+- Released: `JOENESS 0.3.2` for `gpt-6-astra / xhigh`; exact release commit `af9fc62` passed the Windows gate and personal installation check. Earlier releases remain in Git tags. Roadmap creation, existing-document reuse, fresh-project readback and explicitly requested actual-work updates have bounded evidence. Revalidate changed behavior; do not claim a future release complete before its exact commit passes the Windows gate and installation check.
 - Distribution mode: `setup-only`. The sole public skill, `joeness-setup`, is project-scoped setup; the package has no always-on global payload and does not write global `AGENTS.md`.
 - `vendor/source-manifest.json` is the machine-readable active release identity.
 - Keep current sources, setup spec/plan, bounded fixtures/evidence, installer/tests/CI and the Independent Judgment A/B plan. Historical 0.1 sources remain in Git history.
