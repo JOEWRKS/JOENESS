@@ -1,0 +1,145 @@
+{
+  "date": "2026-10-04",
+  "candidate": "0.3.1-dev",
+  "skillSha256": "72c0d978cade38f22cd834102988ffc3cd2ee873bca5a8701c18fa1bbea682d4",
+  "projects": [
+    {
+      "name": "DungeonGameV3",
+      "root": "D:/JOEWRKS/.worktrees/T081-runtime-pass1",
+      "files": [
+        {
+          "bytes": 89429,
+          "path": "ROADMAP.md",
+          "sha256": "33682f724da6d216ee9d512bcec3e6c7db4276ce0a9a72e823f492e6c49e9d67"
+        },
+        {
+          "bytes": 106409,
+          "path": "COMPLETION_CHECKLIST.md",
+          "sha256": "a21151c86429e904eaddf927b32f2ccab5cb4c5414ae8c8b6d85298bce18a0a2"
+        },
+        {
+          "bytes": 2556069,
+          "path": "TASKS.md",
+          "sha256": "4de00815384e9c60502b4c063f888a99c04a3122e01f715f47b8b0ec7e8092fc"
+        },
+        {
+          "bytes": 39918,
+          "path": "AGENTS.md",
+          "sha256": "c6f38ea0b95e28825a6ef2d72e2aa46762ba349b4dc1dd541b665edf22d3571c"
+        },
+        {
+          "bytes": 2023,
+          "path": ".joeness/setup-state.json",
+          "sha256": "321eedf669766d2584f11c2b9b4caef8771e27c7f89d1bbd36336f39fbaeb9cd"
+        }
+      ]
+    },
+    {
+      "name": "머지멜론 개발",
+      "root": "D:/JOEWRKS/MergeDrop/.worktrees/mergedrop-v1",
+      "files": [
+        {
+          "bytes": 314631,
+          "path": "TASK.md",
+          "sha256": "7d29b3e4bbec2d31ccccd2b0083c9abe7eb95451c76aa5bae40119245b6749a2"
+        },
+        {
+          "bytes": 7934,
+          "path": "AGENTS.md",
+          "sha256": "caf2a1543905e86ca5627e6d9ae888120db09ed7e9e772abcd7dd45540ac38a7"
+        },
+        {
+          "bytes": 4391,
+          "path": ".joeness/setup-state.json",
+          "sha256": "581a18da1cf682202e5837ac6bb5dd827f8007b01e26cac0e55e8802d571f5c8"
+        }
+      ]
+    },
+    {
+      "name": "광고 끄기 게임 아이디어 검토",
+      "root": "C:/Users/tjdwo/Documents/New project/SkipFxxkingAd",
+      "files": [
+        {
+          "bytes": 19133,
+          "path": "ROADMAP.md",
+          "sha256": "1a1c0c12c6737b6dda38cb0a4a030086d6b80e2c9e60f9a496e4a475440cc098"
+        },
+        {
+          "bytes": 73324,
+          "path": "TASK.md",
+          "sha256": "0b03f11c8bdef022acf3454d0cda8158733bcf803d7a2ee9cd0aeaeb1dd30574"
+        },
+        {
+          "bytes": 3031,
+          "path": "AGENTS.md",
+          "sha256": "33baa40b5fa9b05404b6292df7f43841b2345cca4611f46a17049c9b128a3f8d"
+        },
+        {
+          "bytes": 4283,
+          "path": ".joeness/setup-state.json",
+          "sha256": "44b680394515d9a57b803fdf65386389ff220ea1e2e22bd9db24141814b8e43f"
+        },
+        {
+          "bytes": 468704,
+          "path": "product-definition/skip-fxxking-ad/state.json",
+          "sha256": "8de6d7fd72dfc4c498f1a36e8d87eea62f070337f9c59cd60a81a7ae02413dc9"
+        }
+      ]
+    }
+  ],
+  "applyReports": {
+    "dungeon": {
+      "id": "msg_02b091eae31446bf016ac2270b380087d0a687b1c633d15cee",
+      "turnId": "01a1065c-6d6b-7f02-9e6a-18e8e54947de",
+      "phase": "final_answer",
+      "text": "작업: 로드맵·체크리스트 보완과 문서 검증을 마쳤습니다. 업데이트 파일: ROADMAP.md, COMPLETION_CHECKLIST.md, TASKS.md. 이슈: 현재 상태와 과거 이력이 혼재했고, 단계 진입·완료 조건의 연결이 부족했습니다. 해결: 현재/다음의 정본을 통일하고, 미완 조건의 차단 범위와 조사 종료 조건을 명시했습니다. 남은 문제: AGENTS 연결 갱신은 길이 제한으로 차단됐으며, 새 대화에서의 규칙 전달은 미검증입니다. 다음 작업: AGENTS 정리 범위를 검토한 뒤 연결을 재확인합니다. 게임 개발은 이번에 재개하지 않았습니다. 작업 경로: D:/JOEWRKS/.worktrees/T081-runtime-pass1 변경 내용과 위치: 문서 반영 내용 ROADMAP.md:178 현재 단계·다음 작업·종료 조건, 7개 단계의 진입/완료 조건 COMPLETION_CHECKLIST.md:11 미완 요건이 막는 판정과 가능한 독립 작업 TASKS.md:3 변경·진단·보존 검사와 연결 미완 기록 현재는 6단계 후속 보완과 1–5단계 열린 요건 정리 단계입니다. 7단계 관찰·최종 판정은 미실행입니다. 휴대폰·음향 청취·사용자 관찰·최종 승인뿐 아니라 부분 구현·경험 요건도 남아 있습니다. 게임 재개 시 다음 가능한 작업은 획득 장비 전환→유료 보급→지역 재방문 경로에서 기존 증거가 답하지 못한 공백만 특정하는 조사입니다. 이미 확인한 표본의 반복 실행은 제외했습니다. 검증 결과는 다음과 같습니다. 기존 요구 21행, 단계 체크 54개의 내용·상태 유지 보호 대상 262개 파일 해시 동일, 기존 TASKS 본문 보존 추가 링크 10개 및 문서 diff 검사 통과 새 파일·커밋·푸시·게임 코드 변경·설치 없음 기존 분석 보고서는 변경 전 내용으로 복원 JOENESS 후보는 단계 조건을 연결하는 데 유효했지만, 문서 보완의 실효성과 비용 절감까지 입증한 것은 아닙니다. AGENTS 39,918바이트가 도구의 32KiB 기준을 넘어 연결 갱신을 중단했고, 기존 지침 축약이나 우회는 하지 않았습니다."
+    },
+    "merge": [
+      {
+        "type": "agentMessage",
+        "id": "msg_095e0c691e9952f5016ac2270707fc8191bae57436aeb49d65",
+        "text": "- 작업: 출시 후 우선순위를 단계별 로드맵으로 보완.\n- 업데이트 파일: 로드맵·작업 기록, JOENESS 연결 지침, 연결 상태 파일.\n- 이슈: 우선순위 목록에 완료 조건과 단계 전환 규칙이 부족했음.\n- 해결: 독립 검증 항목·진입 조건·완료 조건을 작성하고 연결·문서 재확인.\n- 남은 문제: 실제 기기·서비스 검증과 성능 판정 기준.\n- 다음 작업: 정식 스토어 설치 버전을 확인한 뒤 저장·이어하기 검증.\n\n실제 작업 폴더는 `D:/JOEWRKS/MergeDrop/.worktrees/mergedrop-v1`이야. 변경한 파일은 세 개야.\n\n| 파일 | 변경 내용 |\n| --- | --- |\n| [TASK.md](D:/JOEWRKS/MergeDrop/.worktrees/mergedrop-v1/TASK.md:3115) | 기존 순서 유지, 단계별 체크리스트·조건·미검증 범위 구성 |\n| [AGENTS.md](D:/JOEWRKS/MergeDrop/.worktrees/mergedrop-v1/AGENTS.md:50) | 현재 단계 조회, 의존 작업 제한, 완료 판정·상태 갱신 연결 |\n| [setup-state.json](D:/JOEWRKS/MergeDrop/.worktrees/mergedrop-v1/.joeness/setup-state.json) | 후보의 공식 연결 도구로 관리 구역 기준 갱신 |\n\n현재는 **1단계 품질 검증 대기**야. [필수 항목](D:/JOEWRKS/MergeDrop/.worktrees/mergedrop-v1/TASK.md:3145)은 동물·슬라임 장시간 성능, 접촉·움직임, 저장·복원, 계정 전환, 오프라인 랭킹 복구, Play 업데이트, 스킨 해금 유지로 나눴어. 전부 미완료이며, 실제 업데이트 대상 버전이나 성능 기준이 없으면 해당 판정을 보류하도록 했어.\n\n[다음 가능한 작업](D:/JOEWRKS/MergeDrop/.worktrees/mergedrop-v1/TASK.md:3126)은 스토어 설치본·사용 가능한 기기를 확인하고 저장 복원을 검증하는 거야. 2·3단계 구현은 품질 검증과 공유 디자인 승인이 필요하고, 기기 간 복원은 계속 나중 항목이야.\n\n검사는 후보 SHA 일치, 연결 Apply/Check, 저장된 관리 구역과 상태 파일 일치, 단계 문서 재독으로 진행했어. 변경 대상 밖 **990개 파일**, 기존 TASK 이력, AGENTS 관리 구역 밖 내용, HEAD와 기존 Git 상태 경로가 유지됐어. 기존 XML의 779/779·6/6 결과는 읽기만 했으며, 새 게임 시험·태블릿·Play Console 검증은 수행하지 않았어. [변경 전 해시와 검증 기록](D:/JOEWRKS/MergeDrop/.worktrees/mergedrop-v1/TASK.md:3283)도 남겼어.\n\n후보 지침은 이번 누락을 구체화하는 데 도움이 됐어. 작성 중 발견한 **자기 단계의 디자인 승인을 단계 진입 조건으로 요구하는 순환 조건**도 제거했어. 추가 승인이나 에이전트는 필요하지 않았지만, 연결 도구의 `current`만으로 내용 충족을 판단할 수 없어 실제 문서 재확인은 필요했어. 새 채팅에서 자동 전달되는지는 미검증이고, 초기 V1 제품 본문과 이후 승인된 오디오·스킨 범위의 관계도 이번 범위에서는 재작성하지 않았어.\n\n최종 SHA-256:\n\n```text\nTASK.md: 7d29b3e4bbec2d31ccccd2b0083c9abe7eb95451c76aa5bae40119245b6749a2\nAGENTS.md: caf2a1543905e86ca5627e6d9ae888120db09ed7e9e772abcd7dd45540ac38a7\nsetup-state.json: 581a18da1cf682202e5837ac6bb5dd827f8007b01e26cac0e55e8802d571f5c8\n```\n\n문서 보완을 마쳤고 게임 개발은 착수하지 않았어.",
+        "phase": "final_answer"
+      }
+    ],
+    "skip": [
+      {
+        "type": "agentMessage",
+        "id": "msg_0b0f2a421e339572016ac22626e81c87d0a6a5d93bf4d5b491",
+        "text": "- 작업: 후보 JOENESS 지침으로 로드맵 구성·연결 완료.\n- 업데이트 파일: 로드맵, 작업 지침, 연결 상태, 작업 기록.\n- 이슈: 단계와 선행 조건을 관리하는 원본이 없었음.\n- 해결: 현재 단계·필수 결과·검증 근거·다음 작업을 연결함.\n- 남은 문제: 시제품 준비 조건과 실제 기능·기기 검증.\n- 다음 작업: 첫 시작 저장 실패·미확인·복구 화면 경계 정리.\n\n**검토 위치**\n\n작업 경로: `C:/Users/tjdwo/Documents/New project/SkipFxxkingAd`\n\n| 변경 파일 | 반영 내용 |\n|---|---|\n| [ROADMAP.md](<C:/Users/tjdwo/Documents/New project/SkipFxxkingAd/ROADMAP.md>) | 신규 작성. 5개 관리 단계, 필수 결과 24개, 진입·완료 조건 |\n| [AGENTS.md](<C:/Users/tjdwo/Documents/New project/SkipFxxkingAd/AGENTS.md>) | 로드맵 조회·의존 관계·완료 판단·상태 동기화 규칙 |\n| [연결 상태](<C:/Users/tjdwo/Documents/New project/SkipFxxkingAd/.joeness/setup-state.json>) | 후보 관리 도구로 갱신 |\n| [TASK.md](<C:/Users/tjdwo/Documents/New project/SkipFxxkingAd/TASK.md:4>) | 변경 전후 근거·해시·검사·후보 지침 평가 |\n\n**현재 단계는 ‘기획·시제품 준비’ 진행 중**이야. 남은 조건은 대표 판의 미정 의미, 엔진·시험 기기·최소 시각 범위, 실행할 확인 사례 정리야. [현재/다음 작업](<C:/Users/tjdwo/Documents/New project/SkipFxxkingAd/ROADMAP.md:8>)과 [질문별 적용 시점](<C:/Users/tjdwo/Documents/New project/SkipFxxkingAd/ROADMAP.md:120>)을 연결했고, OPEN 질문 14개 전체를 착수 차단 조건으로 삼지 않았어.\n\n검사는 후보 지침 해시 일치, 관리 도구의 `current/clean`, 실제 문서 재읽기, 단계 필드·링크·대표 12개·질문 대응 확인까지 수행했어. 변경 대상 외 기존 파일 18개의 해시가 동일하며, 제품 원본은 리비전 39·OPEN/UNAPPROVED 그대로야. 게임 개발·배포·커밋·푸시는 하지 않았어.\n\n후보 지침과 소유 경계의 충돌은 없었어. 다만 **독립 결과를 어느 크기로 나눌지 예시가 부족**했고, 사용 안내 표제 `0.3`과 후보명 `0.3.1-dev`의 차이는 적용 해시로 식별했어. 새 채팅의 지침 로딩은 별도 채팅을 만들지 않아 미검증이며, 기능·기기 검사와 사용자 수락도 완료로 처리하지 않았어.",
+        "phase": "final_answer"
+      }
+    ]
+  },
+  "followupReports": {
+    "dungeon": {
+      "id": "msg_02b091eae31446bf016ac2273f7de487d09c384da0c9989856",
+      "turnId": "01a10669-1c51-7871-938c-d862489d4e2a",
+      "phase": "final_answer",
+      "text": "끝난 일: T497 로드맵·체크리스트 보완과 문서 검증입니다. 마지막 제품 검수는 T496 이야기·시설 통합 설치 검수이며, 이번에 제품 검증을 추가하지 않았습니다. TASKS T497 미완 단계: 현재는 6단계 후속 보완과 1–5단계 열린 요건 정리입니다. 7단계 관찰·최종 판정은 미실행이며, 1–6단계 전체 완료도 아닙니다. ROADMAP 현재 판정 게임 재개 시 다음 한 작업: 정상 획득→장비 전환→유료 보급→지역 재방문 경로에서 기존 증거가 답하지 못한 진행·비용 조건을 특정하는 조사입니다. 기존 T417·T487·후반 수집 근거와 현행 변경분을 대조하고, 확인된 표본은 반복하지 않습니다. 조사를 끝내면: 질문들을 ‘기존 근거로 해결 / 구체적 미검증 경로 / 사람 판단·미정 기준’으로 분류해 조사 범위와 다음 실행 대상 확정까지 닫습니다. B02/B03·D01–D03의 전체 통과, 휴대폰·청취·관찰·최종 승인과 부분 구현 요건은 남습니다. 조사 종료 조건 연결과 제품 작업은 별개입니다. AGENTS 길이 때문에 JOENESS 연결 갱신·새 대화 전달 확인은 미완입니다. 이것이 독립적인 게임 작업 전체를 막는 제품 선행 조건은 아닙니다. 다만 이번 요청은 조회만이므로 개발에 착수하지 않았습니다. 연결 차단 기록"
+    },
+    "merge": {
+      "id": "msg_095e0c691e9952f5016ac2276e0f988191b1fcb70e71e98de7",
+      "turnId": "01a10669-715a-7241-a7f8-4302f6221376",
+      "phase": "final_answer",
+      "text": "끝난 것은 로드맵과 JOENESS 연결의 문서 보완이야. 게임 품질 검증 완료를 뜻하지 않아. 현재 1단계는 검증 대기, 2~4단계는 미착수, 5단계 기기 간 복원은 보류야. 현재 상태, 문서 보완 기록 다음 한 작업은 Q4, 정식 스토어 설치본의 저장·이어하기 검증이야. 설치 버전과 사용 가능한 기기를 확인한 뒤, 강제 종료·재실행 후 점수·스킨·대기/다음 조각·쌓인 상태가 복원되고 이어하기가 되는지 확인하는 작업이야. Q4 요건 Q4가 통과해도 장시간 성능, 접촉·움직임, 계정 전환, 오프라인 랭킹, 업데이트, 해금 유지 등 나머지 일곱 요건과 성능 판정 기준이 남아. 다음 기능 구현에는 아직 들어갈 수 없어. 1단계를 마친 뒤 공유 디자인을 결정하고, 승인된 디자인에 따라 구현해야 해. 1단계 완료 조건, 2단계 진입 조건 기기·서비스가 준비되지 않은 동안 가능한 독립 작업 하나는 기존 프레임 목표와 성능 기준 자료를 확인해, 아직 결정되지 않은 판정 기준을 특정하는 것이야. 새 수치를 임의로 확정하는 작업은 아니야. 독립 작업 근거 이번에는 해당 문서 절만 읽었고 작업은 실행하지 않았어."
+    },
+    "skip": {
+      "id": "msg_0b0f2a421e339572016ac2266a3ff087d09262a764562cf1bd",
+      "turnId": "01a10665-aeb5-76b0-8f53-f8f4f1824085",
+      "phase": "final_answer",
+      "text": "끝난 일: 로드맵 작성·관리 연결 보완과 P-01의 대표 범위·시험 조건 근거 연결. TASK — ROADMAP-001 미완료 단계: P ‘기획·시제품 준비’는 진행 중. 제작·기기 시험·관찰은 미착수야. 현재 단계 다음 한 작업: 첫 시작 저장 실패·결과 미확인·복구 화면 복귀를 기존 결정과 대조해, 추가 결정과 제작 검증 사항을 구분하는 문서 작업. P-02 그 작업 후: 해당 저장·복귀 범위의 대조·분류는 끝낼 수 있어. 새 결정이 필요하면 여전히 열려 있고, P-02 전체 및 엔진·시험 기기·최소 시각 범위·확인 사례 준비도 자동 완료되지 않아. P 완료 조건 독립 작업 하나: 기존 관찰 문서의 확인 사례 정리는 외부 계정·광고 조건을 기다리지 않고 가능해. 실제 관찰 실행과는 별개야. P-06 이번에는 문서 조회만 했고 수정·추가 검사는 하지 않았어."
+    }
+  },
+  "verdicts": {
+    "dungeon": "PARTIAL: document correction and follow-up lookup passed; managed connection blocked by size; scope reminder required and old report restored.",
+    "merge": "PASS within document application and same-thread read-only follow-up scope; circular stage condition self-corrected before completion.",
+    "skip": "PASS within document application and same-thread read-only follow-up scope."
+  },
+  "limitations": [
+    "No fresh app chat or automatic instruction delivery tested.",
+    "No game implementation, device test, product acceptance, performance/token comparison or release validated.",
+    "Existing informed project owners; one corrective scope reminder for DungeonGameV3.",
+    "Owner-reported large preservation inventories were not rehashed in full by coordinator. Coordinator read changed relevant sections, reran managed-connection Check, compared representative protected hashes and captured final file hashes."
+  ]
+}

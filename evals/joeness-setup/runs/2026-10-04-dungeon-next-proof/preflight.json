@@ -1,0 +1,61 @@
+{
+  "head": "83ef209394ae734d0f3e27daed03b8c011b69054",
+  "branch": "",
+  "index": "",
+  "files": [
+    {
+      "path": "AGENTS.md",
+      "sha256": "cb9f69205e9eb168d7126ab1ab52306133f738b42af1820f04c81717931d06b6"
+    },
+    {
+      "path": ".joeness/setup-state.json",
+      "sha256": "f70bfd3b2cc86e264d401dd7ba40d6a9f9937ab5ca6ed7d7352992a0b9e9efee"
+    },
+    {
+      "path": "ROADMAP.md",
+      "sha256": "f4de920850184a8c33d87dfbfb91e42e0e7e173443a3435f32c374deb887d546"
+    },
+    {
+      "path": "COMPLETION_CHECKLIST.md",
+      "sha256": "0e92d932c6e9bc9fffacd342b506e761bf90cb8966a9aabc898898e879b622f1"
+    },
+    {
+      "path": "TASKS.md",
+      "sha256": "f740fff9371de14d65e6b1266ba67aa23d2a2545fedd0e6a76cbdd84efe99211"
+    },
+    {
+      "path": "PROJECT_OPERATING_CONTRACT.md",
+      "sha256": "2103614efc21d40bc1d3d7d1ff351c13fce24542d04687f6ef65ac5704113bd3"
+    },
+    {
+      "path": "DEVELOPMENT_RULES.md",
+      "sha256": "50e137e0197cbfc7fee8fe10c82f4ada4f5aea409f137898e52e626333d6657d"
+    },
+    {
+      "path": "TICKET_EXECUTION_REPORT_TEMPLATE.md",
+      "sha256": "ccea114ccc840df5b733a8766d29a79602293fafe10e3c74c7907755597a6d10"
+    },
+    {
+      "path": "art/pixel-art/candidates/T081-visual-completion-v8/fixture.tsx",
+      "sha256": "45c773d3edfec8e667032c733b25914f890d4668f1e29d403eb727ac0f9cd8b4"
+    },
+    {
+      "path": "docs/qa/content-scope-2026-09-27/inventory.json",
+      "sha256": "155754919e62c3eb43a617eded913011cb18e99446141ffcc3957b36a2120fe6"
+    }
+  ],
+  "productFiles": 205,
+  "productDigest": "db90493b7dded687dca43fdcb3c23c5f142d9a3c98a238bca18dbe8de9af2ec1",
+  "oldBody": "- Sources: ROADMAP.md §7 owns approved order/current-next; COMPLETION_CHECKLIST.md owns required-item states; TASKS.md and Diagnostic Events own execution/problems; DECISIONS.md and game/UI/DESIGN contracts retain product/design authority.\r\n- Read only relevant sections using the routing below. Resume from current files/Git and actual target state; old notes locate evidence, not new scope. No changed task fact means no repeat verification record.\r\n- Before substantive work find the current stage, entry conditions, required checks and next eligible work. Open prerequisites block dependent work, not independently authorized work. Do not silently change scope/order.\r\n- A finished task does not finish its stage/release. Review required outcomes and actual evidence before that claim. Pending/held items remain open; scope removal requires authority/reason and preserved history. Refresh affected checklist states and ROADMAP current-next from remaining conditions.\r\n- Agreed recording uses existing TASKS/Diagnostic rules only: material work and reusable causes/fixes/remaining work, linked rather than duplicated. Questions, explanations and no-record requests cause no writes; no-record does not cancel separately authorized implementation. No background updates.\r\n- After substantive work or a requested handoff, open with six short Korean bullets: 작업, 업데이트 파일, 이슈, 해결, 남은 문제, 다음 작업. One concrete fact each; 없음 when empty. 이슈 means a problem, 해결 a verified fix, 남은 문제 unresolved/unverified work. State actual changed files; keep technical completion and user acceptance separate. Add only necessary evidence/limits after the receipt. Simple questions need no receipt.\r\n- If a source/write is unavailable, report the exact boundary and continue independent authorized work. Setup is not a routine work step; connection checks do not prove delivery to a fresh chat.",
+  "outsideHash": "5b7c76a79de84e4cb8e592c9e41cadd93b5e8fb252d77d5a1244585a3bb6f8cd",
+  "state": {
+    "schemaVersion": 1,
+    "toolVersion": "0.2",
+    "targetRelativePath": "AGENTS.md",
+    "appliedBlockSha256": "78cdc5be8b4bdb0cd7f6a26be37ef81c3515fbbea56a06aaf2dfae2858e2effe",
+    "ownedBoundary": {
+      "prefixBase64": "",
+      "suffixBase64": "DQoNCg=="
+    }
+  }
+}

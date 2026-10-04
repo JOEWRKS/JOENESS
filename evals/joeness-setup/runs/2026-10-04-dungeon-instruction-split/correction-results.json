@@ -1,0 +1,114 @@
+{
+  "status": "SCOPED_REVALIDATION_PASSED_WITH_LIMITS",
+  "laterQualification": "Document retrieval and read-only/connection checks remain scoped observations. Later T500 missed existing T478 evidence and selected duplicate work; these retrieval results do not validate the factual correctness of the roadmap next-work plan. See ../2026-10-04-roadmap-operation/results.json.",
+  "threadId": "01a106b8-7d02-77c3-ae38-3eab77132a58",
+  "turnId": "01a106b8-813d-7eb3-abd4-a3184d9402a5",
+  "runtime": "Codex saved-project local chat; exact model/reasoning not independently exposed",
+  "prompt": "이 프로젝트를 처음 맡는 담당자에게 인수인계할 수 있도록 현재 상태를 확인해 주세요. 읽기 전용 요청입니다. 파일 수정·작업 기록 추가·게임 실행·새 검사·기기 접근·배포·다른 채팅 메시지는 하지 마세요. 이미 끝난 일, 현재 단계와 남은 필수 조건, 다음에 할 수 있는 한 작업을 짧게 보고해 주세요. 그 작업만 마치면 다음 단계 또는 프로젝트 완료를 선언할 수 있는지도 구분하고 판단 근거의 문서 위치를 붙여 주세요. 실제 작업은 착수하지 마세요.",
+  "officialApply": "{\"action\":\"apply\",\"status\":\"current\",\"verificationScope\":\"managed-connection-only\",\"projectRoot\":\"D:\\\\JOEWRKS\\\\.worktrees\\\\T081-runtime-pass1\",\"target\":\"AGENTS.md\",\"targetHash\":\"88aa32cf285f585a23e804f121b4b7b19c9fbb1f2eb83db516f85bbb653f308c\",\"statePath\":\".joeness/setup-state.json\",\"stateHash\":\"f70bfd3b2cc86e264d401dd7ba40d6a9f9937ab5ca6ed7d7352992a0b9e9efee\",\"blockState\":\"clean\",\"changedTargets\":[\"AGENTS.md\",\".joeness/setup-state.json\"],\"blockers\":[],\"rollback\":null,\"unresolvedTargets\":[]}\r\n{\r\n  \"outsideUnchanged\": true\r\n}\r\n",
+  "checks": {
+    "managedConnection": "current/clean; no manual bypass; unmanaged bytes preserved during Apply",
+    "freshStageAndCompletion": "correct; no game completion or repeated checks",
+    "freshReadOnly": "11 scoped hashes unchanged; four read-only shell commands",
+    "boundedOutput": "no full-ledger output, limited searches/slices; no truncation",
+    "preservation": "old TASKS exact bytes retained; checklist only a new heading and one touched line's CRLF->LF; ROADMAP unchanged"
+  },
+  "readCommands": [
+    {
+      "command": "\"C:\\\\Users\\\\tjdwo\\\\.cache\\\\codex-runtimes\\\\codex-primary-runtime\\\\dependencies\\\\native\\\\powershell\\\\pwsh.exe\" -Command \"Get-Location; git status --short; rg -n -m 3 '\"'^## 7|''^### .*현재|''^### .*진입|''^## .*미완|''^## .*최근 근거'\"' ROADMAP.md COMPLETION_CHECKLIST.md; Get-Content COMPLETION_CHECKLIST.md -TotalCount 115\"",
+      "cwd": "D:\\JOEWRKS\\.worktrees\\T081-runtime-pass1",
+      "exitCode": 0,
+      "outputChars": 17242,
+      "outputTruncated": false
+    },
+    {
+      "command": "\"C:\\\\Users\\\\tjdwo\\\\.cache\\\\codex-runtimes\\\\codex-primary-runtime\\\\dependencies\\\\native\\\\powershell\\\\pwsh.exe\" -Command '$r = Get-Content ROADMAP.md; for ($i=175; $i -lt [Math]::Min(242,$r.Count); $i++) { '\"'{0}: {1}' -f (\"'$i+1),$r[$i] }; rg -n -m 3 '\"'TICKET-081-497|TICKET-081-496' TASKS.md; rg -n -m 1 '\"'^'\"\\\\|.*(S01|B01|B02|B03|D01|D02|D03|N01|N02|C01|C02|C03|U01|U02|U03|U04|R01|R02|R03|P01|P02).*\\\\|' COMPLETION_CHECKLIST.md; rg -n -m 3 '\"'^##|''^###'\"' TICKET_EXECUTION_REPORT_TEMPLATE.md\"",
+      "cwd": "D:\\JOEWRKS\\.worktrees\\T081-runtime-pass1",
+      "exitCode": 0,
+      "outputChars": 10038,
+      "outputTruncated": false
+    },
+    {
+      "command": "\"C:\\\\Users\\\\tjdwo\\\\.cache\\\\codex-runtimes\\\\codex-primary-runtime\\\\dependencies\\\\native\\\\powershell\\\\pwsh.exe\" -Command '$t = Get-Content TASKS.md; for ($i=45; $i -lt 90; $i++) { '\"'{0}: {1}' -f (\"'$i+1),$t[$i] }; $c = Get-Content COMPLETION_CHECKLIST.md; for ($i=117; $i -lt 161; $i++) { '\"'{0}: {1}' -f (\"'$i+1),$c[$i] }; rg -n -m 3 '\"'Core|보고|읽기' TICKET_EXECUTION_REPORT_TEMPLATE.md; Get-Content docs/qa/t496-story-facility-native/REPORT.md -TotalCount 65; git log -1 --format=\\\"%h %s\\\"\"",
+      "cwd": "D:\\JOEWRKS\\.worktrees\\T081-runtime-pass1",
+      "exitCode": 0,
+      "outputChars": 14838,
+      "outputTruncated": false
+    },
+    {
+      "command": "\"C:\\\\Users\\\\tjdwo\\\\.cache\\\\codex-runtimes\\\\codex-primary-runtime\\\\dependencies\\\\native\\\\powershell\\\\pwsh.exe\" -Command \"rg -n -m 1 '\"'^## 제작'\"' COMPLETION_CHECKLIST.md; rg -n '\"'^'\"\\\\| \\\\[x\\\\] \\\\| (S01|C01|R01|R02) \\\\|' COMPLETION_CHECKLIST.md | ForEach-Object { \"'$parts = $_ -split '\"'\\\\|'; (\"'$parts[0..6] -join '\"'|') }; \"'$r = Get-Content docs/qa/t496-story-facility-native/REPORT.md; for ($i=0; $i -lt 12; $i++) { '\"'{0}: {1}' -f (\"'$i+1),$r[$i] }'",
+      "cwd": "D:\\JOEWRKS\\.worktrees\\T081-runtime-pass1",
+      "exitCode": 0,
+      "outputChars": 2372,
+      "outputTruncated": false
+    }
+  ],
+  "outputComparison": {
+    "beforeSourceOutputChars": 475762,
+    "afterSourceOutputChars": 44490,
+    "meaning": "Tool-output source text length only; not total prompt input, cached input, reasoning or output-token usage; same question once before/after, no general causal effect claim."
+  },
+  "postReadHashes": [
+    {
+      "path": "AGENTS.md",
+      "sha256": "cb9f69205e9eb168d7126ab1ab52306133f738b42af1820f04c81717931d06b6",
+      "length": 10384
+    },
+    {
+      "path": "ROADMAP.md",
+      "sha256": "33682f724da6d216ee9d512bcec3e6c7db4276ce0a9a72e823f492e6c49e9d67",
+      "length": 89429
+    },
+    {
+      "path": "COMPLETION_CHECKLIST.md",
+      "sha256": "f2d2e3e54d467eb80dd731d5edebd0e95eacf90cf73500949ef2143cdf5329dc",
+      "length": 106441
+    },
+    {
+      "path": "TASKS.md",
+      "sha256": "592867b0e6d4fc28cc5fd49922650611986a98e26452a20ec90904e5068ff305",
+      "length": 2567148
+    },
+    {
+      "path": "PROJECT_OPERATING_CONTRACT.md",
+      "sha256": "2103614efc21d40bc1d3d7d1ff351c13fce24542d04687f6ef65ac5704113bd3",
+      "length": 35459
+    },
+    {
+      "path": "SOL_VISUAL_QA_PROTOCOL.md",
+      "sha256": "fbfbe727d90fdafa94048cbc078eaac026c9b3a0955c1586e59b39be4835633f",
+      "length": 21084
+    },
+    {
+      "path": "TICKET_EXECUTION_REPORT_TEMPLATE.md",
+      "sha256": "ccea114ccc840df5b733a8766d29a79602293fafe10e3c74c7907755597a6d10",
+      "length": 21361
+    },
+    {
+      "path": "DEVELOPMENT_RULES.md",
+      "sha256": "50e137e0197cbfc7fee8fe10c82f4ada4f5aea409f137898e52e626333d6657d",
+      "length": 5436
+    },
+    {
+      "path": ".joeness/setup-state.json",
+      "sha256": "f70bfd3b2cc86e264d401dd7ba40d6a9f9937ab5ca6ed7d7352992a0b9e9efee",
+      "length": 2903
+    },
+    {
+      "path": "art/pixel-art/candidates/T081-visual-completion-v8/fixture.tsx",
+      "sha256": "45c773d3edfec8e667032c733b25914f890d4668f1e29d403eb727ac0f9cd8b4",
+      "length": 7806
+    },
+    {
+      "path": "docs/qa/content-scope-2026-09-27/inventory.json",
+      "sha256": "155754919e62c3eb43a617eded913011cb18e99446141ffcc3957b36a2120fe6",
+      "length": 43981
+    }
+  ],
+  "limitations": [
+    "Previous file-lock root cause unconfirmed; no holders returned at current probe and official retry succeeded, not proof of permanent cure.",
+    "Some bounded historical content beyond current summary was still read; minimum possible reading not proven.",
+    "Six-field issue was a caution about uncommitted work rather than a demonstrated defect.",
+    "No game tests, production acceptance, exact runtime-token efficiency or release completion claimed."
+  ]
+}

@@ -104,7 +104,7 @@ function Test-ManifestAndEvidence {
     $manifest = [IO.File]::ReadAllText((Join-Path $RepoRoot 'vendor/source-manifest.json')) | ConvertFrom-Json
     Assert-Equal $manifest.schemaVersion 3 'manifest schema is v3'
     Assert-Equal $manifest.release.name 'JOENESS' 'release name'
-    Assert-Equal $manifest.release.version '0.3.0' 'release identity'
+    Assert-Equal $manifest.release.version '0.3.1' 'release identity'
     Assert-Equal $manifest.release.entrypoint 'JOENESS.ps1' 'entrypoint'
     Assert-Equal $manifest.target.model 'gpt-6-astra' 'target model'
     Assert-Equal $manifest.target.reasoningEffort 'xhigh' 'target reasoning'

@@ -1,0 +1,156 @@
+{
+  "date": "2026-10-04",
+  "candidate": "0.3.1-dev",
+  "baseCommit": "7ff231df7b9aa449ca587b2c1847341c71ed58a9",
+  "branch": "codex/joeness-roadmap-default",
+  "state": "uncommitted candidate; local implementation validation only",
+  "runtime": {
+    "requestedModel": "gpt-6-astra",
+    "requestedReasoning": "xhigh",
+    "contexts": "fresh subagents; fork_turns none",
+    "identityBoundary": "Configuration requested at dispatch, not independent server build attestation."
+  },
+  "sourceHashes": {
+    "manifest": "5b806340195acbf71de3db6588bb4da0d74a8a9bf2f0a26ea627cd61dd090aeb"
+  },
+  "tests": [
+    {
+      "command": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\\tests\\joeness-release.tests.ps1",
+      "exitCode": 0,
+      "output": "PASS JOENESS setup-only release contract\n"
+    },
+    {
+      "command": "powershell.exe -NoProfile -File .\\tests\\joeness-project-setup.tests.ps1",
+      "exitCode": 0,
+      "output": "PASS StateIdentityRoundTripAcrossPowerShellVersions\nPASS CurrentConnectionDoesNotCertifyRoadmapContents\nPASS InvalidStateIdentityStillFailsClosed\nPASS InitialApplyAndNoOp\nPASS LongAgentsApplyCannotDisplaceExistingInstructions\nPASS UnconnectedExactWindowCannotAcceptManagedBlock\nPASS InitialWindowExactBoundary\nPASS ExistingFrontBlockReportsDisplacementAndCanDetach\nPASS ExistingCleanTailBlocksRelocationAndRestoresOutsideBytes\nPASS InsideEditSurvivesFreshCheck\nPASS OutsideBytesAndDetach bom=False eol=1 ending=0\nPASS OutsideBytesAndDetach bom=False eol=1 ending=1\nPASS OutsideBytesAndDetach bom=True eol=1 ending=0\nPASS OutsideBytesAndDetach bom=True eol=1 ending=1\nPASS OutsideBytesAndDetach bom=False eol=2 ending=0\nPASS OutsideBytesAndDetach bom=False eol=2 ending=2\nPASS OutsideBytesAndDetach bom=True eol=2 ending=0\nPASS OutsideBytesAndDetach bom=True eol=2 ending=2\nPASS MalformedOrUnownedOrLegacy\nPASS StateTamperAndOneSidedState\nPASS StateWriteFailureAfterUserEdit\nPASS SnapshotAndRootDrift\nPASS CloneRebindsRelativeState\nPASS InvalidUtf8AndOverride\nPASS StateSnapshotDrift\nPASS ReparseAndNonGitFailClosed\nPASS RealGitCloneRebindsCheckoutEolButNotContentEdits\nPASS 27 project safety cases\n"
+    },
+    {
+      "command": "pwsh -NoProfile -File .\\tests\\joeness-project-setup.tests.ps1",
+      "exitCode": 0,
+      "output": "PASS StateIdentityRoundTripAcrossPowerShellVersions\r\nPASS CurrentConnectionDoesNotCertifyRoadmapContents\r\nPASS InvalidStateIdentityStillFailsClosed\r\nPASS InitialApplyAndNoOp\r\nPASS LongAgentsApplyCannotDisplaceExistingInstructions\r\nPASS UnconnectedExactWindowCannotAcceptManagedBlock\r\nPASS InitialWindowExactBoundary\r\nPASS ExistingFrontBlockReportsDisplacementAndCanDetach\r\nPASS ExistingCleanTailBlocksRelocationAndRestoresOutsideBytes\r\nPASS InsideEditSurvivesFreshCheck\r\nPASS OutsideBytesAndDetach bom=False eol=1 ending=0\r\nPASS OutsideBytesAndDetach bom=False eol=1 ending=1\r\nPASS OutsideBytesAndDetach bom=True eol=1 ending=0\r\nPASS OutsideBytesAndDetach bom=True eol=1 ending=1\r\nPASS OutsideBytesAndDetach bom=False eol=2 ending=0\r\nPASS OutsideBytesAndDetach bom=False eol=2 ending=2\r\nPASS OutsideBytesAndDetach bom=True eol=2 ending=0\r\nPASS OutsideBytesAndDetach bom=True eol=2 ending=2\r\nPASS MalformedOrUnownedOrLegacy\r\nPASS StateTamperAndOneSidedState\r\nPASS StateWriteFailureAfterUserEdit\r\nPASS SnapshotAndRootDrift\r\nPASS CloneRebindsRelativeState\r\nPASS InvalidUtf8AndOverride\r\nPASS StateSnapshotDrift\r\nPASS ReparseAndNonGitFailClosed\r\nPASS RealGitCloneRebindsCheckoutEolButNotContentEdits\r\nPASS 27 project safety cases\r\n"
+    },
+    {
+      "command": "powershell.exe -NoProfile -File .\\tests\\joeness-install.tests.ps1",
+      "exitCode": 0,
+      "output": "PASS setup-only lifecycle, user bytes, legacy fail-closed, drift, rollback, manifest boundaries\n"
+    },
+    {
+      "command": "pwsh -NoProfile -File .\\tests\\joeness-install.tests.ps1",
+      "exitCode": 0,
+      "output": "PASS setup-only lifecycle, user bytes, legacy fail-closed, drift, rollback, manifest boundaries\r\n"
+    },
+    {
+      "command": "node --test tests/joeness-setup-contract.tests.mjs tests/joeness-setup-fixtures.tests.mjs",
+      "exitCode": 0,
+      "output": "✔ CLI shows usable onboarding only after successful Apply while stdout stays JSON (15375.915ms)\n✔ one self-contained setup skill with real supporting files (2.6445ms)\n✔ manifest pins exact sole setup skill without global runtime (4.4936ms)\n✔ fresh cases keep expectations outside user requests (7.2686ms)\n✔ routing fixtures distinguish a single reading burden from conflicting authority (7305.0328ms)\n✔ recording fixture locates task checks in TASK and reusable causes in ISSUES (3884.7239ms)\n✔ locked fixture makes TASK record writes fail without hiding its current text (3922.6465ms)\n✔ actual Git archive predates the latest uncommitted detail (3350.9874ms)\n✔ ZIP has no Git history and actual Detach leaves no instruction block (11538.325ms)\nℹ tests 9\nℹ suites 0\nℹ pass 9\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 30181.2182\n"
+    },
+    {
+      "command": "python -X utf8 'C:\\Users\\tjdwo\\.codex\\skills\\.system\\skill-creator\\scripts\\quick_validate.py' 'D:\\JOEWRKS\\작업하네스\\skills\\joeness-setup'",
+      "exitCode": 0,
+      "output": "Skill is valid!\r\n"
+    }
+  ],
+  "snapshots": [
+    {
+      "path": "setup/new/AGENTS.md",
+      "sha256": "7a7bc7fa2de95226442d482597e51c5bc204d3d8dd91de39d7962553a14637b7"
+    },
+    {
+      "path": "setup/new/ROADMAP.md",
+      "sha256": "d4a2c94d35760cbbac7acb24026f2e49d91769df2390a6274c751415a4e78d00"
+    },
+    {
+      "path": "setup/new/TASK.md",
+      "sha256": "fa53a022e279a72f5e69c294335d8b612d784ffdc1d33eee384d7d2a5d3be98d"
+    },
+    {
+      "path": "setup/new/PRODUCT.md",
+      "sha256": "b348e4e7a31da6b528dcbdca74227c514d34167f70d7cf6f3f4fcf40159b97a5"
+    },
+    {
+      "path": "setup/new/.joeness/setup-state.json",
+      "sha256": "b1be34815853c671a0bc8e6862ebeee8b29f2b63e640b95ac1dbb83835e34dc2"
+    },
+    {
+      "path": "setup/unknown/AGENTS.md",
+      "sha256": "9da110d450d32323b726d793cd1214e7d2e59161d214b9fe30f9ccc7cbec5897"
+    },
+    {
+      "path": "setup/unknown/ROADMAP.md",
+      "sha256": "e6485372e6aed6a014beec4d1c5a6a56394c16b15b0bcc329c6d56f396b10e66"
+    },
+    {
+      "path": "setup/unknown/TASK.md",
+      "sha256": "0e9ee9bee203c9424d4aca2c8c77ff6b9ed99a04791c235b320cccdfbb361a34"
+    },
+    {
+      "path": "setup/unknown/README.md",
+      "sha256": "e1fb0d9db4b088607e0c37efa4f59d8eebd1214333197e65b231de8e6444497f"
+    },
+    {
+      "path": "setup/unknown/.joeness/setup-state.json",
+      "sha256": "793ec9d8484eab228e72850605a0c76407c36ec51d3288aa030734241a5713e3"
+    },
+    {
+      "path": "setup/existing/AGENTS.md",
+      "sha256": "041af82245c98854e862fe59d3c9dda0f620c6ba8e347d1bf76798813a7cc330"
+    },
+    {
+      "path": "setup/existing/WORK.md",
+      "sha256": "3dd0b739debd49b0766154b993272ad4f8f671e12421fa18da270497a979c330"
+    },
+    {
+      "path": "setup/existing/CHECKS.md",
+      "sha256": "4731bc86cebe2661e237ed0741a2288bfada06aad8913bde4a884d1e4f3cf58c"
+    },
+    {
+      "path": "setup/existing/PRODUCT.md",
+      "sha256": "f07155bb1eeaa366de2ca21a1485f65f806aceb5dd98e04b04b741d25c893f69"
+    },
+    {
+      "path": "setup/existing/.joeness/setup-state.json",
+      "sha256": "c17b3a37b952e32f0131044d941d4dc35fd5f8bd7b7cb28a4e755d271ea9ae3f"
+    },
+    {
+      "path": "setup/optout/AGENTS.md",
+      "sha256": "6ab924ba169197a040ac427d840867a47171d35895f101c70203ba981a6b058f"
+    },
+    {
+      "path": "setup/optout/TASK.md",
+      "sha256": "4a0f1417c2e2e601c5a95713ce016541640d1c1b7c9bfc7c91b3722879e5a5d7"
+    },
+    {
+      "path": "setup/optout/README.md",
+      "sha256": "4ab34121ba89a85a87a4a69d1c20e3135f344146c41993c3203e4890e2944c63"
+    },
+    {
+      "path": "setup/optout/.joeness/setup-state.json",
+      "sha256": "e6959d704751fc3ca5617fc5b4105b4becb9aad31c64ef82c6497e0019b3d081"
+    },
+    {
+      "path": "resume/existing/AGENTS.md",
+      "sha256": "041af82245c98854e862fe59d3c9dda0f620c6ba8e347d1bf76798813a7cc330"
+    },
+    {
+      "path": "resume/existing/WORK.md",
+      "sha256": "636061946cbe85151f17bf69d5a24b6356ee38ee7ece45472a45fec1055607b1"
+    },
+    {
+      "path": "resume/existing/CHECKS.md",
+      "sha256": "bc3ea203abb98f3ed74da933684775379d409b491b938eb91a8f4db96288b112"
+    },
+    {
+      "path": "resume/existing/PRODUCT.md",
+      "sha256": "05d06bb659c7c54d15e39058ca0532bc6f052be6ae7fca7b48cfd3a3c7a97550"
+    },
+    {
+      "path": "resume/existing/.joeness/setup-state.json",
+      "sha256": "c17b3a37b952e32f0131044d941d4dc35fd5f8bd7b7cb28a4e755d271ea9ae3f"
+    }
+  ],
+  "limits": [
+    "Explicit skill loading for setup; explicit project AGENTS read for resume. No saved-app automatic injection claim.",
+    "No token, speed, general accuracy or comparative superiority measurement.",
+    "Personal installation and real projects unchanged; remote CI and release not performed."
+  ]
+}

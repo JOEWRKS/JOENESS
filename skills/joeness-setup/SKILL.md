@@ -25,8 +25,12 @@ Identify the explicit project root, its AGENTS hierarchy, Git status and existin
 product, plan, task, issue and design sources. Current files/target state outrank
 old handoffs; use handoffs as locators. Do not replay completed work.
 
-Reuse the project's canonical paths and terms. Only suggest a missing document
-when a concrete recurring need has no existing home. The small
+Reuse the project's canonical paths and terms. A roadmap role is the default
+for a project connection: reuse an existing direction source, whatever its
+filename, or propose a small `ROADMAP.md` if none exists. Do not create a
+second roadmap. Include an explicit opt out in the one setup proposal; do not
+reconsider it on every task. Suggest other missing documents only when a
+concrete recurring need has no existing home. The small
 [AGENTS](assets/AGENTS.md), [ROADMAP](assets/ROADMAP.md), [TASK](assets/TASK.md),
 [ISSUES](assets/ISSUES.md) and [DESIGN](assets/DESIGN.md) assets are adaptable
 writing references, not a batch-copy instruction.
@@ -47,8 +51,9 @@ authority/history and expected reading cost; a local conflict may need only a
 local fix. Do not move or delete user documents without approval.
 
 Show a short change proposal: paths reused/created, the actual short AGENTS
-connection, recording scope, and what stays unchanged. Include consent for
-routine factual recording in that proposal. Once authorized, do not request
+connection, the default roadmap or its opt out, recording scope, and what stays
+unchanged. Include consent for routine factual recording in that proposal. Once
+authorized, do not request
 approval for each routine record. A request to inspect or propose is not approval
 to apply. Preserve code changes authorized alongside a request not to record.
 
@@ -60,10 +65,12 @@ checking a connection activates a background process.
 If routine recording is agreed, include a concise work-receipt rule in the
 proposed project connection, preserving the field meanings below (especially
 `해결` = verified fix, not a passing check); no status banner for unrelated questions.
-If an existing roadmap defines approved ordered stages, milestones or release
-scope, connect its current-stage lookup and required-item completion gate
-briefly. A finished task does not finish its stage or release. Keep the actual
-checklist, item states and evidence in the roadmap, not a copied list in AGENTS.
+Connect the roadmap's current-stage lookup and required-item completion gate
+briefly. A finished task does not finish its stage or release. If an existing
+direction source is only a priority list, do not claim it is a stage roadmap:
+show the missing conditions and complete them when staged planning is in the
+approved scope. Keep the actual checklist, item states and evidence in its
+canonical source, not a copied list in AGENTS.
 For a requested handoff to a person, start with the same terse work report:
 what was done, changed, encountered, resolved, still open, and the recipient's
 next action.
@@ -92,6 +99,15 @@ a non-Git project. Explain the boundary and offer a proposed text/manual handoff
    names unresolved files, not success. Inspect targets before any retry.
    Recheck and use a fresh project chat to verify actual instruction delivery.
 
+`current` verifies the managed connection only. Before reporting setup complete,
+read back the actual AGENTS and the created/reused roadmap. Confirm the agreed
+path exists, one direction source is used, and the connection carries lookup,
+dependency, stage-completion and status-update rules (existing project rules
+may supply them). Check the roadmap's current/next and stage fields below,
+including evidence gaps; a marker or filename is not enough. Correct missing
+approved content before finishing, or report the precise incomplete part.
+An explicit opt out or direction-pending starter is a valid stated boundary.
+
 Hash inputs are lower-case SHA-256 or `absent`. The helper owns only
 `JOENESS-SETUP` markers and `.joeness/setup-state.json`. State is an applied-block
 baseline, not task memory or proof of approval. It travels with the project; do
@@ -106,6 +122,17 @@ Create/update other project documents only within the approved proposal. Their
 semantics are the agent's work, not this helper's job. Keep only actual paths,
 authority roles, and agreed recording rules in AGENTS; never copy this full skill
 or the implementation proposal there.
+For a new roadmap or approved stage addition, finish with the known goal,
+current stage, entry condition, required outcomes, each check and evidence gap,
+completion condition, and next eligible work. Split outcomes whose checks can
+pass independently; do not make a checkbox for every implementation detail.
+One small stage suffices when appropriate. With no approved goal, make a
+direction-pending roadmap and name the bounded decision needed; do not fabricate
+a stage. Mark unknown decisions as undecided and make their resolution the next
+eligible action only when they block dependent work. Do not invent approval,
+criteria or a fixed sequence. A user request for only a priority list remains a
+priority list, not a completed stage roadmap. If a project opted out of a
+roadmap and later gains an approved ordered goal, propose its roadmap role then.
 
 ## Explain the completed setup
 
@@ -125,11 +152,14 @@ Normal sessions use the project's short AGENTS connection without invoking setup
 again. Its source list is an index, not a read-every-file checklist: read the
 roles relevant to the request, and open DESIGN only for visual work or an
 approval conflict. Before substantive new or resumed work, use the connected
-roadmap, if one exists, to locate the current approved stage, required checks and the
+roadmap to locate the current approved stage or direction-pending boundary,
+required checks and the
 request's place in that order. Verify progress against current files/Git/target
 state; an old roadmap status or handoff is not proof of present completion.
-If a request would skip an unmet dependency or change approved scope, explain
-the conflict and seek an explicit direction decision. Independent authorized
+If the project explicitly opted out, use its existing task and product sources
+until a roadmap role is approved. If a request would skip an unmet entry condition
+or change approved scope, explain the conflict and seek an explicit direction
+decision. Independent authorized
 work can proceed without falsely advancing the stage. Do not invent stages for
 projects without them or silently reorder a roadmap in response to a proposal.
 Put current task execution/check results in its task source; reusable failure
@@ -138,10 +168,13 @@ verification instead of copying it. Change
 roadmap direction or scope only for an explicit decision; update a required
 item's check/evidence state only from actual verification. Change design only
 within its own authority.
-When a roadmap item or stage status changes, refresh its current-stage and
-next-priority summary in the same document from the remaining open items.
-Do not leave completed work listed as the next action; this status sync does
-not authorize changing approved order or scope.
+Before selecting next work or declaring evidence missing, check the item's
+linked proof and search the relevant task/report index for matching work.
+Resolve conflicting summaries against that evidence; an unsuccessful lookup
+is not proof that a check was never done. Reuse applicable results. Repeat only
+for an identified code/target change, failure or uncovered condition, limited
+to that difference. When status changes, refresh current/next from the remaining
+open conditions without changing approved order or scope.
 Before declaring an approved stage, milestone or release complete, review every
 required roadmap item and its actual check/evidence. Not started, in progress,
 verification pending and on hold remain open. Scope removal is a recorded

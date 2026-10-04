@@ -42,6 +42,16 @@ Case 'StateIdentityRoundTripAcrossPowerShellVersions' {
     Eq $c.blockState clean block
     Eq (Detach $p).status detached detach
 }
+Case 'CurrentConnectionDoesNotCertifyRoadmapContents' {
+    param($p)
+    $result=Apply $p 'Direction: ROADMAP.md. Read it before choosing work.'
+    Eq $result.status current apply
+    Eq $result.verificationScope 'managed-connection-only' scope
+    Eq (Test-Path (Join-Path $p 'ROADMAP.md')) $false noInventedDocument
+    $check=Invoke-JoenessProjectSetup -Check -ProjectPath $p
+    Eq $check.status current connectionStillValid
+    Eq $check.verificationScope 'managed-connection-only' checkScope
+}
 Case 'InvalidStateIdentityStillFailsClosed' {
     param($p)
     Eq (Apply $p).status current apply

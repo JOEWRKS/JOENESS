@@ -1,0 +1,44 @@
+{
+  "helperExitCode": 0,
+  "apply": {
+    "action": "apply",
+    "status": "current",
+    "verificationScope": "managed-connection-only",
+    "projectRoot": "D:\\JOEWRKS\\.worktrees\\T081-runtime-pass1",
+    "target": "AGENTS.md",
+    "targetHash": "1c14a587486c7240dbb77d5cc9b14979f492b41e59967e28d135793ac387f3e5",
+    "statePath": ".joeness/setup-state.json",
+    "stateHash": "5b8a2d237fcbfa195f73e969186490e08db6a76e8d8dc5b2bd0ee63ab2e61670",
+    "blockState": "clean",
+    "changedTargets": [
+      "AGENTS.md",
+      ".joeness/setup-state.json"
+    ],
+    "blockers": [],
+    "rollback": null,
+    "unresolvedTargets": []
+  },
+  "preservation": {
+    "outsideUnchanged": true,
+    "bodyPresent": true,
+    "bytes": 10645
+  },
+  "recheck": {
+    "action": "check",
+    "status": "current",
+    "verificationScope": "managed-connection-only",
+    "projectRoot": "D:\\JOEWRKS\\.worktrees\\T081-runtime-pass1",
+    "target": "AGENTS.md",
+    "targetHash": "1c14a587486c7240dbb77d5cc9b14979f492b41e59967e28d135793ac387f3e5",
+    "statePath": ".joeness/setup-state.json",
+    "stateHash": "5b8a2d237fcbfa195f73e969186490e08db6a76e8d8dc5b2bd0ee63ab2e61670",
+    "blockState": "clean",
+    "changedTargets": [],
+    "blockers": [],
+    "rollback": null,
+    "unresolvedTargets": []
+  },
+  "newThreadId": "01a106ea-25b7-7473-b93d-456f19442cf5",
+  "newThreadPrompt": "이 프로젝트를 새로 이어받는 담당자 관점에서 현재 상태를 확인해 주세요. 읽기 전용 요청입니다. 파일 수정·작업 기록 추가·게임 실행·새 검사·기기 접근·설치·배포·다른 채팅 메시지는 하지 마세요. 끝난 일, 현재 단계와 남은 필수 조건, 다음에 할 수 있는 한 작업을 짧게 보고해 주세요. 그 작업만 마치면 다음 단계 또는 프로젝트 완료를 선언할 수 있는지도 구분하고, 판단에 사용한 실제 근거의 위치를 붙여 주세요. 실제 작업에는 착수하지 마세요.",
+  "projectId": "927516c6-e74e-4b90-a45d-0e7fc80d9564"
+}

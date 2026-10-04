@@ -1,0 +1,40 @@
+{
+  "head": "83ef209394ae734d0f3e27daed03b8c011b69054",
+  "files": [
+    {
+      "path": "AGENTS.md",
+      "sha256": "cb9f69205e9eb168d7126ab1ab52306133f738b42af1820f04c81717931d06b6",
+      "length": 10384
+    },
+    {
+      "path": "ROADMAP.md",
+      "sha256": "33682f724da6d216ee9d512bcec3e6c7db4276ce0a9a72e823f492e6c49e9d67",
+      "length": 89429
+    },
+    {
+      "path": "COMPLETION_CHECKLIST.md",
+      "sha256": "f2d2e3e54d467eb80dd731d5edebd0e95eacf90cf73500949ef2143cdf5329dc",
+      "length": 106441
+    },
+    {
+      "path": "TASKS.md",
+      "sha256": "b841808d50d0480385dda6a20629d7b9326733af3ae49ec560a0e71c23cd8c46",
+      "length": 2567913
+    },
+    {
+      "path": ".joeness/setup-state.json",
+      "sha256": "f70bfd3b2cc86e264d401dd7ba40d6a9f9937ab5ca6ed7d7352992a0b9e9efee",
+      "length": 2903
+    },
+    {
+      "path": "art/pixel-art/candidates/T081-visual-completion-v8/fixture.tsx",
+      "sha256": "45c773d3edfec8e667032c733b25914f890d4668f1e29d403eb727ac0f9cd8b4",
+      "length": 7806
+    },
+    {
+      "path": "docs/qa/content-scope-2026-09-27/inventory.json",
+      "sha256": "155754919e62c3eb43a617eded913011cb18e99446141ffcc3957b36a2120fe6",
+      "length": 43981
+    }
+  ]
+}

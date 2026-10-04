@@ -1,0 +1,117 @@
+{
+  "status": "retest-pending",
+  "scope": "User requested correction after partial result; one same-prompt fresh local project chat, no game work or release.",
+  "before": [
+    {
+      "path": "AGENTS.md",
+      "sha256": "b4a95a4d07db3438a09b65a704d175ef98f6bff373eb1232cb3677ea8bb3e744",
+      "length": 9231
+    },
+    {
+      "path": "ROADMAP.md",
+      "sha256": "33682f724da6d216ee9d512bcec3e6c7db4276ce0a9a72e823f492e6c49e9d67",
+      "length": 89429
+    },
+    {
+      "path": "COMPLETION_CHECKLIST.md",
+      "sha256": "a21151c86429e904eaddf927b32f2ccab5cb4c5414ae8c8b6d85298bce18a0a2",
+      "length": 106409
+    },
+    {
+      "path": "TASKS.md",
+      "sha256": "b3916b9afbd506f320727267b7aed86b7d2b36afb5696df70f5cf9bc52724c58",
+      "length": 2564960
+    },
+    {
+      "path": "PROJECT_OPERATING_CONTRACT.md",
+      "sha256": "2103614efc21d40bc1d3d7d1ff351c13fce24542d04687f6ef65ac5704113bd3",
+      "length": 35459
+    },
+    {
+      "path": "SOL_VISUAL_QA_PROTOCOL.md",
+      "sha256": "fbfbe727d90fdafa94048cbc078eaac026c9b3a0955c1586e59b39be4835633f",
+      "length": 21084
+    },
+    {
+      "path": "TICKET_EXECUTION_REPORT_TEMPLATE.md",
+      "sha256": "f980911395e6e39fbf374bd9d4d595686db82feaff939a1336a13375ab56e0e1",
+      "length": 21127
+    },
+    {
+      "path": "DEVELOPMENT_RULES.md",
+      "sha256": "50e137e0197cbfc7fee8fe10c82f4ada4f5aea409f137898e52e626333d6657d",
+      "length": 5436
+    },
+    {
+      "path": ".joeness/setup-state.json",
+      "sha256": "321eedf669766d2584f11c2b9b4caef8771e27c7f89d1bbd36336f39fbaeb9cd",
+      "length": 2023
+    }
+  ],
+  "retestPreimages": [
+    {
+      "path": "AGENTS.md",
+      "sha256": "cb9f69205e9eb168d7126ab1ab52306133f738b42af1820f04c81717931d06b6",
+      "length": 10384
+    },
+    {
+      "path": "ROADMAP.md",
+      "sha256": "33682f724da6d216ee9d512bcec3e6c7db4276ce0a9a72e823f492e6c49e9d67",
+      "length": 89429
+    },
+    {
+      "path": "COMPLETION_CHECKLIST.md",
+      "sha256": "f2d2e3e54d467eb80dd731d5edebd0e95eacf90cf73500949ef2143cdf5329dc",
+      "length": 106441
+    },
+    {
+      "path": "TASKS.md",
+      "sha256": "592867b0e6d4fc28cc5fd49922650611986a98e26452a20ec90904e5068ff305",
+      "length": 2567148
+    },
+    {
+      "path": "PROJECT_OPERATING_CONTRACT.md",
+      "sha256": "2103614efc21d40bc1d3d7d1ff351c13fce24542d04687f6ef65ac5704113bd3",
+      "length": 35459
+    },
+    {
+      "path": "SOL_VISUAL_QA_PROTOCOL.md",
+      "sha256": "fbfbe727d90fdafa94048cbc078eaac026c9b3a0955c1586e59b39be4835633f",
+      "length": 21084
+    },
+    {
+      "path": "TICKET_EXECUTION_REPORT_TEMPLATE.md",
+      "sha256": "ccea114ccc840df5b733a8766d29a79602293fafe10e3c74c7907755597a6d10",
+      "length": 21361
+    },
+    {
+      "path": "DEVELOPMENT_RULES.md",
+      "sha256": "50e137e0197cbfc7fee8fe10c82f4ada4f5aea409f137898e52e626333d6657d",
+      "length": 5436
+    },
+    {
+      "path": ".joeness/setup-state.json",
+      "sha256": "f70bfd3b2cc86e264d401dd7ba40d6a9f9937ab5ca6ed7d7352992a0b9e9efee",
+      "length": 2903
+    },
+    {
+      "path": "art/pixel-art/candidates/T081-visual-completion-v8/fixture.tsx",
+      "sha256": "45c773d3edfec8e667032c733b25914f890d4668f1e29d403eb727ac0f9cd8b4",
+      "length": 7806
+    },
+    {
+      "path": "docs/qa/content-scope-2026-09-27/inventory.json",
+      "sha256": "155754919e62c3eb43a617eded913011cb18e99446141ffcc3957b36a2120fe6",
+      "length": 43981
+    }
+  ],
+  "prompt": "이 프로젝트를 처음 맡는 담당자에게 인수인계할 수 있도록 현재 상태를 확인해 주세요. 읽기 전용 요청입니다. 파일 수정·작업 기록 추가·게임 실행·새 검사·기기 접근·배포·다른 채팅 메시지는 하지 마세요. 이미 끝난 일, 현재 단계와 남은 필수 조건, 다음에 할 수 있는 한 작업을 짧게 보고해 주세요. 그 작업만 마치면 다음 단계 또는 프로젝트 완료를 선언할 수 있는지도 구분하고 판단 근거의 문서 위치를 붙여 주세요. 실제 작업은 착수하지 마세요.",
+  "successCriteria": [
+    "Same current-stage/open/next/completion accuracy as first test; preserve product acceptance and past failure boundaries.",
+    "Official Apply and Check current/clean; unmanaged text preserved.",
+    "No whole-ledger print or broad history query producing truncation; needed evidence can be read in bounded pages.",
+    "Read-only chat; document and state hashes unchanged."
+  ],
+  "stopRule": "One affected-case retest; retain any failure and report unresolved boundary, no general performance/token-savings claim.",
+  "lockDiagnosis": "Restart Manager returned no holders for both targets; official Apply succeeded after fresh Check. Previous sharing-error cause remains unconfirmed."
+}

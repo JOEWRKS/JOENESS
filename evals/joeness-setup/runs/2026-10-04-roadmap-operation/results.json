@@ -1,0 +1,229 @@
+{
+  "status": "PARTIAL_FAILURE_NEXT_WORK_SELECTION",
+  "originalStatus": "PASS_WITH_BOUNDED_SCOPE",
+  "supersession": {
+    "reason": "T478 already covers the fair same-source/additional-investment paid late melee comparison that T500 incorrectly declared missing. The main reviewer also missed it.",
+    "source": "D:/JOEWRKS/.worktrees/T081-runtime-pass1/docs/qa/t478-late-melee-comparison/REPORT.md",
+    "interpretation": "The checks, after snapshot, and projectNext below preserve the initial assessment, not the current verdict. Document routing and open completion boundaries were observed; evidence classification and next-work selection failed.",
+    "duplicateGameExecution": false,
+    "correctionStatus": "DOCUMENT_CORRECTION_VERIFIED_NOT_AUTONOMOUS_RECURRENCE_PROOF",
+    "correctionEvidence": "correction-results.json"
+  },
+  "purpose": "DungeonGameV3 roadmap operation: do the approved investigation, record results by role, update current/next and keep unmet requirements open.",
+  "threadId": "01a084de-a56e-77d1-a123-4ac5f4d06b84",
+  "turnId": "01a106bf-708a-7df3-b7ff-f299dac53e05",
+  "projectPath": "D:/JOEWRKS/.worktrees/T081-runtime-pass1",
+  "changedProjectFiles": [
+    "ROADMAP.md",
+    "COMPLETION_CHECKLIST.md",
+    "TASKS.md"
+  ],
+  "checks": [
+    {
+      "name": "approved roadmap work executed",
+      "result": "PASS",
+      "evidence": "T500 investigates existing T417/T487/T366/T386/T409 evidence and current equipment/preparation implementation; no repeat game tests."
+    },
+    {
+      "name": "facts classified by evidence boundary",
+      "result": "PASS",
+      "evidence": "Existing answered routes, unverified fair late melee comparison, and human/undecided criteria separated."
+    },
+    {
+      "name": "records by role and next-state synchronization",
+      "result": "PASS",
+      "evidence": "TASKS T500 owns investigation, checklist adds evidence gap, ROADMAP §7 marks investigation complete and replaces it with a bounded next comparison."
+    },
+    {
+      "name": "no false requirement or stage completion",
+      "result": "PASS",
+      "evidence": "21 requirements remain 4 passed/15 partial/2 not run; current stage and human approval gates retained."
+    },
+    {
+      "name": "independent readback and preservation",
+      "result": "PASS",
+      "evidence": "Main inspected docs, representative reports, recipe source and candidate save levels; 12 TASKS links exist, previous TASKS bytes hash identical after excluding T500; scoped protected hashes and HEAD unchanged; diff check passes."
+    }
+  ],
+  "after": {
+    "head": "83ef209394ae734d0f3e27daed03b8c011b69054",
+    "files": [
+      {
+        "path": "AGENTS.md",
+        "sha256": "cb9f69205e9eb168d7126ab1ab52306133f738b42af1820f04c81717931d06b6",
+        "length": 10384
+      },
+      {
+        "path": "ROADMAP.md",
+        "sha256": "db1274fcfded9967e90b3e726736fa13a56890542bf5506a8750bd4995f666da",
+        "length": 90391
+      },
+      {
+        "path": "COMPLETION_CHECKLIST.md",
+        "sha256": "74bdf89e98c49fd4fd257a425d46ac4d1a451038c89b652261983f4ccd99d220",
+        "length": 106795
+      },
+      {
+        "path": "TASKS.md",
+        "sha256": "10feaf83fc9936e329a1210dff21300156f5830fc4dcbab0701cc4fa76c0db43",
+        "length": 2576045
+      },
+      {
+        "path": ".joeness/setup-state.json",
+        "sha256": "f70bfd3b2cc86e264d401dd7ba40d6a9f9937ab5ca6ed7d7352992a0b9e9efee",
+        "length": 2903
+      },
+      {
+        "path": "art/pixel-art/candidates/T081-visual-completion-v8/fixture.tsx",
+        "sha256": "45c773d3edfec8e667032c733b25914f890d4668f1e29d403eb727ac0f9cd8b4",
+        "length": 7806
+      },
+      {
+        "path": "docs/qa/content-scope-2026-09-27/inventory.json",
+        "sha256": "155754919e62c3eb43a617eded913011cb18e99446141ffcc3957b36a2120fe6",
+        "length": 43981
+      }
+    ],
+    "oldTasksHash": "b841808d50d0480385dda6a20629d7b9326733af3ae49ec560a0e71c23cd8c46",
+    "requirements": [
+      {
+        "check": "[x]",
+        "id": "S01",
+        "implementation": "해당 없음",
+        "verification": "통과"
+      },
+      {
+        "check": "[ ]",
+        "id": "D01",
+        "implementation": "구현",
+        "verification": "부분"
+      },
+      {
+        "check": "[ ]",
+        "id": "D02",
+        "implementation": "구현",
+        "verification": "부분"
+      },
+      {
+        "check": "[ ]",
+        "id": "D03",
+        "implementation": "구현",
+        "verification": "부분"
+      },
+      {
+        "check": "[ ]",
+        "id": "B01",
+        "implementation": "구현",
+        "verification": "부분"
+      },
+      {
+        "check": "[ ]",
+        "id": "B02",
+        "implementation": "부분",
+        "verification": "부분"
+      },
+      {
+        "check": "[ ]",
+        "id": "B03",
+        "implementation": "구현",
+        "verification": "부분"
+      },
+      {
+        "check": "[ ]",
+        "id": "N01",
+        "implementation": "구현",
+        "verification": "부분"
+      },
+      {
+        "check": "[ ]",
+        "id": "N02",
+        "implementation": "구현",
+        "verification": "부분"
+      },
+      {
+        "check": "[x]",
+        "id": "C01",
+        "implementation": "구현",
+        "verification": "통과"
+      },
+      {
+        "check": "[ ]",
+        "id": "C02",
+        "implementation": "부분",
+        "verification": "부분"
+      },
+      {
+        "check": "[ ]",
+        "id": "C03",
+        "implementation": "구현",
+        "verification": "부분"
+      },
+      {
+        "check": "[ ]",
+        "id": "U01",
+        "implementation": "부분",
+        "verification": "부분"
+      },
+      {
+        "check": "[ ]",
+        "id": "U02",
+        "implementation": "구현",
+        "verification": "부분"
+      },
+      {
+        "check": "[ ]",
+        "id": "U03",
+        "implementation": "부분",
+        "verification": "부분"
+      },
+      {
+        "check": "[ ]",
+        "id": "U04",
+        "implementation": "부분",
+        "verification": "부분"
+      },
+      {
+        "check": "[x]",
+        "id": "R01",
+        "implementation": "구현",
+        "verification": "통과"
+      },
+      {
+        "check": "[x]",
+        "id": "R02",
+        "implementation": "구현",
+        "verification": "통과"
+      },
+      {
+        "check": "[ ]",
+        "id": "R03",
+        "implementation": "구현",
+        "verification": "부분"
+      },
+      {
+        "check": "[ ]",
+        "id": "P01",
+        "implementation": "해당 없음",
+        "verification": "미실행"
+      },
+      {
+        "check": "[ ]",
+        "id": "P02",
+        "implementation": "해당 없음",
+        "verification": "미실행"
+      }
+    ]
+  },
+  "limits": [
+    "The existing owner was explicitly asked to perform this work and update records; not an unprompted behavior experiment.",
+    "One investigation/document-update workflow; not new gameplay/runtime proof or final product completion.",
+    "No token-savings or general superiority claim."
+  ],
+  "projectNext": "Fair same-source/additional-investment paid late-region chain comparison of longsword+shield vs greatsword; planned only, not executed.",
+  "ownerWritePaths": [
+    "D:\\JOEWRKS\\.worktrees\\T081-runtime-pass1\\ROADMAP.md",
+    "D:\\JOEWRKS\\.worktrees\\T081-runtime-pass1\\COMPLETION_CHECKLIST.md",
+    "D:\\JOEWRKS\\.worktrees\\T081-runtime-pass1\\TASKS.md",
+    "D:\\JOEWRKS\\.worktrees\\T081-runtime-pass1\\TASKS.md"
+  ]
+}

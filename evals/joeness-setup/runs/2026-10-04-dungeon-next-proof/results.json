@@ -1,0 +1,123 @@
+{
+  "status": "BOUNDED_APPLY_AND_FRESH_READBACK_PASSED",
+  "threadId": "01a106ea-25b7-7473-b93d-456f19442cf5",
+  "turnId": "01a106ea-28e2-76c0-ac1e-d363f7983ee1",
+  "cwd": "D:\\JOEWRKS\\.worktrees\\T081-runtime-pass1",
+  "runtime": "Saved-project local Codex chat; model/reasoning not independently exposed by thread tools.",
+  "actualEvidence": {
+    "commands": [
+      {
+        "command": "\"C:\\\\Users\\\\tjdwo\\\\.cache\\\\codex-runtimes\\\\codex-primary-runtime\\\\dependencies\\\\native\\\\powershell\\\\pwsh.exe\" -Command \"rg -n -m 3 '\"'^## 7|''^### .*현재|''^### .*진입|''^## .*미완|''^## .*최근 근거'\"' ROADMAP.md COMPLETION_CHECKLIST.md; git status --short; git log -3 --oneline\"",
+        "cwd": "D:\\JOEWRKS\\.worktrees\\T081-runtime-pass1",
+        "exitCode": 0,
+        "outputCharsFromReadThread": 5170
+      },
+      {
+        "command": "\"C:\\\\Users\\\\tjdwo\\\\.cache\\\\codex-runtimes\\\\codex-primary-runtime\\\\dependencies\\\\native\\\\powershell\\\\pwsh.exe\" -Command '$p='\"'ROADMAP.md'; \"'$s=Get-Content $p; for($i=175;$i -lt [Math]::Min(233,$s.Length);$i++){ '\"'{0}:{1}' -f (\"'$i+1),$s[$i] }; $p='\"'COMPLETION_CHECKLIST.md'; \"'$s=Get-Content $p; for($i=0;$i -lt [Math]::Min(125,$s.Length);$i++){ '\"'{0}:{1}' -f (\"'$i+1),$s[$i] }; rg -n -m 3 '\"'TICKET-081-501|TICKET-081-500|TICKET-081-496|TICKET-081-497|TICKET-081-498|TICKET-081-499' TASKS.md\"",
+        "cwd": "D:\\JOEWRKS\\.worktrees\\T081-runtime-pass1",
+        "exitCode": 0,
+        "outputCharsFromReadThread": 22497
+      },
+      {
+        "command": "\"C:\\\\Users\\\\tjdwo\\\\.cache\\\\codex-runtimes\\\\codex-primary-runtime\\\\dependencies\\\\native\\\\powershell\\\\pwsh.exe\" -Command '$p='\"'COMPLETION_CHECKLIST.md'; \"'$s=Get-Content $p; for($i=14;$i -lt 27;$i++){ '\"'{0}:{1}' -f (\"'$i+1),$s[$i] }; rg -n -m 1 '\"'\"'^## 제작|'\"\\\\|.*\\\\bS01\\\\b|\\\\|.*\\\\bU04\\\\b|\\\\|.*\\\\bR03\\\\b|\\\\|.*\\\\bP01\\\\b|\\\\|.*\\\\bP02\\\\b' COMPLETION_CHECKLIST.md; \"'$p='\"'TASKS.md'; \"'$s=Get-Content $p; for($i=0;$i -lt 15;$i++){ '\"'{0}:{1}' -f (\"'$i+1),$s[$i] }; rg -n -m 2 '\"'\"'^#|''^##|SHA|미검|청취|복원'\"' docs/qa/t496-story-facility-native/REPORT.md docs/qa/t478-late-melee-comparison/REPORT.md\"",
+        "cwd": "D:\\JOEWRKS\\.worktrees\\T081-runtime-pass1",
+        "exitCode": 0,
+        "outputCharsFromReadThread": 5345
+      },
+      {
+        "command": "\"C:\\\\Users\\\\tjdwo\\\\.cache\\\\codex-runtimes\\\\codex-primary-runtime\\\\dependencies\\\\native\\\\powershell\\\\pwsh.exe\" -Command \"rg -n -m 2 '\"'^## 제작|''^'\"\\\\|.*S01|\"'^'\"\\\\|.*C01|\"'^'\"\\\\|.*R01|\"'^'\"\\\\|.*R02' COMPLETION_CHECKLIST.md; \"'$p='\"'docs/qa/t496-story-facility-native/REPORT.md'; \"'$s=Get-Content $p; for($i=0;$i -lt [Math]::Min(65,$s.Length);$i++){ '\"'{0}:{1}' -f (\"'$i+1),$s[$i] }; $p='\"'docs/qa/t478-late-melee-comparison/REPORT.md'; \"'$s=Get-Content $p; for($i=0;$i -lt [Math]::Min(24,$s.Length);$i++){ '\"'{0}:{1}' -f (\"'$i+1),$s[$i] }'",
+        "cwd": "D:\\JOEWRKS\\.worktrees\\T081-runtime-pass1",
+        "exitCode": 0,
+        "outputCharsFromReadThread": 5084
+      },
+      {
+        "command": "\"C:\\\\Users\\\\tjdwo\\\\.cache\\\\codex-runtimes\\\\codex-primary-runtime\\\\dependencies\\\\native\\\\powershell\\\\pwsh.exe\" -Command \"rg -n '\"'^## 제작|''^'\"\\\\| \\\\[[ x]\\\\] \\\\| (S01|C01|R01|R02|B02|C02|U01|U03|U04|P01|P02) \\\\|' COMPLETION_CHECKLIST.md\"",
+        "cwd": "D:\\JOEWRKS\\.worktrees\\T081-runtime-pass1",
+        "exitCode": 0,
+        "outputCharsFromReadThread": 7843
+      },
+      {
+        "command": "\"C:\\\\Users\\\\tjdwo\\\\.cache\\\\codex-runtimes\\\\codex-primary-runtime\\\\dependencies\\\\native\\\\powershell\\\\pwsh.exe\" -Command '$s=Get-Content COMPLETION_CHECKLIST.md; for($i=257;$i -lt 280;$i++){ if($s[$i] -match '\"'\"'^'\"\\\\| \\\\['){ '{0}:{1}' -f (\"'$i+1),(($s[$i] -split '\"'\\\\|')[1..6] -join ' | ') } }\"",
+        "cwd": "D:\\JOEWRKS\\.worktrees\\T081-runtime-pass1",
+        "exitCode": 0,
+        "outputCharsFromReadThread": 15249
+      },
+      {
+        "command": "\"C:\\\\Users\\\\tjdwo\\\\.cache\\\\codex-runtimes\\\\codex-primary-runtime\\\\dependencies\\\\native\\\\powershell\\\\pwsh.exe\" -Command '$s=Get-Content COMPLETION_CHECKLIST.md; for($i=259;$i -lt 280;$i++){ '\"'{0}:{1}' -f (\"'$i+1),(($s[$i] -split '\"'\\\\|')[1..5] -join ' | ') }\"",
+        "cwd": "D:\\JOEWRKS\\.worktrees\\T081-runtime-pass1",
+        "exitCode": 0,
+        "outputCharsFromReadThread": 1732
+      }
+    ],
+    "fileChangeCount": 0,
+    "readT478AndT496": true
+  },
+  "checks": {
+    "officialConnection": "current/clean",
+    "outsideAgentsBytesPreserved": true,
+    "readOnlyTenHashesUnchanged": true,
+    "product205DigestUnchanged": true,
+    "headAndIndexUnchanged": true,
+    "stageAndUnmetBoundary": "correct",
+    "nextTask": "conditional actual audio listening; not another melee comparison",
+    "noStageOrUserAcceptanceClaim": true
+  },
+  "afterRead": {
+    "head": "83ef209394ae734d0f3e27daed03b8c011b69054",
+    "index": "",
+    "files": [
+      {
+        "path": "AGENTS.md",
+        "sha256": "1c14a587486c7240dbb77d5cc9b14979f492b41e59967e28d135793ac387f3e5"
+      },
+      {
+        "path": ".joeness/setup-state.json",
+        "sha256": "5b8a2d237fcbfa195f73e969186490e08db6a76e8d8dc5b2bd0ee63ab2e61670"
+      },
+      {
+        "path": "ROADMAP.md",
+        "sha256": "f4de920850184a8c33d87dfbfb91e42e0e7e173443a3435f32c374deb887d546"
+      },
+      {
+        "path": "COMPLETION_CHECKLIST.md",
+        "sha256": "0e92d932c6e9bc9fffacd342b506e761bf90cb8966a9aabc898898e879b622f1"
+      },
+      {
+        "path": "TASKS.md",
+        "sha256": "f740fff9371de14d65e6b1266ba67aa23d2a2545fedd0e6a76cbdd84efe99211"
+      },
+      {
+        "path": "PROJECT_OPERATING_CONTRACT.md",
+        "sha256": "2103614efc21d40bc1d3d7d1ff351c13fce24542d04687f6ef65ac5704113bd3"
+      },
+      {
+        "path": "DEVELOPMENT_RULES.md",
+        "sha256": "50e137e0197cbfc7fee8fe10c82f4ada4f5aea409f137898e52e626333d6657d"
+      },
+      {
+        "path": "TICKET_EXECUTION_REPORT_TEMPLATE.md",
+        "sha256": "ccea114ccc840df5b733a8766d29a79602293fafe10e3c74c7907755597a6d10"
+      },
+      {
+        "path": "art/pixel-art/candidates/T081-visual-completion-v8/fixture.tsx",
+        "sha256": "45c773d3edfec8e667032c733b25914f890d4668f1e29d403eb727ac0f9cd8b4"
+      },
+      {
+        "path": "docs/qa/content-scope-2026-09-27/inventory.json",
+        "sha256": "155754919e62c3eb43a617eded913011cb18e99446141ffcc3957b36a2120fe6"
+      }
+    ],
+    "productFiles": 205,
+    "productDigest": "db90493b7dded687dca43fdcb3c23c5f142d9a3c98a238bca18dbe8de9af2ec1"
+  },
+  "limits": [
+    "Current documents had already been corrected by T501. This is not independent discovery of stale-summary error, not a causal Bare/Setup A/B, not long-horizon recurrence proof.",
+    "No game runtime or physical listening checks executed. Human acceptance remains separate.",
+    "The behavior is consistent with instruction delivery; no direct inspection of app-generated initial instruction payload.",
+    "Seven read calls, some broad slices and narrowed re-reads; efficiency and token savings not assessed.",
+    "T500 failure remains preserved; no new rules added in this turn."
+  ],
+  "changesAfterTest": "T502 appended by coordinating agent after hash comparison, documenting actual setup change and bounded test.",
+  "personalInstallChanged": false,
+  "commitPush": false
+}

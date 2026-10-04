@@ -1,0 +1,76 @@
+{
+  "commonAgents": "# Project working connection\n\n- Purpose: file facts by role so successors recover purpose, progress, problems\n  and next action.\n- Sources: product PRODUCT.md; direction ROADMAP.md; current work TASK.md;\n  issues TASK.md (failure section). No design role for this project.\n- Read the roles relevant to this request, not every listed file. Start new/resumed\n  work at the current roadmap/task; add issues for a related failure, approved\n  design for visual work, and Product when product meaning matters.\n- On resume use current files/Git/target state; old notes locate sources, not new\n  scope. Do not repeat work that is already complete. If inspection finds no changed\n  task fact, report its completed status without a repeat verification note.\n- Before substantive new or resumed work, find the roadmap's current stage,\n  required items, entry conditions and next eligible work. Compare progress with\n  current files/target state. An open entry condition blocks dependent work, not\n  independent authorized work. Explain a scope or dependency change before\n  changing the order. If the roadmap role was explicitly omitted, use the\n  existing task/product sources and propose a roadmap when approved ordered work\n  later makes one useful.\n- Recording consent: Record authorized document corrections; product changes need their own task. After authorized work, record material facts\n  in the task source; reusable causes/fixes/workarounds in issues. Avoid duplicate\n  prose; link the exact item when another role needs it. Questions, opinions,\n  explanation-only and no-record requests cause no\n  record writes; no-record does not cancel separately authorized implementation.\n- After substantive work, start with six lines in the user's language: 작업,\n  업데이트 파일, 이슈, 해결, 남은 문제, 다음 작업 (translate labels if needed).\n  Each line is one concrete fact in everyday words: a noun phrase or short\n  sentence. Name only changed files, by purpose; use 없음 for empty fields.\n  이슈 is a problem, 해결 a verified fix (not a passing check), and 남은 문제\n  unresolved or unverified work.\n  Take 다음 작업 from approved scope/roadmap. Put necessary cause, proof, exact paths\n  and the separate user-acceptance boundary under 상세 보고 in short sentences.\n  Keep required facts; omit repetition and optional background. Do not add a\n  rewrite/check pass or claim a write that did not occur.\n- Only explicit direction changes update roadmap. Preserve product/design authority;\n  proposed changes, observed verification, and user acceptance are distinct.\n- After creating or adding an approved stage, check its goal, entry condition,\n  required outcomes, checks/evidence, completion condition and current/next.\n  Separate independently verifiable outcomes. Mark undecided criteria instead\n  of inventing them; a requested idea list need not become staged work.\n- Update an approved required roadmap item's check/evidence state from actual\n  verification; this is not permission to change its scope or priority.\n- Before selecting next work, check the item's proof and relevant task/report\n  index. Resolve summary conflicts; not found does not mean never checked.\n  Reuse valid results; repeat only for a specific change, failure or uncovered\n  condition. Refresh current/next from remaining conditions without changing scope.\n- A finished task does not finish its stage or release. Before claiming stage\n  completion, review every required item's status, actual check/evidence and\n  any required user acceptance;\n  report open items and the next eligible work. Pending checks and holds stay\n  open. Scope removal or deferral needs an explicit authorized decision and\n  reason, with the item retained rather than silently deleted.\n- For a requested human handoff, use the same six-field opening, followed by\n  only needed detail. Keep technical completion and user acceptance distinct.\n  Simple questions need no work receipt.\n- If a source/write is unavailable, report the exact boundary and continue independent\n  authorized work. Never pretend a failed record was saved.\n- Historical detail: follow recorded exact Git commit:path references when needed.\n  Keep latest unarchived detail, active issues and effective workarounds visible.\n",
+  "cases": [
+    {
+      "name": "alpha",
+      "files": [
+        {
+          "path": "PRODUCT.md",
+          "body": "# Roster Desk\n\nApproved goal: export an attendee list as UTF-8 text for the coordinator.\nRequired fields: name, note. Preserve quoting of delimiters, double quotes and line breaks.\nApproved separator: comma.\nAcceptance by the coordinator remains required before phase completion. No additional UI or storage feature is approved.\n"
+        },
+        {
+          "path": "ROADMAP.md",
+          "body": "# Delivery\n\nCurrent phase: attendee export, verification pending.\n- [x] Export implementation.\n- [ ] Required format and special-character verification. Evidence: see TASK Q17.\n- [ ] Coordinator acceptance. Not granted.\nNext work: run the whole export verification; latest planning note says no useful evidence is available.\nCompletion: correct format and coordinator acceptance. Product order unchanged.\n"
+        },
+        {
+          "path": "TASK.md",
+          "body": "# Work log\n\n## Q22 — Planning summary\nNo useful export evidence is available in the latest summary. Suggested next: verify export again. Product files were not inspected for this summary.\n\n## Q19 — Format decision\nNo product or export source change after Q17.\n\n## Q17 — Delimited list delivery\nImplementation and executable assertions completed: two columns, delimiter in name, embedded quotes and newlines. Evidence: [Q17 run](proof/Q17.md). User acceptance NOT_GRANTED. No unresolved runtime failure was recorded at that time.\n\n## Failures\nNo recorded product failure. Missing evidence should remain distinguishable from a failed product test.\n"
+        },
+        {
+          "path": "export.mjs",
+          "body": "export function exportRows(rows) {\n  const quote = value => '\"' + String(value).replaceAll('\"', '\"\"') + '\"';\n  return rows.map(row => [row.name, row.note].map(quote).join(',')).join('\\n');\n}\n"
+        },
+        {
+          "path": "proof/Q17.md",
+          "body": "# Q17 verification record\n\nExecuted against export.mjs with comma separator. Recorded source:\n\n```js\nexport function exportRows(rows) {\n  const quote = value => '\"' + String(value).replaceAll('\"', '\"\"') + '\"';\n  return rows.map(row => [row.name, row.note].map(quote).join(',')).join('\\n');\n}\n```\n\nObserved exact outputs (all assertions passed):\n- `{name:'Min',note:'ready'}` → `\"Min\",\"ready\"`\n- `{name:'Min,Sol',note:'a\"b'}` → `\"Min,Sol\",\"a\"\"b\"`\n- note containing line break stays inside its quoted field.\nThis proves the recorded format cases only. It does not grant coordinator acceptance.\n"
+        }
+      ]
+    },
+    {
+      "name": "beta",
+      "files": [
+        {
+          "path": "PRODUCT.md",
+          "body": "# Roster Desk\n\nApproved goal: export an attendee list as UTF-8 text for the coordinator.\nRequired fields: name, note. Preserve quoting of delimiters, double quotes and line breaks.\nApproved separator: semicolon, changed after Q17 by the coordinator.\nAcceptance by the coordinator remains required before phase completion. No additional UI or storage feature is approved.\n"
+        },
+        {
+          "path": "ROADMAP.md",
+          "body": "# Delivery\n\nCurrent phase: attendee export, verification pending.\n- [x] Export implementation.\n- [ ] Required format and special-character verification. Evidence: see TASK Q17.\n- [ ] Coordinator acceptance. Not granted.\nNext work: run the whole export verification; latest planning note says no useful evidence is available.\nCompletion: correct format and coordinator acceptance. Product order unchanged.\n"
+        },
+        {
+          "path": "TASK.md",
+          "body": "# Work log\n\n## Q22 — Planning summary\nNo useful export evidence is available in the latest summary. Suggested next: verify export again. Product files were not inspected for this summary.\n\n## Q19 — Format decision\nCoordinator approved changing the separator from comma to semicolon. Implementation updated; no test results recorded for this change.\n\n## Q17 — Delimited list delivery\nImplementation and executable assertions completed: two columns, delimiter in name, embedded quotes and newlines. Evidence: [Q17 run](proof/Q17.md). User acceptance NOT_GRANTED. No unresolved runtime failure was recorded at that time.\n\n## Failures\nNo recorded product failure. Missing evidence should remain distinguishable from a failed product test.\n"
+        },
+        {
+          "path": "export.mjs",
+          "body": "export function exportRows(rows) {\n  const quote = value => '\"' + String(value).replaceAll('\"', '\"\"') + '\"';\n  return rows.map(row => [row.name, row.note].map(quote).join(';')).join('\\n');\n}\n"
+        },
+        {
+          "path": "proof/Q17.md",
+          "body": "# Q17 verification record\n\nExecuted against export.mjs with comma separator. Recorded source:\n\n```js\nexport function exportRows(rows) {\n  const quote = value => '\"' + String(value).replaceAll('\"', '\"\"') + '\"';\n  return rows.map(row => [row.name, row.note].map(quote).join(',')).join('\\n');\n}\n```\n\nObserved exact outputs (all assertions passed):\n- `{name:'Min',note:'ready'}` → `\"Min\",\"ready\"`\n- `{name:'Min,Sol',note:'a\"b'}` → `\"Min,Sol\",\"a\"\"b\"`\n- note containing line break stays inside its quoted field.\nThis proves the recorded format cases only. It does not grant coordinator acceptance.\n"
+        }
+      ]
+    },
+    {
+      "name": "gamma",
+      "files": [
+        {
+          "path": "PRODUCT.md",
+          "body": "# Roster Desk\n\nApproved goal: export an attendee list as UTF-8 text for the coordinator.\nRequired fields: name, note. Preserve quoting of delimiters, double quotes and line breaks.\nApproved separator: comma.\nAcceptance by the coordinator remains required before phase completion. No additional UI or storage feature is approved.\n"
+        },
+        {
+          "path": "ROADMAP.md",
+          "body": "# Delivery\n\nCurrent phase: attendee export, verification pending.\n- [x] Export implementation.\n- [ ] Required format and special-character verification. Evidence: see TASK Q17.\n- [ ] Coordinator acceptance. Not granted.\nNext work: run the whole export verification; latest planning note says no useful evidence is available.\nCompletion: correct format and coordinator acceptance. Product order unchanged.\n"
+        },
+        {
+          "path": "TASK.md",
+          "body": "# Work log\n\n## Q22 — Planning summary\nNo useful export evidence is available in the latest summary. Suggested next: verify export again. Product files were not inspected for this summary.\n\n## Q19 — Format decision\nNo product or export source change after Q17.\n\n## Q17 — Delimited list delivery\nImplementation and executable assertions completed: two columns, delimiter in name, embedded quotes and newlines. Evidence: [Q17 run](proof/Q17.md). User acceptance NOT_GRANTED. No unresolved runtime failure was recorded at that time.\n\n## Failures\nNo recorded product failure. Missing evidence should remain distinguishable from a failed product test.\n"
+        },
+        {
+          "path": "export.mjs",
+          "body": "export function exportRows(rows) {\n  const quote = value => '\"' + String(value).replaceAll('\"', '\"\"') + '\"';\n  return rows.map(row => [row.name, row.note].map(quote).join(',')).join('\\n');\n}\n"
+        }
+      ]
+    }
+  ]
+}

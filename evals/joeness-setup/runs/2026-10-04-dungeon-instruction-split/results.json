@@ -1,0 +1,144 @@
+{
+  "status": "PARTIAL",
+  "date": "2026-10-04",
+  "ownerThread": "01a084de-a56e-77d1-a123-4ac5f4d06b84",
+  "ownerTurn": "01a10677-e255-7910-ba0d-cd97f4870c86",
+  "freshThread": "01a10682-82c3-7a01-b223-4ede64f8471c",
+  "freshTurn": "01a10682-8678-7ee0-b33b-bd18af843d4b",
+  "runtimeIdentity": "Codex app saved-project local chat; model/reasoning not independently exposed by read_thread; no exact model claim",
+  "agentInstructions": {
+    "beforeBytes": 39918,
+    "afterBytes": 9231,
+    "beforeSha256": "c6f38ea0b95e28825a6ef2d72e2aa46762ba349b4dc1dd541b665edf22d3571c",
+    "afterSha256": "b4a95a4d07db3438a09b65a704d175ef98f6bff373eb1232cb3677ea8bb3e744",
+    "sectionsPreserved": 17
+  },
+  "checks": [
+    {
+      "name": "original backup and moved section bodies",
+      "result": "PASS",
+      "basis": "Main independently verified backup SHA and 17 normalized section bodies (heading depth and EOL normalization only)."
+    },
+    {
+      "name": "existing managed connection",
+      "result": "PASS",
+      "basis": "Helper current/clean; original managed block and state unchanged."
+    },
+    {
+      "name": "new managed connection apply",
+      "result": "FAIL",
+      "basis": "Two File.Replace sharing errors; rollback complete; no changed targets or unresolved transaction writes. No manual bypass."
+    },
+    {
+      "name": "fresh current stage and pending requirements",
+      "result": "PASS"
+    },
+    {
+      "name": "next independent work and completion boundary",
+      "result": "PASS"
+    },
+    {
+      "name": "no repeated tests or unauthorized writes",
+      "result": "PASS",
+      "basis": "Four read-only command executions; nine document/state hashes unchanged; no game/browser/device/tests run."
+    },
+    {
+      "name": "conditional domain-document selection",
+      "result": "PASS",
+      "basis": "Only ROADMAP, COMPLETION_CHECKLIST, bounded latest TASKS and relevant T496 report; no indiscriminate load of all newly separated rules."
+    },
+    {
+      "name": "bounded read output efficiency",
+      "result": "NOT_MET",
+      "basis": "Broad history search and full checklist output required narrower re-reads; output originalChars 323277 and 112208. These are source-output sizes, not actual model token usage."
+    },
+    {
+      "name": "six-field report",
+      "result": "OBSERVED",
+      "basis": "Six headings present; first-person usability not re-rated. A conflicting existing report-template first-line rule remains recorded."
+    }
+  ],
+  "readCommands": [
+    {
+      "command": "\"C:\\\\Users\\\\tjdwo\\\\.cache\\\\codex-runtimes\\\\codex-primary-runtime\\\\dependencies\\\\native\\\\powershell\\\\pwsh.exe\" -Command 'git status --short; git log -5 --oneline; rg -n \"''^## 7|''^## 8|현재|다음|미완 조건|차단 범위|''^## |''^### \" ROADMAP.md COMPLETION_CHECKLIST.md TASKS.md'",
+      "cwd": "D:\\JOEWRKS\\.worktrees\\T081-runtime-pass1",
+      "exitCode": 0,
+      "outputOriginalChars": 323277,
+      "outputTruncated": true
+    },
+    {
+      "command": "\"C:\\\\Users\\\\tjdwo\\\\.cache\\\\codex-runtimes\\\\codex-primary-runtime\\\\dependencies\\\\native\\\\powershell\\\\pwsh.exe\" -Command '$r=Get-Content ROADMAP.md; for($i=155;$i -lt $r.Length;$i++){ '\"'{0}: {1}' -f (\"'$i+1),$r[$i] }; $c=Get-Content COMPLETION_CHECKLIST.md; for($i=0;$i -lt $c.Length;$i++){ '\"'{0}: {1}' -f (\"'$i+1),$c[$i] }; Get-Content TASKS.md -TotalCount 160'",
+      "cwd": "D:\\JOEWRKS\\.worktrees\\T081-runtime-pass1",
+      "exitCode": 0,
+      "outputOriginalChars": 112208,
+      "outputTruncated": true
+    },
+    {
+      "command": "\"C:\\\\Users\\\\tjdwo\\\\.cache\\\\codex-runtimes\\\\codex-primary-runtime\\\\dependencies\\\\native\\\\powershell\\\\pwsh.exe\" -Command '$c=Get-Content COMPLETION_CHECKLIST.md; for($i=0;$i -lt $c.Length;$i++){if($c[$i] -match '\"'\"'^#|''^'\"\\\\| [A-Z][0-9]|\"'^'\"\\\\| 상태|\"'^'\"\\\\| 구현|\"'^'\"\\\\*\\\\*|\"'^- '\"\\\\*\\\\*'){ \"'$s=$c[$i]; if($s.Length -gt 1100){$s=$s.Substring(0,1100)+'\"'…'}; '{0}: {1}' -f (\"'$i+1),$s }}; $t=Get-Content TASKS.md -TotalCount 68; for($i=0;$i -lt $t.Length;$i++){ '\"'{0}: {1}' -f (\"'$i+1),$t[$i] }'",
+      "cwd": "D:\\JOEWRKS\\.worktrees\\T081-runtime-pass1",
+      "exitCode": 0,
+      "outputOriginalChars": 34991,
+      "outputTruncated": true
+    },
+    {
+      "command": "\"C:\\\\Users\\\\tjdwo\\\\.cache\\\\codex-runtimes\\\\codex-primary-runtime\\\\dependencies\\\\native\\\\powershell\\\\pwsh.exe\" -Command '$c=Get-Content COMPLETION_CHECKLIST.md; for($i=0;$i -lt $c.Length;$i++){if($c[$i] -match '\"'\"'^'\"\\\\| (ID|[A-Z][0-9][0-9]) \\\\|'){ \"'$p=$c[$i] -split '\"'\\\\|'; '{0}: {1}' -f (\"'$i+1), (($p | Select-Object -First 6) -join '\"'|') }}; \"'$r=Get-Content docs/qa/t496-story-facility-native/REPORT.md; for($i=0;$i -lt [Math]::Min(34,$r.Length);$i++){ '\"'{0}: {1}' -f (\"'$i+1),$r[$i] }; $c=Get-Content COMPLETION_CHECKLIST.md; for($i=0;$i -lt 29;$i++){ '\"'{0}: {1}' -f (\"'$i+1),$c[$i] }'",
+      "cwd": "D:\\JOEWRKS\\.worktrees\\T081-runtime-pass1",
+      "exitCode": 0,
+      "outputOriginalChars": 5286,
+      "outputTruncated": true
+    }
+  ],
+  "fileHashesUnchanged": [
+    {
+      "path": "AGENTS.md",
+      "sha256": "b4a95a4d07db3438a09b65a704d175ef98f6bff373eb1232cb3677ea8bb3e744",
+      "bytes": 9231
+    },
+    {
+      "path": "ROADMAP.md",
+      "sha256": "33682f724da6d216ee9d512bcec3e6c7db4276ce0a9a72e823f492e6c49e9d67",
+      "bytes": 89429
+    },
+    {
+      "path": "COMPLETION_CHECKLIST.md",
+      "sha256": "a21151c86429e904eaddf927b32f2ccab5cb4c5414ae8c8b6d85298bce18a0a2",
+      "bytes": 106409
+    },
+    {
+      "path": "TASKS.md",
+      "sha256": "b3916b9afbd506f320727267b7aed86b7d2b36afb5696df70f5cf9bc52724c58",
+      "bytes": 2564960
+    },
+    {
+      "path": "DEVELOPMENT_RULES.md",
+      "sha256": "50e137e0197cbfc7fee8fe10c82f4ada4f5aea409f137898e52e626333d6657d",
+      "bytes": 5436
+    },
+    {
+      "path": "PROJECT_OPERATING_CONTRACT.md",
+      "sha256": "2103614efc21d40bc1d3d7d1ff351c13fce24542d04687f6ef65ac5704113bd3",
+      "bytes": 35459
+    },
+    {
+      "path": "SOL_VISUAL_QA_PROTOCOL.md",
+      "sha256": "fbfbe727d90fdafa94048cbc078eaac026c9b3a0955c1586e59b39be4835633f",
+      "bytes": 21084
+    },
+    {
+      "path": "TICKET_EXECUTION_REPORT_TEMPLATE.md",
+      "sha256": "f980911395e6e39fbf374bd9d4d595686db82feaff939a1336a13375ab56e0e1",
+      "bytes": 21127
+    },
+    {
+      "path": ".joeness/setup-state.json",
+      "sha256": "321eedf669766d2584f11c2b9b4caef8771e27c7f89d1bbd36336f39fbaeb9cd",
+      "bytes": 2023
+    }
+  ],
+  "limits": [
+    "One read-only handoff case, not game execution or longitudinal behavior.",
+    "No controlled pre/post model-token or accuracy comparison.",
+    "No proof of exact internally injected prompt bytes.",
+    "No commit/push, personal installation, JOENESS runtime source or product changes."
+  ]
+}

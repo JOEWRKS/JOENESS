@@ -1,0 +1,119 @@
+{
+  "runtime": "Codex collaboration subagents, fork_turns=none, inherited runtime; exact model/reasoning not independently exposed. Not a saved-desktop-chat injection test.",
+  "scope": "After-change forward test, one per case; no Bare/control comparison and no claim of causal improvement.",
+  "agents": [
+    "/root/next_proof_alpha",
+    "/root/next_proof_beta",
+    "/root/next_proof_gamma"
+  ],
+  "prompt": "Read only the named fixture's AGENTS and files; determine current state, next eligible work and whether the stage can finish. Correct ROADMAP/TASK if needed. No product code/tests/acceptance or access outside the fixture. No oracle, previous failure, or patch rationale supplied.",
+  "changedFiles": [
+    "alpha/ROADMAP.md",
+    "alpha/TASK.md",
+    "beta/ROADMAP.md",
+    "beta/TASK.md",
+    "gamma/ROADMAP.md",
+    "gamma/TASK.md"
+  ],
+  "protectedInputsUnchanged": true,
+  "files": [
+    {
+      "path": "alpha/AGENTS.md",
+      "sha256": "dcb270c663078f785512c5c7da9590ed43c18412cfa7e3684d6fcbf8a8c05cd9"
+    },
+    {
+      "path": "alpha/export.mjs",
+      "sha256": "c1124870c35012ee07772a61bce17c0d0040946cce152afa2c018018d648f878"
+    },
+    {
+      "path": "alpha/PRODUCT.md",
+      "sha256": "7ef32b492516ec44dbe00f23e2177f9c7fca5aed35a1eb86921042ebc2df1b50"
+    },
+    {
+      "path": "alpha/ROADMAP.md",
+      "sha256": "9c2429f341678c83bf533acc8be4741e65bf217892e0e0036dcec8a6e7da7a33",
+      "body": "# Delivery\n\nCurrent phase: attendee export, coordinator acceptance pending.\n- [x] Export implementation.\n- [x] Required format and special-character verification. Evidence: see TASK Q17 and proof/Q17.md; its recorded source matches current export.mjs.\n- [ ] Coordinator acceptance. Not granted.\nNext work: obtain coordinator acceptance of the attendee export; reuse Q17's valid format evidence.\nCompletion: correct format and coordinator acceptance. Product order unchanged.\n"
+    },
+    {
+      "path": "alpha/TASK.md",
+      "sha256": "68fb59781ac30852658675c26990ebe34cc595492b6e85815067b5694805e226",
+      "body": "# Work log\n\n## Q22 — Planning summary\nCorrection after inspecting current files: Q17's evidence is available at proof/Q17.md, and its recorded source matches current export.mjs with the approved comma separator. The required two-column and special-character cases passed in that recorded run; no product verification was rerun for this correction. Reuse that evidence. Next: obtain coordinator acceptance, which remains NOT_GRANTED and prevents phase completion.\n\n## Q19 — Format decision\nNo product or export source change after Q17.\n\n## Q17 — Delimited list delivery\nImplementation and executable assertions completed: two columns, delimiter in name, embedded quotes and newlines. Evidence: [Q17 run](proof/Q17.md). User acceptance NOT_GRANTED. No unresolved runtime failure was recorded at that time.\n\n## Failures\nNo recorded product failure. Missing evidence should remain distinguishable from a failed product test.\n"
+    },
+    {
+      "path": "alpha/proof/Q17.md",
+      "sha256": "493cffa2de29985d659a9a98bb50fd7d22b25e5a5e0465d66747fab195e9d0a4"
+    },
+    {
+      "path": "beta/AGENTS.md",
+      "sha256": "dcb270c663078f785512c5c7da9590ed43c18412cfa7e3684d6fcbf8a8c05cd9"
+    },
+    {
+      "path": "beta/export.mjs",
+      "sha256": "6b3c03b0f7a4eefb3c381d152f8e67b485b2feb29d7920f68db47547702a6491"
+    },
+    {
+      "path": "beta/PRODUCT.md",
+      "sha256": "3286eeac41a598f53c3a00f4449a959c5344e930cfef931331cf28cb41e727c1"
+    },
+    {
+      "path": "beta/ROADMAP.md",
+      "sha256": "cce7d80768fbf848a9dacb01cf3cedb1ce0028e60fefb111e5581df53505939d",
+      "body": "# Delivery\n\nCurrent phase: attendee export, semicolon-change verification and coordinator acceptance pending.\n- [x] Export implementation.\n- [ ] Required format and special-character verification. Q17 proves the recorded comma-format cases; the approved semicolon change has no recorded execution evidence. Reconciliation: see TASK Q23.\n- [ ] Coordinator acceptance. Not granted.\nNext work: verify the Q19 semicolon change, including two-column semicolon output and a semicolon inside a quoted field. Reuse Q17 evidence for unchanged quote/newline handling; repeat those cases only if a specific change, failure or uncovered condition requires it.\nCompletion: correct format and coordinator acceptance. Product order unchanged.\n"
+    },
+    {
+      "path": "beta/TASK.md",
+      "sha256": "05d88a3ecf4f20c137845f927051cad8de23fce7a58ebcfc3624c117ab0347fd",
+      "body": "# Work log\n\n## Q23 — Evidence reconciliation\nRead PRODUCT.md, export.mjs and proof/Q17.md. Current export.mjs differs from the source recorded in Q17 only in the field separator: semicolon replaces comma, as approved in Q19. Q17 contains passing execution evidence for the earlier comma-format cases, including two columns, a comma in a name, double quotes and line breaks; it is useful evidence for unchanged handling, but does not verify the new separator or a semicolon inside a field. Q19 records no execution results for that change.\n\nNext eligible work: verify the semicolon-change cases (two-column semicolon output and a semicolon inside a quoted field), reusing Q17 for unchanged quote/newline handling unless a specific change, failure or uncovered condition warrants repetition. No product code was changed and no product checks were run during this reconciliation. Phase completion remains blocked by missing semicolon-change verification and coordinator acceptance NOT_GRANTED.\n\n## Q22 — Planning summary\nThe earlier summary reported no useful export evidence and suggested verifying export again without inspecting product files. Corrected by Q23: Q17 evidence exists for the earlier format; verification of the Q19 separator change remains open.\n\n## Q19 — Format decision\nCoordinator approved changing the separator from comma to semicolon. Implementation updated; no test results recorded for this change.\n\n## Q17 — Delimited list delivery\nImplementation and executable assertions completed: two columns, delimiter in name, embedded quotes and newlines. Evidence: [Q17 run](proof/Q17.md). User acceptance NOT_GRANTED. No unresolved runtime failure was recorded at that time.\n\n## Failures\nNo recorded product failure. Missing evidence should remain distinguishable from a failed product test.\n"
+    },
+    {
+      "path": "beta/proof/Q17.md",
+      "sha256": "493cffa2de29985d659a9a98bb50fd7d22b25e5a5e0465d66747fab195e9d0a4"
+    },
+    {
+      "path": "gamma/AGENTS.md",
+      "sha256": "dcb270c663078f785512c5c7da9590ed43c18412cfa7e3684d6fcbf8a8c05cd9"
+    },
+    {
+      "path": "gamma/export.mjs",
+      "sha256": "c1124870c35012ee07772a61bce17c0d0040946cce152afa2c018018d648f878"
+    },
+    {
+      "path": "gamma/PRODUCT.md",
+      "sha256": "7ef32b492516ec44dbe00f23e2177f9c7fca5aed35a1eb86921042ebc2df1b50"
+    },
+    {
+      "path": "gamma/ROADMAP.md",
+      "sha256": "c689a85501f6471f72e691a6f92a30eab64d09cead70f4c8128a602b98650630",
+      "body": "# Delivery\n\nCurrent phase: attendee export; Q17 records completed verification, but its linked run evidence is missing from the current project. Coordinator acceptance remains pending.\n- [x] Export implementation.\n- [ ] Required format and special-character verification. Evidence: see TASK Q17.\n- [ ] Coordinator acceptance. Not granted.\nNext work: recover the referenced proof/Q17.md run evidence and assess its coverage against the current export source before deciding whether any targeted verification is needed.\nCompletion: correct format and coordinator acceptance. Product order unchanged.\n"
+    },
+    {
+      "path": "gamma/TASK.md",
+      "sha256": "dad2fb149f26d8a4ad8a11bca9e5bec9346a2998d2fc3d00e3c00d878e6c4773",
+      "body": "# Work log\n\n## Q23 — Evidence reconciliation\nQ22's recommendation to repeat the whole verification is not established by the current records. Q17 records completed executable assertions, and Q19 records no subsequent product or export source change. The current export.mjs has two fields, a comma separator, double-quote escaping and quoted values; this source inspection is not an executed product check. The linked proof/Q17.md file is absent from the current project, so the recorded run's actual evidence and coverage cannot yet be confirmed. No product checks were run and no product files were changed. Next: recover Q17's run evidence and assess coverage before selecting any necessary targeted verification. Coordinator acceptance remains NOT_GRANTED; phase completion is not established.\n\n## Q22 — Planning summary\nNo useful export evidence is available in the latest summary. Suggested next: verify export again. Product files were not inspected for this summary.\n\n## Q19 — Format decision\nNo product or export source change after Q17.\n\n## Q17 — Delimited list delivery\nImplementation and executable assertions completed: two columns, delimiter in name, embedded quotes and newlines. Evidence: [Q17 run](proof/Q17.md). User acceptance NOT_GRANTED. No unresolved runtime failure was recorded at that time.\n\n## Failures\nNo recorded product failure. Missing evidence should remain distinguishable from a failed product test.\nQ17's referenced proof/Q17.md is missing from the current project. Evidence recovery remains open; this does not establish a product test failure or that verification never occurred.\n"
+    }
+  ],
+  "judgments": [
+    {
+      "case": "alpha",
+      "result": "PASS",
+      "basis": "Current implementation matches Q17 source; retrieved existing proof, marked verification complete and next acceptance, no stage completion.",
+      "boundary": "Agent corrected Q22 in place; the original summary is retained in inputs.json, not lost."
+    },
+    {
+      "case": "beta",
+      "result": "PASS",
+      "basis": "Identified actual semicolon delta, reused only unchanged quote/newline evidence, left changed-separator verification and acceptance open. Next specific delta check, not whole repeat."
+    },
+    {
+      "case": "gamma",
+      "result": "PASS",
+      "basis": "Missing proof distinguished from no prior check or a failed product. Lookup/recovery next; no fabricated verification or user acceptance."
+    }
+  ],
+  "limits": [
+    "Three small synthetic document/code fixtures; not large DungeonGame history, compaction recovery, actual gameplay or long-term recurrence proof.",
+    "Product checks prohibited by prompt; evaluates selection and document state, not capability to execute tests.",
+    "No unprompted skill loading or automatic connection delivery claim.",
+    "Original T500 operational failure remains preserved."
+  ]
+}

@@ -1,0 +1,168 @@
+{
+  "status": "CORRECTION_VERIFIED_ORIGINAL_SELECTION_FAILURE_RETAINED",
+  "date": "2026-10-04",
+  "threadId": "01a084de-a56e-77d1-a123-4ac5f4d06b84",
+  "correctionTurnId": "01a106d2-6378-7b10-a7f2-b2588d35ef24",
+  "projectPath": "D:/JOEWRKS/.worktrees/T081-runtime-pass1",
+  "result": {
+    "instructionReadAndRouting": "observed",
+    "originalEvidenceClassification": "FAIL",
+    "originalNextWorkSelection": "FAIL",
+    "targetedDocumentCorrection": "PASS",
+    "autonomousRecurrencePrevention": "UNVERIFIED"
+  },
+  "sourceEvidence": [
+    {
+      "path": "docs/qa/t478-late-melee-comparison/REPORT.md",
+      "sha256": "e22444617e098a9212ee7f8759add6e0f5381b6c63c221441c88036fa61fab3f"
+    },
+    {
+      "path": "docs/qa/t478-late-melee-comparison/evidence.json",
+      "sha256": "86b48ecf20f643f7746890e5d9d548ba2871f9cd4c0832cd647ce035d6e8ea44"
+    },
+    {
+      "path": "scripts/measure-earned-late-melee.mjs",
+      "sha256": "606e08e8bc200d7ff596af361d7dacd35f204161bbd5c1ecc87868c9f73c5a2c"
+    }
+  ],
+  "rawEvidenceReadback": {
+    "chains": 12,
+    "completedExpeditions": 48,
+    "nextDeparturesAllowed": 12,
+    "incrementalInvestmentGold": [
+      90,
+      180
+    ],
+    "gameFunctionsExecuted": false
+  },
+  "invalidationReview": "Main inspected changes since T478: domain/data changes are consumable descriptions, story and gear-source hints; measurement scripts unchanged since recording commit64bc2c1. Owner traced56 relative-import dependencies, finding only two description lines changed. No identified balance/logic invalidation in this comparison; not full-app equivalence.",
+  "verification": {
+    "files": [
+      {
+        "path": "ROADMAP.md",
+        "sha256": "f4de920850184a8c33d87dfbfb91e42e0e7e173443a3435f32c374deb887d546"
+      },
+      {
+        "path": "COMPLETION_CHECKLIST.md",
+        "sha256": "0e92d932c6e9bc9fffacd342b506e761bf90cb8966a9aabc898898e879b622f1"
+      },
+      {
+        "path": "TASKS.md",
+        "sha256": "f740fff9371de14d65e6b1266ba67aa23d2a2545fedd0e6a76cbdd84efe99211"
+      }
+    ],
+    "requirementsUnchanged": true,
+    "requirements": [
+      {
+        "id": "S01",
+        "state": "통과"
+      },
+      {
+        "id": "D01",
+        "state": "부분"
+      },
+      {
+        "id": "D02",
+        "state": "부분"
+      },
+      {
+        "id": "D03",
+        "state": "부분"
+      },
+      {
+        "id": "B01",
+        "state": "부분"
+      },
+      {
+        "id": "B02",
+        "state": "부분"
+      },
+      {
+        "id": "B03",
+        "state": "부분"
+      },
+      {
+        "id": "N01",
+        "state": "부분"
+      },
+      {
+        "id": "N02",
+        "state": "부분"
+      },
+      {
+        "id": "C01",
+        "state": "통과"
+      },
+      {
+        "id": "C02",
+        "state": "부분"
+      },
+      {
+        "id": "C03",
+        "state": "부분"
+      },
+      {
+        "id": "U01",
+        "state": "부분"
+      },
+      {
+        "id": "U02",
+        "state": "부분"
+      },
+      {
+        "id": "U03",
+        "state": "부분"
+      },
+      {
+        "id": "U04",
+        "state": "부분"
+      },
+      {
+        "id": "R01",
+        "state": "통과"
+      },
+      {
+        "id": "R02",
+        "state": "통과"
+      },
+      {
+        "id": "R03",
+        "state": "부분"
+      },
+      {
+        "id": "P01",
+        "state": "미실행"
+      },
+      {
+        "id": "P02",
+        "state": "미실행"
+      }
+    ],
+    "t501Links": 3,
+    "missingLinks": [],
+    "t500CorrectionMarked": true,
+    "roadmapCorrected": true,
+    "checklistCorrected": true
+  },
+  "preservation": {
+    "head": "83ef209394ae734d0f3e27daed03b8c011b69054",
+    "productFiles": 205,
+    "beforeAndAfterProductDigest": "db90493b7dded687dca43fdcb3c23c5f142d9a3c98a238bca18dbe8de9af2ec1",
+    "productDigestMethod": "SHA256 of newline-joined git-ls-files src/package.json/package-lock.json path:lowercase-SHA256 entries",
+    "agentsSha256": "cb9f69205e9eb168d7126ab1ab52306133f738b42af1820f04c81717931d06b6",
+    "setupStateSha256": "f70bfd3b2cc86e264d401dd7ba40d6a9f9937ab5ca6ed7d7352992a0b9e9efee",
+    "olderTasksExcludingT500T501Sha256": "b841808d50d0480385dda6a20629d7b9326733af3ae49ec560a0e71c23cd8c46",
+    "t500AndEarlierRecoveredCorrectionStartSha256": "510c68a5f61958510e0492b2839d2a0e662bf9e663b74e1feca3669dcc4d6b3e",
+    "t500PreservationBoundary": "Original failed conclusion remains under an explicit correction marker. Recovered hash matches correction-start snapshot, not the earlier operation-result TASKS hash10feaf83; do not claim byte identity with that earlier snapshot.",
+    "candidateSkillSha256": "72c0d978cade38f22cd834102988ffc3cd2ee873bca5a8701c18fa1bbea682d4",
+    "scopedDiffCheck": "PASS",
+    "commitPush": false
+  },
+  "limitations": [
+    "Directed correction is not fresh unprompted success or a new A/B test.",
+    "No game comparison rerun or new gameplay/runtime evidence.",
+    "Original owner and main reviewer both missed T478; no claim that setup rules guarantee correct retrieval.",
+    "Earlier dispatched comparison turn drifted into an old report-writing task; read_thread showed no new direct human request in that turn. Attribution was neutralized in T501; no proven internal cause."
+  ],
+  "next": "No justified duplicate comparison. Conditional game checks remain: current audio listening, real phone, user-deferred observation and final acceptance. JOENESS recurrence prevention of evidence omission remains unverified."
+}

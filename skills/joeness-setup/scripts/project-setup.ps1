@@ -196,7 +196,7 @@ function Invoke-JoenessProjectSetup {
   [scriptblock]$AfterWrite
  )
  $action=if($Apply){'apply'}elseif($Detach){'detach'}elseif($Relocate){'relocate'}else{'check'}
- $r=[ordered]@{action=$action;status='blocked';projectRoot=$null;target='AGENTS.md';targetHash='absent';statePath='.joeness/setup-state.json';stateHash='absent';blockState='malformed';changedTargets=@();blockers=@();rollback=$null;unresolvedTargets=@()}
+ $r=[ordered]@{action=$action;status='blocked';verificationScope='managed-connection-only';projectRoot=$null;target='AGENTS.md';targetHash='absent';statePath='.joeness/setup-state.json';stateHash='absent';blockState='malformed';changedTargets=@();blockers=@();rollback=$null;unresolvedTargets=@()}
  try {
   $root=Resolve-SetupRoot $ProjectPath; $r.projectRoot=$root
   $o=Read-SetupObservation $root
