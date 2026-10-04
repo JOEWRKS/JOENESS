@@ -1,0 +1,37 @@
+{
+  "date": "2026-10-05",
+  "version": "0.3.2",
+  "checks": {
+    "release": {
+      "command": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File tests/joeness-release.tests.ps1",
+      "exitCode": 0,
+      "output": "PASS JOENESS setup-only release contract\n"
+    },
+    "setup-winps": {
+      "command": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File tests/joeness-project-setup.tests.ps1",
+      "exitCode": 0,
+      "output": "PASS StateIdentityRoundTripAcrossPowerShellVersions\nPASS CurrentConnectionDoesNotCertifyRoadmapContents\nPASS InvalidStateIdentityStillFailsClosed\nPASS InitialApplyAndNoOp\nPASS LongAgentsApplyCannotDisplaceExistingInstructions\nPASS UnconnectedExactWindowCannotAcceptManagedBlock\nPASS InitialWindowExactBoundary\nPASS ExistingFrontBlockReportsDisplacementAndCanDetach\nPASS ExistingCleanTailBlocksRelocationAndRestoresOutsideBytes\nPASS InsideEditSurvivesFreshCheck\nPASS OutsideBytesAndDetach bom=False eol=1 ending=0\nPASS OutsideBytesAndDetach bom=False eol=1 ending=1\nPASS OutsideBytesAndDetach bom=True eol=1 ending=0\nPASS OutsideBytesAndDetach bom=True eol=1 ending=1\nPASS OutsideBytesAndDetach bom=False eol=2 ending=0\nPASS OutsideBytesAndDetach bom=False eol=2 ending=2\nPASS OutsideBytesAndDetach bom=True eol=2 ending=0\nPASS OutsideBytesAndDetach bom=True eol=2 ending=2\nPASS MalformedOrUnownedOrLegacy\nPASS StateTamperAndOneSidedState\nPASS StateWriteFailureAfterUserEdit\nPASS SnapshotAndRootDrift\nPASS CloneRebindsRelativeState\nPASS InvalidUtf8AndOverride\nPASS StateSnapshotDrift\nPASS ReparseAndNonGitFailClosed\nPASS RealGitCloneRebindsCheckoutEolButNotContentEdits\nPASS 27 project safety cases\n"
+    },
+    "setup-pwsh": {
+      "command": "pwsh -NoProfile -File tests/joeness-project-setup.tests.ps1",
+      "exitCode": 0,
+      "output": "PASS StateIdentityRoundTripAcrossPowerShellVersions\r\nPASS CurrentConnectionDoesNotCertifyRoadmapContents\r\nPASS InvalidStateIdentityStillFailsClosed\r\nPASS InitialApplyAndNoOp\r\nPASS LongAgentsApplyCannotDisplaceExistingInstructions\r\nPASS UnconnectedExactWindowCannotAcceptManagedBlock\r\nPASS InitialWindowExactBoundary\r\nPASS ExistingFrontBlockReportsDisplacementAndCanDetach\r\nPASS ExistingCleanTailBlocksRelocationAndRestoresOutsideBytes\r\nPASS InsideEditSurvivesFreshCheck\r\nPASS OutsideBytesAndDetach bom=False eol=1 ending=0\r\nPASS OutsideBytesAndDetach bom=False eol=1 ending=1\r\nPASS OutsideBytesAndDetach bom=True eol=1 ending=0\r\nPASS OutsideBytesAndDetach bom=True eol=1 ending=1\r\nPASS OutsideBytesAndDetach bom=False eol=2 ending=0\r\nPASS OutsideBytesAndDetach bom=False eol=2 ending=2\r\nPASS OutsideBytesAndDetach bom=True eol=2 ending=0\r\nPASS OutsideBytesAndDetach bom=True eol=2 ending=2\r\nPASS MalformedOrUnownedOrLegacy\r\nPASS StateTamperAndOneSidedState\r\nPASS StateWriteFailureAfterUserEdit\r\nPASS SnapshotAndRootDrift\r\nPASS CloneRebindsRelativeState\r\nPASS InvalidUtf8AndOverride\r\nPASS StateSnapshotDrift\r\nPASS ReparseAndNonGitFailClosed\r\nPASS RealGitCloneRebindsCheckoutEolButNotContentEdits\r\nPASS 27 project safety cases\r\n"
+    },
+    "install-winps": {
+      "command": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File tests/joeness-install.tests.ps1",
+      "exitCode": 0,
+      "output": "PASS setup-only lifecycle, user bytes, legacy fail-closed, drift, rollback, manifest boundaries\n"
+    },
+    "install-pwsh": {
+      "command": "pwsh -NoProfile -File tests/joeness-install.tests.ps1",
+      "exitCode": 0,
+      "output": "PASS setup-only lifecycle, user bytes, legacy fail-closed, drift, rollback, manifest boundaries\r\n"
+    },
+    "node": {
+      "command": "node --test tests/joeness-setup-contract.tests.mjs tests/joeness-setup-fixtures.tests.mjs",
+      "exitCode": 0,
+      "output": "✔ CLI shows usable onboarding only after successful Apply while stdout stays JSON (13901.4317ms)\n✔ one self-contained setup skill with real supporting files (2.6711ms)\n✔ manifest pins exact sole setup skill without global runtime (4.6746ms)\n✔ fresh cases keep expectations outside user requests (8.3751ms)\n✔ routing fixtures distinguish a single reading burden from conflicting authority (6542.6907ms)\n✔ recording fixture locates task checks in TASK and reusable causes in ISSUES (3611.632ms)\n✔ locked fixture makes TASK record writes fail without hiding its current text (3914.5275ms)\n✔ actual Git archive predates the latest uncommitted detail (3334.0882ms)\n✔ ZIP has no Git history and actual Detach leaves no instruction block (7782.7842ms)\nℹ tests 9\nℹ suites 0\nℹ pass 9\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 25348.4899\n"
+    }
+  },
+  "note": "Local full Windows workflow matrix before release commit. No installed package or project changed by these isolated tests. Remote exact-commit gate pending."
+}

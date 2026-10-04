@@ -1,0 +1,35 @@
+{
+  "node": {
+    "exitCode": 0,
+    "stdoutTail": "✔ CLI shows usable onboarding only after successful Apply while stdout stays JSON (12177.0246ms)\n✔ one self-contained setup skill with real supporting files (2.6066ms)\n✔ manifest pins exact sole setup skill without global runtime (3.6764ms)\n✔ fresh cases keep expectations outside user requests (2.9978ms)\n✔ routing fixtures distinguish a single reading burden from conflicting authority (5954.774ms)\n✔ recording fixture locates task checks in TASK and reusable causes in ISSUES (2787.7296ms)\n✔ locked fixture makes TASK record writes fail without hiding its current text (2510.9087ms)\n✔ actual Git archive predates the latest uncommitted detail (2505.7807ms)\n✔ ZIP has no Git history and actual Detach leaves no instruction block (6441.0365ms)\nℹ tests 9\nℹ suites 0\nℹ pass 9\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 20315.5169\n"
+  },
+  "release": {
+    "exitCode": 0,
+    "stdoutTail": "PASS JOENESS setup-only release contract\n"
+  },
+  "setup-winps": {
+    "exitCode": 0,
+    "stdoutTail": "PASS OutsideBytesAndDetach bom=False eol=1 ending=0\nPASS OutsideBytesAndDetach bom=False eol=1 ending=1\nPASS OutsideBytesAndDetach bom=True eol=1 ending=0\nPASS OutsideBytesAndDetach bom=True eol=1 ending=1\nPASS OutsideBytesAndDetach bom=False eol=2 ending=0\nPASS OutsideBytesAndDetach bom=False eol=2 ending=2\nPASS OutsideBytesAndDetach bom=True eol=2 ending=0\nPASS OutsideBytesAndDetach bom=True eol=2 ending=2\nPASS MalformedOrUnownedOrLegacy\nPASS StateTamperAndOneSidedState\nPASS StateWriteFailureAfterUserEdit\nPASS SnapshotAndRootDrift\nPASS CloneRebindsRelativeState\nPASS InvalidUtf8AndOverride\nPASS StateSnapshotDrift\nPASS ReparseAndNonGitFailClosed\nPASS RealGitCloneRebindsCheckoutEolButNotContentEdits\nPASS 27 project safety cases\n"
+  },
+  "setup-pwsh": {
+    "exitCode": 0,
+    "stdoutTail": "PASS ExistingFrontBlockReportsDisplacementAndCanDetach\r\nPASS ExistingCleanTailBlocksRelocationAndRestoresOutsideBytes\r\nPASS InsideEditSurvivesFreshCheck\r\nPASS OutsideBytesAndDetach bom=False eol=1 ending=0\r\nPASS OutsideBytesAndDetach bom=False eol=1 ending=1\r\nPASS OutsideBytesAndDetach bom=True eol=1 ending=0\r\nPASS OutsideBytesAndDetach bom=True eol=1 ending=1\r\nPASS OutsideBytesAndDetach bom=False eol=2 ending=0\r\nPASS OutsideBytesAndDetach bom=False eol=2 ending=2\r\nPASS OutsideBytesAndDetach bom=True eol=2 ending=0\r\nPASS OutsideBytesAndDetach bom=True eol=2 ending=2\r\nPASS MalformedOrUnownedOrLegacy\r\nPASS StateTamperAndOneSidedState\r\nPASS StateWriteFailureAfterUserEdit\r\nPASS SnapshotAndRootDrift\r\nPASS CloneRebindsRelativeState\r\nPASS InvalidUtf8AndOverride\r\nPASS StateSnapshotDrift\r\nPASS ReparseAndNonGitFailClosed\r\nPASS RealGitCloneRebindsCheckoutEolButNotContentEdits\r\nPASS 27 project safety cases\r\n"
+  },
+  "install-winps": {
+    "exitCode": 0,
+    "stdoutTail": "PASS setup-only lifecycle, user bytes, legacy fail-closed, drift, rollback, manifest boundaries\n"
+  },
+  "install-pwsh": {
+    "exitCode": 0,
+    "stdoutTail": "PASS setup-only lifecycle, user bytes, legacy fail-closed, drift, rollback, manifest boundaries\r\n"
+  },
+  "node-final": {
+    "exitCode": 0,
+    "stdoutTail": "✔ fresh cases keep expectations outside user requests (9.5904ms)\n✔ routing fixtures distinguish a single reading burden from conflicting authority (4076.1754ms)\n✔ recording fixture locates task checks in TASK and reusable causes in ISSUES (2079.0527ms)\n✔ locked fixture makes TASK record writes fail without hiding its current text (2002.3535ms)\n✔ actual Git archive predates the latest uncommitted detail (1951.8648ms)\n✔ ZIP has no Git history and actual Detach leaves no instruction block (5416.231ms)\nℹ tests 9\nℹ suites 0\nℹ pass 9\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 15639.9665\n"
+  },
+  "release-final": {
+    "exitCode": 0,
+    "stdoutTail": "PASS JOENESS setup-only release contract\n"
+  },
+  "note": "Bounded terminal output tails, not full rollouts. Earlier first chunks are not repeated. node-final total 9; setup tests each end with PASS 27. Source hashes in manifest. First node/release preceded one-line SKILL correction; final node/release and both installer checks used the corrected manifest. Project helper unchanged, so setup safety results reused."
+}

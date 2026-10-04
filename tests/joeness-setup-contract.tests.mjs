@@ -60,7 +60,7 @@ test('one self-contained setup skill with real supporting files', () => {
 test('manifest pins exact sole setup skill without global runtime',()=>{
   const m=JSON.parse(read('vendor/source-manifest.json'));
   assert.equal(m.schemaVersion,3);
-  assert.equal(m.release.version,'0.3.1');
+  assert.equal(m.release.version,'0.3.2');
   assert.equal(m.release.entrypoint,'JOENESS.ps1');
   assert.equal(m.runtimeMode,'setup-only');
   assert.equal(Object.hasOwn(m,'activeCommonCore'),false);

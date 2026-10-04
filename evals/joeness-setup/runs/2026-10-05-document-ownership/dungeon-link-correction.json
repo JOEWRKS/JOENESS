@@ -1,0 +1,66 @@
+{
+  "date": "2026-10-05",
+  "scope": "DungeonGameV3 roadmap evidence links only",
+  "before": {
+    "roadmapNormalizedSha256": "bb297bf8834e4ddaf38bdf93dec4c5a45d879bd0442038b632166d14e7381b60",
+    "tasksNormalizedSha256": "5092e8c066e01be6ffcc4f54645a7e4a5c64b100a2ffada994be535957b257c0"
+  },
+  "after": {
+    "roadmapNormalizedSha256": "3b58864b5e158ce438969058f4df9b7d48055f7e8b0931b264932ff17f6a4b4d",
+    "tasksNormalizedSha256": "36b70db0c8f1c43f6c76f4ce2e60d038b6acc78ad1943e8f42e8c1ea7df0361e"
+  },
+  "checks": {
+    "uniqueHeadingTargets": [
+      {
+        "fragment": "최신-실행--ticket-081-416--2026-09-29--2단계-콘텐츠-대상반복-공략-출구",
+        "ticket": "416",
+        "uniqueTarget": true
+      },
+      {
+        "fragment": "최신-실행--ticket-081-416--2026-09-29--2단계-콘텐츠-대상반복-공략-출구",
+        "ticket": "416",
+        "uniqueTarget": true
+      },
+      {
+        "fragment": "최신-실행--ticket-081-416--2026-09-29--2단계-콘텐츠-대상반복-공략-출구",
+        "ticket": "416",
+        "uniqueTarget": true
+      },
+      {
+        "fragment": "최신-실행--ticket-081-494--2026-10-04--이야기-연결사건-대사-검수",
+        "ticket": "494",
+        "uniqueTarget": true
+      },
+      {
+        "fragment": "최신-실행--ticket-081-494--2026-10-04--이야기-연결사건-대사-검수",
+        "ticket": "494",
+        "uniqueTarget": true
+      }
+    ],
+    "reverseOnlyIntendedEditsRestoresBeforeHashes": true,
+    "protectedFilesUnchanged": [
+      {
+        "hash": "D1036C3E058CAF20642538926F2A5F0BF0ABA5C000ADBA591CF4F534C9B7D40A",
+        "path": "AGENTS.md"
+      },
+      {
+        "hash": "B13560F4C8268E96BE28B011A2616EC554765FBE228E42B940BAC7254DBAEC92",
+        "path": "COMPLETION_CHECKLIST.md"
+      },
+      {
+        "hash": "36CA9062685264BF4BEA555B12B80771C27571482DF72E057D6A561C81A64DF5",
+        "path": ".joeness/setup-state.json"
+      }
+    ],
+    "gitDiffCheckExitCode": 0
+  },
+  "limitations": [
+    "Content hashes normalize CRLF to LF; not a byte-preservation claim.",
+    "No new chat or game runtime rerun: only five URL targets and one T504 follow-up note changed.",
+    "Prior six-field report-format failure remains; actual game-work record updates remain unverified.",
+    "Full TASKS baseline output exceeded tool output limit; discarded and replaced with in-process hash comparison.",
+    "Combined JSON/diff-warning output failed parsing; separated checks passed without additional edits.",
+    "Evidence orchestration had one syntax error before tool dispatch, corrected without file mutation.",
+    "No commit, push, deployment or personal-install change."
+  ]
+}

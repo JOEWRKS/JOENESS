@@ -8,9 +8,11 @@ description: Use when the user asks to install or connect JOENESS in a project, 
 First principle: classify project facts by role so successors can recover purpose,
 current work, decisions, problems and next action. Chat summaries support, not
 replace, those sources.
-Write a material fact once in its primary source; where another role needs it,
-link the exact item instead of repeating its explanation. Keep the record short
-from the start without dropping its evidence, open boundary or approval status.
+Write each material fact once. Record only the applicable outcome/decision,
+state, evidence locator, unresolved condition and next action. Keep identifiers,
+cause and approval boundaries needed to interpret or retrieve it. Link detail;
+omit repeated narration, not distinct facts. Write concisely at source: no fixed
+character cap, routine second summarization pass or unrequested history purge.
 
 Treat "install JOENESS in this project" as a project-connection request: show
 the proposed file changes and recording scope before applying them. It is not
@@ -25,7 +27,8 @@ Identify the explicit project root, its AGENTS hierarchy, Git status and existin
 product, plan, task, issue and design sources. Current files/target state outrank
 old handoffs; use handoffs as locators. Do not replay completed work.
 
-Reuse the project's canonical paths and terms. A roadmap role is the default
+Reuse the project's canonical paths and terms only with explicit ownership below.
+A roadmap role is the default
 for a project connection: reuse an existing direction source, whatever its
 filename, or propose a small `ROADMAP.md` if none exists. Do not create a
 second roadmap. Include an explicit opt out in the one setup proposal; do not
@@ -34,6 +37,27 @@ concrete recurring need has no existing home. The small
 [AGENTS](assets/AGENTS.md), [ROADMAP](assets/ROADMAP.md), [TASK](assets/TASK.md),
 [ISSUES](assets/ISSUES.md) and [DESIGN](assets/DESIGN.md) assets are adaptable
 writing references, not a batch-copy instruction.
+
+Map each used role to one exact file/section in the proposed AGENTS connection:
+
+| Role | Owns | Does not own |
+| --- | --- | --- |
+| AGENTS | Working rules, owner locations, read/update triggers | Progress copies or work history |
+| ROADMAP | Goals, order, required outcomes/criteria, current states, open conditions, next work | Detailed execution logs |
+| TASK | Work performed, target-specific checks/results/limits, evidence locators | A competing stage-completion ledger |
+| ISSUES | Reusable symptoms, causes/uncertainty, fixes/workarounds, remaining risk | Every unfinished task or raw failure |
+| DESIGN | Visual authority, approved scope/version, proposed changes | Product scope or project-wide progress |
+
+Goals, completion criteria and current outcome states belong to the same roadmap
+role, not separately maintained goal/checklist owners. Distinct named sections
+may share a file when unambiguous. A conflicting legacy split needs an approved
+mapping before restructuring, not silent migration. Existing Product/decision
+sources keep scope authority; closed-work archives preserve dated history, not
+live status. Mark unused roles; do not add files just to fill the table.
+Priority follows the question, not a numerical weight or total file hierarchy:
+approved decisions govern intent, current target/evidence governs observed facts.
+Neither code nor a newer summary grants approval. Resolve contradictions at the
+owning source; unresolved conflicts keep only affected verdicts open.
 
 Classify a candidate record source by its stated purpose and actual use.
 Run-scoped evaluation or proof artifacts are evidence for those runs, not a
@@ -51,7 +75,9 @@ authority/history and expected reading cost; a local conflict may need only a
 local fix. Do not move or delete user documents without approval.
 
 Show a short change proposal: paths reused/created, the actual short AGENTS
-connection, the default roadmap or its opt out, recording scope, and what stays
+connection with owner locations, update triggers and the concise-at-source
+record rule (retain proof, open conditions and approval limits), the default roadmap or its
+opt out, recording scope, and what stays
 unchanged. Include consent for routine factual recording in that proposal. Once
 authorized, do not request
 approval for each routine record. A request to inspect or propose is not approval
@@ -100,13 +126,12 @@ a non-Git project. Explain the boundary and offer a proposed text/manual handoff
    Recheck and use a fresh project chat to verify actual instruction delivery.
 
 `current` verifies the managed connection only. Before reporting setup complete,
-read back the actual AGENTS and the created/reused roadmap. Confirm the agreed
-path exists, one direction source is used, and the connection carries lookup,
-dependency, stage-completion and status-update rules (existing project rules
-may supply them). Check the roadmap's current/next and stage fields below,
-including evidence gaps; a marker or filename is not enough. Correct missing
-approved content before finishing, or report the precise incomplete part.
-An explicit opt out or direction-pending starter is a valid stated boundary.
+read back owner locations and the actual roadmap. Trace one relevant outcome
+through its criterion, current state, execution proof and next work. Check for
+competing owners, superseded restrictions, stale pending work and unsupported
+dependencies; field presence or a clean marker is insufficient. Correct missing
+approved content or report the precise gap. Preserve an explicit opt out or
+direction-pending starter; do not invent an outcome to perform this check.
 
 Hash inputs are lower-case SHA-256 or `absent`. The helper owns only
 `JOENESS-SETUP` markers and `.joeness/setup-state.json`. State is an applied-block
@@ -162,19 +187,21 @@ or change approved scope, explain the conflict and seek an explicit direction
 decision. Independent authorized
 work can proceed without falsely advancing the stage. Do not invent stages for
 projects without them or silently reorder a roadmap in response to a proposal.
-Put current task execution/check results in its task source; reusable failure
-cause, fix and remaining workaround in its issue source, linking the TASK
-verification instead of copying it. Change
-roadmap direction or scope only for an explicit decision; update a required
-item's check/evidence state only from actual verification. Change design only
-within its own authority.
+Within recording consent and mapped roles, the worker records the result in
+TASK and updates any affected ROADMAP state/open condition/current-next before
+handoff. The investigator owns reusable cause/fix updates in ISSUES, linking
+TASK proof rather than copying it. Scope/design changes require their authorized
+decision; factual updates need no extra approval round. If a record is forbidden
+or fails, distinguish completed implementation from incomplete record handoff.
 Before selecting next work or declaring evidence missing, check the item's
 linked proof and search the relevant task/report index for matching work.
 Resolve conflicting summaries against that evidence; an unsuccessful lookup
 is not proof that a check was never done. Reuse applicable results. Repeat only
 for an identified code/target change, failure or uncovered condition, limited
 to that difference. When status changes, refresh current/next from the remaining
-open conditions without changing approved order or scope.
+open conditions without changing approved order or scope. Mark conflicting old
+pending states/restrictions as dated or superseded with a link to the current
+owner; retain the original event and its evidence. Do not rewrite unrelated history.
 Before declaring an approved stage, milestone or release complete, review every
 required roadmap item and its actual check/evidence. Not started, in progress,
 verification pending and on hold remain open. Scope removal is a recorded

@@ -8,7 +8,7 @@ param(
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
-$script:JoenessRelease = '0.3.1'
+$script:JoenessRelease = '0.3.2'
 $script:LegacyStateName = 'joewrks-harness-state.json'
 $script:LegacyMarkers = @('<!-- JOEWRKS-HARNESS:BEGIN -->', '<!-- JOEWRKS-HARNESS:END -->')
 $script:Utf8Strict = New-Object Text.UTF8Encoding($false, $true)

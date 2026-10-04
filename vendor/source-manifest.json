@@ -2,7 +2,7 @@
   "schemaVersion": 3,
   "release": {
     "name": "JOENESS",
-    "version": "0.3.1",
+    "version": "0.3.2",
     "entrypoint": "JOENESS.ps1"
   },
   "target": {
@@ -17,7 +17,7 @@
       "files": [
         {
           "path": "SKILL.md",
-          "sha256": "9823b1daedcec01a865eda02ec0c0c6e0e2c140d936d33944c4052925da58392"
+          "sha256": "494ca1a042569dcd48cbb514c1a0b88a13098542be9dd05571ff94791ad026f7"
         },
         {
           "path": "agents/openai.yaml",
@@ -25,27 +25,27 @@
         },
         {
           "path": "assets/AGENTS.md",
-          "sha256": "5168125f85d13f32ded62de5ec14df7b46844c94a78b9e3c2ca8ccd209111288"
+          "sha256": "253f8ae07dbbb6a5228e8ac88205b1ba0d1fc8b88f8eeeba2306fe84cb0517c6"
         },
         {
           "path": "assets/DESIGN.md",
-          "sha256": "d13b8c5012535edf9868ca4bde9e246c3402743038a80f56524d92573e47e854"
+          "sha256": "01ef26d4c5fa572b84535d7f9f98e53ebda35879e8967d3680fa03eb0adb40cd"
         },
         {
           "path": "assets/ISSUES.md",
-          "sha256": "a0778d67030e234bd77b308036082e453fb97935f3f1683c601eaf01bb422636"
+          "sha256": "424bd9f25d42d0b32f5592e291babc6880feddca40041bdb83afc1921c433cac"
         },
         {
           "path": "assets/ROADMAP.md",
-          "sha256": "223de12b55d75ea6351d87a6a784d5db679b9eab7d7ca2cc3895c37560ac4785"
+          "sha256": "09d9746502611f5e69536fc8fcd2f32e7216f5bfc886ea51f4053d3844058d8a"
         },
         {
           "path": "assets/TASK.md",
-          "sha256": "14b406b2f1c4bc8d178f3a9f434244813a3476cfd3720cc34fbbbc51a9a7e347"
+          "sha256": "72fb1d348370820aeff828529e76d89b92e7a34f8bbff53b804b7385ec4e279e"
         },
         {
           "path": "references/usage.md",
-          "sha256": "fece5c87c70056799bbe518c0d94009fb174efcf91cfddfaba705a83b4bac6b7"
+          "sha256": "2a2a9e79fa55a0b0bd9ff79fe4901313e5ccf0ff0b337e0417a2c87392d6bc9a"
         },
         {
           "path": "scripts/project-setup.ps1",

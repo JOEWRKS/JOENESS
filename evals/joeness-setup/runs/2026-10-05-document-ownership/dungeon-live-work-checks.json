@@ -1,0 +1,112 @@
+{
+  "criteriaUnchanged": true,
+  "historicalTasksPreserved": true,
+  "protectedFiles": [
+    {
+      "path": "AGENTS.md",
+      "unchanged": true
+    },
+    {
+      "path": "COMPLETION_CHECKLIST.md",
+      "unchanged": true
+    },
+    {
+      "path": ".joeness/setup-state.json",
+      "unchanged": true
+    }
+  ],
+  "links": [
+    {
+      "fragment": "최신-실행--ticket-081-506--2026-10-05--카지노-실제-판-피드백소리-설정-복원-경계",
+      "unique": true
+    },
+    {
+      "fragment": "diag-081-506-01--open--소리-설정-직후-강제-종료-시-이전-값-복귀",
+      "unique": true
+    },
+    {
+      "fragment": "최신-실행--ticket-081-506--2026-10-05--카지노-실제-판-피드백소리-설정-복원-경계",
+      "unique": true
+    },
+    {
+      "fragment": "최신-실행--ticket-081-505--2026-10-05--홀짝-실제-판-소리무음-전달-확인",
+      "unique": true
+    },
+    {
+      "fragment": "최신-실행--ticket-081-506--2026-10-05--카지노-실제-판-피드백소리-설정-복원-경계",
+      "unique": true
+    }
+  ],
+  "restore505": {
+    "exactBeforeLaunch": true,
+    "changedKeysAfterLaunch": [],
+    "blackjackRestored": true,
+    "soundRestored": "{\"volume\":0.25,\"muted\":false}"
+  },
+  "restore506": {
+    "exactBeforeLaunch": true,
+    "changedKeysAfterLaunch": [],
+    "blackjackRestored": true
+  },
+  "sound": {
+    "baseline": "{\"volume\":0.25,\"muted\":true}",
+    "beforeImmediateStop": "{\"volume\":0.25,\"muted\":false}",
+    "afterImmediateRestart": "{\"volume\":0.25,\"muted\":true}",
+    "final": "{\"volume\":0.25,\"muted\":true}"
+  },
+  "backgroundSound": "{\"volume\":0.25,\"muted\":false}",
+  "finalSound": "{\"volume\":0.25,\"muted\":true}",
+  "runtime": [
+    {
+      "path": "SKILL.md",
+      "matches": true
+    },
+    {
+      "path": "agents/openai.yaml",
+      "matches": true
+    },
+    {
+      "path": "assets/AGENTS.md",
+      "matches": true
+    },
+    {
+      "path": "assets/DESIGN.md",
+      "matches": true
+    },
+    {
+      "path": "assets/ISSUES.md",
+      "matches": true
+    },
+    {
+      "path": "assets/ROADMAP.md",
+      "matches": true
+    },
+    {
+      "path": "assets/TASK.md",
+      "matches": true
+    },
+    {
+      "path": "references/usage.md",
+      "matches": true
+    },
+    {
+      "path": "scripts/project-setup.ps1",
+      "matches": true
+    }
+  ],
+  "roadmapSha256": "862f73f1dcd0b35cb075a9841395441d9773c287a67cb0e3bbf4573e7c83bfaf",
+  "tasksSha256": "c61cbd67d55baed4c584356c6b3af87d067c1b7da101e688c1986461c0a5a896",
+  "reviewDate": "2026-10-05",
+  "scope": "Read-only review of T505/T506; no device action or game edits",
+  "threadId": "01a084de-a56e-77d1-a123-4ac5f4d06b84",
+  "turnIds": [
+    "01a107cf-0167-7661-a9f0-c89052cecbe5",
+    "01a107d8-21ba-7db0-9690-148b551a24a0"
+  ],
+  "limits": [
+    "Explicit task instructions requested TASKS and ROADMAP updates; not an unprompted-autonomy test.",
+    "Human observations apply only to the reported tablet scenarios, not complete U04 or game acceptance.",
+    "Private raw saves and captures remain outside this repository.",
+    "No exact runtime identity or token/performance comparison established."
+  ]
+}

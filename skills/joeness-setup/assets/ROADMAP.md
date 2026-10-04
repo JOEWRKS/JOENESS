@@ -1,6 +1,8 @@
 # Direction and delivery scope
 
 Link the existing Product authority; this is not a second product specification.
+This role owns goals, criteria, current outcome states and next work together.
+Keep execution detail in TASK; each outcome links its proof, not a copied log.
 Use the project's approved order, if one exists. A small project may have one
 stage. If its goal or order is undecided, mark that boundary and the next
 decision instead of inventing an approved sequence. Separate optional/later
@@ -35,7 +37,8 @@ Before claiming a stage, milestone or release complete, inspect every required
 item's current check and evidence. Report what is complete, what remains, and
 the next eligible work. Do not advance a dependent stage while its prerequisite
 is open unless an authorized decision changes that dependency; independent
-authorized work may proceed. When an item or stage status changes, refresh any
+authorized work may proceed. The worker changing an outcome updates its state,
+open conditions and proof link, and refreshes any
 current-stage or next-priority summary from remaining conditions in this roadmap.
 Before selecting next work or calling evidence missing, check the item's proof
 and relevant task/report index. Resolve conflicting summaries; failed lookup
@@ -46,3 +49,6 @@ decisions, scope changes and remaining priorities. Updating check evidence does
 not itself change scope. Put individual task execution in its task source;
 task completion alone does not complete a stage. Routine fixes and discussion
 alone do not change direction.
+Use short outcome/state/gap entries without dropping criteria or approval limits.
+Link detailed history; mark superseded current summaries rather than keeping
+another live status copy. A missing write is a handoff gap, not erased progress.

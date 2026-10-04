@@ -1,0 +1,81 @@
+{
+  "setup": {
+    "AGENTS.md": {
+      "changed": false,
+      "sha256": "e5aa0e57e1eb205173b48fcfa1b9402220b8b92110e16f8bea97acac327861a6",
+      "text": "# Packet Shelf\nProduct truth: PRODUCT.md. Goals: ROADMAP.md. Delivery status: CHECKLIST.md.\nExecution: TASK.md. Visual approval: DESIGN.md.\nNo routine edits without approval. Export is out of scope (initial project rule).\n"
+    },
+    "CHECKLIST.md": {
+      "changed": false,
+      "sha256": "51ea242cf5c48735eee3b9aa77f411ed853111f87da35f49bbc0ad3bca619eb5",
+      "text": "# Delivery status\n- Title export: not started.\n- Device display review: not started.\n- User acceptance: not granted.\nThis file is the current status authority, ROADMAP holds goals only.\n"
+    },
+    "DESIGN.md": {
+      "changed": false,
+      "sha256": "34998581a3238bdaadefdb057a57224ff5993399d46ee2391df883e9514cb79c",
+      "text": "# Visual decision\nApproved: text-only export control. Adding icons requires approval.\nDevice display review not performed. User acceptance not granted.\n"
+    },
+    "PRODUCT.md": {
+      "changed": false,
+      "sha256": "0418520ea7864f9256d8cc32155db8c03b59886e56a4c7d0f0e660eea56fcb93",
+      "text": "# Product decisions\n2026-09-28: Approved P1: export saved titles as text. Titles only, no notes or accounts.\nP1 supersedes the initial no-export scope. Visual review and user acceptance remain required.\n"
+    },
+    "proof.json": {
+      "changed": false,
+      "sha256": "d9d8957c527272e96e0726ab18ed5343661ce52e1781b4495682fe545a638557",
+      "text": "{\"target\":\"r7\",\"check\":\"title-only text export correctness\",\"passed\":4,\"failed\":0,\"deviceDisplay\":\"not-run\",\"userAcceptance\":\"not-granted\"}\n"
+    },
+    "ROADMAP.md": {
+      "changed": false,
+      "sha256": "32d16782033b56fcff0cd972b9ad3a5f676f2c8e092e668c76bc43c4dfb91b00",
+      "text": "# Goals\nPhase 1: title export. Requires text output correctness and device display review.\nPhase 2: user handoff after Phase 1; acceptance required to finish delivery.\nCurrent: Phase 1. Next: build title export.\n"
+    },
+    "TASK.md": {
+      "changed": false,
+      "sha256": "e3f9bbb571241a620adf85245a9332a83758c095b5eca1c439c33860fb5a92bc",
+      "text": "# Work\n2026-10-04 R1: title export completed at source r7. Output correctness 4/4.\nProof: proof.json. Device display review unavailable; acceptance not granted.\n"
+    }
+  },
+  "record": {
+    "AGENTS.md": {
+      "changed": false,
+      "sha256": "e3a99e284b300a4d1c44a5e4896806f1ada40629b4eabae5c39e6f1e817317d4",
+      "text": "# Project working connection\n\n- Purpose: file facts by role so successors recover purpose, progress, problems\n  and next action.\n- Owners (exact file/section; omit unused): product/decisions PRODUCT.md; roadmap\n  ROADMAP.md owns goals, criteria, outcome states and current/next together; task\n  TASK.md owns execution/results; issues ISSUES.md owns reusable causes/fixes;\n  design DESIGN.md owns visual approval. AGENTS owns routing/rules, not progress.\n- Priority follows the question: authorized decisions govern intent; current\n  targets and applicable proof govern observed facts. Neither a newer note nor\n  working code grants approval. Resolve conflicts at the owner, not by file rank.\n- Read the roles relevant to this request, not every listed file. Start new/resumed\n  work at the current roadmap/task; add issues for a related failure, approved\n  design for visual work, and Product when product meaning matters.\n- On resume use current files/Git/target state; old notes locate sources, not new\n  scope. Do not repeat work that is already complete. If inspection finds no changed\n  task fact, report its completed status without a repeat verification note.\n- Before substantive new or resumed work, find the roadmap's current stage,\n  required items, entry conditions and next eligible work. Compare progress with\n  current files/target state. An open entry condition blocks dependent work, not\n  independent authorized work. Explain a scope or dependency change before\n  changing the order. If the roadmap role was explicitly omitted, use the\n  existing task/product sources and propose a roadmap when approved ordered work\n  later makes one useful.\n- Recording consent: Factual TASK, ROADMAP and ISSUES updates for approved work; no scope/design/code changes. The worker records results in task and updates\n  affected roadmap states/open conditions/current-next in the same work; the\n  investigator maintains reusable causes/fixes in issues. Record only applicable\n  outcome, state, proof, remaining condition and next action; preserve necessary\n  cause/approval limits. Link detail, omit repeated narration, not distinct facts.\n  No fixed length cap or routine rewrite pass. Questions, explanations and\n  no-record requests cause no writes or cancellation of authorized implementation.\n- After substantive work, start with six lines in the user's language: 작업,\n  업데이트 파일, 이슈, 해결, 남은 문제, 다음 작업 (translate labels if needed).\n  Each line is one concrete fact in everyday words: a noun phrase or short\n  sentence. Name only changed files, by purpose; use 없음 for empty fields.\n  이슈 is a problem, 해결 a verified fix (not a passing check), and 남은 문제\n  unresolved or unverified work.\n  Take 다음 작업 from approved scope/roadmap. Put necessary cause, proof, exact paths\n  and the separate user-acceptance boundary under 상세 보고 in short sentences.\n  Keep required facts; omit repetition and optional background. Do not add a\n  rewrite/check pass or claim a write that did not occur.\n- Change roadmap goals/order/criteria only by authorized direction; update factual\n  progress within recording consent. Preserve product/design authority;\n  proposed changes, observed verification, and user acceptance are distinct.\n- After creating or adding an approved stage, check its goal, entry condition,\n  required outcomes, checks/evidence, completion condition and current/next.\n  Separate independently verifiable outcomes. Mark undecided criteria instead\n  of inventing them; a requested idea list need not become staged work.\n- Update roadmap state from actual proof, not scope assumptions. Mark conflicting\n  historical pending states/restrictions as dated or superseded and link their\n  current owner; preserve original events. Do not rewrite unrelated history.\n- Before selecting next work, check the item's proof and relevant task/report\n  index. Resolve summary conflicts; not found does not mean never checked.\n  Reuse valid results; repeat only for a specific change, failure or uncovered\n  condition. Refresh current/next from remaining conditions without changing scope.\n- A finished task does not finish its stage or release. Before claiming stage\n  completion, review every required item's status, actual check/evidence and\n  any required user acceptance;\n  report open items and the next eligible work. Pending checks and holds stay\n  open. Scope removal or deferral needs an explicit authorized decision and\n  reason, with the item retained rather than silently deleted.\n- For a requested human handoff, use the same six-field opening, followed by\n  only needed detail. Keep technical completion and user acceptance distinct.\n  Simple questions need no work receipt.\n- If a source/write is unavailable, report the exact boundary and continue independent\n  authorized work. Distinguish implementation done from record handoff incomplete.\n- Historical detail: follow recorded exact Git commit:path references when needed.\n  Keep latest unarchived detail, active issues and effective workarounds visible.\n"
+    },
+    "DESIGN.md": {
+      "changed": false,
+      "sha256": "35358610679a223163b180096d64cfaf68d7126aeb3834ff0f3655231d44d427",
+      "text": "# Visual authority\nApproved revision 2. Keep current appearance. User acceptance not granted.\n"
+    },
+    "ISSUES.md": {
+      "changed": true,
+      "sha256": "feaf68644c595e6fd98e591b7e709c17ecf9fb113f095af69666fdfb5d187992",
+      "text": "# Reusable problems\n## Tag input\nSymptom: whitespace-only value accepted. Cause: the blank check used untrimmed input.\nFix: trim before the blank check; preserve the accepted valid tag.\nVerification: proof.json for r17 records 6 passed / 0 failed tag-validation cases, superseding the previous pending investigation/fix/verification status.\nBoundary: real handheld input remains unverified because no device is available. See ROADMAP.md for the open device outcome and TASK.md, R17 for the handoff.\n"
+    },
+    "PRODUCT.md": {
+      "changed": false,
+      "sha256": "da414bc3bef5335d0b2e672430f83d2d1ebd95ac165a26574375da58785a8768",
+      "text": "# Scope\nApproved: reject blank tags while preserving valid tags. No account or UI redesign.\nDelivery requires deterministic checks, one device check, then user acceptance.\n"
+    },
+    "proof.json": {
+      "changed": false,
+      "sha256": "8144a3aa7595d26f0a27d3fe163c2e685dbf1c306a1b3e487a286df41b4d7355",
+      "text": "{\"target\":\"r17\",\"check\":\"tag validation\",\"passed\":6,\"failed\":0,\"cause\":\"blank check used untrimmed input\",\"change\":\"trim before blank check; preserve accepted valid tag\",\"deviceCheck\":\"not-run: device unavailable\",\"userAcceptance\":\"not-granted\"}\n"
+    },
+    "ROADMAP.md": {
+      "changed": true,
+      "sha256": "e471754b391775b851b51b58ee4750094a9755242b531af5d112587ffebbd6df",
+      "text": "# Delivery\nProduct: PRODUCT.md. Current: Phase 1 — tag validation verified; device check open. Next: run the required real handheld input check when a device is available.\n## Phase 1\nGoal: reject blank tags; preserve valid ones. Entry: approved scope.\n- [x] Required outcome: correct tag validation. State: verified for r17. Check: six deterministic cases, 6 passed / 0 failed. Evidence: proof.json; execution detail: TASK.md, R17.\n- [ ] Required outcome: device check. State: not run — device unavailable. Check: real handheld input. Evidence: proof.json, deviceCheck.\nExit: both required outcomes verified. Next dependent phase: acceptance.\n## Phase 2\n- [ ] Required outcome: user acceptance. State: not granted; entry blocked by the open Phase 1 device check. Entry: Phase 1 passed. Evidence: proof.json, userAcceptance.\n"
+    },
+    "tag.mjs": {
+      "changed": false,
+      "sha256": "fdf7d82c0e38a937cf4739661c5dcb070649b11219e5af108964ed31a8959bbb",
+      "text": "export const isAllowedTag = value => typeof value === 'string' && value.trim().length > 0;\n"
+    },
+    "TASK.md": {
+      "changed": true,
+      "sha256": "51f9110c92db24f96bc8935311f408b1e60a615b9dbb2165220f6914b6c2a1aa",
+      "text": "# Execution\n## R16 — 2026-10-04\nWhitespace-only tag accepted incorrectly. Fix pending. Test pending.\n\nHistorical status: the pending fix and deterministic test above are superseded by R17 below; the original event is retained.\n\n## R17 — 2026-10-05\nReviewed the existing proof.json for target r17; no tests were rerun and no product or code was changed.\nThe blank check previously used untrimmed input. The recorded fix trims before checking for blank input and preserves the accepted valid tag. Tag validation: 6 passed, 0 failed.\nDevice check was not run because a real device is unavailable. User acceptance has not been granted. The validation result completes only that required outcome, not Phase 1 or acceptance.\nHandoff: obtain a real handheld device and perform the required input check; acceptance follows only after Phase 1 passes. Current outcome states and dependencies are owned by ROADMAP.md; reusable cause and fix are in ISSUES.md.\n"
+    }
+  }
+}
