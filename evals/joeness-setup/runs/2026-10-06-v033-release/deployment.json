@@ -1,0 +1,182 @@
+{
+  "version": "0.3.3",
+  "releaseCommit": "0812d768195d7189117a736c8c809eb6ee5f46f5",
+  "releaseTree": "cc80100dbd81e3bf1d5c03b1da156015e0301b3e",
+  "branch": "codex/document-normalization",
+  "tag": "JOENESS-v0.3.3",
+  "tagObject": "a796bb8ee2d2fff9e27b1bbbb448de3d692eff21",
+  "mainUnchanged": "52e307ecfd1ee64f423a17109cc15ded92303912",
+  "ci": {
+    "id": 37476754314,
+    "head_sha": "0812d768195d7189117a736c8c809eb6ee5f46f5",
+    "status": "completed",
+    "conclusion": "success",
+    "html_url": "https://github.com/JOEWRKS/JOENESS/actions/runs/37476754314"
+  },
+  "manifestSha256": "bef807f187591aa88380158391f2f2adf0fa2b81e8c4887caf9c7530af1e1708",
+  "personalInstallation": {
+    "status": "current",
+    "managedFiles": [
+      {
+        "path": "SKILL.md",
+        "sha256": "d783d98a8562938a1228569d7ba79d88da29a15a015a23bdee18ad436ca5ebef",
+        "matches": true
+      },
+      {
+        "path": "agents/openai.yaml",
+        "sha256": "cc275e468658c7793d6f1305aaae5c6f37a06d831a7f2c3f18313f668427ec5c",
+        "matches": true
+      },
+      {
+        "path": "assets/AGENTS.md",
+        "sha256": "6a6364de276c3605535d6d2d6b52d84282848a4322d4b0491ea51bd9eb821074",
+        "matches": true
+      },
+      {
+        "path": "assets/DESIGN.md",
+        "sha256": "3b5ec8a163f2da4a770b4206029dd85a538dea0807060314cf51bd145ff66a5d",
+        "matches": true
+      },
+      {
+        "path": "assets/ISSUES.md",
+        "sha256": "44b5e1f7eea61716bdfa3b364b7eca9ffe60bc9c29f6e31b3a9bf753de6b8635",
+        "matches": true
+      },
+      {
+        "path": "assets/ROADMAP.md",
+        "sha256": "ac80bf15b82f5cb9b6200a4cf48f22739632352850395afe77d62ed1be3e3660",
+        "matches": true
+      },
+      {
+        "path": "assets/TASK.md",
+        "sha256": "4699f81b2afcbf9966754735291459fa71c3f0a23c3277bc42cd3162769f5a43",
+        "matches": true
+      },
+      {
+        "path": "references/usage.md",
+        "sha256": "2c03e2f35189b4ece861e8aa2fd548fdbc7bed961a122636df6dd9dc2f318ce4",
+        "matches": true
+      },
+      {
+        "path": "scripts/project-setup.ps1",
+        "sha256": "631334ba13683f97346d2b14d4aebedd671b16c9125e7dd4a26914d658788c8d",
+        "matches": true
+      }
+    ],
+    "stateSha256": "0d023bb309b17b0b616818daa0d182d77120762b5b8d422c1de4d80c6e598bc6",
+    "otherSkillFileCount": 428,
+    "otherSkillsPreserved": true,
+    "globalAgentsPreserved": true,
+    "globalAgentsSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "geo": {
+    "threadId": "01a1102a-b56a-7b13-a095-ded4cc965f20",
+    "turnId": "01a11191-9790-7fa0-ae42-ec57579b0b5f",
+    "status": "confirmed; no connection rewrite needed",
+    "beforeFiles": [
+      {
+        "path": "AGENTS.md",
+        "sha256": "5c96bd9ea72517994545fa8bd549f5e0f9ae03cd6300fada3be0aaad904f19d1"
+      },
+      {
+        "path": ".joeness/setup-state.json",
+        "sha256": "f141b4869b152af6d837c7527a3bb34b8be6baa909d8e73a02f5a2742fde7498"
+      },
+      {
+        "path": "ROADMAP.md",
+        "sha256": "45b4f1e6bb6831256854fefd54c271acfab4bffa00ff0ec14b2d49d05b6e2fe5"
+      },
+      {
+        "path": "TASK.md",
+        "sha256": "febe4049e575ff92688c878c40547aa38b3276ba179b8331ba72abb0b3e572bc"
+      },
+      {
+        "path": "ISSUES.md",
+        "sha256": "f317991f81532387170d370784e78141f8c26316f751147a880b8e97c51825eb"
+      },
+      {
+        "path": "DESIGN.md",
+        "sha256": "d4d45d1780b677bba36f03bd24d31acbee6605b603d972dee217cab419149ea4"
+      },
+      {
+        "path": "Library/geo-commerce-research.md",
+        "sha256": "52dda2e4d1ab352ee18b4704ce8fefd6fa2011bdc4eff41b43515a3d7c3cf68d"
+      },
+      {
+        "path": "Library/geo-commerce-evaluation-method.md",
+        "sha256": "f69af8978efad7bd8a1fad0bb9fad321aea8a7d296dbd30a0b2119c9d110ab15"
+      },
+      {
+        "path": "product-definition/geo-fresh-market/state.json",
+        "sha256": "21b8d980e27695e33cd35ba1d604961e0292a91d026d00027c125a439d8b0058"
+      },
+      {
+        "path": "product-definition/client-feedback-portal-dogfood/state.json",
+        "sha256": "a6b2070f03c776d1fb10e365202ad028c0ed7aa296af8709d4ab4c949dc1b9bc"
+      },
+      {
+        "path": "docs/superpowers/plans/2026-09-03-post-m6-semantic-review-reliability-enablement.md",
+        "sha256": "e1dc7f194067c92e42f5892eacde021c65408772a7de1c7b5a512221485f559f"
+      }
+    ],
+    "afterFiles": [
+      {
+        "path": "AGENTS.md",
+        "sha256": "5c96bd9ea72517994545fa8bd549f5e0f9ae03cd6300fada3be0aaad904f19d1"
+      },
+      {
+        "path": ".joeness/setup-state.json",
+        "sha256": "f141b4869b152af6d837c7527a3bb34b8be6baa909d8e73a02f5a2742fde7498"
+      },
+      {
+        "path": "ROADMAP.md",
+        "sha256": "45b4f1e6bb6831256854fefd54c271acfab4bffa00ff0ec14b2d49d05b6e2fe5"
+      },
+      {
+        "path": "TASK.md",
+        "sha256": "8309c96ed90691413cfc7b4eca01387653e2beba820121e1d2e08ad8e8fadfcd"
+      },
+      {
+        "path": "ISSUES.md",
+        "sha256": "f317991f81532387170d370784e78141f8c26316f751147a880b8e97c51825eb"
+      },
+      {
+        "path": "DESIGN.md",
+        "sha256": "d4d45d1780b677bba36f03bd24d31acbee6605b603d972dee217cab419149ea4"
+      },
+      {
+        "path": "Library/geo-commerce-research.md",
+        "sha256": "52dda2e4d1ab352ee18b4704ce8fefd6fa2011bdc4eff41b43515a3d7c3cf68d"
+      },
+      {
+        "path": "Library/geo-commerce-evaluation-method.md",
+        "sha256": "f69af8978efad7bd8a1fad0bb9fad321aea8a7d296dbd30a0b2119c9d110ab15"
+      },
+      {
+        "path": "product-definition/geo-fresh-market/state.json",
+        "sha256": "21b8d980e27695e33cd35ba1d604961e0292a91d026d00027c125a439d8b0058"
+      },
+      {
+        "path": "product-definition/client-feedback-portal-dogfood/state.json",
+        "sha256": "a6b2070f03c776d1fb10e365202ad028c0ed7aa296af8709d4ab4c949dc1b9bc"
+      },
+      {
+        "path": "docs/superpowers/plans/2026-09-03-post-m6-semantic-review-reliability-enablement.md",
+        "sha256": "e1dc7f194067c92e42f5892eacde021c65408772a7de1c7b5a512221485f559f"
+      }
+    ],
+    "headUnchanged": true,
+    "protectedTenUnchanged": true,
+    "changedFiles": [
+      "TASK.md"
+    ],
+    "boundary": "Existing chat explicitly reread installed SKILL. Not a new automatic injection/A-B test. Planning/approval untouched.",
+    "responseFile": "geo-receipt.md"
+  },
+  "artifactChecks": {
+    "committedSyntheticSnapshotHashes": "16/16 exact",
+    "rawProofLineEndings": "clamp.txt explicitly -text to preserve evidence bytes"
+  },
+  "cleanup": "Temporary clean detached 0.3.2 source worktree removed with git worktree remove; old source remains in Git.",
+  "boundary": "Tagged branch release, not main merge or generic behavior/performance certification."
+}
