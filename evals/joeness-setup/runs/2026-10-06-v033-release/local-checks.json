@@ -1,0 +1,96 @@
+{
+  "version": "0.3.3",
+  "identity": {
+    "current": [
+      {
+        "path": "SKILL.md",
+        "sha256": "d783d98a8562938a1228569d7ba79d88da29a15a015a23bdee18ad436ca5ebef",
+        "match": true
+      },
+      {
+        "path": "agents/openai.yaml",
+        "sha256": "cc275e468658c7793d6f1305aaae5c6f37a06d831a7f2c3f18313f668427ec5c",
+        "match": true
+      },
+      {
+        "path": "assets/AGENTS.md",
+        "sha256": "6a6364de276c3605535d6d2d6b52d84282848a4322d4b0491ea51bd9eb821074",
+        "match": true
+      },
+      {
+        "path": "assets/DESIGN.md",
+        "sha256": "3b5ec8a163f2da4a770b4206029dd85a538dea0807060314cf51bd145ff66a5d",
+        "match": true
+      },
+      {
+        "path": "assets/ISSUES.md",
+        "sha256": "44b5e1f7eea61716bdfa3b364b7eca9ffe60bc9c29f6e31b3a9bf753de6b8635",
+        "match": true
+      },
+      {
+        "path": "assets/ROADMAP.md",
+        "sha256": "ac80bf15b82f5cb9b6200a4cf48f22739632352850395afe77d62ed1be3e3660",
+        "match": true
+      },
+      {
+        "path": "assets/TASK.md",
+        "sha256": "4699f81b2afcbf9966754735291459fa71c3f0a23c3277bc42cd3162769f5a43",
+        "match": true
+      },
+      {
+        "path": "references/usage.md",
+        "sha256": "2c03e2f35189b4ece861e8aa2fd548fdbc7bed961a122636df6dd9dc2f318ce4",
+        "match": true
+      },
+      {
+        "path": "scripts/project-setup.ps1",
+        "sha256": "631334ba13683f97346d2b14d4aebedd671b16c9125e7dd4a26914d658788c8d",
+        "match": true
+      }
+    ],
+    "manifestSha256": "bef807f187591aa88380158391f2f2adf0fa2b81e8c4887caf9c7530af1e1708",
+    "personalMatchesV032": true
+  },
+  "checks": {
+    "node": {
+      "command": "node --test tests/joeness-setup-contract.tests.mjs tests/joeness-setup-fixtures.tests.mjs",
+      "exitCode": 0,
+      "output": "✔ CLI shows usable onboarding only after successful Apply while stdout stays JSON (10201.7933ms)\n✔ one self-contained setup skill with real supporting files (2.455ms)\n✔ manifest pins exact sole setup skill without global runtime (3.9383ms)\n✔ roadmap asset exposes per-outcome checks without embedding operating procedures (0.6478ms)\n✔ record assets separate execution, unresolved risk and visual authority (0.6587ms)\n✔ fresh cases keep expectations outside user requests (1.9678ms)\n✔ normalization fixture has preserved completed proof, limited plan and open workaround (717.4514ms)\n✔ routing fixtures distinguish a single reading burden from conflicting authority (4746.3423ms)\n✔ recording fixture locates task checks in TASK and reusable causes in ISSUES (2318.564ms)\n✔ locked fixture makes TASK record writes fail without hiding its current text (2362.8881ms)\n✔ actual Git archive predates the latest uncommitted detail (2190.8476ms)\n✔ ZIP has no Git history and actual Detach leaves no instruction block (5648.7068ms)\nℹ tests 12\nℹ suites 0\nℹ pass 12\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 18107.9286\n"
+    },
+    "helper5": {
+      "command": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File tests/joeness-project-setup.tests.ps1",
+      "exitCode": 0,
+      "output": "PASS StateIdentityRoundTripAcrossPowerShellVersions\nPASS CurrentConnectionDoesNotCertifyRoadmapContents\nPASS InvalidStateIdentityStillFailsClosed\nPASS InitialApplyAndNoOp\nPASS LongAgentsApplyCannotDisplaceExistingInstructions\nPASS UnconnectedExactWindowCannotAcceptManagedBlock\nPASS InitialWindowExactBoundary\nPASS ExistingFrontBlockReportsDisplacementAndCanDetach\nPASS ExistingCleanTailBlocksRelocationAndRestoresOutsideBytes\nPASS InsideEditSurvivesFreshCheck\nPASS OutsideBytesAndDetach bom=False eol=1 ending=0\nPASS OutsideBytesAndDetach bom=False eol=1 ending=1\nPASS OutsideBytesAndDetach bom=True eol=1 ending=0\nPASS OutsideBytesAndDetach bom=True eol=1 ending=1\nPASS OutsideBytesAndDetach bom=False eol=2 ending=0\nPASS OutsideBytesAndDetach bom=False eol=2 ending=2\nPASS OutsideBytesAndDetach bom=True eol=2 ending=0\nPASS OutsideBytesAndDetach bom=True eol=2 ending=2\nPASS MalformedOrUnownedOrLegacy\nPASS StateTamperAndOneSidedState\nPASS StateWriteFailureAfterUserEdit\nPASS SnapshotAndRootDrift\nPASS CloneRebindsRelativeState\nPASS InvalidUtf8AndOverride\nPASS StateSnapshotDrift\nPASS ReparseAndNonGitFailClosed\nPASS RealGitCloneRebindsCheckoutEolButNotContentEdits\nPASS 27 project safety cases\n"
+    },
+    "helper7": {
+      "command": "pwsh -NoProfile -File tests/joeness-project-setup.tests.ps1",
+      "exitCode": 0,
+      "output": "PASS StateIdentityRoundTripAcrossPowerShellVersions\r\nPASS CurrentConnectionDoesNotCertifyRoadmapContents\r\nPASS InvalidStateIdentityStillFailsClosed\r\nPASS InitialApplyAndNoOp\r\nPASS LongAgentsApplyCannotDisplaceExistingInstructions\r\nPASS UnconnectedExactWindowCannotAcceptManagedBlock\r\nPASS InitialWindowExactBoundary\r\nPASS ExistingFrontBlockReportsDisplacementAndCanDetach\r\nPASS ExistingCleanTailBlocksRelocationAndRestoresOutsideBytes\r\nPASS InsideEditSurvivesFreshCheck\r\nPASS OutsideBytesAndDetach bom=False eol=1 ending=0\r\nPASS OutsideBytesAndDetach bom=False eol=1 ending=1\r\nPASS OutsideBytesAndDetach bom=True eol=1 ending=0\r\nPASS OutsideBytesAndDetach bom=True eol=1 ending=1\r\nPASS OutsideBytesAndDetach bom=False eol=2 ending=0\r\nPASS OutsideBytesAndDetach bom=False eol=2 ending=2\r\nPASS OutsideBytesAndDetach bom=True eol=2 ending=0\r\nPASS OutsideBytesAndDetach bom=True eol=2 ending=2\r\nPASS MalformedOrUnownedOrLegacy\r\nPASS StateTamperAndOneSidedState\r\nPASS StateWriteFailureAfterUserEdit\r\nPASS SnapshotAndRootDrift\r\nPASS CloneRebindsRelativeState\r\nPASS InvalidUtf8AndOverride\r\nPASS StateSnapshotDrift\r\nPASS ReparseAndNonGitFailClosed\r\nPASS RealGitCloneRebindsCheckoutEolButNotContentEdits\r\nPASS 27 project safety cases\r\n"
+    },
+    "install5": {
+      "command": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File tests/joeness-install.tests.ps1",
+      "exitCode": 0,
+      "output": "PASS setup-only lifecycle, user bytes, legacy fail-closed, drift, rollback, manifest boundaries\n"
+    },
+    "install7": {
+      "command": "pwsh -NoProfile -File tests/joeness-install.tests.ps1",
+      "exitCode": 0,
+      "output": "PASS setup-only lifecycle, user bytes, legacy fail-closed, drift, rollback, manifest boundaries\r\n"
+    },
+    "release": {
+      "command": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File tests/joeness-release.tests.ps1",
+      "exitCode": 0,
+      "output": "PASS JOENESS setup-only release contract\n"
+    },
+    "format": {
+      "command": "python -X utf8 C:/Users/tjdwo/.codex/skills/.system/skill-creator/scripts/quick_validate.py skills/joeness-setup",
+      "exitCode": 0,
+      "output": "Skill is valid!\r\n"
+    }
+  },
+  "notes": [
+    "Initial version mismatch failure preserved separately.",
+    "Helpers unchanged after version-only installer correction; existing 27/27 on each PowerShell retained.",
+    "Local Windows gate, not remote CI or behavioral superiority."
+  ]
+}

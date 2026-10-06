@@ -2,7 +2,7 @@
   "schemaVersion": 3,
   "release": {
     "name": "JOENESS",
-    "version": "0.3.2",
+    "version": "0.3.3",
     "entrypoint": "JOENESS.ps1"
   },
   "target": {
@@ -17,35 +17,35 @@
       "files": [
         {
           "path": "SKILL.md",
-          "sha256": "494ca1a042569dcd48cbb514c1a0b88a13098542be9dd05571ff94791ad026f7"
+          "sha256": "d783d98a8562938a1228569d7ba79d88da29a15a015a23bdee18ad436ca5ebef"
         },
         {
           "path": "agents/openai.yaml",
-          "sha256": "9885686c8cb97e3b8f78d09661423a0a309b713ced11cf25898a10f024be9ae3"
+          "sha256": "cc275e468658c7793d6f1305aaae5c6f37a06d831a7f2c3f18313f668427ec5c"
         },
         {
           "path": "assets/AGENTS.md",
-          "sha256": "253f8ae07dbbb6a5228e8ac88205b1ba0d1fc8b88f8eeeba2306fe84cb0517c6"
+          "sha256": "6a6364de276c3605535d6d2d6b52d84282848a4322d4b0491ea51bd9eb821074"
         },
         {
           "path": "assets/DESIGN.md",
-          "sha256": "01ef26d4c5fa572b84535d7f9f98e53ebda35879e8967d3680fa03eb0adb40cd"
+          "sha256": "3b5ec8a163f2da4a770b4206029dd85a538dea0807060314cf51bd145ff66a5d"
         },
         {
           "path": "assets/ISSUES.md",
-          "sha256": "424bd9f25d42d0b32f5592e291babc6880feddca40041bdb83afc1921c433cac"
+          "sha256": "44b5e1f7eea61716bdfa3b364b7eca9ffe60bc9c29f6e31b3a9bf753de6b8635"
         },
         {
           "path": "assets/ROADMAP.md",
-          "sha256": "09d9746502611f5e69536fc8fcd2f32e7216f5bfc886ea51f4053d3844058d8a"
+          "sha256": "ac80bf15b82f5cb9b6200a4cf48f22739632352850395afe77d62ed1be3e3660"
         },
         {
           "path": "assets/TASK.md",
-          "sha256": "72fb1d348370820aeff828529e76d89b92e7a34f8bbff53b804b7385ec4e279e"
+          "sha256": "4699f81b2afcbf9966754735291459fa71c3f0a23c3277bc42cd3162769f5a43"
         },
         {
           "path": "references/usage.md",
-          "sha256": "2a2a9e79fa55a0b0bd9ff79fe4901313e5ccf0ff0b337e0417a2c87392d6bc9a"
+          "sha256": "2c03e2f35189b4ece861e8aa2fd548fdbc7bed961a122636df6dd9dc2f318ce4"
         },
         {
           "path": "scripts/project-setup.ps1",

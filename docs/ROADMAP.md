@@ -1,8 +1,30 @@
 # JOENESS 0.3 정식 출시 로드맵
 
-기준: 2026-10-05. 이 문서는 **JOENESS 제품의 개발·출시 준비**를 다룬다. `skills/joeness-setup/assets/ROADMAP.md`는 사용자의 *각 프로젝트*에 쓰는 참고 서식이며 이 문서와 다르다.
+기준: 2026-10-06. 이 문서는 **JOENESS 제품의 개발·출시 준비**를 다룬다. `skills/joeness-setup/assets/ROADMAP.md`는 사용자의 *각 프로젝트*에 쓰는 참고 서식이며 이 문서와 다르다.
 
-## 현재 작업 — 문서 책임·간결한 기록 보강
+## 현재 작업 — 0.3.3 표준 문서 운영 배포
+
+범위: 표준 ROADMAP과 다섯 문서의 책임, 주제별 Library, 작업별 읽기·갱신. GEO 한정 적용·새 채팅 읽기 검증 완료. 사용자 후속 승인으로 0.3.3 커밋·푸시·배포 검사·설치 및 GEO 적용 확인 진행. 새 A/B·기획 재작성 제외.
+현재 단계: N1–N4 후보 검증 완료, 0.3.3 출시 준비 진행 중. 다음 작업: 최종 로컬 검사 → 커밋·푸시 → 정확한 커밋 Windows CI → 설치·GEO 인계. [출시 근거](../evals/joeness-setup/runs/2026-10-06-v033-release/review-evidence.md).
+기준: [설계](superpowers/specs/2026-09-29-joeness-context-storage-routing-design.md), [실행 계획](superpowers/plans/2026-09-29-joeness-context-storage-routing.md).
+
+| 단계 | 필수 결과 | 상태 | 검증·완료 조건 | 근거 / 미완 |
+|---|---|---|---|---|
+| N1 | 단일 원본·표준화 기준, 실패 검사 | 완료 | 기존 기준선과 새 RED 확인 | 기존 Node 9/9, 출시 계약 PASS; 새 0/2 |
+| N2 | 규칙·서식·사용 안내 일치 | 완료 | 새 서식 검사 및 내용 대조 | 새 서식 2/2; 안내/manifest 일치 |
+| N3 | 실제 문서 생성·갱신·인계 | 완료(중립 사례) | 격리 산출물에서 중복/누락/권한 경계 확인 | 제안·승인 적용·조사·새 인계·내용 결함 탐지 PASS |
+| N4 | 로컬 패키지·연결 회귀 | 완료(현재 후보) | 현재 Windows workflow의 로컬 명령 모두 PASS | Node 12/12, 양쪽 PS 연결 각 27/27, 설치·출시 계약 PASS |
+
+진입 조건: N2는 N1, N3는 N2, N4는 최종 후보 소스 확정 후. 종료 조건: N1–N4 근거와 실패/미검증 경계 기록. 개발 후보 검증과 정식 출시를 구분한다.
+검증 기록: [실행 결과와 한계](../evals/joeness-setup/runs/2026-10-06-document-normalization/review-evidence.md). N3에서 소스 수정 시 영향받은 검사를 다시 수행한다.
+추가 승인 결과: GEO 적용 후 실제 문서/보호 바이트/조사 기록 대조 완료. 저장된 프로젝트 새 채팅 1회에서 AGENTS 자동 전달·현재/미완/다음·문서 소유권 복원 확인. [응답과 전후 해시](../evals/joeness-setup/runs/2026-10-06-document-normalization/geo-fresh-context-evidence.json).
+후속 보완: 요약 후순위 실패를 보존하고 기존 시작 위치 요구를 서식/연결에 복구. 동일 요청의 새 채팅에서 요약 우선·정보 복원 재확인. 기존 8문제의 원본/경계 보존, 42링크·20결과, Node12/12·양쪽 연결 각27/27·양쪽 설치·로컬 출시 계약 재통과. [보완 판정](../evals/joeness-setup/runs/2026-10-06-document-normalization/geo-report-order-retest-evidence.json).
+추가 한정 시험 종료: 같은 GEO 요청 A/B와 읽기만 보강한 C를 각 1회 실행. 상세 축약 이득 미미, 조회 잘림 감소 관찰. 다만 AGENTS 역할의 명시적 설명이 셋 모두 빠져 사전 보존 기준 전체 통과 아님. 두 시험 문구 모두 기각·원상복구; 기존 문서 재편과 요약 우선 보완 유지. [판정·응답·복원 해시](../evals/joeness-setup/runs/2026-10-06-document-normalization/conciseness-evidence.json). 추가 재시도 없이 후보 검토로 이동.
+남은 한계: 새 앱 실행은 gpt-6-astra/high로 확인, xhigh 검증 아님. 중립 시험 모델 ID는 미확인 유지. 긴 답변·일부 반복 조회·인계 설명의 역할 누락, 장기/타 프로젝트 일반화·사람 사용성 미검증. 성능·토큰 절감 주장 없음.
+범위 변경: 사용자 2026-10-06 승인. 기존 임의 문서 연결/로드맵 제외 대신 승인 후 표준화. 이전 출시 이력은 아래에 보존.
+출시 후속: 위 후속 범위는 승인됨. 검사를 통과하기 전 배포 완료를 선언하지 않으며 다른 프로젝트는 자동 갱신하지 않음.
+
+## 이전 출시 기록 — 0.3.2 문서 책임·간결한 기록 보강
 
 현재 버전: `0.3.2`. 현재 단계: 배포·개인 설치 갱신 완료. 사용자 승인 범위에서 출시 커밋 `af9fc62`의 로컬·원격 Windows 검사와 설치 확인 후 main·태그를 반영했다. 목표는 역할별 원본·질문별 우선권·갱신 책임을 분명히 하고 핵심 사실을 짧게 보관하는 것. [출시 근거](../evals/joeness-setup/runs/2026-10-05-v032-release/review-evidence.md), [검증 범위·한계](../evals/joeness-setup/runs/2026-10-05-document-ownership/review-evidence.md).
 

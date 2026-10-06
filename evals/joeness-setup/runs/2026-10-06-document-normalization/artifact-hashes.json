@@ -1,0 +1,87 @@
+{
+  "sourceBase": "52e307ecfd1ee64f423a17109cc15ded92303912",
+  "sourceManifestSha256": "984f557fbb951c8bd35c9a925cdd43c701e42ac4f5d6fb8eee8beae2849170bc",
+  "snapshotRoot": "applied",
+  "files": [
+    {
+      "path": "AGENTS.md",
+      "sha256": "0c1d84e70e9667d6ca8f50fe11354f50e85df68289eb4e09e6ed1cc81c2255c4",
+      "matchesTrialBytes": true
+    },
+    {
+      "path": "DESIGN.md",
+      "sha256": "f5658422e8b87e54ed112aabfd620d31e19eb05d9d3f5fcd0153ef87e8cb0640",
+      "matchesTrialBytes": true
+    },
+    {
+      "path": "HANDOFF.md",
+      "sha256": "d4a0258d28f6fa6596b76c976e03c0ff0e543c3cd075b2f124e5f12b401b4623",
+      "matchesTrialBytes": true
+    },
+    {
+      "path": "ISSUES.md",
+      "sha256": "38cb9b42aecbe77375b233563b632caa522b11ab5df0637d2c9d66706c6e6bba",
+      "matchesTrialBytes": true
+    },
+    {
+      "path": "main.mjs",
+      "sha256": "9cd84eb90d50ec2a22705eb8da96406d9e09bfc6af61dcd49670055a240a315b",
+      "matchesTrialBytes": true
+    },
+    {
+      "path": "main.test.mjs",
+      "sha256": "a861c4049c290e6fd7f0389bc3c2359d04ae62e5c92cb768e67bf7468bb164f2",
+      "matchesTrialBytes": true
+    },
+    {
+      "path": "product.md",
+      "sha256": "ef6104bb1bc4d74c187169896ea70b762fa6c60d0b9ce8c4da37e9ae51bc6f6e",
+      "matchesTrialBytes": true
+    },
+    {
+      "path": "ROADMAP.md",
+      "sha256": "eb40b8b265b7d87f0d28504b9354572bd15203a1f6d81c08066834cec5bc9f11",
+      "matchesTrialBytes": true
+    },
+    {
+      "path": "TASK.md",
+      "sha256": "d88e94e42bcdd4d88b4676bec0fcf88f2c9356fd521564e0207bb152bb9a135d",
+      "matchesTrialBytes": true
+    },
+    {
+      "path": "Library/numeric-representation.md",
+      "sha256": "681458c9625436c855440b7119f53cfdc6319a62cab9faa0b742ba56f40d3291",
+      "matchesTrialBytes": true
+    },
+    {
+      "path": "notes/delivery.md",
+      "sha256": "a9a89f5332f1601401b38dc05f1cecc030044a9d7599c395480a05410d975da8",
+      "matchesTrialBytes": true
+    },
+    {
+      "path": "notes/research.md",
+      "sha256": "ad3d4a8e086b51ff14656588c1e31811ad5507c6ab5886f47f42a5c21ba49708",
+      "matchesTrialBytes": true
+    },
+    {
+      "path": "notes/reviewer-plan.md",
+      "sha256": "aa09a972fffa23c16a0a17d25bbb7f06ce212392423c53a695073fcd412f0cea",
+      "matchesTrialBytes": true
+    },
+    {
+      "path": "notes/visual.md",
+      "sha256": "5ffba7532cfb7a20883de85cc8fbcc056fc4c5858c6c180a0b01c36d00a39acd",
+      "matchesTrialBytes": true
+    },
+    {
+      "path": "notes/work.md",
+      "sha256": "34bee80de395250d94f6dee17111865ce5b9797fcda39c1f21c4a0c75e4ba2b5",
+      "matchesTrialBytes": true
+    },
+    {
+      "path": "proof/clamp.txt",
+      "sha256": "6db3053fb63ead4822391eacf173f14bf8986c49f00f2eacc2a4a9e8c23fa71b",
+      "matchesTrialBytes": true
+    }
+  ]
+}

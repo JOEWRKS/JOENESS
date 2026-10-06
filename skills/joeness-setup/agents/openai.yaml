@@ -1,6 +1,6 @@
 interface:
   display_name: "JOENESS Setup"
-  short_description: "Connect project sources, records, and safe setup"
-  default_prompt: "Use $joeness-setup to propose a lightweight setup using this project's existing sources."
+  short_description: "Organize project roadmap, records, and source ownership"
+  default_prompt: "Use $joeness-setup to inspect this project and propose its standard roadmap and document ownership before applying changes."
 policy:
   allow_implicit_invocation: true

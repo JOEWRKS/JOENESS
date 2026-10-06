@@ -1,69 +1,46 @@
 # Project working connection
 
-Adapt this body to actual existing paths before applying; omit unused roles.
-- Purpose: file facts by role so successors recover purpose, progress, problems
-  and next action.
-- Owners (exact file/section; omit unused): product/decisions <path>; roadmap
-  <path> owns goals, criteria, outcome states and current/next together; task
-  <path> owns execution/results; issues <path> owns reusable causes/fixes;
-  design <path> owns visual approval. AGENTS owns routing/rules, not progress.
-- Priority follows the question: authorized decisions govern intent; current
-  targets and applicable proof govern observed facts. Neither a newer note nor
-  working code grants approval. Resolve conflicts at the owner, not by file rank.
-- Read the roles relevant to this request, not every listed file. Start new/resumed
-  work at the current roadmap/task; add issues for a related failure, approved
-  design for visual work, and Product when product meaning matters.
-- On resume use current files/Git/target state; old notes locate sources, not new
-  scope. Do not repeat work that is already complete. If inspection finds no changed
-  task fact, report its completed status without a repeat verification note.
-- Before substantive new or resumed work, find the roadmap's current stage,
-  required items, entry conditions and next eligible work. Compare progress with
-  current files/target state. An open entry condition blocks dependent work, not
-  independent authorized work. Explain a scope or dependency change before
-  changing the order. If the roadmap role was explicitly omitted, use the
-  existing task/product sources and propose a roadmap when approved ordered work
-  later makes one useful.
-- Recording consent: <agreed scope>. The worker records results in task and updates
-  affected roadmap states/open conditions/current-next in the same work; the
-  investigator maintains reusable causes/fixes in issues. Record only applicable
-  outcome, state, proof, remaining condition and next action; preserve necessary
-  cause/approval limits. Link detail, omit repeated narration, not distinct facts.
-  No fixed length cap or routine rewrite pass. Questions, explanations and
-  no-record requests cause no writes or cancellation of authorized implementation.
-- After substantive work, start with six lines in the user's language: 작업,
-  업데이트 파일, 이슈, 해결, 남은 문제, 다음 작업 (translate labels if needed).
-  Each line is one concrete fact in everyday words: a noun phrase or short
-  sentence. Name only changed files, by purpose; use 없음 for empty fields.
-  이슈 is a problem, 해결 a verified fix (not a passing check), and 남은 문제
-  unresolved or unverified work.
-  Take 다음 작업 from approved scope/roadmap. Put necessary cause, proof, exact paths
-  and the separate user-acceptance boundary under 상세 보고 in short sentences.
-  Keep required facts; omit repetition and optional background. Do not add a
-  rewrite/check pass or claim a write that did not occur.
-- Change roadmap goals/order/criteria only by authorized direction; update factual
-  progress within recording consent. Preserve product/design authority;
-  proposed changes, observed verification, and user acceptance are distinct.
-- After creating or adding an approved stage, check its goal, entry condition,
-  required outcomes, checks/evidence, completion condition and current/next.
-  Separate independently verifiable outcomes. Mark undecided criteria instead
-  of inventing them; a requested idea list need not become staged work.
-- Update roadmap state from actual proof, not scope assumptions. Mark conflicting
-  historical pending states/restrictions as dated or superseded and link their
-  current owner; preserve original events. Do not rewrite unrelated history.
-- Before selecting next work, check the item's proof and relevant task/report
-  index. Resolve summary conflicts; not found does not mean never checked.
-  Reuse valid results; repeat only for a specific change, failure or uncovered
-  condition. Refresh current/next from remaining conditions without changing scope.
-- A finished task does not finish its stage or release. Before claiming stage
-  completion, review every required item's status, actual check/evidence and
-  any required user acceptance;
-  report open items and the next eligible work. Pending checks and holds stay
-  open. Scope removal or deferral needs an explicit authorized decision and
-  reason, with the item retained rather than silently deleted.
-- For a requested human handoff, use the same six-field opening, followed by
-  only needed detail. Keep technical completion and user acceptance distinct.
-  Simple questions need no work receipt.
-- If a source/write is unavailable, report the exact boundary and continue independent
-  authorized work. Distinguish implementation done from record handoff incomplete.
-- Historical detail: follow recorded exact Git commit:path references when needed.
-  Keep latest unarchived detail, active issues and effective workarounds visible.
+Adapt paths and agreed scope before applying this body.
+- Owners: AGENTS.md = working rules and source index, not history.
+  ROADMAP.md = project delivery goals/order, item criteria/status/proof/next.
+  TASK.md = work results and verification. ISSUES.md = open defects, workarounds,
+  residual risk and closure condition. DESIGN.md = visual rules and approval.
+  Library/ = topic knowledge, not live progress or approval.
+  Product/decisions: <exact source or undecided>; retain its authority.
+- Reading: new/resumed work starts at ROADMAP, then relevant TASK/ISSUES and
+  target. Defects start at ISSUES + target, then TASK proof and roadmap impact.
+  Visual work: roadmap scope → DESIGN → related Library. Research: roadmap
+  question → related Library. Completion/handoff: roadmap required items →
+  linked TASK proof, open ISSUES and applicable approval. Read relevant sections
+  only. Do not load all history or invoke setup for each task.
+- Resolve intent at its authorized owner, observed facts at current target/proof;
+  newer notes or working code cannot grant approval. Old handoffs are locators,
+  not new scope. An unrelated subplan cannot replace the project ROADMAP.
+- Recording consent: <agreed scope>. Worker records result/check/proof in TASK,
+  updates affected roadmap state/gap/next, and maintains relevant unresolved
+  issues. Investigator owns cause/workaround/risk/closure in ISSUES. A workaround
+  stays open until its closure check passes. DESIGN changes need authorization.
+  Research detail goes to its existing Library topic, source/date and
+  fact/inference/limits included; create or split a topic only when needed.
+- Store detail once; use short summaries with links elsewhere. ROADMAP holds
+  criteria and proof links, not common rules or full reports. A one-off review
+  belongs in TASK, not a mandatory evaluation file. Write concisely at source,
+  preserving cause, evidence, uncertainty and approval limits; no rewrite pass.
+- Before work, check the roadmap item/order and entry conditions. Open conditions
+  block dependent work, not independent authorized work. Change scope/order/
+  criteria only by authorized direction. Before completion, inspect every
+  required item's actual proof. Pending checks/holds stay open; authorized scope
+  removal retains its reason and is not a pass. Task, stage and user acceptance
+  are separate. Refresh current/next after changed facts.
+- Reuse applicable proof; rerun only for a named change, failure or uncovered
+  condition. Not found does not mean never checked. No changed fact means no
+  repeat record. Questions and no-record requests cause no record writes.
+  Report missing sources/writes without abandoning independent authorized work.
+- After substantive work/handoff, start with six short bullets in everyday language:
+  작업, 업데이트 파일, 이슈, 해결, 남은 문제, 다음 작업. Use 없음 when empty.
+  Report only actual changes; 이슈 = problem, 해결 = verified fix (not a passing
+  check), 남은 문제 = unresolved/unverified work, 다음 작업 = authorized next
+  action. Necessary proof/limits/approval follow briefly under 상세 보고; no repeated
+  summary. Simple questions need no work report.
+- Preserve dated history and evidence. Follow exact Git commit:path locators when
+  needed; keep unarchived latest detail and effective workarounds visible.

@@ -9,6 +9,18 @@ test('fresh cases keep expectations outside user requests',()=>{
  assert.equal(new Set(cases.map(c=>c.id)).size,21);
  for(const c of cases)for(const key of ['fixture','userRequest','allowedChanges','forbiddenChanges','evidence','expectedOutcome'])assert.ok(c[key],c.id+':'+key);
 });
+test('normalization fixture has preserved completed proof, limited plan and open workaround',()=>{
+ const f=createFixture('normalization');
+ try{
+  assert.equal(existsSync(join(f.root,'ROADMAP.md')),false);
+  assert.match(readFileSync(join(f.root,'notes/reviewer-plan.md'),'utf8'),/Not a Numeric Pocket delivery plan/);
+  assert.match(readFileSync(join(f.root,'proof/clamp.txt'),'utf8'),/(?:pass 1|tests 1)/);
+  assert.match(readFileSync(join(f.root,'notes/delivery.md'),'utf8'),/JSON export has not been implemented/);
+  assert.match(readFileSync(join(f.root,'notes/work.md'),'utf8'),/Automated guard and boundary test are still missing/);
+  assert.match(readFileSync(join(f.root,'product.md'),'utf8'),/acceptance.*not yet granted/);
+  assert.equal(git(f.root,'status','--porcelain'),'');
+ }finally{rmSync(f.root,{recursive:true,force:true});}
+});
 test('routing fixtures distinguish a single reading burden from conflicting authority',()=>{
  const single=createFixture('simple-routing');const scattered=createFixture('scattered');
  try{

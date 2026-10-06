@@ -1,0 +1,38 @@
+{
+  "cause": "Version bump omitted scripts/sync-harness.ps1 JoenessRelease; manifest 0.3.3 rejected against installer 0.3.2.",
+  "results": {
+    "node": {
+      "chunk_id": "5996dc",
+      "wall_time_seconds": 0.0000112,
+      "session_id": 5163,
+      "original_token_count": 384,
+      "output": "✖ CLI shows usable onboarding only after successful Apply while stdout stays JSON (773.9843ms)\n✔ one self-contained setup skill with real supporting files (3.9994ms)\n✔ manifest pins exact sole setup skill without global runtime (4.8389ms)\n✔ roadmap asset exposes per-outcome checks without embedding operating procedures (0.8342ms)\n✔ record assets separate execution, unresolved risk and visual authority (0.7526ms)\n✔ fresh cases keep expectations outside user requests (1.8689ms)\n✔ normalization fixture has preserved completed proof, limited plan and open workaround (840.194ms)\n✔ routing fixtures distinguish a single reading burden from conflicting authority (4386.6138ms)\n✔ recording fixture locates task checks in TASK and reusable causes in ISSUES (2076.514ms)\n✔ locked fixture makes TASK record writes fail without hiding its current text (2061.7368ms)\n✔ actual Git archive predates the latest uncommitted detail (2136.5054ms)\n✔ ZIP has no Git history and actual Detach leaves no instruction block (5741.3888ms)\nℹ tests 12\nℹ suites 0\nℹ pass 11\nℹ fail 1\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 17400.7694\n\n✖ failing tests:\n\ntest at tests\\joeness-setup-contract.tests.mjs:10:1\n✖ CLI shows usable onboarding only after successful Apply while stdout stays JSON (773.9843ms)\n  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n  \n  2 !== 0\n  \n      at TestContext.<anonymous> (file:///D:/JOEWRKS/%EC%9E%91%EC%97%85%ED%95%98%EB%84%A4%EC%8A%A4/tests/joeness-setup-contract.tests.mjs:20:12)\n      at Test.runInAsyncScope (node:async_hooks:226:14)\n      at Test.run (node:internal/test_runner/test:1382:25)\n      at Test.start (node:internal/test_runner/test:1242:17)\n      at startSubtestAfterBootstrap (node:internal/test_runner/harness:387:17) {\n    generatedMessage: true,\n    code: 'ERR_ASSERTION',\n    actual: 2,\n    expected: 0,\n    operator: 'strictEqual',\n    diff: 'simple'\n  }\n",
+      "cmd": "node --test tests/joeness-setup-contract.tests.mjs tests/joeness-setup-fixtures.tests.mjs",
+      "exit_code": 1
+    },
+    "install5": {
+      "chunk_id": "477a72",
+      "wall_time_seconds": 1.7236844,
+      "exit_code": 1,
+      "original_token_count": 116,
+      "output": "cleanCheck expected=ready actual=blocked\r\nAt D:\\JOEWRKS\\작업하네스\\tests\\joeness-install.tests.ps1:8 char:35\r\n+ ... cne $expected) { throw \"$message expected=$expected actual=$actual\" }\r\n+                      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\r\n    + CategoryInfo          : OperationStopped: (cleanCheck expected=ready actual=blocked:String) [], RuntimeException\r\n    + FullyQualifiedErrorId : cleanCheck expected=ready actual=blocked\r\n \r\n",
+      "cmd": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File tests/joeness-install.tests.ps1"
+    },
+    "install7": {
+      "chunk_id": "211de3",
+      "wall_time_seconds": 2.2229699,
+      "exit_code": 1,
+      "original_token_count": 73,
+      "output": "Exception: D:\\JOEWRKS\\작업하네스\\tests\\joeness-install.tests.ps1:8\r\nLine |\r\n   8 |  … cne $expected) { throw \"$message expected=$expected actual=$actual\" }\r\n     |                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\r\n     | cleanCheck expected=ready actual=blocked\r\n",
+      "cmd": "pwsh -NoProfile -File tests/joeness-install.tests.ps1"
+    },
+    "release": {
+      "chunk_id": "2130b0",
+      "wall_time_seconds": 2.7360079,
+      "exit_code": 1,
+      "original_token_count": 124,
+      "output": "ASSERT EQUAL failed: Check exit\r\nExpected: 0\r\nActual: 2\r\nAt D:\\JOEWRKS\\작업하네스\\tests\\joeness-release.tests.ps1:16 char:35\r\n+ ... Expected) { throw \"ASSERT EQUAL failed: $Message`nExpected: $Expected ...\r\n+                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\r\n    + CategoryInfo          : OperationStopped: (ASSERT EQUAL fa...ed: 0\r\nActual: 2:String) [], RuntimeException\r\n    + FullyQualifiedErrorId : ASSERT EQUAL failed: Check exit\r\nExpected: 0\r\nActual: 2\r\n \r\n",
+      "cmd": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File tests/joeness-release.tests.ps1"
+    }
+  }
+}

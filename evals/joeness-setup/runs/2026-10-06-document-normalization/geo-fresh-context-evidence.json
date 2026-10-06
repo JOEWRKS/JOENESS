@@ -1,0 +1,177 @@
+{
+  "date": "2026-10-06",
+  "scope": "One fresh saved-project read-only handoff; no correctness or performance A/B.",
+  "thread": {
+    "id": "01a11123-aee1-71d3-8b63-0d928c2ef04b",
+    "hostId": "local",
+    "title": "GEO 새 담당자 읽기 전용 인수인계 검증",
+    "turnId": "01a11123-b248-7b41-a4e4-96a8a227df5e"
+  },
+  "runtime": {
+    "model": "gpt-6-astra",
+    "reasoningEffort": "high",
+    "originator": "Codex Desktop",
+    "cliVersion": "0.160.0",
+    "note": "Inherited app settings; not an xhigh validation."
+  },
+  "candidate": {
+    "skillSHA256": "d783d98a8562938a1228569d7ba79d88da29a15a015a23bdee18ad436ca5ebef",
+    "manifestSHA256": "984f557fbb951c8bd35c9a925cdd43c701e42ac4f5d6fb8eee8beae2849170bc"
+  },
+  "provenance": {
+    "localRollout": "C:/Users/tjdwo/.codex/sessions/2026/10/06/rollout-2026-10-06T21-15-13-01a11123-aee1-71d3-8b63-0d928c2ef04b.jsonl",
+    "rawRolloutCopied": false,
+    "response": "geo-fresh-context-response.md",
+    "instructionInjection": {
+      "beforeFirstTool": true,
+      "userInstructionRecordIndex": 5,
+      "firstToolRecordIndex": 13,
+      "normalization": "CRLF to LF, trim edge whitespace",
+      "diskAndInjectedBodySHA256": "73fb5ea59ca80d060a5532cffec9ab353c833a728b8085665edece3b6c163502",
+      "match": true
+    },
+    "priorConversationSupplied": false,
+    "expectedAnswerAndReportFormatSuppliedInTaskPrompt": false
+  },
+  "results": {
+    "instructionDelivery": "PASS for this app/project/run",
+    "roadmapEntry": "PASS: first command reads ROADMAP",
+    "stateAndNextWork": "PASS: S0 and S0-4 in progress; S0-1/2/3 complete; next fix benchmark sample/source scope",
+    "ownerRouting": "PASS: Library research, TASK execution, ISSUES defects/workarounds, DESIGN visual approval, Product state product decisions, ROADMAP progress",
+    "approvalBoundary": "PASS: OPEN/UNAPPROVED, no implementation/design approval inferred",
+    "readOnly": "PASS: 11 file hashes, HEAD and Git status unchanged; command trace read-only",
+    "reportFormat": "FAIL: six fields present but below extensive detail; not summary first",
+    "readingEfficiency": "LIMITATION: entire TASK/state/research/method read; ISSUES/DESIGN repeated. No efficiency claim."
+  },
+  "reportFinding": {
+    "skill": "SKILL.md requires 'start with six hyphen bullets'",
+    "template": "assets/AGENTS.md says 'give six short bullets', not start/first",
+    "appliedConnection": "AGENTS says 'report six short Korean bullets', not start/first",
+    "interpretation": "Concrete propagation omission; compatible with output placement but not a proven sole causal explanation.",
+    "action": "Preserve failure. Correct existing summary-first wording in template and approved project connection before any report-format retest; no correction or retest performed in this read-only run."
+  },
+  "baseline": {
+    "root": "D:\\JOEWRKS\\JOEWRKS-Product",
+    "head": "71ffc0a66618c11e2fe08a442df5fd2d67718f7b",
+    "status": [
+      " M docs/superpowers/plans/2026-09-03-post-m6-semantic-review-reliability-enablement.md",
+      "?? .joeness/setup-state.json",
+      "?? AGENTS.md",
+      "?? DESIGN.md",
+      "?? ISSUES.md",
+      "?? Library/geo-commerce-evaluation-method.md",
+      "?? Library/geo-commerce-research.md",
+      "?? ROADMAP.md",
+      "?? TASK.md",
+      "?? product-definition/geo-fresh-market/state.json"
+    ],
+    "files": [
+      {
+        "path": "AGENTS.md",
+        "sha256": "bcd5424cb824a5fc8c03e17790a6f72c6171ac0debbe112fe7d80437f8f2a8c2"
+      },
+      {
+        "path": ".joeness/setup-state.json",
+        "sha256": "0cb5953296c990dc6265ac21450ed69374ad8634ca3f2134b029631450f46eaa"
+      },
+      {
+        "path": "ROADMAP.md",
+        "sha256": "45b4f1e6bb6831256854fefd54c271acfab4bffa00ff0ec14b2d49d05b6e2fe5"
+      },
+      {
+        "path": "TASK.md",
+        "sha256": "c7ddf50dec89a56ba6051c77f0b49953aedf5e17d1f02e19aa93024d0c35ec56"
+      },
+      {
+        "path": "ISSUES.md",
+        "sha256": "f317991f81532387170d370784e78141f8c26316f751147a880b8e97c51825eb"
+      },
+      {
+        "path": "DESIGN.md",
+        "sha256": "d4d45d1780b677bba36f03bd24d31acbee6605b603d972dee217cab419149ea4"
+      },
+      {
+        "path": "Library/geo-commerce-research.md",
+        "sha256": "52dda2e4d1ab352ee18b4704ce8fefd6fa2011bdc4eff41b43515a3d7c3cf68d"
+      },
+      {
+        "path": "Library/geo-commerce-evaluation-method.md",
+        "sha256": "f69af8978efad7bd8a1fad0bb9fad321aea8a7d296dbd30a0b2119c9d110ab15"
+      },
+      {
+        "path": "product-definition/geo-fresh-market/state.json",
+        "sha256": "21b8d980e27695e33cd35ba1d604961e0292a91d026d00027c125a439d8b0058"
+      },
+      {
+        "path": "product-definition/client-feedback-portal-dogfood/state.json",
+        "sha256": "a6b2070f03c776d1fb10e365202ad028c0ed7aa296af8709d4ab4c949dc1b9bc"
+      },
+      {
+        "path": "docs/superpowers/plans/2026-09-03-post-m6-semantic-review-reliability-enablement.md",
+        "sha256": "e1dc7f194067c92e42f5892eacde021c65408772a7de1c7b5a512221485f559f"
+      }
+    ]
+  },
+  "after": {
+    "root": "D:\\JOEWRKS\\JOEWRKS-Product",
+    "head": "71ffc0a66618c11e2fe08a442df5fd2d67718f7b",
+    "status": [
+      " M docs/superpowers/plans/2026-09-03-post-m6-semantic-review-reliability-enablement.md",
+      "?? .joeness/setup-state.json",
+      "?? AGENTS.md",
+      "?? DESIGN.md",
+      "?? ISSUES.md",
+      "?? Library/geo-commerce-evaluation-method.md",
+      "?? Library/geo-commerce-research.md",
+      "?? ROADMAP.md",
+      "?? TASK.md",
+      "?? product-definition/geo-fresh-market/state.json"
+    ],
+    "files": [
+      {
+        "path": "AGENTS.md",
+        "sha256": "bcd5424cb824a5fc8c03e17790a6f72c6171ac0debbe112fe7d80437f8f2a8c2"
+      },
+      {
+        "path": ".joeness/setup-state.json",
+        "sha256": "0cb5953296c990dc6265ac21450ed69374ad8634ca3f2134b029631450f46eaa"
+      },
+      {
+        "path": "ROADMAP.md",
+        "sha256": "45b4f1e6bb6831256854fefd54c271acfab4bffa00ff0ec14b2d49d05b6e2fe5"
+      },
+      {
+        "path": "TASK.md",
+        "sha256": "c7ddf50dec89a56ba6051c77f0b49953aedf5e17d1f02e19aa93024d0c35ec56"
+      },
+      {
+        "path": "ISSUES.md",
+        "sha256": "f317991f81532387170d370784e78141f8c26316f751147a880b8e97c51825eb"
+      },
+      {
+        "path": "DESIGN.md",
+        "sha256": "d4d45d1780b677bba36f03bd24d31acbee6605b603d972dee217cab419149ea4"
+      },
+      {
+        "path": "Library/geo-commerce-research.md",
+        "sha256": "52dda2e4d1ab352ee18b4704ce8fefd6fa2011bdc4eff41b43515a3d7c3cf68d"
+      },
+      {
+        "path": "Library/geo-commerce-evaluation-method.md",
+        "sha256": "f69af8978efad7bd8a1fad0bb9fad321aea8a7d296dbd30a0b2119c9d110ab15"
+      },
+      {
+        "path": "product-definition/geo-fresh-market/state.json",
+        "sha256": "21b8d980e27695e33cd35ba1d604961e0292a91d026d00027c125a439d8b0058"
+      },
+      {
+        "path": "product-definition/client-feedback-portal-dogfood/state.json",
+        "sha256": "a6b2070f03c776d1fb10e365202ad028c0ed7aa296af8709d4ab4c949dc1b9bc"
+      },
+      {
+        "path": "docs/superpowers/plans/2026-09-03-post-m6-semantic-review-reliability-enablement.md",
+        "sha256": "e1dc7f194067c92e42f5892eacde021c65408772a7de1c7b5a512221485f559f"
+      }
+    ]
+  }
+}

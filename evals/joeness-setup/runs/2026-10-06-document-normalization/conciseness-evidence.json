@@ -1,0 +1,383 @@
+{
+  "date": "2026-10-06",
+  "scope": "Single-project exploratory A/B plus final reading-only variant C. No statistical/general performance claim.",
+  "sourceHead": "52e307ecfd1ee64f423a17109cc15ded92303912",
+  "geoHead": "71ffc0a66618c11e2fe08a442df5fd2d67718f7b",
+  "prompt": "이 저장소의 GEO 쇼핑몰 기획을 처음 맡은 담당자라고 생각하고, 현재 파일을 필요한 만큼 읽어 인수인계 보고를 해 주세요. 현재 목표와 단계, 끝난 일, 아직 끝나지 않은 조건, 지금 이어갈 수 있는 다음 작업과 그 근거를 확인해 주세요. 앞으로 조사 결과·작업 결과·미결 문제·디자인 결정은 각각 어디에 기록해야 하는지도 실제 문서에 근거해 짧게 설명해 주세요. 문서 정리가 끝났다는 것과 제품 기획·구현이 끝났다는 것을 구분해 판단해 주세요.\n이번 요청은 읽기 전용입니다. 파일 생성·수정·삭제, 작업 기록 추가, 설치·연결 변경, 외부 사이트 조사, 다른 채팅 조회/메시지, 하위 에이전트 생성, commit/push는 하지 마세요. 이전 담당자의 대화는 제공하지 않습니다. 실제로 읽은 출처와 확인하지 못한 범위는 보고 끝에 간단히 적어 주세요.",
+  "clauses": {
+    "reading": "For long sources, locate the needed fields or sections and read bounded slices. Reuse already visible, unchanged passages; reread for changed facts, conflicts or missing context. If output is truncated, retrieve the missing part rather than repeating the full read.",
+    "oldDetail": "Put necessary details after the six bullets, briefly and without repeating them.",
+    "newDetail": "After the six bullets, add only requested facts and reasons, evidence or limits needed to understand the current decision. Do not restate the same conclusion or enumerate later-stage work again; preserve distinct facts and approval boundaries, and expand when the user requests detail."
+  },
+  "runs": [
+    {
+      "arm": "A",
+      "thread": "01a11145-457e-7320-89ad-2558494b2377",
+      "rolloutPath": "C:/Users/tjdwo/.codex/sessions/2026/10/06/rollout-2026-10-06T21-51-55-01a11145-457e-7320-89ad-2558494b2377.jsonl",
+      "rolloutSha256": "72790c067ca215402927d7565541eb9cbaccb7a32f62902e83f535bbf9d5f364",
+      "model": "gpt-6-astra",
+      "reasoning": "high",
+      "outputBatches": 6,
+      "truncatedBatches": 3,
+      "injectedAgentsNormalizedSha256": "881c4c5c9d9117943a938a82d4e5c528031e18b390947aa1e979e07e92b6ef4d",
+      "turn": "01a11145-48f4-7d42-8e5c-ccbfb69f83d8",
+      "durationMs": 152152,
+      "responseFile": "conciseness-A-response.md",
+      "responseChars": 2878,
+      "commands": [
+        {
+          "command": "\"C:\\\\Users\\\\tjdwo\\\\.cache\\\\codex-runtimes\\\\codex-primary-runtime\\\\dependencies\\\\native\\\\powershell\\\\pwsh.exe\" -Command 'Get-Content -Raw AGENTS.md; Get-Content -Raw ROADMAP.md'",
+          "exitCode": 0
+        },
+        {
+          "command": "\"C:\\\\Users\\\\tjdwo\\\\.cache\\\\codex-runtimes\\\\codex-primary-runtime\\\\dependencies\\\\native\\\\powershell\\\\pwsh.exe\" -Command \"Get-Content -Raw 'C:\\\\Users\\\\tjdwo\\\\.codex\\\\skills\\\\joewrks-product-definition\\\\SKILL.md'\"",
+          "exitCode": 0
+        },
+        {
+          "command": "\"C:\\\\Users\\\\tjdwo\\\\.cache\\\\codex-runtimes\\\\codex-primary-runtime\\\\dependencies\\\\native\\\\powershell\\\\pwsh.exe\" -Command 'Get-Content -Raw product-definition/geo-fresh-market/state.json'",
+          "exitCode": 0
+        },
+        {
+          "command": "\"C:\\\\Users\\\\tjdwo\\\\.cache\\\\codex-runtimes\\\\codex-primary-runtime\\\\dependencies\\\\native\\\\powershell\\\\pwsh.exe\" -Command 'Get-Content -Raw TASK.md; Get-Content -Raw ISSUES.md; Get-Content -Raw DESIGN.md'",
+          "exitCode": 0
+        },
+        {
+          "command": "\"C:\\\\Users\\\\tjdwo\\\\.cache\\\\codex-runtimes\\\\codex-primary-runtime\\\\dependencies\\\\native\\\\powershell\\\\pwsh.exe\" -Command \"Get-Content -Raw 'C:\\\\Users\\\\tjdwo\\\\.codex\\\\skills\\\\joewrks-product-definition\\\\references\\\\workflow-v0.2.0.md'; rg --files -g '\"'!*lock*'\"' -g '\"'!node_modules'\"' -g '\"'!vendor'\"' -g '\"'!dist'\"' -g '\"'!build'\"'\"",
+          "exitCode": 0
+        },
+        {
+          "command": "\"C:\\\\Users\\\\tjdwo\\\\.cache\\\\codex-runtimes\\\\codex-primary-runtime\\\\dependencies\\\\native\\\\powershell\\\\pwsh.exe\" -Command 'Get-Content -Raw Library/geo-commerce-research.md; Get-Content -Raw Library/geo-commerce-evaluation-method.md'",
+          "exitCode": 0
+        },
+        {
+          "command": "\"C:\\\\Users\\\\tjdwo\\\\.cache\\\\codex-runtimes\\\\codex-primary-runtime\\\\dependencies\\\\native\\\\powershell\\\\pwsh.exe\" -Command 'Get-Content TASK.md | Select-Object -Skip 149; Get-Content -Raw ISSUES.md; Get-Content -Raw DESIGN.md'",
+          "exitCode": 0
+        },
+        {
+          "command": "\"C:\\\\Users\\\\tjdwo\\\\.cache\\\\codex-runtimes\\\\codex-primary-runtime\\\\dependencies\\\\native\\\\powershell\\\\pwsh.exe\" -Command 'Get-Content -Raw product-definition/geo-fresh-market/state.json'",
+          "exitCode": 0
+        },
+        {
+          "command": "\"C:\\\\Users\\\\tjdwo\\\\.cache\\\\codex-runtimes\\\\codex-primary-runtime\\\\dependencies\\\\native\\\\powershell\\\\pwsh.exe\" -Command '$geo = Get-Content -Raw product-definition/geo-fresh-market/state.json | ConvertFrom-Json; $geo.PSObject.Properties.Name; $geo.project | ConvertTo-Json -Depth 5; $geo.nodes.PSObject.Properties.Name; $geo.nodes.unknowns | Select-Object id,status,question,decision_authority | ConvertTo-Json -Depth 3; $geo.approval | ConvertTo-Json; $geo.discovery_baseline | ConvertTo-Json; Get-Content -Raw Library/geo-commerce-research.md'",
+          "exitCode": 0
+        },
+        {
+          "command": "\"C:\\\\Users\\\\tjdwo\\\\.cache\\\\codex-runtimes\\\\codex-primary-runtime\\\\dependencies\\\\native\\\\powershell\\\\pwsh.exe\" -Command \"Get-Content -Raw 'C:\\\\Users\\\\tjdwo\\\\.codex\\\\skills\\\\joewrks-product-definition\\\\references\\\\workflow-v0.2.0.md'; Get-Content docs/superpowers/plans/2026-09-03-post-m6-semantic-review-reliability-enablement.md -TotalCount 80; rg --files product-definition/geo-fresh-market\"",
+          "exitCode": 0
+        },
+        {
+          "command": "\"C:\\\\Users\\\\tjdwo\\\\.cache\\\\codex-runtimes\\\\codex-primary-runtime\\\\dependencies\\\\native\\\\powershell\\\\pwsh.exe\" -Command '$geo = Get-Content -Raw product-definition/geo-fresh-market/state.json | ConvertFrom-Json; $geo.objects.PSObject.Properties | ForEach-Object { '\"'{0}: {1}' -f \"'$_.Name,@($_.Value).Count }; $geo.objects.unknowns | Select-Object id,status,question,decision_authority | ConvertTo-Json -Depth 3; $geo.objects.goals | ConvertTo-Json -Depth 5; Get-Content -Raw Library/geo-commerce-evaluation-method.md'",
+          "exitCode": 0
+        },
+        {
+          "command": "\"C:\\\\Users\\\\tjdwo\\\\.cache\\\\codex-runtimes\\\\codex-primary-runtime\\\\dependencies\\\\native\\\\powershell\\\\pwsh.exe\" -Command \"rg -n '\"'^(## |# |<a id=)|definition_status|definition_revision|\"unknowns\"|\"approval\"'\"' AGENTS.md ROADMAP.md TASK.md ISSUES.md DESIGN.md Library/geo-commerce-research.md Library/geo-commerce-evaluation-method.md product-definition/geo-fresh-market/state.json; Get-FileHash -Algorithm SHA256 product-definition/geo-fresh-market/state.json; \"'$geo = Get-Content -Raw product-definition/geo-fresh-market/state.json | ConvertFrom-Json; $geo.objects.users | ConvertTo-Json -Depth 4; $geo.objects.unknowns | Group-Object status | Select-Object Name,Count; Get-Content Library/geo-commerce-evaluation-method.md | Select-Object -Last 9'",
+          "exitCode": 0
+        }
+      ],
+      "semanticVerdict": "Not full PASS: criterion 7 does not explicitly explain AGENTS working-rules responsibility; no material factual error identified in requested goal/stage/approval/next-work."
+    },
+    {
+      "arm": "B",
+      "thread": "01a11147-f048-7f71-b3a3-06f5eeb28a87",
+      "rolloutPath": "C:/Users/tjdwo/.codex/sessions/2026/10/06/rollout-2026-10-06T21-54-49-01a11147-f048-7f71-b3a3-06f5eeb28a87.jsonl",
+      "rolloutSha256": "2c560f01deaefdf68bcddc7a6e1bb8637f078318029825fbf486800a1953974e",
+      "model": "gpt-6-astra",
+      "reasoning": "high",
+      "outputBatches": 5,
+      "truncatedBatches": 1,
+      "injectedAgentsNormalizedSha256": "8d08fd162d477480ecf011e63f25b6937813178f863773393f9473c25bfd0919",
+      "turn": "01a11147-f3a0-7042-9dfe-bdb35a335214",
+      "durationMs": 130674,
+      "responseFile": "conciseness-B-response.md",
+      "responseChars": 2819,
+      "commands": [
+        {
+          "command": "\"C:\\\\Users\\\\tjdwo\\\\.cache\\\\codex-runtimes\\\\codex-primary-runtime\\\\dependencies\\\\native\\\\powershell\\\\pwsh.exe\" -Command 'Get-Content -LiteralPath ROADMAP.md -TotalCount 240'",
+          "exitCode": 0
+        },
+        {
+          "command": "\"C:\\\\Users\\\\tjdwo\\\\.cache\\\\codex-runtimes\\\\codex-primary-runtime\\\\dependencies\\\\native\\\\powershell\\\\pwsh.exe\" -Command \"Get-Content -LiteralPath 'C:\\\\Users\\\\tjdwo\\\\.codex\\\\skills\\\\joewrks-product-definition\\\\SKILL.md' -TotalCount 240\"",
+          "exitCode": 0
+        },
+        {
+          "command": "\"C:\\\\Users\\\\tjdwo\\\\.cache\\\\codex-runtimes\\\\codex-primary-runtime\\\\dependencies\\\\native\\\\powershell\\\\pwsh.exe\" -Command 'rg -n \"''^#|<a |normalization|geo-initial\" TASK.md ISSUES.md DESIGN.md Library/geo-commerce-research.md Library/geo-commerce-evaluation-method.md AGENTS.md; Get-Item TASK.md,ISSUES.md,DESIGN.md,product-definition/geo-fresh-market/state.json | Select-Object Name,Length'",
+          "exitCode": 0
+        },
+        {
+          "command": "\"C:\\\\Users\\\\tjdwo\\\\.cache\\\\codex-runtimes\\\\codex-primary-runtime\\\\dependencies\\\\native\\\\powershell\\\\pwsh.exe\" -Command \"Get-Content -LiteralPath 'C:\\\\Users\\\\tjdwo\\\\.codex\\\\skills\\\\joewrks-product-definition\\\\references\\\\workflow-v0.2.0.md' -TotalCount 190; Get-Content -LiteralPath product-definition/geo-fresh-market/state.json -TotalCount 200\"",
+          "exitCode": 0
+        },
+        {
+          "command": "\"C:\\\\Users\\\\tjdwo\\\\.cache\\\\codex-runtimes\\\\codex-primary-runtime\\\\dependencies\\\\native\\\\powershell\\\\pwsh.exe\" -Command 'Get-Content -LiteralPath TASK.md | Select-Object -Skip 108 -First 110; Get-Content -LiteralPath Library/geo-commerce-research.md; Get-Content -LiteralPath Library/geo-commerce-evaluation-method.md'",
+          "exitCode": 0
+        },
+        {
+          "command": "\"C:\\\\Users\\\\tjdwo\\\\.cache\\\\codex-runtimes\\\\codex-primary-runtime\\\\dependencies\\\\native\\\\powershell\\\\pwsh.exe\" -Command 'Get-Content -LiteralPath TASK.md | Select-Object -First 107; Get-Content -LiteralPath ISSUES.md; Get-Content -LiteralPath DESIGN.md; Get-Content -LiteralPath AGENTS.md'",
+          "exitCode": 0
+        },
+        {
+          "command": "\"C:\\\\Users\\\\tjdwo\\\\.cache\\\\codex-runtimes\\\\codex-primary-runtime\\\\dependencies\\\\native\\\\powershell\\\\pwsh.exe\" -Command '$s = Get-Content -LiteralPath product-definition/geo-fresh-market/state.json -Raw | ConvertFrom-Json; $s.PSObject.Properties | ForEach-Object { '\"'{0}: {1}' -f \"'$_.Name, ($_.Value.GetType().Name) }; $s.approval | ConvertTo-Json -Depth 10; rg --files -g '\"'\"'!node_modules'\"' -g '\"'!package-lock.json'\"' -g '\"'!pnpm-lock.yaml'\"' -g '\"'!uv.lock'\"' product-definition/geo-fresh-market; rg -n '\\\"(unknowns|decisions|product|ux|status|question|resolution|requirements|screens|flows|acceptance)\\\"' product-definition/geo-fresh-market/state.json | Select-Object -Last 100\"",
+          "exitCode": 0
+        },
+        {
+          "command": "\"C:\\\\Users\\\\tjdwo\\\\.cache\\\\codex-runtimes\\\\codex-primary-runtime\\\\dependencies\\\\native\\\\powershell\\\\pwsh.exe\" -Command 'Get-Content -LiteralPath TASK.md | Select-Object -Skip 108 -First 105'",
+          "exitCode": 0
+        },
+        {
+          "command": "\"C:\\\\Users\\\\tjdwo\\\\.cache\\\\codex-runtimes\\\\codex-primary-runtime\\\\dependencies\\\\native\\\\powershell\\\\pwsh.exe\" -Command 'Get-Content -LiteralPath Library/geo-commerce-research.md -TotalCount 95; $s = Get-Content -LiteralPath product-definition/geo-fresh-market/state.json -Raw | ConvertFrom-Json; $s.objects.PSObject.Properties | ForEach-Object { '\"'{0}: {1}' -f \"'$_.Name, @($_.Value).Count }; $s.objects.unknowns | Select-Object id,status,question | ConvertTo-Json -Depth 4; $s.discovery_baseline | ConvertTo-Json -Depth 5; Get-Content -LiteralPath product-definition/geo-fresh-market/state.json | Select-Object -Skip 514 -First 39; Get-Content -LiteralPath product-definition/geo-fresh-market/state.json | Select-Object -Skip 2080 -First 30'",
+          "exitCode": 0
+        }
+      ],
+      "semanticVerdict": "Not full PASS: criterion 7 does not explicitly explain AGENTS working-rules responsibility; no material factual error identified in requested goal/stage/approval/next-work."
+    },
+    {
+      "arm": "C",
+      "thread": "01a1114b-36eb-7733-ba8a-191476b6f5ea",
+      "rolloutPath": "C:/Users/tjdwo/.codex/sessions/2026/10/06/rollout-2026-10-06T21-58-24-01a1114b-36eb-7733-ba8a-191476b6f5ea.jsonl",
+      "rolloutSha256": "64f803e0092186bbe194f53ba464e35eb56198273ce7ec0a3a36121eb305f370",
+      "model": "gpt-6-astra",
+      "reasoning": "high",
+      "outputBatches": 6,
+      "truncatedBatches": 0,
+      "injectedAgentsNormalizedSha256": "9bb39f94c2143b3d861ce91ecb92ceef72006b978e123b8459a8f2e66ced7287",
+      "turn": "01a1114b-3ae5-7080-b5e8-9d33230f658e",
+      "durationMs": 111042,
+      "responseFile": "conciseness-C-response.md",
+      "responseChars": 2801,
+      "commands": [
+        {
+          "command": "\"C:\\\\Users\\\\tjdwo\\\\.cache\\\\codex-runtimes\\\\codex-primary-runtime\\\\dependencies\\\\native\\\\powershell\\\\pwsh.exe\" -Command \"Get-Content -LiteralPath 'C:\\\\Users\\\\tjdwo\\\\.codex\\\\skills\\\\joewrks-product-definition\\\\SKILL.md' -TotalCount 240; Get-Content -LiteralPath 'ROADMAP.md' -TotalCount 260\"",
+          "exitCode": 0
+        },
+        {
+          "command": "\"C:\\\\Users\\\\tjdwo\\\\.cache\\\\codex-runtimes\\\\codex-primary-runtime\\\\dependencies\\\\native\\\\powershell\\\\pwsh.exe\" -Command \"rg -n '\"'^(#|##|###)|DOC-001|normalization|geo-initial|GEO|새 문맥'\"' TASK.md ISSUES.md DESIGN.md Library/geo-commerce-research.md Library/geo-commerce-evaluation-method.md; Get-Content -LiteralPath 'AGENTS.md' -TotalCount 130; Get-Content -LiteralPath 'product-definition/geo-fresh-market/state.json' -TotalCount 240\"",
+          "exitCode": 0
+        },
+        {
+          "command": "\"C:\\\\Users\\\\tjdwo\\\\.cache\\\\codex-runtimes\\\\codex-primary-runtime\\\\dependencies\\\\native\\\\powershell\\\\pwsh.exe\" -Command \"Get-Content -LiteralPath 'TASK.md' | Select-Object -Skip 29 -First 80; Get-Content -LiteralPath 'TASK.md' | Select-Object -Skip 109 -First 104; Get-Content -LiteralPath 'ISSUES.md'; Get-Content -LiteralPath 'DESIGN.md'\"",
+          "exitCode": 0
+        },
+        {
+          "command": "\"C:\\\\Users\\\\tjdwo\\\\.cache\\\\codex-runtimes\\\\codex-primary-runtime\\\\dependencies\\\\native\\\\powershell\\\\pwsh.exe\" -Command \"Get-Content -LiteralPath 'Library/geo-commerce-research.md' -TotalCount 130; Get-Content -LiteralPath 'Library/geo-commerce-evaluation-method.md' -TotalCount 100; rg -n '\"'^(#|##|###)|DISCOVER|APPROVE|HANDOFF|Closure'\"' 'C:\\\\Users\\\\tjdwo\\\\.codex\\\\skills\\\\joewrks-product-definition\\\\references\\\\workflow-v0.2.0.md'; \"'$geoState = Get-Content -LiteralPath '\"'product-definition/geo-fresh-market/state.json' -Raw | ConvertFrom-Json; \"'$geoState.PSObject.Properties | Select-Object Name; $geoState.approval | ConvertTo-Json -Depth 8; $geoState.unknowns | Select-Object id,status,question | Format-List; rg --files product-definition/geo-fresh-market'",
+          "exitCode": 0
+        },
+        {
+          "command": "\"C:\\\\Users\\\\tjdwo\\\\.cache\\\\codex-runtimes\\\\codex-primary-runtime\\\\dependencies\\\\native\\\\powershell\\\\pwsh.exe\" -Command \"Get-Content -LiteralPath 'C:\\\\Users\\\\tjdwo\\\\.codex\\\\skills\\\\joewrks-product-definition\\\\references\\\\workflow-v0.2.0.md' -TotalCount 73; \"'$geoState = Get-Content -LiteralPath '\"'product-definition/geo-fresh-market/state.json' -Raw | ConvertFrom-Json; \"'$geoState.objects.PSObject.Properties | ForEach-Object { [pscustomobject]@{Name=$_.Name;Count=@($_.Value).Count} } | Format-Table -AutoSize; rg -n '\"'\\\"UNK-|\\\"question\\\"|\\\"approval\\\"|\\\"discovery_baseline\\\"' 'product-definition/geo-fresh-market/state.json' | Select-Object -Last 90; Get-Content -LiteralPath 'TASK.md' -TotalCount 29; Get-Content -LiteralPath 'docs/superpowers/plans/2026-09-03-post-m6-semantic-review-reliability-enablement.md' -TotalCount 26\"",
+          "exitCode": 0
+        },
+        {
+          "command": "\"C:\\\\Users\\\\tjdwo\\\\.cache\\\\codex-runtimes\\\\codex-primary-runtime\\\\dependencies\\\\native\\\\powershell\\\\pwsh.exe\" -Command '$geoState = Get-Content -LiteralPath '\"'product-definition/geo-fresh-market/state.json' -Raw | ConvertFrom-Json; \"'$geoState.objects.unknowns | Group-Object status | Select-Object Name,Count; $geoState.objects.goals | ConvertTo-Json -Depth 5; $geoState.objects.users | ConvertTo-Json -Depth 5; $geoState.objects.unknowns | Where-Object { $_.id -in @('\"'UNK-001','UNK-004','UNK-009','UNK-010','UNK-023') } | ConvertTo-Json -Depth 8; \"'$geoState.discovery_baseline | ConvertTo-Json -Depth 5'",
+          "exitCode": 0
+        }
+      ],
+      "semanticVerdict": "Not full PASS: criterion 7 does not explicitly explain AGENTS working-rules responsibility; no material factual error identified in requested goal/stage/approval/next-work."
+    }
+  ],
+  "decision": {
+    "detail": "REJECTED: B 2819 vs A 2878 chars (-2.05%); repeated conclusions remain.",
+    "reading": "NOT_ADOPTED: fewer observed truncations (A 3/B 1/C 0), but preregistered complete owner explanation not met. Missing AGENTS explanation also occurs in baseline; not established as a regression caused by new clause.",
+    "stop": "All three runs finished; no further retry. Restore all trial rules and package bytes to pretrial state.",
+    "unverified": [
+      "General causal effect",
+      "Exact billed tokens/cost",
+      "xhigh runtime",
+      "Human readability of these three answers",
+      "Long-horizon or other-project behavior"
+    ]
+  },
+  "priorityChecks": {
+    "1": "PASS: six bullets first; no writes claimed",
+    "2": "PASS: GEO product-learning goal",
+    "3": "PASS: S0 and S0-4 open; S0-1/2/3 complete",
+    "4": "PASS: samples/use scope next; independent work not blanket-blocked",
+    "5": "PASS: product/design unapproved, implementation not complete",
+    "6": "PASS: extracted page text is not live UX/AI performance",
+    "7": "PARTIAL in A/B/C: main content owners restored, but AGENTS working-rule role not explicit in final explanation",
+    "8": "PASS: DOC-001 closure separate from product completion and post-M6",
+    "9": "PARTIAL: item 7 omitted; no invented material completion identified",
+    "10": "PASS: read-only commands and protected file hashes; no external investigation"
+  },
+  "preservation": {
+    "before": [
+      {
+        "path": "AGENTS.md",
+        "sha256": "5c96bd9ea72517994545fa8bd549f5e0f9ae03cd6300fada3be0aaad904f19d1"
+      },
+      {
+        "path": ".joeness/setup-state.json",
+        "sha256": "f141b4869b152af6d837c7527a3bb34b8be6baa909d8e73a02f5a2742fde7498"
+      },
+      {
+        "path": "ROADMAP.md",
+        "sha256": "45b4f1e6bb6831256854fefd54c271acfab4bffa00ff0ec14b2d49d05b6e2fe5"
+      },
+      {
+        "path": "TASK.md",
+        "sha256": "07707621e9f2fcd91fe3ab5294432e2808dc6698a2e48114b23e7439afba0cbf"
+      },
+      {
+        "path": "ISSUES.md",
+        "sha256": "f317991f81532387170d370784e78141f8c26316f751147a880b8e97c51825eb"
+      },
+      {
+        "path": "DESIGN.md",
+        "sha256": "d4d45d1780b677bba36f03bd24d31acbee6605b603d972dee217cab419149ea4"
+      },
+      {
+        "path": "Library/geo-commerce-research.md",
+        "sha256": "52dda2e4d1ab352ee18b4704ce8fefd6fa2011bdc4eff41b43515a3d7c3cf68d"
+      },
+      {
+        "path": "Library/geo-commerce-evaluation-method.md",
+        "sha256": "f69af8978efad7bd8a1fad0bb9fad321aea8a7d296dbd30a0b2119c9d110ab15"
+      },
+      {
+        "path": "product-definition/geo-fresh-market/state.json",
+        "sha256": "21b8d980e27695e33cd35ba1d604961e0292a91d026d00027c125a439d8b0058"
+      },
+      {
+        "path": "product-definition/client-feedback-portal-dogfood/state.json",
+        "sha256": "a6b2070f03c776d1fb10e365202ad028c0ed7aa296af8709d4ab4c949dc1b9bc"
+      },
+      {
+        "path": "docs/superpowers/plans/2026-09-03-post-m6-semantic-review-reliability-enablement.md",
+        "sha256": "e1dc7f194067c92e42f5892eacde021c65408772a7de1c7b5a512221485f559f"
+      }
+    ],
+    "cBefore": [
+      {
+        "path": "AGENTS.md",
+        "sha256": "a64a29fdd7c2e9e666f541b9f2efff035258c1ca3c0602413684a3773043d653"
+      },
+      {
+        "path": ".joeness/setup-state.json",
+        "sha256": "f5080c6a1bb8d65bee25a7417477aa7c4a4c99fca04a2cbbd4f72c91c1f3cd3e"
+      },
+      {
+        "path": "ROADMAP.md",
+        "sha256": "45b4f1e6bb6831256854fefd54c271acfab4bffa00ff0ec14b2d49d05b6e2fe5"
+      },
+      {
+        "path": "TASK.md",
+        "sha256": "07707621e9f2fcd91fe3ab5294432e2808dc6698a2e48114b23e7439afba0cbf"
+      },
+      {
+        "path": "ISSUES.md",
+        "sha256": "f317991f81532387170d370784e78141f8c26316f751147a880b8e97c51825eb"
+      },
+      {
+        "path": "DESIGN.md",
+        "sha256": "d4d45d1780b677bba36f03bd24d31acbee6605b603d972dee217cab419149ea4"
+      },
+      {
+        "path": "Library/geo-commerce-research.md",
+        "sha256": "52dda2e4d1ab352ee18b4704ce8fefd6fa2011bdc4eff41b43515a3d7c3cf68d"
+      },
+      {
+        "path": "Library/geo-commerce-evaluation-method.md",
+        "sha256": "f69af8978efad7bd8a1fad0bb9fad321aea8a7d296dbd30a0b2119c9d110ab15"
+      },
+      {
+        "path": "product-definition/geo-fresh-market/state.json",
+        "sha256": "21b8d980e27695e33cd35ba1d604961e0292a91d026d00027c125a439d8b0058"
+      },
+      {
+        "path": "product-definition/client-feedback-portal-dogfood/state.json",
+        "sha256": "a6b2070f03c776d1fb10e365202ad028c0ed7aa296af8709d4ab4c949dc1b9bc"
+      },
+      {
+        "path": "docs/superpowers/plans/2026-09-03-post-m6-semantic-review-reliability-enablement.md",
+        "sha256": "e1dc7f194067c92e42f5892eacde021c65408772a7de1c7b5a512221485f559f"
+      }
+    ],
+    "cAfter": [
+      {
+        "path": "AGENTS.md",
+        "sha256": "a64a29fdd7c2e9e666f541b9f2efff035258c1ca3c0602413684a3773043d653"
+      },
+      {
+        "path": ".joeness/setup-state.json",
+        "sha256": "f5080c6a1bb8d65bee25a7417477aa7c4a4c99fca04a2cbbd4f72c91c1f3cd3e"
+      },
+      {
+        "path": "ROADMAP.md",
+        "sha256": "45b4f1e6bb6831256854fefd54c271acfab4bffa00ff0ec14b2d49d05b6e2fe5"
+      },
+      {
+        "path": "TASK.md",
+        "sha256": "07707621e9f2fcd91fe3ab5294432e2808dc6698a2e48114b23e7439afba0cbf"
+      },
+      {
+        "path": "ISSUES.md",
+        "sha256": "f317991f81532387170d370784e78141f8c26316f751147a880b8e97c51825eb"
+      },
+      {
+        "path": "DESIGN.md",
+        "sha256": "d4d45d1780b677bba36f03bd24d31acbee6605b603d972dee217cab419149ea4"
+      },
+      {
+        "path": "Library/geo-commerce-research.md",
+        "sha256": "52dda2e4d1ab352ee18b4704ce8fefd6fa2011bdc4eff41b43515a3d7c3cf68d"
+      },
+      {
+        "path": "Library/geo-commerce-evaluation-method.md",
+        "sha256": "f69af8978efad7bd8a1fad0bb9fad321aea8a7d296dbd30a0b2119c9d110ab15"
+      },
+      {
+        "path": "product-definition/geo-fresh-market/state.json",
+        "sha256": "21b8d980e27695e33cd35ba1d604961e0292a91d026d00027c125a439d8b0058"
+      },
+      {
+        "path": "product-definition/client-feedback-portal-dogfood/state.json",
+        "sha256": "a6b2070f03c776d1fb10e365202ad028c0ed7aa296af8709d4ab4c949dc1b9bc"
+      },
+      {
+        "path": "docs/superpowers/plans/2026-09-03-post-m6-semantic-review-reliability-enablement.md",
+        "sha256": "e1dc7f194067c92e42f5892eacde021c65408772a7de1c7b5a512221485f559f"
+      }
+    ],
+    "nineDataFilesUnchanged": true,
+    "restoration": {
+      "skillExact": true,
+      "assetExact": true,
+      "manifestExact": true,
+      "manifestSha": "c83280d41ac448810c429399892a83c1251c322e81d9891802e7ee4c9ea40a66",
+      "geoAgentsExact": true
+    },
+    "priorEightIssues": "Use geo-report-order-retest-evidence.json priorEightProblems. Nine project content hashes unchanged, all source/report clauses restored. Old research/material tests reused, not regenerated."
+  },
+  "localChecks": {
+    "scope": "Executed while trial reading clause was temporarily in candidate source; all commands completed before rollback. Final source restored byte-for-byte to previously tested c83280... candidate. Do not present as a released build.",
+    "results": {
+      "node": {
+        "exitCode": 0,
+        "output": "✔ CLI shows usable onboarding only after successful Apply while stdout stays JSON (12519.501ms)\n✔ one self-contained setup skill with real supporting files (2.5271ms)\n✔ manifest pins exact sole setup skill without global runtime (4.3539ms)\n✔ roadmap asset exposes per-outcome checks without embedding operating procedures (0.9384ms)\n✔ record assets separate execution, unresolved risk and visual authority (0.7148ms)\n✔ fresh cases keep expectations outside user requests (1.8041ms)\n✔ normalization fixture has preserved completed proof, limited plan and open workaround (888.2084ms)\n✔ routing fixtures distinguish a single reading burden from conflicting authority (5856.3399ms)\n✔ recording fixture locates task checks in TASK and reusable causes in ISSUES (3107.5407ms)\n✔ locked fixture makes TASK record writes fail without hiding its current text (2921.2978ms)\n✔ actual Git archive predates the latest uncommitted detail (2877.2383ms)\n✔ ZIP has no Git history and actual Detach leaves no instruction block (7356.1993ms)\nℹ tests 12\nℹ suites 0\nℹ pass 12\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 23150.6851\n"
+      },
+      "helper5": {
+        "exitCode": 0,
+        "output": "PASS StateIdentityRoundTripAcrossPowerShellVersions\nPASS CurrentConnectionDoesNotCertifyRoadmapContents\nPASS InvalidStateIdentityStillFailsClosed\nPASS InitialApplyAndNoOp\nPASS LongAgentsApplyCannotDisplaceExistingInstructions\nPASS UnconnectedExactWindowCannotAcceptManagedBlock\nPASS InitialWindowExactBoundary\nPASS ExistingFrontBlockReportsDisplacementAndCanDetach\nPASS ExistingCleanTailBlocksRelocationAndRestoresOutsideBytes\nPASS InsideEditSurvivesFreshCheck\nPASS OutsideBytesAndDetach bom=False eol=1 ending=0\nPASS OutsideBytesAndDetach bom=False eol=1 ending=1\nPASS OutsideBytesAndDetach bom=True eol=1 ending=0\nPASS OutsideBytesAndDetach bom=True eol=1 ending=1\nPASS OutsideBytesAndDetach bom=False eol=2 ending=0\nPASS OutsideBytesAndDetach bom=False eol=2 ending=2\nPASS OutsideBytesAndDetach bom=True eol=2 ending=0\nPASS OutsideBytesAndDetach bom=True eol=2 ending=2\nPASS MalformedOrUnownedOrLegacy\nPASS StateTamperAndOneSidedState\nPASS StateWriteFailureAfterUserEdit\nPASS SnapshotAndRootDrift\nPASS CloneRebindsRelativeState\nPASS InvalidUtf8AndOverride\nPASS StateSnapshotDrift\nPASS ReparseAndNonGitFailClosed\nPASS RealGitCloneRebindsCheckoutEolButNotContentEdits\nPASS 27 project safety cases\n"
+      },
+      "helper7": {
+        "exitCode": 0,
+        "output": "PASS StateIdentityRoundTripAcrossPowerShellVersions\r\nPASS CurrentConnectionDoesNotCertifyRoadmapContents\r\nPASS InvalidStateIdentityStillFailsClosed\r\nPASS InitialApplyAndNoOp\r\nPASS LongAgentsApplyCannotDisplaceExistingInstructions\r\nPASS UnconnectedExactWindowCannotAcceptManagedBlock\r\nPASS InitialWindowExactBoundary\r\nPASS ExistingFrontBlockReportsDisplacementAndCanDetach\r\nPASS ExistingCleanTailBlocksRelocationAndRestoresOutsideBytes\r\nPASS InsideEditSurvivesFreshCheck\r\nPASS OutsideBytesAndDetach bom=False eol=1 ending=0\r\nPASS OutsideBytesAndDetach bom=False eol=1 ending=1\r\nPASS OutsideBytesAndDetach bom=True eol=1 ending=0\r\nPASS OutsideBytesAndDetach bom=True eol=1 ending=1\r\nPASS OutsideBytesAndDetach bom=False eol=2 ending=0\r\nPASS OutsideBytesAndDetach bom=False eol=2 ending=2\r\nPASS OutsideBytesAndDetach bom=True eol=2 ending=0\r\nPASS OutsideBytesAndDetach bom=True eol=2 ending=2\r\nPASS MalformedOrUnownedOrLegacy\r\nPASS StateTamperAndOneSidedState\r\nPASS StateWriteFailureAfterUserEdit\r\nPASS SnapshotAndRootDrift\r\nPASS CloneRebindsRelativeState\r\nPASS InvalidUtf8AndOverride\r\nPASS StateSnapshotDrift\r\nPASS ReparseAndNonGitFailClosed\r\nPASS RealGitCloneRebindsCheckoutEolButNotContentEdits\r\nPASS 27 project safety cases\r\n"
+      },
+      "install5": {
+        "exitCode": 0,
+        "output": "PASS setup-only lifecycle, user bytes, legacy fail-closed, drift, rollback, manifest boundaries\n"
+      },
+      "install7": {
+        "exitCode": 0,
+        "output": "PASS setup-only lifecycle, user bytes, legacy fail-closed, drift, rollback, manifest boundaries\r\n"
+      },
+      "release": {
+        "exitCode": 0,
+        "output": "PASS JOENESS setup-only release contract\n"
+      },
+      "format": {
+        "exitCode": 0,
+        "output": "Skill is valid!\r\n"
+      }
+    }
+  },
+  "rolloutPolicy": "Only selected runtime/provenance/command metadata retained. Full raw rollouts and credentials not copied."
+}

@@ -7,3 +7,4 @@
 *.yaml text eol=lf
 # Preserve raw evaluation outputs exactly; Markdown hard breaks and XML formatting are evidence.
 evals/joeness-setup/runs/** whitespace=-blank-at-eol,-blank-at-eof
+evals/joeness-setup/runs/2026-10-06-document-normalization/applied/proof/clamp.txt -text

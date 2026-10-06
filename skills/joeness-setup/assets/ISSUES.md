@@ -1,13 +1,15 @@
-# Issues
+# Open problems and workarounds
 
-Owns reusable diagnosis, not all unfinished work. The investigator maintains the
-cause/fix boundary; TASK owns execution proof and ROADMAP owns delivery status.
+Active issues: <none, or entries below>.
 
-## Active issues and workarounds
-Short symptom, known cause or uncertainty, effective workaround, remaining risk
-and next relevant check. Link reproduction detail; do not copy the whole task log.
+## <issue ID / short symptom>
 
-## Resolved
-Cause, bounded fix, and exact TASK verification reference. For requested compaction, verify the latest
-detail is retrievable at an exact Git commit:path/item and leave that reference.
-Without that evidence (including history-free copies), retain the detail.
+Status: <open / mitigated / closed>.
+Affected roadmap item: <link, or no stage impact>.
+Cause: <confirmed cause or uncertainty>.
+Workaround: <effective temporary measure, or none>.
+Residual risk: <what remains unsafe, unverified or liable to recur>.
+Closure condition: <durable fix and necessary check>.
+Verification: <TASK proof or missing evidence>.
+Next action: <bounded investigation/fix>.
+Closed reference: <when closed, concise result and proof; retain retrievable history>.

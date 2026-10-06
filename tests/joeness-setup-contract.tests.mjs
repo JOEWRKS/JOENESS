@@ -60,7 +60,7 @@ test('one self-contained setup skill with real supporting files', () => {
 test('manifest pins exact sole setup skill without global runtime',()=>{
   const m=JSON.parse(read('vendor/source-manifest.json'));
   assert.equal(m.schemaVersion,3);
-  assert.equal(m.release.version,'0.3.2');
+  assert.equal(m.release.version,'0.3.3');
   assert.equal(m.release.entrypoint,'JOENESS.ps1');
   assert.equal(m.runtimeMode,'setup-only');
   assert.equal(Object.hasOwn(m,'activeCommonCore'),false);
@@ -76,4 +76,26 @@ test('manifest pins exact sole setup skill without global runtime',()=>{
     assert.equal(createHash('sha256').update(read('skills/joeness-setup/'+f.path)).digest('hex'),f.sha256);
   assert.deepEqual(m.defaultVendors,[]); assert.equal(m.pluginRouting,null);
   assert.deepEqual(m.managedRuntimeFiles,[]);
+});
+
+// Static template checks only: semantic placement and agent behavior require
+// the separately recorded normalization replay, not keyword PASS claims.
+test('roadmap asset exposes per-outcome checks without embedding operating procedures',()=>{
+  const roadmap=read('skills/joeness-setup/assets/ROADMAP.md').toString();
+  const rows=roadmap.split(/\r?\n/).filter(line=>line.startsWith('|'));
+  assert.ok(rows.length >= 3, 'per-outcome table includes header, separator and data row');
+  assert.deepEqual(rows[0].split('|').slice(1,-1).map(s=>s.trim()),
+    ['ID','Required outcome','Status','Check / completion criterion','Evidence or gap']);
+  for(const field of ['Project scope:','Product authority:','Current stage:','Next eligible work:',
+    'Entry condition:','Completion condition:','Scope decisions:']) assert.ok(roadmap.includes(field),field);
+  assert.doesNotMatch(roadmap,/Before (claiming|selecting)|worker .*updates|relevant task\/report index|Priority follows/);
+});
+
+test('record assets separate execution, unresolved risk and visual authority',()=>{
+  const task=read('skills/joeness-setup/assets/TASK.md').toString();
+  const issues=read('skills/joeness-setup/assets/ISSUES.md').toString();
+  const design=read('skills/joeness-setup/assets/DESIGN.md').toString();
+  for(const field of ['Roadmap item:','Result:','Check / target / result:','Evidence:']) assert.ok(task.includes(field),field);
+  for(const field of ['Affected roadmap item:','Workaround:','Residual risk:','Closure condition:','Verification:']) assert.ok(issues.includes(field),field);
+  for(const field of ['Authority / version:','Approved scope:','Proposed changes:']) assert.ok(design.includes(field),field);
 });

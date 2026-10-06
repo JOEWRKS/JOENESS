@@ -16,6 +16,26 @@ export function createFixture(kind='normal'){
  git(root,'init','-q');
  git(root,'config','core.autocrlf','false');
  git(root,'config','user.name','JOENESS fixture');git(root,'config','user.email','fixture@example.invalid');
+ if(kind==='normalization'){
+  mkdirSync(join(root,'notes'));mkdirSync(join(root,'proof'));
+  write('AGENTS.md','# Numeric Pocket\nKeep the utility local and dependency-free. Do not change product decisions without approval.\n');
+  write('product.md','# Numeric Pocket — approved scope\nLocal command-line numeric utility. No UI, network or mobile app.\nRelease goal: clamp negatives to zero, then export the values as JSON.\nJSON must preserve order and encode an empty list as []. Product decision approved 2026-10-01.\nUser acceptance for the release is required and not yet granted.\n');
+  write('notes/reviewer-plan.md','# Documentation reviewer plugin plan\nSeparate optional experiment: compare documentation review prompts.\nNot a Numeric Pocket delivery plan. Status: pending.\n');
+  write('notes/delivery.md','# Numeric Pocket delivery\nClamp completed and focused test passed; proof: ../proof/clamp.txt.\nNext required work: JSON export, then release user acceptance.\nJSON export has not been implemented.\n');
+  write('notes/work.md','# Work events\n2026-10-02 clamp implemented; node --test main.test.mjs passed.\n2026-10-03 values above MAX_SAFE_INTEGER lose precision. Temporary measure: reject such inputs manually. Automated guard and boundary test are still missing. No cause confirmed beyond Number representation.\n');
+  write('notes/research.md','# Numeric representation\nSource: local observation in notes/work.md, checked 2026-10-03.\nObserved large-integer precision loss. BigInt as a replacement is only a suggestion; product adoption and JSON compatibility remain unverified.\n');
+  write('notes/visual.md','# Visual scope\nNo visual interface in approved product.md. No visual acceptance has been granted or required.\n');
+  write('HANDOFF.md','# Earlier handoff\n2026-10-01: clamp unfinished. Maybe turn this into a mobile dashboard later.\n');
+  write('main.mjs',fixed);
+  write('main.test.mjs',"import test from 'node:test'; import assert from 'node:assert/strict'; import {clamp} from './main.mjs'; test('clamp',()=>{assert.equal(clamp(-2),0);assert.equal(clamp(4),4);});\n");
+  // A fixture's child test runner must not inherit the parent's node:test mode.
+  const childEnv={...process.env};delete childEnv.NODE_TEST_CONTEXT;
+  const proof=execFileSync(process.execPath,['--test','main.test.mjs'],{cwd:root,encoding:'utf8',env:childEnv});
+  if(!/(?:pass 1|tests 1)/.test(proof))throw new Error('Fixture baseline test produced no execution proof');
+  write('proof/clamp.txt',proof);
+  git(root,'add','.');git(root,'commit','-qm','normalization fixture baseline');
+  return {root,archive:git(root,'rev-parse','HEAD'),kind};
+ }
  write('PRODUCT.md','# Product\nA fictional local numeric utility. Clamp negatives to zero. No UI or network.\n');
  write('ROADMAP.md','# Direction\nNext release: JSON export. No approved mobile app.\n');
  write('TASK.md','# Current task\nClamp negatives to zero; not implemented yet.\n');

@@ -5,243 +5,203 @@ description: Use when the user asks to install or connect JOENESS in a project, 
 
 # JOENESS Setup
 
-First principle: classify project facts by role so successors can recover purpose,
-current work, decisions, problems and next action. Chat summaries support, not
-replace, those sources.
-Write each material fact once. Record only the applicable outcome/decision,
-state, evidence locator, unresolved condition and next action. Keep identifiers,
-cause and approval boundaries needed to interpret or retrieve it. Link detail;
-omit repeated narration, not distinct facts. Write concisely at source: no fixed
-character cap, routine second summarization pass or unrequested history purge.
+Make project goals, current work, evidence and unresolved risks retrievable by
+their owners. Write each detailed fact once; link it from relevant summaries.
+Write concisely at source, retaining cause, uncertainty, evidence and approval
+boundaries. No fixed length cap, routine rewrite pass or history purge.
 
-Treat "install JOENESS in this project" as a project-connection request: show
-the proposed file changes and recording scope before applying them. It is not
-permission to install or replace the personal package. Connect this project to
-its existing sources of truth; do not install a work harness.
-No stage engine, vendor routing, background process, or mandatory
-five-document bundle.
+"Install JOENESS in this project" requests a project setup proposal, not a
+personal package installation. Show changed paths, ownership transfers and
+recording scope; apply after approval. No global payload, background worker,
+stage engine, vendor routing or product/design decision-making.
 
-## Inspect and propose
+## Inspect and normalize
 
-Identify the explicit project root, its AGENTS hierarchy, Git status and existing
-product, plan, task, issue and design sources. Current files/target state outrank
-old handoffs; use handoffs as locators. Do not replay completed work.
+Inspect the explicit root, AGENTS hierarchy, Git state, project goals, active
+plans, work records, relevant code/target and linked proof. Follow topic links
+as needed; do not exhaustively reread unrelated code, assets or history.
+Current evidence outranks stale status; handoffs locate sources, not new scope.
 
-Reuse the project's canonical paths and terms only with explicit ownership below.
-A roadmap role is the default
-for a project connection: reuse an existing direction source, whatever its
-filename, or propose a small `ROADMAP.md` if none exists. Do not create a
-second roadmap. Include an explicit opt out in the one setup proposal; do not
-reconsider it on every task. Suggest other missing documents only when a
-concrete recurring need has no existing home. The small
-[AGENTS](assets/AGENTS.md), [ROADMAP](assets/ROADMAP.md), [TASK](assets/TASK.md),
-[ISSUES](assets/ISSUES.md) and [DESIGN](assets/DESIGN.md) assets are adaptable
-writing references, not a batch-copy instruction.
+An approved JOENESS setup establishes these canonical project files:
+[AGENTS.md](assets/AGENTS.md), [ROADMAP.md](assets/ROADMAP.md),
+[TASK.md](assets/TASK.md), [ISSUES.md](assets/ISSUES.md) and
+[DESIGN.md](assets/DESIGN.md). ROADMAP is required, not an optional connection
+to an arbitrary plan. Existing documents are inputs to normalization.
+Retain compliant content; do not rewrite it just for appearance.
+Where a role has no content, state "none", "not applicable" or "undecided"
+truthfully. Do not invent issues, visual approval, goals or a staged sequence.
 
-Map each used role to one exact file/section in the proposed AGENTS connection:
-
-| Role | Owns | Does not own |
+| Owner | Stores | Excludes |
 | --- | --- | --- |
-| AGENTS | Working rules, owner locations, read/update triggers | Progress copies or work history |
-| ROADMAP | Goals, order, required outcomes/criteria, current states, open conditions, next work | Detailed execution logs |
-| TASK | Work performed, target-specific checks/results/limits, evidence locators | A competing stage-completion ledger |
-| ISSUES | Reusable symptoms, causes/uncertainty, fixes/workarounds, remaining risk | Every unfinished task or raw failure |
-| DESIGN | Visual authority, approved scope/version, proposed changes | Product scope or project-wide progress |
+| AGENTS | Concise work rules, owner paths, reading/update triggers | Work history, progress, copied checklists |
+| ROADMAP | Project delivery scope, ordered stages, required outcomes/checks, current states, gaps, next eligible work | Common operating rules, ownership tables, detailed execution/research |
+| TASK | Per-work result, changed files, target/check/result/limits, proof; links roadmap item | A second current-stage ledger, reusable research detail |
+| ISSUES | Open defects and effective workarounds: cause/uncertainty, residual risk, closure condition and proof link | Every unfinished feature, complete task logs |
+| DESIGN | Visual rules and authority/version/scope; approved versus proposed changes | Product meaning, delivery progress, execution proof |
+| Library/ | Topic-based research, references and reusable technical knowledge with sources | Current progress, adopted product/design approval, competing plans |
 
-Goals, completion criteria and current outcome states belong to the same roadmap
-role, not separately maintained goal/checklist owners. Distinct named sections
-may share a file when unambiguous. A conflicting legacy split needs an approved
-mapping before restructuring, not silent migration. Existing Product/decision
-sources keep scope authority; closed-work archives preserve dated history, not
-live status. Mark unused roles; do not add files just to fill the table.
-Priority follows the question, not a numerical weight or total file hierarchy:
-approved decisions govern intent, current target/evidence governs observed facts.
-Neither code nor a newer summary grants approval. Resolve contradictions at the
-owning source; unresolved conflicts keep only affected verdicts open.
+Existing Product/decision authorities retain product meaning; do not create a
+mandatory PRODUCT.md or replace them with ROADMAP. DESIGN may link an existing
+approved visual source without copying it. Canonical file names do not permit
+overwriting an occupied file or bypassing project instructions.
 
-Classify a candidate record source by its stated purpose and actual use.
-Run-scoped evaluation or proof artifacts are evidence for those runs, not a
-general task or issue ledger merely because they contain work or failures.
-If agreed routine recording has no suitable home, propose one small source
-or mark the role unused; do not silently repurpose evidence artifacts.
+For each existing source, check project, goal, scope and currency before using
+it. A feature plan or evaluation run cannot represent the whole project.
+Propose exact old section → new owner mappings. Transfer live ownership, keep
+dated evidence and links, and mark superseded live summaries as historical or
+limited in scope. Do not leave two active roadmaps. Preserve distinct decisions,
+completed work, pending checks and effective workarounds. If a required transfer
+is not authorized or cannot preserve its sources, report incomplete normalization,
+not complete setup. Do not silently fall back to the old arbitrary-plan model.
 
-Review document restructuring only for observed instruction truncation, a
-reproduced structure-caused lookup error, or at least two independent weaker
-signals: always-read instructions at 75% of a known loader limit, conflicting
-authority across files, forced unrelated reading, duplicated/no primary home,
-or a fresh reader unable to locate done/open/next. An unknown limit supplies
-no percentage signal. Propose the smallest mapping with evidence, preserved
-authority/history and expected reading cost; a local conflict may need only a
-local fix. Do not move or delete user documents without approval.
+Library uses topic files (for example research.md or references.md), not date
+folders. Use an existing relevant topic/section before adding a file; split only
+for independent retrieval/reuse/update needs or demonstrated navigation burden.
+Create the folder when there is material to store, not empty placeholder notes.
+Record source, checked date, observation versus inference, applicable scope and
+remaining uncertainty. A research suggestion is not an adopted decision.
+A one-off review normally belongs in TASK. Keep brief completion methods on
+ROADMAP items; link an existing reusable method if detail warrants it. Do not
+automatically create an EVALUATION.md, criteria file or report for each role.
 
-Show a short change proposal: paths reused/created, the actual short AGENTS
-connection with owner locations, update triggers and the concise-at-source
-record rule (retain proof, open conditions and approval limits), the default roadmap or its
-opt out, recording scope, and what stays
-unchanged. Include consent for routine factual recording in that proposal. Once
-authorized, do not request
-approval for each routine record. A request to inspect or propose is not approval
-to apply. Preserve code changes authorized alongside a request not to record.
+## Proposal and application
 
-When using this skill for substantive work, lead with the terse work report
-defined below. Say whether this turn only proposed changes or changed files.
-Give technical paths and details after the report if useful; omit internal
-helper states or hashes unless they explain a conflict. Do not imply that
-checking a connection activates a background process.
-If routine recording is agreed, include a concise work-receipt rule in the
-proposed project connection, preserving the field meanings below (especially
-`해결` = verified fix, not a passing check); no status banner for unrelated questions.
-Connect the roadmap's current-stage lookup and required-item completion gate
-briefly. A finished task does not finish its stage or release. If an existing
-direction source is only a priority list, do not claim it is a stage roadmap:
-show the missing conditions and complete them when staged planning is in the
-approved scope. Keep the actual checklist, item states and evidence in its
-canonical source, not a copied list in AGENTS.
-For a requested handoff to a person, start with the same terse work report:
-what was done, changed, encountered, resolved, still open, and the recipient's
-next action.
-Put IDs, test counts, paths, and detailed proof after it. Preserve the distinction
-between technical completion, user acceptance, and unverified work.
+Show:
+- Actual files/sections to retain, create, transfer or mark superseded.
+- A short AGENTS connection: exact owners, task-based reads/updates, concise
+  records, stage-completion gate and six-field report meanings below.
+- Routine factual recording scope and preserved code/Product/approval boundaries.
+- Unknown goals/criteria and any ownership conflict that prevents complete setup.
 
-## Apply the short connection
+Inspection/proposal alone authorizes no writes. Approval covers only this plan.
+Within agreed recording scope, routine facts need no repeated approval.
+A no-record request does not cancel separately authorized implementation.
 
 Use [project-setup.ps1](scripts/project-setup.ps1) for the owned AGENTS block.
-It supports Windows PowerShell and an explicit Git root; never run git init for
-a non-Git project. Explain the boundary and offer a proposed text/manual handoff.
+It supports Windows PowerShell and an explicit Git root; do not run git init
+for a non-Git project. Offer the proposed text/manual handoff instead.
 
-1. Run `-Check -ProjectPath <root>`. A block beyond the observed initial
-   `AGENTS.md` window, or a file too long to fit with the front block,
-   reports `blocked`. Do not shorten user-owned instructions without approval;
-   clean ownership alone does not prove that a new chat received the rule.
-2. For an authorized proposal call `-Apply`, with `-ExpectedRoot`,
-   `-ExpectedTargetHash`, `-ExpectedStateHash` from that Check and
-   `-ManagedBodyBase64` containing UTF-8 body text, without markers.
-   New connections go near the beginning of `AGENTS.md`.
-3. A clean block beyond the window means the file cannot fit in that window.
-   Do not offer automatic relocation: moving it forward would displace other
-   instructions. Propose a user-approved reduction of those instructions or
-   inspect and detach the connection. Then recheck the actual target.
-4. Read the JSON result. Only `current` confirms Apply; `partial`
-   names unresolved files, not success. Inspect targets before any retry.
-   Recheck and use a fresh project chat to verify actual instruction delivery.
+1. Check with `-Check -ProjectPath <root>`. An oversized AGENTS or a block beyond
+   the observed initial window is blocked. Do not displace or shorten user rules.
+2. Apply the approved body with `-Apply -ExpectedRoot -ExpectedTargetHash
+   -ExpectedStateHash -ManagedBodyBase64`; use actual Check values and UTF-8 body
+   without markers. Recheck after any authorized outside-block AGENTS edit.
+3. Only `current` confirms block application. `partial` names unresolved files.
+   Inspect current targets before retrying. No blind retry or completion claim.
+4. Verify actual instruction delivery separately in a fresh project context,
+   when authorized and available; otherwise report that check unverified.
 
-`current` verifies the managed connection only. Before reporting setup complete,
-read back owner locations and the actual roadmap. Trace one relevant outcome
-through its criterion, current state, execution proof and next work. Check for
-competing owners, superseded restrictions, stale pending work and unsupported
-dependencies; field presence or a clean marker is insufficient. Correct missing
-approved content or report the precise gap. Preserve an explicit opt out or
-direction-pending starter; do not invent an outcome to perform this check.
+Hashes are lower-case SHA-256 or `absent`. The helper owns only JOENESS-SETUP
+markers and .joeness/setup-state.json. State is the applied-block baseline,
+not task memory, approval or a document-quality certificate. Keep it portable.
+Edited/unowned/legacy markers, malformed state or root/source drift require
+inspection and a scoped correction. Do not reseed state, move markers, replace
+the whole file or overwrite outside bytes to bypass a conflict.
 
-Hash inputs are lower-case SHA-256 or `absent`. The helper owns only
-`JOENESS-SETUP` markers and `.joeness/setup-state.json`. State is an applied-block
-baseline, not task memory or proof of approval. It travels with the project; do
-not put absolute machine paths in it. Do not include secrets in records.
+Other document edits are semantic work within the approved mapping, not helper
+automation. Approved history transfer outside the block must preserve evidence;
+do not copy this skill or the design proposal into AGENTS. Report per-file partial
+application truthfully; block success cannot hide an unfinished document transfer.
 
-`edited`, `unowned`, `legacy`, malformed state, or source/root drift require
-inspection and a scoped correction proposal. Do not manually move markers,
-delete/reseed state, or replace the whole file to bypass a conflict. The helper does not
-automatically merge internal user edits. Preserve outside bytes.
+## Roadmap and suitability check
 
-Create/update other project documents only within the approved proposal. Their
-semantics are the agent's work, not this helper's job. Keep only actual paths,
-authority roles, and agreed recording rules in AGENTS; never copy this full skill
-or the implementation proposal there.
-For a new roadmap or approved stage addition, finish with the known goal,
-current stage, entry condition, required outcomes, each check and evidence gap,
-completion condition, and next eligible work. Split outcomes whose checks can
-pass independently; do not make a checkbox for every implementation detail.
-One small stage suffices when appropriate. With no approved goal, make a
-direction-pending roadmap and name the bounded decision needed; do not fabricate
-a stage. Mark unknown decisions as undecided and make their resolution the next
-eligible action only when they block dependent work. Do not invent approval,
-criteria or a fixed sequence. A user request for only a priority list remains a
-priority list, not a completed stage roadmap. If a project opted out of a
-roadmap and later gains an approved ordered goal, propose its roadmap role then.
+ROADMAP states project scope and Product source, current stage and next eligible
+work. Each stage has an entry condition and completion condition. Each required
+outcome has an ID, status, check/criterion and proof or exact gap. Separate checks
+that can independently pass; do not turn every implementation step into a gate.
+Use the approved order. A small project can have one stage. With unknown goals,
+write a direction-pending boundary and the decision needed, not a fictional stage.
+Unconfirmed criteria remain pending and cannot support a completion verdict.
+Keep optional/later ideas outside required stage outcomes.
 
-## Explain the completed setup
+States: not started, in progress, verification pending, on hold, complete,
+removed from scope. Holds and missing required checks remain open. Scope removal
+requires an authorized decision/reason; retain the item, never count it as passed.
+Keep technical verification and required user acceptance distinct.
 
-After confirmed setup, read [usage.md](references/usage.md) and give a short
-onboarding response in the user's language: actual created/changed files;
-the five document roles mapped to actual reused paths (unused roles marked not
-used); the agreed recording scope; examples for ordinary work, resume, past-issue
-lookup and opting out of recording. Explain that setup is not needed on every
-task. Present this in chat, not as another document or a copy in project AGENTS.
-For a proposal, blocked or partial result, report that actual boundary instead
-of presenting setup as complete. The usage guide's default filenames are role
-examples, not evidence that those files exist.
+Before reporting setup complete, read back actual documents, not just templates:
+- Is this the whole project's approved scope, not merely an available subplan?
+- Are required outcomes independently checkable, with entry/completion conditions,
+  accurate proof/gaps and current/next work? Trace each required item.
+- Does each fact have one owner? Check forbidden content, competing current
+  summaries, obsolete restrictions and unnecessary files, not just field presence.
+- Can a maintainer find the next action and its ground without reading all history?
+- Are old evidence, effective workarounds and approval boundaries preserved?
 
-## Normal work after setup
+Correct authorized gaps or identify them precisely. Report separately:
+connection integrity; document suitability; fresh-context delivery; task-result
+verification. A direction-pending starter is not a completed staged roadmap.
+User acceptance remains separate. No general performance or token-saving claim.
 
-Normal sessions use the project's short AGENTS connection without invoking setup
-again. Its source list is an index, not a read-every-file checklist: read the
-roles relevant to the request, and open DESIGN only for visual work or an
-approval conflict. Before substantive new or resumed work, use the connected
-roadmap to locate the current approved stage or direction-pending boundary,
-required checks and the
-request's place in that order. Verify progress against current files/Git/target
-state; an old roadmap status or handoff is not proof of present completion.
-If the project explicitly opted out, use its existing task and product sources
-until a roadmap role is approved. If a request would skip an unmet entry condition
-or change approved scope, explain the conflict and seek an explicit direction
-decision. Independent authorized
-work can proceed without falsely advancing the stage. Do not invent stages for
-projects without them or silently reorder a roadmap in response to a proposal.
-Within recording consent and mapped roles, the worker records the result in
-TASK and updates any affected ROADMAP state/open condition/current-next before
-handoff. The investigator owns reusable cause/fix updates in ISSUES, linking
-TASK proof rather than copying it. Scope/design changes require their authorized
-decision; factual updates need no extra approval round. If a record is forbidden
-or fails, distinguish completed implementation from incomplete record handoff.
-Before selecting next work or declaring evidence missing, check the item's
-linked proof and search the relevant task/report index for matching work.
-Resolve conflicting summaries against that evidence; an unsuccessful lookup
-is not proof that a check was never done. Reuse applicable results. Repeat only
-for an identified code/target change, failure or uncovered condition, limited
-to that difference. When status changes, refresh current/next from the remaining
-open conditions without changing approved order or scope. Mark conflicting old
-pending states/restrictions as dated or superseded with a link to the current
-owner; retain the original event and its evidence. Do not rewrite unrelated history.
-Before declaring an approved stage, milestone or release complete, review every
-required roadmap item and its actual check/evidence. Not started, in progress,
-verification pending and on hold remain open. Scope removal is a recorded
-authorized decision with a reason, not deletion or a completed check. Report
-the current stage, open items and next eligible work. Optional or later ideas
-are not automatic blockers. A task can finish while its stage remains open;
-keep both states visible and user acceptance separate.
-If a resumed task is already recorded complete and inspection finds no changed
-task fact, report its status without appending a repeat verification note.
-Questions, opinions, explanations and no-record requests are not facts to append.
-If a required source is inaccessible or a record write fails, finish independent
-authorized work and report the exact missing/read/write boundary.
-After substantive work, open with six hyphen bullets in the user's language
-(Korean: `작업`, `업데이트 파일`, `이슈`, `해결`, `남은 문제`, `다음 작업`).
-Each bullet is one concrete fact in everyday words: a noun phrase or short
-sentence, not a paragraph. Name only files changed in this work, by purpose;
-use `없음` when a field is empty. `이슈` names a problem, `해결` a verified fix,
-and `남은 문제` unresolved or unverified work. Derive `다음 작업` from authorized
-scope or the roadmap. Keep codes and exact paths out of the opening.
+## Work after setup
 
-Add `상세 보고` only when the six lines cannot carry a material cause, proof,
-verification limit, scope or acceptance boundary. State checked facts and
-their sources briefly in everyday words; do not repeat the six lines or add a
-separate rewrite or verification pass.
-Simple questions need no work report; never claim a write that did not occur.
+Normal sessions follow the short AGENTS connection; do not invoke setup again.
+AGENTS governs working method. For content, priority follows the question:
+approved owners govern intent, actual target and applicable proof govern facts.
+Neither working code nor a newer note grants approval. Resolve conflicts at the
+owner; keep only affected verdicts open.
 
-When a user requests version cleanup, keep active issues and effective workarounds
-visible. Compact resolved details only after retrieving the *latest actual detail*
-from the exact Git commit and path; record that retrieval reference. A commit from
-before an uncommitted update does not preserve that update. Missing history,
-invalid refs or ZIP copies are not archives: retain detail and state the limitation.
-Do not add an archive engine or rewrite Git history.
+| Work | Read first → as needed | Update within recording consent |
+| --- | --- | --- |
+| New/resumed work | ROADMAP current item → related TASK, ISSUES and actual target | TASK result, related ISSUES, affected ROADMAP state/next |
+| Defect | ISSUES and actual target → TASK proof, ROADMAP impact | TASK check, ISSUES residual risk/closure, affected ROADMAP |
+| Visual | ROADMAP scope → DESIGN authority, relevant Library | TASK proof; DESIGN only for authorized decisions; ROADMAP |
+| Research | ROADMAP question → relevant Library and sources | Library detail, TASK result/link, affected ROADMAP |
+| Direction change | ROADMAP → Product/decision source and relevant evidence | Authorized direction in its owner; ROADMAP scope/order |
+| Completion/handoff | ROADMAP required items → linked TASK proof, ISSUES, applicable approval | Changed facts only; no duplicate handoff ledger |
+
+Read relevant sections, not every file in the row. Before selecting next work
+or declaring evidence missing, inspect linked proof and the relevant record index.
+Failed lookup does not establish that a check never occurred. Reuse applicable
+proof; rerun only for an identified change, failure or uncovered condition.
+
+The worker records execution/checks in TASK and updates affected ROADMAP
+state/gap/next before handoff. The investigator records unresolved cause,
+workaround, residual risk and closure evidence in ISSUES; a workaround is not
+a complete fix. On verified closure, leave a concise closed status/proof link;
+preserve detailed history in TASK, topic knowledge or retrievable Git.
+A brief roadmap gap linked to ISSUES is not a second detailed issue record.
+If nothing changed, report without appending a repeat verification entry.
+Questions, opinions and no-record requests do not cause record writes.
+
+Before starting dependent work, check its entry conditions. Independent authorized
+work may proceed without falsely advancing a blocked stage. Before declaring a
+stage/milestone/release complete, check every required item and actual evidence;
+optional ideas do not block it. Changing approved scope/order/criteria requires
+authorized direction. A finished task does not finish its stage. A read/write
+failure does not erase completed implementation: report the handoff gap and
+continue independent authorized work.
+
+For requested history cleanup, retrieve the latest actual detail at an exact
+Git commit:path before replacing it with a locator. Older commits do not preserve
+uncommitted updates; missing history or ZIP copies are not archives. Keep active
+risks and workarounds visible. Do not add an archive engine or rewrite Git history.
+
+## User guidance and reports
+
+After confirmed setup, read [usage.md](references/usage.md). Explain actual
+created/changed files, the five roles plus topic Library, recording scope and
+ordinary work/resume/no-record requests. State what remains undecided or
+unverified. Do not present unused templates as files already created.
+
+After substantive work or a human handoff, start with six hyphen bullets in the
+user's language (Korean: 작업, 업데이트 파일, 이슈, 해결, 남은 문제, 다음 작업).
+Use everyday words, noun phrases or short sentences, not paragraphs.
+Name only files actually changed, by purpose; use 없음 for empty fields.
+이슈 = encountered problem; 해결 = verified fix, not a passing check;
+남은 문제 = unresolved/unverified work. Next work comes from authorized scope
+or ROADMAP. Put IDs, exact paths and necessary evidence after the opening.
+
+Add 상세 보고 only for a material cause, proof, verification limit, scope or
+acceptance boundary not conveyed above. Keep it brief; no repetition, extra
+rewrite/check pass or invented writes. Simple questions need no work report.
 
 ## Stop recording, detach, uninstall
 
-"Stop automatic recording" updates the authorized managed body to retain source
-navigation but disable routine record writes. It is not Detach.
+"Stop automatic recording" changes the authorized managed body to retain source
+navigation but disable record writes; it is not Detach.
 "Detach this project" uses a fresh Check then `-Detach` with the three expected
-values above; this removes only the unchanged owned block and matching owned
-separators, leaving ordinary documents and even an empty AGENTS.md.
-If the block was edited, preserve it and explain the conflict.
-"Uninstall JOENESS" is a separate package operation; do not search for or detach
-projects as a side effect. Existing sessions may need restarting to reload rules.
+values above. Remove only the unchanged owned block and matching separators;
+leave ordinary files, including an empty AGENTS. Edited blocks remain preserved.
+Package uninstall is separate; do not detach projects as its side effect.
+Already open sessions may need restarting to reload instructions.
