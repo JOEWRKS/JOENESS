@@ -5,7 +5,8 @@
   "branch": "codex/document-normalization",
   "tag": "JOENESS-v0.3.3",
   "tagObject": "a796bb8ee2d2fff9e27b1bbbb448de3d692eff21",
-  "mainUnchanged": "52e307ecfd1ee64f423a17109cc15ded92303912",
+  "mainAtInitialTagPush": "52e307ecfd1ee64f423a17109cc15ded92303912",
+  "subsequentMainIntegration": "main-followup.json",
   "ci": {
     "id": 37476754314,
     "head_sha": "0812d768195d7189117a736c8c809eb6ee5f46f5",

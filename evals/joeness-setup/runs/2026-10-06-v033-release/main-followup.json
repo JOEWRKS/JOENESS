@@ -1,0 +1,137 @@
+{
+  "date": "2026-10-06",
+  "mainIntegratedCommit": "0dfa24ca926b44fbf8ff96b69238020ccabf0840",
+  "ci": {
+    "id": 37482340267,
+    "head_sha": "0dfa24ca926b44fbf8ff96b69238020ccabf0840",
+    "status": "completed",
+    "conclusion": "success",
+    "html_url": "https://github.com/JOEWRKS/JOENESS/actions/runs/37482340267"
+  },
+  "releaseTagUnchanged": "JOENESS-v0.3.3",
+  "releaseCommitUnchanged": "0812d768195d7189117a736c8c809eb6ee5f46f5",
+  "geoThread": "01a1102a-b56a-7b13-a095-ded4cc965f20",
+  "geoTurn": "01a111b2-8bb4-7cf0-a675-f8810134f90f",
+  "before": {
+    "files": [
+      {
+        "path": "AGENTS.md",
+        "sha256": "5c96bd9ea72517994545fa8bd549f5e0f9ae03cd6300fada3be0aaad904f19d1"
+      },
+      {
+        "path": ".joeness/setup-state.json",
+        "sha256": "f141b4869b152af6d837c7527a3bb34b8be6baa909d8e73a02f5a2742fde7498"
+      },
+      {
+        "path": "ROADMAP.md",
+        "sha256": "45b4f1e6bb6831256854fefd54c271acfab4bffa00ff0ec14b2d49d05b6e2fe5"
+      },
+      {
+        "path": "TASK.md",
+        "sha256": "8309c96ed90691413cfc7b4eca01387653e2beba820121e1d2e08ad8e8fadfcd"
+      },
+      {
+        "path": "ISSUES.md",
+        "sha256": "f317991f81532387170d370784e78141f8c26316f751147a880b8e97c51825eb"
+      },
+      {
+        "path": "DESIGN.md",
+        "sha256": "d4d45d1780b677bba36f03bd24d31acbee6605b603d972dee217cab419149ea4"
+      },
+      {
+        "path": "Library/geo-commerce-research.md",
+        "sha256": "52dda2e4d1ab352ee18b4704ce8fefd6fa2011bdc4eff41b43515a3d7c3cf68d"
+      },
+      {
+        "path": "Library/geo-commerce-evaluation-method.md",
+        "sha256": "f69af8978efad7bd8a1fad0bb9fad321aea8a7d296dbd30a0b2119c9d110ab15"
+      },
+      {
+        "path": "product-definition/geo-fresh-market/state.json",
+        "sha256": "21b8d980e27695e33cd35ba1d604961e0292a91d026d00027c125a439d8b0058"
+      },
+      {
+        "path": "product-definition/client-feedback-portal-dogfood/state.json",
+        "sha256": "a6b2070f03c776d1fb10e365202ad028c0ed7aa296af8709d4ab4c949dc1b9bc"
+      },
+      {
+        "path": "docs/superpowers/plans/2026-09-03-post-m6-semantic-review-reliability-enablement.md",
+        "sha256": "e1dc7f194067c92e42f5892eacde021c65408772a7de1c7b5a512221485f559f"
+      }
+    ],
+    "head": "71ffc0a66618c11e2fe08a442df5fd2d67718f7b"
+  },
+  "afterFiles": [
+    {
+      "path": "AGENTS.md",
+      "sha256": "5c96bd9ea72517994545fa8bd549f5e0f9ae03cd6300fada3be0aaad904f19d1"
+    },
+    {
+      "path": ".joeness/setup-state.json",
+      "sha256": "f141b4869b152af6d837c7527a3bb34b8be6baa909d8e73a02f5a2742fde7498"
+    },
+    {
+      "path": "ROADMAP.md",
+      "sha256": "266145b6cb853655d6c8a04dff8fa9812cd73d22c338e4566e03695d4fd50931"
+    },
+    {
+      "path": "TASK.md",
+      "sha256": "02d393874c8bfaff1325e8501c3ca0c39b2965242e894e2decf281490a3441ab"
+    },
+    {
+      "path": "ISSUES.md",
+      "sha256": "8e12b4956f7f64eb6346ec032d07faf4c322579121b1ad7845c74486a849f9a8"
+    },
+    {
+      "path": "DESIGN.md",
+      "sha256": "d4d45d1780b677bba36f03bd24d31acbee6605b603d972dee217cab419149ea4"
+    },
+    {
+      "path": "Library/geo-commerce-research.md",
+      "sha256": "03db69faa1cd4e7f3ef873c861116dad6c26c01ba897ede134bf943fd9c6d2f4"
+    },
+    {
+      "path": "Library/geo-commerce-evaluation-method.md",
+      "sha256": "46c67f006ad293527b88af2ee55f4e26119773e88449765316fd5ebd45220846"
+    },
+    {
+      "path": "product-definition/geo-fresh-market/state.json",
+      "sha256": "21b8d980e27695e33cd35ba1d604961e0292a91d026d00027c125a439d8b0058"
+    },
+    {
+      "path": "product-definition/client-feedback-portal-dogfood/state.json",
+      "sha256": "a6b2070f03c776d1fb10e365202ad028c0ed7aa296af8709d4ab4c949dc1b9bc"
+    },
+    {
+      "path": "docs/superpowers/plans/2026-09-03-post-m6-semantic-review-reliability-enablement.md",
+      "sha256": "e1dc7f194067c92e42f5892eacde021c65408772a7de1c7b5a512221485f559f"
+    }
+  ],
+  "changedFiles": [
+    "ROADMAP.md",
+    "TASK.md",
+    "ISSUES.md",
+    "Library/geo-commerce-research.md",
+    "Library/geo-commerce-evaluation-method.md"
+  ],
+  "checks": {
+    "taskPriorBytesPreserved": true,
+    "roadmapRequiredItems": 20,
+    "criteriaAndStatusesPreserved": true,
+    "stages": 6,
+    "entryConditions": 6,
+    "completionConditions": 6,
+    "localLinksChecked": 55,
+    "brokenLinks": [],
+    "protectedSixFileHashesUnchanged": true
+  },
+  "findingsFixed": [
+    "Already-completed research was still described as current/available work",
+    "S1/S2 entry wording did not name the full existing preceding outcomes",
+    "Library duplicated current execution state and stage order",
+    "S0-3 still said all fresh-context delivery unverified despite bounded proof; parent identified and agent corrected with existing evidence"
+  ],
+  "scope": "Local documentation update only. Product state/design approval/code/JOEFLOW/old plan retained. No new research, A/B or fresh-context trial. Project changes remain local; no GEO commit/push requested.",
+  "runtimeAndLimits": "Existing GEO chat explicitly reread installed skill. Bounded document correctness check, not long-term behavior or token savings.",
+  "reportFile": "geo-local-update.md"
+}

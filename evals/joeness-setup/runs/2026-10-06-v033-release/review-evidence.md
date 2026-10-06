@@ -1,10 +1,10 @@
 # JOENESS 0.3.3 출시 기록
 
-상태: **0.3.3 브랜치·태그 배포, 개인 설치, GEO 수령 확인 완료**. main 병합은 하지 않음.
+상태: **0.3.3 main·태그 반영, 개인 설치, GEO 수령 확인 완료**. 수령 이후 추가 승인된 GEO 로컬 운영 문서 보완은 아래 후속 기록으로 구분한다.
 
 ## 승인 범위
 
-사용자: “계획대로 진행 후 보고 해”. 0.3.3 버전·안내 → 로컬 배포 검사 → 커밋·푸시 → 해당 커밋 Windows CI → 설치·GEO 적용 확인. 새 A/B, GEO 기획 재작성, 다른 프로젝트 일괄 갱신은 제외한다. 현재 개발 브랜치 codex/document-normalization을 푸시하며 main 병합은 이 실행에 포함하지 않는다.
+최초 사용자 승인: “계획대로 진행 후 보고 해”. 0.3.3 버전·안내 → 로컬 배포 검사 → 커밋·푸시 → 해당 커밋 Windows CI → 설치·GEO 적용 확인. 당시 main 병합은 제외했다. 후속 승인 “메인에 병합하고 GEO에는 JOENESS 업데이트 기반으로 방침 잘 지켜서 로컬 파일 업데이트 및 검증 시켜”에 따라 main 반영과 GEO 운영 문서 실제 보완·검증을 추가한다. 새 A/B·제품 결정 변경·다른 프로젝트 일괄 갱신은 제외.
 
 ## 출시 내용과 한계
 
@@ -18,9 +18,17 @@
 
 - 버전·안내: 0.3.3 반영.
 - 로컬 배포 검사: Node 12/12, PS5/PS7 연결 각 27/27, 양쪽 설치·로컬 출시 계약·스킬 형식 PASS. [실행 출력](local-checks.json). 최초 설치기 버전 누락 실패는 [별도 보존](initial-failure.json); 설치기 식별자만 0.3.3으로 수정 후 영향 검사 재통과.
-- 커밋·원격 Windows CI: `0812d768195d7189117a736c8c809eb6ee5f46f5`, tree `cc80100dbd81e3bf1d5c03b1da156015e0301b3e`. [Windows run 37476754314](https://github.com/JOEWRKS/JOENESS/actions/runs/37476754314)의 모든 단계 성공. 개발 브랜치와 `JOENESS-v0.3.3` 태그 푸시 확인. main은 `52e307e` 유지.
+- 커밋·원격 Windows CI: `0812d768195d7189117a736c8c809eb6ee5f46f5`, tree `cc80100dbd81e3bf1d5c03b1da156015e0301b3e`. [Windows run 37476754314](https://github.com/JOEWRKS/JOENESS/actions/runs/37476754314)의 모든 단계 성공. 개발 브랜치와 `JOENESS-v0.3.3` 태그 푸시 확인. 당시 main `52e307e` 유지는 아래 후속 병합으로 변경됨.
+
 - 개인 설치: 정확한 이전 0.3.2 소스에서 current 확인 → 관리 파일 제거 → 0.3.3 ready/Apply/current. 설치 9파일이 출시 manifest와 일치. 전역 AGENTS와 다른 스킬 428파일 해시 불변. 제거한 관리 파일은 새 버전으로 교체됐으며 이전 원본은 Git 태그에 보존. 이전 소스용 임시 clean 작업본만 정리.
 - GEO 인계: 기존 **GEO Website IA** 채팅이 설치 SKILL 전문을 직접 다시 읽고 출시 9파일/연결/문서 역할 확인. 연결 current/clean이며 의미 차이 없어 AGENTS·상태 재작성 없음. TASK에 수령 1건만 추가. 부모가 보호 10파일·HEAD 불변 직접 대조; 담당자의 tracked 474파일 보존 보고도 수령. [최종 답변](geo-receipt.md).
 - 적용 경계: S0/S0-4 진행·제품 미승인 유지. 기존 채팅에서 명시적으로 새 파일을 읽힌 수령 확인이며 새 자동 주입·일반 성능 시험이 아니다. 상세 축약의 미입증을 해결로 승격하지 않음.
 
 [정확한 배포·설치·GEO 전후 해시](deployment.json). 이 후속 기록 커밋은 출시 태그의 소스/설치기/manifest를 변경하지 않는다. 출시 검증은 위 정확한 커밋에 결부되며, 후속 문서 커밋을 소급해 같은 CI로 검증했다고 주장하지 않는다.
+
+## main 및 GEO 로컬 운영 보완 — 후속 승인
+
+- main: `52e307e → 0dfa24ca926b44fbf8ff96b69238020ccabf0840` fast-forward 및 원격 확인. 해당 커밋의 [브랜치 Windows 검사](https://github.com/JOEWRKS/JOENESS/actions/runs/37477896357)와 [main Windows 검사](https://github.com/JOEWRKS/JOENESS/actions/runs/37482340267) 모두 성공. 출시 스킬/설치기/manifest는 태그와 동일하며 개인 설치 current.
+- GEO: ROADMAP·ISSUES·TASK·Library 2개, 총 5파일 보완 완료. 끝난 조사를 다음 일로 남긴 안내 정정, S1/S2 선행 결과 전체 연결, Library의 현황/단계 순서 중복 제거. 부모가 발견한 S0-3의 낡은 포괄적 미검증 표현도 기존 증거에 맞게 한정 확인/일반 미검증으로 정정. 새 실험 없음.
+- 부모 직접 대조: 필수 결과 20개 ID/결과/완료 기준/상태 보존, 단계 6개와 진입/종료 조건 각 6개 확인, 로컬 링크 55개 오류 0. AGENTS·상태·DESIGN·제품 원본 2개·기존 계획 6파일 해시 동일. TASK의 이전 원문 bytes 보존. GEO 기획 S0/S0-4 진행 중·제품 미승인 유지. [대조 해시와 범위](main-followup.json), [담당자 결과](geo-local-update.md).
+- GEO 파일은 로컬에만 반영했으며 해당 저장소 commit/push는 수행하지 않았다. 이번 문서 수정의 확인과 제품/사용자 승인, 일반 성능은 별개다.
