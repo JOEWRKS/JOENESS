@@ -88,3 +88,12 @@ objects.tasks/TASK, evidence/의도, OPEN 관찰/승인 identity를 분리했다
 담당 간 기술 검토 일치는 사용자 채택이나 현장 적용이 아니다. 계약 중단/재개 중립 실행은 남음. JOEFLOW 의미 권한을 JOENESS로
 옮기는 재설계는 별도 승인 사항이다. 자동 앱 지침 전달·실제 동시 경합·장기 사용성·성능 비교는 미검증.
 이번 일반 commit/push는 후보 인계이며 main·태그·개인 설치·실제 프로젝트 갱신을 포함하지 않는다.
+
+## 원격 인계
+
+구현·검증 커밋: `c8cd9b9b6846ab5a41cdbec9cab3f49858570fcc`.
+Tree: `228e23a0dc16d210a490eb68dc9f6985250107d0`.
+`git push -u origin codex/qa-recording-boundaries` 성공 뒤 `git ls-remote origin refs/heads/codex/qa-recording-boundaries`가 같은 SHA를 반환했다.
+커밋 전 staged 배포 파일 9/9 해시·로컬 파일 링크 98개·diff 공백 검사 통과. 링크 검사는 절 앵커와 외부 HTTP 검사가 아니다.
+이 뒤 인계 상태 기록은 docs/ROADMAP·기존 계획·이 증거 파일만 갱신하며 배포 9파일은 불변이다.
+최종 HEAD/원격 SHA는 채팅 인계에서 보고한다. 원격 Actions 성공은 이 기록에서 주장하지 않는다.
