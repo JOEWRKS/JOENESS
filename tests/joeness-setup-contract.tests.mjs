@@ -99,3 +99,14 @@ test('record assets separate execution, unresolved risk and visual authority',()
   for(const field of ['Affected roadmap item:','Workaround:','Residual risk:','Closure condition:','Verification:']) assert.ok(issues.includes(field),field);
   for(const field of ['Authority / version:','Approved scope:','Proposed changes:']) assert.ok(design.includes(field),field);
 });
+
+// Wording-level regression only; these checks do not prove redaction or atomic writes.
+test('setup and normal-session connection carry scoped recording safeguards',()=>{
+  for (const path of ['SKILL.md','assets/AGENTS.md']) {
+    const text=read('skills/joeness-setup/'+path).toString();
+    for(const term of ['credentials','personal data','restricted source','integrator',
+      'before saving','conflict','independent']) assert.ok(text.includes(term),path+': '+term);
+  }
+  const skill=read('skills/joeness-setup/SKILL.md').toString();
+  assert.match(skill,/not an atomic lock/);
+});

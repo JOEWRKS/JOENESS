@@ -22,6 +22,13 @@ Adapt paths and agreed scope before applying this body.
   stays open until its closure check passes. DESIGN changes need authorization.
   Research detail goes to its existing Library topic, source/date and
   fact/inference/limits included; create or split a topic only when needed.
+- Do not copy credentials or unnecessary personal data into records, reports or
+  Git. Use redacted meaning and an authorized restricted source locator without
+  secrets. Unclear storage/access scope: leave raw data at source, report the gap.
+- Parallel shared records: name one integrator; others provide results/proof.
+  Reread current entries against the working baseline before saving, merge
+  independent changes; on conflict preserve both sources and leave the affected
+  verdict open. Reconcile a changed baseline before retrying; this is not a lock.
 - Store detail once; use short summaries with links elsewhere. ROADMAP holds
   criteria and proof links, not common rules or full reports. A one-off review
   belongs in TASK, not a mandatory evaluation file. Write concisely at source,

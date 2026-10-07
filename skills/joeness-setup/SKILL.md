@@ -76,6 +76,11 @@ Show:
 Inspection/proposal alone authorizes no writes. Approval covers only this plan.
 Within agreed recording scope, routine facts need no repeated approval.
 A no-record request does not cancel separately authorized implementation.
+Carry these recording boundaries into the short project connection: never copy
+credentials or unnecessary personal data into records, reports or Git. Preserve
+meaning with a redacted summary and an authorized restricted source locator
+that does not itself expose secrets. If storage/access scope is unclear, leave
+raw material at its source and report the evidence-access gap, not missing proof.
 
 Use [project-setup.ps1](scripts/project-setup.ps1) for the owned AGENTS block.
 It supports Windows PowerShell and an explicit Git root; do not run git init
@@ -163,6 +168,14 @@ preserve detailed history in TASK, topic knowledge or retrievable Git.
 A brief roadmap gap linked to ISSUES is not a second detailed issue record.
 If nothing changed, report without appending a repeat verification entry.
 Questions, opinions and no-record requests do not cause record writes.
+
+For parallel work on shared records, name one integrator for affected entries;
+other workers hand over scoped results and proof instead of overwriting them.
+The integrator rereads current entries and compares the working baseline before saving,
+merges independent changes, and preserves both sources if intent or approval conflicts.
+Leave only the conflict and dependent verdict open; continue independent authorized work.
+If the baseline changed, reconcile before retrying. This is not an atomic lock:
+the setup helper protects only its AGENTS block/state, not TASK/ROADMAP writes.
 
 Before starting dependent work, check its entry conditions. Independent authorized
 work may proceed without falsely advancing a blocked stage. Before declaring a
