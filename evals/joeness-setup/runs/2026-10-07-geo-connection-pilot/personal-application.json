@@ -1,0 +1,76 @@
+{
+  "commands": [
+    "old-release/JOENESS.ps1 -Remove -CodexHome C:/Users/tjdwo/.codex",
+    "JOENESS.ps1 -Apply -CodexHome C:/Users/tjdwo/.codex",
+    "JOENESS.ps1 -Check -CodexHome C:/Users/tjdwo/.codex"
+  ],
+  "oldRelease": "0812d768195d7189117a736c8c809eb6ee5f46f5",
+  "candidate": "a6411e5266ae748bd140b3db2a88b4c07381e351",
+  "exitCode": 0,
+  "results": [
+    {
+      "status": "removed",
+      "mode": "remove",
+      "codexHome": "C:\\Users\\tjdwo\\.codex",
+      "activeSkills": [],
+      "warnings": [],
+      "changesRequired": false,
+      "changes": [
+        "skills/joeness-setup/SKILL.md",
+        "skills/joeness-setup/agents/openai.yaml",
+        "skills/joeness-setup/assets/AGENTS.md",
+        "skills/joeness-setup/assets/DESIGN.md",
+        "skills/joeness-setup/assets/ISSUES.md",
+        "skills/joeness-setup/assets/ROADMAP.md",
+        "skills/joeness-setup/assets/TASK.md",
+        "skills/joeness-setup/references/usage.md",
+        "skills/joeness-setup/scripts/project-setup.ps1",
+        "joeness-skills-state.json"
+      ],
+      "blockers": [
+        null
+      ],
+      "rollback": null
+    },
+    {
+      "status": "current",
+      "mode": "apply",
+      "codexHome": "C:\\Users\\tjdwo\\.codex",
+      "activeSkills": [
+        "joeness-setup"
+      ],
+      "warnings": [],
+      "changesRequired": false,
+      "changes": [
+        "skills/joeness-setup/SKILL.md",
+        "skills/joeness-setup/agents/openai.yaml",
+        "skills/joeness-setup/assets/AGENTS.md",
+        "skills/joeness-setup/assets/DESIGN.md",
+        "skills/joeness-setup/assets/ISSUES.md",
+        "skills/joeness-setup/assets/ROADMAP.md",
+        "skills/joeness-setup/assets/TASK.md",
+        "skills/joeness-setup/references/usage.md",
+        "skills/joeness-setup/scripts/project-setup.ps1",
+        "joeness-skills-state.json"
+      ],
+      "blockers": [
+        null
+      ],
+      "rollback": null
+    },
+    {
+      "status": "current",
+      "mode": "check",
+      "codexHome": "C:\\Users\\tjdwo\\.codex",
+      "activeSkills": [
+        "joeness-setup"
+      ],
+      "warnings": [],
+      "changesRequired": false,
+      "changes": [],
+      "blockers": [],
+      "rollback": null
+    }
+  ],
+  "usageGuideEmitted": true
+}

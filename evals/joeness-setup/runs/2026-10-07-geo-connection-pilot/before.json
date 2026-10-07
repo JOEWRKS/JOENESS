@@ -1,0 +1,194 @@
+{
+  "personal": {
+    "managed": {
+      "SKILL.md": "d783d98a8562938a1228569d7ba79d88da29a15a015a23bdee18ad436ca5ebef",
+      "agents/openai.yaml": "cc275e468658c7793d6f1305aaae5c6f37a06d831a7f2c3f18313f668427ec5c",
+      "assets/AGENTS.md": "6a6364de276c3605535d6d2d6b52d84282848a4322d4b0491ea51bd9eb821074",
+      "assets/DESIGN.md": "3b5ec8a163f2da4a770b4206029dd85a538dea0807060314cf51bd145ff66a5d",
+      "assets/ISSUES.md": "44b5e1f7eea61716bdfa3b364b7eca9ffe60bc9c29f6e31b3a9bf753de6b8635",
+      "assets/ROADMAP.md": "ac80bf15b82f5cb9b6200a4cf48f22739632352850395afe77d62ed1be3e3660",
+      "assets/TASK.md": "4699f81b2afcbf9966754735291459fa71c3f0a23c3277bc42cd3162769f5a43",
+      "references/usage.md": "2c03e2f35189b4ece861e8aa2fd548fdbc7bed961a122636df6dd9dc2f318ce4",
+      "scripts/project-setup.ps1": "631334ba13683f97346d2b14d4aebedd671b16c9125e7dd4a26914d658788c8d"
+    },
+    "stateSha256": "0d023bb309b17b0b616818daa0d182d77120762b5b8d422c1de4d80c6e598bc6",
+    "globalAgentsSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "otherSkills": {
+      "count": 428,
+      "sha256": "e145a06d191992642e041e8fd5670e3b666d1362785be3fa17be6f67501d8c5e"
+    }
+  },
+  "geo": {
+    "root": "D:\\JOEWRKS\\JOEWRKS-Product",
+    "head": "71ffc0a66618c11e2fe08a442df5fd2d67718f7b",
+    "gitStatus": "M docs/superpowers/plans/2026-09-03-post-m6-semantic-review-reliability-enablement.md\n?? .joeness/\n?? AGENTS.md\n?? DESIGN.md\n?? ISSUES.md\n?? Library/\n?? ROADMAP.md\n?? TASK.md\n?? product-definition/geo-fresh-market/",
+    "files": {
+      "AGENTS.md": "5c96bd9ea72517994545fa8bd549f5e0f9ae03cd6300fada3be0aaad904f19d1",
+      ".joeness/setup-state.json": "f141b4869b152af6d837c7527a3bb34b8be6baa909d8e73a02f5a2742fde7498",
+      "ROADMAP.md": "db4a219735880ae040e6101156d6d3c5a44f2d7d4cef2ce39245f02d445bfffa",
+      "TASK.md": "b470e6a2250dbd4b8ed0dfa3440664406816cf031e6373b0ac3dc4f6f2fa2c12",
+      "ISSUES.md": "8e12b4956f7f64eb6346ec032d07faf4c322579121b1ad7845c74486a849f9a8",
+      "DESIGN.md": "d4d45d1780b677bba36f03bd24d31acbee6605b603d972dee217cab419149ea4",
+      "Library/geo-commerce-research.md": "a6919a611ee2dcba3372f6b31b427ce3cd2d0f00938123aab9ab21da6e7b1e7b",
+      "Library/geo-commerce-evaluation-method.md": "51be246a6dd6a04686ae42bc5f0f23d13511e8d5faf21e4e4d4ca276e0f7f8ea",
+      "product-definition/geo-fresh-market/state.json": "dfddf08111729e293f407b0b42f20621cc8c48bb648cb840b01e0f9dbf5466c8",
+      "product-definition/client-feedback-portal-dogfood/state.json": "a6b2070f03c776d1fb10e365202ad028c0ed7aa296af8709d4ab4c949dc1b9bc",
+      "docs/superpowers/plans/2026-09-03-post-m6-semantic-review-reliability-enablement.md": "e1dc7f194067c92e42f5892eacde021c65408772a7de1c7b5a512221485f559f"
+    },
+    "tracked": {
+      "count": 474,
+      "sha256": "5b04d6df17f4f5ce3457c324d7266cc24a4e0d4c81aced302d27aac0fd1ee5fa"
+    },
+    "product": {
+      "schema": "0.2.0",
+      "revision": 6,
+      "status": "OPEN",
+      "approval": "UNAPPROVED",
+      "approvalHistorySha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "decisions": [
+        {
+          "id": "DEC-001",
+          "status": "CURRENT"
+        },
+        {
+          "id": "DEC-002",
+          "status": "CURRENT"
+        }
+      ],
+      "unknowns": [
+        {
+          "id": "UNK-001",
+          "status": "OPEN"
+        },
+        {
+          "id": "UNK-002",
+          "status": "OPEN"
+        },
+        {
+          "id": "UNK-003",
+          "status": "OPEN"
+        },
+        {
+          "id": "UNK-004",
+          "status": "RESOLVED"
+        },
+        {
+          "id": "UNK-005",
+          "status": "OPEN"
+        },
+        {
+          "id": "UNK-006",
+          "status": "OPEN"
+        },
+        {
+          "id": "UNK-007",
+          "status": "OPEN"
+        },
+        {
+          "id": "UNK-008",
+          "status": "OPEN"
+        },
+        {
+          "id": "UNK-009",
+          "status": "RESOLVED"
+        },
+        {
+          "id": "UNK-010",
+          "status": "OPEN"
+        },
+        {
+          "id": "UNK-011",
+          "status": "OPEN"
+        },
+        {
+          "id": "UNK-012",
+          "status": "OPEN"
+        },
+        {
+          "id": "UNK-013",
+          "status": "OPEN"
+        },
+        {
+          "id": "UNK-014",
+          "status": "OPEN"
+        },
+        {
+          "id": "UNK-015",
+          "status": "OPEN"
+        },
+        {
+          "id": "UNK-016",
+          "status": "OPEN"
+        },
+        {
+          "id": "UNK-017",
+          "status": "OPEN"
+        },
+        {
+          "id": "UNK-018",
+          "status": "OPEN"
+        },
+        {
+          "id": "UNK-019",
+          "status": "OPEN"
+        },
+        {
+          "id": "UNK-020",
+          "status": "OPEN"
+        },
+        {
+          "id": "UNK-021",
+          "status": "OPEN"
+        },
+        {
+          "id": "UNK-022",
+          "status": "OPEN"
+        },
+        {
+          "id": "UNK-023",
+          "status": "OPEN"
+        },
+        {
+          "id": "UNK-024",
+          "status": "OPEN"
+        },
+        {
+          "id": "UNK-025",
+          "status": "OPEN"
+        },
+        {
+          "id": "UNK-026",
+          "status": "OPEN"
+        },
+        {
+          "id": "UNK-027",
+          "status": "OPEN"
+        },
+        {
+          "id": "UNK-028",
+          "status": "OPEN"
+        },
+        {
+          "id": "UNK-029",
+          "status": "OPEN"
+        },
+        {
+          "id": "UNK-030",
+          "status": "OPEN"
+        },
+        {
+          "id": "UNK-031",
+          "status": "OPEN"
+        },
+        {
+          "id": "UNK-032",
+          "status": "OPEN"
+        },
+        {
+          "id": "UNK-033",
+          "status": "RESOLVED"
+        }
+      ]
+    }
+  }
+}

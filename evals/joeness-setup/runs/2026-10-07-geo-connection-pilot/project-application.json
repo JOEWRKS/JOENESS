@@ -1,0 +1,50 @@
+{
+  "before": {
+    "action": "check",
+    "status": "current",
+    "verificationScope": "managed-connection-only",
+    "projectRoot": "D:\\JOEWRKS\\JOEWRKS-Product",
+    "target": "AGENTS.md",
+    "targetHash": "5c96bd9ea72517994545fa8bd549f5e0f9ae03cd6300fada3be0aaad904f19d1",
+    "statePath": ".joeness/setup-state.json",
+    "stateHash": "f141b4869b152af6d837c7527a3bb34b8be6baa909d8e73a02f5a2742fde7498",
+    "blockState": "clean",
+    "changedTargets": [],
+    "blockers": [],
+    "rollback": null,
+    "unresolvedTargets": []
+  },
+  "apply": {
+    "action": "apply",
+    "status": "current",
+    "verificationScope": "managed-connection-only",
+    "projectRoot": "D:\\JOEWRKS\\JOEWRKS-Product",
+    "target": "AGENTS.md",
+    "targetHash": "dc123bb96282f9bd24cba3ac92f42fc5d4d331134522f0ae9447b3375e19979c",
+    "statePath": ".joeness/setup-state.json",
+    "stateHash": "a1b2094949ae6270f3bc037598d503561e0885497f679e451646ba4f095caeb1",
+    "blockState": "clean",
+    "changedTargets": [
+      "AGENTS.md",
+      ".joeness/setup-state.json"
+    ],
+    "blockers": [],
+    "rollback": null,
+    "unresolvedTargets": []
+  },
+  "after": {
+    "action": "check",
+    "status": "current",
+    "verificationScope": "managed-connection-only",
+    "projectRoot": "D:\\JOEWRKS\\JOEWRKS-Product",
+    "target": "AGENTS.md",
+    "targetHash": "dc123bb96282f9bd24cba3ac92f42fc5d4d331134522f0ae9447b3375e19979c",
+    "statePath": ".joeness/setup-state.json",
+    "stateHash": "a1b2094949ae6270f3bc037598d503561e0885497f679e451646ba4f095caeb1",
+    "blockState": "clean",
+    "changedTargets": [],
+    "blockers": [],
+    "rollback": null,
+    "unresolvedTargets": []
+  }
+}

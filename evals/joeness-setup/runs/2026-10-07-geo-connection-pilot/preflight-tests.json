@@ -1,0 +1,54 @@
+{
+  "candidate": "a6411e5266ae748bd140b3db2a88b4c07381e351",
+  "tests": {
+    "ps5release": {
+      "chunk_id": "ff75e4",
+      "wall_time_seconds": 0.0000116,
+      "exit_code": 0,
+      "original_token_count": 11,
+      "output": "PASS JOENESS setup-only release contract\n"
+    },
+    "ps7setup": {
+      "chunk_id": "b777c1",
+      "wall_time_seconds": 0.000009,
+      "exit_code": 0,
+      "original_token_count": 280,
+      "output": "PASS StateIdentityRoundTripAcrossPowerShellVersions\r\nPASS CurrentConnectionDoesNotCertifyRoadmapContents\r\nPASS InvalidStateIdentityStillFailsClosed\r\nPASS InitialApplyAndNoOp\r\nPASS LongAgentsApplyCannotDisplaceExistingInstructions\r\nPASS UnconnectedExactWindowCannotAcceptManagedBlock\r\nPASS InitialWindowExactBoundary\r\nPASS ExistingFrontBlockReportsDisplacementAndCanDetach\r\nPASS ExistingCleanTailBlocksRelocationAndRestoresOutsideBytes\r\nPASS InsideEditSurvivesFreshCheck\r\nPASS OutsideBytesAndDetach bom=False eol=1 ending=0\r\nPASS OutsideBytesAndDetach bom=False eol=1 ending=1\r\nPASS OutsideBytesAndDetach bom=True eol=1 ending=0\r\nPASS OutsideBytesAndDetach bom=True eol=1 ending=1\r\nPASS OutsideBytesAndDetach bom=False eol=2 ending=0\r\nPASS OutsideBytesAndDetach bom=False eol=2 ending=2\r\nPASS OutsideBytesAndDetach bom=True eol=2 ending=0\r\nPASS OutsideBytesAndDetach bom=True eol=2 ending=2\r\nPASS MalformedOrUnownedOrLegacy\r\nPASS StateTamperAndOneSidedState\r\nPASS StateWriteFailureAfterUserEdit\r\nPASS SnapshotAndRootDrift\r\nPASS CloneRebindsRelativeState\r\nPASS InvalidUtf8AndOverride\r\nPASS StateSnapshotDrift\r\nPASS ReparseAndNonGitFailClosed\r\nPASS RealGitCloneRebindsCheckoutEolButNotContentEdits\r\nPASS 27 project safety cases\r\n"
+    },
+    "ps5setup": {
+      "chunk_id": "1e90a4",
+      "wall_time_seconds": 0.0000122,
+      "exit_code": 0,
+      "original_token_count": 263,
+      "output": "PASS StateIdentityRoundTripAcrossPowerShellVersions\nPASS CurrentConnectionDoesNotCertifyRoadmapContents\nPASS InvalidStateIdentityStillFailsClosed\nPASS InitialApplyAndNoOp\nPASS LongAgentsApplyCannotDisplaceExistingInstructions\nPASS UnconnectedExactWindowCannotAcceptManagedBlock\nPASS InitialWindowExactBoundary\nPASS ExistingFrontBlockReportsDisplacementAndCanDetach\nPASS ExistingCleanTailBlocksRelocationAndRestoresOutsideBytes\nPASS InsideEditSurvivesFreshCheck\nPASS OutsideBytesAndDetach bom=False eol=1 ending=0\nPASS OutsideBytesAndDetach bom=False eol=1 ending=1\nPASS OutsideBytesAndDetach bom=True eol=1 ending=0\nPASS OutsideBytesAndDetach bom=True eol=1 ending=1\nPASS OutsideBytesAndDetach bom=False eol=2 ending=0\nPASS OutsideBytesAndDetach bom=False eol=2 ending=2\nPASS OutsideBytesAndDetach bom=True eol=2 ending=0\nPASS OutsideBytesAndDetach bom=True eol=2 ending=2\nPASS MalformedOrUnownedOrLegacy\nPASS StateTamperAndOneSidedState\nPASS StateWriteFailureAfterUserEdit\nPASS SnapshotAndRootDrift\nPASS CloneRebindsRelativeState\nPASS InvalidUtf8AndOverride\nPASS StateSnapshotDrift\nPASS ReparseAndNonGitFailClosed\nPASS RealGitCloneRebindsCheckoutEolButNotContentEdits\nPASS 27 project safety cases\n"
+    },
+    "ps7install": {
+      "chunk_id": "a9e800",
+      "wall_time_seconds": 0.0000104,
+      "exit_code": 0,
+      "original_token_count": 25,
+      "output": "PASS setup-only lifecycle, user bytes, legacy fail-closed, drift, rollback, manifest boundaries\r\n"
+    },
+    "ps5install": {
+      "chunk_id": "b79e90",
+      "wall_time_seconds": 0.0000082,
+      "exit_code": 0,
+      "original_token_count": 24,
+      "output": "PASS setup-only lifecycle, user bytes, legacy fail-closed, drift, rollback, manifest boundaries\n"
+    },
+    "node": {
+      "chunk_id": "ecf6a0",
+      "wall_time_seconds": 0.0000092,
+      "exit_code": 0,
+      "original_token_count": 313,
+      "output": "✔ CLI shows usable onboarding only after successful Apply while stdout stays JSON (18372.2621ms)\n✔ one self-contained setup skill with real supporting files (2.5551ms)\n✔ manifest pins exact sole setup skill without global runtime (4.6632ms)\n✔ roadmap asset exposes per-outcome checks without embedding operating procedures (0.6808ms)\n✔ record assets separate execution, unresolved risk and visual authority (0.5888ms)\n✔ setup and normal-session connection carry scoped recording safeguards (0.6429ms)\n✔ fresh cases keep expectations outside user requests (2.8325ms)\n✔ normalization fixture has preserved completed proof, limited plan and open workaround (1515.9618ms)\n✔ routing fixtures distinguish a single reading burden from conflicting authority (12997.5304ms)\n✔ recording fixture locates task checks in TASK and reusable causes in ISSUES (5991.2995ms)\n✔ locked fixture makes TASK record writes fail without hiding its current text (4927.5087ms)\n✔ actual Git archive predates the latest uncommitted detail (4184.0591ms)\n✔ ZIP has no Git history and actual Detach leaves no instruction block (9897.1981ms)\nℹ tests 13\nℹ suites 0\nℹ pass 13\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 39819.9449\n"
+    }
+  },
+  "remote": {
+    "id": 37614501451,
+    "head_sha": "a6411e5266ae748bd140b3db2a88b4c07381e351",
+    "status": "completed",
+    "conclusion": "success",
+    "url": "https://github.com/JOEWRKS/JOENESS/actions/runs/37614501451"
+  }
+}
