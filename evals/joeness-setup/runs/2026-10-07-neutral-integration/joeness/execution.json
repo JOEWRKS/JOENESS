@@ -1,0 +1,62 @@
+{
+  "baseCommit": "f7f9a2b9c40408312bf8bd4266dd9f021146d484",
+  "authorization": {
+    "thread": "01a115f2-a9fd-7c81-930a-0e225906f843",
+    "userTurn": "01a1160b-9b8b-7762-9b6e-6c3a59dc2051"
+  },
+  "setupExecutor": "parent agent; actual candidate PowerShell helper",
+  "behaviorExecutor": "independent collaboration subagent, fork_turns=none, once per fixture",
+  "artifactEvaluator": "parent reads actual captured files/diff and hashes; QA separate cross-review",
+  "runtime": {
+    "model": "not exposed by collaboration tool",
+    "reasoningEffort": "not exposed; no Astra/xhigh claim",
+    "automaticDesktopInjection": "not tested; AGENTS read explicitly requested"
+  },
+  "runs": [
+    {
+      "name": "standalone",
+      "agent": "/root/standalone_resume",
+      "root": "C:/Users/tjdwo/AppData/Local/Temp/joeness-integration-81b10f01bbca4be18b51f2cbbf3d03bb/standalone",
+      "prompt": "격리 프로젝트 C:/Users/tjdwo/AppData/Local/Temp/joeness-integration-81b10f01bbca4be18b51f2cbbf3d03bb/standalone 의 새 담당자입니다. AGENTS.md를 읽고 프로젝트의 실제 원본과 작업 기록으로 현재 상황을 파악한 뒤, 중단된 기록 작업을 이어서 필요한 내용만 반영하고 다음 행동을 보고하세요. 사용자 승인 범위: TASK.md 및 영향받은 ROADMAP.md/ISSUES.md의 사실 기록만 변경. 제품 의미·디자인·AGENTS·설정·코드 변경이나 추가 설치, 외부 조회, 커밋은 금지합니다. 파일 읽기/쓰기 도구로 실제 수행하세요. 평가 기준이나 정답은 별도로 제공되지 않습니다.",
+      "baseline": "8c5c0e291bd6d5894450bf8608a2351c88dd9b07",
+      "observation": "standalone-observed.json",
+      "response": "standalone-response.md",
+      "helperCommand": "pwsh -NoProfile -File evals/joeness-setup/runs/2026-10-07-neutral-integration/joeness/connect-fixture.ps1 -ProjectPath C:/Users/tjdwo/AppData/Local/Temp/joeness-integration-81b10f01bbca4be18b51f2cbbf3d03bb/standalone -ProductSource product-brief.md",
+      "helperExitCode": 0,
+      "captureExitCode": 0
+    },
+    {
+      "name": "combined",
+      "agent": "/root/combined_resume",
+      "root": "C:/Users/tjdwo/AppData/Local/Temp/joeness-integration-81b10f01bbca4be18b51f2cbbf3d03bb/combined",
+      "prompt": "격리 프로젝트 C:/Users/tjdwo/AppData/Local/Temp/joeness-integration-81b10f01bbca4be18b51f2cbbf3d03bb/combined 의 새 담당자입니다. AGENTS.md를 읽고 프로젝트의 실제 원본과 작업 기록으로 현재 상황을 파악한 뒤, 중단된 기록 작업을 이어서 필요한 내용만 반영하고 다음 행동을 보고하세요. 사용자 승인 범위: TASK.md 및 영향받은 ROADMAP.md/ISSUES.md의 사실 기록만 변경. 제품 의미·디자인·AGENTS·설정·코드 변경이나 추가 설치, 외부 조회, 커밋은 금지합니다. 파일 읽기/쓰기 도구로 실제 수행하세요. 평가 기준이나 정답은 별도로 제공되지 않습니다.",
+      "baseline": "e942336a4e21c0ce5a5c5b6f564488a79f345c7b",
+      "observation": "combined-observed.json",
+      "response": "combined-response.md",
+      "helperCommand": "pwsh -NoProfile -File evals/joeness-setup/runs/2026-10-07-neutral-integration/joeness/connect-fixture.ps1 -ProjectPath C:/Users/tjdwo/AppData/Local/Temp/joeness-integration-81b10f01bbca4be18b51f2cbbf3d03bb/combined -ProductSource product-definition/state.json -Combined",
+      "helperExitCode": 0,
+      "captureExitCode": 0
+    }
+  ],
+  "limitations": [
+    "prepared source-saved/summary-stale checkpoint, not process crash or filesystem fault recovery",
+    "synthetic fixtures; no real product authority or new user approval",
+    "combined uses draft-specific glue in temporary AGENTS, not shipped integration automation",
+    "one run per scenario; no Bare control, accuracy rate, usability or token comparison"
+  ],
+  "failures": [
+    {
+      "phase": "fixture driver first standalone invocation",
+      "cause": "dot-sourced helper Check/Apply switch names collided with $check/$apply local result variables",
+      "error": "Cannot convert value \"System.Management.Automation.PSCustomObject\" to type \"System.Management.Automation.SwitchParameter\".",
+      "effect": "failed before Apply; fixture remained ready",
+      "correction": "driver-only $connectionCheck/$connectionApply/$connectionPost/$connectArgs; actual helper unchanged",
+      "result": "subsequent actual helper ready -> current -> current/clean"
+    }
+  ],
+  "observedDeviation": {
+    "scenario": "standalone",
+    "detail": "R1 status 'passed in recorded synthetic evidence (demo-7)' instead of canonical status label; evidence qualifier and no-new-run limit retained",
+    "judgment": "nonmaterial vocabulary deviation, not full formatting-conformance pass; no shipped rule added for one sample"
+  }
+}

@@ -1,0 +1,142 @@
+{
+  "root": "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-integration-81b10f01bbca4be18b51f2cbbf3d03bb\\combined",
+  "baseline": "e942336a4e21c0ce5a5c5b6f564488a79f345c7b",
+  "files": {
+    "AGENTS.md": {
+      "beforeSha256": "6766b27e97dd21f7b82dc0bea06c2929f5ffb0f39a756d365deccae61fc39ceb",
+      "afterSha256": "6766b27e97dd21f7b82dc0bea06c2929f5ffb0f39a756d365deccae61fc39ceb",
+      "unchanged": true,
+      "before": "<!-- JOENESS-SETUP:BEGIN -->\n# Project working connection\n\n\n- Owners: AGENTS.md = working rules and source index, not history.\n  ROADMAP.md = project delivery goals/order, item criteria/status/proof/next.\n  TASK.md = work results and verification. ISSUES.md = open defects, workarounds,\n  residual risk and closure condition. DESIGN.md = visual rules and approval.\n  Library/ = topic knowledge, not live progress or approval.\n  Product/decisions: product-definition/state.json; retain its authority.\n- Reading: new/resumed work starts at ROADMAP, then relevant TASK/ISSUES and\n  target. Defects start at ISSUES + target, then TASK proof and roadmap impact.\n  Visual work: roadmap scope → DESIGN → related Library. Research: roadmap\n  question → related Library. Completion/handoff: roadmap required items →\n  linked TASK proof, open ISSUES and applicable approval. Read relevant sections\n  only. Do not load all history or invoke setup for each task.\n- Resolve intent at its authorized owner, observed facts at current target/proof;\n  newer notes or working code cannot grant approval. Old handoffs are locators,\n  not new scope. An unrelated subplan cannot replace the project ROADMAP.\n- Recording consent: TASK.md and affected ROADMAP.md/ISSUES.md facts only; no Product or DESIGN writes. Worker records result/check/proof in TASK,\n  updates affected roadmap state/gap/next, and maintains relevant unresolved\n  issues. Investigator owns cause/workaround/risk/closure in ISSUES. A workaround\n  stays open until its closure check passes. DESIGN changes need authorization.\n  Research detail goes to its existing Library topic, source/date and\n  fact/inference/limits included; create or split a topic only when needed.\n- Do not copy credentials or unnecessary personal data into records, reports or\n  Git. Use redacted meaning and an authorized restricted source locator without\n  secrets. Unclear storage/access scope: leave raw data at source, report the gap.\n- Parallel shared records: name one integrator; others provide results/proof.\n  Reread current entries against the working baseline before saving, merge\n  independent changes; on conflict preserve both sources and leave the affected\n  verdict open. Reconcile a changed baseline before retrying; this is not a lock.\n- Store detail once; use short summaries with links elsewhere. ROADMAP holds\n  criteria and proof links, not common rules or full reports. A one-off review\n  belongs in TASK, not a mandatory evaluation file. Write concisely at source,\n  preserving cause, evidence, uncertainty and approval limits; no rewrite pass.\n- Before work, check the roadmap item/order and entry conditions. Open conditions\n  block dependent work, not independent authorized work. Change scope/order/\n  criteria only by authorized direction. Before completion, inspect every\n  required item's actual proof. Pending checks/holds stay open; authorized scope\n  removal retains its reason and is not a pass. Task, stage and user acceptance\n  are separate. Refresh current/next after changed facts.\n- Reuse applicable proof; rerun only for a named change, failure or uncovered\n  condition. Not found does not mean never checked. No changed fact means no\n  repeat record. Questions and no-record requests cause no record writes.\n  Report missing sources/writes without abandoning independent authorized work.\n- After substantive work/handoff, start with six short bullets in everyday language:\n  작업, 업데이트 파일, 이슈, 해결, 남은 문제, 다음 작업. Use 없음 when empty.\n  Report only actual changes; 이슈 = problem, 해결 = verified fix (not a passing\n  check), 남은 문제 = unresolved/unverified work, 다음 작업 = authorized next\n  action. Necessary proof/limits/approval follow briefly under 상세 보고; no repeated\n  summary. Simple questions need no work report.\n- Preserve dated history and evidence. Follow exact Git commit:path locators when\n  needed; keep unarchived latest detail and effective workarounds visible.\n\n- Product state writes belong to its authorized product-definition maintainer.\n  This session reads that source only. Reference its schema/revision/file hash and\n  relevant stable IDs; do not turn an observation reference into approval.\n  On resume, reconcile affected summaries against the actual owner; preserve\n  partial decisions, open conditions and approval scope. TASK records any unsaved gap.\n<!-- JOENESS-SETUP:END -->\n\n# Existing project rule\nOnly the product-definition maintainer may change product-definition/state.json.\nThis operational continuation may update authorized work records, not product meaning.\n",
+      "after": "<!-- JOENESS-SETUP:BEGIN -->\n# Project working connection\n\n\n- Owners: AGENTS.md = working rules and source index, not history.\n  ROADMAP.md = project delivery goals/order, item criteria/status/proof/next.\n  TASK.md = work results and verification. ISSUES.md = open defects, workarounds,\n  residual risk and closure condition. DESIGN.md = visual rules and approval.\n  Library/ = topic knowledge, not live progress or approval.\n  Product/decisions: product-definition/state.json; retain its authority.\n- Reading: new/resumed work starts at ROADMAP, then relevant TASK/ISSUES and\n  target. Defects start at ISSUES + target, then TASK proof and roadmap impact.\n  Visual work: roadmap scope → DESIGN → related Library. Research: roadmap\n  question → related Library. Completion/handoff: roadmap required items →\n  linked TASK proof, open ISSUES and applicable approval. Read relevant sections\n  only. Do not load all history or invoke setup for each task.\n- Resolve intent at its authorized owner, observed facts at current target/proof;\n  newer notes or working code cannot grant approval. Old handoffs are locators,\n  not new scope. An unrelated subplan cannot replace the project ROADMAP.\n- Recording consent: TASK.md and affected ROADMAP.md/ISSUES.md facts only; no Product or DESIGN writes. Worker records result/check/proof in TASK,\n  updates affected roadmap state/gap/next, and maintains relevant unresolved\n  issues. Investigator owns cause/workaround/risk/closure in ISSUES. A workaround\n  stays open until its closure check passes. DESIGN changes need authorization.\n  Research detail goes to its existing Library topic, source/date and\n  fact/inference/limits included; create or split a topic only when needed.\n- Do not copy credentials or unnecessary personal data into records, reports or\n  Git. Use redacted meaning and an authorized restricted source locator without\n  secrets. Unclear storage/access scope: leave raw data at source, report the gap.\n- Parallel shared records: name one integrator; others provide results/proof.\n  Reread current entries against the working baseline before saving, merge\n  independent changes; on conflict preserve both sources and leave the affected\n  verdict open. Reconcile a changed baseline before retrying; this is not a lock.\n- Store detail once; use short summaries with links elsewhere. ROADMAP holds\n  criteria and proof links, not common rules or full reports. A one-off review\n  belongs in TASK, not a mandatory evaluation file. Write concisely at source,\n  preserving cause, evidence, uncertainty and approval limits; no rewrite pass.\n- Before work, check the roadmap item/order and entry conditions. Open conditions\n  block dependent work, not independent authorized work. Change scope/order/\n  criteria only by authorized direction. Before completion, inspect every\n  required item's actual proof. Pending checks/holds stay open; authorized scope\n  removal retains its reason and is not a pass. Task, stage and user acceptance\n  are separate. Refresh current/next after changed facts.\n- Reuse applicable proof; rerun only for a named change, failure or uncovered\n  condition. Not found does not mean never checked. No changed fact means no\n  repeat record. Questions and no-record requests cause no record writes.\n  Report missing sources/writes without abandoning independent authorized work.\n- After substantive work/handoff, start with six short bullets in everyday language:\n  작업, 업데이트 파일, 이슈, 해결, 남은 문제, 다음 작업. Use 없음 when empty.\n  Report only actual changes; 이슈 = problem, 해결 = verified fix (not a passing\n  check), 남은 문제 = unresolved/unverified work, 다음 작업 = authorized next\n  action. Necessary proof/limits/approval follow briefly under 상세 보고; no repeated\n  summary. Simple questions need no work report.\n- Preserve dated history and evidence. Follow exact Git commit:path locators when\n  needed; keep unarchived latest detail and effective workarounds visible.\n\n- Product state writes belong to its authorized product-definition maintainer.\n  This session reads that source only. Reference its schema/revision/file hash and\n  relevant stable IDs; do not turn an observation reference into approval.\n  On resume, reconcile affected summaries against the actual owner; preserve\n  partial decisions, open conditions and approval scope. TASK records any unsaved gap.\n<!-- JOENESS-SETUP:END -->\n\n# Existing project rule\nOnly the product-definition maintainer may change product-definition/state.json.\nThis operational continuation may update authorized work records, not product meaning.\n"
+    },
+    "ROADMAP.md": {
+      "beforeSha256": "2d9e486bffb894f8b7f55135428f091c879da6a4250c1e32acb41f2fc0dda9b5",
+      "afterSha256": "8d87415aae241e934caf38308693c8e46f5f8239f85b59374be8fc9fbb9a6ded",
+      "unchanged": false,
+      "before": "# Neutral operations console\nProduct authority: product-definition/state.json.\nCurrent stage: scope and permissions. Next: ask the owner to choose the console direction.\nEntry: source for product decisions is available.\nCompletion: R1 direction adopted and R2 connector rights established; full product approval separate.\n| ID | Required outcome | Status | Check | Evidence or gap |\n|---|---|---|---|---|\n| R1 | Console direction | not started | adopted direction from product owner | UNK-1000 open; no decision reflected |\n| R2 | External connector content permissions | verification pending | permission evidence for intended reuse | UNK-1001 open |\n",
+      "after": "# Neutral operations console\nProduct authority: product-definition/state.json.\nCurrent stage: scope and permissions; direction adopted, connector permissions pending. Next: reconcile R2 when connector-specific permission evidence or an equivalent synthetic source is supplied and reflected by the authorized product-definition maintainer.\nEntry: source for product decisions is available.\nCompletion: R1 direction adopted and R2 connector rights established; full product approval separate.\n| ID | Required outcome | Status | Check | Evidence or gap |\n|---|---|---|---|---|\n| R1 | Console direction | complete (working direction only) | adopted direction from product owner | UNK-1000 RESOLVED; DEC-1000 / EVD-1000 accept read-only operational status aggregation; [source reconciliation](TASK.md#2026-10-07-source-reconciliation) |\n| R2 | External connector content permissions | verification pending | permission evidence for intended reuse | UNK-1001 open |\n\nR2 remains required and blocks stage completion. Product definition remains OPEN and full approval UNAPPROVED; direction acceptance grants no connector content-reuse permission.\n"
+    },
+    "TASK.md": {
+      "beforeSha256": "589b2e18a670cd1aab3043a29356350f21832f9e8f4647de05af4e35cab8846d",
+      "afterSha256": "16a2f6ada71c3b63f518e05609a1b25747328b3e439583a7d1d5b862b112f636",
+      "unchanged": false,
+      "before": "# Work records\n## prepared-summary\nInitial roadmap summary prepared before the product-definition maintainer saved its result.\nNo product implementation or external permission validation has been performed.\n\n## interrupted-source-update\nProduct-definition maintainer's latest state was saved at product-definition/state.json.\nThe operation stopped before related ROADMAP summaries were updated.\nSaved source observation: schema 0.2.0, definition revision 1,\nSHA-256 5d9c05f37a882984913ebe9b6b7d886e978c7d54ef8ab1423db7b2b00aa1bdc9.\nNo operation or user approval has been added by this handoff note.\nRecord handoff gap: inspect the current source and reconcile affected roadmap summaries.\n",
+      "after": "# Work records\n## prepared-summary\nInitial roadmap summary prepared before the product-definition maintainer saved its result.\nNo product implementation or external permission validation has been performed.\n\n## interrupted-source-update\nProduct-definition maintainer's latest state was saved at product-definition/state.json.\nThe operation stopped before related ROADMAP summaries were updated.\nSaved source observation: schema 0.2.0, definition revision 1,\nSHA-256 5d9c05f37a882984913ebe9b6b7d886e978c7d54ef8ab1423db7b2b00aa1bdc9.\nNo operation or user approval has been added by this handoff note.\nRecord handoff gap: inspect the current source and reconcile affected roadmap summaries.\n\n## 2026-10-07-source-reconciliation\nResumed the interrupted record update against the actual product authority, `product-definition/state.json`: schema 0.2.0, definition revision 1, SHA-256 `5d9c05f37a882984913ebe9b6b7d886e978c7d54ef8ab1423db7b2b00aa1bdc9`. The current hash matches the saved observation above. This is a source observation, not new approval.\n\nChecked both required roadmap outcomes: UNK-1000 is RESOLVED by current DEC-1000 with EVD-1000, adopting read-only operational status aggregation as the working direction; UNK-1001 remains OPEN with no permission evidence or resolution. Corrected R1 and the obsolete next action in ROADMAP.md. R2 remains verification pending, so the scope-and-permissions stage is incomplete. Definition status is OPEN, discovery baseline NOT_ESTABLISHED, and approval UNAPPROVED.\n\nThe handoff's unsaved roadmap gap is now reconciled. No product implementation or external permission validation was performed. No new defect was observed; ISSUES.md remains applicable, with product questions retained at their authority. Product meaning, design, working rules, settings and code were not changed.\n\nNext authorized record action: when connector-specific reuse evidence or an equivalent synthetic source is supplied and reflected by the authorized product-definition maintainer, reconcile R2 against that source and record the check. Until then, preserve R2 and full approval as pending; no source-write gap remains from this continuation.\n"
+    },
+    "ISSUES.md": {
+      "beforeSha256": "dce93ae24cfcc0e01fa4d997228cd8040ea4b79c9da3cb5b31267c64c8b92fcf",
+      "afterSha256": "dce93ae24cfcc0e01fa4d997228cd8040ea4b79c9da3cb5b31267c64c8b92fcf",
+      "unchanged": true,
+      "before": "# Open defects\nNone observed. Product questions remain in their product authority, not this file.\n",
+      "after": "# Open defects\nNone observed. Product questions remain in their product authority, not this file.\n"
+    },
+    "DESIGN.md": {
+      "beforeSha256": "cd081410c8cbf61a0282dd283541255cc698e66b50e75bab2a0f92ae399960ba",
+      "afterSha256": "cd081410c8cbf61a0282dd283541255cc698e66b50e75bab2a0f92ae399960ba",
+      "unchanged": true,
+      "before": "# Visual rules\nNo visual design approved. No visual change authorized.\n",
+      "after": "# Visual rules\nNo visual design approved. No visual change authorized.\n"
+    },
+    "product-definition/state.json": {
+      "beforeSha256": "5d9c05f37a882984913ebe9b6b7d886e978c7d54ef8ab1423db7b2b00aa1bdc9",
+      "afterSha256": "5d9c05f37a882984913ebe9b6b7d886e978c7d54ef8ab1423db7b2b00aa1bdc9",
+      "unchanged": true,
+      "sourceEvidence": "../joeflow/open-source-state.json",
+      "beforeSummary": {
+        "schema": "0.2.0",
+        "project": {
+          "slug": "neutral-operations-status-console",
+          "definition_status": "OPEN",
+          "definition_revision": 1,
+          "bootstrap_mode": "NEW_PRODUCT",
+          "closure_contract": {
+            "level": "SEMANTIC_CLOSURE",
+            "product_binding_contract": {
+              "contract_id": "joewrks.product-coverage-binding",
+              "version": "1.0",
+              "digest": "b57459533247de52038aacb158e785c2184edcdd2fa6831f0edc3db713775f3c"
+            },
+            "ux_binding_contract": {
+              "contract_id": "joewrks.ux-coverage-binding",
+              "version": "1.0",
+              "digest": "8fc84057a4a6f0f0ce329a58d11b8e208989800147d703665cea52088de0be0d"
+            }
+          }
+        },
+        "approval": {
+          "status": "UNAPPROVED"
+        },
+        "approval_history": [],
+        "decisions": [
+          {
+            "id": "DEC-1000",
+            "status": "CURRENT"
+          }
+        ],
+        "unknowns": [
+          {
+            "id": "UNK-1000",
+            "status": "RESOLVED"
+          },
+          {
+            "id": "UNK-1001",
+            "status": "OPEN"
+          }
+        ]
+      },
+      "afterSummary": {
+        "schema": "0.2.0",
+        "project": {
+          "slug": "neutral-operations-status-console",
+          "definition_status": "OPEN",
+          "definition_revision": 1,
+          "bootstrap_mode": "NEW_PRODUCT",
+          "closure_contract": {
+            "level": "SEMANTIC_CLOSURE",
+            "product_binding_contract": {
+              "contract_id": "joewrks.product-coverage-binding",
+              "version": "1.0",
+              "digest": "b57459533247de52038aacb158e785c2184edcdd2fa6831f0edc3db713775f3c"
+            },
+            "ux_binding_contract": {
+              "contract_id": "joewrks.ux-coverage-binding",
+              "version": "1.0",
+              "digest": "8fc84057a4a6f0f0ce329a58d11b8e208989800147d703665cea52088de0be0d"
+            }
+          }
+        },
+        "approval": {
+          "status": "UNAPPROVED"
+        },
+        "approval_history": [],
+        "decisions": [
+          {
+            "id": "DEC-1000",
+            "status": "CURRENT"
+          }
+        ],
+        "unknowns": [
+          {
+            "id": "UNK-1000",
+            "status": "RESOLVED"
+          },
+          {
+            "id": "UNK-1001",
+            "status": "OPEN"
+          }
+        ]
+      }
+    }
+  },
+  "connectionState": {
+    "beforeSha256": "e2a0d3ca34caf1532aa5f451b357e1a25c98e439ea65e5665d6e312c52a650df",
+    "afterSha256": "e2a0d3ca34caf1532aa5f451b357e1a25c98e439ea65e5665d6e312c52a650df",
+    "unchanged": true
+  },
+  "changedNames": [
+    "ROADMAP.md",
+    "TASK.md"
+  ],
+  "untracked": [],
+  "diff": "diff --git a/ROADMAP.md b/ROADMAP.md\nindex a87e413..777988e 100644\n--- a/ROADMAP.md\n+++ b/ROADMAP.md\n@@ -1,9 +1,11 @@\n # Neutral operations console\n Product authority: product-definition/state.json.\n-Current stage: scope and permissions. Next: ask the owner to choose the console direction.\n+Current stage: scope and permissions; direction adopted, connector permissions pending. Next: reconcile R2 when connector-specific permission evidence or an equivalent synthetic source is supplied and reflected by the authorized product-definition maintainer.\n Entry: source for product decisions is available.\n Completion: R1 direction adopted and R2 connector rights established; full product approval separate.\n | ID | Required outcome | Status | Check | Evidence or gap |\n |---|---|---|---|---|\n-| R1 | Console direction | not started | adopted direction from product owner | UNK-1000 open; no decision reflected |\n+| R1 | Console direction | complete (working direction only) | adopted direction from product owner | UNK-1000 RESOLVED; DEC-1000 / EVD-1000 accept read-only operational status aggregation; [source reconciliation](TASK.md#2026-10-07-source-reconciliation) |\n | R2 | External connector content permissions | verification pending | permission evidence for intended reuse | UNK-1001 open |\n+\n+R2 remains required and blocks stage completion. Product definition remains OPEN and full approval UNAPPROVED; direction acceptance grants no connector content-reuse permission.\ndiff --git a/TASK.md b/TASK.md\nindex 768d1f1..be9bffa 100644\n--- a/TASK.md\n+++ b/TASK.md\n@@ -10,3 +10,12 @@ Saved source observation: schema 0.2.0, definition revision 1,\n SHA-256 5d9c05f37a882984913ebe9b6b7d886e978c7d54ef8ab1423db7b2b00aa1bdc9.\n No operation or user approval has been added by this handoff note.\n Record handoff gap: inspect the current source and reconcile affected roadmap summaries.\n+\n+## 2026-10-07-source-reconciliation\n+Resumed the interrupted record update against the actual product authority, `product-definition/state.json`: schema 0.2.0, definition revision 1, SHA-256 `5d9c05f37a882984913ebe9b6b7d886e978c7d54ef8ab1423db7b2b00aa1bdc9`. The current hash matches the saved observation above. This is a source observation, not new approval.\n+\n+Checked both required roadmap outcomes: UNK-1000 is RESOLVED by current DEC-1000 with EVD-1000, adopting read-only operational status aggregation as the working direction; UNK-1001 remains OPEN with no permission evidence or resolution. Corrected R1 and the obsolete next action in ROADMAP.md. R2 remains verification pending, so the scope-and-permissions stage is incomplete. Definition status is OPEN, discovery baseline NOT_ESTABLISHED, and approval UNAPPROVED.\n+\n+The handoff's unsaved roadmap gap is now reconciled. No product implementation or external permission validation was performed. No new defect was observed; ISSUES.md remains applicable, with product questions retained at their authority. Product meaning, design, working rules, settings and code were not changed.\n+\n+Next authorized record action: when connector-specific reuse evidence or an equivalent synthetic source is supplied and reflected by the authorized product-definition maintainer, reconcile R2 against that source and record the check. Until then, preserve R2 and full approval as pending; no source-write gap remains from this continuation.\n"
+}

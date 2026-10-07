@@ -1,0 +1,312 @@
+{
+  "schema_version": "0.2.0",
+  "project": {
+    "slug": "neutral-operations-status-console",
+    "definition_status": "OPEN",
+    "definition_revision": 1,
+    "bootstrap_mode": "NEW_PRODUCT",
+    "closure_contract": {
+      "level": "SEMANTIC_CLOSURE",
+      "product_binding_contract": {
+        "contract_id": "joewrks.product-coverage-binding",
+        "version": "1.0",
+        "digest": "b57459533247de52038aacb158e785c2184edcdd2fa6831f0edc3db713775f3c"
+      },
+      "ux_binding_contract": {
+        "contract_id": "joewrks.ux-coverage-binding",
+        "version": "1.0",
+        "digest": "8fc84057a4a6f0f0ce329a58d11b8e208989800147d703665cea52088de0be0d"
+      }
+    }
+  },
+  "migration": {
+    "mode": "NATIVE"
+  },
+  "evidence": [
+    {
+      "id": "EVD-1000",
+      "status": "CURRENT",
+      "source_kind": "USER_CONFIRMED_INTENT",
+      "locator": "synthetic:t008/neutral-direction-acceptance",
+      "claim": "Synthetic test authority accepts read-only operational status aggregation as the working direction while keeping each external connector permission as a separate unresolved condition.",
+      "confidence": "DIRECT",
+      "authority_classes": [
+        "INTENT"
+      ],
+      "observed_version": null,
+      "content_hash": null
+    },
+    {
+      "id": "EVD-1001",
+      "status": "CURRENT",
+      "source_kind": "USER_CONFIRMED_INTENT",
+      "locator": "synthetic:t008/topology-classification",
+      "claim": "The synthetic fixture has no authentication, money, file upload, asynchronous job, permission mutation, or destructive-action topology in scope.",
+      "confidence": "DIRECT",
+      "authority_classes": [
+        "INTENT"
+      ],
+      "observed_version": null,
+      "content_hash": null
+    }
+  ],
+  "surface_manifest": {
+    "records": [],
+    "grill_profile": {
+      "AUTH": {
+        "status": "N/A",
+        "surface_refs": [],
+        "unknown_refs": [],
+        "basis_refs": [
+          "EVD-1001"
+        ],
+        "rationale": "Synthetic discovery found no applicable authentication topology."
+      },
+      "MONEY": {
+        "status": "N/A",
+        "surface_refs": [],
+        "unknown_refs": [],
+        "basis_refs": [
+          "EVD-1001"
+        ],
+        "rationale": "Synthetic discovery found no applicable money topology."
+      },
+      "FILE_UPLOAD": {
+        "status": "N/A",
+        "surface_refs": [],
+        "unknown_refs": [],
+        "basis_refs": [
+          "EVD-1001"
+        ],
+        "rationale": "Synthetic discovery found no applicable file-upload topology."
+      },
+      "ASYNC": {
+        "status": "N/A",
+        "surface_refs": [],
+        "unknown_refs": [],
+        "basis_refs": [
+          "EVD-1001"
+        ],
+        "rationale": "Synthetic discovery found no applicable asynchronous-job topology."
+      },
+      "PERMISSION": {
+        "status": "N/A",
+        "surface_refs": [],
+        "unknown_refs": [],
+        "basis_refs": [
+          "EVD-1001"
+        ],
+        "rationale": "Synthetic discovery found no applicable permission-mutation topology."
+      },
+      "DESTRUCTIVE_ACTION": {
+        "status": "N/A",
+        "surface_refs": [],
+        "unknown_refs": [],
+        "basis_refs": [
+          "EVD-1001"
+        ],
+        "rationale": "Synthetic discovery found no applicable destructive-action topology."
+      }
+    }
+  },
+  "contradictions": [],
+  "objects": {
+    "goals": [
+      {
+        "id": "GOAL-1000",
+        "status": "CURRENT",
+        "statement": "Provide a neutral operations status console without claiming permission to reuse protected external connector content."
+      }
+    ],
+    "users": [],
+    "requirements": [],
+    "unknowns": [
+      {
+        "id": "UNK-1000",
+        "status": "RESOLVED",
+        "question": "Should the neutral console use read-only status aggregation as its working direction?",
+        "why_it_matters": "The direction determines which operational behavior may be specified while leaving connector permissions separate.",
+        "required_authority_class": "INTENT",
+        "question_category": "SCOPE_BOUNDARY",
+        "materiality": {
+          "outcome_divergence": "HIGH",
+          "fan_out": "MULTI_FLOW",
+          "user_visible": true,
+          "reversibility": "REVERSIBLE",
+          "risk_flags": {
+            "security": false,
+            "privacy": false,
+            "money": false,
+            "legal_or_policy": true,
+            "destructive": false,
+            "data_loss": false,
+            "external_commitment": false
+          },
+          "classification": "MATERIAL"
+        },
+        "decision_authority": "USER_CONFIRMATION",
+        "affects": [
+          "GOAL-1000"
+        ],
+        "blocks_unknown_refs": [],
+        "origin": {
+          "kind": "MANUAL",
+          "surface_ref": null,
+          "pack_id": null,
+          "axis_id": null,
+          "source_path": null
+        },
+        "response_mode": "MUTUALLY_EXCLUSIVE",
+        "options": [
+          {
+            "id": "READ_ONLY_AGGREGATION",
+            "statement": "Use read-only operational status aggregation as the working direction.",
+            "consequences": [
+              "Connector-specific permissions remain separate external conditions."
+            ]
+          },
+          {
+            "id": "MUTATING_CONTROL_PLANE",
+            "statement": "Use a mutating operational control plane instead.",
+            "consequences": [
+              "Authentication, authorization, destructive actions, and recovery policy would need separate definition."
+            ]
+          }
+        ],
+        "recommendation": {
+          "recommended_option": "READ_ONLY_AGGREGATION",
+          "reasoning_refs": [
+            "EVD-1000"
+          ],
+          "tradeoffs": [
+            "The console may observe status but may not mutate external systems.",
+            "Direction acceptance does not establish connector content-reuse permission."
+          ],
+          "confidence": "HIGH"
+        },
+        "evidence_refs": [
+          "EVD-1000"
+        ],
+        "resolved_by": [
+          "DEC-1000"
+        ],
+        "resolution_mode": "USER_ACCEPTED_RECOMMENDATION",
+        "resolution_summary": "The synthetic authority accepted read-only status aggregation and kept external reuse permissions separate.",
+        "deferral": null,
+        "blocked_reason": null
+      },
+      {
+        "id": "UNK-1001",
+        "status": "OPEN",
+        "question": "Which external connector content has explicit reuse permission or an equivalent synthetic source?",
+        "why_it_matters": "Public availability does not establish permission to reuse protected external content.",
+        "required_authority_class": "FACTUAL",
+        "question_category": "SCOPE_BOUNDARY",
+        "materiality": {
+          "outcome_divergence": "HIGH",
+          "fan_out": "MULTI_FLOW",
+          "user_visible": true,
+          "reversibility": "REVERSIBLE",
+          "risk_flags": {
+            "security": false,
+            "privacy": false,
+            "money": false,
+            "legal_or_policy": true,
+            "destructive": false,
+            "data_loss": false,
+            "external_commitment": false
+          },
+          "classification": "MATERIAL"
+        },
+        "decision_authority": "EXTERNAL_AUTHORITY_REQUIRED",
+        "affects": [
+          "GOAL-1000"
+        ],
+        "blocks_unknown_refs": [],
+        "origin": {
+          "kind": "MANUAL",
+          "surface_ref": null,
+          "pack_id": null,
+          "axis_id": null,
+          "source_path": null
+        },
+        "response_mode": "OPEN_RESPONSE_REQUIRED",
+        "options": [],
+        "recommendation": null,
+        "evidence_refs": [],
+        "resolved_by": [],
+        "resolution_mode": null,
+        "resolution_summary": null,
+        "deferral": null,
+        "blocked_reason": null
+      }
+    ],
+    "decisions": [
+      {
+        "id": "DEC-1000",
+        "status": "CURRENT",
+        "statement": "Use read-only operational status aggregation as the working direction; connector-specific reuse permissions remain unresolved and separate.",
+        "decision_type": "SYNTHETIC_DIRECTION_SCOPE",
+        "resolution_mode": "USER_ACCEPTED_RECOMMENDATION",
+        "decision_authority": "USER_CONFIRMATION",
+        "source_unknown_refs": [
+          "UNK-1000"
+        ],
+        "evidence_refs": [
+          "EVD-1000"
+        ],
+        "materiality": {
+          "outcome_divergence": "HIGH",
+          "fan_out": "MULTI_FLOW",
+          "user_visible": true,
+          "reversibility": "REVERSIBLE",
+          "risk_flags": {
+            "security": false,
+            "privacy": false,
+            "money": false,
+            "legal_or_policy": true,
+            "destructive": false,
+            "data_loss": false,
+            "external_commitment": false
+          },
+          "classification": "MATERIAL"
+        },
+        "affects": [
+          "GOAL-1000"
+        ],
+        "decided_by": "USER",
+        "accepted_recommendation": {
+          "recommended_option": "READ_ONLY_AGGREGATION",
+          "alternatives_presented": [
+            "READ_ONLY_AGGREGATION",
+            "MUTATING_CONTROL_PLANE"
+          ],
+          "tradeoffs_presented": [
+            "The console may observe status but may not mutate external systems.",
+            "Direction acceptance does not establish connector content-reuse permission."
+          ],
+          "accepted_by": "user",
+          "accepted_at": null
+        }
+      }
+    ],
+    "rules": [],
+    "flows": [],
+    "screens": [],
+    "states": [],
+    "data": [],
+    "integrations": [],
+    "acceptance_criteria": [],
+    "tasks": []
+  },
+  "coverage": [],
+  "ux_coverage": [],
+  "grill_coverage": [],
+  "discovery_baseline": {
+    "status": "NOT_ESTABLISHED"
+  },
+  "approval": {
+    "status": "UNAPPROVED"
+  },
+  "approval_history": []
+}

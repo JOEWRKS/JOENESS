@@ -1,0 +1,2 @@
+# Keep the recorded Python source hash stable on Windows checkouts.
+joeflow/*.py text eol=lf

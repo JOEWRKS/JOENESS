@@ -1,0 +1,66 @@
+{
+  "check": {
+    "action": "check",
+    "status": "ready",
+    "verificationScope": "managed-connection-only",
+    "projectRoot": "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-integration-81b10f01bbca4be18b51f2cbbf3d03bb\\standalone",
+    "target": "AGENTS.md",
+    "targetHash": "25bbdeab4845bc1866dc92b86f816075aafdabdce6023e021492324539d0bd0a",
+    "statePath": ".joeness/setup-state.json",
+    "stateHash": "absent",
+    "blockState": "absent",
+    "changedTargets": [],
+    "blockers": [],
+    "rollback": null,
+    "unresolvedTargets": []
+  },
+  "apply": {
+    "action": "apply",
+    "status": "current",
+    "verificationScope": "managed-connection-only",
+    "projectRoot": "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-integration-81b10f01bbca4be18b51f2cbbf3d03bb\\standalone",
+    "target": "AGENTS.md",
+    "targetHash": "8406735ee9babf968253979d16196ea3a1510aae51d2e449d94c6b52407d99be",
+    "statePath": ".joeness/setup-state.json",
+    "stateHash": "953c2dcbdbdec3f020c4c35b255894181045eb5e0a840a360fbb71ce4b9327b7",
+    "blockState": "clean",
+    "changedTargets": [
+      "AGENTS.md",
+      ".joeness/setup-state.json"
+    ],
+    "blockers": [],
+    "rollback": null,
+    "unresolvedTargets": []
+  },
+  "post": {
+    "action": "check",
+    "status": "current",
+    "verificationScope": "managed-connection-only",
+    "projectRoot": "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-integration-81b10f01bbca4be18b51f2cbbf3d03bb\\standalone",
+    "target": "AGENTS.md",
+    "targetHash": "8406735ee9babf968253979d16196ea3a1510aae51d2e449d94c6b52407d99be",
+    "statePath": ".joeness/setup-state.json",
+    "stateHash": "953c2dcbdbdec3f020c4c35b255894181045eb5e0a840a360fbb71ce4b9327b7",
+    "blockState": "clean",
+    "changedTargets": [],
+    "blockers": [],
+    "rollback": null,
+    "unresolvedTargets": []
+  },
+  "protectedBefore": {
+    "product-brief.md": "3060094b34cb68d94bc4a893da31d3e1c2cbb0cf2fe3e346eb5077ca135cf240",
+    "DESIGN.md": "6ca682794a2a0fd150efde21a549294e4f4ec660fc787422ea55e64d7a25bcbb",
+    "ROADMAP.md": "a0dfa6d14f7e7d3f446727753bcbe8bbf37dc687d4d37f73c22855bb015596c6",
+    "ISSUES.md": "34767a95f39cb3c26a3dfa61b9b35a69a1d1e7f28691705d0b21523858ab473e",
+    "TASK.md": "7498f0cf04e9a04b1e3019275c9ed69141b73af6c0888005e59eb9cc063e2266"
+  },
+  "protectedAfter": {
+    "product-brief.md": "3060094b34cb68d94bc4a893da31d3e1c2cbb0cf2fe3e346eb5077ca135cf240",
+    "DESIGN.md": "6ca682794a2a0fd150efde21a549294e4f4ec660fc787422ea55e64d7a25bcbb",
+    "ROADMAP.md": "a0dfa6d14f7e7d3f446727753bcbe8bbf37dc687d4d37f73c22855bb015596c6",
+    "ISSUES.md": "34767a95f39cb3c26a3dfa61b9b35a69a1d1e7f28691705d0b21523858ab473e",
+    "TASK.md": "7498f0cf04e9a04b1e3019275c9ed69141b73af6c0888005e59eb9cc063e2266"
+  },
+  "outsideAgentsPreserved": true,
+  "combinedDraftGlue": false
+}
