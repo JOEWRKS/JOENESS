@@ -94,3 +94,10 @@ QA가 두 observed JSON을 임시 Git baseline/현재 파일과 직접 대조해
 한정 중단 재개와 두 단독 경로 통과 의견을 수령했다. 이번 결과는 공동 최소 호환안의 선택 근거이며,
 사용자 채택·제품 의미 소유권 이전·main 병합·릴리스·개인 설치·실제 프로젝트 적용은 수행하지 않는다.
 최종 commit/tree/원격 SHA는 Git 이력과 인계 답변에서 식별한다.
+
+## 후보 원격 인계
+
+증거 커밋 `d3a3c4bd9f0a32fb7a97bb5c46db959b1c99db97`, tree `d0a37c0abad130929790d165a94f6123986eeb45`.
+`git push origin codex/qa-recording-boundaries` 성공, `git ls-remote` 동일 SHA 확인.
+main은 `45cdd78efac7a0983a4abba9b0ca71e818983824` 유지. 뒤따르는 완료 상태 기록은
+ROADMAP과 이 보고서만 변경한다. 로컬 앱 이슈 파일·링크는 보존하되 두 커밋에서 제외한다.
