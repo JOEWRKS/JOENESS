@@ -5,7 +5,7 @@
 ## 현재 작업 — 자체 QA 보강·연결 계약 초안 (2026-10-07)
 
 범위: 민감 원문 기록 경계와 병렬 기록 통합 책임 보강, JOEFLOW 연결 계약 초안.
-현재 단계: T008 중립 검증·원격 인계 완료. 2026-10-07 사용자 후속 승인으로 T009 후보 개인 설치·GEO 연결 갱신·현행 운영 기록 대조 완료. 정식 새 출시·main 반영 제외.
+현재 단계: T008 중립 검증·원격 인계, T009 후보 개인 설치·GEO 운영 대조 완료. 사용자 QA 후속 승인으로 T010 저장된 GEO 새 채팅의 자동 지침 전달·읽기 전용 인계 1회 확인 완료. 정식 새 출시·main 반영 제외.
 기준: [기존 설계의 QA·공동 계약 절](superpowers/specs/2026-09-29-joeness-context-storage-routing-design.md), [후속 계획 Q1–Q5](superpowers/plans/2026-09-29-joeness-context-storage-routing.md).
 
 | 단계 | 필수 결과 | 상태 | 검증·완료 조건 | 근거 / 미완 |
@@ -18,10 +18,12 @@
 | Q6 / T008 | 중립 연결·중단 후 재개·두 단독 경로 | 완료(한정) | 실제 helper 두 건, 새 문맥 재개 각1회, Product/승인 보존; JOEFLOW 의존성 검사와 QA 대조 | [실제 전후 근거](../evals/joeness-setup/runs/2026-10-07-neutral-integration/joeness/review-evidence.md). 자동 장애 복구·현장 적용 아님 |
 | Q7 | T008 근거 원격 인계 | 완료 | 관련 증거·초안 commit/push·원격 SHA 일치 | 증거 커밋 d3a3c4b. 기존 앱 문제 기록·배포 소스·main 제외 |
 | Q8 / T009 | 후보 설치·GEO 한정 적용 및 운영 검증 | 완료(한정) | 정확한 후보 Windows gate, 소유 관리파일만 교체, GEO 원본 보존·관련 기록 정합성 대조 | [설치·실제 기록·부모/QA 대조](../evals/joeness-setup/runs/2026-10-07-geo-connection-pilot/review-evidence.md). 설치/연결 current, TASK만 추가·기존 bytes 보존 |
+| Q9 / T010 | 새 채팅 자동 전달·읽기 전용 인계 | 완료(1회 한정) | 첫 도구 전 현행 AGENTS 전체 일치, 현재/미완/다음·기록 책임 구분, 보호 파일 불변 | [독립 대조 결과](../evals/joeness-setup/runs/2026-10-07-geo-fresh-context/review-evidence.md). Astra/high; 긴 상세·반복 조회 잔존, 일반화·효율 개선 미검증 |
 
 진입: Q2는 Q1, Q3는 소스 고정, Q5는 Q2/Q3 검사 뒤. Q4의 미합의가 독립 A 보강을 막지 않음.
 Q6 진입: 고정 후보 및 유효한 합성 원본. Q7 진입: Q6 산출물·원본 불변·QA 대조 확인.
 Q8 진입: 사용자 설치 후 검증 승인, 후보 exactcommit gate 통과, 기존 설치 소유권과 GEO 쓰기 인계 확인.
+Q9 진입: QA 채팅의 사용자 검증 승인, T009 설치·연결 유지, 이전 대화·정답 힌트 없는 새 저장 프로젝트 채팅. T009 당시 자동 전달 미검증 기록은 그대로 보존.
 다음 작업: 후보 보강을 정식 출시할 버전·배포 범위 확정. GEO는 현재 연결로 승인된 업무 재개 가능. 추가 같은 중립/명시 재독해 시험 반복 없음.
 전체 통합 일반화·자동 복구는 미검증이며 원본 이전은 별도 합의; 후보 설치와 기존 0.3.3 정식 출시 상태를 구분.
 
