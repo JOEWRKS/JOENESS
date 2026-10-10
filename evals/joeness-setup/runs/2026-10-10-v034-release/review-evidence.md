@@ -1,5 +1,16 @@
 # JOENESS 0.3.4 출시 기록
 
+## 배포 결과
+
+- GitHub 배포 완료: 출시 commit `5f16ea00c5c1f46c8c87999a3247739576dd537e`.
+- 출시 tree: `3a861d5e4547688095edd42e75ddd3d8debde720`.
+- [정확한 커밋 Windows CI](https://github.com/JOEWRKS/JOENESS/actions/runs/38041503037): completed/success.
+- main fast-forward와 새 태그 `JOENESS-v0.3.4`를 atomic push하고 원격을 다시 조회해 같은 commit임을 확인했다.
+- annotated tag object: `7ba53d7de4b6689135a143cc9b60a2df34d79271`; 기존 태그는 변경하지 않았다.
+- 개인 설치는 별도 승인 대기. GitHub 배포 완료를 개인 설치 완료로 보고하지 않는다.
+
+이 배포 결과를 보강하는 후속 문서 커밋은 출시 패키지 bytes를 변경하지 않는다.
+
 ## 범위와 식별
 
 2026-10-10 사용자가 정식 버전 결정·main 통합·발행을 진행 승인했다.
@@ -24,8 +35,8 @@
   실제 임시 설치본의 review-gate도 각각23 PASS. 개인 설치의 검증과는 구분한다.
 - `git diff bd22517 -- skills`: 차이 없음. `git diff --check`: PASS.
 
-원격 Windows 검사는 출시 커밋 고정 후 별도 확인한다. 이전 후보의 CI 통과를 새 버전의 검사로 대신하지 않는다.
-정확한 SHA·원격 실행·main·태그 결과는 확인 후 이 기록에 보강한다.
+출시 커밋을 고정한 뒤 위 원격 Windows 실행에서 동일 release contract와 PS5/7 설치·연결,
+전체 Node 검사, diff 검사를 통과했다. 이전 후보의 CI 결과로 대신하지 않았다.
 
 ## 개인 설치
 
