@@ -123,6 +123,10 @@ States: not started, in progress, verification pending, on hold, complete,
 removed from scope. Holds and missing required checks remain open. Scope removal
 requires an authorized decision/reason; retain the item, never count it as passed.
 Keep technical verification and required user acceptance distinct.
+Where a required outcome depends on an external specialist verdict, connect the
+explicit [review gate](references/review-gate.md): pinned scope/criteria, current
+target inputs and result path. Never substitute technical checks for visual
+compliance. The gate is opt-in to that required scope, not an always-on engine.
 
 Before reporting setup complete, read back actual documents, not just templates:
 - Is this the whole project's approved scope, not merely an available subplan?
@@ -180,6 +184,11 @@ the setup helper protects only its AGENTS block/state, not TASK/ROADMAP writes.
 Before starting dependent work, check its entry conditions. Independent authorized
 work may proceed without falsely advancing a blocked stage. Before declaring a
 stage/milestone/release complete, check every required item and actual evidence;
+for a connected specialist gate, run its current-input check before advancing
+the affected status. Missing/failed/stale results keep that verdict pending.
+Implementation, technical verification, visual compliance and user acceptance
+remain separate. The helper rejects invalid claims but cannot intercept direct
+document edits or natural-language bypasses; do not claim host enforcement.
 optional ideas do not block it. Changing approved scope/order/criteria requires
 authorized direction. A finished task does not finish its stage. A read/write
 failure does not erase completed implementation: report the handoff gap and

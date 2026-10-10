@@ -68,7 +68,7 @@ test('manifest pins exact sole setup skill without global runtime',()=>{
   const skillRoot=fileURLToPath(new URL('../skills/joeness-setup/',import.meta.url));
   const disk=readdirSync(skillRoot,{recursive:true,withFileTypes:true})
     .filter(e=>e.isFile()).map(e=>relative(skillRoot,join(e.parentPath,e.name)).replaceAll('\\','/'));
-  const expected=['SKILL.md','agents/openai.yaml','scripts/project-setup.ps1','references/usage.md',...['AGENTS','TASK','ROADMAP','ISSUES','DESIGN'].map(n=>'assets/'+n+'.md')].sort();
+  const expected=['SKILL.md','agents/openai.yaml','scripts/project-setup.ps1','scripts/review-gate.mjs','references/usage.md','references/review-gate.md',...['AGENTS','TASK','ROADMAP','ISSUES','DESIGN'].map(n=>'assets/'+n+'.md')].sort();
   assert.equal(m.publicSkills[0].files.length,expected.length);
   assert.deepEqual(disk.sort(),expected);
   assert.deepEqual(m.publicSkills[0].files.map(f=>f.path).sort(),expected);

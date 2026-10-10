@@ -17,7 +17,7 @@
       "files": [
         {
           "path": "SKILL.md",
-          "sha256": "009bed85e032579eb2958e373bbcfbea2bc25df25dc33849a5d15d6a6a920222"
+          "sha256": "d28310d2be866d4a89ed733cd4310da54e1ccd7acf0b9c045ab7dfaea7a0176f"
         },
         {
           "path": "agents/openai.yaml",
@@ -25,7 +25,7 @@
         },
         {
           "path": "assets/AGENTS.md",
-          "sha256": "6d51d75f64eefa50f3df92d419e76654712d7a34944ecd31bf4218b37d38df2c"
+          "sha256": "f2fbd94a9939fbe31d371b21c7e4f2b05f814e0ed81ae22ba73e1097bdfb86ce"
         },
         {
           "path": "assets/DESIGN.md",
@@ -41,15 +41,23 @@
         },
         {
           "path": "assets/TASK.md",
-          "sha256": "4699f81b2afcbf9966754735291459fa71c3f0a23c3277bc42cd3162769f5a43"
+          "sha256": "cbe9d10373067805dcc2659474a7b2b23e28df967bb3ee10500a4c15b6088ee0"
         },
         {
           "path": "references/usage.md",
-          "sha256": "e6010aade335defb50bde9c99705867abd942a00c041a1ae6b3a3b531ede344a"
+          "sha256": "d7d4ea516c714260dcbc0678da8ab72359340a96cd1718b46906334949b8146a"
         },
         {
           "path": "scripts/project-setup.ps1",
           "sha256": "631334ba13683f97346d2b14d4aebedd671b16c9125e7dd4a26914d658788c8d"
+        },
+        {
+          "path": "references/review-gate.md",
+          "sha256": "72e509e4eeeae714cd615cf26bcfba61140f3bd840d7634bfd199bc04c314728"
+        },
+        {
+          "path": "scripts/review-gate.mjs",
+          "sha256": "db37a33ce5ee2f9c210e4250b05aef1afb9712bfa6e524a80d39866b4c8c8c23"
         }
       ]
     }

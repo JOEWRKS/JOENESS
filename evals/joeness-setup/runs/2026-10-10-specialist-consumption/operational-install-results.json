@@ -1,0 +1,59 @@
+{
+  "date": "2026-10-10",
+  "status": "personal candidate installed; bounded GEO connection verified, not release complete",
+  "candidateManifest": "48e6e4215011f923882f0d14551a27405b48e6ff640fa87e7af17aa263ca1ee1",
+  "backup": "D:/JOEWRKS/.joeness-install-backups/20261010-review-gate-b",
+  "installedConsumerTests": {
+    "pass": 23,
+    "fail": 0
+  },
+  "independentLiveCallerRuns": [
+    {
+      "claim": "visual",
+      "exit": 0,
+      "allowed": true,
+      "lanes": {
+        "implementation": "UNVERIFIED",
+        "technical": "UNVERIFIED",
+        "visual": "PASS",
+        "user_acceptance": "NOT_GRANTED"
+      },
+      "checkCount": 51,
+      "passCount": 51,
+      "errors": []
+    },
+    {
+      "claim": "complete",
+      "exit": 2,
+      "allowed": false,
+      "lanes": {
+        "implementation": "UNVERIFIED",
+        "technical": "UNVERIFIED",
+        "visual": "PASS",
+        "user_acceptance": "NOT_GRANTED"
+      },
+      "checkCount": 51,
+      "passCount": 51,
+      "errors": []
+    }
+  ],
+  "projectRoot": "D:/JOEWRKS/GEOTest/FnBShop",
+  "observedHashes": {
+    ".design-harness/conformance/spacing-result.json": "854c39f8ac9b576390e102847576a82d1e4e3c7ed99f9954408f18e5a42bec68",
+    ".design-harness/conformance/check-spacing.ps1": "dd3c26199fff954d7cfd189483718960901fdf8e891b43d6ba999ea673521be5",
+    ".design-harness/conformance/evidence/activation-20261010-cua-b/execution.json": "398c6262a0ec69e9c5121efa84bcd17cbed3f088ce2a1299cfffcb15658b95e2",
+    ".design-harness/conformance/spacing-baseline.json": "62c05b7fde59b5e5101c0c0ffe6d388fa6e74382d038d0b4a613fffa5d3c4251",
+    ".design-harness/conformance/activation-missing-result.json": "ce679f71aa33694e0a07c90356c80d61070a6b7092036dc5131d2294234c408f",
+    "ROADMAP.md": "c58a36d11b08344023b439574fadcd4219baa071922bb9013779ba320f958f65",
+    "AGENTS.md": "e49a021101170e121551997f1a523a3db563b89ee667203647ddfe90f2d2c392",
+    "TASK.md": "a2bacfc1f4b994e327b7cf9b4a85a72de403e4fabe05e38e240cc49af98218d2",
+    "DESIGN.md": "88c722139722e5540cd5ea845465608a5f5ecab3d298b6ed1c09312e0bca29c3"
+  },
+  "limits": [
+    "51 geometry checks only",
+    "Chrome/CUA capture by GEO owner, independently consumed by JOENESS owner",
+    "No new-context automatic instruction delivery test",
+    "No host file-write lock or universal natural-language interception",
+    "No new Git commit, push or release"
+  ]
+}

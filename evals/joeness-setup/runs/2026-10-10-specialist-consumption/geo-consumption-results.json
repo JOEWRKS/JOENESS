@@ -1,0 +1,126 @@
+{
+  "source": "D:\\JOEWRKS\\JOEDESIGN\\.local\\design-conformance-20261010\\geo-r2",
+  "consumer_sha256": "db37a33ce5ee2f9c210e4250b05aef1afb9712bfa6e524a80d39866b4c8c8c23",
+  "baseline_sha256": "51ad469774bbe050001185c14a2cba32af11886c5796115e06e69be52285a713",
+  "observed_receipt_sha256": "6b153aaf41510bef4874e2748fdd43deca93bd4bdc1a3d4e0b6c28cc173d2166",
+  "injected_receipt_sha256": "857e0784bcbcdd8f6bfea01df9214a1e9807d74c6bec1c511c57659e3475b782",
+  "protected_file_count": 178,
+  "producerFilesUnchanged": true,
+  "scope": "GEO frozen snapshot; independent receipt consumption, no new browser measurement or live project activation",
+  "outcomes": {
+    "observed-current": {
+      "exit": 0,
+      "allowed": true,
+      "lanes": {
+        "implementation": "UNVERIFIED",
+        "technical": "UNVERIFIED",
+        "visual": "PASS",
+        "user_acceptance": "NOT_GRANTED"
+      },
+      "counts": {
+        "PASS": 51
+      },
+      "errors": []
+    },
+    "not-user-acceptance": {
+      "exit": 2,
+      "allowed": false,
+      "lanes": {
+        "implementation": "UNVERIFIED",
+        "technical": "UNVERIFIED",
+        "visual": "PASS",
+        "user_acceptance": "NOT_GRANTED"
+      },
+      "counts": {
+        "PASS": 51
+      },
+      "errors": []
+    },
+    "injected-receipt-after-restoration": {
+      "exit": 2,
+      "allowed": false,
+      "lanes": {
+        "implementation": "UNVERIFIED",
+        "technical": "UNVERIFIED",
+        "visual": "STALE",
+        "user_acceptance": "NOT_GRANTED"
+      },
+      "counts": {
+        "STALE": 51
+      },
+      "errors": []
+    },
+    "old-proof-after-mutation": {
+      "exit": 2,
+      "allowed": false,
+      "lanes": {
+        "implementation": "UNVERIFIED",
+        "technical": "UNVERIFIED",
+        "visual": "STALE",
+        "user_acceptance": "NOT_GRANTED"
+      },
+      "counts": {
+        "STALE": 51
+      },
+      "errors": []
+    },
+    "measured-failure-current-inputs": {
+      "exit": 2,
+      "allowed": false,
+      "lanes": {
+        "implementation": "UNVERIFIED",
+        "technical": "UNVERIFIED",
+        "visual": "FAIL",
+        "user_acceptance": "NOT_GRANTED"
+      },
+      "counts": {
+        "PASS": 39,
+        "FAIL": 12
+      },
+      "errors": []
+    },
+    "restored": {
+      "exit": 0,
+      "allowed": true,
+      "lanes": {
+        "implementation": "UNVERIFIED",
+        "technical": "UNVERIFIED",
+        "visual": "PASS",
+        "user_acceptance": "NOT_GRANTED"
+      },
+      "counts": {
+        "PASS": 51
+      },
+      "errors": []
+    },
+    "missing-required-check": {
+      "exit": 2,
+      "allowed": false,
+      "lanes": {
+        "implementation": "UNVERIFIED",
+        "technical": "UNVERIFIED",
+        "visual": "UNVERIFIED",
+        "user_acceptance": "NOT_GRANTED"
+      },
+      "counts": {
+        "PASS": 50,
+        "UNVERIFIED": 1
+      },
+      "errors": []
+    },
+    "same-id-changed-viewport": {
+      "exit": 2,
+      "allowed": false,
+      "lanes": {
+        "implementation": "UNVERIFIED",
+        "technical": "UNVERIFIED",
+        "visual": "STALE",
+        "user_acceptance": "NOT_GRANTED"
+      },
+      "counts": {
+        "STALE": 51
+      },
+      "errors": []
+    }
+  }
+}

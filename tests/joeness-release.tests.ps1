@@ -79,7 +79,7 @@ function Test-MinimalCurrentTree {
     Assert-ExactNames (Join-Path $RepoRoot '.github') @('workflows') '.github only has workflows'
     Assert-ExactNames (Join-Path $RepoRoot '.github/workflows') @('windows-ci.yml') 'one release workflow'
     Assert-ExactNames (Join-Path $RepoRoot 'scripts') @('sync-harness.ps1') 'one package script'
-    Assert-ExactNames (Join-Path $RepoRoot 'tests') @('joeness-release.tests.ps1','joeness-install.tests.ps1','joeness-project-setup.tests.ps1','joeness-setup-contract.tests.mjs','joeness-setup-fixtures.tests.mjs') 'current test surface'
+    Assert-ExactNames (Join-Path $RepoRoot 'tests') @('joeness-release.tests.ps1','joeness-install.tests.ps1','joeness-project-setup.tests.ps1','joeness-setup-contract.tests.mjs','joeness-setup-fixtures.tests.mjs','joeness-review-gate.tests.mjs') 'current test surface'
     Assert-ExactNames (Join-Path $RepoRoot 'vendor') @('source-manifest.json') 'one active manifest'
     Assert-ExactNames (Join-Path $RepoRoot 'evals/experiments') @('joeness-astra-independent-judgment-ab-plan-v1.json','joeness-astra-independent-judgment-ab-run-2026-09-26.json','joeness-astra-independent-judgment-ab-invalid-preflight-2026-09-26.json','joeness-astra-independent-judgment-ab-results-2026-09-26.json') 'bounded A/B evidence remains'
     foreach ($removed in @('astra-judgment-core.md','JOENESS-0.1.ps1','harness.ps1','common-core.md','TASKS.md')) {

@@ -42,6 +42,15 @@ try {
     Eq (Test-Path (Join-Path $clean skills/joeness-setup/SKILL.md)) $true skillInstalled
     Eq (Invoke-JoenessHarnessSync -Apply -CodexHome $clean -AfterWrite { throw 'no-op wrote' }).status current noOpApply
     Eq (Invoke-JoenessHarnessSync -Check -CodexHome $clean).status current currentCheck
+    # Execute the installed consumer; source-only tests cannot catch missing shipped files.
+    $priorGateCli = $env:JOENESS_TEST_GATE_CLI
+    try {
+        $env:JOENESS_TEST_GATE_CLI = Join-Path $clean skills/joeness-setup/scripts/review-gate.mjs
+        & node --test (Join-Path $repo tests/joeness-review-gate.tests.mjs)
+        if ($LASTEXITCODE -ne 0) { throw 'Installed review gate behavior failed' }
+    } finally {
+        $env:JOENESS_TEST_GATE_CLI = $priorGateCli
+    }
     Eq (Invoke-JoenessHarnessSync -Remove -CodexHome $clean).status removed cleanRemove
     Eq (Test-Path (Join-Path $clean skills/joeness-setup/SKILL.md)) $false skillRemoved
     Eq (Test-Path (Join-Path $clean AGENTS.md)) $false removeNoAgents

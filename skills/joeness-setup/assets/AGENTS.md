@@ -39,6 +39,12 @@ Adapt paths and agreed scope before applying this body.
   required item's actual proof. Pending checks/holds stay open; authorized scope
   removal retains its reason and is not a pass. Task, stage and user acceptance
   are separate. Refresh current/next after changed facts.
+- Required external verdict: <applicable scoped gate command, baseline pin and
+  result path, or none>. Before resume/completion, run the connected current-input
+  check. Missing/failed/stale results keep only the affected verdict pending.
+  Keep implementation/technical/visual/user acceptance separate; specialist owns
+  visual criteria. Never repin weakened criteria without authorization. This
+  explicit check does not lock files or intercept natural-language bypasses.
 - Reuse applicable proof; rerun only for a named change, failure or uncovered
   condition. Not found does not mean never checked. No changed fact means no
   repeat record. Questions and no-record requests cause no record writes.

@@ -1,0 +1,42 @@
+{
+  "date": "2026-10-10",
+  "scope": "Independent consumer replay of real JOEDESIGN producer artifacts; no browser recapture",
+  "source": "D:/JOEWRKS/JOEDESIGN/.local/design-conformance-20261010/connection-r1",
+  "initial_consumer_sha256": "65a8c611e37c4e24f5bd50d111c86208ce7afd73c46f66886e96da07e176c5f0",
+  "consumer_sha256": "7f9d728a082c38e8b4ece838286ec61365e82fbfe2f5980288e5df42147141bf",
+  "sources": {
+    "project/baseline.json": "cc17b0d20246191ca7ee0622c78dcdae0945b9466cca2439fd71b8d6c632b4bc",
+    "project/DESIGN.md": "51a77274a630ca7831fe029a65add33f549bd573cb56bf962ec58c222edfbef5",
+    "project/index.html": "972b5987cfd793ea113246b1726f0b106b38586881824e31d585c8ac639557d8",
+    "artifacts/corrected-receipt.json": "fe8f3dbddcc21c9ab52f888363da63f3394260445ac9e958d96ac8a263cb6e02",
+    "artifacts/stacked-receipt.json": "6943ac24c66cf3dc72160d1ec1b8e8a529323bc50bff508faf2c4b381aa53024",
+    "results.json": "182062c98f74ec64c9543e3aac9cae060c8fe93fbb715e5777e646d27811188f"
+  },
+  "producerArtifactsUnchanged": true,
+  "finalProducerR2ReadOnlyConsumption": {"visualExit":0,"completeWithoutAcceptanceExit":2},
+  "producerRepositoryEvidence": {
+    "root":"D:/JOEWRKS/JOEDESIGN/evals/design-conformance-20261010",
+    "connection-manifest.json":"f36cb8617472801c03b99b4b8a7d1bd6a9aac5c98be8110ada9ad8c220c48339",
+    "connection-final-results.json":"39426dc340db153159aa13c1edd14584b6dfa33af5bc8972328a856dba98f869",
+    "captures/stacked.png":"ccb0a8f22fd1e98040f64a56c131780234c925651ab0ba159dc0e55846f7b3e6",
+    "captures/corrected.png":"336a4eceaaad50b207f379875b68524385d47b11c8276b8630b9470df872d007"
+  },
+  "finalConsumerReplay": "17 unit and same 10 producer-consumer cases passed after reading pinned bytes once for both hash and parse",
+  "independentlyExecutedCases": [
+    {"case":"actual-producer-current","expectedExit":0,"actualExit":0,"visual":"PASS","acceptance":"NOT_GRANTED"},
+    {"case":"actual-producer-not-acceptance","expectedExit":2,"actualExit":2,"visual":"PASS","acceptance":"NOT_GRANTED"},
+    {"case":"missing","expectedExit":2,"actualExit":2},
+    {"case":"missing-one-check","expectedExit":2,"actualExit":2,"preservedPassingChecks":3},
+    {"case":"damaged-result","expectedExit":2,"actualExit":2},
+    {"case":"changed-output","expectedExit":2,"actualExit":2,"visual":"STALE"},
+    {"case":"deleted-required-check","expectedExit":2,"actualExit":2},
+    {"case":"damaged-proof","expectedExit":2,"actualExit":2,"preservedPassingChecks":3},
+    {"case":"unrelated-work","expectedExit":0,"actualExit":0},
+    {"case":"recovered","expectedExit":0,"actualExit":0}
+  ],
+  "producerObservedValuesReviewedNotRemeasured": {
+    "stacked":[24,80,160,32],
+    "corrected":[16,40,8,32]
+  },
+  "limits":["Synthetic approval scope only","Live GEO gate not installed or connected","Local pins and natural-language claims not host-enforced","Producer browser captures not rerun by JOENESS"]
+}
