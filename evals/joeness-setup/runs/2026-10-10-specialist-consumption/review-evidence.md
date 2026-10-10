@@ -2,6 +2,7 @@
 
 ## 최신 상태 요약 — 2026-10-10
 
+- 개발 후보 `e421aea45059f2710152f21ec81b9230b2ed58c7` 푸시 및 [동일 커밋 Windows 검사](https://github.com/JOEWRKS/JOENESS/actions/runs/38035412249) 성공. Tree `d6f42bf110de9f168d4324add56c512d9fe5ff56`. main·출시 태그 미변경; 새 정식 버전 발행은 아니다.
 - 개인 후보 설치와 실제 GEO의 한정 연결 완료. 설치11파일은 manifest `48e6e4215011f923882f0d14551a27405b48e6ff640fa87e7af17aa263ca1ee1`에 결속한다.
 - 소비기23/23, 전체 Node36/36, PS5/7 연결 각27/27, 설치 수명주기·로컬 출시 계약 통과. 실제 GEO 설치 caller는 visual51 PASS, 수락 없는 complete는 거부했다.
 - 전체 디자인·모델 일반 성능·새 문맥 자동 전달·파일 편집 강제 차단은 검증 범위 밖이다.
@@ -24,7 +25,9 @@
 - `git diff --check`: PASS. 실행 환경 Node26.3.0, PowerShell7.6.5. Node18 별도 실행은 하지 않았다.
 
 기존 앱 이슈 파일·ROADMAP의 APP-001 변경은 후보 커밋에서 제외하고 작업 폴더에 보존한다.
-원격 Windows 검사는 후보 커밋 푸시 후 별도 확인한다. 로컬 PASS만으로 원격 통과를 주장하지 않는다.
+푸시한 정확한 후보 SHA `e421aea45059f2710152f21ec81b9230b2ed58c7`의 원격 Windows 검사
+`38035412249`는 completed/success다. 이후 이 결과를 기록하는 문서 변경은 배포 skill·manifest·installer·tests를 바꾸지 않는다.
+커밋 후 개인 설치 Check도 current이며, 최종 소스와 설치11파일의 SHA가 일치한다.
 
 ### 최초 요청과 역할 배분
 
