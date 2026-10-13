@@ -38,3 +38,9 @@
 - `git diff --check`: PASS. skills/scripts/tests/vendor/.github 변경 없음. 전체 런타임 회귀 재실행 불필요.
 - 기존 docs/ISSUES.md SHA: `d3c87c8fa0e2e34600ae12ff0b1c9ea1d503ca5a7f6a30db17ca8e8ea9b529c7`. APP-001 ROADMAP 변경과 함께 commit 제외.
 - 개인 설치·버전·태그·Release 변경 없음. 후보 full SHA는 Manager 인계 메시지에서 확인.
+
+## QA 제목 표기 보완
+
+- Manager 요청: 공통 여섯 H2에 1~6 번호 적용. 본문·명령·한계 변경 없음.
+- 연결표의 JOENESS 역할: `작업 순서·진행 상태·완료 근거 관리`. 최초 후보9009a3b부터 확정 문구와 일치, 추가 변경 불필요.
+- 번호를 제거한 README와 직전 후보9009a3b 본문의 정확 일치 확인. 공통 제목·역할표 대조 및 diff 검사 통과. 푸시 대기 유지.
