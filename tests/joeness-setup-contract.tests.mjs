@@ -60,7 +60,10 @@ test('one self-contained setup skill with real supporting files', () => {
 test('manifest pins exact sole setup skill without global runtime',()=>{
   const m=JSON.parse(read('vendor/source-manifest.json'));
   assert.equal(m.schemaVersion,3);
-  assert.equal(m.release.version,'0.3.4');
+  assert.equal(m.release.version,'1.0.0');
+  const installer=read('scripts/sync-harness.ps1').toString();
+  assert.ok(installer.includes("$script:JoenessRelease = '"+m.release.version+"'"), 'installer and manifest share the product version');
+  assert.ok(read('README.md').toString().startsWith('# JOENESS '+m.release.version+'\n'), 'README identifies the same product');
   assert.equal(m.release.entrypoint,'JOENESS.ps1');
   assert.equal(m.runtimeMode,'setup-only');
   assert.equal(Object.hasOwn(m,'activeCommonCore'),false);
