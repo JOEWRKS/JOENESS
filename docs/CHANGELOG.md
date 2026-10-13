@@ -5,7 +5,7 @@
 - 제품 버전·설치기·manifest를 1.0.0으로 통일. 검증된 F01–F06 연결 보강을 유지하고 공통 사용 안내 정리.
 - README를 역할·사용 시점·시작법·결과·도구 간 인계·주의사항의 여섯 절로 정리. 상세 설치·복구 안내 분리.
 - 공개 스킬 `joeness-setup`, manifest schema3, 설치 상태 schema1, 기존 helper 계약과 17개 skill 파일은 유지. 제품 버전과 데이터 규격 버전은 별개.
-- 소스 게시와 개인 설치·태그·GitHub Release는 별도입니다. 이번 main 통합에는 개인 설치 변경·태그·Release 발행을 포함하지 않습니다. [검증·게시 기록](../evals/joeness-setup/runs/2026-10-13-v100-candidate/review-evidence.md).
+- 소스 게시 뒤 별도 승인으로 개인 설치1.0.0 전환·검증 완료. 태그·GitHub Release는 QA 담당의 공동 설치검증 후 발행 단계입니다. [소스 검증·게시](../evals/joeness-setup/runs/2026-10-13-v100-candidate/review-evidence.md), [개인 설치](../evals/joeness-setup/runs/2026-10-13-v100-personal/review-evidence.md).
 
 ## 0.3.4 및 후속 검증 후보
 

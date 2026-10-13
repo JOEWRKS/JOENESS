@@ -2,7 +2,7 @@
 
 기준: 2026-10-13. 이 문서는 **JOENESS 제품의 개발·출시 준비**를 다룬다. `skills/joeness-setup/assets/ROADMAP.md`는 사용자의 *각 프로젝트*에 쓰는 참고 서식이며 이 문서와 다르다.
 
-## 현재 작업 — 1.0.0 제품 안내·패키지 정리 (2026-10-13)
+## 현재 작업 — 1.0.0 제품 안내·패키지·개인 설치 (2026-10-13)
 
 범위: 검증된 F01–F06 기능·skill 17파일·데이터 규격 유지. 제품 버전과 README·설치/복구/변경 안내 일치. 기존 APP-001 기록 제외·보존.
 
@@ -12,10 +12,12 @@
 | P2 | 영향 검사·격리 설치 | 완료 | Node96/96·PS5/7 연결각27·설치각83·출시계약PASS. 새 설치8단계·17파일 일치·개인설치 불변 |
 | P3 | 후보 고정·QA 인계 | 완료(후보) | 관련 변경만commit해 exact SHA·검증 근거 인계. QA 교차검토와 원격반영은 P4 |
 | P4 | 원격 게시·main 통합 | 완료 | QA 공동설치·연결 통과 후 e6bd217 일반push, 원격 작업branch/main exactSHA 확인·localmain FF. 이후 마감기록만 추가 |
+| P5 | 개인 설치1.0.0 전환 | 완료 | T040 사용자승인 후 기존17파일/state백업·구패키지Remove·신규Apply/Check. 17bytes불변·state1.0.0·설치본대표3/3 |
+| P6 | 공동 설치검증·태그/Release | QA 담당 진행 | Manager가 세 실제설치 교차검증 후 JOENESS-v1.0.0 태그·Release 발행·대조. 이 담당은 중복발행하지 않음 |
 
-진입: P2는 P1, P3는 P2, P4는 QA 승인 후. 개인설치·태그·GitHub Release는 이번 main 통합에서 제외.
+진입: P2는 P1, P3는 P2, P4는 QA 승인 후. T039 main 통합 뒤 T040 별도 승인으로 P5/P6 추가. 기능·기존 프로젝트 변경 없음.
 근거: [1.0.0 검증·게시 기록](../evals/joeness-setup/runs/2026-10-13-v100-candidate/review-evidence.md).
-다음 작업: 1.0.0 소스·안내의 main 반영 완료. 개인 설치는 기존0.3.4 후보 유지; 별도 승인 전 갱신·태그·Release 발행 없음.
+다음 작업: [개인 설치 완료 근거](../evals/joeness-setup/runs/2026-10-13-v100-personal/review-evidence.md)를 Manager에 인계하고 P6 최종 결과 확인. 설치 성공을 태그·Release 완료로 보고하지 않는다.
 
 ## 이전 작업 — F01–F06 도구 간 결과 연결 (2026-10-13)
 
