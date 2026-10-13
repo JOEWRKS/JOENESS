@@ -1,5 +1,126 @@
 # JOENESS 1.0.0
 
+[English](#english) | [한국어](#korean)
+
+<a name="english"></a>
+
+**English**
+
+## 1. Summary
+
+**Task sequence, progress, and remaining-work management.**
+
+Three-point summary:
+
+1. Project goals and completion criteria organized into a staged roadmap.
+2. Separate document owners for plans, results, issues, and design, with task-specific reading priorities.
+3. Six-field summary first; supporting evidence only where needed.
+
+Source version: **1.0.0**. [Validation and publication record](evals/joeness-setup/runs/2026-10-13-v100-candidate/review-evidence.md). No automatic update of personal installations.
+
+## 2. Design Purpose
+
+- Purpose: organize scattered plans and records; recover current status when resuming or handing off work.
+- Focus: next eligible work, completed work, and outstanding verification.
+- Replacement scope: duplicate current-progress trackers consolidated into one roadmap. Existing evidence and approval sources preserved.
+- Outside scope: product definition, design judgment, development execution, and user approval.
+
+## 3. Key Features
+
+| File | Owned information |
+|---|---|
+| `AGENTS.md` | Working rules and document locations |
+| `ROADMAP.md` | Goals, staged checklists, current status, and next work |
+| `TASK.md` | Work results and verification evidence |
+| `ISSUES.md` | Open issues, workarounds, and residual risks |
+| `DESIGN.md` | Design standards and approval scope |
+
+- Document organization: preservation and relocation within approved scope. Product-definition sources retained separately.
+- Reference storage: `Library/` created when material exists; research and references grouped by topic.
+- Reading order: relevant documents first. [Document responsibilities and reading order (Korean)](skills/joeness-setup/references/usage.md#문서-구조와-책임).
+
+Example report:
+
+- Work: reservation cancellation bug fixed.
+- Updated files: reservation logic, tests, and work record.
+- Issue: cancellation also deleted the reservation history.
+- Resolution: status-only cancellation implemented and checked.
+- Remaining problems: verification on the actual venue device pending.
+- Next work: reservation and cancellation tests on that device.
+
+Field meanings: `Issue` for encountered problems; `Resolution` for verified action; `Remaining problems` for unresolved or unverified work. Additional evidence only when needed. No mandatory report format for simple questions.
+
+## 4. Usage
+
+### Installation
+
+Repository checkout in Windows PowerShell. For an existing download, start in that folder.
+
+```powershell
+git clone https://github.com/JOEWRKS/JOENESS.git
+cd JOENESS
+powershell.exe -NoProfile -File .\JOENESS.ps1 -Check
+```
+
+| Check result | Action |
+|---|---|
+| `ready` | Installation commands below permitted |
+| `current` | Same package already installed; no reinstall needed |
+| `blocked` | Existing files preserved; no overwrite. Consult the [update and recovery guide (Korean)](docs/installation.md) |
+
+```powershell
+powershell.exe -NoProfile -File .\JOENESS.ps1 -Apply
+powershell.exe -NoProfile -File .\JOENESS.ps1 -Check
+```
+
+### Project setup
+
+Open the intended Git project in Codex, then request setup.
+
+- New project: `Install JOENESS in this project. The goal is [goal]. First show the proposed documents and recording scope.`
+- Existing project: `Install JOENESS in this project. Preserve existing plans, results, and approval evidence. Show the organization proposal first.`
+- Approve the proposal: `Apply this proposal.`
+- Routine work: `Continue with the next eligible task in the roadmap.`
+
+Personal tool installation and project-document setup are separate. Project files created or changed **only after proposal approval**. No per-task reinstall.
+
+## 5. Tool Integration
+
+| Tool | Role |
+|---|---|
+| [JOENESS](https://github.com/JOEWRKS/JOENESS) | Task sequence, progress, and completion evidence |
+| [JOEFLOW](https://github.com/JOEWRKS/JOEFLOW) | Requirements, rules, exceptions, and acceptance criteria |
+| [JOEDESIGN](https://github.com/JOEWRKS/JOEDESIGN) | UI creation, visual standards, and design review |
+
+**Work organization → product definition → UI creation and review → development by the implementation owner → result verification → completed and remaining-work records.**
+
+Reservation-feature handoff example:
+
+- JOEFLOW → design and implementation owners: reservation/cancellation rules and acceptance criteria.
+- Design owner → implementation and recording owners: UI standards and review results.
+- Implementation owner → JOENESS records: development/test results and outstanding verification.
+- JOENESS: links to each source; roadmap completion and remaining-work status updates.
+
+JOENESS used throughout the workflow. **Standalone use supported for each tool.** No automatic execution of other tools or approval on the user's behalf. [Connect verification results to required outcomes](skills/joeness-setup/references/review-gate.md).
+
+## 6. Limitations
+
+- Supported environment: Codex, Windows PowerShell 5.1 or PowerShell 7 on Windows, UTF-8 documents in Git projects. Optional verification helpers require Node.js 18 or later.
+- Undecided scope: unresolved goals remain pending. No invented completion or design approval.
+- Separate checks: installation, document organization, instruction delivery, and work verification. No overall completion while required verification or user acceptance remains pending.
+- Automation limits: no continuous monitoring, automatic updates, or enforced locking. No automatic update of existing projects or open conversations.
+- Check reuse: only within an evidence-backed, bounded scope. No comprehensive CSS/dynamic-change analysis or automatic interception of completion claims in chat.
+- Unproven: token savings, general performance superiority, and reliability across all environments.
+- Excluded from records: passwords, credentials, and unnecessary personal data.
+
+[Detailed usage, recording controls, and disconnecting (Korean)](skills/joeness-setup/references/usage.md) · [Installation checks, updates, and recovery (Korean)](docs/installation.md) · [Changelog (Korean)](docs/CHANGELOG.md) · [Development roadmap (Korean)](docs/ROADMAP.md) · [Windows checks](.github/workflows/windows-ci.yml)
+
+---
+
+<a name="korean"></a>
+
+**한국어**
+
 ## 1. 핵심 요약
 
 **작업 순서·진행 상태·남은 일 관리 도구.**
@@ -108,3 +229,5 @@ JOENESS는 전 과정에서 사용. **각 도구의 단독 사용 지원.** 다�
 - 기록 제외: 비밀번호·인증키·불필요한 개인정보.
 
 [상세 사용법·기록 중지·연결 해제](skills/joeness-setup/references/usage.md) · [설치 확인·업데이트·복구](docs/installation.md) · [변경 이력](docs/CHANGELOG.md) · [개발 로드맵](docs/ROADMAP.md) · [Windows 검사](.github/workflows/windows-ci.yml)
+
+[English ↑](#english) | [한국어 ↑](#korean)
