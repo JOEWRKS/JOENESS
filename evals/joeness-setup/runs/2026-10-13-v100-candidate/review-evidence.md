@@ -1,6 +1,6 @@
 # JOENESS 1.0.0 candidate — T039
 
-Status: local candidate checks PASS; committed candidate for QA cross-review. Not a release-complete claim.
+Status: local and Manager cross-review PASS; main integration authorized. See publication follow-up below. Personal1.0.0/tag/Release excluded; not a release-complete claim.
 
 - Authorized source: Manager user turn `01a13543-e662-7200-bfae-2ae33552db09`:
   approved1.x alignment and main integration after candidate review. This first
@@ -58,3 +58,21 @@ The initial clone prompt still fetches prior main until integration; candidate
 wording must be reviewed at that step. Version1.0.0 is not evidence of universal
 reliability, token savings, model superiority or automatic acceptance.
 Previous failures remain in their original evidence directories and Git history.
+
+## Main integration follow-up
+
+- QA reviewed candidate `4443c0e94452059bd69da59d54f2af27dcba03ca` and authorized
+  ordinary branch/main publication under the user's T039 approval.
+- Manager independently installed all three candidates in
+  `D:/JOEWRKS/JOEWRKS-Product-isolated-installs/joe-1x-t039-manager`, checked
+  17/30/172 file hashes, JOENESS Check/Apply/Check, JOEDESIGN1.0.0, JOEFLOW→JOENESS
+  11/11 and JOEDESIGN→JOENESS13/13 plus19 gate calls. Original fixtures, personal
+  installation and protected settings remained unchanged.
+- Independent records: `D:/JOEWRKS/JOEQASAM/evidence/t039-joe-1x-release/`
+  candidate-audit.json, joint-install.json, joint-operation.json, joint-impact.json.
+- Publication edit is documentation only: README, AGENTS, installation guide,
+  changelog and product roadmap. Runtime, manifest and all17 skill bytes fixed.
+  Previous candidate-stage limits above describe that earlier checkpoint.
+- Remote preflight still ee61baf on both refs; remote/local main are ancestors,
+  and no worktree has main checked out. No force/reset/stash or user edits included.
+  Publication result is recorded after the actual remote comparison.

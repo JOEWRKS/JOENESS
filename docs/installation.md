@@ -1,6 +1,6 @@
 # JOENESS 설치·업데이트·복구
 
-설치 진입점은 저장소 루트의 `JOENESS.ps1`입니다. 버전 원본은 `vendor/source-manifest.json`의 `release.version`이며, 정확한 설치본은 버전뿐 아니라 manifest 해시로 구분합니다. 현재 1.0.0은 검토 후보입니다.
+설치 진입점은 저장소 루트의 `JOENESS.ps1`입니다. 버전 원본은 `vendor/source-manifest.json`의 `release.version`이며, 정확한 설치본은 버전뿐 아니라 manifest 해시로 구분합니다. 현재 소스 버전은 1.0.0입니다. 저장소 업데이트만으로 개인 설치가 바뀌지는 않습니다.
 
 ## 새 설치
 

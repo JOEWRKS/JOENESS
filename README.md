@@ -10,7 +10,7 @@
 2. 계획·결과·문제·디자인을 각 문서에 나누고, 필요한 순서로 찾아봅니다.
 3. 작업 뒤에는 한 일과 남은 일을 여섯 항목으로 먼저 보고합니다.
 
-현재 **1.0.0 검토 후보**입니다. 정식 배포·개인 설치 상태는 [검증 기록](evals/joeness-setup/runs/2026-10-13-v100-candidate/review-evidence.md)에서 구분합니다.
+소스 버전은 **1.0.0**입니다. [검증·게시 기록](evals/joeness-setup/runs/2026-10-13-v100-candidate/review-evidence.md). 개인 설치는 자동으로 갱신되지 않습니다.
 
 ## 2. 언제 쓰냐
 
@@ -28,7 +28,7 @@ cd JOENESS
 powershell.exe -NoProfile -File .\JOENESS.ps1 -Check
 ```
 
-`ready`일 때만 설치합니다. `current`는 같은 설치본이 있다는 뜻입니다. `blocked`이면 덮어쓰지 말고 [업데이트·복구 안내](docs/installation.md)를 따르세요. 후보가 main에 반영되기 전에는 위 주소에서 이전 배포본을 받습니다.
+`ready`일 때만 설치합니다. `current`는 같은 설치본이 있다는 뜻입니다. `blocked`이면 덮어쓰지 말고 [업데이트·복구 안내](docs/installation.md)를 따르세요.
 
 ```powershell
 powershell.exe -NoProfile -File .\JOENESS.ps1 -Apply
