@@ -1,0 +1,158 @@
+{
+  "stage": "ABC-source-candidate-not-release",
+  "base_head": "ee61bafcfe044bb567f371d920c901e505f99441",
+  "patch_sha256": "a0d23a8f3d0c12bb25b2b1f3692f6610a21d6934660dc3dc3c1c13d76f622f80",
+  "files": [
+    {
+      "path": "skills/joeness-setup/scripts/review-gate.mjs",
+      "sha256": "7ad13a9020a57aa0a6396348f8575229d7cac076a5d5a6c89178d26c3b6d9bd2"
+    },
+    {
+      "path": "skills/joeness-setup/references/review-gate.md",
+      "sha256": "0422021f6a247d44a3c2980353dddac76dee613282ecf4315cd4d357ebdf8432"
+    },
+    {
+      "path": "skills/joeness-setup/scripts/impact-review.mjs",
+      "sha256": "9cd8359daae4e0f68bcab688ae831e43d81a0b98bcb8ca10ed65a63d0e70cbc8"
+    },
+    {
+      "path": "skills/joeness-setup/references/impact-review.md",
+      "sha256": "6d98aa307aaace44461699e66fdbc3d658f67f8b6c756812ad9faa23ed330a82"
+    },
+    {
+      "path": "tests/joeness-impact-review.tests.mjs",
+      "sha256": "4beb15fe4b046491fed19ded1f0fea09a5072896a0940554d16a41adc3e4976f"
+    },
+    {
+      "path": "AGENTS.md",
+      "sha256": "ea3362ee533e02ab8234ee052e3b5aeef76b38aa0da6af95d898375032a9ba27"
+    },
+    {
+      "path": ".github/workflows/windows-ci.yml",
+      "sha256": "e0badcd562396a6a07908d656280ea1e78d361c6ff3d00f1fdf920726e5a74a0"
+    },
+    {
+      "path": "scripts/sync-harness.ps1",
+      "sha256": "838346b17cc45acda3079c804434a6b5b15d4f61b9939b88a1db2c5b2c8111c2"
+    },
+    {
+      "path": "skills/joeness-setup/SKILL.md",
+      "sha256": "0f5db50f1f1ffc21359372cd49c72fcd05cc785869f995a7ac9e175f6696beba"
+    },
+    {
+      "path": "skills/joeness-setup/assets/AGENTS.md",
+      "sha256": "691cd5eac50c3324da16987d2661d98e0d47f9e6a8e3f90e8804ae7050c628c0"
+    },
+    {
+      "path": "skills/joeness-setup/references/roadmap-review.md",
+      "sha256": "bfb8910df6814edd4fab15b18b1c88c6dcc1127eb9921488772bdb9ffc15a201"
+    },
+    {
+      "path": "skills/joeness-setup/scripts/roadmap-review.mjs",
+      "sha256": "5dfb2d5a81df58d9e1c43651b43cc945356bbf61630b103877f9b8bcd13ba33f"
+    },
+    {
+      "path": "skills/joeness-setup/references/operation-review.md",
+      "sha256": "748d1631847ac23045406f6742b43a3a0bddb29ebfb32b3720f8f97c9546959c"
+    },
+    {
+      "path": "skills/joeness-setup/scripts/operation-review.mjs",
+      "sha256": "a1a6d80a7d57d4e9c3e66c49a6f877bf07836bac25d330bb466fc2a858679aad"
+    },
+    {
+      "path": "tests/joeness-roadmap-review.tests.mjs",
+      "sha256": "b39005e5166ea84d324e3f80a9e660841581039e924d256874cdb63546bdee81"
+    },
+    {
+      "path": "tests/joeness-operation-review.tests.mjs",
+      "sha256": "362af6414edef465ac0b984147dbc237b6d40743a953daa4bc688d944c882443"
+    },
+    {
+      "path": "tests/joeness-setup-contract.tests.mjs",
+      "sha256": "18ad70dedf1fe6233856362e834ff2567d48057cb55f5c126fc527a4562aacb7"
+    },
+    {
+      "path": "tests/joeness-release.tests.ps1",
+      "sha256": "546dcbd725887133ce90f8eb50c04d97f507fcbb01c0a2096cc617ba34ad1f38"
+    },
+    {
+      "path": "tests/joeness-install.tests.ps1",
+      "sha256": "d648bfa6ba54c46926ba552c28c8df925f29be1f970d0c7f50997001023e4dfe"
+    },
+    {
+      "path": "vendor/source-manifest.json",
+      "sha256": "49889a08818ac80006527a16bfa0911c08024ea67f4d263375ab4a96a6167aeb"
+    }
+  ],
+  "skill_files": [
+    {
+      "path": "SKILL.md",
+      "sha256": "0f5db50f1f1ffc21359372cd49c72fcd05cc785869f995a7ac9e175f6696beba"
+    },
+    {
+      "path": "agents/openai.yaml",
+      "sha256": "cc275e468658c7793d6f1305aaae5c6f37a06d831a7f2c3f18313f668427ec5c"
+    },
+    {
+      "path": "assets/AGENTS.md",
+      "sha256": "691cd5eac50c3324da16987d2661d98e0d47f9e6a8e3f90e8804ae7050c628c0"
+    },
+    {
+      "path": "assets/DESIGN.md",
+      "sha256": "3b5ec8a163f2da4a770b4206029dd85a538dea0807060314cf51bd145ff66a5d"
+    },
+    {
+      "path": "assets/ISSUES.md",
+      "sha256": "44b5e1f7eea61716bdfa3b364b7eca9ffe60bc9c29f6e31b3a9bf753de6b8635"
+    },
+    {
+      "path": "assets/ROADMAP.md",
+      "sha256": "ac80bf15b82f5cb9b6200a4cf48f22739632352850395afe77d62ed1be3e3660"
+    },
+    {
+      "path": "assets/TASK.md",
+      "sha256": "cbe9d10373067805dcc2659474a7b2b23e28df967bb3ee10500a4c15b6088ee0"
+    },
+    {
+      "path": "references/usage.md",
+      "sha256": "d7d4ea516c714260dcbc0678da8ab72359340a96cd1718b46906334949b8146a"
+    },
+    {
+      "path": "scripts/project-setup.ps1",
+      "sha256": "631334ba13683f97346d2b14d4aebedd671b16c9125e7dd4a26914d658788c8d"
+    },
+    {
+      "path": "references/review-gate.md",
+      "sha256": "0422021f6a247d44a3c2980353dddac76dee613282ecf4315cd4d357ebdf8432"
+    },
+    {
+      "path": "scripts/review-gate.mjs",
+      "sha256": "7ad13a9020a57aa0a6396348f8575229d7cac076a5d5a6c89178d26c3b6d9bd2"
+    },
+    {
+      "path": "references/roadmap-review.md",
+      "sha256": "bfb8910df6814edd4fab15b18b1c88c6dcc1127eb9921488772bdb9ffc15a201"
+    },
+    {
+      "path": "scripts/roadmap-review.mjs",
+      "sha256": "5dfb2d5a81df58d9e1c43651b43cc945356bbf61630b103877f9b8bcd13ba33f"
+    },
+    {
+      "path": "references/operation-review.md",
+      "sha256": "748d1631847ac23045406f6742b43a3a0bddb29ebfb32b3720f8f97c9546959c"
+    },
+    {
+      "path": "scripts/operation-review.mjs",
+      "sha256": "a1a6d80a7d57d4e9c3e66c49a6f877bf07836bac25d330bb466fc2a858679aad"
+    },
+    {
+      "path": "scripts/impact-review.mjs",
+      "sha256": "9cd8359daae4e0f68bcab688ae831e43d81a0b98bcb8ca10ed65a63d0e70cbc8"
+    },
+    {
+      "path": "references/impact-review.md",
+      "sha256": "6d98aa307aaace44461699e66fdbc3d658f67f8b6c756812ad9faa23ed330a82"
+    }
+  ],
+  "excluded": "Pre-existing docs/ROADMAP APP-001 and docs/ISSUES edits excluded. A/B frozen artifacts preserved separately. This is cumulative A+B+C source/test/package patch, not a new release."
+}

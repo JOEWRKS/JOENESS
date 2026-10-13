@@ -1,0 +1,34 @@
+{
+  "stage": "local-source-candidate-not-hosted-release",
+  "manifest_sha256": "c644ab274f8f28aa845abd3dc4305252d5ab9187ab8c529571ed0df24198d534",
+  "results": [
+    {
+      "command": [
+        "python",
+        "-X",
+        "utf8",
+        "C:/Users/tjdwo/.codex/skills/.system/skill-creator/scripts/quick_validate.py",
+        "skills/joeness-setup"
+      ],
+      "module_path": "inherited",
+      "exit": 0,
+      "signal": null,
+      "error": null,
+      "stdout": "Skill is valid!\r\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "module_path": "inherited",
+      "exit": 0,
+      "signal": null,
+      "error": null,
+      "stdout": "",
+      "stderr": ""
+    }
+  ]
+}

@@ -44,12 +44,27 @@ try {
     Eq (Invoke-JoenessHarnessSync -Check -CodexHome $clean).status current currentCheck
     # Execute the installed consumer; source-only tests cannot catch missing shipped files.
     $priorGateCli = $env:JOENESS_TEST_GATE_CLI
+    $priorRoadmapCli = $env:JOENESS_TEST_ROADMAP_CLI
+    $priorOperationCli = $env:JOENESS_TEST_OPERATION_CLI
+    $priorImpactCli = $env:JOENESS_TEST_IMPACT_CLI
     try {
         $env:JOENESS_TEST_GATE_CLI = Join-Path $clean skills/joeness-setup/scripts/review-gate.mjs
         & node --test (Join-Path $repo tests/joeness-review-gate.tests.mjs)
         if ($LASTEXITCODE -ne 0) { throw 'Installed review gate behavior failed' }
+        $env:JOENESS_TEST_ROADMAP_CLI = Join-Path $clean skills/joeness-setup/scripts/roadmap-review.mjs
+        & node --test (Join-Path $repo tests/joeness-roadmap-review.tests.mjs)
+        if ($LASTEXITCODE -ne 0) { throw 'Installed roadmap review behavior failed' }
+        $env:JOENESS_TEST_OPERATION_CLI = Join-Path $clean skills/joeness-setup/scripts/operation-review.mjs
+        & node --test (Join-Path $repo tests/joeness-operation-review.tests.mjs)
+        if ($LASTEXITCODE -ne 0) { throw 'Installed operation review behavior failed' }
+        $env:JOENESS_TEST_IMPACT_CLI = Join-Path $clean skills/joeness-setup/scripts/impact-review.mjs
+        & node --test (Join-Path $repo tests/joeness-impact-review.tests.mjs)
+        if ($LASTEXITCODE -ne 0) { throw 'Installed impact review behavior failed' }
     } finally {
         $env:JOENESS_TEST_GATE_CLI = $priorGateCli
+        $env:JOENESS_TEST_ROADMAP_CLI = $priorRoadmapCli
+        $env:JOENESS_TEST_OPERATION_CLI = $priorOperationCli
+        $env:JOENESS_TEST_IMPACT_CLI = $priorImpactCli
     }
     Eq (Invoke-JoenessHarnessSync -Remove -CodexHome $clean).status removed cleanRemove
     Eq (Test-Path (Join-Path $clean skills/joeness-setup/SKILL.md)) $false skillRemoved

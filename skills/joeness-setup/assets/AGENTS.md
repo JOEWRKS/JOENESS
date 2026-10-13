@@ -38,7 +38,10 @@ Adapt paths and agreed scope before applying this body.
   criteria only by authorized direction. Before completion, inspect every
   required item's actual proof. Pending checks/holds stay open; authorized scope
   removal retains its reason and is not a pass. Task, stage and user acceptance
-  are separate. Refresh current/next after changed facts.
+  are separate. Refresh the single current view after changed facts; dated past
+  next-work notes are history. Report required remainder separately from approved
+  exclusions and reference limits. Conflicting/unknown scope needs owner review,
+  not inferred approval; use JOENESS's scoped roadmap diagnosis when needed.
 - Required external verdict: <applicable scoped gate command, baseline pin and
   result path, or none>. Before resume/completion, run the connected current-input
   check. Missing/failed/stale results keep only the affected verdict pending.

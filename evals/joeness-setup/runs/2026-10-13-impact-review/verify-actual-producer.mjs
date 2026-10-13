@@ -1,0 +1,52 @@
+import {readFileSync,writeFileSync,mkdtempSync,readdirSync,mkdirSync,cpSync,appendFileSync} from 'node:fs';
+import {tmpdir} from 'node:os';
+import {join,resolve} from 'node:path';
+import {fileURLToPath} from 'node:url';
+import {createHash} from 'node:crypto';
+import {spawnSync} from 'node:child_process';
+import assert from 'node:assert/strict';
+const here=fileURLToPath(new URL('.',import.meta.url)),repo=resolve(here,'../../../..');
+const cli=process.env.JOENESS_TEST_IMPACT_CLI||join(repo,'skills/joeness-setup/scripts/impact-review.mjs');
+const gateCli=process.env.JOENESS_TEST_GATE_CLI||join(repo,'skills/joeness-setup/scripts/review-gate.mjs');
+const limited=process.argv.includes('--limited');
+const producer=process.env.JOEDESIGN_PRODUCER_CLI||'D:/JOEWRKS/JOEDESIGN/skills/joedesign/scripts/harness_cli.py';
+const sourceRoot=resolve(producer,'..');
+const fixtures='D:/JOEWRKS/JOEDESIGN/.local/f05-impact-20261013/real-v1';
+const manager='D:/JOEWRKS/JOEQASAM/evidence/t035-joe-implementation/f05-actual-manager.json';
+const sha=p=>createHash('sha256').update(readFileSync(p)).digest('hex');
+const all=root=>readdirSync(root,{recursive:true,withFileTypes:true}).filter(f=>f.isFile()&&!f.name.endsWith('.pyc')).map(f=>join(f.parentPath,f.name));
+const watched=[...all(sourceRoot).filter(p=>p.endsWith('.py')),...all(fixtures),manager,cli,gateCli];
+const snapshot=()=>Object.fromEntries(watched.map(p=>[p,sha(p)]));
+const before=snapshot(),summary=JSON.parse(readFileSync(join(fixtures,'summary.json'))),independent=JSON.parse(readFileSync(manager));
+const temp=mkdtempSync(join(tmpdir(),'joeness-impact-link-')),results=[];
+for(const row of summary){
+ const reviewed=independent.rows.find(x=>x.case===row.case);assert.ok(reviewed?.met);assert.deepEqual(reviewed.pins,row.pins);
+ const root=row.project;for(const [p,pin] of Object.entries(row.pins))assert.equal(sha(join(root,p)),pin,'Reviewed fixture pin changed');
+ const dir=join(temp,row.case);mkdirSync(dir);
+ const command=['python','-B','-X','utf8',producer,'inspect-impact','--project',root,'--request',join(root,'request.json'),'--request-sha256',row.pins['request.json'],'--review-sha256',row.pins['review.json']];
+ const p=spawnSync(command[0],command.slice(1),{encoding:'utf8',timeout:60000,maxBuffer:4*1024*1024});assert.ifError(p.error);
+ const impact=join(dir,'impact.json');writeFileSync(impact,p.stdout);writeFileSync(join(dir,'stderr.txt'),p.stderr);
+ assert.equal(p.status,0);const report=JSON.parse(p.stdout);assert.deepEqual(report,JSON.parse(readFileSync(join(root,'impact.json'))));
+ const ref=path=>({path,sha256:sha(path)});
+ const review={schema:'joeness.impact-reuse-review.v1',scope_id:report.scope_id,impact_sha256:sha(impact),old_baseline_sha256:row.pins['old.json'],new_baseline_sha256:row.pins['new.json'],old_result_sha256:row.pins['old-result.json'],semantic_review_sha256:row.pins['review.json'],implementation_context:'JOEDESIGN-fixture-producer',review_context:'JOENESS-consumer-with-Manager-independent-source-review',confirmed_candidate_check_ids:report.checks.filter(c=>c.classification==='reusable-candidate').map(c=>c.check_id),source_refs:[ref(manager),...['DESIGN.md','authority-before.md','index.html','served.json'].map(p=>ref(join(root,p)))],rationale:'Manager inspected these exact P01/P02 pins, source append, actual PNG and four box distances. Consuming that independent diagnostic review only; no approval or reuse activation.'};
+ const reviewPath=join(dir,'consumer-review.json');writeFileSync(reviewPath,JSON.stringify(review));
+ const args=[cli,'--root',root,'--evidence-root',dir,'--evidence-root',resolve(manager,'..'),'--impact',impact,'--impact-sha256',sha(impact),'--impact-review',reviewPath,'--impact-review-sha256',sha(reviewPath),'--baseline','new.json','--baseline-sha256',row.pins['new.json'],'--previous-baseline','old.json','--previous-baseline-sha256',row.pins['old.json'],'--old-result','old-result.json','--old-result-sha256',row.pins['old-result.json']];
+ const c=spawnSync(process.execPath,args,{encoding:'utf8'});assert.ifError(c.error);const output=JSON.parse(c.stdout);
+ const gateCommand=[process.execPath,gateCli,'--root',root,'--baseline','new.json','--baseline-sha256',row.pins['new.json'],'--previous-baseline','old.json','--previous-baseline-sha256',row.pins['old.json'],'--result','old-result.json','--claim','visual'];
+ const gate=spawnSync(gateCommand[0],gateCommand.slice(1),{encoding:'utf8'});assert.ifError(gate.error);
+ results.push({case:row.case,producer_command:command,producer_exit:p.status,impact_sha256:sha(impact),consumer_command:[process.execPath,...args],consumer_exit:c.status,output,gate_command:gateCommand,gate_exit:gate.status,gate_output:JSON.parse(gate.stdout),met:c.status===0&&output.valid&&output.candidate_check_ids.length===4&&output.allowed===false&&output.reuse_authorized===false&&gate.status===2});
+ if(limited){
+  const extra=['--evidence-root',dir,'--evidence-root',resolve(manager,'..'),'--impact',impact,'--impact-sha256',sha(impact),'--impact-review',reviewPath,'--impact-review-sha256',sha(reviewPath),'--old-result','old-result.json','--old-result-sha256',row.pins['old-result.json']];
+  const call=(name,cmd,expected)=>{const r=spawnSync(cmd[0],cmd.slice(1),{encoding:'utf8'});assert.ifError(r.error);const output=JSON.parse(r.stdout);results.push({case:row.case+'-'+name,command:cmd,exit:r.status,output,met:output.allowed===expected&&output.project_complete===false&&r.status===(expected?0:2)});return output;};
+  const full=[...gateCommand,...extra],positive=call('reviewed-visual',full,true);assert.equal(positive.impact_reuse.reused_check_ids.length,4);assert.equal(positive.lanes.user_acceptance,'NOT_GRANTED');
+  const complete=[...full];complete[complete.indexOf('--claim')+1]='complete';call('complete-without-acceptance',complete,false);
+  const missing=full.filter((_,i)=>![full.indexOf('--impact-review-sha256'),full.indexOf('--impact-review-sha256')+1].includes(i));call('missing-review-pin',missing,false);
+  const changed=join(dir,'changed-project');cpSync(root,changed,{recursive:true});appendFileSync(join(changed,'index.html'),'\n<!-- changed runtime -->');
+  const changedArgs=[...full,'--evidence-root',root];changedArgs[changedArgs.indexOf('--root')+1]=changed;call('changed-runtime',changedArgs,false);
+ }
+}
+const after=snapshot(),record={stage:'actual-producer-to-diagnostic-consumer-not-reuse',temporary_evidence:temp,before,after,source_unchanged:JSON.stringify(before)===JSON.stringify(after),results,passed:results.filter(r=>r.met).length,total:results.length,limits:['Uses provided actual Edge capture; no new render/measurement by JOENESS','Manager semantic/box review cited by exact file, not authenticated identity','Existing gate still denies authority-changed old result; no reuse enabled']};
+record.stage=limited?'actual-producer-to-limited-reuse-gate':record.stage;
+if(limited)record.limits[2]='Explicit reviewed geometry transition only; user acceptance remains separate';
+writeFileSync(join(here,(limited?'limited-':'actual-')+(process.env.JOEDESIGN_PRODUCER_CLI?'personal-producer-':'')+(process.env.JOENESS_TEST_IMPACT_CLI?'installed.json':'source.json')),JSON.stringify(record,null,2)+'\n');
+console.log(JSON.stringify({passed:record.passed,total:record.total,unchanged:record.source_unchanged,temp}));assert.equal(record.passed,record.total);assert.ok(record.source_unchanged);

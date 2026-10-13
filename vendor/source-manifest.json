@@ -17,7 +17,7 @@
       "files": [
         {
           "path": "SKILL.md",
-          "sha256": "d28310d2be866d4a89ed733cd4310da54e1ccd7acf0b9c045ab7dfaea7a0176f"
+          "sha256": "0f5db50f1f1ffc21359372cd49c72fcd05cc785869f995a7ac9e175f6696beba"
         },
         {
           "path": "agents/openai.yaml",
@@ -25,7 +25,7 @@
         },
         {
           "path": "assets/AGENTS.md",
-          "sha256": "f2fbd94a9939fbe31d371b21c7e4f2b05f814e0ed81ae22ba73e1097bdfb86ce"
+          "sha256": "691cd5eac50c3324da16987d2661d98e0d47f9e6a8e3f90e8804ae7050c628c0"
         },
         {
           "path": "assets/DESIGN.md",
@@ -53,11 +53,35 @@
         },
         {
           "path": "references/review-gate.md",
-          "sha256": "72e509e4eeeae714cd615cf26bcfba61140f3bd840d7634bfd199bc04c314728"
+          "sha256": "0422021f6a247d44a3c2980353dddac76dee613282ecf4315cd4d357ebdf8432"
         },
         {
           "path": "scripts/review-gate.mjs",
-          "sha256": "db37a33ce5ee2f9c210e4250b05aef1afb9712bfa6e524a80d39866b4c8c8c23"
+          "sha256": "7ad13a9020a57aa0a6396348f8575229d7cac076a5d5a6c89178d26c3b6d9bd2"
+        },
+        {
+          "path": "references/roadmap-review.md",
+          "sha256": "bfb8910df6814edd4fab15b18b1c88c6dcc1127eb9921488772bdb9ffc15a201"
+        },
+        {
+          "path": "scripts/roadmap-review.mjs",
+          "sha256": "5dfb2d5a81df58d9e1c43651b43cc945356bbf61630b103877f9b8bcd13ba33f"
+        },
+        {
+          "path": "references/operation-review.md",
+          "sha256": "748d1631847ac23045406f6742b43a3a0bddb29ebfb32b3720f8f97c9546959c"
+        },
+        {
+          "path": "scripts/operation-review.mjs",
+          "sha256": "a1a6d80a7d57d4e9c3e66c49a6f877bf07836bac25d330bb466fc2a858679aad"
+        },
+        {
+          "path": "scripts/impact-review.mjs",
+          "sha256": "9cd8359daae4e0f68bcab688ae831e43d81a0b98bcb8ca10ed65a63d0e70cbc8"
+        },
+        {
+          "path": "references/impact-review.md",
+          "sha256": "6d98aa307aaace44461699e66fdbc3d658f67f8b6c756812ad9faa23ed330a82"
         }
       ]
     }

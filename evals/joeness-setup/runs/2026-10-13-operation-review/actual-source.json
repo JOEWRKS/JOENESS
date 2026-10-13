@@ -1,0 +1,771 @@
+{
+  "kind": "actual-python-producer-to-source-consumer-on-synthetic-fixtures",
+  "producer_head": "fe869ad2c376ed5937f60da74fdc1eba4e994f61",
+  "consumer_cli": "D:\\JOEWRKS\\작업하네스\\skills\\joeness-setup\\scripts\\operation-review.mjs",
+  "consumer_sha256": "5cc094925c22aab56bc4255ff037551991bab56a471dcd1116e5d2889d8e50cc",
+  "temporary_captures": "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-operation-execution-qvOzQ0",
+  "passed": 4,
+  "total": 4,
+  "source_unchanged": true,
+  "before": {
+    "skills/joewrks-product-definition/scripts/approval_v2.py": "8c1d82c62dc8039b4a95f5ba5f4bd620edc699d813d9be6b879c630ca5b7f145",
+    "skills/joewrks-product-definition/scripts/audit_downstream_v2.py": "e111843ff03053632fb1cb05b56a69922ba0e33227c0e8e8ce13f4d9d15fefd0",
+    "skills/joewrks-product-definition/scripts/audit_planning_projections.py": "2a557a254a685e52ae54513fc56d55bb4edaa36ada3c3e70ebf47445ca955efc",
+    "skills/joewrks-product-definition/scripts/audit_reviewer_runner.py": "81d18c2ad35864b4ccdc9eeac65e84f26e713f1a458e38e6cf3973b4962791b5",
+    "skills/joewrks-product-definition/scripts/authority_binding_v2.py": "b7e72857d85dc7e234cadcc515319aa892e9a0cc73cc29153d5be40f31c99827",
+    "skills/joewrks-product-definition/scripts/authority_binding_value.py": "bd3bd8e2058dcfafc4d1feeb9cdc06da736bd4d54ca989c6de8c8be78cfd0781",
+    "skills/joewrks-product-definition/scripts/build_approval_manifest.py": "6bf4cc41f3df6939093b35455076afb0307104dd00e464f49eb901d031d32c14",
+    "skills/joewrks-product-definition/scripts/build_discovery_baseline.py": "a45bd0ba445db0b74de8b83dfbb95f473be9646eab9f5a2097e924a4c7fbd599",
+    "skills/joewrks-product-definition/scripts/build_semantic_review_v2.py": "1772bf91ebd94b2275bc7cbd3784a08de427368a2fa44b3a3ead0112265a0d07",
+    "skills/joewrks-product-definition/scripts/candidate_preflight_v2.py": "4c24a47fb856fcebfbc21ad3cbc7ce8efd7bc80a01b5ed8c08c9f4708b496415",
+    "skills/joewrks-product-definition/scripts/compile_downstream_v2.py": "88ff15aa89c0f2dab73719fe5764d50af815114dfd957fcbacde1b614c9c2eb2",
+    "skills/joewrks-product-definition/scripts/discovery_v2.py": "8eec96449e2e5fd8d152b1fe0e232eef8ffd68e6c1b47be7f0834f3659d63136",
+    "skills/joewrks-product-definition/scripts/grill_v2.py": "91fb3872b6a6ddbf324327e9aef33cc839f31c34c7a09d1a64580ebbf4ce445e",
+    "skills/joewrks-product-definition/scripts/materiality_v2.py": "96f0286a5eaffca367861d56b6d1083efc0c6fd1c14ec9d00be01dc6c3fc8eba",
+    "skills/joewrks-product-definition/scripts/migrate_state.py": "be0d73fb70345ab6b80f73bf329d254cad0ea6856f65a7656f6bce4ef167881a",
+    "skills/joewrks-product-definition/scripts/migration_v2.py": "bb622be48286d7b23cf7c252423cc441e95394628c13240607d6e7ceeb1a239f",
+    "skills/joewrks-product-definition/scripts/next_product_question.py": "4485b2c12346a16a1f9357bea1f3d3468de1e5aaeb5634e67aaad9626e0eeb02",
+    "skills/joewrks-product-definition/scripts/preflight_state_candidate.py": "712087016a64abde86c226b1d8627a862c2d7a0f659b71698eb93722278d760a",
+    "skills/joewrks-product-definition/scripts/projection_audit_v2.py": "dd7d8d99f6728b44db3e9e8bb3ed30d5d28c412384ee53aab2f0e2469648839d",
+    "skills/joewrks-product-definition/scripts/state_contract_dispatch.py": "f809586b4046780956c47696a56a8bac80bdb518b883614a7b5b7b3c2e359c33",
+    "skills/joewrks-product-definition/scripts/state_validation.py": "7b8d955ee19fb7b53f72ee5e0dd0a9d789d0031312a04f9a1894f059fbc97d32",
+    "skills/joewrks-product-definition/scripts/state_validation_v2.py": "c1a18f47679f9e95ac436811db8f2b39af326e07c0e6ca646ddb6677940b75b8",
+    "skills/joewrks-product-definition/scripts/validate_closure.py": "b894b52ee23f05852b3a8fb391078438e17f5950994ba90d8437c8fe40aedfaa",
+    "skills/joewrks-product-definition/scripts/validate_state.py": "7b8b5353b6b2f25237a3a595846712be6060ea1aa7d4ca4116efd88f38fa3fda",
+    "skills/joewrks-product-definition/scripts/verify_runtime_v2.py": "3bca5b53fc2c66156fbc47227c42c9cf2fddfe69e9c0684fd0ad3ace5a01ad30",
+    "skills/joewrks-product-definition/scripts/verify_runtime_v21.py": "d6a69f9b6991013bae560eed1360547994b77ca160a74f7e408cebae3c26a430",
+    "evals/joeflow-f03-f04/fixtures/README.md": "7c4c8e365e7060ccff094a4ba9bc982a660a3a59b095e5fb79bd2d75511ef99e",
+    "evals/joeflow-f03-f04/fixtures/f03/malformed-candidate.json": "ca3d163bab055381827226140568f3bef7eaac187cebd76878e0b63e9e442356",
+    "evals/joeflow-f03-f04/fixtures/f03/output-error.json": "46c07b7a8371ea236732bc4464f9ecfe18449218c3ccd3b9ad7ab7ca6a80f434",
+    "evals/joeflow-f03-f04/fixtures/f03/output-pass.json": "7c297d2496bb5549eb2db24e070df506490e39f650416503549d33fa250465f2",
+    "evals/joeflow-f03-f04/fixtures/f03/ready-for-review-candidate.json": "03e9a51406990d614da97694b54a03b85f4f03e8d242d6d43c938ab5248bb1ba",
+    "evals/joeflow-f03-f04/fixtures/f04/approved-scope.json": "24fb9021bd034cd6c99b726c47cfa1da3a6aea2a67b161df9fc45a55ba4db29b",
+    "evals/joeflow-f03-f04/fixtures/f04/audit-input-partial.json": "b48918024c0129d960386fdf634e0dd05ff9928149f4b3827719cb50c3b851b1",
+    "evals/joeflow-f03-f04/fixtures/f04/audit-input-pass.json": "8650102eeb5d8ad3aedf403f5ac82279704fa3d1bb414b78e6b043bd92645c38",
+    "evals/joeflow-f03-f04/fixtures/f04/html-review.json": "4678d4e29013d6079d572dfcb4d0d65feb9734ee8ee4c69787567016c3532874",
+    "evals/joeflow-f03-f04/fixtures/f04/master-review.json": "ca9b4990faa266968d8b0539bc2b1a942158feb4ae93bf2238d7c2fe0266019f",
+    "evals/joeflow-f03-f04/fixtures/f04/MASTER_PLANNING_SPEC.md": "702dde0ef8c9bf17c1bf9505704d6fb154357915daa2a6bcee112c3f20cde80b",
+    "evals/joeflow-f03-f04/fixtures/f04/output-partial.json": "c5d84b29989063ad6e0277601dc389c577dc67de8e9664dbb068d4678e206f08",
+    "evals/joeflow-f03-f04/fixtures/f04/output-pass.json": "1e83a5bcb0a59c626763281165111fde335790da693d2c3c8fdebf9ce8797a82",
+    "evals/joeflow-f03-f04/fixtures/f04/planning-review-core.html": "218e47bf05c9474930294d8b49e89bd36ae5919b7d267b7075745de760b4ee7b",
+    "skills/joewrks-product-definition/templates/state-v0.2.0.example.json": "e824dfc8498a3dfe308277f680fdf83bc1ed38690bc9247f473324054628e00f"
+  },
+  "after": {
+    "skills/joewrks-product-definition/scripts/approval_v2.py": "8c1d82c62dc8039b4a95f5ba5f4bd620edc699d813d9be6b879c630ca5b7f145",
+    "skills/joewrks-product-definition/scripts/audit_downstream_v2.py": "e111843ff03053632fb1cb05b56a69922ba0e33227c0e8e8ce13f4d9d15fefd0",
+    "skills/joewrks-product-definition/scripts/audit_planning_projections.py": "2a557a254a685e52ae54513fc56d55bb4edaa36ada3c3e70ebf47445ca955efc",
+    "skills/joewrks-product-definition/scripts/audit_reviewer_runner.py": "81d18c2ad35864b4ccdc9eeac65e84f26e713f1a458e38e6cf3973b4962791b5",
+    "skills/joewrks-product-definition/scripts/authority_binding_v2.py": "b7e72857d85dc7e234cadcc515319aa892e9a0cc73cc29153d5be40f31c99827",
+    "skills/joewrks-product-definition/scripts/authority_binding_value.py": "bd3bd8e2058dcfafc4d1feeb9cdc06da736bd4d54ca989c6de8c8be78cfd0781",
+    "skills/joewrks-product-definition/scripts/build_approval_manifest.py": "6bf4cc41f3df6939093b35455076afb0307104dd00e464f49eb901d031d32c14",
+    "skills/joewrks-product-definition/scripts/build_discovery_baseline.py": "a45bd0ba445db0b74de8b83dfbb95f473be9646eab9f5a2097e924a4c7fbd599",
+    "skills/joewrks-product-definition/scripts/build_semantic_review_v2.py": "1772bf91ebd94b2275bc7cbd3784a08de427368a2fa44b3a3ead0112265a0d07",
+    "skills/joewrks-product-definition/scripts/candidate_preflight_v2.py": "4c24a47fb856fcebfbc21ad3cbc7ce8efd7bc80a01b5ed8c08c9f4708b496415",
+    "skills/joewrks-product-definition/scripts/compile_downstream_v2.py": "88ff15aa89c0f2dab73719fe5764d50af815114dfd957fcbacde1b614c9c2eb2",
+    "skills/joewrks-product-definition/scripts/discovery_v2.py": "8eec96449e2e5fd8d152b1fe0e232eef8ffd68e6c1b47be7f0834f3659d63136",
+    "skills/joewrks-product-definition/scripts/grill_v2.py": "91fb3872b6a6ddbf324327e9aef33cc839f31c34c7a09d1a64580ebbf4ce445e",
+    "skills/joewrks-product-definition/scripts/materiality_v2.py": "96f0286a5eaffca367861d56b6d1083efc0c6fd1c14ec9d00be01dc6c3fc8eba",
+    "skills/joewrks-product-definition/scripts/migrate_state.py": "be0d73fb70345ab6b80f73bf329d254cad0ea6856f65a7656f6bce4ef167881a",
+    "skills/joewrks-product-definition/scripts/migration_v2.py": "bb622be48286d7b23cf7c252423cc441e95394628c13240607d6e7ceeb1a239f",
+    "skills/joewrks-product-definition/scripts/next_product_question.py": "4485b2c12346a16a1f9357bea1f3d3468de1e5aaeb5634e67aaad9626e0eeb02",
+    "skills/joewrks-product-definition/scripts/preflight_state_candidate.py": "712087016a64abde86c226b1d8627a862c2d7a0f659b71698eb93722278d760a",
+    "skills/joewrks-product-definition/scripts/projection_audit_v2.py": "dd7d8d99f6728b44db3e9e8bb3ed30d5d28c412384ee53aab2f0e2469648839d",
+    "skills/joewrks-product-definition/scripts/state_contract_dispatch.py": "f809586b4046780956c47696a56a8bac80bdb518b883614a7b5b7b3c2e359c33",
+    "skills/joewrks-product-definition/scripts/state_validation.py": "7b8d955ee19fb7b53f72ee5e0dd0a9d789d0031312a04f9a1894f059fbc97d32",
+    "skills/joewrks-product-definition/scripts/state_validation_v2.py": "c1a18f47679f9e95ac436811db8f2b39af326e07c0e6ca646ddb6677940b75b8",
+    "skills/joewrks-product-definition/scripts/validate_closure.py": "b894b52ee23f05852b3a8fb391078438e17f5950994ba90d8437c8fe40aedfaa",
+    "skills/joewrks-product-definition/scripts/validate_state.py": "7b8b5353b6b2f25237a3a595846712be6060ea1aa7d4ca4116efd88f38fa3fda",
+    "skills/joewrks-product-definition/scripts/verify_runtime_v2.py": "3bca5b53fc2c66156fbc47227c42c9cf2fddfe69e9c0684fd0ad3ace5a01ad30",
+    "skills/joewrks-product-definition/scripts/verify_runtime_v21.py": "d6a69f9b6991013bae560eed1360547994b77ca160a74f7e408cebae3c26a430",
+    "evals/joeflow-f03-f04/fixtures/README.md": "7c4c8e365e7060ccff094a4ba9bc982a660a3a59b095e5fb79bd2d75511ef99e",
+    "evals/joeflow-f03-f04/fixtures/f03/malformed-candidate.json": "ca3d163bab055381827226140568f3bef7eaac187cebd76878e0b63e9e442356",
+    "evals/joeflow-f03-f04/fixtures/f03/output-error.json": "46c07b7a8371ea236732bc4464f9ecfe18449218c3ccd3b9ad7ab7ca6a80f434",
+    "evals/joeflow-f03-f04/fixtures/f03/output-pass.json": "7c297d2496bb5549eb2db24e070df506490e39f650416503549d33fa250465f2",
+    "evals/joeflow-f03-f04/fixtures/f03/ready-for-review-candidate.json": "03e9a51406990d614da97694b54a03b85f4f03e8d242d6d43c938ab5248bb1ba",
+    "evals/joeflow-f03-f04/fixtures/f04/approved-scope.json": "24fb9021bd034cd6c99b726c47cfa1da3a6aea2a67b161df9fc45a55ba4db29b",
+    "evals/joeflow-f03-f04/fixtures/f04/audit-input-partial.json": "b48918024c0129d960386fdf634e0dd05ff9928149f4b3827719cb50c3b851b1",
+    "evals/joeflow-f03-f04/fixtures/f04/audit-input-pass.json": "8650102eeb5d8ad3aedf403f5ac82279704fa3d1bb414b78e6b043bd92645c38",
+    "evals/joeflow-f03-f04/fixtures/f04/html-review.json": "4678d4e29013d6079d572dfcb4d0d65feb9734ee8ee4c69787567016c3532874",
+    "evals/joeflow-f03-f04/fixtures/f04/master-review.json": "ca9b4990faa266968d8b0539bc2b1a942158feb4ae93bf2238d7c2fe0266019f",
+    "evals/joeflow-f03-f04/fixtures/f04/MASTER_PLANNING_SPEC.md": "702dde0ef8c9bf17c1bf9505704d6fb154357915daa2a6bcee112c3f20cde80b",
+    "evals/joeflow-f03-f04/fixtures/f04/output-partial.json": "c5d84b29989063ad6e0277601dc389c577dc67de8e9664dbb068d4678e206f08",
+    "evals/joeflow-f03-f04/fixtures/f04/output-pass.json": "1e83a5bcb0a59c626763281165111fde335790da693d2c3c8fdebf9ce8797a82",
+    "evals/joeflow-f03-f04/fixtures/f04/planning-review-core.html": "218e47bf05c9474930294d8b49e89bd36ae5919b7d267b7075745de760b4ee7b",
+    "skills/joewrks-product-definition/templates/state-v0.2.0.example.json": "e824dfc8498a3dfe308277f680fdf83bc1ed38690bc9247f473324054628e00f"
+  },
+  "results": [
+    {
+      "id": "F03-pass",
+      "producer_command": [
+        "python",
+        "-B",
+        "-X",
+        "utf8",
+        "D:\\JOEWRKS\\JOEWRKS-Product-worktrees\\joeflow-product-visual-handoff-reinforcement\\skills\\joewrks-product-definition\\scripts\\preflight_state_candidate.py",
+        "D:\\JOEWRKS\\JOEWRKS-Product-worktrees\\joeflow-product-visual-handoff-reinforcement\\evals\\joeflow-f03-f04\\fixtures\\f03\\ready-for-review-candidate.json"
+      ],
+      "producer_exit": 0,
+      "consumer_command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "D:\\JOEWRKS\\작업하네스\\skills\\joeness-setup\\scripts\\operation-review.mjs",
+        "--root",
+        "D:/JOEWRKS/JOEWRKS-Product-worktrees/joeflow-product-visual-handoff-reinforcement",
+        "--evidence-root",
+        "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-operation-execution-qvOzQ0\\F03-pass",
+        "--request",
+        "request.json",
+        "--request-sha256",
+        "d968ce270c4f5cf0ce42748e4b5742b41b9ca0bc3b481195cd78bb92b38aaadc",
+        "--capture",
+        "capture.json",
+        "--capture-sha256",
+        "f0e6de4d3e8b5092e89fe12c6318cf00f70986559ca93e9c23a5679fa1c8b670"
+      ],
+      "consumer_exit": 0,
+      "expected_exit": 0,
+      "expected_allowed": true,
+      "met": true,
+      "capture_sha256": "f0e6de4d3e8b5092e89fe12c6318cf00f70986559ca93e9c23a5679fa1c8b670",
+      "request_sha256": "d968ce270c4f5cf0ce42748e4b5742b41b9ca0bc3b481195cd78bb92b38aaadc",
+      "output": {
+        "schema": "joeness.operation-consumption.v1",
+        "allowed": true,
+        "verdict": "pass",
+        "project_complete": false,
+        "approval_granted": false,
+        "findings": [],
+        "reported": {
+          "canonical": null,
+          "canonical_unchanged": null,
+          "findings": [],
+          "identity": {
+            "approval_status": "UNAPPROVED",
+            "definition_digest": "dd1a16a678b431fc971d65e61eef77b68edef26c33b8d5891f3f9b5f888d8876",
+            "definition_revision": 1,
+            "definition_status": "READY_FOR_REVIEW",
+            "schema_version": "0.2.0"
+          },
+          "next_action": "PRESENT_EXACT_MANIFEST_FOR_USER_REVIEW",
+          "overall_status": "PASS",
+          "schema_version": "joewrks.state-candidate-preflight/1.0",
+          "source": {
+            "path": "D:\\JOEWRKS\\JOEWRKS-Product-worktrees\\joeflow-product-visual-handoff-reinforcement\\evals\\joeflow-f03-f04\\fixtures\\f03\\ready-for-review-candidate.json",
+            "sha256": "03e9a51406990d614da97694b54a03b85f4f03e8d242d6d43c938ab5248bb1ba"
+          },
+          "source_unchanged": true,
+          "stages": {
+            "manifest_review_readiness": "PASS",
+            "semantic_readiness": "PASS",
+            "state_validation": "PASS",
+            "user_approval": "UNAPPROVED"
+          },
+          "summary": {
+            "blocking_metric_count": 0,
+            "finding_count": 0,
+            "validation_error_count": 0
+          }
+        },
+        "limits": [
+          "Pinned capture integrity is not producer execution authentication or semantic correctness.",
+          "Preflight/audit is not product approval or project completion."
+        ]
+      }
+    },
+    {
+      "id": "F03-invalid",
+      "producer_command": [
+        "python",
+        "-B",
+        "-X",
+        "utf8",
+        "D:\\JOEWRKS\\JOEWRKS-Product-worktrees\\joeflow-product-visual-handoff-reinforcement\\skills\\joewrks-product-definition\\scripts\\preflight_state_candidate.py",
+        "D:\\JOEWRKS\\JOEWRKS-Product-worktrees\\joeflow-product-visual-handoff-reinforcement\\evals\\joeflow-f03-f04\\fixtures\\f03\\malformed-candidate.json"
+      ],
+      "producer_exit": 1,
+      "consumer_command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "D:\\JOEWRKS\\작업하네스\\skills\\joeness-setup\\scripts\\operation-review.mjs",
+        "--root",
+        "D:/JOEWRKS/JOEWRKS-Product-worktrees/joeflow-product-visual-handoff-reinforcement",
+        "--evidence-root",
+        "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-operation-execution-qvOzQ0\\F03-invalid",
+        "--request",
+        "request.json",
+        "--request-sha256",
+        "49c77f69fc2061c0f6e4afbc8bf373bb95d41a088389819d8fcc044bb6a5fdad",
+        "--capture",
+        "capture.json",
+        "--capture-sha256",
+        "bf73537a225ff635ce63aa807aebac785173b4257e585c66aca2f0490d61537a"
+      ],
+      "consumer_exit": 2,
+      "expected_exit": 1,
+      "expected_allowed": false,
+      "met": true,
+      "capture_sha256": "bf73537a225ff635ce63aa807aebac785173b4257e585c66aca2f0490d61537a",
+      "request_sha256": "49c77f69fc2061c0f6e4afbc8bf373bb95d41a088389819d8fcc044bb6a5fdad",
+      "output": {
+        "schema": "joeness.operation-consumption.v1",
+        "allowed": false,
+        "verdict": "blocked",
+        "project_complete": false,
+        "approval_granted": false,
+        "findings": [],
+        "reported": {
+          "canonical": null,
+          "canonical_unchanged": null,
+          "findings": [
+            {
+              "actual": null,
+              "allowed_types": null,
+              "cause": "schema_version must equal 0.2.0",
+              "code": "schema_error",
+              "id": "VALIDATION-0001",
+              "next_action": "CORRECT_THE_CANDIDATE_AT_THE_REPORTED_POINTER_THEN_RERUN",
+              "object_id": null,
+              "pointer": "/schema_version"
+            },
+            {
+              "actual": null,
+              "allowed_types": null,
+              "cause": "state root fields do not match the 0.2.0 foundation contract",
+              "code": "schema_error",
+              "id": "VALIDATION-0002",
+              "next_action": "CORRECT_THE_CANDIDATE_AT_THE_REPORTED_POINTER_THEN_RERUN",
+              "object_id": null,
+              "pointer": null
+            },
+            {
+              "actual": null,
+              "allowed_types": null,
+              "cause": "project fields do not match the 0.2.0 foundation contract",
+              "code": "schema_error",
+              "id": "VALIDATION-0003",
+              "next_action": "CORRECT_THE_CANDIDATE_AT_THE_REPORTED_POINTER_THEN_RERUN",
+              "object_id": null,
+              "pointer": "/project"
+            },
+            {
+              "actual": null,
+              "allowed_types": null,
+              "cause": "objects must contain all 13 canonical groups",
+              "code": "schema_error",
+              "id": "VALIDATION-0004",
+              "next_action": "CORRECT_THE_CANDIDATE_AT_THE_REPORTED_POINTER_THEN_RERUN",
+              "object_id": null,
+              "pointer": "/objects"
+            },
+            {
+              "actual": null,
+              "allowed_types": null,
+              "cause": "migration must be a dict",
+              "code": "schema_error",
+              "id": "VALIDATION-0005",
+              "next_action": "CORRECT_THE_CANDIDATE_AT_THE_REPORTED_POINTER_THEN_RERUN",
+              "object_id": null,
+              "pointer": "/migration"
+            },
+            {
+              "actual": null,
+              "allowed_types": null,
+              "cause": "evidence must be a list",
+              "code": "schema_error",
+              "id": "VALIDATION-0006",
+              "next_action": "CORRECT_THE_CANDIDATE_AT_THE_REPORTED_POINTER_THEN_RERUN",
+              "object_id": null,
+              "pointer": "/evidence"
+            },
+            {
+              "actual": null,
+              "allowed_types": null,
+              "cause": "surface_manifest must be a dict",
+              "code": "schema_error",
+              "id": "VALIDATION-0007",
+              "next_action": "CORRECT_THE_CANDIDATE_AT_THE_REPORTED_POINTER_THEN_RERUN",
+              "object_id": null,
+              "pointer": "/surface_manifest"
+            },
+            {
+              "actual": null,
+              "allowed_types": null,
+              "cause": "contradictions must be a list",
+              "code": "schema_error",
+              "id": "VALIDATION-0008",
+              "next_action": "CORRECT_THE_CANDIDATE_AT_THE_REPORTED_POINTER_THEN_RERUN",
+              "object_id": null,
+              "pointer": "/contradictions"
+            },
+            {
+              "actual": null,
+              "allowed_types": null,
+              "cause": "coverage must be a list",
+              "code": "schema_error",
+              "id": "VALIDATION-0009",
+              "next_action": "CORRECT_THE_CANDIDATE_AT_THE_REPORTED_POINTER_THEN_RERUN",
+              "object_id": null,
+              "pointer": "/coverage"
+            },
+            {
+              "actual": null,
+              "allowed_types": null,
+              "cause": "ux_coverage must be a list",
+              "code": "schema_error",
+              "id": "VALIDATION-0010",
+              "next_action": "CORRECT_THE_CANDIDATE_AT_THE_REPORTED_POINTER_THEN_RERUN",
+              "object_id": null,
+              "pointer": "/ux_coverage"
+            },
+            {
+              "actual": null,
+              "allowed_types": null,
+              "cause": "grill_coverage must be a list",
+              "code": "schema_error",
+              "id": "VALIDATION-0011",
+              "next_action": "CORRECT_THE_CANDIDATE_AT_THE_REPORTED_POINTER_THEN_RERUN",
+              "object_id": null,
+              "pointer": "/grill_coverage"
+            },
+            {
+              "actual": null,
+              "allowed_types": null,
+              "cause": "discovery_baseline must be a dict",
+              "code": "schema_error",
+              "id": "VALIDATION-0012",
+              "next_action": "CORRECT_THE_CANDIDATE_AT_THE_REPORTED_POINTER_THEN_RERUN",
+              "object_id": null,
+              "pointer": "/discovery_baseline"
+            },
+            {
+              "actual": null,
+              "allowed_types": null,
+              "cause": "approval must be a dict",
+              "code": "schema_error",
+              "id": "VALIDATION-0013",
+              "next_action": "CORRECT_THE_CANDIDATE_AT_THE_REPORTED_POINTER_THEN_RERUN",
+              "object_id": null,
+              "pointer": "/approval"
+            },
+            {
+              "actual": null,
+              "allowed_types": null,
+              "cause": "approval_history must be a list",
+              "code": "schema_error",
+              "id": "VALIDATION-0014",
+              "next_action": "CORRECT_THE_CANDIDATE_AT_THE_REPORTED_POINTER_THEN_RERUN",
+              "object_id": null,
+              "pointer": "/approval_history"
+            },
+            {
+              "actual": null,
+              "allowed_types": null,
+              "cause": "migration must be an object",
+              "code": "schema_error",
+              "id": "VALIDATION-0015",
+              "next_action": "CORRECT_THE_CANDIDATE_AT_THE_REPORTED_POINTER_THEN_RERUN",
+              "object_id": null,
+              "pointer": "/migration"
+            },
+            {
+              "actual": null,
+              "allowed_types": null,
+              "cause": "surface_manifest must contain records and the complete Grill Topology Profile",
+              "code": "invalid_surface_manifest",
+              "id": "VALIDATION-0016",
+              "next_action": "CORRECT_THE_CANDIDATE_AT_THE_REPORTED_POINTER_THEN_RERUN",
+              "object_id": null,
+              "pointer": "/surface_manifest"
+            },
+            {
+              "actual": null,
+              "allowed_types": null,
+              "cause": "surface_manifest.grill_profile must contain all six topology domains",
+              "code": "invalid_grill_profile",
+              "id": "VALIDATION-0017",
+              "next_action": "CORRECT_THE_CANDIDATE_AT_THE_REPORTED_POINTER_THEN_RERUN",
+              "object_id": null,
+              "pointer": "/surface_manifest/grill_profile"
+            },
+            {
+              "actual": null,
+              "allowed_types": null,
+              "cause": "discovery_baseline must be an object",
+              "code": "invalid_discovery_baseline",
+              "id": "VALIDATION-0018",
+              "next_action": "CORRECT_THE_CANDIDATE_AT_THE_REPORTED_POINTER_THEN_RERUN",
+              "object_id": null,
+              "pointer": "/discovery_baseline"
+            },
+            {
+              "actual": null,
+              "allowed_types": null,
+              "cause": "approval must be the exact UNAPPROVED or APPROVED form",
+              "code": "invalid_approval",
+              "id": "VALIDATION-0019",
+              "next_action": "CORRECT_THE_CANDIDATE_AT_THE_REPORTED_POINTER_THEN_RERUN",
+              "object_id": null,
+              "pointer": "/approval"
+            },
+            {
+              "actual": null,
+              "allowed_types": null,
+              "cause": "approval_history commitments must be exact with unique revisions",
+              "code": "approval_history_gaps",
+              "id": "VALIDATION-0020",
+              "next_action": "CORRECT_THE_CANDIDATE_AT_THE_REPORTED_POINTER_THEN_RERUN",
+              "object_id": null,
+              "pointer": "/approval_history"
+            },
+            {
+              "actual": 6,
+              "allowed_types": null,
+              "cause": "semantic readiness metric active_grill_pack_gaps is nonzero",
+              "code": "active_grill_pack_gaps",
+              "id": "READINESS-0001",
+              "next_action": "CORRECT_THE_CANDIDATE_AT_THE_REPORTED_POINTER_THEN_RERUN",
+              "object_id": null,
+              "pointer": null
+            },
+            {
+              "actual": 1,
+              "allowed_types": null,
+              "cause": "semantic readiness metric discovery_baseline_gaps is nonzero",
+              "code": "discovery_baseline_gaps",
+              "id": "READINESS-0002",
+              "next_action": "CORRECT_THE_CANDIDATE_AT_THE_REPORTED_POINTER_THEN_RERUN",
+              "object_id": null,
+              "pointer": null
+            },
+            {
+              "actual": 1,
+              "allowed_types": null,
+              "cause": "semantic readiness metric discovery_procedure_gaps is nonzero",
+              "code": "discovery_procedure_gaps",
+              "id": "READINESS-0003",
+              "next_action": "CORRECT_THE_CANDIDATE_AT_THE_REPORTED_POINTER_THEN_RERUN",
+              "object_id": null,
+              "pointer": null
+            },
+            {
+              "actual": 2,
+              "allowed_types": null,
+              "cause": "semantic readiness metric minimum_definition_gaps is nonzero",
+              "code": "minimum_definition_gaps",
+              "id": "READINESS-0004",
+              "next_action": "CORRECT_THE_CANDIDATE_AT_THE_REPORTED_POINTER_THEN_RERUN",
+              "object_id": null,
+              "pointer": null
+            }
+          ],
+          "identity": {
+            "approval_status": null,
+            "definition_digest": "08bdedbf632d63ca1f1d24ea2e2be526b1d34148aee314c14b232a6297f23a99",
+            "definition_revision": null,
+            "definition_status": null,
+            "schema_version": null
+          },
+          "next_action": "CORRECT_REPORTED_CANDIDATE_FINDINGS_AND_RERUN",
+          "overall_status": "FAIL",
+          "schema_version": "joewrks.state-candidate-preflight/1.0",
+          "source": {
+            "path": "D:\\JOEWRKS\\JOEWRKS-Product-worktrees\\joeflow-product-visual-handoff-reinforcement\\evals\\joeflow-f03-f04\\fixtures\\f03\\malformed-candidate.json",
+            "sha256": "ca3d163bab055381827226140568f3bef7eaac187cebd76878e0b63e9e442356"
+          },
+          "source_unchanged": true,
+          "stages": {
+            "manifest_review_readiness": "NOT_READY",
+            "semantic_readiness": "FAIL",
+            "state_validation": "FAIL",
+            "user_approval": "UNAPPROVED"
+          },
+          "summary": {
+            "blocking_metric_count": 4,
+            "finding_count": 24,
+            "validation_error_count": 20
+          }
+        },
+        "limits": [
+          "Pinned capture integrity is not producer execution authentication or semantic correctness.",
+          "Preflight/audit is not product approval or project completion."
+        ]
+      }
+    },
+    {
+      "id": "F04-pass",
+      "producer_command": [
+        "python",
+        "-B",
+        "-X",
+        "utf8",
+        "D:\\JOEWRKS\\JOEWRKS-Product-worktrees\\joeflow-product-visual-handoff-reinforcement\\skills\\joewrks-product-definition\\scripts\\audit_planning_projections.py",
+        "D:\\JOEWRKS\\JOEWRKS-Product-worktrees\\joeflow-product-visual-handoff-reinforcement\\evals\\joeflow-f03-f04\\fixtures\\f04\\audit-input-pass.json"
+      ],
+      "producer_exit": 0,
+      "consumer_command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "D:\\JOEWRKS\\작업하네스\\skills\\joeness-setup\\scripts\\operation-review.mjs",
+        "--root",
+        "D:/JOEWRKS/JOEWRKS-Product-worktrees/joeflow-product-visual-handoff-reinforcement",
+        "--evidence-root",
+        "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-operation-execution-qvOzQ0\\F04-pass",
+        "--request",
+        "request.json",
+        "--request-sha256",
+        "309a85e6a285d28adfb4defdfd886918876265755ae56876534b2eb2c14f28e0",
+        "--capture",
+        "capture.json",
+        "--capture-sha256",
+        "1e9ff814e915b015cd794c58298bab1ed314a7db4ae4cea6790b874b88f22fca"
+      ],
+      "consumer_exit": 0,
+      "expected_exit": 0,
+      "expected_allowed": true,
+      "met": true,
+      "capture_sha256": "1e9ff814e915b015cd794c58298bab1ed314a7db4ae4cea6790b874b88f22fca",
+      "request_sha256": "309a85e6a285d28adfb4defdfd886918876265755ae56876534b2eb2c14f28e0",
+      "output": {
+        "schema": "joeness.operation-consumption.v1",
+        "allowed": true,
+        "verdict": "pass",
+        "project_complete": false,
+        "approval_granted": false,
+        "findings": [],
+        "reported": {
+          "canonical_source": {
+            "path": "D:\\JOEWRKS\\JOEWRKS-Product-worktrees\\joeflow-product-visual-handoff-reinforcement\\skills\\joewrks-product-definition\\templates\\state-v0.2.0.example.json",
+            "sha256": "e824dfc8498a3dfe308277f680fdf83bc1ed38690bc9247f473324054628e00f"
+          },
+          "completed_projection_ids": [
+            "master",
+            "review-html"
+          ],
+          "failed_projection_ids": [],
+          "input": {
+            "path": "D:\\JOEWRKS\\JOEWRKS-Product-worktrees\\joeflow-product-visual-handoff-reinforcement\\evals\\joeflow-f03-f04\\fixtures\\f04\\audit-input-pass.json",
+            "sha256": "8650102eeb5d8ad3aedf403f5ac82279704fa3d1bb414b78e6b043bd92645c38"
+          },
+          "limitations": [
+            "Exact hashes, pointers, and review-record binding prove identity and coverage only; they do not authenticate the reviewer's authority or make the semantic verdict true.",
+            "This audit never edits canonical state or projections and never creates product approval."
+          ],
+          "next_actions": [],
+          "overall_status": "PASS",
+          "pending_projection_ids": [],
+          "projections": [
+            {
+              "coverage": {
+                "required": [],
+                "reviewed": [],
+                "status": "PASS"
+              },
+              "findings": [],
+              "kind": "MARKDOWN",
+              "materialization": "PASS",
+              "next_action": "NONE",
+              "path": "D:\\JOEWRKS\\JOEWRKS-Product-worktrees\\joeflow-product-visual-handoff-reinforcement\\evals\\joeflow-f03-f04\\fixtures\\f04\\MASTER_PLANNING_SPEC.md",
+              "projection_id": "master",
+              "recovery_owner": "PRODUCT_DEFINITION_OWNER",
+              "render_evidence_sha256": null,
+              "render_review": {
+                "findings": [],
+                "status": "NOT_REQUIRED"
+              },
+              "required": true,
+              "review_evidence_sha256": null,
+              "semantic_review": {
+                "coverage": [],
+                "findings": [],
+                "status": "NOT_REQUIRED"
+              },
+              "sha256": "702dde0ef8c9bf17c1bf9505704d6fb154357915daa2a6bcee112c3f20cde80b",
+              "source_identity": "PASS",
+              "status": "COMPLETE",
+              "structure": "PASS"
+            },
+            {
+              "coverage": {
+                "required": [],
+                "reviewed": [],
+                "status": "PASS"
+              },
+              "findings": [],
+              "kind": "HTML",
+              "materialization": "PASS",
+              "next_action": "NONE",
+              "path": "D:\\JOEWRKS\\JOEWRKS-Product-worktrees\\joeflow-product-visual-handoff-reinforcement\\evals\\joeflow-f03-f04\\fixtures\\f04\\planning-review-core.html",
+              "projection_id": "review-html",
+              "recovery_owner": "PRODUCT_DEFINITION_OWNER",
+              "render_evidence_sha256": null,
+              "render_review": {
+                "findings": [],
+                "status": "NOT_REQUIRED"
+              },
+              "required": true,
+              "review_evidence_sha256": "4678d4e29013d6079d572dfcb4d0d65feb9734ee8ee4c69787567016c3532874",
+              "semantic_review": {
+                "coverage": [],
+                "findings": [],
+                "status": "PASS"
+              },
+              "sha256": "218e47bf05c9474930294d8b49e89bd36ae5919b7d267b7075745de760b4ee7b",
+              "source_identity": "PASS",
+              "status": "COMPLETE",
+              "structure": "PASS"
+            }
+          ],
+          "resume_identity": "834407f87a08d3905d584dc694d4f4cfa8715d0210fbe27cb3f3e816a3013ef1",
+          "resumed_projection_ids": [],
+          "schema_version": "joewrks.projection-audit/1.0",
+          "scope_authority_sha256": "24fb9021bd034cd6c99b726c47cfa1da3a6aea2a67b161df9fc45a55ba4db29b",
+          "source_unchanged": true
+        },
+        "limits": [
+          "Pinned capture integrity is not producer execution authentication or semantic correctness.",
+          "Preflight/audit is not product approval or project completion."
+        ]
+      }
+    },
+    {
+      "id": "F04-partial",
+      "producer_command": [
+        "python",
+        "-B",
+        "-X",
+        "utf8",
+        "D:\\JOEWRKS\\JOEWRKS-Product-worktrees\\joeflow-product-visual-handoff-reinforcement\\skills\\joewrks-product-definition\\scripts\\audit_planning_projections.py",
+        "D:\\JOEWRKS\\JOEWRKS-Product-worktrees\\joeflow-product-visual-handoff-reinforcement\\evals\\joeflow-f03-f04\\fixtures\\f04\\audit-input-partial.json"
+      ],
+      "producer_exit": 1,
+      "consumer_command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "D:\\JOEWRKS\\작업하네스\\skills\\joeness-setup\\scripts\\operation-review.mjs",
+        "--root",
+        "D:/JOEWRKS/JOEWRKS-Product-worktrees/joeflow-product-visual-handoff-reinforcement",
+        "--evidence-root",
+        "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-operation-execution-qvOzQ0\\F04-partial",
+        "--request",
+        "request.json",
+        "--request-sha256",
+        "cdd3437ad59a017361c76ab943a7ddb635ce0dc4ae056f0dfbe7c90be78de165",
+        "--capture",
+        "capture.json",
+        "--capture-sha256",
+        "582e860ce7d1b1d2afa21dd792bd3805c6fc380fb40dac4cb8db21388b9a4980"
+      ],
+      "consumer_exit": 2,
+      "expected_exit": 1,
+      "expected_allowed": false,
+      "met": true,
+      "capture_sha256": "582e860ce7d1b1d2afa21dd792bd3805c6fc380fb40dac4cb8db21388b9a4980",
+      "request_sha256": "cdd3437ad59a017361c76ab943a7ddb635ce0dc4ae056f0dfbe7c90be78de165",
+      "output": {
+        "schema": "joeness.operation-consumption.v1",
+        "allowed": false,
+        "verdict": "blocked",
+        "project_complete": false,
+        "approval_granted": false,
+        "findings": [],
+        "reported": {
+          "canonical_source": {
+            "path": "D:\\JOEWRKS\\JOEWRKS-Product-worktrees\\joeflow-product-visual-handoff-reinforcement\\skills\\joewrks-product-definition\\templates\\state-v0.2.0.example.json",
+            "sha256": "e824dfc8498a3dfe308277f680fdf83bc1ed38690bc9247f473324054628e00f"
+          },
+          "completed_projection_ids": [
+            "master"
+          ],
+          "failed_projection_ids": [],
+          "input": {
+            "path": "D:\\JOEWRKS\\JOEWRKS-Product-worktrees\\joeflow-product-visual-handoff-reinforcement\\evals\\joeflow-f03-f04\\fixtures\\f04\\audit-input-partial.json",
+            "sha256": "b48918024c0129d960386fdf634e0dd05ff9928149f4b3827719cb50c3b851b1"
+          },
+          "limitations": [
+            "Exact hashes, pointers, and review-record binding prove identity and coverage only; they do not authenticate the reviewer's authority or make the semantic verdict true.",
+            "This audit never edits canonical state or projections and never creates product approval."
+          ],
+          "next_actions": [
+            {
+              "action": "COMPLETE_THE_UNREVIEWED_REQUIRED_AXIS",
+              "owner": "PRODUCT_DEFINITION_OWNER",
+              "path": "D:\\JOEWRKS\\JOEWRKS-Product-worktrees\\joeflow-product-visual-handoff-reinforcement\\evals\\joeflow-f03-f04\\fixtures\\f04\\planning-review-core.html",
+              "projection_id": "review-html"
+            }
+          ],
+          "overall_status": "PARTIAL",
+          "pending_projection_ids": [
+            "review-html"
+          ],
+          "projections": [
+            {
+              "coverage": {
+                "required": [],
+                "reviewed": [],
+                "status": "PASS"
+              },
+              "findings": [],
+              "kind": "MARKDOWN",
+              "materialization": "PASS",
+              "next_action": "NONE",
+              "path": "D:\\JOEWRKS\\JOEWRKS-Product-worktrees\\joeflow-product-visual-handoff-reinforcement\\evals\\joeflow-f03-f04\\fixtures\\f04\\MASTER_PLANNING_SPEC.md",
+              "projection_id": "master",
+              "recovery_owner": "PRODUCT_DEFINITION_OWNER",
+              "render_evidence_sha256": null,
+              "render_review": {
+                "findings": [],
+                "status": "NOT_REQUIRED"
+              },
+              "required": true,
+              "review_evidence_sha256": null,
+              "semantic_review": {
+                "coverage": [],
+                "findings": [],
+                "status": "NOT_REQUIRED"
+              },
+              "sha256": "702dde0ef8c9bf17c1bf9505704d6fb154357915daa2a6bcee112c3f20cde80b",
+              "source_identity": "PASS",
+              "status": "COMPLETE",
+              "structure": "PASS"
+            },
+            {
+              "coverage": {
+                "required": [],
+                "reviewed": null,
+                "status": "UNKNOWN"
+              },
+              "findings": [],
+              "kind": "HTML",
+              "materialization": "PASS",
+              "next_action": "COMPLETE_THE_UNREVIEWED_REQUIRED_AXIS",
+              "path": "D:\\JOEWRKS\\JOEWRKS-Product-worktrees\\joeflow-product-visual-handoff-reinforcement\\evals\\joeflow-f03-f04\\fixtures\\f04\\planning-review-core.html",
+              "projection_id": "review-html",
+              "recovery_owner": "PRODUCT_DEFINITION_OWNER",
+              "render_evidence_sha256": null,
+              "render_review": {
+                "findings": [],
+                "status": "NOT_REQUIRED"
+              },
+              "required": true,
+              "review_evidence_sha256": null,
+              "semantic_review": {
+                "coverage": [],
+                "findings": null,
+                "status": "UNKNOWN"
+              },
+              "sha256": "218e47bf05c9474930294d8b49e89bd36ae5919b7d267b7075745de760b4ee7b",
+              "source_identity": "PASS",
+              "status": "PENDING",
+              "structure": "PASS"
+            }
+          ],
+          "resume_identity": "834407f87a08d3905d584dc694d4f4cfa8715d0210fbe27cb3f3e816a3013ef1",
+          "resumed_projection_ids": [],
+          "schema_version": "joewrks.projection-audit/1.0",
+          "scope_authority_sha256": "24fb9021bd034cd6c99b726c47cfa1da3a6aea2a67b161df9fc45a55ba4db29b",
+          "source_unchanged": true
+        },
+        "limits": [
+          "Pinned capture integrity is not producer execution authentication or semantic correctness.",
+          "Preflight/audit is not product approval or project completion."
+        ]
+      }
+    }
+  ]
+}

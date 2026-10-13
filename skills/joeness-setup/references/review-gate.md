@@ -100,6 +100,13 @@ still permit reuse of unchanged checks. Supply refreshed results without duplica
 the previous baseline/results as dated proof; they are not competing live state.
 Use narrow scopes so an unrelated criterion change does not block other work.
 
+For an explicitly requested, independently reviewed DESIGN append-only transition,
+read [impact-review.md](impact-review.md). Its diagnostic alone never grants reuse.
+Only the exact externally pinned transition may reuse unchanged geometry through
+the gate's optional impact arguments; absent those, the shared-context rule above
+is unchanged. CSS, runtime, target, criterion or unknown served-build changes are
+not supported by that exception. Old receipts and user acceptance remain separate.
+
 Acceptance is never emitted by the specialist. If the user has accepted the
 exact output, supply a separately pinned `--acceptance <json>
 --acceptance-sha256 <authorized-pin>`. Schema `joeness.user-acceptance.v1` has

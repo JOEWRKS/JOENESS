@@ -1,0 +1,1380 @@
+diff --git a/.github/workflows/windows-ci.yml b/.github/workflows/windows-ci.yml
+index 2f7de47..2cc5547 100644
+--- a/.github/workflows/windows-ci.yml
++++ b/.github/workflows/windows-ci.yml
+@@ -45,7 +45,7 @@ jobs:
+           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+           pwsh -NoProfile -File .\tests\joeness-install.tests.ps1
+           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+-          node --test tests/joeness-setup-contract.tests.mjs tests/joeness-setup-fixtures.tests.mjs tests/joeness-review-gate.tests.mjs
++          node --test tests/joeness-setup-contract.tests.mjs tests/joeness-setup-fixtures.tests.mjs tests/joeness-review-gate.tests.mjs tests/joeness-roadmap-review.tests.mjs tests/joeness-operation-review.tests.mjs tests/joeness-impact-review.tests.mjs
+           exit $LASTEXITCODE
+ 
+       - name: Check candidate diff whitespace
+diff --git a/AGENTS.md b/AGENTS.md
+index a2b1a94..e8172d6 100644
+--- a/AGENTS.md
++++ b/AGENTS.md
+@@ -1,5 +1,7 @@
+ # JOENESS Repository
+ 
++- Local F01–F06 integration is a source candidate; exact checks/installation status are in `evals/joeness-setup/runs/2026-10-13-impact-review/review-evidence.md`, with A/B evidence preserved separately. It is not the released 0.3.4 package. Determine personal installation from its exact manifest/receipt, not the unchanged version label. Do not republish the existing tag or replace a personal installation without the coordinated review/install step.
++
+ - Source version: `JOENESS 0.3.4`; release status and exact commit are in `evals/joeness-setup/runs/2026-10-10-v034-release/review-evidence.md`. Previous release `0.3.3` evidence remains in `evals/joeness-setup/runs/2026-10-06-v033-release/review-evidence.md`. The manifest target remains `gpt-6-astra / xhigh`; earlier GEO replay evidence is `gpt-6-astra / high`, not xhigh validation. The 0.3.4 gate tests do not establish model performance. Earlier releases remain in Git tags. Revalidate changed behavior; do not claim a release complete before its exact commit passes the Windows gate and installation check.
+ - Distribution mode: `setup-only`. The sole public skill, `joeness-setup`, is project-scoped setup; the package has no always-on global payload and does not write global `AGENTS.md`.
+ - `vendor/source-manifest.json` is the machine-readable active release identity.
+diff --git a/scripts/sync-harness.ps1 b/scripts/sync-harness.ps1
+index 942691c..ce4f9e1 100644
+--- a/scripts/sync-harness.ps1
++++ b/scripts/sync-harness.ps1
+@@ -61,7 +61,7 @@ function Get-JoenessSourceIdentity {
+     if ($null -ne $manifest.PSObject.Properties['compatibility']) { throw 'Unexpected distribution manifest field: compatibility' }
+     if (@($manifest.publicSkills).Count -ne 1 -or $manifest.publicSkills[0].name -cne 'joeness-setup') { throw 'Only joeness-setup may ship' }
+ 
+-    $expectedFiles = @('SKILL.md', 'agents/openai.yaml', 'assets/AGENTS.md', 'assets/DESIGN.md', 'assets/ISSUES.md', 'assets/ROADMAP.md', 'assets/TASK.md', 'references/usage.md', 'references/review-gate.md', 'scripts/project-setup.ps1', 'scripts/review-gate.mjs')
++    $expectedFiles = @('SKILL.md', 'agents/openai.yaml', 'assets/AGENTS.md', 'assets/DESIGN.md', 'assets/ISSUES.md', 'assets/ROADMAP.md', 'assets/TASK.md', 'references/usage.md', 'references/review-gate.md', 'references/roadmap-review.md', 'references/operation-review.md', 'references/impact-review.md', 'scripts/project-setup.ps1', 'scripts/review-gate.mjs', 'scripts/roadmap-review.mjs', 'scripts/operation-review.mjs', 'scripts/impact-review.mjs')
+     $files = @($manifest.publicSkills[0].files)
+     if ($files.Count -ne $expectedFiles.Count -or ((@($files.path | Sort-Object) -join ',') -cne (($expectedFiles | Sort-Object) -join ','))) {
+         throw 'Unexpected skill source inventory'
+diff --git a/skills/joeness-setup/SKILL.md b/skills/joeness-setup/SKILL.md
+index 567d611..f6c32e5 100644
+--- a/skills/joeness-setup/SKILL.md
++++ b/skills/joeness-setup/SKILL.md
+@@ -142,6 +142,14 @@ connection integrity; document suitability; fresh-context delivery; task-result
+ verification. A direction-pending starter is not a completed staged roadmap.
+ User acceptance remains separate. No general performance or token-saving claim.
+ 
++For competing current summaries or unclear delivery limits, use the scoped
++[roadmap diagnosis](references/roadmap-review.md). Review source interpretation
++and coverage first; its read-only checks do not certify prose meaning or the
++whole project. Keep one current view; old next-work notes remain history.
++For an explicitly required planning preflight/projection audit, consume its
++[captured execution](references/operation-review.md) without substituting old
++output or turning an unreviewed axis into a pass. This does not launch tools.
++
+ ## Work after setup
+ 
+ Normal sessions follow the short AGENTS connection; do not invoke setup again.
+diff --git a/skills/joeness-setup/assets/AGENTS.md b/skills/joeness-setup/assets/AGENTS.md
+index 7ea5acb..0d6660a 100644
+--- a/skills/joeness-setup/assets/AGENTS.md
++++ b/skills/joeness-setup/assets/AGENTS.md
+@@ -38,7 +38,10 @@ Adapt paths and agreed scope before applying this body.
+   criteria only by authorized direction. Before completion, inspect every
+   required item's actual proof. Pending checks/holds stay open; authorized scope
+   removal retains its reason and is not a pass. Task, stage and user acceptance
+-  are separate. Refresh current/next after changed facts.
++  are separate. Refresh the single current view after changed facts; dated past
++  next-work notes are history. Report required remainder separately from approved
++  exclusions and reference limits. Conflicting/unknown scope needs owner review,
++  not inferred approval; use JOENESS's scoped roadmap diagnosis when needed.
+ - Required external verdict: <applicable scoped gate command, baseline pin and
+   result path, or none>. Before resume/completion, run the connected current-input
+   check. Missing/failed/stale results keep only the affected verdict pending.
+diff --git a/skills/joeness-setup/references/review-gate.md b/skills/joeness-setup/references/review-gate.md
+index 4fdf143..086f5bb 100644
+--- a/skills/joeness-setup/references/review-gate.md
++++ b/skills/joeness-setup/references/review-gate.md
+@@ -100,6 +100,13 @@ still permit reuse of unchanged checks. Supply refreshed results without duplica
+ the previous baseline/results as dated proof; they are not competing live state.
+ Use narrow scopes so an unrelated criterion change does not block other work.
+ 
++For an explicitly requested, independently reviewed DESIGN append-only transition,
++read [impact-review.md](impact-review.md). Its diagnostic alone never grants reuse.
++Only the exact externally pinned transition may reuse unchanged geometry through
++the gate's optional impact arguments; absent those, the shared-context rule above
++is unchanged. CSS, runtime, target, criterion or unknown served-build changes are
++not supported by that exception. Old receipts and user acceptance remain separate.
++
+ Acceptance is never emitted by the specialist. If the user has accepted the
+ exact output, supply a separately pinned `--acceptance <json>
+ --acceptance-sha256 <authorized-pin>`. Schema `joeness.user-acceptance.v1` has
+diff --git a/skills/joeness-setup/scripts/review-gate.mjs b/skills/joeness-setup/scripts/review-gate.mjs
+index de30424..a35b17f 100644
+--- a/skills/joeness-setup/scripts/review-gate.mjs
++++ b/skills/joeness-setup/scripts/review-gate.mjs
+@@ -3,6 +3,7 @@ import {readFileSync,realpathSync} from 'node:fs';
+ import {resolve,relative,isAbsolute,sep} from 'node:path';
+ import {createHash} from 'node:crypto';
+ import {pathToFileURL} from 'node:url';
++import {inspect as inspectImpact} from './impact-review.mjs';
+ 
+ const hash=b=>createHash('sha256').update(b).digest('hex');
+ const digest=x=>typeof x==='string'&&/^[a-f0-9]{64}$/.test(x);
+@@ -48,6 +49,14 @@ export function evaluate(options) {
+   let previous=null;
+   if(options.previousBaseline){previous=pin(options.previousBaseline,options.previousBaselineSha256);baseline(previous);assert(previous.scope_id===b.scope_id,'Previous scope mismatch');}
+   const errors=[];
++  const impactKeys=['impact','impactSha256','impactReview','impactReviewSha256','oldResult','oldResultSha256'];
++  let impact=null;
++  const reused=[];
++  if(impactKeys.some(k=>options[k]!==undefined)){
++    assert(previous&&impactKeys.every(k=>text(options[k])),'Impact reuse needs every independent pin and previous baseline');
++    impact=inspectImpact(options);
++    if(!impact.valid)errors.push('Impact review invalid: '+impact.errors.join('; '));
++  }
+   for(const a of b.authority){try{assert(hash(bytes(a.path))===a.sha256,'Authority changed');}catch{errors.push('Authority missing/changed: '+a.path);}}
+   const received=new Map();
+   for(const path of options.results||[]) {
+@@ -65,7 +74,7 @@ export function evaluate(options) {
+         assert(c&&!received.has(entry.check_id),'Unknown/duplicate result');
+         assert(c.lane!=='visual'||r.schema==='joedesign.conformance.v1','Non-specialist result cannot attest visual compliance');
+         assert(c.lane==='visual'||r.schema==='joeness.check-results.v1','Design result cannot attest technical/implementation completion');
+-        received.set(entry.check_id,{entry,current,unresolved:r.unresolved.some(u=>u.check_id===entry.check_id)});
++        received.set(entry.check_id,{entry,current,sourcePath:pathFor(path,true),sourceSha256:hash(bytes(path,true)),unresolved:r.unresolved.some(u=>u.check_id===entry.check_id)});
+       }
+       // An unresolved item remains blocking even if its result was omitted.
+       for(const u of r.unresolved)if(!r.results.some(e=>e.check_id===u.check_id)) errors.push('Unresolved without result: '+u.check_id);
+@@ -78,7 +87,8 @@ export function evaluate(options) {
+     const item=received.get(c.check_id);
+     if(!item)return output('UNVERIFIED','Required result missing');
+     const {entry:e,current,unresolved}=item;
+-    if(!current&&(!equal(reuseContext(b),reuseContext(previous))||!equal(c,previous.required_checks.find(p=>p.check_id===c.check_id))))return output('STALE','Required criterion/target/dependencies or shared baseline context changed');
++    const reviewedTransition=!current&&impact?.valid&&impact.candidate_check_ids.includes(c.check_id)&&item.sourceSha256===options.oldResultSha256&&item.sourcePath===pathFor(options.oldResult,true);
++    if(!current&&((!equal(reuseContext(b),reuseContext(previous))&&!reviewedTransition)||!equal(c,previous.required_checks.find(p=>p.check_id===c.check_id))))return output('STALE','Required criterion/target/dependencies or shared baseline context changed');
+     if(e.target_id!==c.target_id||e.method!==c.method||e.criterion_sha256!==c.criterion_sha256)return output('STALE','Result does not match pinned criterion/target/method');
+     if(e.input_fingerprint!==fingerprint)return output('STALE','Target inputs changed');
+     if(!['PASS','FAIL','UNVERIFIED'].includes(e.status))return output('UNVERIFIED','Malformed specialist status');
+@@ -88,6 +98,7 @@ export function evaluate(options) {
+       assert(Array.isArray(e.evidence)&&e.evidence.length>0,'Missing proof');
+       for(const proof of e.evidence)assert(digest(proof.sha256)&&hash(bytes(proof.path,true))===proof.sha256,'Missing/damaged proof');
+     } catch{return output('UNVERIFIED','Evidence missing, damaged or outside allowed roots');}
++    if(reviewedTransition){reused.push(c.check_id);return output('PASS','Prior observation reused through exact independently reviewed transition; not a fresh render');}
+     return output('PASS','Current bound specialist result; evidence integrity only');
+   });
+   const states=Object.fromEntries(lanes.map(l=>{
+@@ -108,13 +119,13 @@ export function evaluate(options) {
+   const scopeComplete=!errors.length&&required.every(l=>states[l]==='PASS')&&(b.required_acceptance===false||states.user_acceptance==='ACCEPTED');
+   assert([...lanes,'complete'].includes(options.claim),'Unknown claim');
+   const allowed=!errors.length&&(options.claim==='complete'?scopeComplete:states[options.claim]==='PASS');
+-  return {schema:'joeness.review-gate.v1',scope_id:b.scope_id,claim:options.claim,allowed,required_scope_complete:scopeComplete,project_complete:false,lanes:states,checks,errors,limits:['No visual re-judgment or user-identity authentication','Pinned scope completeness and dependency discovery require authorized review','Explicit CLI only; direct Markdown edits and natural-language claims are not intercepted']};
++  return {schema:'joeness.review-gate.v1',scope_id:b.scope_id,claim:options.claim,allowed,required_scope_complete:scopeComplete,project_complete:false,lanes:states,checks,errors,...(impact?{impact_reuse:{diagnostic_valid:impact.valid,candidate_check_ids:impact.candidate_check_ids,reused_check_ids:reused}}:{}),limits:['No visual re-judgment or user-identity authentication','Pinned scope completeness and dependency discovery require authorized review','Explicit CLI only; direct Markdown edits and natural-language claims are not intercepted']};
+ }
+ 
+ if(process.argv[1]&&import.meta.url===pathToFileURL(resolve(process.argv[1])).href){
+   try {
+     const o={results:[],evidenceRoots:[]};
+-    const names={'--root':'root','--baseline':'baseline','--baseline-sha256':'baselineSha256','--previous-baseline':'previousBaseline','--previous-baseline-sha256':'previousBaselineSha256','--claim':'claim','--acceptance':'acceptance','--acceptance-sha256':'acceptanceSha256'};
++    const names={'--root':'root','--baseline':'baseline','--baseline-sha256':'baselineSha256','--previous-baseline':'previousBaseline','--previous-baseline-sha256':'previousBaselineSha256','--claim':'claim','--acceptance':'acceptance','--acceptance-sha256':'acceptanceSha256','--impact':'impact','--impact-sha256':'impactSha256','--impact-review':'impactReview','--impact-review-sha256':'impactReviewSha256','--old-result':'oldResult','--old-result-sha256':'oldResultSha256'};
+     for(let i=2;i<process.argv.length;i+=2){const k=process.argv[i],v=process.argv[i+1];assert(text(v)&&!v.startsWith('--'),'Missing CLI argument');if(k==='--result')o.results.push(v);else if(k==='--evidence-root')o.evidenceRoots.push(v);else{assert(Object.hasOwn(names,k),'Unknown CLI argument');assert(!Object.hasOwn(o,names[k]),'Duplicate CLI argument: '+k);o[names[k]]=v;}}
+     const result=evaluate(o);console.log(JSON.stringify(result));process.exitCode=result.allowed?0:2;
+   }catch(e){console.log(JSON.stringify({schema:'joeness.review-gate.v1',allowed:false,required_scope_complete:false,project_complete:false,errors:[e.message]}));process.exitCode=2;}
+diff --git a/tests/joeness-install.tests.ps1 b/tests/joeness-install.tests.ps1
+index 6083c33..f9214a0 100644
+--- a/tests/joeness-install.tests.ps1
++++ b/tests/joeness-install.tests.ps1
+@@ -44,12 +44,27 @@ try {
+     Eq (Invoke-JoenessHarnessSync -Check -CodexHome $clean).status current currentCheck
+     # Execute the installed consumer; source-only tests cannot catch missing shipped files.
+     $priorGateCli = $env:JOENESS_TEST_GATE_CLI
++    $priorRoadmapCli = $env:JOENESS_TEST_ROADMAP_CLI
++    $priorOperationCli = $env:JOENESS_TEST_OPERATION_CLI
++    $priorImpactCli = $env:JOENESS_TEST_IMPACT_CLI
+     try {
+         $env:JOENESS_TEST_GATE_CLI = Join-Path $clean skills/joeness-setup/scripts/review-gate.mjs
+         & node --test (Join-Path $repo tests/joeness-review-gate.tests.mjs)
+         if ($LASTEXITCODE -ne 0) { throw 'Installed review gate behavior failed' }
++        $env:JOENESS_TEST_ROADMAP_CLI = Join-Path $clean skills/joeness-setup/scripts/roadmap-review.mjs
++        & node --test (Join-Path $repo tests/joeness-roadmap-review.tests.mjs)
++        if ($LASTEXITCODE -ne 0) { throw 'Installed roadmap review behavior failed' }
++        $env:JOENESS_TEST_OPERATION_CLI = Join-Path $clean skills/joeness-setup/scripts/operation-review.mjs
++        & node --test (Join-Path $repo tests/joeness-operation-review.tests.mjs)
++        if ($LASTEXITCODE -ne 0) { throw 'Installed operation review behavior failed' }
++        $env:JOENESS_TEST_IMPACT_CLI = Join-Path $clean skills/joeness-setup/scripts/impact-review.mjs
++        & node --test (Join-Path $repo tests/joeness-impact-review.tests.mjs)
++        if ($LASTEXITCODE -ne 0) { throw 'Installed impact review behavior failed' }
+     } finally {
+         $env:JOENESS_TEST_GATE_CLI = $priorGateCli
++        $env:JOENESS_TEST_ROADMAP_CLI = $priorRoadmapCli
++        $env:JOENESS_TEST_OPERATION_CLI = $priorOperationCli
++        $env:JOENESS_TEST_IMPACT_CLI = $priorImpactCli
+     }
+     Eq (Invoke-JoenessHarnessSync -Remove -CodexHome $clean).status removed cleanRemove
+     Eq (Test-Path (Join-Path $clean skills/joeness-setup/SKILL.md)) $false skillRemoved
+diff --git a/tests/joeness-release.tests.ps1 b/tests/joeness-release.tests.ps1
+index 68484e0..9be4896 100644
+--- a/tests/joeness-release.tests.ps1
++++ b/tests/joeness-release.tests.ps1
+@@ -79,7 +79,7 @@ function Test-MinimalCurrentTree {
+     Assert-ExactNames (Join-Path $RepoRoot '.github') @('workflows') '.github only has workflows'
+     Assert-ExactNames (Join-Path $RepoRoot '.github/workflows') @('windows-ci.yml') 'one release workflow'
+     Assert-ExactNames (Join-Path $RepoRoot 'scripts') @('sync-harness.ps1') 'one package script'
+-    Assert-ExactNames (Join-Path $RepoRoot 'tests') @('joeness-release.tests.ps1','joeness-install.tests.ps1','joeness-project-setup.tests.ps1','joeness-setup-contract.tests.mjs','joeness-setup-fixtures.tests.mjs','joeness-review-gate.tests.mjs') 'current test surface'
++    Assert-ExactNames (Join-Path $RepoRoot 'tests') @('joeness-release.tests.ps1','joeness-install.tests.ps1','joeness-project-setup.tests.ps1','joeness-setup-contract.tests.mjs','joeness-setup-fixtures.tests.mjs','joeness-review-gate.tests.mjs','joeness-roadmap-review.tests.mjs','joeness-operation-review.tests.mjs','joeness-impact-review.tests.mjs') 'current test surface'
+     Assert-ExactNames (Join-Path $RepoRoot 'vendor') @('source-manifest.json') 'one active manifest'
+     Assert-ExactNames (Join-Path $RepoRoot 'evals/experiments') @('joeness-astra-independent-judgment-ab-plan-v1.json','joeness-astra-independent-judgment-ab-run-2026-09-26.json','joeness-astra-independent-judgment-ab-invalid-preflight-2026-09-26.json','joeness-astra-independent-judgment-ab-results-2026-09-26.json') 'bounded A/B evidence remains'
+     foreach ($removed in @('astra-judgment-core.md','JOENESS-0.1.ps1','harness.ps1','common-core.md','TASKS.md')) {
+diff --git a/tests/joeness-setup-contract.tests.mjs b/tests/joeness-setup-contract.tests.mjs
+index 8cd78bd..8cfb654 100644
+--- a/tests/joeness-setup-contract.tests.mjs
++++ b/tests/joeness-setup-contract.tests.mjs
+@@ -68,7 +68,7 @@ test('manifest pins exact sole setup skill without global runtime',()=>{
+   const skillRoot=fileURLToPath(new URL('../skills/joeness-setup/',import.meta.url));
+   const disk=readdirSync(skillRoot,{recursive:true,withFileTypes:true})
+     .filter(e=>e.isFile()).map(e=>relative(skillRoot,join(e.parentPath,e.name)).replaceAll('\\','/'));
+-  const expected=['SKILL.md','agents/openai.yaml','scripts/project-setup.ps1','scripts/review-gate.mjs','references/usage.md','references/review-gate.md',...['AGENTS','TASK','ROADMAP','ISSUES','DESIGN'].map(n=>'assets/'+n+'.md')].sort();
++  const expected=['SKILL.md','agents/openai.yaml','scripts/project-setup.ps1','scripts/review-gate.mjs','scripts/roadmap-review.mjs','scripts/operation-review.mjs','scripts/impact-review.mjs','references/usage.md','references/review-gate.md','references/roadmap-review.md','references/operation-review.md','references/impact-review.md',...['AGENTS','TASK','ROADMAP','ISSUES','DESIGN'].map(n=>'assets/'+n+'.md')].sort();
+   assert.equal(m.publicSkills[0].files.length,expected.length);
+   assert.deepEqual(disk.sort(),expected);
+   assert.deepEqual(m.publicSkills[0].files.map(f=>f.path).sort(),expected);
+diff --git a/vendor/source-manifest.json b/vendor/source-manifest.json
+index 5ef0c31..8bb3208 100644
+--- a/vendor/source-manifest.json
++++ b/vendor/source-manifest.json
+@@ -17,7 +17,7 @@
+       "files": [
+         {
+           "path": "SKILL.md",
+-          "sha256": "d28310d2be866d4a89ed733cd4310da54e1ccd7acf0b9c045ab7dfaea7a0176f"
++          "sha256": "0f5db50f1f1ffc21359372cd49c72fcd05cc785869f995a7ac9e175f6696beba"
+         },
+         {
+           "path": "agents/openai.yaml",
+@@ -25,7 +25,7 @@
+         },
+         {
+           "path": "assets/AGENTS.md",
+-          "sha256": "f2fbd94a9939fbe31d371b21c7e4f2b05f814e0ed81ae22ba73e1097bdfb86ce"
++          "sha256": "691cd5eac50c3324da16987d2661d98e0d47f9e6a8e3f90e8804ae7050c628c0"
+         },
+         {
+           "path": "assets/DESIGN.md",
+@@ -53,11 +53,35 @@
+         },
+         {
+           "path": "references/review-gate.md",
+-          "sha256": "72e509e4eeeae714cd615cf26bcfba61140f3bd840d7634bfd199bc04c314728"
++          "sha256": "0422021f6a247d44a3c2980353dddac76dee613282ecf4315cd4d357ebdf8432"
+         },
+         {
+           "path": "scripts/review-gate.mjs",
+-          "sha256": "db37a33ce5ee2f9c210e4250b05aef1afb9712bfa6e524a80d39866b4c8c8c23"
++          "sha256": "7ad13a9020a57aa0a6396348f8575229d7cac076a5d5a6c89178d26c3b6d9bd2"
++        },
++        {
++          "path": "references/roadmap-review.md",
++          "sha256": "bfb8910df6814edd4fab15b18b1c88c6dcc1127eb9921488772bdb9ffc15a201"
++        },
++        {
++          "path": "scripts/roadmap-review.mjs",
++          "sha256": "5dfb2d5a81df58d9e1c43651b43cc945356bbf61630b103877f9b8bcd13ba33f"
++        },
++        {
++          "path": "references/operation-review.md",
++          "sha256": "748d1631847ac23045406f6742b43a3a0bddb29ebfb32b3720f8f97c9546959c"
++        },
++        {
++          "path": "scripts/operation-review.mjs",
++          "sha256": "a1a6d80a7d57d4e9c3e66c49a6f877bf07836bac25d330bb466fc2a858679aad"
++        },
++        {
++          "path": "scripts/impact-review.mjs",
++          "sha256": "9cd8359daae4e0f68bcab688ae831e43d81a0b98bcb8ca10ed65a63d0e70cbc8"
++        },
++        {
++          "path": "references/impact-review.md",
++          "sha256": "6d98aa307aaace44461699e66fdbc3d658f67f8b6c756812ad9faa23ed330a82"
+         }
+       ]
+     }
+diff --git a/skills/joeness-setup/scripts/impact-review.mjs b/skills/joeness-setup/scripts/impact-review.mjs
+new file mode 100644
+index 0000000..f8eea28
+--- /dev/null
++++ b/skills/joeness-setup/scripts/impact-review.mjs
+@@ -0,0 +1,110 @@
++// Read-only diagnostic. No gate override, receipt rewrite, repin or approval.
++import {readFileSync,realpathSync,statSync} from 'node:fs';
++import {resolve,relative,isAbsolute,sep} from 'node:path';
++import {fileURLToPath} from 'node:url';
++import {createHash} from 'node:crypto';
++import {isDeepStrictEqual as equal} from 'node:util';
++const sha=b=>createHash('sha256').update(b).digest('hex');
++const obj=x=>x!==null&&typeof x==='object'&&!Array.isArray(x);
++const text=x=>typeof x==='string'&&x.trim().length>0;
++const hash=x=>typeof x==='string'&&/^[a-f0-9]{64}$/.test(x);
++const need=(ok,message)=>{if(!ok)throw Error(message);};
++const canon=v=>Array.isArray(v)?v.map(canon):obj(v)?Object.fromEntries(Object.keys(v).sort().map(k=>[k,canon(v[k])])):v;
++const digest=v=>sha(JSON.stringify(canon(v)));
++const omit=(v,keys)=>Object.fromEntries(Object.entries(v).filter(([k])=>!keys.includes(k)));
++const list=x=>{need(Array.isArray(x)&&x.length<=4096,'Expected bounded list');return x;};
++const ids=x=>{list(x);need(x.every(text)&&new Set(x).size===x.length,'Duplicate/invalid IDs');return x;};
++function index(rows,key){const m=new Map();for(const row of list(rows)){need(obj(row)&&text(row[key])&&!m.has(row[key]),'Missing/duplicate '+key);m.set(row[key],row);}return m;}
++const sameKeys=(a,b)=>equal([...a.keys()].sort(),[...b.keys()].sort());
++const categories=['reusable-candidate','rerun','unknown'];
++export function inspect(options){
++ const out={schema:'joeness.impact-consumption.v1',valid:false,allowed:false,reuse_authorized:false,project_complete:false,scope_id:null,candidate_check_ids:[],checks:[],errors:[],limits:['Diagnostic only; existing gate and user acceptance remain unchanged.','Local pins and review contexts do not authenticate actors, measurements or dependency completeness.']};
++ const seen=[];
++ try{
++  const root=realpathSync(options.root),roots=[root,...(options.evidenceRoots||[]).map(p=>realpathSync(p))];
++  const inside=(base,p)=>{const r=relative(base,p);return r===''||r!=='..'&&!r.startsWith('..'+sep)&&!isAbsolute(r);};
++  function path(p,evidence=false){need(text(p)&&!p.includes('\0'),'Invalid path');const full=realpathSync(resolve(root,p));need((evidence?roots:[root]).some(r=>inside(r,full)),'Path outside allowed roots');return full;}
++  function bytes(ref,evidence=false){need(obj(ref)&&hash(ref.sha256),'Missing independent reference hash');const p=path(ref.path,evidence);need(statSync(p).isFile()&&statSync(p).size<=64*1024*1024,'Invalid/oversize evidence');const b=readFileSync(p);need(sha(b)===ref.sha256,'Pinned bytes changed: '+ref.path);seen.push({ref,evidence,p});return b;}
++  const decode=b=>new TextDecoder('utf-8',{fatal:true}).decode(b).replace(/^\uFEFF/,'');
++  function json(ref,evidence=false){const b=bytes(ref,evidence);need(b.length<=4*1024*1024,'Oversize JSON');const v=JSON.parse(decode(b));need(obj(v),'Expected JSON object');return v;}
++  const external=(name,pin)=>({path:options[name],sha256:options[pin]});
++  const impactRef=external('impact','impactSha256'),reviewRef=external('impactReview','impactReviewSha256'),newRef=external('baseline','baselineSha256'),oldRef=external('previousBaseline','previousBaselineSha256'),receiptRef=external('oldResult','oldResultSha256');
++  const report=json(impactRef,true),review=json(reviewRef,true),old=json(oldRef),current=json(newRef),receipt=json(receiptRef,true);
++  need(report.schema==='joedesign.impact.v1'&&report.reuse_authorized===false&&report.acceptance==='NOT_GRANTED'&&report.trust==='LOCAL_UNAUTHENTICATED','Impact cannot grant reuse/acceptance');
++  need(old.schema==='joeness.review-baseline.v1'&&current.schema===old.schema&&text(current.scope_id)&&old.scope_id===current.scope_id,'Invalid baseline scope');out.scope_id=current.scope_id;
++  need(report.scope_id===out.scope_id&&review.schema==='joeness.impact-reuse-review.v1'&&review.scope_id===out.scope_id,'Review/report scope mismatch');
++  need(equal(omit(old,['authority','authorization_ref']),omit(current,['authority','authorization_ref'])),'Baseline scope/criterion/target/acceptance/context changed');
++  const definitions=index(current.required_checks,'check_id'),targets=index(current.targets,'id');need(definitions.size>0&&targets.size>0,'Empty required scope');
++  function sameRef(actual,expected,evidence=false){need(actual?.sha256===expected.sha256&&path(actual.path,evidence)===path(expected.path,evidence),'Reported source differs from independent pin');bytes(actual,evidence);}
++  sameRef(report.old_baseline,oldRef);sameRef(report.new_baseline,newRef);sameRef(report.old_result,receiptRef,true);
++  need(review.impact_sha256===impactRef.sha256&&review.old_baseline_sha256===oldRef.sha256&&review.new_baseline_sha256===newRef.sha256&&review.old_result_sha256===receiptRef.sha256&&review.semantic_review_sha256===report.review?.sha256,'Independent review binds another transition');
++  need(text(review.implementation_context)&&text(review.review_context)&&review.implementation_context!==review.review_context&&text(review.rationale),'Missing independent substantive review');
++  need(list(review.source_refs).length>0,'Missing independent review source material');for(const ref of review.source_refs)bytes(ref,true);
++  const request=json(report.request);need(request.schema==='joedesign.impact-request.v1','Invalid request');
++  for(const k of ['old_baseline','new_baseline','old_result','served','review','authority_before'])need(equal(request[k],report[k]),'Report/request binding mismatch: '+k);
++  const transition=digest(omit(request,['review']));need(report.transition_sha256===transition,'Transition digest mismatch');
++  const semantic=json(report.review);need(semantic.schema==='joedesign.impact-review.v1'&&semantic.scope_id===out.scope_id&&semantic.transition_sha256===transition&&text(semantic.scope_analysis),'Semantic review scope mismatch');
++  need(text(semantic.implementation_context)&&text(semantic.review_context)&&semantic.implementation_context!==semantic.review_context,'Semantic review not independent');
++  const decisions=index(semantic.checks,'check_id');need([...decisions.keys()].every(id=>definitions.has(id)),'Unknown semantic review check');
++  const before=index(old.authority,'path'),after=index(current.authority,'path'),snapshots=index(report.authority_before,'path'),analysis=index(semantic.authority_analysis,'path'),deltas=index(report.authority_delta,'path');
++  need(before.size>0&&[after,snapshots,analysis,deltas].every(m=>sameKeys(before,m)),'Authority coverage mismatch');
++  for(const [name,a] of before){
++   const b=after.get(name),s=snapshots.get(name).snapshot,v=analysis.get(name),d=deltas.get(name);
++   need(equal(omit(a,['sha256']),omit(b,['sha256']))&&s?.sha256===a.sha256,'Authority definition/snapshot mismatch');
++   const original=bytes(s),now=bytes(b),suffix=now.subarray(original.length);
++   need(now.subarray(0,original.length).equals(original),'Existing authority bytes changed');
++   need(text(v.rationale)&&d.kind===v.kind&&d.old_sha256===a.sha256&&d.new_sha256===b.sha256&&d.appended_sha256===sha(suffix),'Authority delta contradicts actual bytes');
++   if(now.equals(original))need(v.kind==='UNCHANGED','Unchanged authority misclassified');
++   else{
++    need(name==='DESIGN.md'&&suffix.length>0,'Only root DESIGN append is supported');const content=decode(suffix).trim();
++    if(v.kind==='COMMENT_APPEND')need(content.startsWith('<!--')&&content.endsWith('-->')&&!content.slice(4,-3).includes('-->'),'Not one comment append');
++    else if(v.kind==='UNRELATED_SECTION_APPEND')need(/^\r?\n/.test(decode(suffix))&&content.startsWith('## ')&&!decode(original).split(/\r?\n/).includes(content.split(/\r?\n/)[0]),'Not a new appended section');
++    else throw Error('Unsupported authority change');
++   }
++  }
++  need(receipt.schema==='joedesign.conformance.v1'&&receipt.scope_id===out.scope_id&&receipt.baseline_sha256===oldRef.sha256&&receipt.acceptance==='NOT_GRANTED','Old receipt identity/acceptance mismatch');
++  const previous=index(receipt.results,'check_id'),unresolved=index(receipt.unresolved,'check_id'),rows=index(report.checks,'check_id');
++  need(sameKeys(previous,definitions)&&sameKeys(rows,definitions)&&[...unresolved.keys()].every(id=>definitions.has(id)),'Required receipt/report coverage mismatch');
++  const confirmed=ids(review.confirmed_candidate_check_ids);need(confirmed.every(id=>rows.get(id)?.classification==='reusable-candidate'),'Review confirms missing/noncandidate check');
++  const counts=Object.fromEntries(categories.map(k=>[k,[...rows.values()].filter(r=>r.classification===k).length]));need(equal(report.counts,counts)&&list(report.findings).length===0,'Invalid counts or unresolved shared findings');
++  const served=json(report.served);need(served.schema==='joedesign.served-build.v1'&&served.scope_id===out.scope_id&&served.baseline_sha256===newRef.sha256,'Served scope mismatch');
++  const servedTargets=index(list(served.targets).map(t=>({...t,id:t.target?.id})),'id');need(sameKeys(servedTargets,targets),'Served target coverage mismatch');
++  for(const [id,c] of definitions){
++   const row=rows.get(id),prior=previous.get(id),verdict={check_id:id,classification:row.classification,reasons:row.reasons};
++   need(categories.includes(row.classification)&&list(row.reasons).length>0&&row.reasons.every(text),'Malformed impact row');
++   need(['check_id','target_id','method','criterion_sha256'].every(k=>row[k]===c[k]),'Impact check definition mismatch');
++   if(row.classification==='reusable-candidate'){
++    try{
++     need(confirmed.includes(id),'Candidate has no independent confirmation');
++     need(equal(row.previous_result,prior)&&prior.status==='PASS'&&!unresolved.has(id),'Old failure/unverified/altered result');
++     need(c.method==='geometry'&&c.lane==='visual'&&['check_id','target_id','method','criterion_sha256'].every(k=>prior[k]===c[k]),'Unchanged geometry only');
++     const inputs=ids(c.inputs);need(inputs.length>0,'Empty dependencies');
++     const fingerprint=sha(JSON.stringify([...inputs].sort((a,b)=>Buffer.compare(Buffer.from(a),Buffer.from(b))).map(p=>{const b=readFileSync(path(p));const ref={path:p,sha256:sha(b)};bytes(ref);return [p,ref.sha256];})));
++     need(row.input_fingerprint===fingerprint&&prior.input_fingerprint===fingerprint,'Current runtime inputs changed');
++     const decision=decisions.get(id);need(decision?.verdict==='UNAFFECTED'&&text(decision.rationale)&&list(decision.blocking_findings).length===0&&list(decision.source_refs).length>0,'Missing review or current blocker/rejection');for(const ref of decision.source_refs)bytes(ref,true);
++     const target=targets.get(c.target_id),live=servedTargets.get(c.target_id);need(target&&equal(row.target,target)&&equal(live.target,target)&&text(live.build_id)&&row.build_id===live.build_id,'Current target/build mismatch');
++     need(live.dependencies_complete===true&&equal(live.limitations,[]),'Unverified served/late dependencies');
++     const resources=index(live.resources,'path'),expected=new Set([...definitions.values()].filter(x=>x.target_id===c.target_id).flatMap(x=>x.inputs));need(equal([...resources.keys()].sort(),[...expected].sort()),'Served dependency coverage mismatch');
++     for(const ref of resources.values()){bytes(ref);need(ref.response_sha256===ref.sha256,'Served response differs from current input');}
++     const proofs=list(prior.evidence);need(proofs.length>0,'Missing old evidence');const logs=[],bound=new Map();
++     for(const proof of proofs){const b=bytes(proof,true);bound.set(path(proof.path,true),proof.sha256);try{const log=JSON.parse(decode(b));if(obj(log)&&obj(log.target)&&obj(log.design))logs.push(log);}catch{}}
++     need(logs.length===1,'Missing/ambiguous prior observation');const log=logs[0];
++     need(equal(log.target,target)&&log.build_id===live.build_id&&log.design.baseline_sha256===oldRef.sha256&&log.design.input_fingerprints?.[id]===fingerprint,'Observed target/build/baseline differs');
++     need(list(log.frames).length>0,'Missing rendered frame');for(const frame of log.frames){const expected=log.frame_hashes?.[frame];need(hash(expected)&&bound.get(path(frame,true))===expected,'Unbound frame');bytes({path:frame,sha256:expected},true);}
++    }catch(e){verdict.classification='unknown';verdict.reasons=[e.message];}
++   }
++   out.checks.push(verdict);
++  }
++  for(const s of seen)need(path(s.ref.path,s.evidence)===s.p&&sha(readFileSync(s.p))===s.ref.sha256,'Source changed during read');
++  out.candidate_check_ids=out.checks.filter(c=>c.classification==='reusable-candidate').map(c=>c.check_id);out.valid=true;
++ }catch(e){out.errors.push(e.message);out.checks=out.checks.map(c=>({...c,classification:'unknown',reasons:['Invalid shared evidence']}));out.candidate_check_ids=[];}
++ return out;
++}
++if(process.argv[1]&&resolve(process.argv[1])===fileURLToPath(import.meta.url)){
++ let out;try{
++  const names={'--root':'root','--impact':'impact','--impact-sha256':'impactSha256','--impact-review':'impactReview','--impact-review-sha256':'impactReviewSha256','--baseline':'baseline','--baseline-sha256':'baselineSha256','--previous-baseline':'previousBaseline','--previous-baseline-sha256':'previousBaselineSha256','--old-result':'oldResult','--old-result-sha256':'oldResultSha256'},opts={evidenceRoots:[]};
++  for(let i=2;i<process.argv.length;i+=2){const k=process.argv[i],v=process.argv[i+1];need(text(v)&&!v.startsWith('--'),'Missing CLI value');if(k==='--evidence-root')opts.evidenceRoots.push(v);else{need(Object.hasOwn(names,k)&&!Object.hasOwn(opts,names[k]),'Unknown/duplicate CLI option');opts[names[k]]=v;}}
++  need(Object.values(names).every(k=>text(opts[k])),'Missing independent pin argument');out=inspect(opts);
++ }catch(e){out={schema:'joeness.impact-consumption.v1',valid:false,allowed:false,reuse_authorized:false,project_complete:false,candidate_check_ids:[],checks:[],errors:[e.message]};}
++ console.log(JSON.stringify(out));process.exitCode=out.valid?0:2;
++}
+diff --git a/skills/joeness-setup/references/impact-review.md b/skills/joeness-setup/references/impact-review.md
+new file mode 100644
+index 0000000..60b5234
+--- /dev/null
++++ b/skills/joeness-setup/references/impact-review.md
+@@ -0,0 +1,73 @@
++# Reviewed geometry reuse
++
++Read only when an authorized ROADMAP outcome requests reuse across a DESIGN
++authority change. This is not automatic routing or a new approval source.
++
++JOEDESIGN produces `joedesign.impact.v1` from its explicitly requested
++`inspect-impact` command. Preserve the real execution exit, stdout/stderr and
++source pins. On failed/truncated execution do not substitute an older report.
++Independent source review must cover the exact transition and every candidate.
++
++First run the diagnostic from the installed skill directory:
++
++```text
++node scripts/impact-review.mjs --root PROJECT --impact REPORT --impact-sha256 PIN --impact-review REVIEW --impact-review-sha256 PIN --baseline NEW --baseline-sha256 PIN --previous-baseline OLD --previous-baseline-sha256 PIN --old-result RECEIPT --old-result-sha256 PIN
++```
++
++Optional repeated `--evidence-root` admits explicitly allowed external evidence.
++Root-contained source references and exact SHA-256 pins are mandatory. JSON is
++bounded to4MiB, other evidence to64MiB. No input is executed or rewritten.
++
++Independent review schema `joeness.impact-reuse-review.v1`:
++
++- `scope_id`, `impact_sha256`, `old_baseline_sha256`, `new_baseline_sha256`,
++  `old_result_sha256`, `semantic_review_sha256`: exact reviewed identities.
++- `implementation_context`, `review_context`: distinct nonempty contexts.
++- `confirmed_candidate_check_ids`: unique reviewed subset of reported candidates.
++- `source_refs`: nonempty pinned `{path,sha256}` evidence; `rationale`: substantive
++  scoped reason, not a name, PASS label or invented user approval.
++
++Diagnostic `valid` means structurally consistent inputs, not scope completion.
++It always returns `allowed:false`, `reuse_authorized:false`, `project_complete:false`.
++Candidate IDs are separated from rerun/unknown and reasons. rc0 means a valid
++diagnostic, possibly with unknown checks; rc2 means invalid input. Do not advance
++work because this diagnostic returned0.
++
++## Explicit gate connection
++
++After independently reviewing the exact report and transition, use the ordinary
++review-gate command with the same root, current/previous baseline pins and old
++receipt as `--result`. Add all six options:
++
++```text
++--impact REPORT --impact-sha256 PIN --impact-review REVIEW --impact-review-sha256 PIN --old-result RECEIPT --old-result-sha256 PIN
++```
++
++Missing any pin blocks the transition. No options means the prior gate behavior:
++changed shared authority/context requires fresh results. The old receipt must
++match both exact bytes and the explicitly named path, not a replacement receipt.
++Only `review-gate` rc0/allowed for the requested claim permits related progress.
++Reused checks are named in `impact_reuse.reused_check_ids` and labeled as prior
++observations, never as a fresh render. User acceptance stays separately bound to
++the current output/baseline; old acceptance is not migrated.
++
++## Bounded support and ownership
++
++Only geometry checks support this transition. Old/new baseline definitions must
++match completely except authority hashes and authorization reference. Runtime
++inputs, required checks, targets, criteria, acceptance requirements and opaque
++fields cannot be weakened. Root DESIGN.md may only append one reviewed comment
++or a reviewed unrelated new section; its original bytes must remain intact.
++Semantic noninterference is independently reviewed, not inferred from a heading.
++
++Current served-build identity, exact target, dependency coverage and response/file
++hashes must match the old observation. Old measurements, frames, source refs and
++evidence remain immutable. FAIL/UNVERIFIED, unresolved checks and current review
++blockers/rejection cannot become reusable. CSS/token/runtime changes, unknown
++late dependencies or served-build mismatch require fresh scoped evidence.
++
++JOEDESIGN owns measurement and impact interpretation; JOENESS checks binding,
++coverage/current bytes and consumes the result. Hashes/contexts do not authenticate
++reviewers, HTTP observations, approval, omitted dependencies or semantic truth.
++The gate is explicit, not a host interceptor. Keep failures and direct-edit limits
++visible. Do not install or activate a project merely because this source exists.
+diff --git a/tests/joeness-impact-review.tests.mjs b/tests/joeness-impact-review.tests.mjs
+new file mode 100644
+index 0000000..3ae0134
+--- /dev/null
++++ b/tests/joeness-impact-review.tests.mjs
+@@ -0,0 +1,55 @@
++import test from 'node:test';
++import assert from 'node:assert/strict';
++import {mkdtempSync,writeFileSync,readFileSync,rmSync,readdirSync} from 'node:fs';
++import {tmpdir} from 'node:os';
++import {join} from 'node:path';
++import {createHash} from 'node:crypto';
++import {spawnSync} from 'node:child_process';
++import {fileURLToPath} from 'node:url';
++const cli=process.env.JOENESS_TEST_IMPACT_CLI||fileURLToPath(new URL('../skills/joeness-setup/scripts/impact-review.mjs',import.meta.url));
++const gate=process.env.JOENESS_TEST_GATE_CLI||fileURLToPath(new URL('../skills/joeness-setup/scripts/review-gate.mjs',import.meta.url));
++const hash=b=>createHash('sha256').update(b).digest('hex');
++const canon=v=>Array.isArray(v)?v.map(canon):v&&typeof v==='object'?Object.fromEntries(Object.keys(v).sort().map(k=>[k,canon(v[k])])):v;
++const digest=v=>hash(JSON.stringify(canon(v)));
++function fixture(t){
++ const root=mkdtempSync(join(tmpdir(),'joeness-impact-'));t.after(()=>rmSync(root,{recursive:true,force:true}));
++ const put=(p,v)=>writeFileSync(join(root,p),typeof v==='string'?v:JSON.stringify(v)),sha=p=>hash(readFileSync(join(root,p))),ref=p=>({path:p,sha256:sha(p)});
++ put('DESIGN-before.md','# approved\n');put('DESIGN.md','# approved\n\n<!-- unrelated note -->');put('app.css','gap:40px');put('frame.png','synthetic frame, not real render');
++ const c={check_id:'gap',target_id:'desktop',method:'geometry',lane:'visual',criterion_sha256:hash('gap40'),inputs:['app.css']};
++ const target={id:'desktop',route:'/',state:'default',viewport:{width:1440,height:1000}};
++ const old={schema:'joeness.review-baseline.v1',scope_id:'fixture',authorization_ref:'original',authority:[{path:'DESIGN.md',sha256:sha('DESIGN-before.md')}],required_checks:[c],targets:[target],rules:[{id:'gap',meaning:'40px'}],required_acceptance:true};
++ const current={...structuredClone(old),authorization_ref:'explicit-transition',authority:[ref('DESIGN.md')]};
++ put('old.json',old);put('new.json',current);
++ const fingerprint=hash(JSON.stringify([['app.css',sha('app.css')]]));
++ put('observation.json',{target,build_id:'build-1',design:{baseline_sha256:sha('old.json'),input_fingerprints:{gap:fingerprint}},frames:['frame.png'],frame_hashes:{'frame.png':sha('frame.png')}});
++ const previous={...c,status:'PASS',input_fingerprint:fingerprint,evidence:[ref('observation.json'),ref('frame.png')]};
++ const receipt={schema:'joedesign.conformance.v1',scope_id:'fixture',baseline_sha256:sha('old.json'),acceptance:'NOT_GRANTED',results:[previous],unresolved:[]};put('old-result.json',receipt);
++ const served={schema:'joedesign.served-build.v1',scope_id:'fixture',baseline_sha256:sha('new.json'),targets:[{target,build_id:'build-1',dependencies_complete:true,resources:[{...ref('app.css'),response_sha256:sha('app.css')}],limitations:[]}]};put('served.json',served);
++ const request={schema:'joedesign.impact-request.v1',old_baseline:ref('old.json'),new_baseline:ref('new.json'),old_result:ref('old-result.json'),served:ref('served.json'),authority_before:[{path:'DESIGN.md',snapshot:ref('DESIGN-before.md')}]};
++ const semantic={schema:'joedesign.impact-review.v1',scope_id:'fixture',transition_sha256:digest(request),implementation_context:'producer',review_context:'independent-review',scope_analysis:'Only a non-normative comment was appended; required scope unchanged.',authority_analysis:[{path:'DESIGN.md',kind:'COMMENT_APPEND',rationale:'No rule/exception change'}],checks:[{check_id:'gap',verdict:'UNAFFECTED',rationale:'Same rule and served runtime',source_refs:[ref('app.css'),ref('DESIGN.md')],blocking_findings:[]}]};
++ put('semantic.json',semantic);request.review=ref('semantic.json');put('request.json',request);
++ const report={schema:'joedesign.impact.v1',scope_id:'fixture',reuse_authorized:false,acceptance:'NOT_GRANTED',trust:'LOCAL_UNAUTHENTICATED',request:ref('request.json'),transition_sha256:semantic.transition_sha256,...request,review:ref('semantic.json'),checks:[{...c,classification:'reusable-candidate',reasons:['Reviewed unchanged runtime'],previous_result:previous,input_fingerprint:fingerprint,target,build_id:'build-1'}],authority_delta:[{path:'DESIGN.md',old_sha256:sha('DESIGN-before.md'),new_sha256:sha('DESIGN.md'),kind:'COMMENT_APPEND',appended_sha256:hash('\n<!-- unrelated note -->'),rationale:'No rule/exception change'}],findings:[],counts:{'reusable-candidate':1,rerun:0,unknown:0}};
++ report.schema='joedesign.impact.v1';
++ const review={schema:'joeness.impact-reuse-review.v1',scope_id:'fixture',impact_sha256:null,old_baseline_sha256:sha('old.json'),new_baseline_sha256:sha('new.json'),old_result_sha256:sha('old-result.json'),semantic_review_sha256:sha('semantic.json'),implementation_context:'producer',review_context:'consumer-review',confirmed_candidate_check_ids:['gap'],source_refs:[ref('DESIGN-before.md'),ref('DESIGN.md'),ref('app.css')],rationale:'Compared exact transition and unchanged evidence; synthetic fixture only'};
++ const seal=()=>{put('impact.json',report);review.impact_sha256=sha('impact.json');put('review.json',review);};seal();
++ const run=(extra=[])=>{const r=spawnSync(process.execPath,[cli,'--root',root,'--impact','impact.json','--impact-sha256',sha('impact.json'),'--impact-review','review.json','--impact-review-sha256',sha('review.json'),'--baseline','new.json','--baseline-sha256',sha('new.json'),'--previous-baseline','old.json','--previous-baseline-sha256',sha('old.json'),'--old-result','old-result.json','--old-result-sha256',sha('old-result.json'),...extra],{encoding:'utf8'});assert.ifError(r.error);assert.ok(r.stdout.trim(),r.stderr);return {exit:r.status,...JSON.parse(r.stdout)};};
++ const runGate=(impact=true,claim='visual',result='old-result.json')=>{const args=[gate,'--root',root,'--baseline','new.json','--baseline-sha256',sha('new.json'),'--previous-baseline','old.json','--previous-baseline-sha256',sha('old.json'),'--result',result,'--claim',claim];if(impact)args.push('--impact','impact.json','--impact-sha256',sha('impact.json'),'--impact-review','review.json','--impact-review-sha256',sha('review.json'),'--old-result','old-result.json','--old-result-sha256',sha('old-result.json'));const r=spawnSync(process.execPath,args,{encoding:'utf8'});assert.ifError(r.error);return {exit:r.status,...JSON.parse(r.stdout)};};
++ return {root,put,sha,ref,c,old,current,receipt,served,request,semantic,report,review,seal,run,runGate};
++}
++test('reviewed unchanged candidate is diagnostic only; gate/approval not granted',t=>{const f=fixture(t),r=f.run();assert.equal(r.valid,true);assert.deepEqual(r.candidate_check_ids,['gap']);assert.equal(r.allowed,false);assert.equal(r.reuse_authorized,false);assert.equal(r.project_complete,false);});
++test('external impact review pin and exact transition are required',t=>{const f=fixture(t);f.review.old_baseline_sha256='0'.repeat(64);f.seal();assert.equal(f.run().valid,false);});
++test('missing and duplicate required output cannot become valid candidates',t=>{const f=fixture(t);f.report.checks=[];f.report.counts['reusable-candidate']=0;f.seal();assert.equal(f.run().valid,false);f.report.checks=[{check_id:'gap'},{check_id:'gap'}];f.seal();assert.equal(f.run().valid,false);});
++test('changed baseline rule/target/acceptance/opaque context cannot be waived',t=>{const f=fixture(t);for(const mutate of [b=>b.required_acceptance=false,b=>b.targets[0].state='other',b=>b.rules[0].meaning='weaker',b=>b.extra='changed']){const b=structuredClone(f.current);mutate(b);f.put('new.json',b);assert.equal(f.run().valid,false);}});
++test('runtime change cannot pass using unchanged claimed fingerprint',t=>{const f=fixture(t);f.put('app.css','gap:80px');assert.equal(f.run().candidate_check_ids.length,0);});
++test('altered capture and source evidence are rejected',t=>{const f=fixture(t);f.put('frame.png','changed');assert.equal(f.run().candidate_check_ids.length,0);});
++test('producer cannot promote acceptance or self-authorize reuse',t=>{const f=fixture(t);f.report.reuse_authorized=true;f.seal();assert.equal(f.run().valid,false);});
++test('old failure and current rejection cannot become reusable',t=>{const f=fixture(t);f.report.checks[0].previous_result.status='FAIL';f.seal();assert.equal(f.run().candidate_check_ids.length,0);});
++test('unknown is retained without erasing diagnostic scope',t=>{const f=fixture(t);f.report.checks[0].classification='unknown';f.report.checks[0].reasons=['Review unavailable'];f.report.counts={'reusable-candidate':0,rerun:0,unknown:1};f.review.confirmed_candidate_check_ids=[];f.seal();const r=f.run();assert.equal(r.valid,true);assert.equal(r.checks[0].classification,'unknown');assert.equal(r.allowed,false);});
++test('independent review cannot confirm a producer rerun',t=>{const f=fixture(t);f.report.checks[0].classification='rerun';f.report.counts={'reusable-candidate':0,rerun:1,unknown:0};f.seal();assert.equal(f.run().valid,false);});
++test('request/semantic source mutation invalidates earlier capture',t=>{const f=fixture(t);f.semantic.checks[0].blocking_findings=['Current rejection'];f.put('semantic.json',f.semantic);assert.equal(f.run().valid,false);});
++test('duplicate CLI pins and root escapes are rejected',t=>{const f=fixture(t);assert.equal(f.run(['--impact-sha256',f.sha('impact.json')]).valid,false);f.review.source_refs=[{path:'../outside',sha256:'a'.repeat(64)}];f.seal();assert.equal(f.run().valid,false);});
++test('diagnosis preserves every source byte',t=>{const f=fixture(t);const snapshot=()=>Object.fromEntries(readdirSync(f.root).map(p=>[p,f.sha(p)]));const before=snapshot();assert.equal(f.run().valid,true);assert.deepEqual(snapshot(),before);});
++test('gate limited reuse requires exact reviewed transition and retains acceptance boundary',t=>{const f=fixture(t);assert.equal(f.runGate(false).allowed,false);const r=f.runGate();assert.equal(r.allowed,true);assert.deepEqual(r.impact_reuse.reused_check_ids,['gap']);assert.equal(r.lanes.user_acceptance,'NOT_GRANTED');assert.equal(f.runGate(true,'complete').allowed,false);});
++test('gate cannot reuse changed runtime or missing independent confirmation',t=>{const f=fixture(t);f.review.confirmed_candidate_check_ids=[];f.seal();assert.equal(f.runGate().allowed,false);f.review.confirmed_candidate_check_ids=['gap'];f.seal();f.put('app.css','changed');assert.equal(f.runGate().allowed,false);});
++test('gate cannot substitute another receipt even when its content matches',t=>{const f=fixture(t);f.put('other-result.json',f.receipt);assert.equal(f.runGate(true,'visual','other-result.json').allowed,false);});
++test('limited reuse keeps old failure evidence and source bytes immutable',t=>{const f=fixture(t);const before=f.sha('old-result.json');assert.equal(f.runGate().allowed,true);assert.equal(f.sha('old-result.json'),before);f.report.checks[0].previous_result.status='FAIL';f.seal();assert.equal(f.runGate().allowed,false);assert.equal(f.sha('old-result.json'),before);});
+diff --git a/skills/joeness-setup/references/roadmap-review.md b/skills/joeness-setup/references/roadmap-review.md
+new file mode 100644
+index 0000000..d8a97df
+--- /dev/null
++++ b/skills/joeness-setup/references/roadmap-review.md
+@@ -0,0 +1,125 @@
++# Current roadmap and delivery diagnosis
++
++Use when setup normalization, a relevant scope/state change, or a handoff reveals
++competing current summaries or unclear delivery limits. Not a check for every
++question. Preserve the source documents and old failures. Fix only authorized
++owner sections; this reader does not rewrite, install, approve or schedule work.
++
++## Owners and extraction
++
++ROADMAP owns current scope/order/status/next; TASK owns performed work and proof.
++Product/decision owners establish scope, required checks, exclusions and whether
++acceptance is required. Design specialists supply observations with exact
++screen/state/viewport/output identity, never user acceptance by inference.
++Acceptance/rejection must come from its actual decision source. The integrator
++reviews source interpretation and completeness of the extraction. Unknown
++meaning remains unknown; a reviewer name or hash cannot prove it correct.
++
++Use a one-time, source-bound input to inspect existing records, not a competing
++live ledger. Reuse specialist source objects where available. Do not maintain
++these inputs beside ROADMAP as a second state store. Small direct read-back can
++remain manual; use the helper for repeatable identity/coverage/conflict checks.
++
++1. Locate current ROADMAP sections and related proof. Classify dated former
++   summaries as history only when the original context supports that choice.
++   Check that no other current section is omitted; the helper cannot find an
++   unlisted assertion or interpret all free prose.
++2. Extract scoped required outcomes and exclusions from authorized owners. Bind
++   to exact current source bytes and a nonempty quote or JSON pointer/value.
++   Keep partial outcomes/target-specific acceptance separate. Include target
++   identity metadata (route/state/viewport/theme/locale as applicable), actual
++   output/build and criteria dependencies in each target set.
++3. Review the mapping against sources, including coverage, scope authority and
++   acceptance requirements. Record that review at its existing work/evidence
++   location, not a new approval authority. Pending review => null. A confirmed
++   review binds the digest below; never auto-sign a mapping merely to pass.
++4. Run the explicit read-only helper with an independently checked input pin.
++   Inspect findings; correct at the owner and review affected mappings again.
++   Preserve invalid/failed attempts as evidence. Unrelated work remains eligible.
++
++## Invocation and output
++
++Node.js 18+; from the absolute installed skill directory:
++
++```text
++node scripts/roadmap-review.mjs --root <project> --input <relative-json> --input-sha256 <checked-sha256> [--format text]
++```
++
++Default output is JSON `joeness.roadmap-diagnosis.v1`. `--format text` shows
++scope, delivery, required remainder, exclusions and limitations together.
++Exit0 means only that the declared, reviewed scope has no detected gap; exit2
++means incomplete or undetermined (inspect delivery/findings, not exit alone).
++`project_complete` is always false. No output grants product approval, proves
++unlisted checks, refreshes a specialist receipt, or bypasses review-gate.mjs.
++This helper does not authenticate reviewers/users or prove prose meaning.
++
++- `invalid`: malformed reference/shape, wrong source value, duplicate IDs, escape.
++- `conflict`: contradictory current claims/results or required/excluded overlap.
++- `unknown`: missing/unreadable/stale source, target mismatch, missing required
++  observation, incomplete semantic review or undecided acceptance requirement.
++- Observed FAIL/REJECTED/PARTIAL retain those states; never convert absent proof
++  to a failed implementation or silently erase a completed independent lane.
++
++`delivery` is complete/incomplete/undetermined within the declared scope only.
++Show required remainder separately from authorized exclusions and disclosed
++verification limits. An excluded item is not passed. READY_FOR_REVIEW is not
++approval; Manifest UNAPPROVED can coexist with a separately authorized demo
++delivery. Do not invent that separate authorization.
++
++For unknown/conflict/invalid, name affected source/outcome and the manual check
++needed. No newest-date-wins or automatic rewrite. Do not call missing access
++missing work. After correction, inspect current targets before retrying.
++
++## Input v1
++
++`schema: "joeness.roadmap-review.v1"`, nonempty `scope_id`, and:
++
++- `scope_source`, `scope_authorization`: source refs. Scope definition and actual
++  authorized delivery decision are separate; either may be a section of an
++  existing source. These refs do not authenticate their author's authority.
++- `mapping_review`: null or a JSON ref to an object containing `scope_id`,
++  `status: "CONFIRMED"`, `mapping_sha256`. Extra review explanation is allowed.
++  Digest = SHA-256 of input excluding only top-level mapping_review, recursively
++  sorted object keys, array order unchanged, compact UTF-8 JSON, no newline.
++  The exported mappingHash(input) computes it; computing it is NOT review.
++- `views`: `{id,kind:"current"|"history",source,claims:[{key,value,source}]}`.
++  Current claims use nonempty strings; same key with different values conflicts.
++  Claim refs stay inside the view. Use `outcome:<id>:<lane>` to compare roadmap
++  status directly with the corresponding current observation. Other keys, e.g.
++  stage/next, are compared between current views, not semantically interpreted.
++  Historical claims are not evaluated or followed; their classification and
++  preserved source locator are covered by mapping review.
++- `required_outcomes`: nonempty array of `{id,label,required_lanes,
++  acceptance_required,source,targets}`. Lanes: implementation/technical/visual.
++  Acceptance: true/false/null; null is unresolved. A source object containing
++  these fields must agree with the normalized outcome. A free-text source
++  requires actual interpretation review, not keyword matching.
++- `excluded_outcomes`: `{id,label,source,authorization}`. Keep the original
++  exclusion decision and former failures retrievable; do not count as PASS.
++- `observations`: `{outcome_id,lane,status,source,targets}`. One current result
++  per required outcome/lane. Ordinary status: PASS/FAIL/UNVERIFIED/PARTIAL.
++  Acceptance lane: ACCEPTED/REJECTED/NOT_GRANTED/UNVERIFIED/PARTIAL.
++  For JSON sources, pointer/value must select the observation object containing
++  outcome_id/lane/status/targets; these must equal the normalized fields.
++  Text observations require mapping review of their actual meaning. Do not
++  promote a measurement or specialist PASS into exact user acceptance.
++- `limitations`: `{text,source}`; non-blocking disclosed boundaries, not a place
++  to hide required gaps. All five arrays above must be present; each <=256.
++
++Source ref: `{path,sha256,quote}` OR `{path,sha256,pointer,value}`. Quote is exact,
++nonempty UTF-8 text. Pointer is RFC6901, including empty string for the root;
++value must deep-equal the source value, not merely mention the same status.
++Target ref: `{path,sha256}`; each nonempty target set has unique paths and must
++exactly match its outcome's set. Every source/target is read at its current hash.
++Paths are root-contained NFC POSIX relative paths; traversal, symlink escapes,
++absolute paths and backslashes rejected. SHA-256 is lowercase hex. File bound
++4 MiB; a larger source requires a scoped authorized extraction or manual review,
++never silent truncation. No file is written by this CLI.
++
++## Regression boundary
++
++Test current/history negative controls, closed/reopened work, source contradiction,
++partial/rejected acceptance, unknown criteria, absent/stale/other-target proof,
++exclusion without authority, mapping mutation, and source bytes unchanged.
++Source tests do not prove fresh-context instruction delivery or real-world
++completeness. Personal installation and project connection remain separate.
+diff --git a/skills/joeness-setup/scripts/roadmap-review.mjs b/skills/joeness-setup/scripts/roadmap-review.mjs
+new file mode 100644
+index 0000000..0ecb183
+--- /dev/null
++++ b/skills/joeness-setup/scripts/roadmap-review.mjs
+@@ -0,0 +1,224 @@
++#!/usr/bin/env node
++// Explicit, read-only diagnosis of a reviewed extraction. Not a stage engine.
++import {readFileSync,realpathSync,statSync} from 'node:fs';
++import {resolve,relative,isAbsolute,sep} from 'node:path';
++import {fileURLToPath} from 'node:url';
++import {createHash} from 'node:crypto';
++import {isDeepStrictEqual} from 'node:util';
++
++const hash=b=>createHash('sha256').update(b).digest('hex');
++const object=x=>x!==null&&typeof x==='object'&&!Array.isArray(x);
++const text=x=>typeof x==='string'&&x.trim().length>0;
++const digest=x=>typeof x==='string'&&/^[a-f0-9]{64}$/.test(x);
++export const canonical=v=>Array.isArray(v)?'['+v.map(canonical).join(',')+']':object(v)?'{'+Object.keys(v).sort().map(k=>JSON.stringify(k)+':'+canonical(v[k])).join(',')+'}':JSON.stringify(v);
++export function mappingHash(input){const {mapping_review,...mapping}=input;return hash(canonical(mapping));}
++const same=(a,b)=>canonical(a)===canonical(b);
++const targetKey=t=>canonical([...t].sort((a,b)=>a.path.localeCompare(b.path,'en')));
++const pointer=(value,path)=>{
++  if(typeof path!=='string'||(path!==''&&!path.startsWith('/'))||/~(?![01])/u.test(path))throw Error('Invalid JSON pointer');
++  for(const token of path===''?[]:path.slice(1).split('/').map(t=>t.replaceAll('~1','/').replaceAll('~0','~'))){
++    if(value===null||typeof value!=='object'||!Object.hasOwn(value,token))throw Error('JSON pointer not found');
++    value=value[token];
++  }
++  return value;
++};
++
++export function diagnose({root,inputPath,inputSha256}){
++  const findings=[];
++  const add=(kind,code,at,message)=>{findings.push({kind,code,at,message});return false;};
++  const result={schema:'joeness.roadmap-diagnosis.v1',scope_id:null,delivery:'undetermined',project_complete:false,
++    interpretation:'Reviewed extraction only; source hashes do not authenticate approval or prove semantic correctness.',
++    coverage:'Declared current views/outcomes only; no whole-project certification.',findings,outcomes:[],excluded:[],limitations:[],current:[],historical_views_ignored:0};
++  let base;
++  try{base=realpathSync(root);if(!statSync(base).isDirectory())throw Error('root not directory');}
++  catch{add('invalid','ROOT','root','Readable explicit project root required');return result;}
++  // Recheck every read source at the end: no mixed snapshot is called current.
++  const snapshots=new Map();
++  function file(ref,at){
++    if(!object(ref)||!text(ref.path)||!digest(ref.sha256))return add('invalid','REFERENCE',at,'Path and lowercase SHA-256 required');
++    const p=ref.path;
++    if(p!==p.normalize('NFC')||p.includes('\\')||p.includes(':')||p.includes('\0')||isAbsolute(p)||p.split('/').some(x=>!x||x==='.'||x==='..'))return add('invalid','PATH',at,'Use a root-contained NFC relative path');
++    let abs;
++    try{abs=realpathSync(resolve(base,p));}
++    catch{return add('unknown','UNREADABLE',at,'Source unavailable; this does not establish that work never occurred');}
++    const rel=relative(base,abs);
++    if(rel==='..'||rel.startsWith('..'+sep)||isAbsolute(rel))return add('invalid','PATH_ESCAPE',at,'Resolved source escapes root');
++    try{
++      if(!statSync(abs).isFile()||statSync(abs).size>4*1024*1024)return add('invalid','FILE_BOUND',at,'Expected file of at most 4 MiB');
++      const bytes=readFileSync(abs),actual=hash(bytes);
++      if(actual!==ref.sha256)return add('unknown','STALE',at,'Current bytes differ from referenced evidence');
++      snapshots.set(p,{abs,sha256:actual});return bytes;
++    }catch{return add('unknown','UNREADABLE',at,'Cannot read source');}
++  }
++  function source(ref,at){
++    const b=file(ref,at);if(!b)return false;
++    if(Object.hasOwn(ref,'quote')===Object.hasOwn(ref,'pointer'))return add('invalid','SELECTOR',at,'Choose exact nonempty quote or JSON pointer/value');
++    let s;try{s=new TextDecoder('utf-8',{fatal:true}).decode(b);}catch{return add('invalid','ENCODING',at,'Source text must be UTF-8');}
++    if(Object.hasOwn(ref,'quote')){
++      if(!text(ref.quote)||!s.includes(ref.quote))return add('invalid','QUOTE',at,'Exact quote is absent');
++    }else{
++      try{if(!Object.hasOwn(ref,'value')||!isDeepStrictEqual(pointer(JSON.parse(s),ref.pointer),ref.value))throw Error('mismatch');}
++      catch{return add('invalid','POINTER',at,'JSON pointer/value does not match source');}
++    }
++    return true;
++  }
++  function list(v,at,nonempty=false){if(!Array.isArray(v)||v.length>256||(nonempty&&!v.length))return add('invalid','LIST',at,'Expected bounded array'+(nonempty?' with entries':''));return true;}
++  function targets(v,at){
++    if(!list(v,at,true))return false;let ok=true;const seen=new Set();
++    for(const [i,t] of v.entries()){
++      if(!object(t)||seen.has(t.path)){add('invalid','TARGETS',at,'Malformed or duplicate target');ok=false;continue;}
++      seen.add(t.path);if(!file(t,at+'/'+i))ok=false;
++    }return ok;
++  }
++  let input;
++  try{
++    const bytes=file({path:inputPath,sha256:inputSha256},'input');if(!bytes)return result;
++    input=JSON.parse(new TextDecoder('utf-8',{fatal:true}).decode(bytes));
++  }catch{add('invalid','INPUT','input','Input must be valid UTF-8 JSON');return result;}
++  if(!object(input)||input.schema!=='joeness.roadmap-review.v1'||!text(input.scope_id)){add('invalid','SCHEMA','input','Expected schema and scope_id');return result;}
++  result.scope_id=input.scope_id;
++  source(input.scope_source,'scope_source');source(input.scope_authorization,'scope_authorization');
++  if(input.mapping_review===null||input.mapping_review===undefined)add('unknown','MAPPING_REVIEW','mapping_review','Source interpretation and coverage need explicit review');
++  else if(source(input.mapping_review,'mapping_review')){
++    const v=input.mapping_review.value;
++    if(!object(v)||v.status!=='CONFIRMED'||v.scope_id!==input.scope_id||!digest(v.mapping_sha256))add('unknown','MAPPING_REVIEW','mapping_review','Expected source-backed review of this exact scope/mapping, not a name or boolean');
++    else if(v.mapping_sha256!==mappingHash(input))add('unknown','MAPPING_STALE','mapping_review','Extraction changed since semantic/coverage review');
++  }
++  const arrays=['views','required_outcomes','excluded_outcomes','observations','limitations'];
++  if(!arrays.every(k=>list(input[k],k,k==='required_outcomes')))return result;
++  if(object(input.scope_source?.value)){
++    const v=input.scope_source.value;
++    if(Object.hasOwn(v,'scope_id')&&v.scope_id!==input.scope_id)add('invalid','SCOPE_ID','scope_source','Normalized scope differs from source');
++    if(Array.isArray(v.required)&&!same(v.required.map(o=>o.id).sort(),input.required_outcomes.map(o=>o?.id).sort()))add('invalid','SCOPE_COVERAGE','required_outcomes','Required set differs from source scope');
++    if(Array.isArray(v.excluded)&&!same(v.excluded.map(o=>o.id).sort(),input.excluded_outcomes.map(o=>o?.id).sort()))add('invalid','SCOPE_COVERAGE','excluded_outcomes','Excluded set differs from source scope');
++  }
++  if(object(input.scope_authorization?.value)){
++    const a=input.scope_authorization.value;
++    if(Object.hasOwn(a,'scope_id')&&a.scope_id!==input.scope_id)add('conflict','AUTHORIZATION_SCOPE','scope_authorization','Decision belongs to a different scope');
++    if(object(a.scope)&&object(input.scope_source?.value)&&!same(a.scope,input.scope_source.value))add('conflict','AUTHORIZATION_SCOPE','scope_authorization','Authorized scope and selected scope source differ');
++  }
++  const viewIds=new Set(),claims=new Map();
++  for(const [i,v] of input.views.entries()){
++    const at='views/'+i;
++    if(!object(v)||!text(v.id)||viewIds.has(v.id)||!['current','history'].includes(v.kind)){add('invalid','VIEW',at,'Unique view id and explicit current/history classification required');continue;}
++    viewIds.add(v.id);
++    // Historical text is not a current assertion; do not force a full history read.
++    if(v.kind==='history'){result.historical_views_ignored++;continue;}
++    const valid=source(v.source,at+'/source');
++    if(!list(v.claims,at+'/claims',true))continue;
++    for(const [j,c] of v.claims.entries()){
++      const ca=at+'/claims/'+j;
++      if(!object(c)||!text(c.key)||!text(c.value)){add('invalid','CLAIM',ca,'Nonempty claim key/value required');continue;}
++      const good=source(c.source,ca+'/source');
++      if(valid&&good){
++        if(Object.hasOwn(v.source,'quote')!==Object.hasOwn(c.source,'quote')){add('invalid','CLAIM_LOCATION',ca,'View and claim must use the same selector type');continue;}
++        if(c.source.path!==v.source.path||c.source.sha256!==v.source.sha256||(v.source.quote&&c.source.quote&&!v.source.quote.includes(c.source.quote))){add('invalid','CLAIM_LOCATION',ca,'Claim must be within its current view source');continue;}
++        if(Object.hasOwn(v.source,'pointer')&&(!Object.hasOwn(c.source,'pointer')||(v.source.pointer!==''&&c.source.pointer!==v.source.pointer&&!c.source.pointer.startsWith(v.source.pointer+'/')))){add('invalid','CLAIM_LOCATION',ca,'Claim pointer is outside its view');continue;}
++        if(Object.hasOwn(c.source,'pointer')&&!same(c.source.value,c.value)){add('invalid','CLAIM_VALUE',ca,'Claim differs from source value');continue;}
++        if(claims.has(c.key)&&claims.get(c.key)!==c.value)add('conflict','CURRENT_CONFLICT',ca,'Current views disagree on '+c.key);
++        claims.set(c.key,c.value);result.current.push({view_id:v.id,key:c.key,value:c.value,source:c.source});
++      }
++    }
++  }
++  if(!result.current.length)add('unknown','CURRENT_MISSING','views','No verified current view; inspect roadmap before choosing next work');
++  const ids=new Set(),outcomes=new Map();
++  for(const [i,o] of input.required_outcomes.entries()){
++    const at='required_outcomes/'+i;
++    if(!object(o)||!text(o.id)||!text(o.label)||ids.has(o.id)){add('invalid','OUTCOME',at,'Unique outcome id and label required');continue;}
++    ids.add(o.id);
++    const sourceOk=source(o.source,at+'/source');
++    if(sourceOk&&object(o.source.value)&&!['id','required_lanes','acceptance_required','targets'].every(k=>same(o.source.value[k],o[k])))add('invalid','OUTCOME_VALUE',at,'Required outcome differs from source object');
++    const targetOk=targets(o.targets,at+'/targets');
++    if(!list(o.required_lanes,at+'/required_lanes',true)||new Set(o.required_lanes).size!==o.required_lanes.length||o.required_lanes.some(l=>!['implementation','technical','visual'].includes(l))){add('invalid','LANES',at,'Unique implementation/technical/visual required lanes');continue;}
++    if(![true,false,null].includes(o.acceptance_required)){add('invalid','ACCEPTANCE_REQUIREMENT',at,'Use explicit true/false/null acceptance requirement');continue;}
++    if(o.acceptance_required===null)add('unknown','ACCEPTANCE_REQUIREMENT',at,'Acceptance requirement undecided');
++    const entry={id:o.id,label:o.label,lanes:{},acceptance_required:o.acceptance_required};
++    result.outcomes.push(entry);outcomes.set(o.id,{o,entry,usable:sourceOk&&targetOk});
++  }
++  const excludedIds=new Set();
++  for(const [i,e] of input.excluded_outcomes.entries()){
++    const at='excluded_outcomes/'+i;
++    if(!object(e)||!text(e.id)||!text(e.label)||excludedIds.has(e.id)){add('invalid','EXCLUDED',at,'Unique excluded id/label required');continue;}
++    excludedIds.add(e.id);
++    if(ids.has(e.id))add('conflict','SCOPE_CONFLICT',at,'Outcome is both required and excluded');
++    const a=source(e.source,at+'/source'),b=source(e.authorization,at+'/authorization');
++    if(a&&object(e.source.value)&&e.source.value.id!==e.id)add('invalid','EXCLUDED_VALUE',at,'Excluded outcome differs from source object');
++    result.excluded.push({id:e.id,label:e.label,verified:a&&b,source:e.source});
++  }
++  const observations=new Map();
++  for(const [i,o] of input.observations.entries()){
++    const at='observations/'+i;
++    if(!object(o)||!outcomes.has(o.outcome_id)||!['implementation','technical','visual','acceptance'].includes(o.lane)){add('invalid','OBSERVATION',at,'Observation needs known required outcome and lane');continue;}
++    const permitted=o.lane==='acceptance'?['ACCEPTED','REJECTED','NOT_GRANTED','PARTIAL','UNVERIFIED']:['PASS','FAIL','UNVERIFIED','PARTIAL'];
++    if(!permitted.includes(o.status)){add('invalid','STATUS',at,'Status is incompatible with lane');continue;}
++    const sourceOk=source(o.source,at+'/source');
++    let sourceFieldsOk=true;
++    if(sourceOk&&Object.hasOwn(o.source,'pointer')){
++      const raw=o.source.value;
++      if(!object(raw)||!['outcome_id','lane','status','targets'].every(k=>same(raw[k],o[k]))){add('invalid','OBSERVATION_VALUE',at,'Source observation object and normalized fields differ');sourceFieldsOk=false;}
++    }
++    const targetOk=targets(o.targets,at+'/targets'),expected=outcomes.get(o.outcome_id);
++    const identityOk=Array.isArray(o.targets)&&Array.isArray(expected.o.targets)&&targetKey(o.targets)===targetKey(expected.o.targets);
++    if(!identityOk)add('unknown','TARGET_MISMATCH',at,'Observation does not cover the exact required target set');
++    const key=o.outcome_id+'/'+o.lane,prior=observations.get(key);
++    if(prior){add(prior.status!==o.status?'conflict':'invalid',prior.status!==o.status?'OBSERVATION_CONFLICT':'DUPLICATE_OBSERVATION',at,'More than one current observation for outcome/lane');prior.usable=false;}
++    else observations.set(key,{status:o.status,usable:sourceOk&&sourceFieldsOk&&targetOk&&identityOk&&expected.usable});
++  }
++  let incomplete=false;
++  for(const {o,entry} of outcomes.values()){
++    const lanes=new Set([...o.required_lanes,'acceptance',...input.observations.filter(x=>x?.outcome_id===o.id).map(x=>x.lane)]);
++    for(const lane of lanes){
++      const obs=observations.get(o.id+'/'+lane),required=o.required_lanes.includes(lane)||(lane==='acceptance'&&o.acceptance_required===true);
++      entry.lanes[lane]=obs?.usable?obs.status:lane==='acceptance'?'NOT_GRANTED':'UNVERIFIED';
++      if(lane==='acceptance'&&obs?.usable&&obs.status==='REJECTED'&&o.acceptance_required===false)add('conflict','EXACT_REJECTION',o.id+'/acceptance','Current exact rejection needs owner resolution even when acceptance was not required');
++      if(required){
++        if(!obs)add('unknown','RESULT_MISSING',o.id+'/'+lane,'Required result not supplied; inspect linked evidence before rerunning');
++        else if(!obs.usable)entry.lanes[lane]='UNVERIFIED';
++        else if(obs.status==='UNVERIFIED')add('unknown','RESULT_UNVERIFIED',o.id+'/'+lane,'Owner explicitly left this required check unverified');
++        else if(obs.status!==(lane==='acceptance'?'ACCEPTED':'PASS'))incomplete=true;
++      }
++    }
++  }
++  for(const c of result.current){
++    if(c.key.startsWith('outcome:')){
++      const parts=c.key.split(':');
++      if(parts.length!==3||!outcomes.has(parts[1])||!['implementation','technical','visual','acceptance'].includes(parts[2])){add('invalid','CLAIM_KEY',c.view_id,'Expected outcome:<known id>:<lane>');continue;}
++      const obs=observations.get(parts[1]+'/'+parts[2]);
++      if(obs?.usable&&c.value!==obs.status)add('conflict','ROADMAP_RESULT_CONFLICT',c.view_id,'Current roadmap differs from linked execution result: '+c.key);
++    }
++  }
++  for(const [i,l] of input.limitations.entries()){
++    if(!object(l)||!text(l.text)){add('invalid','LIMITATION','limitations/'+i,'Text and source required');continue;}
++    result.limitations.push({text:l.text,verified:source(l.source,'limitations/'+i),source:l.source});
++  }
++  for(const [p,s] of snapshots){
++    try{if(realpathSync(resolve(base,p))!==s.abs||hash(readFileSync(s.abs))!==s.sha256)add('unknown','CHANGED_DURING_READ',p,'Source changed during diagnosis; inspect current state before retry');}
++    catch{add('unknown','CHANGED_DURING_READ',p,'Source unavailable at end of diagnosis');}
++  }
++  if(!findings.length)result.delivery=incomplete?'incomplete':'complete';
++  result.required_remaining=result.outcomes.flatMap(o=>Object.entries(o.lanes).filter(([lane,status])=>
++    (outcomes.get(o.id).o.required_lanes.includes(lane)||(lane==='acceptance'&&o.acceptance_required===true))&&status!==(lane==='acceptance'?'ACCEPTED':'PASS')).map(([lane,status])=>({id:o.id,label:o.label,lane,status})));
++  return result;
++}
++
++export function renderText(r){
++  const labels={complete:'완료(검토된 범위 한정)',incomplete:'미완',undetermined:'판정 대기'};
++  const lanes={implementation:'구현',technical:'동작 확인',visual:'화면 검토',acceptance:'사용자 수락'};
++  return ['범위: '+(r.scope_id??'확인 필요'),'이번 납품: '+labels[r.delivery],
++    '필수 잔여: '+(r.required_remaining?.map(x=>x.label+' / '+lanes[x.lane]+' ['+x.status+']').join(', ')|| (r.delivery==='complete'?'없음':'판정 근거 확인 필요')),
++    '범위 밖: '+(r.excluded.map(x=>x.label+(x.verified?'':'(근거 확인 필요)')).join(', ')||'없음'),
++    '참고 한계: '+(r.limitations.map(x=>x.text+(x.verified?'':'(근거 확인 필요)')).join('; ')||'전체 프로젝트 완료·제품 승인을 대신하지 않음'),
++    ...r.findings.map(x=>'- '+x.kind+' / '+x.at+': '+x.message)].join('\n')+'\n';
++}
++
++if(process.argv[1]&&resolve(process.argv[1])===fileURLToPath(import.meta.url)){
++  let format='json',r;
++  try{
++    const opts=Object.create(null),allowed=new Set(['--root','--input','--input-sha256','--format']);
++    for(let i=2;i<process.argv.length;i+=2){const k=process.argv[i],v=process.argv[i+1];if(!allowed.has(k)||Object.hasOwn(opts,k)||!v||v.startsWith('--'))throw Error('Unknown/duplicate option or missing value');opts[k]=v;}
++    if(!opts['--root']||!opts['--input']||!opts['--input-sha256']||!['json','text'].includes(opts['--format']??'json'))throw Error('Use --root --input --input-sha256 [--format json|text]');
++    format=opts['--format']??'json';r=diagnose({root:opts['--root'],inputPath:opts['--input'],inputSha256:opts['--input-sha256']});
++  }catch(e){r={schema:'joeness.roadmap-diagnosis.v1',scope_id:null,delivery:'undetermined',project_complete:false,findings:[{kind:'invalid',code:'CLI',at:'input',message:e.message}],outcomes:[],excluded:[],limitations:[]};}
++  process.stdout.write(format==='text'?renderText(r):JSON.stringify(r)+'\n');
++  process.exitCode=r.delivery==='complete'&&!r.findings.length?0:2;
++}
+diff --git a/skills/joeness-setup/references/operation-review.md b/skills/joeness-setup/references/operation-review.md
+new file mode 100644
+index 0000000..9858d25
+--- /dev/null
++++ b/skills/joeness-setup/references/operation-review.md
+@@ -0,0 +1,87 @@
++# Consume a captured planning operation
++
++Use only for an explicitly requested JOEFLOW candidate preflight or planning
++projection audit whose outcome affects an authorized ROADMAP item. This is
++not automatic product routing, a new approval authority, or a background runner.
++The helper reads a capture; it never launches a producer or writes a project.
++
++## Execution boundary
++
++The caller runs the authorized producer once with a fresh run ID, capturing
++complete stdout, stderr and actual process exit/signal into fresh evidence paths.
++Pin the request before launch, and record the exact source/dependency files of
++the producer invoked. On timeout, missing exit, nonzero execution failure,
++truncated output or changed input, preserve the failed attempt. Never reuse an
++older stdout or infer success from an existing file. Inspect current targets
++before any retry. The read-only consumer does not authenticate that a caller
++really executed the command; actual caller-to-producer evidence is required.
++
++JOEFLOW owns candidate correctness, Product/approval meaning, projection review
++and repair. JOENESS checks execution identity, current source bytes, required
++coverage and consistent result structure. It records detailed findings in TASK
++and only affected gaps/next work in ROADMAP. Keep unrelated completed work intact.
++Do not copy these contracts into project AGENTS or add a second live status file.
++
++## Invocation
++
++Node18+; use the absolute installed skill directory:
++
++```text
++node scripts/operation-review.mjs --root <source-root> --evidence-root <capture-root> --request <request.json> --request-sha256 <pin> --capture <capture.json> --capture-sha256 <pin>
++```
++
++Paths in request/capture are resolved under evidence-root (default source-root).
++Source paths resolve under source-root. When the installed producer is outside
++the project, explicitly pass `--producer-root <installed-skill-root>`; only the
++request's `producer_files` resolve under that root (default source-root). It does
++not widen project/evidence access or select/launch a producer. Absolute producer-reported
++paths are permitted only inside that root; symlink escapes fail. Each file is
++bounded to4MiB and checked against lowercase SHA-256. No silent truncation.
++
++Request `joeness.operation-request.v1`:
++
++- `run_id`: caller-created unique invocation identity.
++- `producer_schema`: `joewrks.state-candidate-preflight/1.0` or
++  `joewrks.projection-audit/1.0`.
++- `primary`: `{path,sha256}` of candidate state or audit input.
++- `canonical`: candidate's optional canonical state ref, otherwise null.
++- `producer_files`: nonempty `{path,sha256}` list including the entrypoint and
++  actual implementation/dependency files used. No vendor package is installed
++  or selected by this helper; the approved caller supplies the producer.
++
++Capture `joeness.operation-capture.v1`:
++
++- `run_id`, `request_sha256`: exact invocation/request association.
++- `exit_code`: actual exit; `signal`: null or actual interruption signal.
++- `stdout`, `stderr`: `{path,sha256}` of captured raw streams under evidence-root.
++
++The producer's rc0 means its scoped operation passed, rc1 means a valid negative
++or partial result, rc2 indicates invocation/read/output failure. Only complete
++single JSON stdout for rc0/1 is consumed. Failure on stderr cannot be replaced
++with a previous success. The consumer returns JSON and rc0 only for `allowed:true`;
++otherwise rc2. Consult `verdict` (pass/blocked/unknown/invalid) and findings.
++
++## Preserved meaning
++
++`joeness.operation-consumption.v1` retains producer data in `reported`, including
++recovery owner/action and each projection's separate source identity, structure,
++semantic review, render review, approved coverage and materialization. Approved
++coverage, recovery owner, kind and required structural markers are checked against
++the pinned scope. A semantic review not required by that scope stays NOT_REQUIRED;
++do not demand an extra review record for it. `reported` is the producer's
++claim, not necessarily a current usable result: check allowed/verdict/findings.
++UNKNOWN/NOT_REVIEWED meaning must not become zero findings or PASS. Unknown
++semantic/render findings remain null. One pending projection does not erase a
++completed sibling. Required coverage comes from the pinned scope source, not a
++weakened top-level PASS or an omitted output row.
++
++F03 PASS permits presenting a candidate for review, not recording its approval.
++F04 PASS means only the declared required projections passed that audit. It is
++not proof of full Product/design quality. `project_complete:false` and
++`approval_granted:false` are invariant. Existing specialist/acceptance gates
++remain required; this helper does not repin or replace them.
++
++Source hashes and pointers establish identity, not semantic truth or signer
++identity. Producer/receipt fabrication and omitted producer dependencies require
++trusted capture and independent review, not a stronger wording claim. A new
++producer contract needs consumer compatibility tests before adoption.
+diff --git a/skills/joeness-setup/scripts/operation-review.mjs b/skills/joeness-setup/scripts/operation-review.mjs
+new file mode 100644
+index 0000000..b827fed
+--- /dev/null
++++ b/skills/joeness-setup/scripts/operation-review.mjs
+@@ -0,0 +1,151 @@
++#!/usr/bin/env node
++// Reads a pinned capture of an explicitly invoked producer. Never executes it.
++import {readFileSync,realpathSync,statSync} from 'node:fs';
++import {resolve,relative,dirname,isAbsolute,sep} from 'node:path';
++import {fileURLToPath} from 'node:url';
++import {createHash} from 'node:crypto';
++import {isDeepStrictEqual as equal} from 'node:util';
++const sha=b=>createHash('sha256').update(b).digest('hex');
++const obj=v=>v!==null&&typeof v==='object'&&!Array.isArray(v);
++const str=v=>typeof v==='string'&&v.trim().length>0;
++const digest=v=>typeof v==='string'&&/^[0-9a-f]{64}$/.test(v);
++const schemas=['joewrks.state-candidate-preflight/1.0','joewrks.projection-audit/1.0'];
++class Finding extends Error{constructor(kind,code,at,message){super(message);Object.assign(this,{kind,code,at});}}
++const fail=(code,at,message)=>{throw new Finding('invalid',code,at,message);};
++const unknown=(code,at,message)=>{throw new Finding('unknown',code,at,message);};
++const need=(condition,code,at,message)=>{if(!condition)fail(code,at,message);};
++function array(v,at){need(Array.isArray(v)&&v.length<=512,'ARRAY',at,'Expected bounded array');return v;}
++function unique(v,at){array(v,at);need(v.every(str)&&new Set(v).size===v.length,'IDS',at,'Expected unique nonempty IDs');return v;}
++function select(v,p){
++  need(typeof p==='string'&&(p===''||p.startsWith('/'))&&!/~(?![01])/.test(p),'POINTER','scope','Invalid JSON pointer');
++  for(const k of p===''?[]:p.slice(1).split('/').map(k=>k.replaceAll('~1','/').replaceAll('~0','~'))){need(obj(v)||Array.isArray(v),'POINTER',p,'Missing pointer');need(Object.hasOwn(v,k),'POINTER',p,'Missing pointer');v=v[k];}return v;
++}
++
++export function consume(options){
++  const result={schema:'joeness.operation-consumption.v1',allowed:false,verdict:'unknown',project_complete:false,approval_granted:false,findings:[],reported:null,
++    limits:['Pinned capture integrity is not producer execution authentication or semantic correctness.','Preflight/audit is not product approval or project completion.']};
++  const snapshots=[];
++  try{
++    const root=realpathSync(options.root),evidence=realpathSync(options.evidenceRoot??options.root),producerRoot=realpathSync(options.producerRoot??options.root);
++    function contained(base,path){
++      need(str(path)&&!path.includes('\0'),'PATH','reference','Nonempty path required');
++      let abs;try{abs=realpathSync(resolve(base,path));}catch{unknown('UNREADABLE',path,'Source is unavailable, not proven unperformed');}
++      const r=relative(base,abs);need(r!=='..'&&!r.startsWith('..'+sep)&&!isAbsolute(r),'PATH_ESCAPE',path,'Resolved path escapes explicit root');return abs;
++    }
++    function load(base,ref){
++      need(obj(ref)&&digest(ref.sha256),'REFERENCE','reference','Path/SHA-256 required');
++      const abs=contained(base,ref.path);need(statSync(abs).isFile()&&statSync(abs).size<=4*1024*1024,'FILE_BOUND',ref.path,'Expected file <=4 MiB');
++      const bytes=readFileSync(abs);if(sha(bytes)!==ref.sha256)unknown('STALE',ref.path,'Current bytes differ from pinned input');
++      snapshots.push({base,path:ref.path,abs,sha256:ref.sha256});return {abs,bytes};
++    }
++    function json(file){try{return JSON.parse(new TextDecoder('utf-8',{fatal:true}).decode(file.bytes));}catch{fail('JSON',file.abs,'Expected one complete UTF-8 JSON value');}}
++    const requestFile=load(evidence,{path:options.request,sha256:options.requestSha256}),request=json(requestFile);
++    need(obj(request)&&request.schema==='joeness.operation-request.v1'&&str(request.run_id)&&schemas.includes(request.producer_schema),'REQUEST','request','Unknown request contract');
++    const capture=json(load(evidence,{path:options.capture,sha256:options.captureSha256}));
++    need(obj(capture)&&capture.schema==='joeness.operation-capture.v1'&&capture.run_id===request.run_id&&capture.request_sha256===options.requestSha256,'CAPTURE_ID','capture','Capture is not for this exact run/request');
++    const stdout=load(evidence,capture.stdout);load(evidence,capture.stderr);
++    if(![0,1].includes(capture.exit_code)||capture.signal!==null)unknown('EXECUTION_FAILED','capture','Producer execution did not complete successfully; never substitute older stdout');
++    const report=json(stdout);result.reported=report;
++    need(obj(report)&&report.schema_version===request.producer_schema,'SCHEMA','stdout','Unexpected producer output schema');
++    array(request.producer_files,'producer_files');need(request.producer_files.length>0,'PRODUCER','request','Pin the producer source files used for this run');
++    for(const f of request.producer_files)load(producerRoot,f);
++    const primaryFile=load(root,request.primary),primary=json(primaryFile);
++    function sameFile(actual,expected,at){
++      need(obj(actual)&&obj(expected)&&actual.sha256===expected.sha256,'IDENTITY',at,'Reported identity differs from expected input');
++      const a=load(root,actual),b=load(root,expected);need(a.abs===b.abs,'IDENTITY',at,'Reported source path differs from requested input');
++    }
++    need(report.source_unchanged===true,'SOURCE_CHANGED','stdout','Producer did not confirm source preservation');
++    if(request.producer_schema===schemas[0]){
++      sameFile(report.source,request.primary,'source');
++      if(request.canonical!==null){sameFile(report.canonical,request.canonical,'canonical');need(report.canonical_unchanged===true,'SOURCE_CHANGED','canonical','Canonical source changed');}
++      else need(report.canonical===null&&report.canonical_unchanged===null,'IDENTITY','canonical','Unexpected canonical source');
++      need(obj(report.identity)&&obj(report.stages)&&obj(report.summary),'STRUCTURE','stdout','Missing preflight axes');
++      const expectedIdentity={schema_version:primary.schema_version??null,definition_revision:primary.project?.definition_revision??null,definition_status:primary.project?.definition_status??null,approval_status:primary.approval?.status??null};
++      for(const [key,v] of Object.entries(expectedIdentity))need(equal(report.identity[key],v),'IDENTITY','identity/'+key,'Producer identity contradicts candidate');
++      need(['PASS','FAIL'].includes(report.stages.state_validation)&&['PASS','FAIL'].includes(report.stages.semantic_readiness)&&['PASS','NOT_READY'].includes(report.stages.manifest_review_readiness),'STAGES','stages','Malformed stage status');
++      need(report.stages.user_approval===(primary.approval?.status==='APPROVED'?'APPROVED':'UNAPPROVED'),'APPROVAL','stages','Reported approval differs from candidate, not a new approval');
++      array(report.findings,'findings');need(report.summary.finding_count===report.findings.length,'COUNTS','summary','Finding count differs from actual findings');
++      for(const k of ['validation_error_count','blocking_metric_count','finding_count'])need(Number.isSafeInteger(report.summary[k])&&report.summary[k]>=0,'COUNTS','summary/'+k,'Expected nonnegative count');
++      need(str(report.next_action),'NEXT','next_action','Missing next action');
++      need(['PASS','FAIL'].includes(report.overall_status),'STATUS','overall_status','Unknown preflight status');
++      if(report.overall_status==='PASS')need(['state_validation','semantic_readiness','manifest_review_readiness'].every(k=>report.stages[k]==='PASS')&&report.findings.length===0&&Object.values(report.summary).every(x=>x===0),'FALSE_PASS','stdout','PASS contradicts preflight axes');
++    }else{
++      sameFile(report.input,request.primary,'input');
++      need(primary.schema_version==='joewrks.projection-audit-input/1.0','SCHEMA','primary','Wrong audit input');
++      const auditDir=dirname(primaryFile.abs);
++      // Producer paths are relative to the audit input; all must still stay inside root.
++      const fromAudit=ref=>{need(obj(ref)&&str(ref.path),'REFERENCE','audit','Missing audit ref');return {...ref,path:resolve(auditDir,ref.path)};};
++      sameFile(report.canonical_source,fromAudit(primary.canonical_state),'canonical_source');
++      const scopeFile=load(root,fromAudit(primary.scope_authority)),scope=select(json(scopeFile),primary.scope_authority.pointer??'');
++      need(obj(scope)&&report.scope_authority_sha256===sha(scopeFile.bytes),'SCOPE','scope','Scope identity mismatch');
++      const required=unique(scope.required_projection_ids,'required'),semanticRequired=unique(scope.semantic_review_required_ids,'semantic_required'),renderRequired=unique(scope.render_review_required_ids,'render_required');
++      need(required.length>0&&[...semanticRequired,...renderRequired].every(id=>required.includes(id)),'SCOPE','scope','Empty or conflicting required scope');
++      need(obj(scope.projection_contracts)&&required.every(id=>Object.hasOwn(scope.projection_contracts,id)),'SCOPE','contracts','Approved contracts for required projections are missing');
++      const declarations=new Map();
++      for(const d of array(primary.projections,'declarations')){need(obj(d)&&str(d.projection_id)&&!declarations.has(d.projection_id),'DUPLICATE','declarations','Unique declared projections required');declarations.set(d.projection_id,d);}
++      const seen=new Set(),completed=[],pending=[],failed=[];
++      for(const p of array(report.projections,'projections')){
++        need(obj(p)&&str(p.projection_id)&&!seen.has(p.projection_id),'DUPLICATE','projections','Unique reported projections required');seen.add(p.projection_id);
++        const id=p.projection_id,d=declarations.get(id),mandatory=required.includes(id);
++        const contract=Object.hasOwn(scope.projection_contracts,id)?scope.projection_contracts[id]:null;
++        need(d||mandatory,'PROJECTION','projections','Unknown projection');
++        need(p.required===mandatory&&str(p.recovery_owner)&&str(p.next_action),'PROJECTION',id,'Required flag/recovery owner/next action mismatch');
++        if(contract){
++          need(obj(contract)&&str(contract.kind)&&str(contract.recovery_owner),'SCOPE',id,'Malformed approved contract');
++          array(contract.required_markers,id+'/required_markers');array(contract.semantic_coverage,id+'/semantic_coverage');
++          need(p.recovery_owner===contract.recovery_owner,'RECOVERY_OWNER',id,'Recovery owner differs from approved contract');
++          need(obj(p.coverage)&&['PASS','FAIL','UNKNOWN'].includes(p.coverage.status)&&equal(p.coverage.required,contract.semantic_coverage),'COVERAGE',id,'Missing or altered approved coverage');
++          need(p.coverage.status==='UNKNOWN'?p.coverage.reviewed===null:Array.isArray(p.coverage.reviewed),'COVERAGE',id,'Unknown reviewed coverage must be null');
++          if(p.coverage.status==='PASS')need(equal(p.coverage.reviewed,contract.semantic_coverage)&&(!semanticRequired.includes(id)||equal(p.coverage.reviewed,d?.review?.scope)),'COVERAGE',id,'Passing coverage differs from approved or required declared set');
++          if(p.structure==='PASS')need(p.kind===contract.kind,'KIND',id,'Passing projection kind differs from approved contract');
++        }
++        need(['PASS','FAIL'].includes(p.structure)&&['PASS','FAIL'].includes(p.materialization)&&['PASS','FAIL','UNKNOWN'].includes(p.source_identity)&&['COMPLETE','PENDING','FAILED'].includes(p.status),'AXES',id,'Unknown projection axis');
++        for(const [axis,requiredAxis] of [['semantic_review',semanticRequired.includes(id)],['render_review',renderRequired.includes(id)]]){
++          const a=p[axis];need(obj(a)&&['PASS','FAIL','UNKNOWN','NOT_REQUIRED'].includes(a.status),'AXES',id+'/'+axis,'Missing review axis');
++          need(a.status==='UNKNOWN'?a.findings===null:Array.isArray(a.findings),'UNKNOWN_COUNT',id+'/'+axis,'Unreviewed findings must be null, not zero/empty');
++          if(a.status==='PASS'||a.status==='NOT_REQUIRED')need(a.findings.length===0,'FALSE_PASS',id+'/'+axis,'Passing review cannot contain findings');
++          need(!requiredAxis||a.status!=='NOT_REQUIRED','SCOPE',id+'/'+axis,'Required review cannot be waived by output');
++        }
++        array(p.findings,id+'/findings');
++        if(d){
++          if(p.materialization==='PASS'){
++            sameFile({path:p.path,sha256:p.sha256},fromAudit(d),id+'/target');
++            if(contract&&p.structure==='PASS'){
++              const content=new TextDecoder('utf-8',{fatal:true}).decode(load(root,fromAudit(d)).bytes);
++              need(contract.required_markers.every(m=>str(m)&&content.includes(m)),'STRUCTURE_MARKERS',id,'Current projection lacks approved required markers');
++            }
++          }
++          for(const [key,field] of [['review_evidence','review_evidence_sha256'],['render_evidence','render_evidence_sha256']]){
++            if(p[field]!==null){const expected=fromAudit(d.review?.[key]);need(p[field]===expected.sha256,'IDENTITY',id+'/'+field,'Reported review evidence differs from input');load(root,expected);}
++          }
++          need(p.semantic_review.status!=='PASS'||digest(p.review_evidence_sha256),'REVIEW_EVIDENCE',id,'PASS needs current semantic review proof');
++          need(p.render_review.status!=='PASS'||digest(p.render_evidence_sha256),'REVIEW_EVIDENCE',id,'PASS needs current render review proof');
++          need(p.semantic_review.status!=='PASS'||d.review?.semantic_status==='PASS','REVIEW_STATUS',id,'Semantic PASS contradicts declared review');
++          need(p.render_review.status!=='PASS'||d.review?.render_status==='PASS','REVIEW_STATUS',id,'Render PASS contradicts declared review');
++        }
++        if(p.status==='COMPLETE')need(d&&p.structure==='PASS'&&p.materialization==='PASS'&&p.source_identity==='PASS'&&p.coverage?.status==='PASS'&&['PASS','NOT_REQUIRED'].includes(p.semantic_review.status)&&['PASS','NOT_REQUIRED'].includes(p.render_review.status)&&p.findings.length===0,'FALSE_COMPLETE',id,'COMPLETE contradicts a review axis');
++        if(mandatory)(p.status==='COMPLETE'?completed:p.status==='PENDING'?pending:failed).push(id);
++      }
++      need(equal([...seen].sort(),[...new Set([...required,...declarations.keys()])].sort()),'COVERAGE','projections','Missing required/declared projection result');
++      for(const [key,expected] of [['completed_projection_ids',completed],['pending_projection_ids',pending],['failed_projection_ids',failed]])need(equal([...unique(report[key],key)].sort(),expected.sort()),'PARTITION',key,'Summary does not match projection outcomes');
++      need(unique(report.resumed_projection_ids,'resumed').every(id=>completed.includes(id))&&digest(report.resume_identity),'RESUME','resume','Malformed resume identity/IDs');
++      need(report.resumed_projection_ids.length===0||primary.resume_receipt!=null,'RESUME','resume','Reused results need an explicit prior receipt');
++      const shouldPass=completed.length===required.length&&!pending.length&&!failed.length;
++      need(report.overall_status===(shouldPass?'PASS':'PARTIAL'),'FALSE_PASS','overall_status','Overall result contradicts required projections');
++      array(report.next_actions,'next_actions');array(report.limitations,'limitations');
++    }
++    need(capture.exit_code===(report.overall_status==='PASS'?0:1),'EXIT_MISMATCH','capture','Exit code and producer verdict disagree');
++    for(const s of snapshots){if(realpathSync(resolve(s.base,s.path))!==s.abs||sha(readFileSync(s.abs))!==s.sha256)unknown('CHANGED_DURING_READ',s.path,'Input changed while consuming result');}
++    result.allowed=report.overall_status==='PASS';result.verdict=result.allowed?'pass':'blocked';
++  }catch(e){result.findings.push({kind:e.kind??'invalid',code:e.code??'READ_ERROR',at:e.at??'input',message:e instanceof Finding?e.message:'Cannot consume this input safely'});result.verdict=result.findings[0].kind;}
++  return result;
++}
++
++if(process.argv[1]&&resolve(process.argv[1])===fileURLToPath(import.meta.url)){
++  const keys=new Map([['--root','root'],['--evidence-root','evidenceRoot'],['--producer-root','producerRoot'],['--request','request'],['--request-sha256','requestSha256'],['--capture','capture'],['--capture-sha256','captureSha256']]);
++  let result;try{
++    const opts={};for(let i=2;i<process.argv.length;i+=2){const k=keys.get(process.argv[i]),v=process.argv[i+1];need(k&&!Object.hasOwn(opts,k)&&str(v)&&!v.startsWith('--'),'CLI','arguments','Unknown/duplicate option or missing value');opts[k]=v;}
++    need(['root','request','requestSha256','capture','captureSha256'].every(k=>str(opts[k])),'CLI','arguments','Missing explicit root/request/capture pins');result=consume(opts);
++  }catch(e){result={schema:'joeness.operation-consumption.v1',allowed:false,verdict:'invalid',project_complete:false,approval_granted:false,findings:[{kind:'invalid',code:e.code??'CLI',message:e.message}],reported:null};}
++  process.stdout.write(JSON.stringify(result)+'\n');process.exitCode=result.allowed?0:2;
++}
+diff --git a/tests/joeness-roadmap-review.tests.mjs b/tests/joeness-roadmap-review.tests.mjs
+new file mode 100644
+index 0000000..84cccfc
+--- /dev/null
++++ b/tests/joeness-roadmap-review.tests.mjs
+@@ -0,0 +1,157 @@
++import test from 'node:test';
++import assert from 'node:assert/strict';
++import {mkdtempSync,writeFileSync,readFileSync,rmSync,readdirSync,symlinkSync} from 'node:fs';
++import {tmpdir} from 'node:os';
++import {join} from 'node:path';
++import {createHash} from 'node:crypto';
++import {spawnSync} from 'node:child_process';
++import {fileURLToPath} from 'node:url';
++const cli=process.env.JOENESS_TEST_ROADMAP_CLI||fileURLToPath(new URL('../skills/joeness-setup/scripts/roadmap-review.mjs',import.meta.url));
++const sha=b=>createHash('sha256').update(b).digest('hex');
++const canonical=v=>Array.isArray(v)?'['+v.map(canonical).join(',')+']':v&&typeof v==='object'?'{'+Object.keys(v).sort().map(k=>JSON.stringify(k)+':'+canonical(v[k])).join(',')+'}':JSON.stringify(v);
++
++function fixture(t){
++  const root=mkdtempSync(join(tmpdir(),'joeness-roadmap-'));
++  t.after(()=>rmSync(root,{recursive:true,force:true}));
++  const put=(p,v)=>writeFileSync(join(root,p),typeof v==='string'?v:JSON.stringify(v));
++  const hash=p=>sha(readFileSync(join(root,p)));
++  const ref=(p,quote)=>({path:p,sha256:hash(p),quote});
++  put('ROADMAP.md','## Current\nStage: closed\nNext: none\n## History\nStage: building\nNext: finish demo\n');
++  put('scope.json',{scope:'demo',required:'demo only',excluded:'live search',acceptance:'not required',approval:'UNAPPROVED'});
++  put('decision.txt','User authorizes non-launch demo delivery; live search excluded; visual acceptance not required for this delivery.');
++  put('target.html','demo output');
++  put('TASK.md','Implementation and technical check passed for demo output.');
++  const ptr=(p,pointer,value)=>({path:p,sha256:hash(p),pointer,value});
++  const targets=[{path:'target.html',sha256:hash('target.html')}];
++  const input={schema:'joeness.roadmap-review.v1',scope_id:'demo',
++    scope_source:ptr('scope.json','/scope','demo'),scope_authorization:ref('decision.txt','User authorizes non-launch demo delivery; live search excluded; visual acceptance not required for this delivery.'),
++    mapping_review:null,
++    views:[{id:'now',kind:'current',source:ref('ROADMAP.md','## Current\nStage: closed\nNext: none'),claims:[{key:'stage',value:'closed',source:ref('ROADMAP.md','Stage: closed')},{key:'next',value:'none',source:ref('ROADMAP.md','Next: none')}]},
++      {id:'past',kind:'history',source:ref('ROADMAP.md','## History\nStage: building\nNext: finish demo'),claims:[{key:'stage',value:'building',source:ref('ROADMAP.md','Stage: building')}]}],
++    required_outcomes:[{id:'demo',label:'데모 제작',required_lanes:['implementation','technical'],acceptance_required:false,source:ptr('scope.json','/required','demo only'),targets}],
++    excluded_outcomes:[{id:'search',label:'실제 검색 성과',source:ptr('scope.json','/excluded','live search'),authorization:ref('decision.txt','live search excluded')}],
++    observations:['implementation','technical'].map(lane=>({outcome_id:'demo',lane,status:'PASS',source:ref('TASK.md','Implementation and technical check passed for demo output.'),targets})),
++    limitations:[{text:'전체 기획 승인은 별도',source:ptr('scope.json','/approval','UNAPPROVED')}]};
++  function seal(){
++    const {mapping_review,...mapping}=input;
++    const review={scope_id:input.scope_id,status:'CONFIRMED',mapping_sha256:sha(canonical(mapping))};
++    put('review.json',review);input.mapping_review=ptr('review.json','',review);put('input.json',input);
++  }
++  function run(args=[]){
++    const r=spawnSync(process.execPath,[cli,'--root',root,'--input','input.json','--input-sha256',hash('input.json'),...args],{encoding:'utf8'});
++    assert.ifError(r.error);assert.ok(r.stdout.trim(),r.stderr);return {exit:r.status,...JSON.parse(r.stdout)};
++  }
++  seal();return {root,input,put,hash,ref,ptr,seal,run,targets};
++}
++const kinds=r=>r.findings.map(f=>f.kind);
++test('historical next work is ignored; authorized demo completion is scoped, not product approval',t=>{
++  const f=fixture(t),r=f.run();assert.equal(r.exit,0);assert.equal(r.delivery,'complete');assert.equal(r.project_complete,false);
++  assert.equal(r.excluded[0].id,'search');assert.equal(r.limitations[0].text,'전체 기획 승인은 별도');assert.deepEqual(r.findings,[]);
++});
++test('conflicting current views are not resolved by newest date',t=>{
++  const f=fixture(t);f.input.views[1].kind='current';f.seal();const r=f.run();assert.equal(r.exit,2);assert.ok(kinds(r).includes('conflict'));assert.equal(r.delivery,'undetermined');
++});
++test('authorized reopening keeps old closure historical and required work incomplete',t=>{
++  const f=fixture(t);f.input.views[0].kind='history';f.input.views[1].kind='current';f.input.observations[1].status='UNVERIFIED';f.seal();const r=f.run();assert.ok(!kinds(r).includes('conflict'));assert.equal(r.delivery,'undetermined');assert.ok(kinds(r).includes('unknown'));assert.equal(r.outcomes[0].lanes.implementation,'PASS');
++});
++test('missing evidence is unknown, not a fabricated failure or erased implementation',t=>{
++  const f=fixture(t);f.input.observations[1].source={path:'missing.txt',sha256:'a'.repeat(64),quote:'checked'};f.seal();const r=f.run();assert.equal(r.delivery,'undetermined');assert.ok(kinds(r).includes('unknown'));assert.equal(r.outcomes[0].lanes.implementation,'PASS');
++});
++test('source quote and JSON pointer must match exact current bytes',t=>{
++  const f=fixture(t);f.input.scope_source.value='production';f.seal();assert.ok(kinds(f.run()).includes('invalid'));
++  f.input.scope_source.value='demo';f.input.observations[0].source.quote='fabricated PASS';f.seal();assert.ok(kinds(f.run()).includes('invalid'));
++});
++test('reviewer name or boolean is not semantic confirmation; changed mapping invalidates old review',t=>{
++  const f=fixture(t);f.input.mapping_review={reviewer:'someone',confirmed:true};f.put('input.json',f.input);assert.notEqual(f.run().delivery,'complete');
++  f.seal();f.input.observations[1].status='FAIL';f.put('input.json',f.input);const r=f.run();assert.ok(r.findings.some(x=>x.code==='MAPPING_STALE'));assert.notEqual(r.delivery,'complete');
++});
++test('pending mapping review or absent current view needs manual review',t=>{
++  const f=fixture(t);f.input.mapping_review=null;f.put('input.json',f.input);assert.ok(kinds(f.run()).includes('unknown'));
++  f.input.views.forEach(v=>v.kind='history');f.seal();assert.notEqual(f.run().delivery,'complete');
++});
++test('visual rejection, partial acceptance and missing required acceptance cannot complete',t=>{
++  const f=fixture(t);f.input.required_outcomes[0].acceptance_required=true;
++  for(const status of ['REJECTED','PARTIAL','NOT_GRANTED']){
++    f.input.observations=f.input.observations.filter(o=>o.lane!=='acceptance');
++    f.input.observations.push({outcome_id:'demo',lane:'acceptance',status,source:f.ref('decision.txt','User authorizes non-launch demo delivery; live search excluded; visual acceptance not required for this delivery.'),targets:f.targets});
++    f.seal();const r=f.run();assert.equal(r.delivery,'incomplete');assert.equal(r.outcomes[0].lanes.implementation,'PASS');
++  }
++  f.input.observations.pop();f.seal();assert.equal(f.run().delivery,'undetermined');
++});
++test('technical pass cannot replace visual FAIL or PARTIAL',t=>{
++  const f=fixture(t);f.input.required_outcomes[0].required_lanes.push('visual');
++  f.input.observations.push({outcome_id:'demo',lane:'visual',status:'FAIL',source:f.ref('TASK.md','Implementation and technical check passed for demo output.'),targets:f.targets});
++  f.seal();assert.equal(f.run().delivery,'incomplete');f.input.observations.at(-1).status='PARTIAL';f.seal();assert.equal(f.run().delivery,'incomplete');
++});
++test('stale or wrong-target evidence is unknown, never accepted on a PASS label',t=>{
++  const f=fixture(t);f.input.observations[1].targets=[];f.seal();assert.notEqual(f.run().delivery,'complete');
++  f.input.observations[1].targets=[{path:'other.html',sha256:'a'.repeat(64)}];f.seal();assert.ok(kinds(f.run()).includes('unknown'));
++  f.input.observations[1].targets=f.targets;f.seal();f.put('target.html','new output');assert.ok(kinds(f.run()).includes('unknown'));
++});
++test('required and excluded overlap or contradictory observations are conflicts',t=>{
++  const f=fixture(t);f.input.excluded_outcomes[0].id='demo';f.seal();assert.ok(kinds(f.run()).includes('conflict'));
++  f.input.excluded_outcomes[0].id='search';f.input.observations.push({...f.input.observations[0],status:'FAIL'});f.seal();assert.ok(kinds(f.run()).includes('conflict'));
++});
++test('missing exclusion authority cannot be treated as approved out-of-scope',t=>{
++  const f=fixture(t);delete f.input.excluded_outcomes[0].authorization;f.seal();const r=f.run();assert.notEqual(r.delivery,'complete');assert.ok(kinds(r).includes('invalid'));
++});
++test('malformed status, duplicate outcome and empty criterion lanes are invalid',t=>{
++  for(const mutate of [f=>f.input.observations[0].status='ACCEPTED',f=>f.input.required_outcomes.push(f.input.required_outcomes[0]),f=>f.input.required_outcomes[0].required_lanes=[]]){
++    const f=fixture(t);mutate(f);f.seal();assert.ok(kinds(f.run()).includes('invalid'));
++  }
++});
++test('path traversal, absolute paths, inherited pointer and outside symlink are rejected',t=>{
++  const f=fixture(t);for(const p of ['../outside','C:/outside','constructor']){
++    f.input.scope_source=p==='constructor'?f.ptr('scope.json','/constructor','x'):{path:p,sha256:'a'.repeat(64),quote:'x'};
++    f.seal();assert.notEqual(f.run().delivery,'complete');
++  }
++  const outside=mkdtempSync(join(tmpdir(),'joeness-roadmap-outside-'));t.after(()=>rmSync(outside,{recursive:true,force:true}));
++  writeFileSync(join(outside,'proof.txt'),'hidden');symlinkSync(outside,join(f.root,'link'),'junction');
++  f.input.scope_source={path:'link/proof.txt',sha256:sha('hidden'),quote:'hidden'};f.seal();assert.ok(kinds(f.run()).includes('invalid'));
++});
++test('CLI rejects duplicate/unknown options and wrong pinned input',t=>{
++  const f=fixture(t);for(const args of [['--input','input.json'],['--constructor','x'],['--input-sha256','0'.repeat(64)]])assert.equal(f.run(args).exit,2);
++});
++test('read-only run leaves all source bytes intact and renders bounded human summary',t=>{
++  const f=fixture(t),snapshot=()=>readdirSync(f.root).map(p=>[p,f.hash(p)]);const before=snapshot();assert.equal(f.run().exit,0);assert.deepEqual(snapshot(),before);
++  const r=spawnSync(process.execPath,[cli,'--root',f.root,'--input','input.json','--input-sha256',f.hash('input.json'),'--format','text'],{encoding:'utf8'});
++  assert.equal(r.status,0);assert.match(r.stdout,/이번 납품: 완료/);assert.match(r.stdout,/필수 잔여: 없음/);assert.match(r.stdout,/범위 밖: 실제 검색 성과/);assert.match(r.stdout,/참고 한계: 전체 기획 승인은 별도/);assert.deepEqual(snapshot(),before);
++});
++test('raw structured FAIL cannot be mapped to PASS even with fresh mapping review',t=>{
++  const f=fixture(t);const raw={outcome_id:'demo',lane:'technical',status:'FAIL',targets:f.targets};
++  f.put('raw.json',raw);f.input.observations[1].source=f.ptr('raw.json','',raw);f.seal();
++  const r=f.run();assert.ok(r.findings.some(x=>x.code==='OBSERVATION_VALUE'));assert.notEqual(r.delivery,'complete');
++});
++test('source required criterion cannot be removed by a freshly sealed extraction',t=>{
++  const f=fixture(t),raw={scope_id:'demo',required:[{...f.input.required_outcomes[0],id:'mandatory'}],excluded:[]};
++  f.put('canonical.json',raw);f.input.scope_source=f.ptr('canonical.json','',raw);f.seal();
++  assert.ok(f.run().findings.some(x=>x.code==='SCOPE_COVERAGE'));
++});
++test('roadmap complete claim conflicts with current TASK failure',t=>{
++  const f=fixture(t);f.put('ROADMAP.md','## Current\ntechnical: PASS\n');
++  f.input.views=[{id:'now',kind:'current',source:f.ref('ROADMAP.md','## Current\ntechnical: PASS'),claims:[{key:'outcome:demo:technical',value:'PASS',source:f.ref('ROADMAP.md','technical: PASS')}]}];
++  f.input.observations[1].status='FAIL';f.seal();assert.ok(f.run().findings.some(x=>x.code==='ROADMAP_RESULT_CONFLICT'));
++});
++test('optional acceptance does not hide an explicit current rejection',t=>{
++  const f=fixture(t);f.input.observations.push({outcome_id:'demo',lane:'acceptance',status:'REJECTED',source:f.ref('TASK.md','Implementation and technical check passed for demo output.'),targets:f.targets});f.seal();
++  const r=f.run();assert.notEqual(r.delivery,'complete');assert.equal(r.outcomes[0].lanes.acceptance,'REJECTED');assert.ok(kinds(r).includes('conflict'));
++});
++test('manager regression: source-required acceptance and lanes cannot be downgraded',t=>{
++  for(const field of ['acceptance','lanes']){
++    const f=fixture(t),raw={...f.input.required_outcomes[0]};delete raw.source;
++    if(field==='acceptance')raw.acceptance_required=true;else raw.required_lanes=['implementation','technical','visual'];
++    f.put('required.json',raw);f.input.required_outcomes[0].source=f.ptr('required.json','',raw);f.seal();
++    const r=f.run();assert.equal(r.exit,2);assert.ok(r.findings.some(x=>x.code==='OUTCOME_VALUE'));
++  }
++});
++test('manager regression: history pointer cannot be classified inside current source',t=>{
++  const f=fixture(t),raw={current:{next:'none'},history:{next:'resume closed work'}};f.put('view.json',raw);
++  f.input.views=[{id:'now',kind:'current',source:f.ptr('view.json','/current',raw.current),claims:[{key:'next',value:raw.history.next,source:f.ptr('view.json','/history/next',raw.history.next)}]}];
++  f.seal();const r=f.run();assert.equal(r.exit,2);assert.ok(r.findings.some(x=>x.code==='CLAIM_LOCATION'));
++});
++test('authorization for another scope and mixed current/history selector tricks do not pass',t=>{
++  const f=fixture(t);const auth={scope_id:'different',decision:'approved'};f.put('auth.json',auth);f.input.scope_authorization=f.ptr('auth.json','',auth);f.seal();assert.ok(f.run().findings.some(x=>x.code==='AUTHORIZATION_SCOPE'));
++  f.input.scope_authorization=f.ref('decision.txt','User authorizes non-launch demo delivery; live search excluded; visual acceptance not required for this delivery.');
++  f.put('view.json',{current:'done',history:'resume'});f.input.views=[{id:'now',kind:'current',source:f.ref('view.json','"current":"done"'),claims:[{key:'next',value:'resume',source:f.ptr('view.json','/history','resume')}]}];f.seal();
++  assert.ok(f.run().findings.some(x=>x.code==='CLAIM_LOCATION'));
++});
+diff --git a/tests/joeness-operation-review.tests.mjs b/tests/joeness-operation-review.tests.mjs
+new file mode 100644
+index 0000000..29fdaa0
+--- /dev/null
++++ b/tests/joeness-operation-review.tests.mjs
+@@ -0,0 +1,65 @@
++import test from 'node:test';
++import assert from 'node:assert/strict';
++import {mkdtempSync,readFileSync,writeFileSync,rmSync,readdirSync} from 'node:fs';
++import {tmpdir} from 'node:os';
++import {join} from 'node:path';
++import {createHash} from 'node:crypto';
++import {spawnSync} from 'node:child_process';
++import {fileURLToPath} from 'node:url';
++const cli=process.env.JOENESS_TEST_OPERATION_CLI||fileURLToPath(new URL('../skills/joeness-setup/scripts/operation-review.mjs',import.meta.url));
++const hash=b=>createHash('sha256').update(b).digest('hex');
++function fixture(t,projection=false){
++  const root=mkdtempSync(join(tmpdir(),'joeness-operation-'));t.after(()=>rmSync(root,{recursive:true,force:true}));
++  const put=(p,v)=>writeFileSync(join(root,p),typeof v==='string'?v:JSON.stringify(v)),sha=p=>hash(readFileSync(join(root,p)));
++  const ref=p=>({path:p,sha256:sha(p)}),absolute=p=>({path:join(root,p),sha256:sha(p)});
++  put('producer.py','# synthetic transport fixture, not a real producer execution');
++  put('state.json',{schema_version:'0.2.0',project:{definition_revision:1,definition_status:'READY_FOR_REVIEW'},approval:{status:'UNAPPROVED'}});
++  let report,primary='state.json';
++  if(!projection)report={schema_version:'joewrks.state-candidate-preflight/1.0',source:absolute(primary),canonical:null,canonical_unchanged:null,source_unchanged:true,identity:{schema_version:'0.2.0',definition_revision:1,definition_status:'READY_FOR_REVIEW',approval_status:'UNAPPROVED',definition_digest:'a'.repeat(64)},stages:{state_validation:'PASS',semantic_readiness:'PASS',manifest_review_readiness:'PASS',user_approval:'UNAPPROVED'},overall_status:'PASS',findings:[],summary:{validation_error_count:0,blocking_metric_count:0,finding_count:0},next_action:'PRESENT_EXACT_MANIFEST_FOR_USER_REVIEW'};
++  else{
++    put('scope.json',{scope_id:'fixture',required_projection_ids:['master','html'],semantic_review_required_ids:['master','html'],render_review_required_ids:[],projection_contracts:Object.fromEntries(['master','html'].map(id=>[id,{kind:'MARKDOWN',required_markers:[id+' content'],semantic_coverage:[],recovery_owner:'PRODUCT_DEFINITION_OWNER'}]))});
++    const declarations=['master','html'].map(id=>{
++      put(id+'.md',id+' content');put(id+'-review.json',{status:'PASS'});
++      return {projection_id:id,kind:'MARKDOWN',...ref(id+'.md'),required:true,review:{scope:[],semantic_status:'PASS',semantic_findings:[],review_evidence:ref(id+'-review.json'),render_status:'NOT_REQUIRED'}};
++    });
++    put('audit.json',{schema_version:'joewrks.projection-audit-input/1.0',canonical_state:ref('state.json'),scope_authority:{...ref('scope.json'),pointer:''},projections:declarations});primary='audit.json';
++    report={schema_version:'joewrks.projection-audit/1.0',input:absolute(primary),canonical_source:absolute('state.json'),scope_authority_sha256:sha('scope.json'),source_unchanged:true,overall_status:'PASS',resume_identity:'a'.repeat(64),resumed_projection_ids:[],completed_projection_ids:['html','master'],pending_projection_ids:[],failed_projection_ids:[],next_actions:[],limitations:['Synthetic observations only'],projections:declarations.map(d=>({projection_id:d.projection_id,kind:d.kind,...absolute(d.path),required:true,source_identity:'PASS',structure:'PASS',materialization:'PASS',semantic_review:{status:'PASS',findings:[],coverage:[]},coverage:{status:'PASS',required:[],reviewed:[]},render_review:{status:'NOT_REQUIRED',findings:[]},review_evidence_sha256:sha(d.projection_id+'-review.json'),render_evidence_sha256:null,status:'COMPLETE',findings:[],next_action:'NONE',recovery_owner:'PRODUCT_DEFINITION_OWNER'}))};
++  }
++  const request={schema:'joeness.operation-request.v1',run_id:'synthetic-run-1',producer_schema:report.schema_version,primary:ref(primary),canonical:null,producer_files:[ref('producer.py')]};
++  const capture={schema:'joeness.operation-capture.v1',run_id:request.run_id,request_sha256:null,exit_code:0,signal:null,stdout:null,stderr:null};
++  function seal(raw=JSON.stringify(report)){
++    put('request.json',request);put('stdout.txt',raw);put('stderr.txt','');capture.request_sha256=sha('request.json');capture.stdout=ref('stdout.txt');capture.stderr=ref('stderr.txt');put('capture.json',capture);
++  }
++  function run(extra=[]){const r=spawnSync(process.execPath,[cli,'--root',root,'--evidence-root',root,'--request','request.json','--request-sha256',sha('request.json'),'--capture','capture.json','--capture-sha256',sha('capture.json'),...extra],{encoding:'utf8'});assert.ifError(r.error);assert.ok(r.stdout.trim(),r.stderr);return {exit:r.status,...JSON.parse(r.stdout)};}
++  seal();return {root,put,sha,ref,request,capture,report,seal,run};
++}
++test('F03 PASS is preflight only and preserves UNAPPROVED',t=>{const f=fixture(t),r=f.run();assert.equal(r.exit,0);assert.equal(r.allowed,true);assert.equal(r.project_complete,false);assert.equal(r.approval_granted,false);assert.equal(r.reported.stages.user_approval,'UNAPPROVED');});
++test('F03 structured failure preserves findings but never allows completion',t=>{const f=fixture(t);f.report.overall_status='FAIL';f.report.stages.state_validation='FAIL';f.report.findings=[{id:'F1',pointer:'/schema_version',cause:'bad schema',next_action:'repair candidate'}];f.report.summary.finding_count=1;f.capture.exit_code=1;f.seal();const r=f.run();assert.equal(r.exit,2);assert.equal(r.verdict,'blocked');assert.equal(r.reported.findings[0].pointer,'/schema_version');});
++test('failed execution cannot reuse a previous valid stdout',t=>{const f=fixture(t);f.capture.exit_code=2;f.seal();assert.equal(f.run().allowed,false);assert.ok(f.run().findings.some(x=>x.code==='EXECUTION_FAILED'));});
++test('truncated, trailing or multiple JSON outputs are rejected',t=>{const f=fixture(t);for(const raw of ['{','{}\n{}',JSON.stringify(f.report)+'warning']){f.seal(raw);assert.equal(f.run().allowed,false);}});
++test('run identity and current request pin prevent another run capture reuse',t=>{const f=fixture(t);f.capture.run_id='old-run';f.seal();assert.equal(f.run().allowed,false);f.capture.run_id=f.request.run_id;f.seal();f.capture.request_sha256='0'.repeat(64);f.put('capture.json',f.capture);assert.equal(f.run().allowed,false);});
++test('stale target and producer bytes keep result pending',t=>{const f=fixture(t);f.put('state.json','changed');assert.equal(f.run().allowed,false);const g=fixture(t);g.put('producer.py','changed');assert.equal(g.run().allowed,false);});
++test('F03 approval and source identity cannot be silently promoted',t=>{const f=fixture(t);f.report.identity.approval_status='APPROVED';f.seal();assert.equal(f.run().allowed,false);f.report.identity.approval_status='UNAPPROVED';f.report.source.sha256='a'.repeat(64);f.seal();assert.equal(f.run().allowed,false);});
++test('F04 valid scope preserves every axis separately',t=>{const f=fixture(t,true),r=f.run();assert.equal(r.exit,0);assert.equal(r.reported.projections[0].semantic_review.status,'PASS');assert.equal(r.reported.projections[0].render_review.status,'NOT_REQUIRED');assert.equal(r.approval_granted,false);});
++test('F04 PARTIAL keeps completed sibling and UNKNOWN/null semantic findings',t=>{const f=fixture(t,true),p=f.report.projections[1];p.status='PENDING';p.semantic_review={status:'UNKNOWN',findings:null,coverage:[]};p.coverage={status:'UNKNOWN',required:[],reviewed:null};p.review_evidence_sha256=null;p.next_action='COMPLETE_THE_UNREVIEWED_REQUIRED_AXIS';f.report.overall_status='PARTIAL';f.report.completed_projection_ids=['master'];f.report.pending_projection_ids=['html'];f.report.next_actions=[{projection_id:'html',owner:'PRODUCT_DEFINITION_OWNER',action:p.next_action,path:p.path}];f.capture.exit_code=1;f.seal();const r=f.run();assert.equal(r.exit,2);assert.equal(r.reported.projections[0].status,'COMPLETE');assert.equal(r.reported.projections[1].semantic_review.findings,null);});
++test('UNKNOWN findings cannot be zero and UNKNOWN cannot be COMPLETE',t=>{const f=fixture(t,true),p=f.report.projections[0];p.semantic_review={status:'UNKNOWN',findings:0,coverage:[]};f.seal();assert.equal(f.run().allowed,false);p.semantic_review.findings=null;f.seal();assert.equal(f.run().allowed,false);});
++test('missing, duplicate, downgraded required projection cannot hide behind top PASS',t=>{for(const mutate of [f=>f.report.projections.pop(),f=>f.report.projections.push(f.report.projections[0]),f=>f.report.projections[0].required=false]){const f=fixture(t,true);mutate(f);f.seal();assert.equal(f.run().allowed,false);}});
++test('stale projection or review evidence prevents reusing output',t=>{const f=fixture(t,true);f.put('master.md','new body');assert.equal(f.run().allowed,false);const g=fixture(t,true);g.put('master-review.json','{}');assert.equal(g.run().allowed,false);});
++test('incorrect status partitions and missing recovery owner are rejected',t=>{const f=fixture(t,true);f.report.completed_projection_ids=['master'];f.seal();assert.equal(f.run().allowed,false);f.report.completed_projection_ids=['master','html'];delete f.report.projections[0].recovery_owner;f.seal();assert.equal(f.run().allowed,false);});
++test('root escape, duplicate CLI flags and altered capture bytes are rejected',t=>{const f=fixture(t);f.request.primary.path='../outside';f.seal();assert.equal(f.run().allowed,false);assert.equal(f.run(['--request','request.json']).allowed,false);});
++test('consumer is read-only and no producer is executed by it',t=>{const f=fixture(t),snap=()=>readdirSync(f.root).map(p=>[p,f.sha(p)]),before=snap();assert.equal(f.run().exit,0);assert.deepEqual(snap(),before);});
++test('final producer coverage FAIL/UNKNOWN cannot be hidden by COMPLETE',t=>{for(const status of ['FAIL','UNKNOWN']){const f=fixture(t,true);f.report.projections[0].coverage.status=status;f.seal();assert.equal(f.run().allowed,false);}});
++test('approved projection coverage and recovery owner cannot be replaced',t=>{for(const mutate of [f=>f.report.projections[0].coverage.required=['invented'],f=>f.report.projections[0].recovery_owner='OTHER']){const f=fixture(t,true);mutate(f);f.seal();assert.equal(f.run().allowed,false);}});
++test('projection with missing approved structural markers is not complete',t=>{const f=fixture(t,true);f.put('master.md','wrong content');let input=JSON.parse(readFileSync(join(f.root,'audit.json')));input.projections[0].sha256=f.sha('master.md');f.put('audit.json',input);f.request.primary=f.ref('audit.json');f.report.input.sha256=f.sha('audit.json');f.report.projections[0].sha256=f.sha('master.md');f.seal();assert.equal(f.run().allowed,false);});
++test('approved nonrequired semantic review does not demand an extra review record',t=>{
++  const f=fixture(t,true),scope=JSON.parse(readFileSync(join(f.root,'scope.json'))),input=JSON.parse(readFileSync(join(f.root,'audit.json')));
++  scope.semantic_review_required_ids=['html'];f.put('scope.json',scope);input.scope_authority={...f.ref('scope.json'),pointer:''};delete input.projections[0].review;f.put('audit.json',input);
++  f.request.primary=f.ref('audit.json');f.report.input.sha256=f.sha('audit.json');f.report.scope_authority_sha256=f.sha('scope.json');
++  f.report.projections[0].semantic_review={status:'NOT_REQUIRED',findings:[],coverage:[]};f.report.projections[0].review_evidence_sha256=null;f.seal();assert.equal(f.run().allowed,true);
++});
++test('installed producer needs an explicit separate root; omitted root and escapes stay blocked',t=>{
++  const f=fixture(t),producerRoot=mkdtempSync(join(tmpdir(),'joeness-installed-producer-'));t.after(()=>rmSync(producerRoot,{recursive:true,force:true}));
++  const p=join(producerRoot,'producer.py');writeFileSync(p,'# installed producer fixture');f.request.producer_files=[{path:p,sha256:hash(readFileSync(p))}];f.seal();
++  assert.equal(f.run().allowed,false);assert.equal(f.run(['--producer-root',producerRoot]).allowed,true);
++  f.request.producer_files=[{...f.ref('producer.py'),path:join(f.root,'producer.py')}];f.seal();const escaped=f.run(['--producer-root',producerRoot]);assert.equal(escaped.allowed,false);assert.equal(escaped.findings[0].code,'PATH_ESCAPE');
++});

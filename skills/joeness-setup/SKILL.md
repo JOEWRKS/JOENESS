@@ -142,6 +142,14 @@ connection integrity; document suitability; fresh-context delivery; task-result
 verification. A direction-pending starter is not a completed staged roadmap.
 User acceptance remains separate. No general performance or token-saving claim.
 
+For competing current summaries or unclear delivery limits, use the scoped
+[roadmap diagnosis](references/roadmap-review.md). Review source interpretation
+and coverage first; its read-only checks do not certify prose meaning or the
+whole project. Keep one current view; old next-work notes remain history.
+For an explicitly required planning preflight/projection audit, consume its
+[captured execution](references/operation-review.md) without substituting old
+output or turning an unreviewed axis into a pass. This does not launch tools.
+
 ## Work after setup
 
 Normal sessions follow the short AGENTS connection; do not invoke setup again.

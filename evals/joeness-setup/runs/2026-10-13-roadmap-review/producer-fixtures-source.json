@@ -1,0 +1,1602 @@
+{
+  "kind": "independent-producer-synthetic-fixtures-source-consumption",
+  "cli": "D:\\JOEWRKS\\작업하네스\\skills\\joeness-setup\\scripts\\roadmap-review.mjs",
+  "cli_sha256": "5dfb2d5a81df58d9e1c43651b43cc945356bbf61630b103877f9b8bcd13ba33f",
+  "expectations": "D:/JOEWRKS/JOEDESIGN/evals/feedback-implementation-20261013/f02-expectations-v3.json",
+  "expectation_sha256": "8f3dd6235fcc96c434671a7b82d0dfb602710bf9e371b1105ea416c9bb3c86bb",
+  "passed": 13,
+  "total": 13,
+  "results": [
+    {
+      "id": "F02-P01",
+      "expected": "ready",
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "D:\\JOEWRKS\\작업하네스\\skills\\joeness-setup\\scripts\\roadmap-review.mjs",
+        "--root",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-P01",
+        "--input",
+        "input.json",
+        "--input-sha256",
+        "e8ffa156cd445e115b3640c7ff022ef74d75ce49cbe9e3404b1e36415e975458"
+      ],
+      "exit": 0,
+      "met": true,
+      "source_unchanged": true,
+      "fixture_sha256": {
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-P01\\design-fragment.json": "f9f6494ae3584d69b450017a68b50349d743eca70ea24392f2ad89be52d95c4c",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-P01\\input.json": "e8ffa156cd445e115b3640c7ff022ef74d75ce49cbe9e3404b1e36415e975458",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-P01\\outputs\\desktop.json": "b9a119368fa9d0b1edebe31e992c080be623046579e4318b7184eb29624de0fd",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-P01\\outputs\\mobile.json": "b9a119368fa9d0b1edebe31e992c080be623046579e4318b7184eb29624de0fd",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-P01\\sources\\authorization.json": "48b3eae9201052ec61c5832bea221182e57a2fd8d18cebe94f8a399ad96a7472",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-P01\\sources\\current-view.json": "d9aee02ba9f46b1819b424a39c24e8db60685054e695630d03db995f15c52ea6",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-P01\\sources\\design-observations.json": "66fff35869d2383e594b905bde888c09b688e5c72c88738bd7478684de6bc1e4",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-P01\\sources\\exact-acceptance.json": "3b3a9cf4b7869fec749253822968c9ce01d6f348311db86df21a31797b4a5483",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-P01\\sources\\mapping-review-v2.json": "72a1fe4ce89c3fbb81146f46844cd27446629294a89a1f004ac1cffe66a52494",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-P01\\sources\\mapping-review.json": "9a0b78ba6d5e813a14cbd29056b6efc1edd1a27e5d66869072e284209115fb9b",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-P01\\sources\\scope.json": "3a6f6f6ab2b2fc131d71ea48820ff47bec126704bbf51786394f7e1cd0ef6621",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-P01\\targets\\desktop.json": "83217f14df9c234bca01c49954458b946c97f92686c70c9ea0a7a417554ac2d3",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-P01\\targets\\mobile.json": "84b32d50877e5aa66af16894d01f00feac35b978de7e4cb3ffe3365ddf075382"
+      },
+      "output": {
+        "schema": "joeness.roadmap-diagnosis.v1",
+        "scope_id": "synthetic-demo",
+        "delivery": "complete",
+        "project_complete": false,
+        "interpretation": "Reviewed extraction only; source hashes do not authenticate approval or prove semantic correctness.",
+        "coverage": "Declared current views/outcomes only; no whole-project certification.",
+        "findings": [],
+        "outcomes": [
+          {
+            "id": "desktop-view",
+            "label": "desktop scoped review",
+            "lanes": {
+              "implementation": "PASS",
+              "technical": "PASS",
+              "visual": "PASS",
+              "acceptance": "NOT_GRANTED"
+            },
+            "acceptance_required": false
+          },
+          {
+            "id": "mobile-view",
+            "label": "mobile scoped review",
+            "lanes": {
+              "implementation": "PASS",
+              "technical": "PASS",
+              "visual": "PASS",
+              "acceptance": "NOT_GRANTED"
+            },
+            "acceptance_required": false
+          }
+        ],
+        "excluded": [
+          {
+            "id": "production-operations",
+            "label": "Live operations",
+            "verified": true,
+            "source": {
+              "path": "sources/scope.json",
+              "sha256": "3a6f6f6ab2b2fc131d71ea48820ff47bec126704bbf51786394f7e1cd0ef6621",
+              "pointer": "/excluded/0",
+              "value": {
+                "id": "production-operations",
+                "label": "Live operations",
+                "reason": "The synthetic scope explicitly excludes launch"
+              }
+            }
+          }
+        ],
+        "limitations": [
+          {
+            "text": "Synthetic only; full Manifest approval remains UNAPPROVED.",
+            "verified": true,
+            "source": {
+              "path": "sources/scope.json",
+              "sha256": "3a6f6f6ab2b2fc131d71ea48820ff47bec126704bbf51786394f7e1cd0ef6621",
+              "pointer": "/manifest_approval",
+              "value": "UNAPPROVED"
+            }
+          }
+        ],
+        "current": [
+          {
+            "view_id": "current",
+            "key": "scope",
+            "value": "synthetic-demo",
+            "source": {
+              "path": "sources/current-view.json",
+              "sha256": "d9aee02ba9f46b1819b424a39c24e8db60685054e695630d03db995f15c52ea6",
+              "pointer": "/current/scope",
+              "value": "synthetic-demo"
+            }
+          }
+        ],
+        "historical_views_ignored": 0,
+        "required_remaining": []
+      }
+    },
+    {
+      "id": "F02-N01",
+      "expected": "blocked",
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "D:\\JOEWRKS\\작업하네스\\skills\\joeness-setup\\scripts\\roadmap-review.mjs",
+        "--root",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N01",
+        "--input",
+        "input.json",
+        "--input-sha256",
+        "704090954dd617335ed79d060179084ce4de25d83b6fdfa881e2e3c5236b8141"
+      ],
+      "exit": 2,
+      "met": true,
+      "source_unchanged": true,
+      "fixture_sha256": {
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N01\\design-fragment.json": "d2b7b779f47fcf999412fb3b2149cf9f6624426eae2b8352f484a17d2d9a942c",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N01\\input.json": "704090954dd617335ed79d060179084ce4de25d83b6fdfa881e2e3c5236b8141",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N01\\outputs\\desktop.json": "b9a119368fa9d0b1edebe31e992c080be623046579e4318b7184eb29624de0fd",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N01\\outputs\\mobile.json": "b9a119368fa9d0b1edebe31e992c080be623046579e4318b7184eb29624de0fd",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N01\\sources\\authorization.json": "9631ad9a7e1bce204e58bc48f90fbc83198a7be39afdbfd87f67aef7283c80e0",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N01\\sources\\current-view.json": "d9aee02ba9f46b1819b424a39c24e8db60685054e695630d03db995f15c52ea6",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N01\\sources\\design-observations.json": "66fff35869d2383e594b905bde888c09b688e5c72c88738bd7478684de6bc1e4",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N01\\sources\\exact-acceptance.json": "f7486d2dad98054b75c7002d80227316f2f8e35523de3a8525512674e391dae1",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N01\\sources\\mapping-review-v2.json": "db6ab7d7a38eea11e4c9ca1d84d95d5a26be05fc9937ff39d5dd3dbf8ad05fa2",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N01\\sources\\mapping-review.json": "10425f80a529af6a90a2ff8de914736bed32ff5ca98b56cd0cedf620d6ea3901",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N01\\sources\\scope.json": "34bd1d9e07d09f96ff7494394419dd66b75ea4b19489d4aff0de792003eb4df0",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N01\\targets\\desktop.json": "83217f14df9c234bca01c49954458b946c97f92686c70c9ea0a7a417554ac2d3",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N01\\targets\\mobile.json": "84b32d50877e5aa66af16894d01f00feac35b978de7e4cb3ffe3365ddf075382"
+      },
+      "output": {
+        "schema": "joeness.roadmap-diagnosis.v1",
+        "scope_id": "synthetic-demo",
+        "delivery": "incomplete",
+        "project_complete": false,
+        "interpretation": "Reviewed extraction only; source hashes do not authenticate approval or prove semantic correctness.",
+        "coverage": "Declared current views/outcomes only; no whole-project certification.",
+        "findings": [],
+        "outcomes": [
+          {
+            "id": "desktop-view",
+            "label": "desktop scoped review",
+            "lanes": {
+              "implementation": "PASS",
+              "technical": "PASS",
+              "visual": "PASS",
+              "acceptance": "ACCEPTED"
+            },
+            "acceptance_required": true
+          },
+          {
+            "id": "mobile-view",
+            "label": "mobile scoped review",
+            "lanes": {
+              "implementation": "PASS",
+              "technical": "PASS",
+              "visual": "PASS",
+              "acceptance": "REJECTED"
+            },
+            "acceptance_required": true
+          }
+        ],
+        "excluded": [
+          {
+            "id": "production-operations",
+            "label": "Live operations",
+            "verified": true,
+            "source": {
+              "path": "sources/scope.json",
+              "sha256": "34bd1d9e07d09f96ff7494394419dd66b75ea4b19489d4aff0de792003eb4df0",
+              "pointer": "/excluded/0",
+              "value": {
+                "id": "production-operations",
+                "label": "Live operations",
+                "reason": "The synthetic scope explicitly excludes launch"
+              }
+            }
+          }
+        ],
+        "limitations": [
+          {
+            "text": "Synthetic only; full Manifest approval remains UNAPPROVED.",
+            "verified": true,
+            "source": {
+              "path": "sources/scope.json",
+              "sha256": "34bd1d9e07d09f96ff7494394419dd66b75ea4b19489d4aff0de792003eb4df0",
+              "pointer": "/manifest_approval",
+              "value": "UNAPPROVED"
+            }
+          }
+        ],
+        "current": [
+          {
+            "view_id": "current",
+            "key": "scope",
+            "value": "synthetic-demo",
+            "source": {
+              "path": "sources/current-view.json",
+              "sha256": "d9aee02ba9f46b1819b424a39c24e8db60685054e695630d03db995f15c52ea6",
+              "pointer": "/current/scope",
+              "value": "synthetic-demo"
+            }
+          }
+        ],
+        "historical_views_ignored": 0,
+        "required_remaining": [
+          {
+            "id": "mobile-view",
+            "label": "mobile scoped review",
+            "lane": "acceptance",
+            "status": "REJECTED"
+          }
+        ]
+      }
+    },
+    {
+      "id": "F02-N02",
+      "expected": "blocked",
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "D:\\JOEWRKS\\작업하네스\\skills\\joeness-setup\\scripts\\roadmap-review.mjs",
+        "--root",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N02",
+        "--input",
+        "input.json",
+        "--input-sha256",
+        "c42de35ed5f54cfa64717f51929b203b040034dfd86f46b8ac2c8da44039e0ee"
+      ],
+      "exit": 2,
+      "met": true,
+      "source_unchanged": true,
+      "fixture_sha256": {
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N02\\design-fragment.json": "9e577e12a9211993d426020ae0b30eeaa1f84a8c1ad6835f1b579cdd4db0298a",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N02\\input.json": "c42de35ed5f54cfa64717f51929b203b040034dfd86f46b8ac2c8da44039e0ee",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N02\\outputs\\desktop.json": "b9a119368fa9d0b1edebe31e992c080be623046579e4318b7184eb29624de0fd",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N02\\outputs\\mobile.json": "b9a119368fa9d0b1edebe31e992c080be623046579e4318b7184eb29624de0fd",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N02\\sources\\authorization.json": "9631ad9a7e1bce204e58bc48f90fbc83198a7be39afdbfd87f67aef7283c80e0",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N02\\sources\\current-view.json": "d9aee02ba9f46b1819b424a39c24e8db60685054e695630d03db995f15c52ea6",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N02\\sources\\design-observations.json": "66fff35869d2383e594b905bde888c09b688e5c72c88738bd7478684de6bc1e4",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N02\\sources\\exact-acceptance.json": "1e21ef83a48ec5a508c18a9955b488676d8a204e00fae6da87c4addd05603db0",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N02\\sources\\mapping-review-v2.json": "11b6d53bb4cebb74a0619b736dff2e54d866de59e347ab91d411d53c3e0a4fe1",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N02\\sources\\mapping-review.json": "29476b62260804ded2b2a1db476aa349aa6cfc7949ab070755d173ef37860faf",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N02\\sources\\scope.json": "34bd1d9e07d09f96ff7494394419dd66b75ea4b19489d4aff0de792003eb4df0",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N02\\targets\\desktop.json": "83217f14df9c234bca01c49954458b946c97f92686c70c9ea0a7a417554ac2d3",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N02\\targets\\mobile.json": "84b32d50877e5aa66af16894d01f00feac35b978de7e4cb3ffe3365ddf075382"
+      },
+      "output": {
+        "schema": "joeness.roadmap-diagnosis.v1",
+        "scope_id": "synthetic-demo",
+        "delivery": "incomplete",
+        "project_complete": false,
+        "interpretation": "Reviewed extraction only; source hashes do not authenticate approval or prove semantic correctness.",
+        "coverage": "Declared current views/outcomes only; no whole-project certification.",
+        "findings": [],
+        "outcomes": [
+          {
+            "id": "desktop-view",
+            "label": "desktop scoped review",
+            "lanes": {
+              "implementation": "PASS",
+              "technical": "PASS",
+              "visual": "PASS",
+              "acceptance": "ACCEPTED"
+            },
+            "acceptance_required": true
+          },
+          {
+            "id": "mobile-view",
+            "label": "mobile scoped review",
+            "lanes": {
+              "implementation": "PASS",
+              "technical": "PASS",
+              "visual": "PASS",
+              "acceptance": "NOT_GRANTED"
+            },
+            "acceptance_required": true
+          }
+        ],
+        "excluded": [
+          {
+            "id": "production-operations",
+            "label": "Live operations",
+            "verified": true,
+            "source": {
+              "path": "sources/scope.json",
+              "sha256": "34bd1d9e07d09f96ff7494394419dd66b75ea4b19489d4aff0de792003eb4df0",
+              "pointer": "/excluded/0",
+              "value": {
+                "id": "production-operations",
+                "label": "Live operations",
+                "reason": "The synthetic scope explicitly excludes launch"
+              }
+            }
+          }
+        ],
+        "limitations": [
+          {
+            "text": "Synthetic only; full Manifest approval remains UNAPPROVED.",
+            "verified": true,
+            "source": {
+              "path": "sources/scope.json",
+              "sha256": "34bd1d9e07d09f96ff7494394419dd66b75ea4b19489d4aff0de792003eb4df0",
+              "pointer": "/manifest_approval",
+              "value": "UNAPPROVED"
+            }
+          }
+        ],
+        "current": [
+          {
+            "view_id": "current",
+            "key": "scope",
+            "value": "synthetic-demo",
+            "source": {
+              "path": "sources/current-view.json",
+              "sha256": "d9aee02ba9f46b1819b424a39c24e8db60685054e695630d03db995f15c52ea6",
+              "pointer": "/current/scope",
+              "value": "synthetic-demo"
+            }
+          }
+        ],
+        "historical_views_ignored": 0,
+        "required_remaining": [
+          {
+            "id": "mobile-view",
+            "label": "mobile scoped review",
+            "lane": "acceptance",
+            "status": "NOT_GRANTED"
+          }
+        ]
+      }
+    },
+    {
+      "id": "F02-N03",
+      "expected": "unknown",
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "D:\\JOEWRKS\\작업하네스\\skills\\joeness-setup\\scripts\\roadmap-review.mjs",
+        "--root",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N03",
+        "--input",
+        "input.json",
+        "--input-sha256",
+        "920d8582b1859f41a931e7a197af2241942dd4482088f1bf817056cf11923167"
+      ],
+      "exit": 2,
+      "met": true,
+      "source_unchanged": true,
+      "fixture_sha256": {
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N03\\design-fragment.json": "f561632fdc775d40d3cea6c28881f3683751b07d4fdb90362629f858a53e7005",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N03\\input.json": "920d8582b1859f41a931e7a197af2241942dd4482088f1bf817056cf11923167",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N03\\outputs\\desktop.json": "b9a119368fa9d0b1edebe31e992c080be623046579e4318b7184eb29624de0fd",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N03\\outputs\\mobile.json": "b9a119368fa9d0b1edebe31e992c080be623046579e4318b7184eb29624de0fd",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N03\\sources\\authorization.json": "48b3eae9201052ec61c5832bea221182e57a2fd8d18cebe94f8a399ad96a7472",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N03\\sources\\current-view.json": "d9aee02ba9f46b1819b424a39c24e8db60685054e695630d03db995f15c52ea6",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N03\\sources\\design-observations.json": "66889598a8e0e2635cf3769466b66d58aa895562420002df54c417bce8227eed",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N03\\sources\\exact-acceptance.json": "3b3a9cf4b7869fec749253822968c9ce01d6f348311db86df21a31797b4a5483",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N03\\sources\\mapping-review-v2.json": "9f6bb80182e3ee12f8991be77f68d581763ce8ed309355642b7da2319db21f6d",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N03\\sources\\mapping-review.json": "db91990565cf731fcabaa13e031c7b578adbd6e754155cfc6ae7878982e8deb3",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N03\\sources\\scope.json": "3a6f6f6ab2b2fc131d71ea48820ff47bec126704bbf51786394f7e1cd0ef6621",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N03\\targets\\desktop.json": "83217f14df9c234bca01c49954458b946c97f92686c70c9ea0a7a417554ac2d3",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N03\\targets\\mobile.json": "84b32d50877e5aa66af16894d01f00feac35b978de7e4cb3ffe3365ddf075382"
+      },
+      "output": {
+        "schema": "joeness.roadmap-diagnosis.v1",
+        "scope_id": "synthetic-demo",
+        "delivery": "undetermined",
+        "project_complete": false,
+        "interpretation": "Reviewed extraction only; source hashes do not authenticate approval or prove semantic correctness.",
+        "coverage": "Declared current views/outcomes only; no whole-project certification.",
+        "findings": [
+          {
+            "kind": "unknown",
+            "code": "RESULT_UNVERIFIED",
+            "at": "mobile-view/visual",
+            "message": "Owner explicitly left this required check unverified"
+          }
+        ],
+        "outcomes": [
+          {
+            "id": "desktop-view",
+            "label": "desktop scoped review",
+            "lanes": {
+              "implementation": "PASS",
+              "technical": "PASS",
+              "visual": "PASS",
+              "acceptance": "NOT_GRANTED"
+            },
+            "acceptance_required": false
+          },
+          {
+            "id": "mobile-view",
+            "label": "mobile scoped review",
+            "lanes": {
+              "implementation": "PASS",
+              "technical": "PASS",
+              "visual": "UNVERIFIED",
+              "acceptance": "NOT_GRANTED"
+            },
+            "acceptance_required": false
+          }
+        ],
+        "excluded": [
+          {
+            "id": "production-operations",
+            "label": "Live operations",
+            "verified": true,
+            "source": {
+              "path": "sources/scope.json",
+              "sha256": "3a6f6f6ab2b2fc131d71ea48820ff47bec126704bbf51786394f7e1cd0ef6621",
+              "pointer": "/excluded/0",
+              "value": {
+                "id": "production-operations",
+                "label": "Live operations",
+                "reason": "The synthetic scope explicitly excludes launch"
+              }
+            }
+          }
+        ],
+        "limitations": [
+          {
+            "text": "Synthetic only; full Manifest approval remains UNAPPROVED.",
+            "verified": true,
+            "source": {
+              "path": "sources/scope.json",
+              "sha256": "3a6f6f6ab2b2fc131d71ea48820ff47bec126704bbf51786394f7e1cd0ef6621",
+              "pointer": "/manifest_approval",
+              "value": "UNAPPROVED"
+            }
+          }
+        ],
+        "current": [
+          {
+            "view_id": "current",
+            "key": "scope",
+            "value": "synthetic-demo",
+            "source": {
+              "path": "sources/current-view.json",
+              "sha256": "d9aee02ba9f46b1819b424a39c24e8db60685054e695630d03db995f15c52ea6",
+              "pointer": "/current/scope",
+              "value": "synthetic-demo"
+            }
+          }
+        ],
+        "historical_views_ignored": 0,
+        "required_remaining": [
+          {
+            "id": "mobile-view",
+            "label": "mobile scoped review",
+            "lane": "visual",
+            "status": "UNVERIFIED"
+          }
+        ]
+      }
+    },
+    {
+      "id": "F02-N04",
+      "expected": "unknown",
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "D:\\JOEWRKS\\작업하네스\\skills\\joeness-setup\\scripts\\roadmap-review.mjs",
+        "--root",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N04",
+        "--input",
+        "input.json",
+        "--input-sha256",
+        "e8ffa156cd445e115b3640c7ff022ef74d75ce49cbe9e3404b1e36415e975458"
+      ],
+      "exit": 2,
+      "met": true,
+      "source_unchanged": true,
+      "fixture_sha256": {
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N04\\design-fragment.json": "f9f6494ae3584d69b450017a68b50349d743eca70ea24392f2ad89be52d95c4c",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N04\\input.json": "e8ffa156cd445e115b3640c7ff022ef74d75ce49cbe9e3404b1e36415e975458",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N04\\outputs\\desktop.json": "b9a119368fa9d0b1edebe31e992c080be623046579e4318b7184eb29624de0fd",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N04\\outputs\\mobile.json": "d6f43c1cbbac064a73018333922d6ee41c5e2e0b0a10f68fc1d0b7a5314a970e",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N04\\sources\\authorization.json": "48b3eae9201052ec61c5832bea221182e57a2fd8d18cebe94f8a399ad96a7472",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N04\\sources\\current-view.json": "d9aee02ba9f46b1819b424a39c24e8db60685054e695630d03db995f15c52ea6",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N04\\sources\\design-observations.json": "66fff35869d2383e594b905bde888c09b688e5c72c88738bd7478684de6bc1e4",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N04\\sources\\exact-acceptance.json": "3b3a9cf4b7869fec749253822968c9ce01d6f348311db86df21a31797b4a5483",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N04\\sources\\mapping-review-v2.json": "72a1fe4ce89c3fbb81146f46844cd27446629294a89a1f004ac1cffe66a52494",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N04\\sources\\mapping-review.json": "9a0b78ba6d5e813a14cbd29056b6efc1edd1a27e5d66869072e284209115fb9b",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N04\\sources\\scope.json": "3a6f6f6ab2b2fc131d71ea48820ff47bec126704bbf51786394f7e1cd0ef6621",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N04\\targets\\desktop.json": "83217f14df9c234bca01c49954458b946c97f92686c70c9ea0a7a417554ac2d3",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N04\\targets\\mobile.json": "84b32d50877e5aa66af16894d01f00feac35b978de7e4cb3ffe3365ddf075382"
+      },
+      "output": {
+        "schema": "joeness.roadmap-diagnosis.v1",
+        "scope_id": "synthetic-demo",
+        "delivery": "undetermined",
+        "project_complete": false,
+        "interpretation": "Reviewed extraction only; source hashes do not authenticate approval or prove semantic correctness.",
+        "coverage": "Declared current views/outcomes only; no whole-project certification.",
+        "findings": [
+          {
+            "kind": "unknown",
+            "code": "STALE",
+            "at": "required_outcomes/1/targets/1",
+            "message": "Current bytes differ from referenced evidence"
+          },
+          {
+            "kind": "unknown",
+            "code": "STALE",
+            "at": "observations/3/targets/1",
+            "message": "Current bytes differ from referenced evidence"
+          },
+          {
+            "kind": "unknown",
+            "code": "STALE",
+            "at": "observations/4/targets/1",
+            "message": "Current bytes differ from referenced evidence"
+          },
+          {
+            "kind": "unknown",
+            "code": "STALE",
+            "at": "observations/5/targets/1",
+            "message": "Current bytes differ from referenced evidence"
+          },
+          {
+            "kind": "unknown",
+            "code": "STALE",
+            "at": "observations/7/targets/1",
+            "message": "Current bytes differ from referenced evidence"
+          }
+        ],
+        "outcomes": [
+          {
+            "id": "desktop-view",
+            "label": "desktop scoped review",
+            "lanes": {
+              "implementation": "PASS",
+              "technical": "PASS",
+              "visual": "PASS",
+              "acceptance": "NOT_GRANTED"
+            },
+            "acceptance_required": false
+          },
+          {
+            "id": "mobile-view",
+            "label": "mobile scoped review",
+            "lanes": {
+              "implementation": "UNVERIFIED",
+              "technical": "UNVERIFIED",
+              "visual": "UNVERIFIED",
+              "acceptance": "NOT_GRANTED"
+            },
+            "acceptance_required": false
+          }
+        ],
+        "excluded": [
+          {
+            "id": "production-operations",
+            "label": "Live operations",
+            "verified": true,
+            "source": {
+              "path": "sources/scope.json",
+              "sha256": "3a6f6f6ab2b2fc131d71ea48820ff47bec126704bbf51786394f7e1cd0ef6621",
+              "pointer": "/excluded/0",
+              "value": {
+                "id": "production-operations",
+                "label": "Live operations",
+                "reason": "The synthetic scope explicitly excludes launch"
+              }
+            }
+          }
+        ],
+        "limitations": [
+          {
+            "text": "Synthetic only; full Manifest approval remains UNAPPROVED.",
+            "verified": true,
+            "source": {
+              "path": "sources/scope.json",
+              "sha256": "3a6f6f6ab2b2fc131d71ea48820ff47bec126704bbf51786394f7e1cd0ef6621",
+              "pointer": "/manifest_approval",
+              "value": "UNAPPROVED"
+            }
+          }
+        ],
+        "current": [
+          {
+            "view_id": "current",
+            "key": "scope",
+            "value": "synthetic-demo",
+            "source": {
+              "path": "sources/current-view.json",
+              "sha256": "d9aee02ba9f46b1819b424a39c24e8db60685054e695630d03db995f15c52ea6",
+              "pointer": "/current/scope",
+              "value": "synthetic-demo"
+            }
+          }
+        ],
+        "historical_views_ignored": 0,
+        "required_remaining": [
+          {
+            "id": "mobile-view",
+            "label": "mobile scoped review",
+            "lane": "implementation",
+            "status": "UNVERIFIED"
+          },
+          {
+            "id": "mobile-view",
+            "label": "mobile scoped review",
+            "lane": "technical",
+            "status": "UNVERIFIED"
+          },
+          {
+            "id": "mobile-view",
+            "label": "mobile scoped review",
+            "lane": "visual",
+            "status": "UNVERIFIED"
+          }
+        ]
+      }
+    },
+    {
+      "id": "F02-N05",
+      "expected": "conflict",
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "D:\\JOEWRKS\\작업하네스\\skills\\joeness-setup\\scripts\\roadmap-review.mjs",
+        "--root",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N05",
+        "--input",
+        "input.json",
+        "--input-sha256",
+        "a8dee8828f36000e26bc2fac92efb6f91ed7d458d8c07cf9c76135f03c89c85c"
+      ],
+      "exit": 2,
+      "met": true,
+      "source_unchanged": true,
+      "fixture_sha256": {
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N05\\design-fragment.json": "117ed48cc4ab34303b2679380387e0ca5fbb38a14d2505c27419099a64c18abd",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N05\\input.json": "a8dee8828f36000e26bc2fac92efb6f91ed7d458d8c07cf9c76135f03c89c85c",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N05\\outputs\\desktop.json": "b9a119368fa9d0b1edebe31e992c080be623046579e4318b7184eb29624de0fd",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N05\\outputs\\mobile.json": "b9a119368fa9d0b1edebe31e992c080be623046579e4318b7184eb29624de0fd",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N05\\sources\\authorization.json": "9631ad9a7e1bce204e58bc48f90fbc83198a7be39afdbfd87f67aef7283c80e0",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N05\\sources\\current-view.json": "d9aee02ba9f46b1819b424a39c24e8db60685054e695630d03db995f15c52ea6",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N05\\sources\\design-observations.json": "66fff35869d2383e594b905bde888c09b688e5c72c88738bd7478684de6bc1e4",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N05\\sources\\exact-acceptance.json": "8f945df1afa670cf1f924aa6b1b800d9e112172cfbf2d7c2e8780c9c39d7c7ba",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N05\\sources\\mapping-review-v2.json": "dd88e50e4b63622bb16c355d0177b044e879e9a15be4d65f6dfc5370687c7cc9",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N05\\sources\\mapping-review.json": "ebd12dc1c777a56569f3bc505929884de3f1ac17e982e8bc2c0a4b7c86dee81e",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N05\\sources\\scope.json": "34bd1d9e07d09f96ff7494394419dd66b75ea4b19489d4aff0de792003eb4df0",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N05\\targets\\desktop.json": "83217f14df9c234bca01c49954458b946c97f92686c70c9ea0a7a417554ac2d3",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N05\\targets\\mobile.json": "84b32d50877e5aa66af16894d01f00feac35b978de7e4cb3ffe3365ddf075382"
+      },
+      "output": {
+        "schema": "joeness.roadmap-diagnosis.v1",
+        "scope_id": "synthetic-demo",
+        "delivery": "undetermined",
+        "project_complete": false,
+        "interpretation": "Reviewed extraction only; source hashes do not authenticate approval or prove semantic correctness.",
+        "coverage": "Declared current views/outcomes only; no whole-project certification.",
+        "findings": [
+          {
+            "kind": "conflict",
+            "code": "OBSERVATION_CONFLICT",
+            "at": "observations/8",
+            "message": "More than one current observation for outcome/lane"
+          }
+        ],
+        "outcomes": [
+          {
+            "id": "desktop-view",
+            "label": "desktop scoped review",
+            "lanes": {
+              "implementation": "PASS",
+              "technical": "PASS",
+              "visual": "PASS",
+              "acceptance": "ACCEPTED"
+            },
+            "acceptance_required": true
+          },
+          {
+            "id": "mobile-view",
+            "label": "mobile scoped review",
+            "lanes": {
+              "implementation": "PASS",
+              "technical": "PASS",
+              "visual": "PASS",
+              "acceptance": "UNVERIFIED"
+            },
+            "acceptance_required": true
+          }
+        ],
+        "excluded": [
+          {
+            "id": "production-operations",
+            "label": "Live operations",
+            "verified": true,
+            "source": {
+              "path": "sources/scope.json",
+              "sha256": "34bd1d9e07d09f96ff7494394419dd66b75ea4b19489d4aff0de792003eb4df0",
+              "pointer": "/excluded/0",
+              "value": {
+                "id": "production-operations",
+                "label": "Live operations",
+                "reason": "The synthetic scope explicitly excludes launch"
+              }
+            }
+          }
+        ],
+        "limitations": [
+          {
+            "text": "Synthetic only; full Manifest approval remains UNAPPROVED.",
+            "verified": true,
+            "source": {
+              "path": "sources/scope.json",
+              "sha256": "34bd1d9e07d09f96ff7494394419dd66b75ea4b19489d4aff0de792003eb4df0",
+              "pointer": "/manifest_approval",
+              "value": "UNAPPROVED"
+            }
+          }
+        ],
+        "current": [
+          {
+            "view_id": "current",
+            "key": "scope",
+            "value": "synthetic-demo",
+            "source": {
+              "path": "sources/current-view.json",
+              "sha256": "d9aee02ba9f46b1819b424a39c24e8db60685054e695630d03db995f15c52ea6",
+              "pointer": "/current/scope",
+              "value": "synthetic-demo"
+            }
+          }
+        ],
+        "historical_views_ignored": 0,
+        "required_remaining": [
+          {
+            "id": "mobile-view",
+            "label": "mobile scoped review",
+            "lane": "acceptance",
+            "status": "UNVERIFIED"
+          }
+        ]
+      }
+    },
+    {
+      "id": "F02-P02",
+      "expected": "ready",
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "D:\\JOEWRKS\\작업하네스\\skills\\joeness-setup\\scripts\\roadmap-review.mjs",
+        "--root",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-P02",
+        "--input",
+        "input.json",
+        "--input-sha256",
+        "b937f3b100b42de7ee23ffc3f83f663b9e628e997758b9560cf2f3b55de476b6"
+      ],
+      "exit": 0,
+      "met": true,
+      "source_unchanged": true,
+      "fixture_sha256": {
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-P02\\design-fragment.json": "a8982980498a562343cd6047981e3e75b23bf968d178aaefaf0bf175be5ce09b",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-P02\\input.json": "b937f3b100b42de7ee23ffc3f83f663b9e628e997758b9560cf2f3b55de476b6",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-P02\\outputs\\desktop.json": "b9a119368fa9d0b1edebe31e992c080be623046579e4318b7184eb29624de0fd",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-P02\\outputs\\mobile.json": "b9a119368fa9d0b1edebe31e992c080be623046579e4318b7184eb29624de0fd",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-P02\\sources\\authorization.json": "bb248d3c0074c18476cc18a9fab0269554ae2b767c2d3e8344dc1bf885534a24",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-P02\\sources\\current-view.json": "d9aee02ba9f46b1819b424a39c24e8db60685054e695630d03db995f15c52ea6",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-P02\\sources\\design-observations.json": "780f4532f3f89e02b9c790f70ef66b6a5459457e48c8426a4657a446f5cd1d72",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-P02\\sources\\exact-acceptance.json": "3b3a9cf4b7869fec749253822968c9ce01d6f348311db86df21a31797b4a5483",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-P02\\sources\\excluded-history.json": "5c34e3aee5dce41e75c211670e78ad32fcbea9f67c5202476ac526af044baf29",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-P02\\sources\\mapping-review-v2.json": "f04f5d4035a6bde1ba83cb36ebbc15e7c74f3acb8d8aa13e673c65d0148c9647",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-P02\\sources\\mapping-review-v3.json": "3a3757ef93610f934cbb549011b700c94288d5e3c8b62db9a07735c183c41ba5",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-P02\\sources\\mapping-review.json": "2d205245d0c81f32327e97c9ab2d7cb491b967a923273fd5a0eb831870bcd6be",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-P02\\sources\\scope.json": "368fb5f7e03fed81637dda83b5c2ecdc02cc6387884200b2a1eebd358f7c948b",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-P02\\targets\\desktop.json": "83217f14df9c234bca01c49954458b946c97f92686c70c9ea0a7a417554ac2d3",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-P02\\targets\\mobile.json": "84b32d50877e5aa66af16894d01f00feac35b978de7e4cb3ffe3365ddf075382"
+      },
+      "output": {
+        "schema": "joeness.roadmap-diagnosis.v1",
+        "scope_id": "synthetic-demo",
+        "delivery": "complete",
+        "project_complete": false,
+        "interpretation": "Reviewed extraction only; source hashes do not authenticate approval or prove semantic correctness.",
+        "coverage": "Declared current views/outcomes only; no whole-project certification.",
+        "findings": [],
+        "outcomes": [
+          {
+            "id": "desktop-view",
+            "label": "desktop scoped review",
+            "lanes": {
+              "implementation": "PASS",
+              "technical": "PASS",
+              "visual": "PASS",
+              "acceptance": "NOT_GRANTED"
+            },
+            "acceptance_required": false
+          }
+        ],
+        "excluded": [
+          {
+            "id": "production-operations",
+            "label": "Live operations",
+            "verified": true,
+            "source": {
+              "path": "sources/scope.json",
+              "sha256": "368fb5f7e03fed81637dda83b5c2ecdc02cc6387884200b2a1eebd358f7c948b",
+              "pointer": "/excluded/0",
+              "value": {
+                "id": "production-operations",
+                "label": "Live operations",
+                "reason": "The synthetic scope explicitly excludes launch"
+              }
+            }
+          },
+          {
+            "id": "mobile-view",
+            "label": "Prior mobile outcome",
+            "verified": true,
+            "source": {
+              "path": "sources/scope.json",
+              "sha256": "368fb5f7e03fed81637dda83b5c2ecdc02cc6387884200b2a1eebd358f7c948b",
+              "pointer": "/excluded/1",
+              "value": {
+                "id": "mobile-view",
+                "label": "Prior mobile outcome",
+                "reason": "Explicit synthetic scoped change"
+              }
+            }
+          }
+        ],
+        "limitations": [
+          {
+            "text": "Synthetic only; full Manifest approval remains UNAPPROVED.",
+            "verified": true,
+            "source": {
+              "path": "sources/scope.json",
+              "sha256": "368fb5f7e03fed81637dda83b5c2ecdc02cc6387884200b2a1eebd358f7c948b",
+              "pointer": "/manifest_approval",
+              "value": "UNAPPROVED"
+            }
+          }
+        ],
+        "current": [
+          {
+            "view_id": "current",
+            "key": "scope",
+            "value": "synthetic-demo",
+            "source": {
+              "path": "sources/current-view.json",
+              "sha256": "d9aee02ba9f46b1819b424a39c24e8db60685054e695630d03db995f15c52ea6",
+              "pointer": "/current/scope",
+              "value": "synthetic-demo"
+            }
+          }
+        ],
+        "historical_views_ignored": 1,
+        "required_remaining": []
+      }
+    },
+    {
+      "id": "F02-N06",
+      "expected": "invalid_or_unknown",
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "D:\\JOEWRKS\\작업하네스\\skills\\joeness-setup\\scripts\\roadmap-review.mjs",
+        "--root",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N06",
+        "--input",
+        "input.json",
+        "--input-sha256",
+        "a55895f865a85bf6d66ac28a69b24bc2339d80c2e39deca6f5d584ba2c351ef5"
+      ],
+      "exit": 2,
+      "met": true,
+      "source_unchanged": true,
+      "fixture_sha256": {
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N06\\design-fragment.json": "a8982980498a562343cd6047981e3e75b23bf968d178aaefaf0bf175be5ce09b",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N06\\input.json": "a55895f865a85bf6d66ac28a69b24bc2339d80c2e39deca6f5d584ba2c351ef5",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N06\\outputs\\desktop.json": "b9a119368fa9d0b1edebe31e992c080be623046579e4318b7184eb29624de0fd",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N06\\outputs\\mobile.json": "b9a119368fa9d0b1edebe31e992c080be623046579e4318b7184eb29624de0fd",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N06\\sources\\authorization.json": "bb248d3c0074c18476cc18a9fab0269554ae2b767c2d3e8344dc1bf885534a24",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N06\\sources\\current-view.json": "d9aee02ba9f46b1819b424a39c24e8db60685054e695630d03db995f15c52ea6",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N06\\sources\\design-observations.json": "780f4532f3f89e02b9c790f70ef66b6a5459457e48c8426a4657a446f5cd1d72",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N06\\sources\\exact-acceptance.json": "3b3a9cf4b7869fec749253822968c9ce01d6f348311db86df21a31797b4a5483",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N06\\sources\\excluded-history.json": "5c34e3aee5dce41e75c211670e78ad32fcbea9f67c5202476ac526af044baf29",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N06\\sources\\mapping-review-v2.json": "a939cae65c123586786d9c20930aeb5cdd6cfd0e24822f5532b68e18ba638a67",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N06\\sources\\mapping-review-v3.json": "ba1f82a1614f3c87422f22ff8fdaae575dcba4eab4332ca5d0919a2c4167bc70",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N06\\sources\\mapping-review.json": "2d205245d0c81f32327e97c9ab2d7cb491b967a923273fd5a0eb831870bcd6be",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N06\\sources\\scope.json": "368fb5f7e03fed81637dda83b5c2ecdc02cc6387884200b2a1eebd358f7c948b",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N06\\targets\\desktop.json": "83217f14df9c234bca01c49954458b946c97f92686c70c9ea0a7a417554ac2d3",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N06\\targets\\mobile.json": "84b32d50877e5aa66af16894d01f00feac35b978de7e4cb3ffe3365ddf075382"
+      },
+      "output": {
+        "schema": "joeness.roadmap-diagnosis.v1",
+        "scope_id": "synthetic-demo",
+        "delivery": "undetermined",
+        "project_complete": false,
+        "interpretation": "Reviewed extraction only; source hashes do not authenticate approval or prove semantic correctness.",
+        "coverage": "Declared current views/outcomes only; no whole-project certification.",
+        "findings": [
+          {
+            "kind": "invalid",
+            "code": "REFERENCE",
+            "at": "excluded_outcomes/1/authorization",
+            "message": "Path and lowercase SHA-256 required"
+          }
+        ],
+        "outcomes": [
+          {
+            "id": "desktop-view",
+            "label": "desktop scoped review",
+            "lanes": {
+              "implementation": "PASS",
+              "technical": "PASS",
+              "visual": "PASS",
+              "acceptance": "NOT_GRANTED"
+            },
+            "acceptance_required": false
+          }
+        ],
+        "excluded": [
+          {
+            "id": "production-operations",
+            "label": "Live operations",
+            "verified": true,
+            "source": {
+              "path": "sources/scope.json",
+              "sha256": "368fb5f7e03fed81637dda83b5c2ecdc02cc6387884200b2a1eebd358f7c948b",
+              "pointer": "/excluded/0",
+              "value": {
+                "id": "production-operations",
+                "label": "Live operations",
+                "reason": "The synthetic scope explicitly excludes launch"
+              }
+            }
+          },
+          {
+            "id": "mobile-view",
+            "label": "Prior mobile outcome",
+            "verified": false,
+            "source": {
+              "path": "sources/scope.json",
+              "sha256": "368fb5f7e03fed81637dda83b5c2ecdc02cc6387884200b2a1eebd358f7c948b",
+              "pointer": "/excluded/1",
+              "value": {
+                "id": "mobile-view",
+                "label": "Prior mobile outcome",
+                "reason": "Explicit synthetic scoped change"
+              }
+            }
+          }
+        ],
+        "limitations": [
+          {
+            "text": "Synthetic only; full Manifest approval remains UNAPPROVED.",
+            "verified": true,
+            "source": {
+              "path": "sources/scope.json",
+              "sha256": "368fb5f7e03fed81637dda83b5c2ecdc02cc6387884200b2a1eebd358f7c948b",
+              "pointer": "/manifest_approval",
+              "value": "UNAPPROVED"
+            }
+          }
+        ],
+        "current": [
+          {
+            "view_id": "current",
+            "key": "scope",
+            "value": "synthetic-demo",
+            "source": {
+              "path": "sources/current-view.json",
+              "sha256": "d9aee02ba9f46b1819b424a39c24e8db60685054e695630d03db995f15c52ea6",
+              "pointer": "/current/scope",
+              "value": "synthetic-demo"
+            }
+          }
+        ],
+        "historical_views_ignored": 1,
+        "required_remaining": []
+      }
+    },
+    {
+      "id": "F02-N07",
+      "expected": "unknown",
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "D:\\JOEWRKS\\작업하네스\\skills\\joeness-setup\\scripts\\roadmap-review.mjs",
+        "--root",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N07",
+        "--input",
+        "input.json",
+        "--input-sha256",
+        "c409b25eac385107cb31e2f4c49931b24ab87e6fab05ca024e4d0c77aa5850a3"
+      ],
+      "exit": 2,
+      "met": true,
+      "source_unchanged": true,
+      "fixture_sha256": {
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N07\\design-fragment.json": "c2d9bd49bd18cfc28129d576daee0f9a6ec4f644d01f5cb527a01f4fba645af4",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N07\\input.json": "c409b25eac385107cb31e2f4c49931b24ab87e6fab05ca024e4d0c77aa5850a3",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N07\\outputs\\desktop.json": "b9a119368fa9d0b1edebe31e992c080be623046579e4318b7184eb29624de0fd",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N07\\outputs\\mobile.json": "b9a119368fa9d0b1edebe31e992c080be623046579e4318b7184eb29624de0fd",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N07\\sources\\authorization.json": "48b3eae9201052ec61c5832bea221182e57a2fd8d18cebe94f8a399ad96a7472",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N07\\sources\\current-view.json": "d9aee02ba9f46b1819b424a39c24e8db60685054e695630d03db995f15c52ea6",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N07\\sources\\design-observations.json": "d0908b6ce38367f1fde8da4157901d3b4d874566852a9a023f9518daa3ce82c9",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N07\\sources\\exact-acceptance.json": "3b3a9cf4b7869fec749253822968c9ce01d6f348311db86df21a31797b4a5483",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N07\\sources\\mapping-review-v2.json": "d307b37bc7e83a677bf323e8252f695ec2246306867da722eac7eee213297a1c",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N07\\sources\\mapping-review.json": "ce32d9560bf3c9e48e97a4ef8173590d1d9e83f3f58ee7531b5a3a3ea5563b24",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N07\\sources\\scope.json": "3a6f6f6ab2b2fc131d71ea48820ff47bec126704bbf51786394f7e1cd0ef6621",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N07\\targets\\desktop.json": "83217f14df9c234bca01c49954458b946c97f92686c70c9ea0a7a417554ac2d3",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N07\\targets\\mobile.json": "84b32d50877e5aa66af16894d01f00feac35b978de7e4cb3ffe3365ddf075382"
+      },
+      "output": {
+        "schema": "joeness.roadmap-diagnosis.v1",
+        "scope_id": "synthetic-demo",
+        "delivery": "undetermined",
+        "project_complete": false,
+        "interpretation": "Reviewed extraction only; source hashes do not authenticate approval or prove semantic correctness.",
+        "coverage": "Declared current views/outcomes only; no whole-project certification.",
+        "findings": [
+          {
+            "kind": "unknown",
+            "code": "RESULT_UNVERIFIED",
+            "at": "mobile-view/technical",
+            "message": "Owner explicitly left this required check unverified"
+          }
+        ],
+        "outcomes": [
+          {
+            "id": "desktop-view",
+            "label": "desktop scoped review",
+            "lanes": {
+              "implementation": "PASS",
+              "technical": "PASS",
+              "visual": "PASS",
+              "acceptance": "NOT_GRANTED"
+            },
+            "acceptance_required": false
+          },
+          {
+            "id": "mobile-view",
+            "label": "mobile scoped review",
+            "lanes": {
+              "implementation": "PASS",
+              "technical": "UNVERIFIED",
+              "visual": "PASS",
+              "acceptance": "NOT_GRANTED"
+            },
+            "acceptance_required": false
+          }
+        ],
+        "excluded": [
+          {
+            "id": "production-operations",
+            "label": "Live operations",
+            "verified": true,
+            "source": {
+              "path": "sources/scope.json",
+              "sha256": "3a6f6f6ab2b2fc131d71ea48820ff47bec126704bbf51786394f7e1cd0ef6621",
+              "pointer": "/excluded/0",
+              "value": {
+                "id": "production-operations",
+                "label": "Live operations",
+                "reason": "The synthetic scope explicitly excludes launch"
+              }
+            }
+          }
+        ],
+        "limitations": [
+          {
+            "text": "Synthetic only; full Manifest approval remains UNAPPROVED.",
+            "verified": true,
+            "source": {
+              "path": "sources/scope.json",
+              "sha256": "3a6f6f6ab2b2fc131d71ea48820ff47bec126704bbf51786394f7e1cd0ef6621",
+              "pointer": "/manifest_approval",
+              "value": "UNAPPROVED"
+            }
+          }
+        ],
+        "current": [
+          {
+            "view_id": "current",
+            "key": "scope",
+            "value": "synthetic-demo",
+            "source": {
+              "path": "sources/current-view.json",
+              "sha256": "d9aee02ba9f46b1819b424a39c24e8db60685054e695630d03db995f15c52ea6",
+              "pointer": "/current/scope",
+              "value": "synthetic-demo"
+            }
+          }
+        ],
+        "historical_views_ignored": 0,
+        "required_remaining": [
+          {
+            "id": "mobile-view",
+            "label": "mobile scoped review",
+            "lane": "technical",
+            "status": "UNVERIFIED"
+          }
+        ]
+      }
+    },
+    {
+      "id": "F02-N08",
+      "expected": "unknown",
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "D:\\JOEWRKS\\작업하네스\\skills\\joeness-setup\\scripts\\roadmap-review.mjs",
+        "--root",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N08",
+        "--input",
+        "input.json",
+        "--input-sha256",
+        "0b51aaf59004f0ac9ac41ee1f85f3d826f50fa51dd6cf04e28dbdbaaa5b4341e"
+      ],
+      "exit": 2,
+      "met": true,
+      "source_unchanged": true,
+      "fixture_sha256": {
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N08\\design-fragment.json": "e211107a9a8559b1c7d7a59ea39bca273dc259fc1b154d4b6c1c6c8cceee5ec2",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N08\\input.json": "0b51aaf59004f0ac9ac41ee1f85f3d826f50fa51dd6cf04e28dbdbaaa5b4341e",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N08\\outputs\\desktop.json": "b9a119368fa9d0b1edebe31e992c080be623046579e4318b7184eb29624de0fd",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N08\\outputs\\mobile.json": "b9a119368fa9d0b1edebe31e992c080be623046579e4318b7184eb29624de0fd",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N08\\sources\\authorization.json": "48b3eae9201052ec61c5832bea221182e57a2fd8d18cebe94f8a399ad96a7472",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N08\\sources\\current-view.json": "d9aee02ba9f46b1819b424a39c24e8db60685054e695630d03db995f15c52ea6",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N08\\sources\\design-observations.json": "20f6240d324cfc675118e6544a6d232c22e4139aa513232aaa9ac2055a074d9e",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N08\\sources\\exact-acceptance.json": "3b3a9cf4b7869fec749253822968c9ce01d6f348311db86df21a31797b4a5483",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N08\\sources\\mapping-review-v2.json": "ad74ec5d7456f26348b07927c520ee299f0db8531301660189ef5d2be604dcad",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N08\\sources\\mapping-review.json": "d5757130ab9831c7c1ed649ebbcd39c9587da466db17fee4e3632ad26aaeef3e",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N08\\sources\\scope.json": "3a6f6f6ab2b2fc131d71ea48820ff47bec126704bbf51786394f7e1cd0ef6621",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N08\\targets\\desktop.json": "83217f14df9c234bca01c49954458b946c97f92686c70c9ea0a7a417554ac2d3",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N08\\targets\\mobile-other.json": "49156380a404326a6ebad44c9e06a1c8516f0a4d80692dc061d0a79464760a50",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N08\\targets\\mobile.json": "84b32d50877e5aa66af16894d01f00feac35b978de7e4cb3ffe3365ddf075382"
+      },
+      "output": {
+        "schema": "joeness.roadmap-diagnosis.v1",
+        "scope_id": "synthetic-demo",
+        "delivery": "undetermined",
+        "project_complete": false,
+        "interpretation": "Reviewed extraction only; source hashes do not authenticate approval or prove semantic correctness.",
+        "coverage": "Declared current views/outcomes only; no whole-project certification.",
+        "findings": [
+          {
+            "kind": "unknown",
+            "code": "TARGET_MISMATCH",
+            "at": "observations/5",
+            "message": "Observation does not cover the exact required target set"
+          }
+        ],
+        "outcomes": [
+          {
+            "id": "desktop-view",
+            "label": "desktop scoped review",
+            "lanes": {
+              "implementation": "PASS",
+              "technical": "PASS",
+              "visual": "PASS",
+              "acceptance": "NOT_GRANTED"
+            },
+            "acceptance_required": false
+          },
+          {
+            "id": "mobile-view",
+            "label": "mobile scoped review",
+            "lanes": {
+              "implementation": "PASS",
+              "technical": "PASS",
+              "visual": "UNVERIFIED",
+              "acceptance": "NOT_GRANTED"
+            },
+            "acceptance_required": false
+          }
+        ],
+        "excluded": [
+          {
+            "id": "production-operations",
+            "label": "Live operations",
+            "verified": true,
+            "source": {
+              "path": "sources/scope.json",
+              "sha256": "3a6f6f6ab2b2fc131d71ea48820ff47bec126704bbf51786394f7e1cd0ef6621",
+              "pointer": "/excluded/0",
+              "value": {
+                "id": "production-operations",
+                "label": "Live operations",
+                "reason": "The synthetic scope explicitly excludes launch"
+              }
+            }
+          }
+        ],
+        "limitations": [
+          {
+            "text": "Synthetic only; full Manifest approval remains UNAPPROVED.",
+            "verified": true,
+            "source": {
+              "path": "sources/scope.json",
+              "sha256": "3a6f6f6ab2b2fc131d71ea48820ff47bec126704bbf51786394f7e1cd0ef6621",
+              "pointer": "/manifest_approval",
+              "value": "UNAPPROVED"
+            }
+          }
+        ],
+        "current": [
+          {
+            "view_id": "current",
+            "key": "scope",
+            "value": "synthetic-demo",
+            "source": {
+              "path": "sources/current-view.json",
+              "sha256": "d9aee02ba9f46b1819b424a39c24e8db60685054e695630d03db995f15c52ea6",
+              "pointer": "/current/scope",
+              "value": "synthetic-demo"
+            }
+          }
+        ],
+        "historical_views_ignored": 0,
+        "required_remaining": [
+          {
+            "id": "mobile-view",
+            "label": "mobile scoped review",
+            "lane": "visual",
+            "status": "UNVERIFIED"
+          }
+        ]
+      }
+    },
+    {
+      "id": "F02-N09",
+      "expected": "invalid",
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "D:\\JOEWRKS\\작업하네스\\skills\\joeness-setup\\scripts\\roadmap-review.mjs",
+        "--root",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N09",
+        "--input",
+        "input.json",
+        "--input-sha256",
+        "cd5d59df38f3bb116c1cd0cd23c41b0eaa87a4ab39543d4b5e0f9bbd9e782359"
+      ],
+      "exit": 2,
+      "met": true,
+      "source_unchanged": true,
+      "fixture_sha256": {
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N09\\design-fragment.json": "f9f6494ae3584d69b450017a68b50349d743eca70ea24392f2ad89be52d95c4c",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N09\\input.json": "cd5d59df38f3bb116c1cd0cd23c41b0eaa87a4ab39543d4b5e0f9bbd9e782359",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N09\\outputs\\desktop.json": "b9a119368fa9d0b1edebe31e992c080be623046579e4318b7184eb29624de0fd",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N09\\outputs\\mobile.json": "b9a119368fa9d0b1edebe31e992c080be623046579e4318b7184eb29624de0fd",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N09\\sources\\authorization.json": "48b3eae9201052ec61c5832bea221182e57a2fd8d18cebe94f8a399ad96a7472",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N09\\sources\\current-view.json": "d9aee02ba9f46b1819b424a39c24e8db60685054e695630d03db995f15c52ea6",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N09\\sources\\design-observations.json": "66fff35869d2383e594b905bde888c09b688e5c72c88738bd7478684de6bc1e4",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N09\\sources\\exact-acceptance.json": "3b3a9cf4b7869fec749253822968c9ce01d6f348311db86df21a31797b4a5483",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N09\\sources\\mapping-review-v2.json": "4a885913aa34eb69bfcc057d1d912351242874cc8657721a2a46a28cdb6cb225",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N09\\sources\\mapping-review.json": "9a0b78ba6d5e813a14cbd29056b6efc1edd1a27e5d66869072e284209115fb9b",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N09\\sources\\scope.json": "3a6f6f6ab2b2fc131d71ea48820ff47bec126704bbf51786394f7e1cd0ef6621",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N09\\targets\\desktop.json": "83217f14df9c234bca01c49954458b946c97f92686c70c9ea0a7a417554ac2d3",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N09\\targets\\mobile.json": "84b32d50877e5aa66af16894d01f00feac35b978de7e4cb3ffe3365ddf075382"
+      },
+      "output": {
+        "schema": "joeness.roadmap-diagnosis.v1",
+        "scope_id": "synthetic-demo",
+        "delivery": "undetermined",
+        "project_complete": false,
+        "interpretation": "Reviewed extraction only; source hashes do not authenticate approval or prove semantic correctness.",
+        "coverage": "Declared current views/outcomes only; no whole-project certification.",
+        "findings": [
+          {
+            "kind": "invalid",
+            "code": "SCOPE_COVERAGE",
+            "at": "required_outcomes",
+            "message": "Required set differs from source scope"
+          },
+          {
+            "kind": "invalid",
+            "code": "OUTCOME",
+            "at": "required_outcomes/2",
+            "message": "Unique outcome id and label required"
+          }
+        ],
+        "outcomes": [
+          {
+            "id": "desktop-view",
+            "label": "desktop scoped review",
+            "lanes": {
+              "implementation": "PASS",
+              "technical": "PASS",
+              "visual": "PASS",
+              "acceptance": "NOT_GRANTED"
+            },
+            "acceptance_required": false
+          },
+          {
+            "id": "mobile-view",
+            "label": "mobile scoped review",
+            "lanes": {
+              "implementation": "PASS",
+              "technical": "PASS",
+              "visual": "PASS",
+              "acceptance": "NOT_GRANTED"
+            },
+            "acceptance_required": false
+          }
+        ],
+        "excluded": [
+          {
+            "id": "production-operations",
+            "label": "Live operations",
+            "verified": true,
+            "source": {
+              "path": "sources/scope.json",
+              "sha256": "3a6f6f6ab2b2fc131d71ea48820ff47bec126704bbf51786394f7e1cd0ef6621",
+              "pointer": "/excluded/0",
+              "value": {
+                "id": "production-operations",
+                "label": "Live operations",
+                "reason": "The synthetic scope explicitly excludes launch"
+              }
+            }
+          }
+        ],
+        "limitations": [
+          {
+            "text": "Synthetic only; full Manifest approval remains UNAPPROVED.",
+            "verified": true,
+            "source": {
+              "path": "sources/scope.json",
+              "sha256": "3a6f6f6ab2b2fc131d71ea48820ff47bec126704bbf51786394f7e1cd0ef6621",
+              "pointer": "/manifest_approval",
+              "value": "UNAPPROVED"
+            }
+          }
+        ],
+        "current": [
+          {
+            "view_id": "current",
+            "key": "scope",
+            "value": "synthetic-demo",
+            "source": {
+              "path": "sources/current-view.json",
+              "sha256": "d9aee02ba9f46b1819b424a39c24e8db60685054e695630d03db995f15c52ea6",
+              "pointer": "/current/scope",
+              "value": "synthetic-demo"
+            }
+          }
+        ],
+        "historical_views_ignored": 0,
+        "required_remaining": []
+      }
+    },
+    {
+      "id": "F02-N10",
+      "expected": "invalid_or_conflict",
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "D:\\JOEWRKS\\작업하네스\\skills\\joeness-setup\\scripts\\roadmap-review.mjs",
+        "--root",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N10",
+        "--input",
+        "input.json",
+        "--input-sha256",
+        "9f2ad31a39ffa26b863747e50effee6feba06aa0471c7accfe79f12cf0e21ce6"
+      ],
+      "exit": 2,
+      "met": true,
+      "source_unchanged": true,
+      "fixture_sha256": {
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N10\\design-fragment.json": "64c8fb092be478db000bed355d6bd82251b0ad8129f5b6823e3dcf0244453dfc",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N10\\input.json": "9f2ad31a39ffa26b863747e50effee6feba06aa0471c7accfe79f12cf0e21ce6",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N10\\outputs\\desktop.json": "b9a119368fa9d0b1edebe31e992c080be623046579e4318b7184eb29624de0fd",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N10\\outputs\\mobile.json": "b9a119368fa9d0b1edebe31e992c080be623046579e4318b7184eb29624de0fd",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N10\\sources\\authorization.json": "48b3eae9201052ec61c5832bea221182e57a2fd8d18cebe94f8a399ad96a7472",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N10\\sources\\current-view.json": "d9aee02ba9f46b1819b424a39c24e8db60685054e695630d03db995f15c52ea6",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N10\\sources\\design-observations.json": "780f4532f3f89e02b9c790f70ef66b6a5459457e48c8426a4657a446f5cd1d72",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N10\\sources\\exact-acceptance.json": "3b3a9cf4b7869fec749253822968c9ce01d6f348311db86df21a31797b4a5483",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N10\\sources\\mapping-review-v2.json": "5b6ae63b5b23dcade4fd5b13184664b056330aa22adb2518dd1b7cfd0f5d8a5d",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N10\\sources\\mapping-review.json": "6398772c1b5a4430a610aeb641a9c73e64cbf2f7a3a31150fe71cbbd4b5c2cd7",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N10\\sources\\scope.json": "3a6f6f6ab2b2fc131d71ea48820ff47bec126704bbf51786394f7e1cd0ef6621",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N10\\targets\\desktop.json": "83217f14df9c234bca01c49954458b946c97f92686c70c9ea0a7a417554ac2d3",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N10\\targets\\mobile.json": "84b32d50877e5aa66af16894d01f00feac35b978de7e4cb3ffe3365ddf075382"
+      },
+      "output": {
+        "schema": "joeness.roadmap-diagnosis.v1",
+        "scope_id": "synthetic-demo",
+        "delivery": "undetermined",
+        "project_complete": false,
+        "interpretation": "Reviewed extraction only; source hashes do not authenticate approval or prove semantic correctness.",
+        "coverage": "Declared current views/outcomes only; no whole-project certification.",
+        "findings": [
+          {
+            "kind": "invalid",
+            "code": "OBSERVATION_VALUE",
+            "at": "observations/5",
+            "message": "Source observation object and normalized fields differ"
+          }
+        ],
+        "outcomes": [
+          {
+            "id": "desktop-view",
+            "label": "desktop scoped review",
+            "lanes": {
+              "implementation": "PASS",
+              "technical": "PASS",
+              "visual": "PASS",
+              "acceptance": "NOT_GRANTED"
+            },
+            "acceptance_required": false
+          },
+          {
+            "id": "mobile-view",
+            "label": "mobile scoped review",
+            "lanes": {
+              "implementation": "PASS",
+              "technical": "PASS",
+              "visual": "UNVERIFIED",
+              "acceptance": "NOT_GRANTED"
+            },
+            "acceptance_required": false
+          }
+        ],
+        "excluded": [
+          {
+            "id": "production-operations",
+            "label": "Live operations",
+            "verified": true,
+            "source": {
+              "path": "sources/scope.json",
+              "sha256": "3a6f6f6ab2b2fc131d71ea48820ff47bec126704bbf51786394f7e1cd0ef6621",
+              "pointer": "/excluded/0",
+              "value": {
+                "id": "production-operations",
+                "label": "Live operations",
+                "reason": "The synthetic scope explicitly excludes launch"
+              }
+            }
+          }
+        ],
+        "limitations": [
+          {
+            "text": "Synthetic only; full Manifest approval remains UNAPPROVED.",
+            "verified": true,
+            "source": {
+              "path": "sources/scope.json",
+              "sha256": "3a6f6f6ab2b2fc131d71ea48820ff47bec126704bbf51786394f7e1cd0ef6621",
+              "pointer": "/manifest_approval",
+              "value": "UNAPPROVED"
+            }
+          }
+        ],
+        "current": [
+          {
+            "view_id": "current",
+            "key": "scope",
+            "value": "synthetic-demo",
+            "source": {
+              "path": "sources/current-view.json",
+              "sha256": "d9aee02ba9f46b1819b424a39c24e8db60685054e695630d03db995f15c52ea6",
+              "pointer": "/current/scope",
+              "value": "synthetic-demo"
+            }
+          }
+        ],
+        "historical_views_ignored": 0,
+        "required_remaining": [
+          {
+            "id": "mobile-view",
+            "label": "mobile scoped review",
+            "lane": "visual",
+            "status": "UNVERIFIED"
+          }
+        ]
+      }
+    },
+    {
+      "id": "F02-N11",
+      "expected": "unknown",
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "D:\\JOEWRKS\\작업하네스\\skills\\joeness-setup\\scripts\\roadmap-review.mjs",
+        "--root",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N11",
+        "--input",
+        "input.json",
+        "--input-sha256",
+        "c70fab2c296f9da9ac3c2fec1512d6c2135851665433e98b4dbfc77670faee0d"
+      ],
+      "exit": 2,
+      "met": true,
+      "source_unchanged": true,
+      "fixture_sha256": {
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N11\\design-fragment.json": "f9f6494ae3584d69b450017a68b50349d743eca70ea24392f2ad89be52d95c4c",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N11\\input.json": "c70fab2c296f9da9ac3c2fec1512d6c2135851665433e98b4dbfc77670faee0d",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N11\\outputs\\desktop.json": "b9a119368fa9d0b1edebe31e992c080be623046579e4318b7184eb29624de0fd",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N11\\outputs\\mobile.json": "b9a119368fa9d0b1edebe31e992c080be623046579e4318b7184eb29624de0fd",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N11\\sources\\authorization.json": "48b3eae9201052ec61c5832bea221182e57a2fd8d18cebe94f8a399ad96a7472",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N11\\sources\\current-view.json": "d9aee02ba9f46b1819b424a39c24e8db60685054e695630d03db995f15c52ea6",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N11\\sources\\design-observations.json": "66fff35869d2383e594b905bde888c09b688e5c72c88738bd7478684de6bc1e4",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N11\\sources\\exact-acceptance.json": "3b3a9cf4b7869fec749253822968c9ce01d6f348311db86df21a31797b4a5483",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N11\\sources\\mapping-review-v2.json": "72a1fe4ce89c3fbb81146f46844cd27446629294a89a1f004ac1cffe66a52494",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N11\\sources\\mapping-review.json": "9a0b78ba6d5e813a14cbd29056b6efc1edd1a27e5d66869072e284209115fb9b",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N11\\sources\\scope.json": "3a6f6f6ab2b2fc131d71ea48820ff47bec126704bbf51786394f7e1cd0ef6621",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N11\\targets\\desktop.json": "83217f14df9c234bca01c49954458b946c97f92686c70c9ea0a7a417554ac2d3",
+        "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N11\\targets\\mobile.json": "84b32d50877e5aa66af16894d01f00feac35b978de7e4cb3ffe3365ddf075382"
+      },
+      "output": {
+        "schema": "joeness.roadmap-diagnosis.v1",
+        "scope_id": "synthetic-demo",
+        "delivery": "undetermined",
+        "project_complete": false,
+        "interpretation": "Reviewed extraction only; source hashes do not authenticate approval or prove semantic correctness.",
+        "coverage": "Declared current views/outcomes only; no whole-project certification.",
+        "findings": [
+          {
+            "kind": "unknown",
+            "code": "MAPPING_REVIEW",
+            "at": "mapping_review",
+            "message": "Source interpretation and coverage need explicit review"
+          }
+        ],
+        "outcomes": [
+          {
+            "id": "desktop-view",
+            "label": "desktop scoped review",
+            "lanes": {
+              "implementation": "PASS",
+              "technical": "PASS",
+              "visual": "PASS",
+              "acceptance": "NOT_GRANTED"
+            },
+            "acceptance_required": false
+          },
+          {
+            "id": "mobile-view",
+            "label": "mobile scoped review",
+            "lanes": {
+              "implementation": "PASS",
+              "technical": "PASS",
+              "visual": "PASS",
+              "acceptance": "NOT_GRANTED"
+            },
+            "acceptance_required": false
+          }
+        ],
+        "excluded": [
+          {
+            "id": "production-operations",
+            "label": "Live operations",
+            "verified": true,
+            "source": {
+              "path": "sources/scope.json",
+              "sha256": "3a6f6f6ab2b2fc131d71ea48820ff47bec126704bbf51786394f7e1cd0ef6621",
+              "pointer": "/excluded/0",
+              "value": {
+                "id": "production-operations",
+                "label": "Live operations",
+                "reason": "The synthetic scope explicitly excludes launch"
+              }
+            }
+          }
+        ],
+        "limitations": [
+          {
+            "text": "Synthetic only; full Manifest approval remains UNAPPROVED.",
+            "verified": true,
+            "source": {
+              "path": "sources/scope.json",
+              "sha256": "3a6f6f6ab2b2fc131d71ea48820ff47bec126704bbf51786394f7e1cd0ef6621",
+              "pointer": "/manifest_approval",
+              "value": "UNAPPROVED"
+            }
+          }
+        ],
+        "current": [
+          {
+            "view_id": "current",
+            "key": "scope",
+            "value": "synthetic-demo",
+            "source": {
+              "path": "sources/current-view.json",
+              "sha256": "d9aee02ba9f46b1819b424a39c24e8db60685054e695630d03db995f15c52ea6",
+              "pointer": "/current/scope",
+              "value": "synthetic-demo"
+            }
+          }
+        ],
+        "historical_views_ignored": 0,
+        "required_remaining": []
+      }
+    }
+  ]
+}

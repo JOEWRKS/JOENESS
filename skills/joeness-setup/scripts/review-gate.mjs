@@ -3,6 +3,7 @@ import {readFileSync,realpathSync} from 'node:fs';
 import {resolve,relative,isAbsolute,sep} from 'node:path';
 import {createHash} from 'node:crypto';
 import {pathToFileURL} from 'node:url';
+import {inspect as inspectImpact} from './impact-review.mjs';
 
 const hash=b=>createHash('sha256').update(b).digest('hex');
 const digest=x=>typeof x==='string'&&/^[a-f0-9]{64}$/.test(x);
@@ -48,6 +49,14 @@ export function evaluate(options) {
   let previous=null;
   if(options.previousBaseline){previous=pin(options.previousBaseline,options.previousBaselineSha256);baseline(previous);assert(previous.scope_id===b.scope_id,'Previous scope mismatch');}
   const errors=[];
+  const impactKeys=['impact','impactSha256','impactReview','impactReviewSha256','oldResult','oldResultSha256'];
+  let impact=null;
+  const reused=[];
+  if(impactKeys.some(k=>options[k]!==undefined)){
+    assert(previous&&impactKeys.every(k=>text(options[k])),'Impact reuse needs every independent pin and previous baseline');
+    impact=inspectImpact(options);
+    if(!impact.valid)errors.push('Impact review invalid: '+impact.errors.join('; '));
+  }
   for(const a of b.authority){try{assert(hash(bytes(a.path))===a.sha256,'Authority changed');}catch{errors.push('Authority missing/changed: '+a.path);}}
   const received=new Map();
   for(const path of options.results||[]) {
@@ -65,7 +74,7 @@ export function evaluate(options) {
         assert(c&&!received.has(entry.check_id),'Unknown/duplicate result');
         assert(c.lane!=='visual'||r.schema==='joedesign.conformance.v1','Non-specialist result cannot attest visual compliance');
         assert(c.lane==='visual'||r.schema==='joeness.check-results.v1','Design result cannot attest technical/implementation completion');
-        received.set(entry.check_id,{entry,current,unresolved:r.unresolved.some(u=>u.check_id===entry.check_id)});
+        received.set(entry.check_id,{entry,current,sourcePath:pathFor(path,true),sourceSha256:hash(bytes(path,true)),unresolved:r.unresolved.some(u=>u.check_id===entry.check_id)});
       }
       // An unresolved item remains blocking even if its result was omitted.
       for(const u of r.unresolved)if(!r.results.some(e=>e.check_id===u.check_id)) errors.push('Unresolved without result: '+u.check_id);
@@ -78,7 +87,8 @@ export function evaluate(options) {
     const item=received.get(c.check_id);
     if(!item)return output('UNVERIFIED','Required result missing');
     const {entry:e,current,unresolved}=item;
-    if(!current&&(!equal(reuseContext(b),reuseContext(previous))||!equal(c,previous.required_checks.find(p=>p.check_id===c.check_id))))return output('STALE','Required criterion/target/dependencies or shared baseline context changed');
+    const reviewedTransition=!current&&impact?.valid&&impact.candidate_check_ids.includes(c.check_id)&&item.sourceSha256===options.oldResultSha256&&item.sourcePath===pathFor(options.oldResult,true);
+    if(!current&&((!equal(reuseContext(b),reuseContext(previous))&&!reviewedTransition)||!equal(c,previous.required_checks.find(p=>p.check_id===c.check_id))))return output('STALE','Required criterion/target/dependencies or shared baseline context changed');
     if(e.target_id!==c.target_id||e.method!==c.method||e.criterion_sha256!==c.criterion_sha256)return output('STALE','Result does not match pinned criterion/target/method');
     if(e.input_fingerprint!==fingerprint)return output('STALE','Target inputs changed');
     if(!['PASS','FAIL','UNVERIFIED'].includes(e.status))return output('UNVERIFIED','Malformed specialist status');
@@ -88,6 +98,7 @@ export function evaluate(options) {
       assert(Array.isArray(e.evidence)&&e.evidence.length>0,'Missing proof');
       for(const proof of e.evidence)assert(digest(proof.sha256)&&hash(bytes(proof.path,true))===proof.sha256,'Missing/damaged proof');
     } catch{return output('UNVERIFIED','Evidence missing, damaged or outside allowed roots');}
+    if(reviewedTransition){reused.push(c.check_id);return output('PASS','Prior observation reused through exact independently reviewed transition; not a fresh render');}
     return output('PASS','Current bound specialist result; evidence integrity only');
   });
   const states=Object.fromEntries(lanes.map(l=>{
@@ -108,13 +119,13 @@ export function evaluate(options) {
   const scopeComplete=!errors.length&&required.every(l=>states[l]==='PASS')&&(b.required_acceptance===false||states.user_acceptance==='ACCEPTED');
   assert([...lanes,'complete'].includes(options.claim),'Unknown claim');
   const allowed=!errors.length&&(options.claim==='complete'?scopeComplete:states[options.claim]==='PASS');
-  return {schema:'joeness.review-gate.v1',scope_id:b.scope_id,claim:options.claim,allowed,required_scope_complete:scopeComplete,project_complete:false,lanes:states,checks,errors,limits:['No visual re-judgment or user-identity authentication','Pinned scope completeness and dependency discovery require authorized review','Explicit CLI only; direct Markdown edits and natural-language claims are not intercepted']};
+  return {schema:'joeness.review-gate.v1',scope_id:b.scope_id,claim:options.claim,allowed,required_scope_complete:scopeComplete,project_complete:false,lanes:states,checks,errors,...(impact?{impact_reuse:{diagnostic_valid:impact.valid,candidate_check_ids:impact.candidate_check_ids,reused_check_ids:reused}}:{}),limits:['No visual re-judgment or user-identity authentication','Pinned scope completeness and dependency discovery require authorized review','Explicit CLI only; direct Markdown edits and natural-language claims are not intercepted']};
 }
 
 if(process.argv[1]&&import.meta.url===pathToFileURL(resolve(process.argv[1])).href){
   try {
     const o={results:[],evidenceRoots:[]};
-    const names={'--root':'root','--baseline':'baseline','--baseline-sha256':'baselineSha256','--previous-baseline':'previousBaseline','--previous-baseline-sha256':'previousBaselineSha256','--claim':'claim','--acceptance':'acceptance','--acceptance-sha256':'acceptanceSha256'};
+    const names={'--root':'root','--baseline':'baseline','--baseline-sha256':'baselineSha256','--previous-baseline':'previousBaseline','--previous-baseline-sha256':'previousBaselineSha256','--claim':'claim','--acceptance':'acceptance','--acceptance-sha256':'acceptanceSha256','--impact':'impact','--impact-sha256':'impactSha256','--impact-review':'impactReview','--impact-review-sha256':'impactReviewSha256','--old-result':'oldResult','--old-result-sha256':'oldResultSha256'};
     for(let i=2;i<process.argv.length;i+=2){const k=process.argv[i],v=process.argv[i+1];assert(text(v)&&!v.startsWith('--'),'Missing CLI argument');if(k==='--result')o.results.push(v);else if(k==='--evidence-root')o.evidenceRoots.push(v);else{assert(Object.hasOwn(names,k),'Unknown CLI argument');assert(!Object.hasOwn(o,names[k]),'Duplicate CLI argument: '+k);o[names[k]]=v;}}
     const result=evaluate(o);console.log(JSON.stringify(result));process.exitCode=result.allowed?0:2;
   }catch(e){console.log(JSON.stringify({schema:'joeness.review-gate.v1',allowed:false,required_scope_complete:false,project_complete:false,errors:[e.message]}));process.exitCode=2;}

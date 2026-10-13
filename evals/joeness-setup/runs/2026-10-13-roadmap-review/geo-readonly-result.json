@@ -1,0 +1,156 @@
+{
+  "kind": "actual-record-readonly-copy-not-new-UI-test",
+  "source_root": "D:/JOEWRKS/GEOTest/FnBShop",
+  "temporary_root": "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-geo-readonly-raV5d7",
+  "command": [
+    "C:\\Program Files\\nodejs\\node.exe",
+    "D:\\JOEWRKS\\작업하네스\\skills\\joeness-setup\\scripts\\roadmap-review.mjs",
+    "--root",
+    "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-geo-readonly-raV5d7",
+    "--input",
+    "input.json",
+    "--input-sha256",
+    "9e5d356f02dc1bfc528fe163fb2ed80cbfedd3f1213564d078fc90c7014302bb"
+  ],
+  "cli_sha256": "5dfb2d5a81df58d9e1c43651b43cc945356bbf61630b103877f9b8bcd13ba33f",
+  "exit": 0,
+  "text_exit": 0,
+  "output": {
+    "schema": "joeness.roadmap-diagnosis.v1",
+    "scope_id": "GEO 비런칭 데모 마감 기록",
+    "delivery": "complete",
+    "project_complete": false,
+    "interpretation": "Reviewed extraction only; source hashes do not authenticate approval or prove semantic correctness.",
+    "coverage": "Declared current views/outcomes only; no whole-project certification.",
+    "findings": [],
+    "outcomes": [
+      {
+        "id": "demo",
+        "label": "비런칭 데모 제작 마감",
+        "lanes": {
+          "implementation": "PASS",
+          "acceptance": "NOT_GRANTED"
+        },
+        "acceptance_required": false
+      },
+      {
+        "id": "records",
+        "label": "마감 문서·보관 정합 확인",
+        "lanes": {
+          "technical": "PASS",
+          "acceptance": "NOT_GRANTED"
+        },
+        "acceptance_required": false
+      }
+    ],
+    "excluded": [
+      {
+        "id": "live",
+        "label": "실서비스 운영·실검색 성과",
+        "verified": true,
+        "source": {
+          "path": "ROADMAP.md",
+          "sha256": "0dd12461b5b516f8751ec2533c7c8e07f556f40b0a76fa624bed300033e9ddd6",
+          "quote": "실서비스 운영·실검색 성과는 범위 밖이다."
+        }
+      }
+    ],
+    "limitations": [
+      {
+        "text": "전체 기획 UNAPPROVED 유지",
+        "verified": true,
+        "source": {
+          "path": "checks.json",
+          "sha256": "8dc18d0d5401195c95a4dde77b7ffc065a8b27ae7acaaba7ca40a4dad6cda424",
+          "quote": "\"approval\": \"UNAPPROVED\""
+        }
+      },
+      {
+        "text": "실제 확대·음성·5인 조사·모델 안정성 미검증",
+        "verified": true,
+        "source": {
+          "path": "ROADMAP.md",
+          "sha256": "0dd12461b5b516f8751ec2533c7c8e07f556f40b0a76fa624bed300033e9ddd6",
+          "quote": "실제 PC 200%·음성·5인 조사·다모델/질문변형 안정성은 미검증 한계로 보존하며 통과로 바꾸지 않는다."
+        }
+      },
+      {
+        "text": "기존 기록 재사용; 새 화면·검색·운영 검사 아님",
+        "verified": true,
+        "source": {
+          "path": "checks.json",
+          "sha256": "8dc18d0d5401195c95a4dde77b7ffc065a8b27ae7acaaba7ca40a4dad6cda424",
+          "quote": "Documentation and recoverable file organization only; no new UI/search/production claim"
+        }
+      },
+      {
+        "text": "원본 해석 검토이며 실제 사용자 서명 인증 아님",
+        "verified": true,
+        "source": {
+          "path": "mapping-review-note.md",
+          "sha256": "ec5c8172435d4b8e76087b12968670b84f0a2c53fc8c3534ff4e064e73dbf615",
+          "quote": "실제 사용자 서명이나 새 승인 증거가 아니다."
+        }
+      }
+    ],
+    "current": [
+      {
+        "view_id": "current",
+        "key": "stage",
+        "value": "비런칭 데모 마감",
+        "source": {
+          "path": "ROADMAP.md",
+          "sha256": "0dd12461b5b516f8751ec2533c7c8e07f556f40b0a76fa624bed300033e9ddd6",
+          "quote": "**현재 — 비런칭 데모 제작 마감, 2026-10-13.**"
+        }
+      },
+      {
+        "view_id": "current",
+        "key": "next",
+        "value": "없음",
+        "source": {
+          "path": "ROADMAP.md",
+          "sha256": "0dd12461b5b516f8751ec2533c7c8e07f556f40b0a76fa624bed300033e9ddd6",
+          "quote": "**다음 작업: 없음.**"
+        }
+      }
+    ],
+    "historical_views_ignored": 1,
+    "required_remaining": []
+  },
+  "source_unchanged": true,
+  "fixture_unchanged": true,
+  "before": {
+    "ROADMAP.md": "0dd12461b5b516f8751ec2533c7c8e07f556f40b0a76fa624bed300033e9ddd6",
+    "TASK.md": "b93491bd5f9071ca509e09042a5f23cfb7cd1fd4a54653c265a3c463b838b6ec",
+    "product-definition/geo-fresh-market/state.json": "5cbb9d5a0bafc914dd4e6630f4f3ca6c30491d8f9fa43cf8647f86232c26d86f",
+    "Library/evidence/service-design/final-self-audit-20261012/demo-closeout-checks.json": "8dc18d0d5401195c95a4dde77b7ffc065a8b27ae7acaaba7ca40a4dad6cda424",
+    "AGENTS.md": "72965ffbd8e0b8ee0cd13fd6869429879aedc364163d228b1352e1dae7c594fe",
+    "ISSUES.md": "9d93d78dc15776541662bc069d9d9557536dad88b31b744b426eba6ffa585144",
+    "DESIGN.md": "22eb17f148f98a87cd4f69298ed40729fe7d114190c4fc0bce370ac3314b1d11"
+  },
+  "after": {
+    "ROADMAP.md": "0dd12461b5b516f8751ec2533c7c8e07f556f40b0a76fa624bed300033e9ddd6",
+    "TASK.md": "b93491bd5f9071ca509e09042a5f23cfb7cd1fd4a54653c265a3c463b838b6ec",
+    "product-definition/geo-fresh-market/state.json": "5cbb9d5a0bafc914dd4e6630f4f3ca6c30491d8f9fa43cf8647f86232c26d86f",
+    "Library/evidence/service-design/final-self-audit-20261012/demo-closeout-checks.json": "8dc18d0d5401195c95a4dde77b7ffc065a8b27ae7acaaba7ca40a4dad6cda424",
+    "AGENTS.md": "72965ffbd8e0b8ee0cd13fd6869429879aedc364163d228b1352e1dae7c594fe",
+    "ISSUES.md": "9d93d78dc15776541662bc069d9d9557536dad88b31b744b426eba6ffa585144",
+    "DESIGN.md": "22eb17f148f98a87cd4f69298ed40729fe7d114190c4fc0bce370ac3314b1d11"
+  },
+  "fixture_sha256": {
+    "checks.json": "8dc18d0d5401195c95a4dde77b7ffc065a8b27ae7acaaba7ca40a4dad6cda424",
+    "input.json": "9e5d356f02dc1bfc528fe163fb2ed80cbfedd3f1213564d078fc90c7014302bb",
+    "mapping-review-note.md": "ec5c8172435d4b8e76087b12968670b84f0a2c53fc8c3534ff4e064e73dbf615",
+    "review.json": "49957a1a937096984223e987f9139b9a22668f6e889bc3fafa783dd1bcf3ffdd",
+    "ROADMAP.md": "0dd12461b5b516f8751ec2533c7c8e07f556f40b0a76fa624bed300033e9ddd6",
+    "state.json": "5cbb9d5a0bafc914dd4e6630f4f3ca6c30491d8f9fa43cf8647f86232c26d86f",
+    "TASK.md": "b93491bd5f9071ca509e09042a5f23cfb7cd1fd4a54653c265a3c463b838b6ec"
+  },
+  "cost": {
+    "copied_sources": 4,
+    "total_source_bytes": 3193414,
+    "additional_model_runs": 0
+  },
+  "limits": "Manual semantic review, declared scope only. No rendering/deployment/project writes. Temporary review copy retained for QA."
+}

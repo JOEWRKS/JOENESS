@@ -61,7 +61,7 @@ function Get-JoenessSourceIdentity {
     if ($null -ne $manifest.PSObject.Properties['compatibility']) { throw 'Unexpected distribution manifest field: compatibility' }
     if (@($manifest.publicSkills).Count -ne 1 -or $manifest.publicSkills[0].name -cne 'joeness-setup') { throw 'Only joeness-setup may ship' }
 
-    $expectedFiles = @('SKILL.md', 'agents/openai.yaml', 'assets/AGENTS.md', 'assets/DESIGN.md', 'assets/ISSUES.md', 'assets/ROADMAP.md', 'assets/TASK.md', 'references/usage.md', 'references/review-gate.md', 'scripts/project-setup.ps1', 'scripts/review-gate.mjs')
+    $expectedFiles = @('SKILL.md', 'agents/openai.yaml', 'assets/AGENTS.md', 'assets/DESIGN.md', 'assets/ISSUES.md', 'assets/ROADMAP.md', 'assets/TASK.md', 'references/usage.md', 'references/review-gate.md', 'references/roadmap-review.md', 'references/operation-review.md', 'references/impact-review.md', 'scripts/project-setup.ps1', 'scripts/review-gate.mjs', 'scripts/roadmap-review.mjs', 'scripts/operation-review.mjs', 'scripts/impact-review.mjs')
     $files = @($manifest.publicSkills[0].files)
     if ($files.Count -ne $expectedFiles.Count -or ((@($files.path | Sort-Object) -join ',') -cne (($expectedFiles | Sort-Object) -join ','))) {
         throw 'Unexpected skill source inventory'

@@ -1,0 +1,26 @@
+{
+  "command": "Import-Module Microsoft.PowerShell.Utility; $m = Get-Module Microsoft.PowerShell.Utility; $c = Get-Command Get-FileHash -ErrorAction SilentlyContinue; [pscustomobject]@{version=$PSVersionTable.PSVersion.ToString();module=$m.Path;hashAvailable=($null -ne $c)} | ConvertTo-Json -Compress",
+  "results": [
+    {
+      "mode": "inherited-PS7-path",
+      "exit": 0,
+      "output": {
+        "version": "5.1.19041.6456",
+        "module": "C:\\users\\tjdwo\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\powershell\\Modules\\Microsoft.PowerShell.Utility\\Microsoft.PowerShell.Utility.psd1",
+        "hashAvailable": false
+      },
+      "stderr": ""
+    },
+    {
+      "mode": "PS5-default-path",
+      "exit": 0,
+      "output": {
+        "version": "5.1.19041.6456",
+        "module": "C:\\Windows\\system32\\WindowsPowerShell\\v1.0\\Modules\\Microsoft.PowerShell.Utility\\Microsoft.PowerShell.Utility.psd1",
+        "hashAvailable": true
+      },
+      "stderr": ""
+    }
+  ],
+  "personal_environment_changed": false
+}

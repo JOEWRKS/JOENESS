@@ -1,5 +1,7 @@
 # JOENESS Repository
 
+- Local F01–F06 integration is a source candidate; exact checks/installation status are in `evals/joeness-setup/runs/2026-10-13-impact-review/review-evidence.md`, with A/B evidence preserved separately. It is not the released 0.3.4 package. Determine personal installation from its exact manifest/receipt, not the unchanged version label. Do not republish the existing tag or replace a personal installation without the coordinated review/install step.
+
 - Source version: `JOENESS 0.3.4`; release status and exact commit are in `evals/joeness-setup/runs/2026-10-10-v034-release/review-evidence.md`. Previous release `0.3.3` evidence remains in `evals/joeness-setup/runs/2026-10-06-v033-release/review-evidence.md`. The manifest target remains `gpt-6-astra / xhigh`; earlier GEO replay evidence is `gpt-6-astra / high`, not xhigh validation. The 0.3.4 gate tests do not establish model performance. Earlier releases remain in Git tags. Revalidate changed behavior; do not claim a release complete before its exact commit passes the Windows gate and installation check.
 - Distribution mode: `setup-only`. The sole public skill, `joeness-setup`, is project-scoped setup; the package has no always-on global payload and does not write global `AGENTS.md`.
 - `vendor/source-manifest.json` is the machine-readable active release identity.

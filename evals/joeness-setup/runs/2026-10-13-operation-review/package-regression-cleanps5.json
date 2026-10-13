@@ -1,0 +1,99 @@
+{
+  "stage": "local-source-candidate-not-hosted-release",
+  "manifest_sha256": "c644ab274f8f28aa845abd3dc4305252d5ab9187ab8c529571ed0df24198d534",
+  "results": [
+    {
+      "command": [
+        "powershell.exe",
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "tests/joeness-release.tests.ps1"
+      ],
+      "module_path": "PS5 default discovery, inherited PS7 path omitted",
+      "exit": 0,
+      "signal": null,
+      "error": null,
+      "stdout": "PASS JOENESS setup-only release contract\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "powershell.exe",
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "tests/joeness-project-setup.tests.ps1"
+      ],
+      "module_path": "PS5 default discovery, inherited PS7 path omitted",
+      "exit": 0,
+      "signal": null,
+      "error": null,
+      "stdout": "PASS StateIdentityRoundTripAcrossPowerShellVersions\nPASS CurrentConnectionDoesNotCertifyRoadmapContents\nPASS InvalidStateIdentityStillFailsClosed\nPASS InitialApplyAndNoOp\nPASS LongAgentsApplyCannotDisplaceExistingInstructions\nPASS UnconnectedExactWindowCannotAcceptManagedBlock\nPASS InitialWindowExactBoundary\nPASS ExistingFrontBlockReportsDisplacementAndCanDetach\nPASS ExistingCleanTailBlocksRelocationAndRestoresOutsideBytes\nPASS InsideEditSurvivesFreshCheck\nPASS OutsideBytesAndDetach bom=False eol=1 ending=0\nPASS OutsideBytesAndDetach bom=False eol=1 ending=1\nPASS OutsideBytesAndDetach bom=True eol=1 ending=0\nPASS OutsideBytesAndDetach bom=True eol=1 ending=1\nPASS OutsideBytesAndDetach bom=False eol=2 ending=0\nPASS OutsideBytesAndDetach bom=False eol=2 ending=2\nPASS OutsideBytesAndDetach bom=True eol=2 ending=0\nPASS OutsideBytesAndDetach bom=True eol=2 ending=2\nPASS MalformedOrUnownedOrLegacy\nPASS StateTamperAndOneSidedState\nPASS StateWriteFailureAfterUserEdit\nPASS SnapshotAndRootDrift\nPASS CloneRebindsRelativeState\nPASS InvalidUtf8AndOverride\nPASS StateSnapshotDrift\nPASS ReparseAndNonGitFailClosed\nPASS RealGitCloneRebindsCheckoutEolButNotContentEdits\nPASS 27 project safety cases\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "powershell.exe",
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "tests/joeness-install.tests.ps1"
+      ],
+      "module_path": "PS5 default discovery, inherited PS7 path omitted",
+      "exit": 0,
+      "signal": null,
+      "error": null,
+      "stdout": "✔ current full specialist coverage permits only visual claim, not user acceptance (78.2634ms)\n✔ missing check blocks and recovering the missing result passes (142.6264ms)\n✔ sum-spacing failure and unresolved item cannot be overridden by top-level PASS (142.4136ms)\n✔ technical pass cannot substitute for missing visual result (68.4862ms)\n✔ changed output invalidates only affected check; fresh evidence restores it (150.5441ms)\n✔ weakened baseline or deleted check fails against externally pinned expectation (90.5495ms)\n✔ missing/corrupt result and damaged evidence fail closed (282.3666ms)\n✔ changed criteria, wrong target, duplicate result and path escape fail closed (303.5398ms)\n✔ changed approved source is stale even when result says PASS (80.1219ms)\n✔ approval remains separate and bound to exact current outputs (239.0466ms)\n✔ new authorized baseline reuses unchanged checks only with explicit prior baseline pin (92.1932ms)\n✔ empty scope and forged visual acceptance cannot pass (226.6808ms)\n✔ explicit consumer advances only after gate permits the requested scope (250.4116ms)\n✔ outside proof needs an explicitly allowed evidence root (448.5102ms)\n✔ external producer receipt is read directly only within allowlisted evidence root (450.0134ms)\n✔ separate technical lane passes without falsely advancing visual or complete (201.8026ms)\n✔ authorized changed criterion recovers with fresh affected and reusable unaffected results (116.4229ms)\n✔ prior evidence cannot cross changed target, rule, authority or opaque baseline context (974.224ms)\n✔ duplicate singleton CLI options cannot silently weaken requested claim or pin (191.3618ms)\n✔ declared missing lane blocks complete but does not undo verified visual work (182.9179ms)\n✔ unverified specialist result stays unverified despite intact evidence (99.378ms)\n✔ junction outside root cannot smuggle evidence into allowed project (227.3644ms)\n✔ CLI rejects inherited property names as unknown options (248.0007ms)\nℹ tests 23\nℹ suites 0\nℹ pass 23\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 5376.2251\n✔ historical next work is ignored; authorized demo completion is scoped, not product approval (122.552ms)\n✔ conflicting current views are not resolved by newest date (131.0229ms)\n✔ authorized reopening keeps old closure historical and required work incomplete (124.1887ms)\n✔ missing evidence is unknown, not a fabricated failure or erased implementation (108.4892ms)\n✔ source quote and JSON pointer must match exact current bytes (263.0562ms)\n✔ reviewer name or boolean is not semantic confirmation; changed mapping invalidates old review (581.7657ms)\n✔ pending mapping review or absent current view needs manual review (319.7044ms)\n✔ visual rejection, partial acceptance and missing required acceptance cannot complete (463.2335ms)\n✔ technical pass cannot replace visual FAIL or PARTIAL (220.7606ms)\n✔ stale or wrong-target evidence is unknown, never accepted on a PASS label (378.0319ms)\n✔ required and excluded overlap or contradictory observations are conflicts (224.8929ms)\n✔ missing exclusion authority cannot be treated as approved out-of-scope (128.4723ms)\n✔ malformed status, duplicate outcome and empty criterion lanes are invalid (378.019ms)\n✔ path traversal, absolute paths, inherited pointer and outside symlink are rejected (454.6978ms)\n✔ CLI rejects duplicate/unknown options and wrong pinned input (223.2209ms)\n✔ read-only run leaves all source bytes intact and renders bounded human summary (291.2534ms)\n✔ raw structured FAIL cannot be mapped to PASS even with fresh mapping review (134.4242ms)\n✔ source required criterion cannot be removed by a freshly sealed extraction (141.184ms)\n✔ roadmap complete claim conflicts with current TASK failure (108.9488ms)\n✔ optional acceptance does not hide an explicit current rejection (119.3653ms)\n✔ manager regression: source-required acceptance and lanes cannot be downgraded (286.4685ms)\n✔ manager regression: history pointer cannot be classified inside current source (153.1758ms)\n✔ authorization for another scope and mixed current/history selector tricks do not pass (262.481ms)\nℹ tests 23\nℹ suites 0\nℹ pass 23\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 5718.6216\n✔ F03 PASS is preflight only and preserves UNAPPROVED (116.9456ms)\n✔ F03 structured failure preserves findings but never allows completion (121.2148ms)\n✔ failed execution cannot reuse a previous valid stdout (183.4299ms)\n✔ truncated, trailing or multiple JSON outputs are rejected (277.0262ms)\n✔ run identity and current request pin prevent another run capture reuse (204.0635ms)\n✔ stale target and producer bytes keep result pending (939.8077ms)\n✔ F03 approval and source identity cannot be silently promoted (235.6652ms)\n✔ F04 valid scope preserves every axis separately (177.5335ms)\n✔ F04 PARTIAL keeps completed sibling and UNKNOWN/null semantic findings (164.2101ms)\n✔ UNKNOWN findings cannot be zero and UNKNOWN cannot be COMPLETE (339.6625ms)\n✔ missing, duplicate, downgraded required projection cannot hide behind top PASS (895.795ms)\n✔ stale projection or review evidence prevents reusing output (276.7937ms)\n✔ incorrect status partitions and missing recovery owner are rejected (257.7761ms)\n✔ root escape, duplicate CLI flags and altered capture bytes are rejected (191.2995ms)\n✔ consumer is read-only and no producer is executed by it (110.7559ms)\n✔ final producer coverage FAIL/UNKNOWN cannot be hidden by COMPLETE (216.6788ms)\n✔ approved projection coverage and recovery owner cannot be replaced (207.6082ms)\n✔ projection with missing approved structural markers is not complete (112.9365ms)\n✔ approved nonrequired semantic review does not demand an extra review record (142.4983ms)\nℹ tests 19\nℹ suites 0\nℹ pass 19\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 5291.7601\nPASS setup-only lifecycle, user bytes, legacy fail-closed, drift, rollback, manifest boundaries\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:/Users/tjdwo/.cache/codex-runtimes/codex-primary-runtime/dependencies/native/powershell/pwsh.exe",
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "tests/joeness-project-setup.tests.ps1"
+      ],
+      "module_path": "inherited",
+      "exit": 0,
+      "signal": null,
+      "error": null,
+      "stdout": "PASS StateIdentityRoundTripAcrossPowerShellVersions\r\nPASS CurrentConnectionDoesNotCertifyRoadmapContents\r\nPASS InvalidStateIdentityStillFailsClosed\r\nPASS InitialApplyAndNoOp\r\nPASS LongAgentsApplyCannotDisplaceExistingInstructions\r\nPASS UnconnectedExactWindowCannotAcceptManagedBlock\r\nPASS InitialWindowExactBoundary\r\nPASS ExistingFrontBlockReportsDisplacementAndCanDetach\r\nPASS ExistingCleanTailBlocksRelocationAndRestoresOutsideBytes\r\nPASS InsideEditSurvivesFreshCheck\r\nPASS OutsideBytesAndDetach bom=False eol=1 ending=0\r\nPASS OutsideBytesAndDetach bom=False eol=1 ending=1\r\nPASS OutsideBytesAndDetach bom=True eol=1 ending=0\r\nPASS OutsideBytesAndDetach bom=True eol=1 ending=1\r\nPASS OutsideBytesAndDetach bom=False eol=2 ending=0\r\nPASS OutsideBytesAndDetach bom=False eol=2 ending=2\r\nPASS OutsideBytesAndDetach bom=True eol=2 ending=0\r\nPASS OutsideBytesAndDetach bom=True eol=2 ending=2\r\nPASS MalformedOrUnownedOrLegacy\r\nPASS StateTamperAndOneSidedState\r\nPASS StateWriteFailureAfterUserEdit\r\nPASS SnapshotAndRootDrift\r\nPASS CloneRebindsRelativeState\r\nPASS InvalidUtf8AndOverride\r\nPASS StateSnapshotDrift\r\nPASS ReparseAndNonGitFailClosed\r\nPASS RealGitCloneRebindsCheckoutEolButNotContentEdits\r\nPASS 27 project safety cases\r\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:/Users/tjdwo/.cache/codex-runtimes/codex-primary-runtime/dependencies/native/powershell/pwsh.exe",
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "tests/joeness-install.tests.ps1"
+      ],
+      "module_path": "inherited",
+      "exit": 0,
+      "signal": null,
+      "error": null,
+      "stdout": "✔ current full specialist coverage permits only visual claim, not user acceptance (73.9682ms)\n✔ missing check blocks and recovering the missing result passes (144.0155ms)\n✔ sum-spacing failure and unresolved item cannot be overridden by top-level PASS (138.8503ms)\n✔ technical pass cannot substitute for missing visual result (80.6936ms)\n✔ changed output invalidates only affected check; fresh evidence restores it (138.3921ms)\n✔ weakened baseline or deleted check fails against externally pinned expectation (67.2789ms)\n✔ missing/corrupt result and damaged evidence fail closed (188.9571ms)\n✔ changed criteria, wrong target, duplicate result and path escape fail closed (261.1168ms)\n✔ changed approved source is stale even when result says PASS (77.8979ms)\n✔ approval remains separate and bound to exact current outputs (211.954ms)\n✔ new authorized baseline reuses unchanged checks only with explicit prior baseline pin (76.186ms)\n✔ empty scope and forged visual acceptance cannot pass (147.3035ms)\n✔ explicit consumer advances only after gate permits the requested scope (163.9896ms)\n✔ outside proof needs an explicitly allowed evidence root (140.6001ms)\n✔ external producer receipt is read directly only within allowlisted evidence root (147.4313ms)\n✔ separate technical lane passes without falsely advancing visual or complete (137.7788ms)\n✔ authorized changed criterion recovers with fresh affected and reusable unaffected results (83.0726ms)\n✔ prior evidence cannot cross changed target, rule, authority or opaque baseline context (688.0842ms)\n✔ duplicate singleton CLI options cannot silently weaken requested claim or pin (167.7733ms)\n✔ declared missing lane blocks complete but does not undo verified visual work (156.2179ms)\n✔ unverified specialist result stays unverified despite intact evidence (89.1488ms)\n✔ junction outside root cannot smuggle evidence into allowed project (153.7237ms)\n✔ CLI rejects inherited property names as unknown options (194.4236ms)\nℹ tests 23\nℹ suites 0\nℹ pass 23\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 3815.1844\n✔ historical next work is ignored; authorized demo completion is scoped, not product approval (101.0451ms)\n✔ conflicting current views are not resolved by newest date (99.8076ms)\n✔ authorized reopening keeps old closure historical and required work incomplete (110.6467ms)\n✔ missing evidence is unknown, not a fabricated failure or erased implementation (91.9203ms)\n✔ source quote and JSON pointer must match exact current bytes (208.3329ms)\n✔ reviewer name or boolean is not semantic confirmation; changed mapping invalidates old review (180.0084ms)\n✔ pending mapping review or absent current view needs manual review (186.0183ms)\n✔ visual rejection, partial acceptance and missing required acceptance cannot complete (610.1649ms)\n✔ technical pass cannot replace visual FAIL or PARTIAL (251.2168ms)\n✔ stale or wrong-target evidence is unknown, never accepted on a PASS label (358.3296ms)\n✔ required and excluded overlap or contradictory observations are conflicts (252.9527ms)\n✔ missing exclusion authority cannot be treated as approved out-of-scope (110.6705ms)\n✔ malformed status, duplicate outcome and empty criterion lanes are invalid (374.7336ms)\n✔ path traversal, absolute paths, inherited pointer and outside symlink are rejected (489.3689ms)\n✔ CLI rejects duplicate/unknown options and wrong pinned input (282.2309ms)\n✔ read-only run leaves all source bytes intact and renders bounded human summary (233.8432ms)\n✔ raw structured FAIL cannot be mapped to PASS even with fresh mapping review (152.5163ms)\n✔ source required criterion cannot be removed by a freshly sealed extraction (146.1452ms)\n✔ roadmap complete claim conflicts with current TASK failure (111.3583ms)\n✔ optional acceptance does not hide an explicit current rejection (122.7477ms)\n✔ manager regression: source-required acceptance and lanes cannot be downgraded (259.4078ms)\n✔ manager regression: history pointer cannot be classified inside current source (116.848ms)\n✔ authorization for another scope and mixed current/history selector tricks do not pass (225.0908ms)\nℹ tests 23\nℹ suites 0\nℹ pass 23\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 5181.7415\n✔ F03 PASS is preflight only and preserves UNAPPROVED (92.3957ms)\n✔ F03 structured failure preserves findings but never allows completion (104.2769ms)\n✔ failed execution cannot reuse a previous valid stdout (172.872ms)\n✔ truncated, trailing or multiple JSON outputs are rejected (260.4084ms)\n✔ run identity and current request pin prevent another run capture reuse (157.5186ms)\n✔ stale target and producer bytes keep result pending (160.8454ms)\n✔ F03 approval and source identity cannot be silently promoted (168.3624ms)\n✔ F04 valid scope preserves every axis separately (130.0769ms)\n✔ F04 PARTIAL keeps completed sibling and UNKNOWN/null semantic findings (124.8887ms)\n✔ UNKNOWN findings cannot be zero and UNKNOWN cannot be COMPLETE (227.9664ms)\n✔ missing, duplicate, downgraded required projection cannot hide behind top PASS (322.7788ms)\n✔ stale projection or review evidence prevents reusing output (195.6483ms)\n✔ incorrect status partitions and missing recovery owner are rejected (196.7528ms)\n✔ root escape, duplicate CLI flags and altered capture bytes are rejected (145.6174ms)\n✔ consumer is read-only and no producer is executed by it (94.9705ms)\n✔ final producer coverage FAIL/UNKNOWN cannot be hidden by COMPLETE (191.1505ms)\n✔ approved projection coverage and recovery owner cannot be replaced (181.1727ms)\n✔ projection with missing approved structural markers is not complete (112.5728ms)\n✔ approved nonrequired semantic review does not demand an extra review record (111.6967ms)\nℹ tests 19\nℹ suites 0\nℹ pass 19\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 3248.4771\nPASS setup-only lifecycle, user bytes, legacy fail-closed, drift, rollback, manifest boundaries\r\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "python",
+        "C:/Users/tjdwo/.codex/skills/.system/skill-creator/scripts/quick_validate.py",
+        "skills/joeness-setup"
+      ],
+      "module_path": "inherited",
+      "exit": 1,
+      "signal": null,
+      "error": null,
+      "stdout": "",
+      "stderr": "Traceback (most recent call last):\r\n  File \"C:\\Users\\tjdwo\\.codex\\skills\\.system\\skill-creator\\scripts\\quick_validate.py\", line 125, in <module>\r\n    valid, message = validate_skill(sys.argv[1])\r\n                     ~~~~~~~~~~~~~~^^^^^^^^^^^^^\r\n  File \"C:\\Users\\tjdwo\\.codex\\skills\\.system\\skill-creator\\scripts\\quick_validate.py\", line 23, in validate_skill\r\n    content = skill_md.read_text()\r\n  File \"C:\\Python314\\Lib\\pathlib\\__init__.py\", line 788, in read_text\r\n    return f.read()\r\n           ~~~~~~^^\r\nUnicodeDecodeError: 'cp949' codec can't decode byte 0xe2 in position 3230: illegal multibyte sequence\r\n"
+    }
+  ]
+}
