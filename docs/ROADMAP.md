@@ -11,10 +11,11 @@
 | P1 | 버전·공통 안내 일치 | 완료 | manifest·설치기1.0.0, README6절·구체인계·안전한 업데이트 안내 |
 | P2 | 영향 검사·격리 설치 | 완료 | Node96/96·PS5/7 연결각27·설치각83·출시계약PASS. 새 설치8단계·17파일 일치·개인설치 불변 |
 | P3 | 후보 고정·QA 인계 | 완료(후보) | 관련 변경만commit해 exact SHA·검증 근거 인계. QA 교차검토와 원격반영은 P4 |
-| P4 | 원격 게시·main 통합 | 작업중 | QA 공동설치·실제연결 검토 통과. 최종안내 정리 후 일반push/main 반영·원격 SHA 대조 |
+| P4 | 원격 게시·main 통합 | 완료 | QA 공동설치·연결 통과 후 e6bd217 일반push, 원격 작업branch/main exactSHA 확인·localmain FF. 이후 마감기록만 추가 |
 
 진입: P2는 P1, P3는 P2, P4는 QA 승인 후. 개인설치·태그·GitHub Release는 이번 main 통합에서 제외.
 근거: [1.0.0 검증·게시 기록](../evals/joeness-setup/runs/2026-10-13-v100-candidate/review-evidence.md).
+다음 작업: 1.0.0 소스·안내의 main 반영 완료. 개인 설치는 기존0.3.4 후보 유지; 별도 승인 전 갱신·태그·Release 발행 없음.
 
 ## 이전 작업 — F01–F06 도구 간 결과 연결 (2026-10-13)
 

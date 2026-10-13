@@ -1,6 +1,6 @@
 # JOENESS 1.0.0 candidate — T039
 
-Status: local and Manager cross-review PASS; main integration authorized. See publication follow-up below. Personal1.0.0/tag/Release excluded; not a release-complete claim.
+Status: local and Manager cross-review PASS; source1.0.0 published to main. See publication follow-up below. Personal1.0.0/tag/Release excluded; no broader release-complete claim.
 
 - Authorized source: Manager user turn `01a13543-e662-7200-bfae-2ae33552db09`:
   approved1.x alignment and main integration after candidate review. This first
@@ -76,3 +76,25 @@ Previous failures remain in their original evidence directories and Git history.
 - Remote preflight still ee61baf on both refs; remote/local main are ancestors,
   and no worktree has main checked out. No force/reset/stash or user edits included.
   Publication result is recorded after the actual remote comparison.
+
+### Publication confirmed — 2026-10-13
+
+- Final public-documentation commit `e6bd2173232b9c5bc438735fa3ca3613aff751a8`.
+  Only six documentation files changed after tested candidate4443c0e; skills,
+  installer, manifest, tests and workflow unchanged. Targeted version/manifest
+  test1/1 and local documentation links16 PASS, diff check PASS. Full candidate
+  suites and QA cross-tool checks reused; no new model/render claims.
+- Ordinary push of that exact commit to `codex/qa-recording-boundaries` and
+  `main` succeeded (exit0). Independent `git ls-remote --heads` returned exact
+  `e6bd2173232b9c5bc438735fa3ca3613aff751a8` for both refs. No forced update.
+- Local main was not checked out in any worktree. Verified ancestor ee61baf
+  then advanced its ref with compare-and-swap to the same publication commit;
+  working branch and all other worktrees were untouched.
+- Existing APP-001 ROADMAP hunk and untracked docs/ISSUES.md remained excluded;
+  ISSUES SHA remains d3c87c8fa0e2e34600ae12ff0b1c9ea1d503ca5a7f6a30db17ca8e8ea9b529c7.
+- This closing documentation record is a follow-up commit with identical runtime
+  and package. The final follow-up ref SHA is handed to Manager T039 after push.
+  Individual installation remains the verified0.3.4 candidate. No personal
+  upgrade, tag, GitHub Release or existing project migration performed.
+- Hosted CI is separate from the completed local/QA checks; this record does not
+  assert a new hosted run has finished. Source main publication is confirmed.
