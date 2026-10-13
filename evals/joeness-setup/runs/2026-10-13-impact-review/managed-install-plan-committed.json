@@ -1,0 +1,156 @@
+{
+  "status": "PLAN_ONLY_WAIT_FOR_MANAGER",
+  "personal": "C:/Users/tjdwo/.codex",
+  "previous_release_commit": "5f16ea00c5c1f46c8c87999a3247739576dd537e",
+  "previous_manifest_sha256": "a569ff74f16df210e1e87046c8edfd61f19912653f2c8cfec328ec92e64d8fed",
+  "source_commit": "eed525502e5c704b16ef4539c6334eabab187744",
+  "source_manifest_sha256": "49889a08818ac80006527a16bfa0911c08024ea67f4d263375ab4a96a6167aeb",
+  "source_files": [
+    {
+      "path": "SKILL.md",
+      "sha256": "0f5db50f1f1ffc21359372cd49c72fcd05cc785869f995a7ac9e175f6696beba"
+    },
+    {
+      "path": "agents/openai.yaml",
+      "sha256": "cc275e468658c7793d6f1305aaae5c6f37a06d831a7f2c3f18313f668427ec5c"
+    },
+    {
+      "path": "assets/AGENTS.md",
+      "sha256": "691cd5eac50c3324da16987d2661d98e0d47f9e6a8e3f90e8804ae7050c628c0"
+    },
+    {
+      "path": "assets/DESIGN.md",
+      "sha256": "3b5ec8a163f2da4a770b4206029dd85a538dea0807060314cf51bd145ff66a5d"
+    },
+    {
+      "path": "assets/ISSUES.md",
+      "sha256": "44b5e1f7eea61716bdfa3b364b7eca9ffe60bc9c29f6e31b3a9bf753de6b8635"
+    },
+    {
+      "path": "assets/ROADMAP.md",
+      "sha256": "ac80bf15b82f5cb9b6200a4cf48f22739632352850395afe77d62ed1be3e3660"
+    },
+    {
+      "path": "assets/TASK.md",
+      "sha256": "cbe9d10373067805dcc2659474a7b2b23e28df967bb3ee10500a4c15b6088ee0"
+    },
+    {
+      "path": "references/usage.md",
+      "sha256": "d7d4ea516c714260dcbc0678da8ab72359340a96cd1718b46906334949b8146a"
+    },
+    {
+      "path": "scripts/project-setup.ps1",
+      "sha256": "631334ba13683f97346d2b14d4aebedd671b16c9125e7dd4a26914d658788c8d"
+    },
+    {
+      "path": "references/review-gate.md",
+      "sha256": "0422021f6a247d44a3c2980353dddac76dee613282ecf4315cd4d357ebdf8432"
+    },
+    {
+      "path": "scripts/review-gate.mjs",
+      "sha256": "7ad13a9020a57aa0a6396348f8575229d7cac076a5d5a6c89178d26c3b6d9bd2"
+    },
+    {
+      "path": "references/roadmap-review.md",
+      "sha256": "bfb8910df6814edd4fab15b18b1c88c6dcc1127eb9921488772bdb9ffc15a201"
+    },
+    {
+      "path": "scripts/roadmap-review.mjs",
+      "sha256": "5dfb2d5a81df58d9e1c43651b43cc945356bbf61630b103877f9b8bcd13ba33f"
+    },
+    {
+      "path": "references/operation-review.md",
+      "sha256": "748d1631847ac23045406f6742b43a3a0bddb29ebfb32b3720f8f97c9546959c"
+    },
+    {
+      "path": "scripts/operation-review.mjs",
+      "sha256": "a1a6d80a7d57d4e9c3e66c49a6f877bf07836bac25d330bb466fc2a858679aad"
+    },
+    {
+      "path": "scripts/impact-review.mjs",
+      "sha256": "9cd8359daae4e0f68bcab688ae831e43d81a0b98bcb8ca10ed65a63d0e70cbc8"
+    },
+    {
+      "path": "references/impact-review.md",
+      "sha256": "6d98aa307aaace44461699e66fdbc3d658f67f8b6c756812ad9faa23ed330a82"
+    }
+  ],
+  "before": [
+    {
+      "path": "skills/joeness-setup/SKILL.md",
+      "expected": "d28310d2be866d4a89ed733cd4310da54e1ccd7acf0b9c045ab7dfaea7a0176f",
+      "actual": "d28310d2be866d4a89ed733cd4310da54e1ccd7acf0b9c045ab7dfaea7a0176f"
+    },
+    {
+      "path": "skills/joeness-setup/agents/openai.yaml",
+      "expected": "cc275e468658c7793d6f1305aaae5c6f37a06d831a7f2c3f18313f668427ec5c",
+      "actual": "cc275e468658c7793d6f1305aaae5c6f37a06d831a7f2c3f18313f668427ec5c"
+    },
+    {
+      "path": "skills/joeness-setup/assets/AGENTS.md",
+      "expected": "f2fbd94a9939fbe31d371b21c7e4f2b05f814e0ed81ae22ba73e1097bdfb86ce",
+      "actual": "f2fbd94a9939fbe31d371b21c7e4f2b05f814e0ed81ae22ba73e1097bdfb86ce"
+    },
+    {
+      "path": "skills/joeness-setup/assets/DESIGN.md",
+      "expected": "3b5ec8a163f2da4a770b4206029dd85a538dea0807060314cf51bd145ff66a5d",
+      "actual": "3b5ec8a163f2da4a770b4206029dd85a538dea0807060314cf51bd145ff66a5d"
+    },
+    {
+      "path": "skills/joeness-setup/assets/ISSUES.md",
+      "expected": "44b5e1f7eea61716bdfa3b364b7eca9ffe60bc9c29f6e31b3a9bf753de6b8635",
+      "actual": "44b5e1f7eea61716bdfa3b364b7eca9ffe60bc9c29f6e31b3a9bf753de6b8635"
+    },
+    {
+      "path": "skills/joeness-setup/assets/ROADMAP.md",
+      "expected": "ac80bf15b82f5cb9b6200a4cf48f22739632352850395afe77d62ed1be3e3660",
+      "actual": "ac80bf15b82f5cb9b6200a4cf48f22739632352850395afe77d62ed1be3e3660"
+    },
+    {
+      "path": "skills/joeness-setup/assets/TASK.md",
+      "expected": "cbe9d10373067805dcc2659474a7b2b23e28df967bb3ee10500a4c15b6088ee0",
+      "actual": "cbe9d10373067805dcc2659474a7b2b23e28df967bb3ee10500a4c15b6088ee0"
+    },
+    {
+      "path": "skills/joeness-setup/references/usage.md",
+      "expected": "d7d4ea516c714260dcbc0678da8ab72359340a96cd1718b46906334949b8146a",
+      "actual": "d7d4ea516c714260dcbc0678da8ab72359340a96cd1718b46906334949b8146a"
+    },
+    {
+      "path": "skills/joeness-setup/scripts/project-setup.ps1",
+      "expected": "631334ba13683f97346d2b14d4aebedd671b16c9125e7dd4a26914d658788c8d",
+      "actual": "631334ba13683f97346d2b14d4aebedd671b16c9125e7dd4a26914d658788c8d"
+    },
+    {
+      "path": "skills/joeness-setup/references/review-gate.md",
+      "expected": "72e509e4eeeae714cd615cf26bcfba61140f3bd840d7634bfd199bc04c314728",
+      "actual": "72e509e4eeeae714cd615cf26bcfba61140f3bd840d7634bfd199bc04c314728"
+    },
+    {
+      "path": "skills/joeness-setup/scripts/review-gate.mjs",
+      "expected": "db37a33ce5ee2f9c210e4250b05aef1afb9712bfa6e524a80d39866b4c8c8c23",
+      "actual": "db37a33ce5ee2f9c210e4250b05aef1afb9712bfa6e524a80d39866b4c8c8c23"
+    }
+  ],
+  "protected_before": {
+    "joeness-skills-state.json": "b52caeabdc104d55cfa0e4605f9266bb364a48e67dd49159a29dabd86d0e05cb",
+    "AGENTS.md": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "config.toml": "f3121e33d0d2b9e69bfcbe2284483d492238f7fb67394a5c58d73a02e5c5de83"
+  },
+  "backup_root": "C:/Users/tjdwo/.codex-install-backups/joeness-20261013-49889a08818a",
+  "steps": [
+    "Recheck every before hash and exact inventory immediately before mutation. Block on drift/unknown files.",
+    "Back up only the 11 owned skill files and joeness-skills-state.json outside skill discovery; verify backup hashes. Never copy login/config into repository evidence.",
+    "Export previous exact release to a fresh temp source. Old JOENESS.ps1 -Check must report current with the personal target.",
+    "Old exact release JOENESS.ps1 -Remove removes only owned skill bytes/state. New candidate Apply directly over old ownership is intentionally blocked; do not bypass that check.",
+    "New exact committed source JOENESS.ps1 -Apply -CodexHome personal, then -Check current; compare all17 files and new state manifest.",
+    "Run actual producer-consumer scenarios against installed CLI plus all82 installed behavioral tests; global AGENTS/config and other tools remain unchanged.",
+    "If new Apply fails, preserve its failure/rollback record. Restore previous version with its exact installer only after proving target is clean/owned. On drift or partial unknown content stop; never force overwrite. Keep verified backup for recovery."
+  ],
+  "limits": [
+    "No installation authorized by this plan itself",
+    "Candidate 0.3.4 source, not a new version tag or hosted release",
+    "GEO and existing project docs untouched",
+    "Source commit must be fixed and final regressions complete before installation"
+  ]
+}

@@ -39,10 +39,10 @@
 | C3 | 실제 생산→소비·격리 설치 | 완료(격리) | 17파일current·설치본실제10/10, 원본/개인 불변 |
 | C4 | 명시적 승인 pin 한정 재사용 | 완료(한정) | Manager 진입 후17+기존gate23 PASS, 독립gate13+6경계 통과. geometry만, CSS/미상 fresh |
 | C5 | 최종 통합 회귀·설치 준비 | 완료(한정) | C/D 설치경로 보정 후96/96·PS5release·PS5/7install각83 통과; setup각27 기존동일byte 회귀재사용. 격리17파일·개인producer연결4/4·교체원복8단계 PASS |
-| C6 | 승인된 개인 설치 전환 | 작업중 | Manager 최종후보/백업계획 검토 후 exactcommit고정→11+state백업→old정식Remove/newApply→17파일·개인83검사·양쪽개인producer연결 |
+| C6 | 승인된 개인 설치 전환 | 완료(개인 후보) | 소스 eed5255 고정·기존11파일/state 백업 후 정식 제거/설치. 17파일 일치·설치본83/83·개인 JOEFLOW4/4·JOEDESIGN10/10, 개인설정/전역지침 불변 |
 
 기존 실패 근거·사용자 수락 원본 유지. C6만 별도 관리설치 승인에 따라 진행하며 자동 pin 갱신·GEO 변경·태그/원격출시는 제외.
-근거: [C 구현·검증 기록](../evals/joeness-setup/runs/2026-10-13-impact-review/review-evidence.md). 다음 작업은 C6이며, 배포된0.3.4 완료와 혼동하지 않는다.
+근거: [C 구현·검증 기록](../evals/joeness-setup/runs/2026-10-13-impact-review/review-evidence.md). C6까지 완료. 다음은 QA 최종 대조이며 추가 반복 검증·GEO 수정 없음. 개인 후보 설치와 원격 정식 배포를 구분한다.
 
 ## 이전 작업 — 0.3.4 정식 배포 (2026-10-10)
 

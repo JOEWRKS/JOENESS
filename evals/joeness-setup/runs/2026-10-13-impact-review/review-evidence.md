@@ -69,3 +69,36 @@ Windows source/installation regressions are still being collected in
 - Exact new-manifest old11→new17→old rollback rehearsal8 steps PASS
   (`managed-transition-cd.json`). Manager approved personal transition only after
   source commit freeze and before-hash recheck. Personal execution receipt is separate.
+
+## Personal installation completed — 2026-10-13
+
+- Exact source commit: `eed525502e5c704b16ef4539c6334eabab187744`;
+  tree `c88cd6069683f0eb38cd4a84c195ee42c2560a4b`.
+  Manifest `49889a08818ac80006527a16bfa0911c08024ea67f4d263375ab4a96a6167aeb`.
+- Approved transition executed once: before hashes matched the old release;
+  backed up11 owned files and state outside skill discovery; old exact installer
+  Check/Remove and frozen candidate Apply/Check succeeded. New17 files and state
+  matched exactly. Receipt: [personal-install.json](personal-install.json).
+- Backup retained at `C:/Users/tjdwo/.codex-install-backups/joeness-20261013-49889a08818a`.
+  Global AGENTS.md/config.toml unchanged; credentials and existing projects untouched.
+- Actual personal installed behavioral tests83/83, JOEFLOW connection4/4 and
+  JOEDESIGN producer/consumer10/10 PASS. [Validation](personal-validation.json),
+  [planning connection](planning-personal.json),
+  [design connection](limited-personal-producer-installed.json). Installation
+  bytes remained unchanged during validation; final phase `installed-and-behavior-verified`.
+- The committed plan's prose still says82 tests from an earlier draft; actual
+  command and result are83. The receipt and validation, not that stale prose,
+  establish the count. Prior plans and failures remain preserved.
+- Scope: personal candidate installed, no push/main merge/tag/new release.
+  Version label remains0.3.4; identify this candidate by commit/manifest above.
+  No new rendered measurement, model-performance claim, automatic old-chat
+  reload guarantee, or GEO document migration. Geometry reuse remains explicitly
+  reviewed and bounded; user acceptance stays separate.
+- Manager's independent personal-install audit also passed: F02v3 13/13,
+  actual JOEFLOW/C-D connection11/11, JOEDESIGN production2 plus consumption13
+  and gate19. Three personal package inventories17/44/201, old backup11+state,
+  new state and protected files matched; original/installed bytes unchanged.
+  QA records under `D:/JOEWRKS/JOEQASAM/evidence/t035-joe-implementation/`:
+  `f02-personal-final.json`, `operation-manager-personal.json`,
+  `f05-personal-final.json`, `personal-final-comparison.json`.
+  These are independent Manager results, not additional runs by this owner.

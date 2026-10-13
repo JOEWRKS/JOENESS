@@ -1,0 +1,86 @@
+{
+  "source_commit": "eed525502e5c704b16ef4539c6334eabab187744",
+  "manifest_sha256": "49889a08818ac80006527a16bfa0911c08024ea67f4d263375ab4a96a6167aeb",
+  "before": {
+    "skills/joeness-setup/SKILL.md": "0f5db50f1f1ffc21359372cd49c72fcd05cc785869f995a7ac9e175f6696beba",
+    "skills/joeness-setup/agents/openai.yaml": "cc275e468658c7793d6f1305aaae5c6f37a06d831a7f2c3f18313f668427ec5c",
+    "skills/joeness-setup/assets/AGENTS.md": "691cd5eac50c3324da16987d2661d98e0d47f9e6a8e3f90e8804ae7050c628c0",
+    "skills/joeness-setup/assets/DESIGN.md": "3b5ec8a163f2da4a770b4206029dd85a538dea0807060314cf51bd145ff66a5d",
+    "skills/joeness-setup/assets/ISSUES.md": "44b5e1f7eea61716bdfa3b364b7eca9ffe60bc9c29f6e31b3a9bf753de6b8635",
+    "skills/joeness-setup/assets/ROADMAP.md": "ac80bf15b82f5cb9b6200a4cf48f22739632352850395afe77d62ed1be3e3660",
+    "skills/joeness-setup/assets/TASK.md": "cbe9d10373067805dcc2659474a7b2b23e28df967bb3ee10500a4c15b6088ee0",
+    "skills/joeness-setup/references/usage.md": "d7d4ea516c714260dcbc0678da8ab72359340a96cd1718b46906334949b8146a",
+    "skills/joeness-setup/scripts/project-setup.ps1": "631334ba13683f97346d2b14d4aebedd671b16c9125e7dd4a26914d658788c8d",
+    "skills/joeness-setup/references/review-gate.md": "0422021f6a247d44a3c2980353dddac76dee613282ecf4315cd4d357ebdf8432",
+    "skills/joeness-setup/scripts/review-gate.mjs": "7ad13a9020a57aa0a6396348f8575229d7cac076a5d5a6c89178d26c3b6d9bd2",
+    "skills/joeness-setup/references/roadmap-review.md": "bfb8910df6814edd4fab15b18b1c88c6dcc1127eb9921488772bdb9ffc15a201",
+    "skills/joeness-setup/scripts/roadmap-review.mjs": "5dfb2d5a81df58d9e1c43651b43cc945356bbf61630b103877f9b8bcd13ba33f",
+    "skills/joeness-setup/references/operation-review.md": "748d1631847ac23045406f6742b43a3a0bddb29ebfb32b3720f8f97c9546959c",
+    "skills/joeness-setup/scripts/operation-review.mjs": "a1a6d80a7d57d4e9c3e66c49a6f877bf07836bac25d330bb466fc2a858679aad",
+    "skills/joeness-setup/scripts/impact-review.mjs": "9cd8359daae4e0f68bcab688ae831e43d81a0b98bcb8ca10ed65a63d0e70cbc8",
+    "skills/joeness-setup/references/impact-review.md": "6d98aa307aaace44461699e66fdbc3d658f67f8b6c756812ad9faa23ed330a82",
+    "joeness-skills-state.json": "0e910838a939538c1d725afb48410be0790ddde1be26a90c1ed9b066387a1c8e",
+    "AGENTS.md": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "config.toml": "f3121e33d0d2b9e69bfcbe2284483d492238f7fb67394a5c58d73a02e5c5de83"
+  },
+  "after": {
+    "skills/joeness-setup/SKILL.md": "0f5db50f1f1ffc21359372cd49c72fcd05cc785869f995a7ac9e175f6696beba",
+    "skills/joeness-setup/agents/openai.yaml": "cc275e468658c7793d6f1305aaae5c6f37a06d831a7f2c3f18313f668427ec5c",
+    "skills/joeness-setup/assets/AGENTS.md": "691cd5eac50c3324da16987d2661d98e0d47f9e6a8e3f90e8804ae7050c628c0",
+    "skills/joeness-setup/assets/DESIGN.md": "3b5ec8a163f2da4a770b4206029dd85a538dea0807060314cf51bd145ff66a5d",
+    "skills/joeness-setup/assets/ISSUES.md": "44b5e1f7eea61716bdfa3b364b7eca9ffe60bc9c29f6e31b3a9bf753de6b8635",
+    "skills/joeness-setup/assets/ROADMAP.md": "ac80bf15b82f5cb9b6200a4cf48f22739632352850395afe77d62ed1be3e3660",
+    "skills/joeness-setup/assets/TASK.md": "cbe9d10373067805dcc2659474a7b2b23e28df967bb3ee10500a4c15b6088ee0",
+    "skills/joeness-setup/references/usage.md": "d7d4ea516c714260dcbc0678da8ab72359340a96cd1718b46906334949b8146a",
+    "skills/joeness-setup/scripts/project-setup.ps1": "631334ba13683f97346d2b14d4aebedd671b16c9125e7dd4a26914d658788c8d",
+    "skills/joeness-setup/references/review-gate.md": "0422021f6a247d44a3c2980353dddac76dee613282ecf4315cd4d357ebdf8432",
+    "skills/joeness-setup/scripts/review-gate.mjs": "7ad13a9020a57aa0a6396348f8575229d7cac076a5d5a6c89178d26c3b6d9bd2",
+    "skills/joeness-setup/references/roadmap-review.md": "bfb8910df6814edd4fab15b18b1c88c6dcc1127eb9921488772bdb9ffc15a201",
+    "skills/joeness-setup/scripts/roadmap-review.mjs": "5dfb2d5a81df58d9e1c43651b43cc945356bbf61630b103877f9b8bcd13ba33f",
+    "skills/joeness-setup/references/operation-review.md": "748d1631847ac23045406f6742b43a3a0bddb29ebfb32b3720f8f97c9546959c",
+    "skills/joeness-setup/scripts/operation-review.mjs": "a1a6d80a7d57d4e9c3e66c49a6f877bf07836bac25d330bb466fc2a858679aad",
+    "skills/joeness-setup/scripts/impact-review.mjs": "9cd8359daae4e0f68bcab688ae831e43d81a0b98bcb8ca10ed65a63d0e70cbc8",
+    "skills/joeness-setup/references/impact-review.md": "6d98aa307aaace44461699e66fdbc3d658f67f8b6c756812ad9faa23ed330a82",
+    "joeness-skills-state.json": "0e910838a939538c1d725afb48410be0790ddde1be26a90c1ed9b066387a1c8e",
+    "AGENTS.md": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "config.toml": "f3121e33d0d2b9e69bfcbe2284483d492238f7fb67394a5c58d73a02e5c5de83"
+  },
+  "personal_bytes_unchanged": true,
+  "results": [
+    {
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "--test",
+        "D:\\JOEWRKS\\작업하네스\\tests\\joeness-review-gate.tests.mjs",
+        "D:\\JOEWRKS\\작업하네스\\tests\\joeness-roadmap-review.tests.mjs",
+        "D:\\JOEWRKS\\작업하네스\\tests\\joeness-operation-review.tests.mjs",
+        "D:\\JOEWRKS\\작업하네스\\tests\\joeness-impact-review.tests.mjs"
+      ],
+      "exit": 0,
+      "error": null,
+      "stdout": "✔ reviewed unchanged candidate is diagnostic only; gate/approval not granted (235.6842ms)\n✔ external impact review pin and exact transition are required (146.5171ms)\n✔ missing and duplicate required output cannot become valid candidates (324.4258ms)\n✔ changed baseline rule/target/acceptance/opaque context cannot be waived (858.6672ms)\n✔ runtime change cannot pass using unchanged claimed fingerprint (148.2804ms)\n✔ altered capture and source evidence are rejected (200.9812ms)\n✔ producer cannot promote acceptance or self-authorize reuse (126.8628ms)\n✔ old failure and current rejection cannot become reusable (181.0562ms)\n✔ unknown is retained without erasing diagnostic scope (173.9395ms)\n✔ independent review cannot confirm a producer rerun (158.4809ms)\n✔ request/semantic source mutation invalidates earlier capture (150.549ms)\n✔ duplicate CLI pins and root escapes are rejected (241.7462ms)\n✔ diagnosis preserves every source byte (219.1105ms)\n✔ gate limited reuse requires exact reviewed transition and retains acceptance boundary (504.9787ms)\n✔ gate cannot reuse changed runtime or missing independent confirmation (368.4239ms)\n✔ gate cannot substitute another receipt even when its content matches (248.0757ms)\n✔ limited reuse keeps old failure evidence and source bytes immutable (400.5753ms)\n✔ F03 PASS is preflight only and preserves UNAPPROVED (141.7162ms)\n✔ F03 structured failure preserves findings but never allows completion (129.4409ms)\n✔ failed execution cannot reuse a previous valid stdout (199.4643ms)\n✔ truncated, trailing or multiple JSON outputs are rejected (335.1367ms)\n✔ run identity and current request pin prevent another run capture reuse (553.4677ms)\n✔ stale target and producer bytes keep result pending (341.5423ms)\n✔ F03 approval and source identity cannot be silently promoted (213.9019ms)\n✔ F04 valid scope preserves every axis separately (160.8793ms)\n✔ F04 PARTIAL keeps completed sibling and UNKNOWN/null semantic findings (162.1888ms)\n✔ UNKNOWN findings cannot be zero and UNKNOWN cannot be COMPLETE (261.6142ms)\n✔ missing, duplicate, downgraded required projection cannot hide behind top PASS (428.6534ms)\n✔ stale projection or review evidence prevents reusing output (263.9418ms)\n✔ incorrect status partitions and missing recovery owner are rejected (265.4093ms)\n✔ root escape, duplicate CLI flags and altered capture bytes are rejected (197.5013ms)\n✔ consumer is read-only and no producer is executed by it (126.554ms)\n✔ final producer coverage FAIL/UNKNOWN cannot be hidden by COMPLETE (312.6858ms)\n✔ approved projection coverage and recovery owner cannot be replaced (289.1173ms)\n✔ projection with missing approved structural markers is not complete (157.2093ms)\n✔ approved nonrequired semantic review does not demand an extra review record (186.009ms)\n✔ installed producer needs an explicit separate root; omitted root and escapes stay blocked (329.2225ms)\n✔ current full specialist coverage permits only visual claim, not user acceptance (125.3885ms)\n✔ missing check blocks and recovering the missing result passes (222.9101ms)\n✔ sum-spacing failure and unresolved item cannot be overridden by top-level PASS (209.9352ms)\n✔ technical pass cannot substitute for missing visual result (102.7046ms)\n✔ changed output invalidates only affected check; fresh evidence restores it (282.0144ms)\n✔ weakened baseline or deleted check fails against externally pinned expectation (510.599ms)\n✔ missing/corrupt result and damaged evidence fail closed (330.2086ms)\n✔ changed criteria, wrong target, duplicate result and path escape fail closed (419.4517ms)\n✔ changed approved source is stale even when result says PASS (117.2986ms)\n✔ approval remains separate and bound to exact current outputs (324.5627ms)\n✔ new authorized baseline reuses unchanged checks only with explicit prior baseline pin (117.72ms)\n✔ empty scope and forged visual acceptance cannot pass (211.6842ms)\n✔ explicit consumer advances only after gate permits the requested scope (222.5752ms)\n✔ outside proof needs an explicitly allowed evidence root (225.1613ms)\n✔ external producer receipt is read directly only within allowlisted evidence root (208.844ms)\n✔ separate technical lane passes without falsely advancing visual or complete (234.3744ms)\n✔ authorized changed criterion recovers with fresh affected and reusable unaffected results (168.0423ms)\n✔ prior evidence cannot cross changed target, rule, authority or opaque baseline context (1141.2139ms)\n✔ duplicate singleton CLI options cannot silently weaken requested claim or pin (256.7281ms)\n✔ declared missing lane blocks complete but does not undo verified visual work (218.6743ms)\n✔ unverified specialist result stays unverified despite intact evidence (105.0037ms)\n✔ junction outside root cannot smuggle evidence into allowed project (204.4587ms)\n✔ CLI rejects inherited property names as unknown options (284.0322ms)\n✔ historical next work is ignored; authorized demo completion is scoped, not product approval (157.2197ms)\n✔ conflicting current views are not resolved by newest date (147.9977ms)\n✔ authorized reopening keeps old closure historical and required work incomplete (142.2751ms)\n✔ missing evidence is unknown, not a fabricated failure or erased implementation (159.2377ms)\n✔ source quote and JSON pointer must match exact current bytes (286.7569ms)\n✔ reviewer name or boolean is not semantic confirmation; changed mapping invalidates old review (552.5349ms)\n✔ pending mapping review or absent current view needs manual review (348.2605ms)\n✔ visual rejection, partial acceptance and missing required acceptance cannot complete (539.4488ms)\n✔ technical pass cannot replace visual FAIL or PARTIAL (288.4931ms)\n✔ stale or wrong-target evidence is unknown, never accepted on a PASS label (399.498ms)\n✔ required and excluded overlap or contradictory observations are conflicts (271.7079ms)\n✔ missing exclusion authority cannot be treated as approved out-of-scope (138.6292ms)\n✔ malformed status, duplicate outcome and empty criterion lanes are invalid (421.3203ms)\n✔ path traversal, absolute paths, inherited pointer and outside symlink are rejected (627.3908ms)\n✔ CLI rejects duplicate/unknown options and wrong pinned input (283.6318ms)\n✔ read-only run leaves all source bytes intact and renders bounded human summary (281.2584ms)\n✔ raw structured FAIL cannot be mapped to PASS even with fresh mapping review (137.7477ms)\n✔ source required criterion cannot be removed by a freshly sealed extraction (135.8115ms)\n✔ roadmap complete claim conflicts with current TASK failure (140.8306ms)\n✔ optional acceptance does not hide an explicit current rejection (145.0208ms)\n✔ manager regression: source-required acceptance and lanes cannot be downgraded (256.2096ms)\n✔ manager regression: history pointer cannot be classified inside current source (120.8089ms)\n✔ authorization for another scope and mixed current/history selector tricks do not pass (255.3279ms)\nℹ tests 83\nℹ suites 0\nℹ pass 83\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 6389.1529\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "D:\\JOEWRKS\\작업하네스\\evals\\joeness-setup\\runs\\2026-10-13-impact-review\\verify-installed-planning.mjs"
+      ],
+      "exit": 0,
+      "error": null,
+      "stdout": "{\"passed\":4,\"total\":4,\"source_unchanged\":true,\"consumer_sha256\":\"a1a6d80a7d57d4e9c3e66c49a6f877bf07836bac25d330bb466fc2a858679aad\",\"captures\":\"C:\\\\Users\\\\tjdwo\\\\AppData\\\\Local\\\\Temp\\\\joeness-operation-execution-jWblXd\"}\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "D:\\JOEWRKS\\작업하네스\\evals\\joeness-setup\\runs\\2026-10-13-impact-review\\verify-actual-producer.mjs",
+        "--limited"
+      ],
+      "exit": 0,
+      "error": null,
+      "stdout": "{\"passed\":10,\"total\":10,\"unchanged\":true,\"temp\":\"C:\\\\Users\\\\tjdwo\\\\AppData\\\\Local\\\\Temp\\\\joeness-impact-link-JqJeV4\"}\n",
+      "stderr": ""
+    }
+  ]
+}

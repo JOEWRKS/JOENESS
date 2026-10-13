@@ -1,0 +1,1162 @@
+{
+  "stage": "actual-producer-to-limited-reuse-gate",
+  "temporary_evidence": "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-impact-link-JqJeV4",
+  "before": {
+    "C:\\Users\\tjdwo\\.codex\\skills\\joedesign\\scripts\\harness_cli.py": "a4b7a5597ca2fb7df1209cabe78b781569a2ac4f9d910258d060844a93024e8e",
+    "C:\\Users\\tjdwo\\.codex\\skills\\joedesign\\scripts\\harness\\conformance.py": "50f1aa9cd6807ba1f900bcdf1e100e2360e5dbeb6197ff9cc34cad14d16aa3c2",
+    "C:\\Users\\tjdwo\\.codex\\skills\\joedesign\\scripts\\harness\\contracts.py": "b2806c4d3145b4b7a5196a475a7c329068549ea47ff3865ec413250cd9abc44a",
+    "C:\\Users\\tjdwo\\.codex\\skills\\joedesign\\scripts\\harness\\evidence.py": "e3e0d1bd1f841dbee369009692e02e50dff184f26dc53cd48359793dee920b22",
+    "C:\\Users\\tjdwo\\.codex\\skills\\joedesign\\scripts\\harness\\execution.py": "692c66d613debea9f26111907f84f2d1b492985250937690439b562b607fa7ef",
+    "C:\\Users\\tjdwo\\.codex\\skills\\joedesign\\scripts\\harness\\impact.py": "8454b4fd8df5ebb97d04e015ecc35edd4a21651f2cfaf049943da3e2bd4b774f",
+    "C:\\Users\\tjdwo\\.codex\\skills\\joedesign\\scripts\\harness\\io.py": "6579dda892f684319897ae8ca87f0f192bc32715ae6a5d5921966137a5dfaba4",
+    "C:\\Users\\tjdwo\\.codex\\skills\\joedesign\\scripts\\harness\\pipeline.py": "9608a7367cb40cf60fb17ba5d2da12bde9b88fac5410a369e52fe78a7e8accd6",
+    "C:\\Users\\tjdwo\\.codex\\skills\\joedesign\\scripts\\harness\\references.py": "50f44f6b8bd4509f8918b52141f3232b95040a3bd5db9d766b205813ec93ea20",
+    "C:\\Users\\tjdwo\\.codex\\skills\\joedesign\\scripts\\harness\\runner.py": "353ad461994bcc99ab0a8fa76c47fe7cc5dd88b6ab28980cec2f91a02a87f7b2",
+    "C:\\Users\\tjdwo\\.codex\\skills\\joedesign\\scripts\\harness\\__init__.py": "065c95c4c3cb07e74eca0807874c2bfb6b974950a14ff808c05d8a2abcbf1778",
+    "D:\\JOEWRKS\\JOEDESIGN\\.local\\f05-impact-20261013\\real-v1\\summary.json": "50e05475625d93fdf3b817cf7ce2a3fda55a0b23850ea2ff4a0fa067bb6141e5",
+    "D:\\JOEWRKS\\JOEDESIGN\\.local\\f05-impact-20261013\\real-v1\\P01\\authority-before.md": "51a77274a630ca7831fe029a65add33f549bd573cb56bf962ec58c222edfbef5",
+    "D:\\JOEWRKS\\JOEDESIGN\\.local\\f05-impact-20261013\\real-v1\\P01\\capture-manifest.json": "214e1d967165d079786ed06c6ae4c4edc8259547607c471ebd3da9c13020d7d4",
+    "D:\\JOEWRKS\\JOEDESIGN\\.local\\f05-impact-20261013\\real-v1\\P01\\capture-process.json": "0734f70e8e81d0427abd5b257f2876a36dda78aa3701eb0073f24689a6eccd1b",
+    "D:\\JOEWRKS\\JOEDESIGN\\.local\\f05-impact-20261013\\real-v1\\P01\\DESIGN.md": "f24e501ff180d7c4ac175b9518b3040b7915fc84052a1e1c4f73aa2d824a1041",
+    "D:\\JOEWRKS\\JOEDESIGN\\.local\\f05-impact-20261013\\real-v1\\P01\\diagnostic-process.json": "b82ff9299fb3a5c1740ddd0449746d5ec4d361e6545582d69a1534a6a16dfe7b",
+    "D:\\JOEWRKS\\JOEDESIGN\\.local\\f05-impact-20261013\\real-v1\\P01\\impact.json": "06ec3a44cd997726be4659323636ae76f5d309dd1848b1761de836e089a41c03",
+    "D:\\JOEWRKS\\JOEDESIGN\\.local\\f05-impact-20261013\\real-v1\\P01\\index.html": "972b5987cfd793ea113246b1726f0b106b38586881824e31d585c8ac639557d8",
+    "D:\\JOEWRKS\\JOEDESIGN\\.local\\f05-impact-20261013\\real-v1\\P01\\new.json": "8523be5fda38367ea1463f581388b69dd47c44438a20116a11fa5003eaeb1174",
+    "D:\\JOEWRKS\\JOEDESIGN\\.local\\f05-impact-20261013\\real-v1\\P01\\old-result.json": "01760c5dee4bb8a2bd3224fac3a12cff9c3ca485023551798ce7800419afad9e",
+    "D:\\JOEWRKS\\JOEDESIGN\\.local\\f05-impact-20261013\\real-v1\\P01\\old.json": "cc17b0d20246191ca7ee0622c78dcdae0945b9466cca2439fd71b8d6c632b4bc",
+    "D:\\JOEWRKS\\JOEDESIGN\\.local\\f05-impact-20261013\\real-v1\\P01\\request.json": "7341d964516cbf63a5f9ce334a3fccb386921bb7fcce93aa5951d4aa70d5d445",
+    "D:\\JOEWRKS\\JOEDESIGN\\.local\\f05-impact-20261013\\real-v1\\P01\\review.json": "e0d75f467bf6b0b868eabec608d772876c19881f1832c255b660f9da433cc4fb",
+    "D:\\JOEWRKS\\JOEDESIGN\\.local\\f05-impact-20261013\\real-v1\\P01\\served-process.json": "0734f70e8e81d0427abd5b257f2876a36dda78aa3701eb0073f24689a6eccd1b",
+    "D:\\JOEWRKS\\JOEDESIGN\\.local\\f05-impact-20261013\\real-v1\\P01\\served.json": "73795fce1affb478c4b6c7e9aa524905c750a9f4eba0eab639512a9a3d496a33",
+    "D:\\JOEWRKS\\JOEDESIGN\\.local\\f05-impact-20261013\\real-v1\\P02\\authority-before.md": "51a77274a630ca7831fe029a65add33f549bd573cb56bf962ec58c222edfbef5",
+    "D:\\JOEWRKS\\JOEDESIGN\\.local\\f05-impact-20261013\\real-v1\\P02\\capture-manifest.json": "7114d719424a66fa3808b041861a03e1b29940434fa62f269d48a2cda7508e2d",
+    "D:\\JOEWRKS\\JOEDESIGN\\.local\\f05-impact-20261013\\real-v1\\P02\\capture-process.json": "0734f70e8e81d0427abd5b257f2876a36dda78aa3701eb0073f24689a6eccd1b",
+    "D:\\JOEWRKS\\JOEDESIGN\\.local\\f05-impact-20261013\\real-v1\\P02\\DESIGN.md": "4d50fca29ad2384d0b887b25b2c42b3a46b105a56f43239ce865ac2a02378614",
+    "D:\\JOEWRKS\\JOEDESIGN\\.local\\f05-impact-20261013\\real-v1\\P02\\diagnostic-process.json": "8b9749efdc7e528a52cbde0760bdc98185d6fde860711b387151211d1f5ebd11",
+    "D:\\JOEWRKS\\JOEDESIGN\\.local\\f05-impact-20261013\\real-v1\\P02\\impact.json": "0ac04df6aa41204148b88ae11580b767556141072063241a10dc5e2ae4527c5e",
+    "D:\\JOEWRKS\\JOEDESIGN\\.local\\f05-impact-20261013\\real-v1\\P02\\index.html": "972b5987cfd793ea113246b1726f0b106b38586881824e31d585c8ac639557d8",
+    "D:\\JOEWRKS\\JOEDESIGN\\.local\\f05-impact-20261013\\real-v1\\P02\\new.json": "25df3db03810f4487223f9518a64f6a7acf1ffc156a15f1a366285e4fd9b9b52",
+    "D:\\JOEWRKS\\JOEDESIGN\\.local\\f05-impact-20261013\\real-v1\\P02\\old-result.json": "82a9a6e4d1767884c7b4c0be13bdee0624bb50112adc49fc95cca78e753d489b",
+    "D:\\JOEWRKS\\JOEDESIGN\\.local\\f05-impact-20261013\\real-v1\\P02\\old.json": "cc17b0d20246191ca7ee0622c78dcdae0945b9466cca2439fd71b8d6c632b4bc",
+    "D:\\JOEWRKS\\JOEDESIGN\\.local\\f05-impact-20261013\\real-v1\\P02\\request.json": "79539f15cece9a7008c9c5732bb9d0a8027c6143302ff999b32e718c29ce1b9d",
+    "D:\\JOEWRKS\\JOEDESIGN\\.local\\f05-impact-20261013\\real-v1\\P02\\review.json": "d343b1ac0bd46124dcf718f93072b95bc30c78846028f25e55e90cff5a4fabe7",
+    "D:\\JOEWRKS\\JOEDESIGN\\.local\\f05-impact-20261013\\real-v1\\P02\\served-process.json": "0734f70e8e81d0427abd5b257f2876a36dda78aa3701eb0073f24689a6eccd1b",
+    "D:\\JOEWRKS\\JOEDESIGN\\.local\\f05-impact-20261013\\real-v1\\P02\\served.json": "55d851debb758f1134df26703ad85bf5d0565f448fd64fff2220a61d807162a3",
+    "D:\\JOEWRKS\\JOEDESIGN\\.local\\f05-impact-20261013\\real-v1\\P01\\old-capture\\0-full.png": "336a4eceaaad50b207f379875b68524385d47b11c8276b8630b9470df872d007",
+    "D:\\JOEWRKS\\JOEDESIGN\\.local\\f05-impact-20261013\\real-v1\\P01\\old-capture\\0-observation.json": "756809776d7509b18da1ce9c16e1ce158bed15ea128107d93a976c76da3acb85",
+    "D:\\JOEWRKS\\JOEDESIGN\\.local\\f05-impact-20261013\\real-v1\\P01\\old-capture\\0-result.png": "336a4eceaaad50b207f379875b68524385d47b11c8276b8630b9470df872d007",
+    "D:\\JOEWRKS\\JOEDESIGN\\.local\\f05-impact-20261013\\real-v1\\P01\\old-capture\\0-start.png": "336a4eceaaad50b207f379875b68524385d47b11c8276b8630b9470df872d007",
+    "D:\\JOEWRKS\\JOEDESIGN\\.local\\f05-impact-20261013\\real-v1\\P02\\old-capture\\0-full.png": "336a4eceaaad50b207f379875b68524385d47b11c8276b8630b9470df872d007",
+    "D:\\JOEWRKS\\JOEDESIGN\\.local\\f05-impact-20261013\\real-v1\\P02\\old-capture\\0-observation.json": "7d74a20f33c9ed7ddf21b0a0165dc790ee39e48e83af1939b521e3f25c7459f7",
+    "D:\\JOEWRKS\\JOEDESIGN\\.local\\f05-impact-20261013\\real-v1\\P02\\old-capture\\0-result.png": "336a4eceaaad50b207f379875b68524385d47b11c8276b8630b9470df872d007",
+    "D:\\JOEWRKS\\JOEDESIGN\\.local\\f05-impact-20261013\\real-v1\\P02\\old-capture\\0-start.png": "336a4eceaaad50b207f379875b68524385d47b11c8276b8630b9470df872d007",
+    "D:/JOEWRKS/JOEQASAM/evidence/t035-joe-implementation/f05-actual-manager.json": "edd5c3b09bb04b32dea6885dca8c6e2830a87459805d9573f0ff0ade50521026",
+    "C:\\Users\\tjdwo\\.codex\\skills\\joeness-setup\\scripts\\impact-review.mjs": "9cd8359daae4e0f68bcab688ae831e43d81a0b98bcb8ca10ed65a63d0e70cbc8",
+    "C:\\Users\\tjdwo\\.codex\\skills\\joeness-setup\\scripts\\review-gate.mjs": "7ad13a9020a57aa0a6396348f8575229d7cac076a5d5a6c89178d26c3b6d9bd2"
+  },
+  "after": {
+    "C:\\Users\\tjdwo\\.codex\\skills\\joedesign\\scripts\\harness_cli.py": "a4b7a5597ca2fb7df1209cabe78b781569a2ac4f9d910258d060844a93024e8e",
+    "C:\\Users\\tjdwo\\.codex\\skills\\joedesign\\scripts\\harness\\conformance.py": "50f1aa9cd6807ba1f900bcdf1e100e2360e5dbeb6197ff9cc34cad14d16aa3c2",
+    "C:\\Users\\tjdwo\\.codex\\skills\\joedesign\\scripts\\harness\\contracts.py": "b2806c4d3145b4b7a5196a475a7c329068549ea47ff3865ec413250cd9abc44a",
+    "C:\\Users\\tjdwo\\.codex\\skills\\joedesign\\scripts\\harness\\evidence.py": "e3e0d1bd1f841dbee369009692e02e50dff184f26dc53cd48359793dee920b22",
+    "C:\\Users\\tjdwo\\.codex\\skills\\joedesign\\scripts\\harness\\execution.py": "692c66d613debea9f26111907f84f2d1b492985250937690439b562b607fa7ef",
+    "C:\\Users\\tjdwo\\.codex\\skills\\joedesign\\scripts\\harness\\impact.py": "8454b4fd8df5ebb97d04e015ecc35edd4a21651f2cfaf049943da3e2bd4b774f",
+    "C:\\Users\\tjdwo\\.codex\\skills\\joedesign\\scripts\\harness\\io.py": "6579dda892f684319897ae8ca87f0f192bc32715ae6a5d5921966137a5dfaba4",
+    "C:\\Users\\tjdwo\\.codex\\skills\\joedesign\\scripts\\harness\\pipeline.py": "9608a7367cb40cf60fb17ba5d2da12bde9b88fac5410a369e52fe78a7e8accd6",
+    "C:\\Users\\tjdwo\\.codex\\skills\\joedesign\\scripts\\harness\\references.py": "50f44f6b8bd4509f8918b52141f3232b95040a3bd5db9d766b205813ec93ea20",
+    "C:\\Users\\tjdwo\\.codex\\skills\\joedesign\\scripts\\harness\\runner.py": "353ad461994bcc99ab0a8fa76c47fe7cc5dd88b6ab28980cec2f91a02a87f7b2",
+    "C:\\Users\\tjdwo\\.codex\\skills\\joedesign\\scripts\\harness\\__init__.py": "065c95c4c3cb07e74eca0807874c2bfb6b974950a14ff808c05d8a2abcbf1778",
+    "D:\\JOEWRKS\\JOEDESIGN\\.local\\f05-impact-20261013\\real-v1\\summary.json": "50e05475625d93fdf3b817cf7ce2a3fda55a0b23850ea2ff4a0fa067bb6141e5",
+    "D:\\JOEWRKS\\JOEDESIGN\\.local\\f05-impact-20261013\\real-v1\\P01\\authority-before.md": "51a77274a630ca7831fe029a65add33f549bd573cb56bf962ec58c222edfbef5",
+    "D:\\JOEWRKS\\JOEDESIGN\\.local\\f05-impact-20261013\\real-v1\\P01\\capture-manifest.json": "214e1d967165d079786ed06c6ae4c4edc8259547607c471ebd3da9c13020d7d4",
+    "D:\\JOEWRKS\\JOEDESIGN\\.local\\f05-impact-20261013\\real-v1\\P01\\capture-process.json": "0734f70e8e81d0427abd5b257f2876a36dda78aa3701eb0073f24689a6eccd1b",
+    "D:\\JOEWRKS\\JOEDESIGN\\.local\\f05-impact-20261013\\real-v1\\P01\\DESIGN.md": "f24e501ff180d7c4ac175b9518b3040b7915fc84052a1e1c4f73aa2d824a1041",
+    "D:\\JOEWRKS\\JOEDESIGN\\.local\\f05-impact-20261013\\real-v1\\P01\\diagnostic-process.json": "b82ff9299fb3a5c1740ddd0449746d5ec4d361e6545582d69a1534a6a16dfe7b",
+    "D:\\JOEWRKS\\JOEDESIGN\\.local\\f05-impact-20261013\\real-v1\\P01\\impact.json": "06ec3a44cd997726be4659323636ae76f5d309dd1848b1761de836e089a41c03",
+    "D:\\JOEWRKS\\JOEDESIGN\\.local\\f05-impact-20261013\\real-v1\\P01\\index.html": "972b5987cfd793ea113246b1726f0b106b38586881824e31d585c8ac639557d8",
+    "D:\\JOEWRKS\\JOEDESIGN\\.local\\f05-impact-20261013\\real-v1\\P01\\new.json": "8523be5fda38367ea1463f581388b69dd47c44438a20116a11fa5003eaeb1174",
+    "D:\\JOEWRKS\\JOEDESIGN\\.local\\f05-impact-20261013\\real-v1\\P01\\old-result.json": "01760c5dee4bb8a2bd3224fac3a12cff9c3ca485023551798ce7800419afad9e",
+    "D:\\JOEWRKS\\JOEDESIGN\\.local\\f05-impact-20261013\\real-v1\\P01\\old.json": "cc17b0d20246191ca7ee0622c78dcdae0945b9466cca2439fd71b8d6c632b4bc",
+    "D:\\JOEWRKS\\JOEDESIGN\\.local\\f05-impact-20261013\\real-v1\\P01\\request.json": "7341d964516cbf63a5f9ce334a3fccb386921bb7fcce93aa5951d4aa70d5d445",
+    "D:\\JOEWRKS\\JOEDESIGN\\.local\\f05-impact-20261013\\real-v1\\P01\\review.json": "e0d75f467bf6b0b868eabec608d772876c19881f1832c255b660f9da433cc4fb",
+    "D:\\JOEWRKS\\JOEDESIGN\\.local\\f05-impact-20261013\\real-v1\\P01\\served-process.json": "0734f70e8e81d0427abd5b257f2876a36dda78aa3701eb0073f24689a6eccd1b",
+    "D:\\JOEWRKS\\JOEDESIGN\\.local\\f05-impact-20261013\\real-v1\\P01\\served.json": "73795fce1affb478c4b6c7e9aa524905c750a9f4eba0eab639512a9a3d496a33",
+    "D:\\JOEWRKS\\JOEDESIGN\\.local\\f05-impact-20261013\\real-v1\\P02\\authority-before.md": "51a77274a630ca7831fe029a65add33f549bd573cb56bf962ec58c222edfbef5",
+    "D:\\JOEWRKS\\JOEDESIGN\\.local\\f05-impact-20261013\\real-v1\\P02\\capture-manifest.json": "7114d719424a66fa3808b041861a03e1b29940434fa62f269d48a2cda7508e2d",
+    "D:\\JOEWRKS\\JOEDESIGN\\.local\\f05-impact-20261013\\real-v1\\P02\\capture-process.json": "0734f70e8e81d0427abd5b257f2876a36dda78aa3701eb0073f24689a6eccd1b",
+    "D:\\JOEWRKS\\JOEDESIGN\\.local\\f05-impact-20261013\\real-v1\\P02\\DESIGN.md": "4d50fca29ad2384d0b887b25b2c42b3a46b105a56f43239ce865ac2a02378614",
+    "D:\\JOEWRKS\\JOEDESIGN\\.local\\f05-impact-20261013\\real-v1\\P02\\diagnostic-process.json": "8b9749efdc7e528a52cbde0760bdc98185d6fde860711b387151211d1f5ebd11",
+    "D:\\JOEWRKS\\JOEDESIGN\\.local\\f05-impact-20261013\\real-v1\\P02\\impact.json": "0ac04df6aa41204148b88ae11580b767556141072063241a10dc5e2ae4527c5e",
+    "D:\\JOEWRKS\\JOEDESIGN\\.local\\f05-impact-20261013\\real-v1\\P02\\index.html": "972b5987cfd793ea113246b1726f0b106b38586881824e31d585c8ac639557d8",
+    "D:\\JOEWRKS\\JOEDESIGN\\.local\\f05-impact-20261013\\real-v1\\P02\\new.json": "25df3db03810f4487223f9518a64f6a7acf1ffc156a15f1a366285e4fd9b9b52",
+    "D:\\JOEWRKS\\JOEDESIGN\\.local\\f05-impact-20261013\\real-v1\\P02\\old-result.json": "82a9a6e4d1767884c7b4c0be13bdee0624bb50112adc49fc95cca78e753d489b",
+    "D:\\JOEWRKS\\JOEDESIGN\\.local\\f05-impact-20261013\\real-v1\\P02\\old.json": "cc17b0d20246191ca7ee0622c78dcdae0945b9466cca2439fd71b8d6c632b4bc",
+    "D:\\JOEWRKS\\JOEDESIGN\\.local\\f05-impact-20261013\\real-v1\\P02\\request.json": "79539f15cece9a7008c9c5732bb9d0a8027c6143302ff999b32e718c29ce1b9d",
+    "D:\\JOEWRKS\\JOEDESIGN\\.local\\f05-impact-20261013\\real-v1\\P02\\review.json": "d343b1ac0bd46124dcf718f93072b95bc30c78846028f25e55e90cff5a4fabe7",
+    "D:\\JOEWRKS\\JOEDESIGN\\.local\\f05-impact-20261013\\real-v1\\P02\\served-process.json": "0734f70e8e81d0427abd5b257f2876a36dda78aa3701eb0073f24689a6eccd1b",
+    "D:\\JOEWRKS\\JOEDESIGN\\.local\\f05-impact-20261013\\real-v1\\P02\\served.json": "55d851debb758f1134df26703ad85bf5d0565f448fd64fff2220a61d807162a3",
+    "D:\\JOEWRKS\\JOEDESIGN\\.local\\f05-impact-20261013\\real-v1\\P01\\old-capture\\0-full.png": "336a4eceaaad50b207f379875b68524385d47b11c8276b8630b9470df872d007",
+    "D:\\JOEWRKS\\JOEDESIGN\\.local\\f05-impact-20261013\\real-v1\\P01\\old-capture\\0-observation.json": "756809776d7509b18da1ce9c16e1ce158bed15ea128107d93a976c76da3acb85",
+    "D:\\JOEWRKS\\JOEDESIGN\\.local\\f05-impact-20261013\\real-v1\\P01\\old-capture\\0-result.png": "336a4eceaaad50b207f379875b68524385d47b11c8276b8630b9470df872d007",
+    "D:\\JOEWRKS\\JOEDESIGN\\.local\\f05-impact-20261013\\real-v1\\P01\\old-capture\\0-start.png": "336a4eceaaad50b207f379875b68524385d47b11c8276b8630b9470df872d007",
+    "D:\\JOEWRKS\\JOEDESIGN\\.local\\f05-impact-20261013\\real-v1\\P02\\old-capture\\0-full.png": "336a4eceaaad50b207f379875b68524385d47b11c8276b8630b9470df872d007",
+    "D:\\JOEWRKS\\JOEDESIGN\\.local\\f05-impact-20261013\\real-v1\\P02\\old-capture\\0-observation.json": "7d74a20f33c9ed7ddf21b0a0165dc790ee39e48e83af1939b521e3f25c7459f7",
+    "D:\\JOEWRKS\\JOEDESIGN\\.local\\f05-impact-20261013\\real-v1\\P02\\old-capture\\0-result.png": "336a4eceaaad50b207f379875b68524385d47b11c8276b8630b9470df872d007",
+    "D:\\JOEWRKS\\JOEDESIGN\\.local\\f05-impact-20261013\\real-v1\\P02\\old-capture\\0-start.png": "336a4eceaaad50b207f379875b68524385d47b11c8276b8630b9470df872d007",
+    "D:/JOEWRKS/JOEQASAM/evidence/t035-joe-implementation/f05-actual-manager.json": "edd5c3b09bb04b32dea6885dca8c6e2830a87459805d9573f0ff0ade50521026",
+    "C:\\Users\\tjdwo\\.codex\\skills\\joeness-setup\\scripts\\impact-review.mjs": "9cd8359daae4e0f68bcab688ae831e43d81a0b98bcb8ca10ed65a63d0e70cbc8",
+    "C:\\Users\\tjdwo\\.codex\\skills\\joeness-setup\\scripts\\review-gate.mjs": "7ad13a9020a57aa0a6396348f8575229d7cac076a5d5a6c89178d26c3b6d9bd2"
+  },
+  "source_unchanged": true,
+  "results": [
+    {
+      "case": "P01",
+      "producer_command": [
+        "python",
+        "-B",
+        "-X",
+        "utf8",
+        "C:\\Users\\tjdwo\\.codex\\skills\\joedesign\\scripts\\harness_cli.py",
+        "inspect-impact",
+        "--project",
+        "D:\\JOEWRKS\\JOEDESIGN\\.local\\f05-impact-20261013\\real-v1\\P01",
+        "--request",
+        "D:\\JOEWRKS\\JOEDESIGN\\.local\\f05-impact-20261013\\real-v1\\P01\\request.json",
+        "--request-sha256",
+        "7341d964516cbf63a5f9ce334a3fccb386921bb7fcce93aa5951d4aa70d5d445",
+        "--review-sha256",
+        "e0d75f467bf6b0b868eabec608d772876c19881f1832c255b660f9da433cc4fb"
+      ],
+      "producer_exit": 0,
+      "impact_sha256": "9900175d1bf389c5f98c7a7a842dfd47385dbac3dc7008cc2324c6d8cdc837b3",
+      "consumer_command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "C:\\Users\\tjdwo\\.codex\\skills\\joeness-setup\\scripts\\impact-review.mjs",
+        "--root",
+        "D:\\JOEWRKS\\JOEDESIGN\\.local\\f05-impact-20261013\\real-v1\\P01",
+        "--evidence-root",
+        "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-impact-link-JqJeV4\\P01",
+        "--evidence-root",
+        "D:\\JOEWRKS\\JOEQASAM\\evidence\\t035-joe-implementation",
+        "--impact",
+        "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-impact-link-JqJeV4\\P01\\impact.json",
+        "--impact-sha256",
+        "9900175d1bf389c5f98c7a7a842dfd47385dbac3dc7008cc2324c6d8cdc837b3",
+        "--impact-review",
+        "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-impact-link-JqJeV4\\P01\\consumer-review.json",
+        "--impact-review-sha256",
+        "cf4d0fa7e32911bc79b4bb7c82473aa887db9daa7086c64f98a5a98dbaea3131",
+        "--baseline",
+        "new.json",
+        "--baseline-sha256",
+        "8523be5fda38367ea1463f581388b69dd47c44438a20116a11fa5003eaeb1174",
+        "--previous-baseline",
+        "old.json",
+        "--previous-baseline-sha256",
+        "cc17b0d20246191ca7ee0622c78dcdae0945b9466cca2439fd71b8d6c632b4bc",
+        "--old-result",
+        "old-result.json",
+        "--old-result-sha256",
+        "01760c5dee4bb8a2bd3224fac3a12cff9c3ca485023551798ce7800419afad9e"
+      ],
+      "consumer_exit": 0,
+      "output": {
+        "schema": "joeness.impact-consumption.v1",
+        "valid": true,
+        "allowed": false,
+        "reuse_authorized": false,
+        "project_complete": false,
+        "scope_id": "spacing-fixture",
+        "candidate_check_ids": [
+          "c0",
+          "c1",
+          "c2",
+          "c3"
+        ],
+        "checks": [
+          {
+            "check_id": "c0",
+            "classification": "reusable-candidate",
+            "reasons": [
+              "This check still covers the same web spacing rule; appended editorial/print-only material introduces no web default or exception."
+            ]
+          },
+          {
+            "check_id": "c1",
+            "classification": "reusable-candidate",
+            "reasons": [
+              "This check still covers the same web spacing rule; appended editorial/print-only material introduces no web default or exception."
+            ]
+          },
+          {
+            "check_id": "c2",
+            "classification": "reusable-candidate",
+            "reasons": [
+              "This check still covers the same web spacing rule; appended editorial/print-only material introduces no web default or exception."
+            ]
+          },
+          {
+            "check_id": "c3",
+            "classification": "reusable-candidate",
+            "reasons": [
+              "This check still covers the same web spacing rule; appended editorial/print-only material introduces no web default or exception."
+            ]
+          }
+        ],
+        "errors": [],
+        "limits": [
+          "Diagnostic only; existing gate and user acceptance remain unchanged.",
+          "Local pins and review contexts do not authenticate actors, measurements or dependency completeness."
+        ]
+      },
+      "gate_command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "C:\\Users\\tjdwo\\.codex\\skills\\joeness-setup\\scripts\\review-gate.mjs",
+        "--root",
+        "D:\\JOEWRKS\\JOEDESIGN\\.local\\f05-impact-20261013\\real-v1\\P01",
+        "--baseline",
+        "new.json",
+        "--baseline-sha256",
+        "8523be5fda38367ea1463f581388b69dd47c44438a20116a11fa5003eaeb1174",
+        "--previous-baseline",
+        "old.json",
+        "--previous-baseline-sha256",
+        "cc17b0d20246191ca7ee0622c78dcdae0945b9466cca2439fd71b8d6c632b4bc",
+        "--result",
+        "old-result.json",
+        "--claim",
+        "visual"
+      ],
+      "gate_exit": 2,
+      "gate_output": {
+        "schema": "joeness.review-gate.v1",
+        "scope_id": "spacing-fixture",
+        "claim": "visual",
+        "allowed": false,
+        "required_scope_complete": false,
+        "project_complete": false,
+        "lanes": {
+          "implementation": "UNVERIFIED",
+          "technical": "UNVERIFIED",
+          "visual": "STALE",
+          "user_acceptance": "NOT_GRANTED"
+        },
+        "checks": [
+          {
+            "check_id": "c0",
+            "lane": "visual",
+            "status": "STALE",
+            "reason": "Required criterion/target/dependencies or shared baseline context changed",
+            "input_fingerprint": "b9d820a2fee802af3484d9405e46adfdc14c454c99488837e700499e7bc98a8e"
+          },
+          {
+            "check_id": "c1",
+            "lane": "visual",
+            "status": "STALE",
+            "reason": "Required criterion/target/dependencies or shared baseline context changed",
+            "input_fingerprint": "b9d820a2fee802af3484d9405e46adfdc14c454c99488837e700499e7bc98a8e"
+          },
+          {
+            "check_id": "c2",
+            "lane": "visual",
+            "status": "STALE",
+            "reason": "Required criterion/target/dependencies or shared baseline context changed",
+            "input_fingerprint": "b9d820a2fee802af3484d9405e46adfdc14c454c99488837e700499e7bc98a8e"
+          },
+          {
+            "check_id": "c3",
+            "lane": "visual",
+            "status": "STALE",
+            "reason": "Required criterion/target/dependencies or shared baseline context changed",
+            "input_fingerprint": "b9d820a2fee802af3484d9405e46adfdc14c454c99488837e700499e7bc98a8e"
+          }
+        ],
+        "errors": [],
+        "limits": [
+          "No visual re-judgment or user-identity authentication",
+          "Pinned scope completeness and dependency discovery require authorized review",
+          "Explicit CLI only; direct Markdown edits and natural-language claims are not intercepted"
+        ]
+      },
+      "met": true
+    },
+    {
+      "case": "P01-reviewed-visual",
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "C:\\Users\\tjdwo\\.codex\\skills\\joeness-setup\\scripts\\review-gate.mjs",
+        "--root",
+        "D:\\JOEWRKS\\JOEDESIGN\\.local\\f05-impact-20261013\\real-v1\\P01",
+        "--baseline",
+        "new.json",
+        "--baseline-sha256",
+        "8523be5fda38367ea1463f581388b69dd47c44438a20116a11fa5003eaeb1174",
+        "--previous-baseline",
+        "old.json",
+        "--previous-baseline-sha256",
+        "cc17b0d20246191ca7ee0622c78dcdae0945b9466cca2439fd71b8d6c632b4bc",
+        "--result",
+        "old-result.json",
+        "--claim",
+        "visual",
+        "--evidence-root",
+        "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-impact-link-JqJeV4\\P01",
+        "--evidence-root",
+        "D:\\JOEWRKS\\JOEQASAM\\evidence\\t035-joe-implementation",
+        "--impact",
+        "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-impact-link-JqJeV4\\P01\\impact.json",
+        "--impact-sha256",
+        "9900175d1bf389c5f98c7a7a842dfd47385dbac3dc7008cc2324c6d8cdc837b3",
+        "--impact-review",
+        "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-impact-link-JqJeV4\\P01\\consumer-review.json",
+        "--impact-review-sha256",
+        "cf4d0fa7e32911bc79b4bb7c82473aa887db9daa7086c64f98a5a98dbaea3131",
+        "--old-result",
+        "old-result.json",
+        "--old-result-sha256",
+        "01760c5dee4bb8a2bd3224fac3a12cff9c3ca485023551798ce7800419afad9e"
+      ],
+      "exit": 0,
+      "output": {
+        "schema": "joeness.review-gate.v1",
+        "scope_id": "spacing-fixture",
+        "claim": "visual",
+        "allowed": true,
+        "required_scope_complete": false,
+        "project_complete": false,
+        "lanes": {
+          "implementation": "UNVERIFIED",
+          "technical": "UNVERIFIED",
+          "visual": "PASS",
+          "user_acceptance": "NOT_GRANTED"
+        },
+        "checks": [
+          {
+            "check_id": "c0",
+            "lane": "visual",
+            "status": "PASS",
+            "reason": "Prior observation reused through exact independently reviewed transition; not a fresh render",
+            "input_fingerprint": "b9d820a2fee802af3484d9405e46adfdc14c454c99488837e700499e7bc98a8e"
+          },
+          {
+            "check_id": "c1",
+            "lane": "visual",
+            "status": "PASS",
+            "reason": "Prior observation reused through exact independently reviewed transition; not a fresh render",
+            "input_fingerprint": "b9d820a2fee802af3484d9405e46adfdc14c454c99488837e700499e7bc98a8e"
+          },
+          {
+            "check_id": "c2",
+            "lane": "visual",
+            "status": "PASS",
+            "reason": "Prior observation reused through exact independently reviewed transition; not a fresh render",
+            "input_fingerprint": "b9d820a2fee802af3484d9405e46adfdc14c454c99488837e700499e7bc98a8e"
+          },
+          {
+            "check_id": "c3",
+            "lane": "visual",
+            "status": "PASS",
+            "reason": "Prior observation reused through exact independently reviewed transition; not a fresh render",
+            "input_fingerprint": "b9d820a2fee802af3484d9405e46adfdc14c454c99488837e700499e7bc98a8e"
+          }
+        ],
+        "errors": [],
+        "impact_reuse": {
+          "diagnostic_valid": true,
+          "candidate_check_ids": [
+            "c0",
+            "c1",
+            "c2",
+            "c3"
+          ],
+          "reused_check_ids": [
+            "c0",
+            "c1",
+            "c2",
+            "c3"
+          ]
+        },
+        "limits": [
+          "No visual re-judgment or user-identity authentication",
+          "Pinned scope completeness and dependency discovery require authorized review",
+          "Explicit CLI only; direct Markdown edits and natural-language claims are not intercepted"
+        ]
+      },
+      "met": true
+    },
+    {
+      "case": "P01-complete-without-acceptance",
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "C:\\Users\\tjdwo\\.codex\\skills\\joeness-setup\\scripts\\review-gate.mjs",
+        "--root",
+        "D:\\JOEWRKS\\JOEDESIGN\\.local\\f05-impact-20261013\\real-v1\\P01",
+        "--baseline",
+        "new.json",
+        "--baseline-sha256",
+        "8523be5fda38367ea1463f581388b69dd47c44438a20116a11fa5003eaeb1174",
+        "--previous-baseline",
+        "old.json",
+        "--previous-baseline-sha256",
+        "cc17b0d20246191ca7ee0622c78dcdae0945b9466cca2439fd71b8d6c632b4bc",
+        "--result",
+        "old-result.json",
+        "--claim",
+        "complete",
+        "--evidence-root",
+        "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-impact-link-JqJeV4\\P01",
+        "--evidence-root",
+        "D:\\JOEWRKS\\JOEQASAM\\evidence\\t035-joe-implementation",
+        "--impact",
+        "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-impact-link-JqJeV4\\P01\\impact.json",
+        "--impact-sha256",
+        "9900175d1bf389c5f98c7a7a842dfd47385dbac3dc7008cc2324c6d8cdc837b3",
+        "--impact-review",
+        "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-impact-link-JqJeV4\\P01\\consumer-review.json",
+        "--impact-review-sha256",
+        "cf4d0fa7e32911bc79b4bb7c82473aa887db9daa7086c64f98a5a98dbaea3131",
+        "--old-result",
+        "old-result.json",
+        "--old-result-sha256",
+        "01760c5dee4bb8a2bd3224fac3a12cff9c3ca485023551798ce7800419afad9e"
+      ],
+      "exit": 2,
+      "output": {
+        "schema": "joeness.review-gate.v1",
+        "scope_id": "spacing-fixture",
+        "claim": "complete",
+        "allowed": false,
+        "required_scope_complete": false,
+        "project_complete": false,
+        "lanes": {
+          "implementation": "UNVERIFIED",
+          "technical": "UNVERIFIED",
+          "visual": "PASS",
+          "user_acceptance": "NOT_GRANTED"
+        },
+        "checks": [
+          {
+            "check_id": "c0",
+            "lane": "visual",
+            "status": "PASS",
+            "reason": "Prior observation reused through exact independently reviewed transition; not a fresh render",
+            "input_fingerprint": "b9d820a2fee802af3484d9405e46adfdc14c454c99488837e700499e7bc98a8e"
+          },
+          {
+            "check_id": "c1",
+            "lane": "visual",
+            "status": "PASS",
+            "reason": "Prior observation reused through exact independently reviewed transition; not a fresh render",
+            "input_fingerprint": "b9d820a2fee802af3484d9405e46adfdc14c454c99488837e700499e7bc98a8e"
+          },
+          {
+            "check_id": "c2",
+            "lane": "visual",
+            "status": "PASS",
+            "reason": "Prior observation reused through exact independently reviewed transition; not a fresh render",
+            "input_fingerprint": "b9d820a2fee802af3484d9405e46adfdc14c454c99488837e700499e7bc98a8e"
+          },
+          {
+            "check_id": "c3",
+            "lane": "visual",
+            "status": "PASS",
+            "reason": "Prior observation reused through exact independently reviewed transition; not a fresh render",
+            "input_fingerprint": "b9d820a2fee802af3484d9405e46adfdc14c454c99488837e700499e7bc98a8e"
+          }
+        ],
+        "errors": [],
+        "impact_reuse": {
+          "diagnostic_valid": true,
+          "candidate_check_ids": [
+            "c0",
+            "c1",
+            "c2",
+            "c3"
+          ],
+          "reused_check_ids": [
+            "c0",
+            "c1",
+            "c2",
+            "c3"
+          ]
+        },
+        "limits": [
+          "No visual re-judgment or user-identity authentication",
+          "Pinned scope completeness and dependency discovery require authorized review",
+          "Explicit CLI only; direct Markdown edits and natural-language claims are not intercepted"
+        ]
+      },
+      "met": true
+    },
+    {
+      "case": "P01-missing-review-pin",
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "C:\\Users\\tjdwo\\.codex\\skills\\joeness-setup\\scripts\\review-gate.mjs",
+        "--root",
+        "D:\\JOEWRKS\\JOEDESIGN\\.local\\f05-impact-20261013\\real-v1\\P01",
+        "--baseline",
+        "new.json",
+        "--baseline-sha256",
+        "8523be5fda38367ea1463f581388b69dd47c44438a20116a11fa5003eaeb1174",
+        "--previous-baseline",
+        "old.json",
+        "--previous-baseline-sha256",
+        "cc17b0d20246191ca7ee0622c78dcdae0945b9466cca2439fd71b8d6c632b4bc",
+        "--result",
+        "old-result.json",
+        "--claim",
+        "visual",
+        "--evidence-root",
+        "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-impact-link-JqJeV4\\P01",
+        "--evidence-root",
+        "D:\\JOEWRKS\\JOEQASAM\\evidence\\t035-joe-implementation",
+        "--impact",
+        "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-impact-link-JqJeV4\\P01\\impact.json",
+        "--impact-sha256",
+        "9900175d1bf389c5f98c7a7a842dfd47385dbac3dc7008cc2324c6d8cdc837b3",
+        "--impact-review",
+        "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-impact-link-JqJeV4\\P01\\consumer-review.json",
+        "--old-result",
+        "old-result.json",
+        "--old-result-sha256",
+        "01760c5dee4bb8a2bd3224fac3a12cff9c3ca485023551798ce7800419afad9e"
+      ],
+      "exit": 2,
+      "output": {
+        "schema": "joeness.review-gate.v1",
+        "allowed": false,
+        "required_scope_complete": false,
+        "project_complete": false,
+        "errors": [
+          "Impact reuse needs every independent pin and previous baseline"
+        ]
+      },
+      "met": true
+    },
+    {
+      "case": "P01-changed-runtime",
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "C:\\Users\\tjdwo\\.codex\\skills\\joeness-setup\\scripts\\review-gate.mjs",
+        "--root",
+        "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-impact-link-JqJeV4\\P01\\changed-project",
+        "--baseline",
+        "new.json",
+        "--baseline-sha256",
+        "8523be5fda38367ea1463f581388b69dd47c44438a20116a11fa5003eaeb1174",
+        "--previous-baseline",
+        "old.json",
+        "--previous-baseline-sha256",
+        "cc17b0d20246191ca7ee0622c78dcdae0945b9466cca2439fd71b8d6c632b4bc",
+        "--result",
+        "old-result.json",
+        "--claim",
+        "visual",
+        "--evidence-root",
+        "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-impact-link-JqJeV4\\P01",
+        "--evidence-root",
+        "D:\\JOEWRKS\\JOEQASAM\\evidence\\t035-joe-implementation",
+        "--impact",
+        "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-impact-link-JqJeV4\\P01\\impact.json",
+        "--impact-sha256",
+        "9900175d1bf389c5f98c7a7a842dfd47385dbac3dc7008cc2324c6d8cdc837b3",
+        "--impact-review",
+        "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-impact-link-JqJeV4\\P01\\consumer-review.json",
+        "--impact-review-sha256",
+        "cf4d0fa7e32911bc79b4bb7c82473aa887db9daa7086c64f98a5a98dbaea3131",
+        "--old-result",
+        "old-result.json",
+        "--old-result-sha256",
+        "01760c5dee4bb8a2bd3224fac3a12cff9c3ca485023551798ce7800419afad9e",
+        "--evidence-root",
+        "D:\\JOEWRKS\\JOEDESIGN\\.local\\f05-impact-20261013\\real-v1\\P01"
+      ],
+      "exit": 2,
+      "output": {
+        "schema": "joeness.review-gate.v1",
+        "scope_id": "spacing-fixture",
+        "claim": "visual",
+        "allowed": false,
+        "required_scope_complete": false,
+        "project_complete": false,
+        "lanes": {
+          "implementation": "UNVERIFIED",
+          "technical": "UNVERIFIED",
+          "visual": "STALE",
+          "user_acceptance": "NOT_GRANTED"
+        },
+        "checks": [
+          {
+            "check_id": "c0",
+            "lane": "visual",
+            "status": "STALE",
+            "reason": "Required criterion/target/dependencies or shared baseline context changed",
+            "input_fingerprint": "22b696e4b5486b967a424dfc518c39599dfb71b562d3531dc1b2d3aca8df74b0"
+          },
+          {
+            "check_id": "c1",
+            "lane": "visual",
+            "status": "STALE",
+            "reason": "Required criterion/target/dependencies or shared baseline context changed",
+            "input_fingerprint": "22b696e4b5486b967a424dfc518c39599dfb71b562d3531dc1b2d3aca8df74b0"
+          },
+          {
+            "check_id": "c2",
+            "lane": "visual",
+            "status": "STALE",
+            "reason": "Required criterion/target/dependencies or shared baseline context changed",
+            "input_fingerprint": "22b696e4b5486b967a424dfc518c39599dfb71b562d3531dc1b2d3aca8df74b0"
+          },
+          {
+            "check_id": "c3",
+            "lane": "visual",
+            "status": "STALE",
+            "reason": "Required criterion/target/dependencies or shared baseline context changed",
+            "input_fingerprint": "22b696e4b5486b967a424dfc518c39599dfb71b562d3531dc1b2d3aca8df74b0"
+          }
+        ],
+        "errors": [],
+        "impact_reuse": {
+          "diagnostic_valid": true,
+          "candidate_check_ids": [],
+          "reused_check_ids": []
+        },
+        "limits": [
+          "No visual re-judgment or user-identity authentication",
+          "Pinned scope completeness and dependency discovery require authorized review",
+          "Explicit CLI only; direct Markdown edits and natural-language claims are not intercepted"
+        ]
+      },
+      "met": true
+    },
+    {
+      "case": "P02",
+      "producer_command": [
+        "python",
+        "-B",
+        "-X",
+        "utf8",
+        "C:\\Users\\tjdwo\\.codex\\skills\\joedesign\\scripts\\harness_cli.py",
+        "inspect-impact",
+        "--project",
+        "D:\\JOEWRKS\\JOEDESIGN\\.local\\f05-impact-20261013\\real-v1\\P02",
+        "--request",
+        "D:\\JOEWRKS\\JOEDESIGN\\.local\\f05-impact-20261013\\real-v1\\P02\\request.json",
+        "--request-sha256",
+        "79539f15cece9a7008c9c5732bb9d0a8027c6143302ff999b32e718c29ce1b9d",
+        "--review-sha256",
+        "d343b1ac0bd46124dcf718f93072b95bc30c78846028f25e55e90cff5a4fabe7"
+      ],
+      "producer_exit": 0,
+      "impact_sha256": "990d5b088905f99effee362ed79b0eb4f29030181dc7e65735d23d7ebd707335",
+      "consumer_command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "C:\\Users\\tjdwo\\.codex\\skills\\joeness-setup\\scripts\\impact-review.mjs",
+        "--root",
+        "D:\\JOEWRKS\\JOEDESIGN\\.local\\f05-impact-20261013\\real-v1\\P02",
+        "--evidence-root",
+        "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-impact-link-JqJeV4\\P02",
+        "--evidence-root",
+        "D:\\JOEWRKS\\JOEQASAM\\evidence\\t035-joe-implementation",
+        "--impact",
+        "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-impact-link-JqJeV4\\P02\\impact.json",
+        "--impact-sha256",
+        "990d5b088905f99effee362ed79b0eb4f29030181dc7e65735d23d7ebd707335",
+        "--impact-review",
+        "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-impact-link-JqJeV4\\P02\\consumer-review.json",
+        "--impact-review-sha256",
+        "477ddf537d452b1a20e2c138fb0a73de507f2b36a4e7afafa2013e6030be5e93",
+        "--baseline",
+        "new.json",
+        "--baseline-sha256",
+        "25df3db03810f4487223f9518a64f6a7acf1ffc156a15f1a366285e4fd9b9b52",
+        "--previous-baseline",
+        "old.json",
+        "--previous-baseline-sha256",
+        "cc17b0d20246191ca7ee0622c78dcdae0945b9466cca2439fd71b8d6c632b4bc",
+        "--old-result",
+        "old-result.json",
+        "--old-result-sha256",
+        "82a9a6e4d1767884c7b4c0be13bdee0624bb50112adc49fc95cca78e753d489b"
+      ],
+      "consumer_exit": 0,
+      "output": {
+        "schema": "joeness.impact-consumption.v1",
+        "valid": true,
+        "allowed": false,
+        "reuse_authorized": false,
+        "project_complete": false,
+        "scope_id": "spacing-fixture",
+        "candidate_check_ids": [
+          "c0",
+          "c1",
+          "c2",
+          "c3"
+        ],
+        "checks": [
+          {
+            "check_id": "c0",
+            "classification": "reusable-candidate",
+            "reasons": [
+              "This check still covers the same web spacing rule; appended editorial/print-only material introduces no web default or exception."
+            ]
+          },
+          {
+            "check_id": "c1",
+            "classification": "reusable-candidate",
+            "reasons": [
+              "This check still covers the same web spacing rule; appended editorial/print-only material introduces no web default or exception."
+            ]
+          },
+          {
+            "check_id": "c2",
+            "classification": "reusable-candidate",
+            "reasons": [
+              "This check still covers the same web spacing rule; appended editorial/print-only material introduces no web default or exception."
+            ]
+          },
+          {
+            "check_id": "c3",
+            "classification": "reusable-candidate",
+            "reasons": [
+              "This check still covers the same web spacing rule; appended editorial/print-only material introduces no web default or exception."
+            ]
+          }
+        ],
+        "errors": [],
+        "limits": [
+          "Diagnostic only; existing gate and user acceptance remain unchanged.",
+          "Local pins and review contexts do not authenticate actors, measurements or dependency completeness."
+        ]
+      },
+      "gate_command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "C:\\Users\\tjdwo\\.codex\\skills\\joeness-setup\\scripts\\review-gate.mjs",
+        "--root",
+        "D:\\JOEWRKS\\JOEDESIGN\\.local\\f05-impact-20261013\\real-v1\\P02",
+        "--baseline",
+        "new.json",
+        "--baseline-sha256",
+        "25df3db03810f4487223f9518a64f6a7acf1ffc156a15f1a366285e4fd9b9b52",
+        "--previous-baseline",
+        "old.json",
+        "--previous-baseline-sha256",
+        "cc17b0d20246191ca7ee0622c78dcdae0945b9466cca2439fd71b8d6c632b4bc",
+        "--result",
+        "old-result.json",
+        "--claim",
+        "visual"
+      ],
+      "gate_exit": 2,
+      "gate_output": {
+        "schema": "joeness.review-gate.v1",
+        "scope_id": "spacing-fixture",
+        "claim": "visual",
+        "allowed": false,
+        "required_scope_complete": false,
+        "project_complete": false,
+        "lanes": {
+          "implementation": "UNVERIFIED",
+          "technical": "UNVERIFIED",
+          "visual": "STALE",
+          "user_acceptance": "NOT_GRANTED"
+        },
+        "checks": [
+          {
+            "check_id": "c0",
+            "lane": "visual",
+            "status": "STALE",
+            "reason": "Required criterion/target/dependencies or shared baseline context changed",
+            "input_fingerprint": "b9d820a2fee802af3484d9405e46adfdc14c454c99488837e700499e7bc98a8e"
+          },
+          {
+            "check_id": "c1",
+            "lane": "visual",
+            "status": "STALE",
+            "reason": "Required criterion/target/dependencies or shared baseline context changed",
+            "input_fingerprint": "b9d820a2fee802af3484d9405e46adfdc14c454c99488837e700499e7bc98a8e"
+          },
+          {
+            "check_id": "c2",
+            "lane": "visual",
+            "status": "STALE",
+            "reason": "Required criterion/target/dependencies or shared baseline context changed",
+            "input_fingerprint": "b9d820a2fee802af3484d9405e46adfdc14c454c99488837e700499e7bc98a8e"
+          },
+          {
+            "check_id": "c3",
+            "lane": "visual",
+            "status": "STALE",
+            "reason": "Required criterion/target/dependencies or shared baseline context changed",
+            "input_fingerprint": "b9d820a2fee802af3484d9405e46adfdc14c454c99488837e700499e7bc98a8e"
+          }
+        ],
+        "errors": [],
+        "limits": [
+          "No visual re-judgment or user-identity authentication",
+          "Pinned scope completeness and dependency discovery require authorized review",
+          "Explicit CLI only; direct Markdown edits and natural-language claims are not intercepted"
+        ]
+      },
+      "met": true
+    },
+    {
+      "case": "P02-reviewed-visual",
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "C:\\Users\\tjdwo\\.codex\\skills\\joeness-setup\\scripts\\review-gate.mjs",
+        "--root",
+        "D:\\JOEWRKS\\JOEDESIGN\\.local\\f05-impact-20261013\\real-v1\\P02",
+        "--baseline",
+        "new.json",
+        "--baseline-sha256",
+        "25df3db03810f4487223f9518a64f6a7acf1ffc156a15f1a366285e4fd9b9b52",
+        "--previous-baseline",
+        "old.json",
+        "--previous-baseline-sha256",
+        "cc17b0d20246191ca7ee0622c78dcdae0945b9466cca2439fd71b8d6c632b4bc",
+        "--result",
+        "old-result.json",
+        "--claim",
+        "visual",
+        "--evidence-root",
+        "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-impact-link-JqJeV4\\P02",
+        "--evidence-root",
+        "D:\\JOEWRKS\\JOEQASAM\\evidence\\t035-joe-implementation",
+        "--impact",
+        "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-impact-link-JqJeV4\\P02\\impact.json",
+        "--impact-sha256",
+        "990d5b088905f99effee362ed79b0eb4f29030181dc7e65735d23d7ebd707335",
+        "--impact-review",
+        "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-impact-link-JqJeV4\\P02\\consumer-review.json",
+        "--impact-review-sha256",
+        "477ddf537d452b1a20e2c138fb0a73de507f2b36a4e7afafa2013e6030be5e93",
+        "--old-result",
+        "old-result.json",
+        "--old-result-sha256",
+        "82a9a6e4d1767884c7b4c0be13bdee0624bb50112adc49fc95cca78e753d489b"
+      ],
+      "exit": 0,
+      "output": {
+        "schema": "joeness.review-gate.v1",
+        "scope_id": "spacing-fixture",
+        "claim": "visual",
+        "allowed": true,
+        "required_scope_complete": false,
+        "project_complete": false,
+        "lanes": {
+          "implementation": "UNVERIFIED",
+          "technical": "UNVERIFIED",
+          "visual": "PASS",
+          "user_acceptance": "NOT_GRANTED"
+        },
+        "checks": [
+          {
+            "check_id": "c0",
+            "lane": "visual",
+            "status": "PASS",
+            "reason": "Prior observation reused through exact independently reviewed transition; not a fresh render",
+            "input_fingerprint": "b9d820a2fee802af3484d9405e46adfdc14c454c99488837e700499e7bc98a8e"
+          },
+          {
+            "check_id": "c1",
+            "lane": "visual",
+            "status": "PASS",
+            "reason": "Prior observation reused through exact independently reviewed transition; not a fresh render",
+            "input_fingerprint": "b9d820a2fee802af3484d9405e46adfdc14c454c99488837e700499e7bc98a8e"
+          },
+          {
+            "check_id": "c2",
+            "lane": "visual",
+            "status": "PASS",
+            "reason": "Prior observation reused through exact independently reviewed transition; not a fresh render",
+            "input_fingerprint": "b9d820a2fee802af3484d9405e46adfdc14c454c99488837e700499e7bc98a8e"
+          },
+          {
+            "check_id": "c3",
+            "lane": "visual",
+            "status": "PASS",
+            "reason": "Prior observation reused through exact independently reviewed transition; not a fresh render",
+            "input_fingerprint": "b9d820a2fee802af3484d9405e46adfdc14c454c99488837e700499e7bc98a8e"
+          }
+        ],
+        "errors": [],
+        "impact_reuse": {
+          "diagnostic_valid": true,
+          "candidate_check_ids": [
+            "c0",
+            "c1",
+            "c2",
+            "c3"
+          ],
+          "reused_check_ids": [
+            "c0",
+            "c1",
+            "c2",
+            "c3"
+          ]
+        },
+        "limits": [
+          "No visual re-judgment or user-identity authentication",
+          "Pinned scope completeness and dependency discovery require authorized review",
+          "Explicit CLI only; direct Markdown edits and natural-language claims are not intercepted"
+        ]
+      },
+      "met": true
+    },
+    {
+      "case": "P02-complete-without-acceptance",
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "C:\\Users\\tjdwo\\.codex\\skills\\joeness-setup\\scripts\\review-gate.mjs",
+        "--root",
+        "D:\\JOEWRKS\\JOEDESIGN\\.local\\f05-impact-20261013\\real-v1\\P02",
+        "--baseline",
+        "new.json",
+        "--baseline-sha256",
+        "25df3db03810f4487223f9518a64f6a7acf1ffc156a15f1a366285e4fd9b9b52",
+        "--previous-baseline",
+        "old.json",
+        "--previous-baseline-sha256",
+        "cc17b0d20246191ca7ee0622c78dcdae0945b9466cca2439fd71b8d6c632b4bc",
+        "--result",
+        "old-result.json",
+        "--claim",
+        "complete",
+        "--evidence-root",
+        "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-impact-link-JqJeV4\\P02",
+        "--evidence-root",
+        "D:\\JOEWRKS\\JOEQASAM\\evidence\\t035-joe-implementation",
+        "--impact",
+        "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-impact-link-JqJeV4\\P02\\impact.json",
+        "--impact-sha256",
+        "990d5b088905f99effee362ed79b0eb4f29030181dc7e65735d23d7ebd707335",
+        "--impact-review",
+        "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-impact-link-JqJeV4\\P02\\consumer-review.json",
+        "--impact-review-sha256",
+        "477ddf537d452b1a20e2c138fb0a73de507f2b36a4e7afafa2013e6030be5e93",
+        "--old-result",
+        "old-result.json",
+        "--old-result-sha256",
+        "82a9a6e4d1767884c7b4c0be13bdee0624bb50112adc49fc95cca78e753d489b"
+      ],
+      "exit": 2,
+      "output": {
+        "schema": "joeness.review-gate.v1",
+        "scope_id": "spacing-fixture",
+        "claim": "complete",
+        "allowed": false,
+        "required_scope_complete": false,
+        "project_complete": false,
+        "lanes": {
+          "implementation": "UNVERIFIED",
+          "technical": "UNVERIFIED",
+          "visual": "PASS",
+          "user_acceptance": "NOT_GRANTED"
+        },
+        "checks": [
+          {
+            "check_id": "c0",
+            "lane": "visual",
+            "status": "PASS",
+            "reason": "Prior observation reused through exact independently reviewed transition; not a fresh render",
+            "input_fingerprint": "b9d820a2fee802af3484d9405e46adfdc14c454c99488837e700499e7bc98a8e"
+          },
+          {
+            "check_id": "c1",
+            "lane": "visual",
+            "status": "PASS",
+            "reason": "Prior observation reused through exact independently reviewed transition; not a fresh render",
+            "input_fingerprint": "b9d820a2fee802af3484d9405e46adfdc14c454c99488837e700499e7bc98a8e"
+          },
+          {
+            "check_id": "c2",
+            "lane": "visual",
+            "status": "PASS",
+            "reason": "Prior observation reused through exact independently reviewed transition; not a fresh render",
+            "input_fingerprint": "b9d820a2fee802af3484d9405e46adfdc14c454c99488837e700499e7bc98a8e"
+          },
+          {
+            "check_id": "c3",
+            "lane": "visual",
+            "status": "PASS",
+            "reason": "Prior observation reused through exact independently reviewed transition; not a fresh render",
+            "input_fingerprint": "b9d820a2fee802af3484d9405e46adfdc14c454c99488837e700499e7bc98a8e"
+          }
+        ],
+        "errors": [],
+        "impact_reuse": {
+          "diagnostic_valid": true,
+          "candidate_check_ids": [
+            "c0",
+            "c1",
+            "c2",
+            "c3"
+          ],
+          "reused_check_ids": [
+            "c0",
+            "c1",
+            "c2",
+            "c3"
+          ]
+        },
+        "limits": [
+          "No visual re-judgment or user-identity authentication",
+          "Pinned scope completeness and dependency discovery require authorized review",
+          "Explicit CLI only; direct Markdown edits and natural-language claims are not intercepted"
+        ]
+      },
+      "met": true
+    },
+    {
+      "case": "P02-missing-review-pin",
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "C:\\Users\\tjdwo\\.codex\\skills\\joeness-setup\\scripts\\review-gate.mjs",
+        "--root",
+        "D:\\JOEWRKS\\JOEDESIGN\\.local\\f05-impact-20261013\\real-v1\\P02",
+        "--baseline",
+        "new.json",
+        "--baseline-sha256",
+        "25df3db03810f4487223f9518a64f6a7acf1ffc156a15f1a366285e4fd9b9b52",
+        "--previous-baseline",
+        "old.json",
+        "--previous-baseline-sha256",
+        "cc17b0d20246191ca7ee0622c78dcdae0945b9466cca2439fd71b8d6c632b4bc",
+        "--result",
+        "old-result.json",
+        "--claim",
+        "visual",
+        "--evidence-root",
+        "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-impact-link-JqJeV4\\P02",
+        "--evidence-root",
+        "D:\\JOEWRKS\\JOEQASAM\\evidence\\t035-joe-implementation",
+        "--impact",
+        "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-impact-link-JqJeV4\\P02\\impact.json",
+        "--impact-sha256",
+        "990d5b088905f99effee362ed79b0eb4f29030181dc7e65735d23d7ebd707335",
+        "--impact-review",
+        "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-impact-link-JqJeV4\\P02\\consumer-review.json",
+        "--old-result",
+        "old-result.json",
+        "--old-result-sha256",
+        "82a9a6e4d1767884c7b4c0be13bdee0624bb50112adc49fc95cca78e753d489b"
+      ],
+      "exit": 2,
+      "output": {
+        "schema": "joeness.review-gate.v1",
+        "allowed": false,
+        "required_scope_complete": false,
+        "project_complete": false,
+        "errors": [
+          "Impact reuse needs every independent pin and previous baseline"
+        ]
+      },
+      "met": true
+    },
+    {
+      "case": "P02-changed-runtime",
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "C:\\Users\\tjdwo\\.codex\\skills\\joeness-setup\\scripts\\review-gate.mjs",
+        "--root",
+        "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-impact-link-JqJeV4\\P02\\changed-project",
+        "--baseline",
+        "new.json",
+        "--baseline-sha256",
+        "25df3db03810f4487223f9518a64f6a7acf1ffc156a15f1a366285e4fd9b9b52",
+        "--previous-baseline",
+        "old.json",
+        "--previous-baseline-sha256",
+        "cc17b0d20246191ca7ee0622c78dcdae0945b9466cca2439fd71b8d6c632b4bc",
+        "--result",
+        "old-result.json",
+        "--claim",
+        "visual",
+        "--evidence-root",
+        "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-impact-link-JqJeV4\\P02",
+        "--evidence-root",
+        "D:\\JOEWRKS\\JOEQASAM\\evidence\\t035-joe-implementation",
+        "--impact",
+        "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-impact-link-JqJeV4\\P02\\impact.json",
+        "--impact-sha256",
+        "990d5b088905f99effee362ed79b0eb4f29030181dc7e65735d23d7ebd707335",
+        "--impact-review",
+        "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-impact-link-JqJeV4\\P02\\consumer-review.json",
+        "--impact-review-sha256",
+        "477ddf537d452b1a20e2c138fb0a73de507f2b36a4e7afafa2013e6030be5e93",
+        "--old-result",
+        "old-result.json",
+        "--old-result-sha256",
+        "82a9a6e4d1767884c7b4c0be13bdee0624bb50112adc49fc95cca78e753d489b",
+        "--evidence-root",
+        "D:\\JOEWRKS\\JOEDESIGN\\.local\\f05-impact-20261013\\real-v1\\P02"
+      ],
+      "exit": 2,
+      "output": {
+        "schema": "joeness.review-gate.v1",
+        "scope_id": "spacing-fixture",
+        "claim": "visual",
+        "allowed": false,
+        "required_scope_complete": false,
+        "project_complete": false,
+        "lanes": {
+          "implementation": "UNVERIFIED",
+          "technical": "UNVERIFIED",
+          "visual": "STALE",
+          "user_acceptance": "NOT_GRANTED"
+        },
+        "checks": [
+          {
+            "check_id": "c0",
+            "lane": "visual",
+            "status": "STALE",
+            "reason": "Required criterion/target/dependencies or shared baseline context changed",
+            "input_fingerprint": "22b696e4b5486b967a424dfc518c39599dfb71b562d3531dc1b2d3aca8df74b0"
+          },
+          {
+            "check_id": "c1",
+            "lane": "visual",
+            "status": "STALE",
+            "reason": "Required criterion/target/dependencies or shared baseline context changed",
+            "input_fingerprint": "22b696e4b5486b967a424dfc518c39599dfb71b562d3531dc1b2d3aca8df74b0"
+          },
+          {
+            "check_id": "c2",
+            "lane": "visual",
+            "status": "STALE",
+            "reason": "Required criterion/target/dependencies or shared baseline context changed",
+            "input_fingerprint": "22b696e4b5486b967a424dfc518c39599dfb71b562d3531dc1b2d3aca8df74b0"
+          },
+          {
+            "check_id": "c3",
+            "lane": "visual",
+            "status": "STALE",
+            "reason": "Required criterion/target/dependencies or shared baseline context changed",
+            "input_fingerprint": "22b696e4b5486b967a424dfc518c39599dfb71b562d3531dc1b2d3aca8df74b0"
+          }
+        ],
+        "errors": [],
+        "impact_reuse": {
+          "diagnostic_valid": true,
+          "candidate_check_ids": [],
+          "reused_check_ids": []
+        },
+        "limits": [
+          "No visual re-judgment or user-identity authentication",
+          "Pinned scope completeness and dependency discovery require authorized review",
+          "Explicit CLI only; direct Markdown edits and natural-language claims are not intercepted"
+        ]
+      },
+      "met": true
+    }
+  ],
+  "passed": 10,
+  "total": 10,
+  "limits": [
+    "Uses provided actual Edge capture; no new render/measurement by JOENESS",
+    "Manager semantic/box review cited by exact file, not authenticated identity",
+    "Explicit reviewed geometry transition only; user acceptance remains separate"
+  ]
+}

@@ -1,0 +1,254 @@
+{
+  "phase": "installed-and-behavior-verified",
+  "source_commit": "eed525502e5c704b16ef4539c6334eabab187744",
+  "source_manifest_sha256": "49889a08818ac80006527a16bfa0911c08024ea67f4d263375ab4a96a6167aeb",
+  "plan_sha256": "2244d772220458237e98550618850697dca398655aae35d598a4558004b50865",
+  "backup": "C:\\Users\\tjdwo\\.codex-install-backups\\joeness-20261013-49889a08818a",
+  "backup_manifest_sha256": "874efdd06116386e1119ea3d3b57b46af8152c31f0b1915aa07409cc7a3803ea",
+  "old_source": "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-approved-upgrade-P31PVV\\old-source",
+  "steps": [
+    {
+      "command": [
+        "powershell.exe",
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-approved-upgrade-P31PVV\\old-source\\JOENESS.ps1",
+        "-Check",
+        "-CodexHome",
+        "C:/Users/tjdwo/.codex"
+      ],
+      "exit": 0,
+      "output": {
+        "status": "current",
+        "mode": "check",
+        "codexHome": "C:\\Users\\tjdwo\\.codex",
+        "activeSkills": [
+          "joeness-setup"
+        ],
+        "warnings": [],
+        "changesRequired": false,
+        "changes": [],
+        "blockers": [],
+        "rollback": null
+      },
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": [
+        "powershell.exe",
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-approved-upgrade-P31PVV\\old-source\\JOENESS.ps1",
+        "-Remove",
+        "-CodexHome",
+        "C:/Users/tjdwo/.codex"
+      ],
+      "exit": 0,
+      "output": {
+        "status": "removed",
+        "mode": "remove",
+        "codexHome": "C:\\Users\\tjdwo\\.codex",
+        "activeSkills": [],
+        "warnings": [],
+        "changesRequired": false,
+        "changes": [
+          "skills/joeness-setup/SKILL.md",
+          "skills/joeness-setup/agents/openai.yaml",
+          "skills/joeness-setup/assets/AGENTS.md",
+          "skills/joeness-setup/assets/DESIGN.md",
+          "skills/joeness-setup/assets/ISSUES.md",
+          "skills/joeness-setup/assets/ROADMAP.md",
+          "skills/joeness-setup/assets/TASK.md",
+          "skills/joeness-setup/references/usage.md",
+          "skills/joeness-setup/scripts/project-setup.ps1",
+          "skills/joeness-setup/references/review-gate.md",
+          "skills/joeness-setup/scripts/review-gate.mjs",
+          "joeness-skills-state.json"
+        ],
+        "blockers": null,
+        "rollback": null
+      },
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": [
+        "powershell.exe",
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "D:\\JOEWRKS\\작업하네스\\JOENESS.ps1",
+        "-Apply",
+        "-CodexHome",
+        "C:/Users/tjdwo/.codex"
+      ],
+      "exit": 0,
+      "output": {
+        "status": "current",
+        "mode": "apply",
+        "codexHome": "C:\\Users\\tjdwo\\.codex",
+        "activeSkills": [
+          "joeness-setup"
+        ],
+        "warnings": [],
+        "changesRequired": false,
+        "changes": [
+          "skills/joeness-setup/SKILL.md",
+          "skills/joeness-setup/agents/openai.yaml",
+          "skills/joeness-setup/assets/AGENTS.md",
+          "skills/joeness-setup/assets/DESIGN.md",
+          "skills/joeness-setup/assets/ISSUES.md",
+          "skills/joeness-setup/assets/ROADMAP.md",
+          "skills/joeness-setup/assets/TASK.md",
+          "skills/joeness-setup/references/usage.md",
+          "skills/joeness-setup/scripts/project-setup.ps1",
+          "skills/joeness-setup/references/review-gate.md",
+          "skills/joeness-setup/scripts/review-gate.mjs",
+          "skills/joeness-setup/references/roadmap-review.md",
+          "skills/joeness-setup/scripts/roadmap-review.mjs",
+          "skills/joeness-setup/references/operation-review.md",
+          "skills/joeness-setup/scripts/operation-review.mjs",
+          "skills/joeness-setup/scripts/impact-review.mjs",
+          "skills/joeness-setup/references/impact-review.md",
+          "joeness-skills-state.json"
+        ],
+        "blockers": null,
+        "rollback": null
+      },
+      "stderr_sha256": "3463fe84717a74847e6332692c097e700bdf93def8288023bf13b030d63f64fe"
+    },
+    {
+      "command": [
+        "powershell.exe",
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "D:\\JOEWRKS\\작업하네스\\JOENESS.ps1",
+        "-Check",
+        "-CodexHome",
+        "C:/Users/tjdwo/.codex"
+      ],
+      "exit": 0,
+      "output": {
+        "status": "current",
+        "mode": "check",
+        "codexHome": "C:\\Users\\tjdwo\\.codex",
+        "activeSkills": [
+          "joeness-setup"
+        ],
+        "warnings": [],
+        "changesRequired": false,
+        "changes": [],
+        "blockers": [],
+        "rollback": null
+      },
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "installed": [
+    {
+      "path": "SKILL.md",
+      "expected": "0f5db50f1f1ffc21359372cd49c72fcd05cc785869f995a7ac9e175f6696beba",
+      "actual": "0f5db50f1f1ffc21359372cd49c72fcd05cc785869f995a7ac9e175f6696beba"
+    },
+    {
+      "path": "agents/openai.yaml",
+      "expected": "cc275e468658c7793d6f1305aaae5c6f37a06d831a7f2c3f18313f668427ec5c",
+      "actual": "cc275e468658c7793d6f1305aaae5c6f37a06d831a7f2c3f18313f668427ec5c"
+    },
+    {
+      "path": "assets/AGENTS.md",
+      "expected": "691cd5eac50c3324da16987d2661d98e0d47f9e6a8e3f90e8804ae7050c628c0",
+      "actual": "691cd5eac50c3324da16987d2661d98e0d47f9e6a8e3f90e8804ae7050c628c0"
+    },
+    {
+      "path": "assets/DESIGN.md",
+      "expected": "3b5ec8a163f2da4a770b4206029dd85a538dea0807060314cf51bd145ff66a5d",
+      "actual": "3b5ec8a163f2da4a770b4206029dd85a538dea0807060314cf51bd145ff66a5d"
+    },
+    {
+      "path": "assets/ISSUES.md",
+      "expected": "44b5e1f7eea61716bdfa3b364b7eca9ffe60bc9c29f6e31b3a9bf753de6b8635",
+      "actual": "44b5e1f7eea61716bdfa3b364b7eca9ffe60bc9c29f6e31b3a9bf753de6b8635"
+    },
+    {
+      "path": "assets/ROADMAP.md",
+      "expected": "ac80bf15b82f5cb9b6200a4cf48f22739632352850395afe77d62ed1be3e3660",
+      "actual": "ac80bf15b82f5cb9b6200a4cf48f22739632352850395afe77d62ed1be3e3660"
+    },
+    {
+      "path": "assets/TASK.md",
+      "expected": "cbe9d10373067805dcc2659474a7b2b23e28df967bb3ee10500a4c15b6088ee0",
+      "actual": "cbe9d10373067805dcc2659474a7b2b23e28df967bb3ee10500a4c15b6088ee0"
+    },
+    {
+      "path": "references/usage.md",
+      "expected": "d7d4ea516c714260dcbc0678da8ab72359340a96cd1718b46906334949b8146a",
+      "actual": "d7d4ea516c714260dcbc0678da8ab72359340a96cd1718b46906334949b8146a"
+    },
+    {
+      "path": "scripts/project-setup.ps1",
+      "expected": "631334ba13683f97346d2b14d4aebedd671b16c9125e7dd4a26914d658788c8d",
+      "actual": "631334ba13683f97346d2b14d4aebedd671b16c9125e7dd4a26914d658788c8d"
+    },
+    {
+      "path": "references/review-gate.md",
+      "expected": "0422021f6a247d44a3c2980353dddac76dee613282ecf4315cd4d357ebdf8432",
+      "actual": "0422021f6a247d44a3c2980353dddac76dee613282ecf4315cd4d357ebdf8432"
+    },
+    {
+      "path": "scripts/review-gate.mjs",
+      "expected": "7ad13a9020a57aa0a6396348f8575229d7cac076a5d5a6c89178d26c3b6d9bd2",
+      "actual": "7ad13a9020a57aa0a6396348f8575229d7cac076a5d5a6c89178d26c3b6d9bd2"
+    },
+    {
+      "path": "references/roadmap-review.md",
+      "expected": "bfb8910df6814edd4fab15b18b1c88c6dcc1127eb9921488772bdb9ffc15a201",
+      "actual": "bfb8910df6814edd4fab15b18b1c88c6dcc1127eb9921488772bdb9ffc15a201"
+    },
+    {
+      "path": "scripts/roadmap-review.mjs",
+      "expected": "5dfb2d5a81df58d9e1c43651b43cc945356bbf61630b103877f9b8bcd13ba33f",
+      "actual": "5dfb2d5a81df58d9e1c43651b43cc945356bbf61630b103877f9b8bcd13ba33f"
+    },
+    {
+      "path": "references/operation-review.md",
+      "expected": "748d1631847ac23045406f6742b43a3a0bddb29ebfb32b3720f8f97c9546959c",
+      "actual": "748d1631847ac23045406f6742b43a3a0bddb29ebfb32b3720f8f97c9546959c"
+    },
+    {
+      "path": "scripts/operation-review.mjs",
+      "expected": "a1a6d80a7d57d4e9c3e66c49a6f877bf07836bac25d330bb466fc2a858679aad",
+      "actual": "a1a6d80a7d57d4e9c3e66c49a6f877bf07836bac25d330bb466fc2a858679aad"
+    },
+    {
+      "path": "scripts/impact-review.mjs",
+      "expected": "9cd8359daae4e0f68bcab688ae831e43d81a0b98bcb8ca10ed65a63d0e70cbc8",
+      "actual": "9cd8359daae4e0f68bcab688ae831e43d81a0b98bcb8ca10ed65a63d0e70cbc8"
+    },
+    {
+      "path": "references/impact-review.md",
+      "expected": "6d98aa307aaace44461699e66fdbc3d658f67f8b6c756812ad9faa23ed330a82",
+      "actual": "6d98aa307aaace44461699e66fdbc3d658f67f8b6c756812ad9faa23ed330a82"
+    }
+  ],
+  "protected_before": {
+    "joeness-skills-state.json": "b52caeabdc104d55cfa0e4605f9266bb364a48e67dd49159a29dabd86d0e05cb",
+    "AGENTS.md": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "config.toml": "f3121e33d0d2b9e69bfcbe2284483d492238f7fb67394a5c58d73a02e5c5de83"
+  },
+  "state_sha256": "0e910838a939538c1d725afb48410be0790ddde1be26a90c1ed9b066387a1c8e",
+  "protected_after": {
+    "AGENTS.md": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "config.toml": "f3121e33d0d2b9e69bfcbe2284483d492238f7fb67394a5c58d73a02e5c5de83"
+  },
+  "validation": {
+    "file": "personal-validation.json",
+    "sha256": "527425964aa8e896b38c455f81a7bd391b1a8fe532f03f37c7d1f7a0c27ee993"
+  }
+}
