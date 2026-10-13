@@ -28,3 +28,9 @@
 ## 인계 상태
 
 로컬 후보 commit 후 Manager 독립 검토 대기. push/main·태그·Release·개인 설치 변경 없음. 기능·행동 성능 또는 새로운 런타임 검증 주장 없음.
+
+## 번역 의미 보완
+
+- Manager 검토: Summary의 `Separate document owners`가 사람별 소유자 분리로 오해될 가능성.
+- 수정: `Dedicated documents for plans, results, issues, and design, with task-specific reading priorities.`로 교체. 문서 역할과 읽기 우선순위라는 원래 의미에 한정.
+- 검증: 직전 후보 f099cca 대비 해당 문장만 변경, 한국어 본문 hash 유지·diff 검사 통과. 추가 범위 변경 없음.

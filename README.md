@@ -13,7 +13,7 @@
 Three-point summary:
 
 1. Project goals and completion criteria organized into a staged roadmap.
-2. Separate document owners for plans, results, issues, and design, with task-specific reading priorities.
+2. Dedicated documents for plans, results, issues, and design, with task-specific reading priorities.
 3. Six-field summary first; supporting evidence only where needed.
 
 Source version: **1.0.0**. [Validation and publication record](evals/joeness-setup/runs/2026-10-13-v100-candidate/review-evidence.md). No automatic update of personal installations.
