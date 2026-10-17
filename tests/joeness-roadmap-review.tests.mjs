@@ -155,3 +155,53 @@ test('authorization for another scope and mixed current/history selector tricks 
   f.put('view.json',{current:'done',history:'resume'});f.input.views=[{id:'now',kind:'current',source:f.ref('view.json','"current":"done"'),claims:[{key:'next',value:'resume',source:f.ptr('view.json','/history','resume')}]}];f.seal();
   assert.ok(f.run().findings.some(x=>x.code==='CLAIM_LOCATION'));
 });
+
+// Capability-boundary controls, NOT approval of the deliberately wrong mapping.
+// An exact source hash and a sealed mapping do not prove the source was interpreted.
+test('boundary: sealed prose mapping can overclaim an inspection that never covered the criterion',t=>{
+  const f=fixture(t);
+  f.put('inspection.txt','96 files exported; borders checked. Source proportions were not compared.');
+  f.input.required_outcomes[0].required_lanes.push('visual');
+  f.input.observations.push({outcome_id:'demo',lane:'visual',status:'PASS',
+    source:f.ref('inspection.txt','96 files exported; borders checked. Source proportions were not compared.'),targets:f.targets});
+  f.seal();
+  // This is a false semantic claim outside this consumer's documented capability.
+  const unchecked=f.run();assert.equal(unchecked.delivery,'complete');assert.equal(unchecked.project_complete,false);
+  // Accurate interpretation, not another export/test run, restores the boundary.
+  f.input.observations.at(-1).status='UNVERIFIED';f.seal();
+  const corrected=f.run();assert.notEqual(corrected.delivery,'complete');
+  assert.equal(corrected.outcomes[0].lanes.technical,'PASS');
+  assert.equal(corrected.outcomes[0].lanes.visual,'UNVERIFIED');
+});
+
+test('boundary: an omitted current next-action claim is not discovered by a signed extraction',t=>{
+  const f=fixture(t);
+  f.put('ROADMAP.md','## Current\nStage: closed\nNext: none\n## History\nStage: building\nNext: finish demo\n## Current correction\nNext: repair rejected output\n');
+  for(const view of f.input.views){
+    view.source.sha256=f.hash('ROADMAP.md');
+    for(const claim of view.claims)claim.source.sha256=f.hash('ROADMAP.md');
+  }
+  f.seal();assert.equal(f.run().delivery,'complete');
+  f.input.views.push({id:'correction',kind:'current',
+    source:f.ref('ROADMAP.md','## Current correction\nNext: repair rejected output'),
+    claims:[{key:'next',value:'repair rejected output',source:f.ref('ROADMAP.md','Next: repair rejected output')}]});
+  f.seal();assert.ok(kinds(f.run()).includes('conflict'));
+});
+
+test('scoped rejection correction retains technical proof and old history without another live next action',t=>{
+  const f=fixture(t);
+  f.put('ROADMAP.md','## Current\nStage: review\nNext: repair rejected output\n## History\nStage: closed\nNext: bundle release\n');
+  f.input.views=[
+    {id:'now',kind:'current',source:f.ref('ROADMAP.md','## Current\nStage: review\nNext: repair rejected output'),
+      claims:[{key:'next',value:'repair rejected output',source:f.ref('ROADMAP.md','Next: repair rejected output')}]},
+    {id:'past',kind:'history',source:f.ref('ROADMAP.md','## History\nStage: closed\nNext: bundle release'),
+      claims:[{key:'next',value:'bundle release',source:f.ref('ROADMAP.md','Next: bundle release')}]}
+  ];
+  const rejection={outcome_id:'demo',lane:'acceptance',status:'REJECTED',targets:f.targets};
+  f.put('rejection.json',rejection);f.input.required_outcomes[0].acceptance_required=true;
+  f.input.observations.push({...rejection,source:f.ptr('rejection.json','',rejection)});f.seal();
+  const r=f.run();assert.equal(r.delivery,'incomplete');assert.ok(!kinds(r).includes('conflict'));
+  assert.equal(r.outcomes[0].lanes.implementation,'PASS');assert.equal(r.outcomes[0].lanes.technical,'PASS');
+  assert.equal(r.outcomes[0].lanes.acceptance,'REJECTED');
+  assert.match(readFileSync(join(f.root,'ROADMAP.md'),'utf8'),/## History\nStage: closed\nNext: bundle release/);
+});

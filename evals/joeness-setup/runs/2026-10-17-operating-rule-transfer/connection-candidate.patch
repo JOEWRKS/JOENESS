@@ -1,0 +1,11 @@
+--- skills/joeness-setup/assets/AGENTS.md (released 1.0.0; unchanged)
++++ skills/joeness-setup/assets/AGENTS.md (candidate only; not installed)
+@@
+ - Required external verdict: <applicable scoped gate command, baseline pin and
+-  result path, or none>. Before resume/completion, run the connected current-input
+-  check. Missing/failed/stale results keep only the affected verdict pending.
++  result path, or none>. Only for an explicitly connected required gate, run its
++  current-input check before resume/completion. With none, do not invent a missing
++  checker or receipt requirement; assess required outcomes from their evidence.
++  For a connected gate, missing/failed/stale results keep only its verdict pending.
+   Keep implementation/technical/visual/user acceptance separate; specialist owns

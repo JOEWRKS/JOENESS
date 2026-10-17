@@ -43,8 +43,10 @@ Adapt paths and agreed scope before applying this body.
   exclusions and reference limits. Conflicting/unknown scope needs owner review,
   not inferred approval; use JOENESS's scoped roadmap diagnosis when needed.
 - Required external verdict: <applicable scoped gate command, baseline pin and
-  result path, or none>. Before resume/completion, run the connected current-input
-  check. Missing/failed/stale results keep only the affected verdict pending.
+  result path, or none>. Only for an explicitly connected required gate, run its
+  current-input check before resume/completion. With none, do not invent a missing
+  checker or receipt requirement; assess required outcomes from their evidence.
+  For a connected gate, missing/failed/stale results keep only its verdict pending.
   Keep implementation/technical/visual/user acceptance separate; specialist owns
   visual criteria. Never repin weakened criteria without authorization. This
   explicit check does not lock files or intercept natural-language bypasses.
