@@ -1,6 +1,6 @@
 # JOENESS Repository
 
-- Current source: 1.0.1 optional-gate patch. User authorized commit/push and personal installation update on 2026-10-17, with new publication coordinated with QA. Keep the existing `JOENESS-v1.0.0` tag untouched. QA owns main/tag/Release publication; do not duplicate it here. Exact source/install/publication status: `evals/joeness-setup/runs/2026-10-17-v101-release/review-evidence.md`. Only `assets/AGENTS.md` changes within the 17-file payload; preserve all other 16 files and F01–F06 scripts/contracts. Existing project connections are not automatically updated.
+- Current source and verified personal installation: 1.0.1 optional-gate patch. User authorized commit/push and personal installation update on 2026-10-17, with new publication coordinated with QA. Keep the existing `JOENESS-v1.0.0` tag untouched. QA owns main/tag/Release publication; do not duplicate it here. Exact source/install/publication status: `evals/joeness-setup/runs/2026-10-17-v101-release/review-evidence.md`. Only `assets/AGENTS.md` changes within the 17-file payload; preserve all other 16 files and F01–F06 scripts/contracts. Existing project connections are not automatically updated.
 
 - Previous 1.0.0 source/main validation: `evals/joeness-setup/runs/2026-10-13-v100-candidate/review-evidence.md`; previous authorized personal transition: `evals/joeness-setup/runs/2026-10-13-v100-personal/review-evidence.md`. These and earlier 0.3.4 evidence are historical. Do not conflate source, personal install, main publication and a tagged release.
 

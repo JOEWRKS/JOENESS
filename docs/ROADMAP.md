@@ -13,12 +13,12 @@
 | O3 | 조건문 최소 보강·재검증 | 완료·후보 시험 | 미설정 도구 요구 없음·명시 필수 검사 유지, 두 새 실행 통과. 이후 제품 반영은 O5 |
 | O4 | 회귀·보존 대조 및 결과 보고 | 완료·로컬 | Node99/99·Windows 출시계약·PS5/7 연결각27 및 설치 PASS. 실행 파일·개인 설치 불변, 실제 문서 차이 대조 |
 | O5 | 승인 후보 제품 반영·패키지 재검증 | 완료·미배포 소스 | 제품 연결문과 검증 후보 정확 일치, manifest 갱신. Node99/99·Windows 계약·PS5/7 설치 통과, 격리 설치17파일 일치. 개인 설치·배포 별도 |
-| O6 | 1.0.1 고정·검사·작업 브랜치 게시 | 진행 중 | 버전 일치, Windows workflow 전체 명령 통과, exact commit push·QA 인계 |
-| O7 | 개인 설치 갱신·검증 | 미완 | QA 후보 확인 후 기존 관리 파일/state 백업·구패키지 Remove·신규 Apply/Check·17파일 및 보호 파일 대조 |
+| O6 | 1.0.1 고정·검사·작업 브랜치 게시 | 완료 | 90db1b0 push·로컬 전명령 통과·원격 Windows 39017686496 성공·QA 독립 대조 통과 |
+| O7 | 개인 설치 갱신·검증 | 완료 | QA 확인 후 구17파일/state 백업·Remove→Apply/Check current. 새17해시 일치·설치본 검사3/3, template/state만 변경 |
 | O8 | main·새 태그·Release 발행 | QA 담당·미완 | 최종 SHA·CI·설치 교차검증 후 QA 발행. 기존 1.0.0 태그 보존 |
 
 진입: O2는 O1, O3는 O2에서 확인된 실패, O4는 O3 결과 대조 후 마감.
-현재 작업: O6 → QA 교차검증 → O7 → O8. 사용자 최신 승인으로 커밋·푸시·개인 설치 진행, QA와 1.0.1 수정판 합의. 후보와 같은 문구의 행동 시험 재사용. 실제 프로젝트 연결 변경은 승인 범위 밖. [제품 반영 검사](../evals/joeness-setup/runs/2026-10-17-operating-rule-transfer/promotion-evidence.md), [출시·설치 진행 근거](../evals/joeness-setup/runs/2026-10-17-v101-release/review-evidence.md).
+다음 작업: QA의 O8 최종 SHA·설치 교차검증 후 main·새 태그·Release 발행. 후보와 같은 문구의 행동 시험 재사용. 실제 프로젝트 연결 변경은 승인 범위 밖. [제품 반영 검사](../evals/joeness-setup/runs/2026-10-17-operating-rule-transfer/promotion-evidence.md), [출시·설치 진행 근거](../evals/joeness-setup/runs/2026-10-17-v101-release/review-evidence.md).
 근거: [결과·실패·수정 후보·검증 한계](../evals/joeness-setup/runs/2026-10-17-operating-rule-transfer/review-evidence.md), [사전 판정 기준](../evals/joeness-setup/runs/2026-10-17-operating-rule-transfer/plan.md). 아래 진행·다음 작업은 각 당시 이력이며 현재 지시가 아님.
 
 ## 이전 작업 — 1.0.0 제품 안내·패키지·개인 설치 (2026-10-13 당시 기록)
