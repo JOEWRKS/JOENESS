@@ -1,8 +1,8 @@
 # JOENESS 1.0.1 — source, installation and publication
 
-Status: 1.0.1 source candidate, QA source review and hosted Windows gates passed;
-authorized personal transition completed and verified. Final main/tag/Release is
-QA follow-up, not claimed complete by this evidence commit.
+Status: 1.0.1 released by QA, with exact-release Windows gates and authorized
+personal transition verified. This subsequent documentation-only closure does not
+move the release tag or change the installed payload.
 
 User authority (2026-10-17): commit/push and personal update; preserve the existing
 1.0.0 tag; coordinate the new version with QA. QA Manager owns main/tag/Release
@@ -31,9 +31,25 @@ transition → QA exact final commit/CI/install verification → main/tag/Releas
 - Personal backup, old matching package Remove, new Apply/Check: PASS, after QA's
   explicit candidate/CI verification message. [Raw transition evidence](personal-install.json).
 - Installed 17-file hashes, protected files and representative gate: PASS, 3/3.
-- QA main/tag/Release: agreed QA ownership; final evidence commit/CI and installed
-  cross-check remain before publication. Final evidence changes no payload,
-  installer, tests or workflow from the passing source candidate.
+- QA main/tag/Release: completed; released commit
+  `a50e62fe3677aecca62125af9578abf2773a5400`. QA cross-checked installed files,
+  previous backups, global settings and other JOE skills before publication.
+  No payload, installer, test or workflow change from the passing source candidate.
+
+## Publication confirmation — 2026-10-17
+
+- Release: [JOENESS-v1.0.1](https://github.com/JOEWRKS/JOENESS/releases/tag/JOENESS-v1.0.1),
+  ID `415683536`, latest, non-draft, non-prerelease; independently fetched again.
+- Annotated tag object: `4a09ef9a1d8aaa20ba9a702a35c57a24d2042168`.
+- Tag peeled commit and main at publication:
+  `a50e62fe3677aecca62125af9578abf2773a5400`, verified with `git ls-remote`.
+- Exact-release main Windows CI: [39018200088](https://github.com/JOEWRKS/JOENESS/actions/runs/39018200088), completed/success.
+- Same-commit branch CI: [39018118940](https://github.com/JOEWRKS/JOENESS/actions/runs/39018118940), completed/success.
+- Existing 1.0.0 tag object and peeled commit independently rechecked unchanged;
+  QA additionally confirmed the old Release identity, body and publication state
+  unchanged. No old tag or Release was replaced.
+- This closure edits only ROADMAP status and this evidence document. Later main
+  documentation commits are not a new release or a reason to move the fixed tag.
 
 New manifest SHA-256: `7e00a1b4981ba4a677c7214d287c17cb02e91faa42574a4c87c4bed356b2c36c`.
 Template SHA-256: `a79d9f2cce804ea06942bcd507d32b2c7e449be17fcb6471f8b1273392b014eb`.
