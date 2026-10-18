@@ -11,7 +11,9 @@
 | P1 | 버전 고정·로컬 전체 검사 | 완료 | 1.0.2 버전 정합, 검증 후보17파일 동일, Windows workflow 전7명령·Node99/99 통과 |
 | P2 | 소스 커밋·작업 브랜치 push | 완료 | 9834284 원격 일치·QA 소스 대조·exact Windows39104618549 성공. APP-001/ISSUES 제외 |
 | P3 | 개인 설치 갱신 | 완료 | 백업·구1.0.1 Remove·1.0.2 Apply/Check current, 설치17해시·대표검사3/3. 변경은 연결문/state뿐 |
-| P4 | QA 정식 발행 | 미완 | QA가 최종SHA·CI·설치 대조 후 main·새태그·Release 발행, 기존태그 보존 |
+| P4 | QA 정식 발행 | 완료 | QA가17349aa의 mainCI39105043941 성공·설치대조 후 JOENESS-v1.0.2 정식 발행·재조회. 기존1.0.0/1.0.1태그/Release 보존 |
+
+종료: 1.0.2 소스·개인 설치·정식 발행 완료. 배포 태그는17349aa로 고정하며 이후 문서 마감 커밋과 구분. 기존 프로젝트 연결 자동 갱신 없음. [Release](https://github.com/JOEWRKS/JOENESS/releases/tag/JOENESS-v1.0.2).
 
 ## 이전 작업 — 선택한 방법의 필수 규칙화 방지 (2026-10-18)
 

@@ -1,6 +1,6 @@
 # JOENESS 1.0.2 — source, personal installation and publication
 
-Status: source committed/pushed, exact hosted Windows CI passed, personal1.0.2 installed and verified. QA final main/tag/Release remains pending.
+Status:1.0.2 source, personal installation and QA publication completed. Exact release commit Windows gates passed. This subsequent documentation closure does not move the fixed tag or change installed bytes.
 User authorized commit/push, personal update and new-version coordination with QA
 on 2026-10-18. QA confirmed version1.0.2 and the sequence below after checking the
 actual user message `01a14db2-1a1c-79c3-a5d2-cd08bd86c04c`.
@@ -30,7 +30,7 @@ publication here. Preserve existing JOENESS-v1.0.0 and JOENESS-v1.0.1 tags/Relea
 1. Final-version local Windows workflow: all7 commands passed. [Exact outputs](local-gates.json): Node99/99, release contract, PS5/7 project safety27/27 each and both installation lifecycle suites. PSModulePath isolated for child shells; previous failed environment evidence retained in method-boundary.
 2. Source commit `98342841161234f1ad5e267f6c633aff0e00a971` pushed to `codex/qa-recording-boundaries`; git ls-remote exact match. QA independently confirmed source17 hashes, the bounded behavioral probes and local7-command outputs. Hosted exact-commit [Windows run39104618549](https://github.com/JOEWRKS/JOENESS/actions/runs/39104618549) completed/success, directly rechecked by QA before personal transition.
 3. Verified backup, matching1.0.1 Remove →1.0.2 Apply/Check and installed proof: PASS. [Exact transition record](personal-install.json). Old Check current → Remove removed → new Check ready → Apply current → Check current, all exit0. Installed17-file hashes match manifest/state. Representative installed checks3/3 passed.
-4. QA final SHA/CI/install verification → main/tag/Release: pending.
+4. QA final SHA/CI/install verification → main/tag/Release: completed. Released commit `17349aa5ccb11995acc7563f2892c1da00ae0095`; main was fast-forwarded by QA, exact main [Windows39105043941](https://github.com/JOEWRKS/JOENESS/actions/runs/39105043941) and same-SHA branch [Windows39104998238](https://github.com/JOEWRKS/JOENESS/actions/runs/39104998238) completed/success.
 
 Personal transition uses the exact installed1.0.1 source `90db1b08ddaeccea7468c28bdc41f234ab7ccaaa`
 and manifest `7e00a1b4981ba4a677c7214d287c17cb02e91faa42574a4c87c4bed356b2c36c`.
@@ -53,3 +53,11 @@ Protected preflight tag identities (git ls-remote origin):
 Preparation issue: the staging helper's initial private-key heuristic matched its
 own regex source. It stopped before staging any files. Replaced the wildcard with
 specific optional key-family names; no credential found and no product/test change.
+
+## Publication confirmation
+
+- [JOENESS-v1.0.2](https://github.com/JOEWRKS/JOENESS/releases/tag/JOENESS-v1.0.2), Release ID416284498, published2026-10-18T06:49:23Z, latest/non-draft/non-prerelease. QA separately fetched the published record and checked the English-first/Korean-second body.
+- Annotated tag object `8857cc617afdff5044913ff548af6603bf82af56`; peeled commit `17349aa5ccb11995acc7563f2892c1da00ae0095`. This task independently rechecked origin refs with git ls-remote after publication.
+- Existing1.0.0/1.0.1 tag objects and peeled commits match the preflight values above. QA independently confirmed both previous Release identities, bodies and publication states unchanged.
+- QA raw cross-checks inspected: `D:/JOEWRKS/JOEQASAM/evidence/t044-joeness-102-release/{installed-direct.json,main-publish.json,candidate-ci.json,ci.json,publish.json,verify.json}`. Independent personal Check=current, backup hashes and other JOE skill/global settings preserved.
+- Publication changes are owned by QA. This two-document closure only records completed P4 and the confirmed publication identity; source payload, installer/tests/workflow and installed package remain unchanged. The fixed release tag is not moved to a later documentation commit.
