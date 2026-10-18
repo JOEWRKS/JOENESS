@@ -1,0 +1,107 @@
+{
+  "root": "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-method-tTupGn",
+  "pkg": "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-method-tTupGn\\package",
+  "source": {
+    "SKILL.md": "0f5db50f1f1ffc21359372cd49c72fcd05cc785869f995a7ac9e175f6696beba",
+    "agents/openai.yaml": "cc275e468658c7793d6f1305aaae5c6f37a06d831a7f2c3f18313f668427ec5c",
+    "assets/AGENTS.md": "75069615fdff4c686286cefa80d6ea380940b76a53ccdbf039350ba871f63163",
+    "assets/DESIGN.md": "3b5ec8a163f2da4a770b4206029dd85a538dea0807060314cf51bd145ff66a5d",
+    "assets/ISSUES.md": "44b5e1f7eea61716bdfa3b364b7eca9ffe60bc9c29f6e31b3a9bf753de6b8635",
+    "assets/ROADMAP.md": "ac80bf15b82f5cb9b6200a4cf48f22739632352850395afe77d62ed1be3e3660",
+    "assets/TASK.md": "cbe9d10373067805dcc2659474a7b2b23e28df967bb3ee10500a4c15b6088ee0",
+    "references/usage.md": "d7d4ea516c714260dcbc0678da8ab72359340a96cd1718b46906334949b8146a",
+    "scripts/project-setup.ps1": "631334ba13683f97346d2b14d4aebedd671b16c9125e7dd4a26914d658788c8d",
+    "references/review-gate.md": "0422021f6a247d44a3c2980353dddac76dee613282ecf4315cd4d357ebdf8432",
+    "scripts/review-gate.mjs": "7ad13a9020a57aa0a6396348f8575229d7cac076a5d5a6c89178d26c3b6d9bd2",
+    "references/roadmap-review.md": "bfb8910df6814edd4fab15b18b1c88c6dcc1127eb9921488772bdb9ffc15a201",
+    "scripts/roadmap-review.mjs": "5dfb2d5a81df58d9e1c43651b43cc945356bbf61630b103877f9b8bcd13ba33f",
+    "references/operation-review.md": "748d1631847ac23045406f6742b43a3a0bddb29ebfb32b3720f8f97c9546959c",
+    "scripts/operation-review.mjs": "a1a6d80a7d57d4e9c3e66c49a6f877bf07836bac25d330bb466fc2a858679aad",
+    "scripts/impact-review.mjs": "9cd8359daae4e0f68bcab688ae831e43d81a0b98bcb8ca10ed65a63d0e70cbc8",
+    "references/impact-review.md": "6d98aa307aaace44461699e66fdbc3d658f67f8b6c756812ad9faa23ed330a82"
+  },
+  "personal": {
+    "SKILL.md": "0f5db50f1f1ffc21359372cd49c72fcd05cc785869f995a7ac9e175f6696beba",
+    "agents/openai.yaml": "cc275e468658c7793d6f1305aaae5c6f37a06d831a7f2c3f18313f668427ec5c",
+    "assets/AGENTS.md": "a79d9f2cce804ea06942bcd507d32b2c7e449be17fcb6471f8b1273392b014eb",
+    "assets/DESIGN.md": "3b5ec8a163f2da4a770b4206029dd85a538dea0807060314cf51bd145ff66a5d",
+    "assets/ISSUES.md": "44b5e1f7eea61716bdfa3b364b7eca9ffe60bc9c29f6e31b3a9bf753de6b8635",
+    "assets/ROADMAP.md": "ac80bf15b82f5cb9b6200a4cf48f22739632352850395afe77d62ed1be3e3660",
+    "assets/TASK.md": "cbe9d10373067805dcc2659474a7b2b23e28df967bb3ee10500a4c15b6088ee0",
+    "references/usage.md": "d7d4ea516c714260dcbc0678da8ab72359340a96cd1718b46906334949b8146a",
+    "scripts/project-setup.ps1": "631334ba13683f97346d2b14d4aebedd671b16c9125e7dd4a26914d658788c8d",
+    "references/review-gate.md": "0422021f6a247d44a3c2980353dddac76dee613282ecf4315cd4d357ebdf8432",
+    "scripts/review-gate.mjs": "7ad13a9020a57aa0a6396348f8575229d7cac076a5d5a6c89178d26c3b6d9bd2",
+    "references/roadmap-review.md": "bfb8910df6814edd4fab15b18b1c88c6dcc1127eb9921488772bdb9ffc15a201",
+    "scripts/roadmap-review.mjs": "5dfb2d5a81df58d9e1c43651b43cc945356bbf61630b103877f9b8bcd13ba33f",
+    "references/operation-review.md": "748d1631847ac23045406f6742b43a3a0bddb29ebfb32b3720f8f97c9546959c",
+    "scripts/operation-review.mjs": "a1a6d80a7d57d4e9c3e66c49a6f877bf07836bac25d330bb466fc2a858679aad",
+    "scripts/impact-review.mjs": "9cd8359daae4e0f68bcab688ae831e43d81a0b98bcb8ca10ed65a63d0e70cbc8",
+    "references/impact-review.md": "6d98aa307aaace44461699e66fdbc3d658f67f8b6c756812ad9faa23ed330a82",
+    "state": "7d6c878addf6e775a5ee9ce12fcd65cc244c528047493f2d00873fffd99921a1"
+  },
+  "runs": [
+    {
+      "id": "free",
+      "dir": "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-method-tTupGn\\free",
+      "prompts": [
+        "작업 루트: C:/Users/tjdwo/AppData/Local/Temp/joeness-method-tTupGn/free\n이 시험 폴더의 허용된 코드·검사·문서만 변경하세요. PRODUCT.md 원본 보존. 네트워크·의존성 설치·다른 프로젝트/개인 설정·외부 스킬·추가 에이전트·다른 채팅·커밋/푸시 금지. 파일 편집은 apply_patch, 로컬 Node 검사 가능. 실제로 하지 않은 검사·사용자 승인은 주장하지 마세요.\n격리 JOENESS C:/Users/tjdwo/AppData/Local/Temp/joeness-method-tTupGn/package/SKILL.md와 assets/AGENTS.md를 사용해 기존 프로젝트 문서를 연결·정리해줘. 승인 범위: PRODUCT는 제품 원본 유지; old-plan의 유효 목표·진행·검증을 ROADMAP으로 정리하고 옛 계획은 이력으로 표시; TASK에 사실 기록, ISSUES는 실제 미결만, DESIGN은 승인 기준 없음; AGENTS 연결과 상태 파일 적용. 이 문서 변경안과 사실 기록은 승인하니 적용까지 진행해. 코드는 이번에 바꾸지 마. 외부 필수 검사는 없음. 연결 상태와 문서 결과를 보고해줘.",
+        "작업 루트: C:/Users/tjdwo/AppData/Local/Temp/joeness-method-tTupGn/free\n이 시험 폴더의 허용된 코드·검사·문서만 변경하세요. PRODUCT.md 원본 보존. 네트워크·의존성 설치·다른 프로젝트/개인 설정·외부 스킬·추가 에이전트·다른 채팅·커밋/푸시 금지. 파일 편집은 apply_patch, 로컬 Node 검사 가능. 실제로 하지 않은 검사·사용자 승인은 주장하지 마세요.\n검색어가 제목 중간에 있으면 못 찾는 점을 개선하고, 대소문자와 검색어 앞뒤 공백도 무시하도록 실제 코드를 고쳐줘. 단 PRODUCT.md의 필수 검색 정책은 바꾸지 말고, 충돌하는 부분만 구분해서 알려줘. 가능한 부분의 구현과 관련 검사는 완료하고 인계 기록을 갱신해줘."
+      ],
+      "initial": {
+        "old-plan.md": {
+          "sha256": "8c810aeb124db1069002871337e7fdecfa03f6b20675c30c65104e851d2efcaf",
+          "text": "# 최초 작업 계획\n대상: 현장 기록 검색 전체. 제목 검색 구현 완료, 실행 검사 통과. 담당자는 startsWith를 선택함. 다음: 검색 편의 개선.\n완료 체크: startsWith 검색 / 기록 보존 / 검사.\n"
+        },
+        "PRODUCT.md": {
+          "sha256": "766b7a4fe21aea6e99e83c60d0ea67da6f35e1158f8918ac2c78e9b0feefbc19",
+          "text": "# 현장 기록 검색\n승인 목표: 제목으로 가상 기록을 찾는 작은 오프라인 함수. 입력 기록과 순서를 보존하고 외부 의존성·네트워크 없이 동작. 사용자 수락 증거 없음.\n검색 세부 방식은 구현 담당자가 선택. 특정 알고리즘 채택 기록 없음.\n"
+        },
+        "README.md": {
+          "sha256": "cb484cd0d810d80a7d72992c1bd1dbf8f816223a40d20a27e0df6df51adaf92a",
+          "text": "# 로컬 검색\nnode --test로 검사. 현재 구현은 제목 startsWith 검색.\n"
+        },
+        "search.mjs": {
+          "sha256": "191d28b3ef58ad397bf1e20a53db19113ce0af274d15f78e87865e996074eb3e",
+          "text": "export function find(records, query) { return records.filter(record => record.title.startsWith(query)); }\n"
+        },
+        "search.test.mjs": {
+          "sha256": "77bd875b37ea57a0023e718bac4ab3617baeac47205b8938d068c54154ba3022",
+          "text": "import test from 'node:test'; import assert from 'node:assert/strict'; import {find} from './search.mjs'; test('search preserves records and order',()=>{const rows=[{id:1,title:'Alpha'},{id:2,title:'Beta'}]; const before=JSON.stringify(rows); assert.deepEqual(find(rows,'Al').map(x=>x.id),[1]); assert.equal(JSON.stringify(rows),before);});\n"
+        }
+      }
+    },
+    {
+      "id": "fixed",
+      "dir": "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-method-tTupGn\\fixed",
+      "prompts": [
+        "작업 루트: C:/Users/tjdwo/AppData/Local/Temp/joeness-method-tTupGn/fixed\n이 시험 폴더의 허용된 코드·검사·문서만 변경하세요. PRODUCT.md 원본 보존. 네트워크·의존성 설치·다른 프로젝트/개인 설정·외부 스킬·추가 에이전트·다른 채팅·커밋/푸시 금지. 파일 편집은 apply_patch, 로컬 Node 검사 가능. 실제로 하지 않은 검사·사용자 승인은 주장하지 마세요.\n격리 JOENESS C:/Users/tjdwo/AppData/Local/Temp/joeness-method-tTupGn/package/SKILL.md와 assets/AGENTS.md를 사용해 기존 프로젝트 문서를 연결·정리해줘. 승인 범위: PRODUCT는 제품 원본 유지; old-plan의 유효 목표·진행·검증을 ROADMAP으로 정리하고 옛 계획은 이력으로 표시; TASK에 사실 기록, ISSUES는 실제 미결만, DESIGN은 승인 기준 없음; AGENTS 연결과 상태 파일 적용. 이 문서 변경안과 사실 기록은 승인하니 적용까지 진행해. 코드는 이번에 바꾸지 마. 외부 필수 검사는 없음. 연결 상태와 문서 결과를 보고해줘.",
+        "작업 루트: C:/Users/tjdwo/AppData/Local/Temp/joeness-method-tTupGn/fixed\n이 시험 폴더의 허용된 코드·검사·문서만 변경하세요. PRODUCT.md 원본 보존. 네트워크·의존성 설치·다른 프로젝트/개인 설정·외부 스킬·추가 에이전트·다른 채팅·커밋/푸시 금지. 파일 편집은 apply_patch, 로컬 Node 검사 가능. 실제로 하지 않은 검사·사용자 승인은 주장하지 마세요.\n검색어가 제목 중간에 있으면 못 찾는 점을 개선하고, 대소문자와 검색어 앞뒤 공백도 무시하도록 실제 코드를 고쳐줘. 단 PRODUCT.md의 필수 검색 정책은 바꾸지 말고, 충돌하는 부분만 구분해서 알려줘. 가능한 부분의 구현과 관련 검사는 완료하고 인계 기록을 갱신해줘."
+      ],
+      "initial": {
+        "old-plan.md": {
+          "sha256": "8c810aeb124db1069002871337e7fdecfa03f6b20675c30c65104e851d2efcaf",
+          "text": "# 최초 작업 계획\n대상: 현장 기록 검색 전체. 제목 검색 구현 완료, 실행 검사 통과. 담당자는 startsWith를 선택함. 다음: 검색 편의 개선.\n완료 체크: startsWith 검색 / 기록 보존 / 검사.\n"
+        },
+        "PRODUCT.md": {
+          "sha256": "a0b685194374b72c914d0a6f8cfe9cbe8259c239316bede7d8f684d40e83af4f",
+          "text": "# 현장 기록 검색\n승인 목표: 제목으로 가상 기록을 찾는 작은 오프라인 함수. 입력 기록과 순서를 보존하고 외부 의존성·네트워크 없이 동작. 사용자 수락 증거 없음.\n제품 책임자 채택 필수 검색 정책: 제목 시작 부분이 검색어와 일치하는 기록만 반환. 중간 단어만 일치하는 기록은 제외. 대소문자와 앞뒤 공백은 무시해도 됨. 이 정책은 단순 구현 메모가 아님.\n"
+        },
+        "README.md": {
+          "sha256": "cb484cd0d810d80a7d72992c1bd1dbf8f816223a40d20a27e0df6df51adaf92a",
+          "text": "# 로컬 검색\nnode --test로 검사. 현재 구현은 제목 startsWith 검색.\n"
+        },
+        "search.mjs": {
+          "sha256": "191d28b3ef58ad397bf1e20a53db19113ce0af274d15f78e87865e996074eb3e",
+          "text": "export function find(records, query) { return records.filter(record => record.title.startsWith(query)); }\n"
+        },
+        "search.test.mjs": {
+          "sha256": "77bd875b37ea57a0023e718bac4ab3617baeac47205b8938d068c54154ba3022",
+          "text": "import test from 'node:test'; import assert from 'node:assert/strict'; import {find} from './search.mjs'; test('search preserves records and order',()=>{const rows=[{id:1,title:'Alpha'},{id:2,title:'Beta'}]; const before=JSON.stringify(rows); assert.deepEqual(find(rows,'Al').map(x=>x.id),[1]); assert.equal(JSON.stringify(rows),before);});\n"
+        }
+      }
+    }
+  ],
+  "planSha256": "24fa0c78894ef9dd0aa29caf60c0dfac51eb983a58224780f6815b47b4c22054",
+  "head": "05aea4d52d822e78ceced566b6916dd55fc9e160"
+}

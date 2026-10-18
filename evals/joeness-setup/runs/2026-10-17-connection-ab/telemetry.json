@@ -1,0 +1,612 @@
+[
+  {
+    "id": "booking-A",
+    "thread": "01a149a3-a2b7-7793-bc6e-ba1528eafa1a",
+    "agent": "/root/booking_run_one",
+    "rollout": "rollout-2026-10-17T20-33-43-01a149a3-a2b7-7793-bc6e-ba1528eafa1a.jsonl",
+    "rolloutSha256": "35148058d488d33e7846e3e88f17930e390d299a0aaae9926027a6add4c823a8",
+    "runtime": [
+      {
+        "model": "gpt-6-astra",
+        "effort": "xhigh"
+      }
+    ],
+    "startedAt": 1792236823,
+    "completedAt": 1792237020,
+    "durationMs": 196753,
+    "tokens": {
+      "input_tokens": 529364,
+      "cached_input_tokens": 500224,
+      "cache_write_input_tokens": 0,
+      "output_tokens": 7045,
+      "reasoning_output_tokens": 1732,
+      "total_tokens": 536409
+    },
+    "uncachedInputTokens": 29140,
+    "itemCounts": {
+      "Reasoning": 7,
+      "AgentMessage": 4,
+      "CommandExecution": 12,
+      "FileChange": 3
+    },
+    "commands": [
+      {
+        "command": [
+          "C:\\Users\\tjdwo\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\powershell\\pwsh.exe",
+          "-Command",
+          "Get-Content -LiteralPath 'AGENTS.md' -Raw"
+        ],
+        "cwd": "file:///C:/Users/tjdwo/AppData/Local/Temp/joeness-connection-ab-n1MRB6/booking-A",
+        "exitCode": 0,
+        "status": "completed"
+      },
+      {
+        "command": [
+          "C:\\Users\\tjdwo\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\powershell\\pwsh.exe",
+          "-Command",
+          "Get-Content -LiteralPath 'ROADMAP.md' -Raw"
+        ],
+        "cwd": "file:///C:/Users/tjdwo/AppData/Local/Temp/joeness-connection-ab-n1MRB6/booking-A",
+        "exitCode": 0,
+        "status": "completed"
+      },
+      {
+        "command": [
+          "C:\\Users\\tjdwo\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\powershell\\pwsh.exe",
+          "-Command",
+          "rg --files -g '!Library/**' -g '!data/**' -g '!.joeness/**'"
+        ],
+        "cwd": "file:///C:/Users/tjdwo/AppData/Local/Temp/joeness-connection-ab-n1MRB6/booking-A",
+        "exitCode": 0,
+        "status": "completed"
+      },
+      {
+        "command": [
+          "C:\\Users\\tjdwo\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\powershell\\pwsh.exe",
+          "-Command",
+          "Get-Content -LiteralPath 'TASK.md' -Raw; Get-Content -LiteralPath 'ISSUES.md' -Raw; Get-Content -LiteralPath 'PRODUCT.md' -Raw"
+        ],
+        "cwd": "file:///C:/Users/tjdwo/AppData/Local/Temp/joeness-connection-ab-n1MRB6/booking-A",
+        "exitCode": 0,
+        "status": "completed"
+      },
+      {
+        "command": [
+          "C:\\Users\\tjdwo\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\powershell\\pwsh.exe",
+          "-Command",
+          "Get-Content -LiteralPath 'src/booking.mjs' -Raw; Get-Content -LiteralPath 'tests/booking.test.mjs' -Raw; Get-Content -LiteralPath 'package.json' -Raw"
+        ],
+        "cwd": "file:///C:/Users/tjdwo/AppData/Local/Temp/joeness-connection-ab-n1MRB6/booking-A",
+        "exitCode": 0,
+        "status": "completed"
+      },
+      {
+        "command": [
+          "C:\\Users\\tjdwo\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\powershell\\pwsh.exe",
+          "-Command",
+          "Get-FileHash -Algorithm SHA256 -LiteralPath 'AGENTS.md','PRODUCT.md','DESIGN.md'; Get-ChildItem -LiteralPath 'Library','data','.joeness' -File -Recurse | Get-FileHash -Algorithm SHA256"
+        ],
+        "cwd": "file:///C:/Users/tjdwo/AppData/Local/Temp/joeness-connection-ab-n1MRB6/booking-A",
+        "exitCode": 0,
+        "status": "completed"
+      },
+      {
+        "command": [
+          "C:\\Users\\tjdwo\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\powershell\\pwsh.exe",
+          "-Command",
+          "@((Get-Item -LiteralPath 'AGENTS.md','PRODUCT.md','DESIGN.md') + (Get-ChildItem -LiteralPath 'Library','data','.joeness' -File -Recurse)) | ForEach-Object { [PSCustomObject]@{ Path = $_.FullName; Hash = (Get-FileHash -Algorithm SHA256 -LiteralPath $_.FullName).Hash } } | ConvertTo-Json"
+        ],
+        "cwd": "file:///C:/Users/tjdwo/AppData/Local/Temp/joeness-connection-ab-n1MRB6/booking-A",
+        "exitCode": 0,
+        "status": "completed"
+      },
+      {
+        "command": [
+          "C:\\Users\\tjdwo\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\powershell\\pwsh.exe",
+          "-Command",
+          "node --test"
+        ],
+        "cwd": "file:///C:/Users/tjdwo/AppData/Local/Temp/joeness-connection-ab-n1MRB6/booking-A",
+        "exitCode": 0,
+        "status": "completed"
+      },
+      {
+        "command": [
+          "C:\\Users\\tjdwo\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\powershell\\pwsh.exe",
+          "-Command",
+          "node --test"
+        ],
+        "cwd": "file:///C:/Users/tjdwo/AppData/Local/Temp/joeness-connection-ab-n1MRB6/booking-A",
+        "exitCode": 0,
+        "status": "completed"
+      },
+      {
+        "command": [
+          "C:\\Users\\tjdwo\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\powershell\\pwsh.exe",
+          "-Command",
+          "Get-Content -LiteralPath 'TASK.md' -Raw; Get-Content -LiteralPath 'ROADMAP.md' -Raw; Get-Content -LiteralPath 'ISSUES.md' -Raw"
+        ],
+        "cwd": "file:///C:/Users/tjdwo/AppData/Local/Temp/joeness-connection-ab-n1MRB6/booking-A",
+        "exitCode": 0,
+        "status": "completed"
+      },
+      {
+        "command": [
+          "C:\\Users\\tjdwo\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\powershell\\pwsh.exe",
+          "-Command",
+          "Get-Content -LiteralPath 'TASK.md' -Raw; Get-Content -LiteralPath 'ROADMAP.md' -Raw; Get-Content -LiteralPath 'ISSUES.md' -Raw"
+        ],
+        "cwd": "file:///C:/Users/tjdwo/AppData/Local/Temp/joeness-connection-ab-n1MRB6/booking-A",
+        "exitCode": 0,
+        "status": "completed"
+      },
+      {
+        "command": [
+          "C:\\Users\\tjdwo\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\powershell\\pwsh.exe",
+          "-Command",
+          "$expected = @{ 'AGENTS.md' = '21E2760AAD4542CAF8C51C5545EE50D02DEEDD4B921C6B247C9BADEAE152D925'; 'PRODUCT.md' = 'C55D791D8B02712198A7C4AFB2A7DB272ECC97BBA1EA7D226DC34709F83E9044'; 'DESIGN.md' = 'EAADD1D42AEEDDFFCD2773FCB7D9FD6E8BBBD2F65676146529E10F07969BE405'; 'Library/booking-idea.md' = '5D0B6781160A220823914EA1F827129706CEFB1756E870B11985FF372F96597C'; 'data/sample.json' = '690128B47BACB004428AA27E6A468CBD2E471337F533DF3779FB61B6C2E7477E'; '.joeness/connection-details.md' = '84448AE9A360EDF2370E028EB46259A3C1CB1DB4024DCC5E300410C25193AE38' }; foreach ($entry in $expected.GetEnumerator()) { if ((Get-FileHash -Algorithm SHA256 -LiteralPath $entry.Key).Hash -ne $entry.Value) { throw \"Protected file changed: $($entry.Key)\" } }; $protectedFiles = @((Get-Item -LiteralPath 'AGENTS.md','PRODUCT.md','DESIGN.md') + (Get-ChildItem -LiteralPath 'Library','data','.joeness' -File -Recurse)); if ($protectedFiles.Count -ne $expected.Count) { throw 'Protected file inventory changed' }; Write-Output 'Protected files unchanged: 6/6 (SHA-256 and file count)'"
+        ],
+        "cwd": "file:///C:/Users/tjdwo/AppData/Local/Temp/joeness-connection-ab-n1MRB6/booking-A",
+        "exitCode": 0,
+        "status": "completed"
+      }
+    ],
+    "report": "- 작업: 확인표 없이 바로 예약하는 기능 완성.\n- 업데이트 파일: [예약 코드](C:/Users/tjdwo/AppData/Local/Temp/joeness-connection-ab-n1MRB6/booking-A/src/booking.mjs), [테스트](C:/Users/tjdwo/AppData/Local/Temp/joeness-connection-ab-n1MRB6/booking-A/tests/booking.test.mjs), [TASK](C:/Users/tjdwo/AppData/Local/Temp/joeness-connection-ab-n1MRB6/booking-A/TASK.md), [ROADMAP](C:/Users/tjdwo/AppData/Local/Temp/joeness-connection-ab-n1MRB6/booking-A/ROADMAP.md), [ISSUES](C:/Users/tjdwo/AppData/Local/Temp/joeness-connection-ab-n1MRB6/booking-A/ISSUES.md).\n- 이슈: 확인표 강제, 입력 검증 누락, 원본 데이터 변경.\n- 해결: 이름·좌석·잔여 검증과 성공·실패 시 원본 보존 확인.\n- 남은 문제: R3 사용자 수락 미확인.\n- 다음 작업: 사용자의 동작 검토 및 수락 여부 확인.\n\n상세 보고: `node --test` 19/19 통과했습니다. 보호 대상 6개 파일은 SHA-256과 파일 수가 모두 유지됐습니다. 과거 기록을 보존하면서 실제 코드와 달랐던 설명을 바로잡았습니다. R1/R2는 완료했으며 전체 단계는 사용자 수락 대기로 남겼습니다.",
+    "excludedPostCompletionTurns": 1
+  },
+  {
+    "id": "booking-B",
+    "thread": "01a149a7-a6aa-72c2-bc16-564c8b016b03",
+    "agent": "/root/booking_run_two",
+    "rollout": "rollout-2026-10-17T20-38-06-01a149a7-a6aa-72c2-bc16-564c8b016b03.jsonl",
+    "rolloutSha256": "e6d9c46dd3651cc14872428d8b96d8be28edba86e6eeca94aa5f99a43660aced",
+    "runtime": [
+      {
+        "model": "gpt-6-astra",
+        "effort": "xhigh"
+      }
+    ],
+    "startedAt": 1792237086,
+    "completedAt": 1792237251,
+    "durationMs": 164330,
+    "tokens": {
+      "input_tokens": 381790,
+      "cached_input_tokens": 369152,
+      "cache_write_input_tokens": 0,
+      "output_tokens": 5996,
+      "reasoning_output_tokens": 1451,
+      "total_tokens": 387786
+    },
+    "uncachedInputTokens": 12638,
+    "itemCounts": {
+      "Reasoning": 6,
+      "AgentMessage": 4,
+      "CommandExecution": 9,
+      "FileChange": 2
+    },
+    "commands": [
+      {
+        "command": [
+          "C:\\Users\\tjdwo\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\powershell\\pwsh.exe",
+          "-Command",
+          "Get-Content -LiteralPath 'AGENTS.md' -Raw"
+        ],
+        "cwd": "file:///C:/Users/tjdwo/AppData/Local/Temp/joeness-connection-ab-n1MRB6/booking-B",
+        "exitCode": 0,
+        "status": "completed"
+      },
+      {
+        "command": [
+          "C:\\Users\\tjdwo\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\powershell\\pwsh.exe",
+          "-Command",
+          "Get-Content -LiteralPath 'ROADMAP.md' -Raw"
+        ],
+        "cwd": "file:///C:/Users/tjdwo/AppData/Local/Temp/joeness-connection-ab-n1MRB6/booking-B",
+        "exitCode": 0,
+        "status": "completed"
+      },
+      {
+        "command": [
+          "C:\\Users\\tjdwo\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\powershell\\pwsh.exe",
+          "-Command",
+          "Get-Content -LiteralPath 'TASK.md' -Raw; Get-Content -LiteralPath 'ISSUES.md' -Raw; Get-Content -LiteralPath 'PRODUCT.md' -Raw"
+        ],
+        "cwd": "file:///C:/Users/tjdwo/AppData/Local/Temp/joeness-connection-ab-n1MRB6/booking-B",
+        "exitCode": 0,
+        "status": "completed"
+      },
+      {
+        "command": [
+          "C:\\Users\\tjdwo\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\powershell\\pwsh.exe",
+          "-Command",
+          "rg --files -g '!node_modules/**' -g '!Library/**' -g '!data/**' -g '!.joeness/**'"
+        ],
+        "cwd": "file:///C:/Users/tjdwo/AppData/Local/Temp/joeness-connection-ab-n1MRB6/booking-B",
+        "exitCode": 0,
+        "status": "completed"
+      },
+      {
+        "command": [
+          "C:\\Users\\tjdwo\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\powershell\\pwsh.exe",
+          "-Command",
+          "Get-Content -LiteralPath 'data/sample.json' -Raw; Get-Content -LiteralPath 'Library/booking-idea.md' -Raw"
+        ],
+        "cwd": "file:///C:/Users/tjdwo/AppData/Local/Temp/joeness-connection-ab-n1MRB6/booking-B",
+        "exitCode": 0,
+        "status": "completed"
+      },
+      {
+        "command": [
+          "C:\\Users\\tjdwo\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\powershell\\pwsh.exe",
+          "-Command",
+          "Get-Content -LiteralPath 'src/booking.mjs' -Raw; Get-Content -LiteralPath 'tests/booking.test.mjs' -Raw; Get-Content -LiteralPath 'package.json' -Raw"
+        ],
+        "cwd": "file:///C:/Users/tjdwo/AppData/Local/Temp/joeness-connection-ab-n1MRB6/booking-B",
+        "exitCode": 0,
+        "status": "completed"
+      },
+      {
+        "command": [
+          "C:\\Users\\tjdwo\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\powershell\\pwsh.exe",
+          "-Command",
+          "node --test"
+        ],
+        "cwd": "file:///C:/Users/tjdwo/AppData/Local/Temp/joeness-connection-ab-n1MRB6/booking-B",
+        "exitCode": 0,
+        "status": "completed"
+      },
+      {
+        "command": [
+          "C:\\Users\\tjdwo\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\powershell\\pwsh.exe",
+          "-Command",
+          "node --test"
+        ],
+        "cwd": "file:///C:/Users/tjdwo/AppData/Local/Temp/joeness-connection-ab-n1MRB6/booking-B",
+        "exitCode": 0,
+        "status": "completed"
+      },
+      {
+        "command": [
+          "C:\\Users\\tjdwo\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\powershell\\pwsh.exe",
+          "-Command",
+          "Get-Content -LiteralPath 'TASK.md','ROADMAP.md','ISSUES.md' -Raw"
+        ],
+        "cwd": "file:///C:/Users/tjdwo/AppData/Local/Temp/joeness-connection-ab-n1MRB6/booking-B",
+        "exitCode": 0,
+        "status": "completed"
+      }
+    ],
+    "report": "- 작업: 확인표 없이 한 번에 예약하도록 구현했습니다.\n- 업데이트 파일: [예약 코드](C:/Users/tjdwo/AppData/Local/Temp/joeness-connection-ab-n1MRB6/booking-B/src/booking.mjs), [검사](C:/Users/tjdwo/AppData/Local/Temp/joeness-connection-ab-n1MRB6/booking-B/tests/booking.test.mjs), TASK.md·ROADMAP.md·ISSUES.md.\n- 이슈: 확인표 강제, 원본 상태 변경, 입력 검증 누락을 확인했습니다.\n- 해결: 이름·좌석 수·잔여 좌석을 검증하고 예약이 추가된 새 상태를 반환합니다. `node --test` 21/21 통과했습니다.\n- 남은 문제: 확인된 미해결 구현 결함 없음. 사용자 수락은 대기 중입니다.\n- 다음 작업: R3 사용자 동작 검토와 수락 여부 확인입니다.\n\n기존 기록은 과거 상태로 보존했고, 지정된 보호 파일과 폴더는 수정하지 않았습니다.",
+    "excludedPostCompletionTurns": 0
+  },
+  {
+    "id": "loans-A",
+    "thread": "01a149a7-cc53-7730-ba21-be2aebd762c2",
+    "agent": "/root/loans_run_two",
+    "rollout": "rollout-2026-10-17T20-38-16-01a149a7-cc53-7730-ba21-be2aebd762c2.jsonl",
+    "rolloutSha256": "9efef3d535c646e9a6a6428420d5d11a968d55ad8aec63b82dc945ea44116f13",
+    "runtime": [
+      {
+        "model": "gpt-6-astra",
+        "effort": "xhigh"
+      }
+    ],
+    "startedAt": 1792237096,
+    "completedAt": 1792237315,
+    "durationMs": 218840,
+    "tokens": {
+      "input_tokens": 469559,
+      "cached_input_tokens": 446848,
+      "cache_write_input_tokens": 0,
+      "output_tokens": 8356,
+      "reasoning_output_tokens": 2166,
+      "total_tokens": 477915
+    },
+    "uncachedInputTokens": 22711,
+    "itemCounts": {
+      "Reasoning": 8,
+      "AgentMessage": 4,
+      "CommandExecution": 14,
+      "FileChange": 4
+    },
+    "commands": [
+      {
+        "command": [
+          "C:\\Users\\tjdwo\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\powershell\\pwsh.exe",
+          "-Command",
+          "Get-Content -Raw -LiteralPath AGENTS.md"
+        ],
+        "cwd": "file:///C:/Users/tjdwo/AppData/Local/Temp/joeness-connection-ab-n1MRB6/loans-A",
+        "exitCode": 0,
+        "status": "completed"
+      },
+      {
+        "command": [
+          "C:\\Users\\tjdwo\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\powershell\\pwsh.exe",
+          "-Command",
+          "Get-Content -Raw -LiteralPath ISSUES.md; Get-Content -Raw -LiteralPath src/report.mjs"
+        ],
+        "cwd": "file:///C:/Users/tjdwo/AppData/Local/Temp/joeness-connection-ab-n1MRB6/loans-A",
+        "exitCode": 0,
+        "status": "completed"
+      },
+      {
+        "command": [
+          "C:\\Users\\tjdwo\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\powershell\\pwsh.exe",
+          "-Command",
+          "Get-Content -Raw -LiteralPath ROADMAP.md; Get-Content -Raw -LiteralPath TASK.md; rg --files -g '!node_modules' -g '!.git'"
+        ],
+        "cwd": "file:///C:/Users/tjdwo/AppData/Local/Temp/joeness-connection-ab-n1MRB6/loans-A",
+        "exitCode": 0,
+        "status": "completed"
+      },
+      {
+        "command": [
+          "C:\\Users\\tjdwo\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\powershell\\pwsh.exe",
+          "-Command",
+          "Get-Content -Raw -LiteralPath PRODUCT.md; Get-Content -Raw -LiteralPath data/sample.json; Get-Content -Raw -LiteralPath tests/report.test.mjs; Get-Content -Raw -LiteralPath package.json"
+        ],
+        "cwd": "file:///C:/Users/tjdwo/AppData/Local/Temp/joeness-connection-ab-n1MRB6/loans-A",
+        "exitCode": 0,
+        "status": "completed"
+      },
+      {
+        "command": [
+          "C:\\Users\\tjdwo\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\powershell\\pwsh.exe",
+          "-Command",
+          "Get-Content -Raw -LiteralPath src/export.mjs; Get-Content -Raw -LiteralPath tests/export.test.mjs; Get-Content -Raw -LiteralPath Library/report-note.md; Get-ChildItem -Force; Get-FileHash -Algorithm SHA256 -LiteralPath AGENTS.md,PRODUCT.md,DESIGN.md,Library/report-note.md,data/sample.json,src/export.mjs,tests/export.test.mjs; Get-ChildItem -Force -Recurse -LiteralPath .joeness -File | Get-FileHash -Algorithm SHA256"
+        ],
+        "cwd": "file:///C:/Users/tjdwo/AppData/Local/Temp/joeness-connection-ab-n1MRB6/loans-A",
+        "exitCode": 0,
+        "status": "completed"
+      },
+      {
+        "command": [
+          "C:\\Users\\tjdwo\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\powershell\\pwsh.exe",
+          "-Command",
+          "node --input-type=module -e \"import { readFileSync } from 'node:fs'; import { summarize } from './src/report.mjs'; const rows = JSON.parse(readFileSync('data/sample.json', 'utf8')); console.log(JSON.stringify({ asOf: '2026-10-17', actual: summarize(rows, '2026-10-17'), expected: { total: 3, returned: 1, open: 2, overdue: 1 } }, null, 2));\""
+        ],
+        "cwd": "file:///C:/Users/tjdwo/AppData/Local/Temp/joeness-connection-ab-n1MRB6/loans-A",
+        "exitCode": 0,
+        "status": "completed"
+      },
+      {
+        "command": [
+          "C:\\Users\\tjdwo\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\powershell\\pwsh.exe",
+          "-Command",
+          "git status --short; node --test"
+        ],
+        "cwd": "file:///C:/Users/tjdwo/AppData/Local/Temp/joeness-connection-ab-n1MRB6/loans-A",
+        "exitCode": 0,
+        "status": "completed"
+      },
+      {
+        "command": [
+          "C:\\Users\\tjdwo\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\powershell\\pwsh.exe",
+          "-Command",
+          "node --test tests/report.test.mjs"
+        ],
+        "cwd": "file:///C:/Users/tjdwo/AppData/Local/Temp/joeness-connection-ab-n1MRB6/loans-A",
+        "exitCode": 1,
+        "status": "failed"
+      },
+      {
+        "command": [
+          "C:\\Users\\tjdwo\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\powershell\\pwsh.exe",
+          "-Command",
+          "git diff --check; git diff --stat; Get-Content -Raw -LiteralPath TASK.md; Get-Content -Raw -LiteralPath ROADMAP.md; Get-Content -Raw -LiteralPath ISSUES.md"
+        ],
+        "cwd": "file:///C:/Users/tjdwo/AppData/Local/Temp/joeness-connection-ab-n1MRB6/loans-A",
+        "exitCode": 0,
+        "status": "completed"
+      },
+      {
+        "command": [
+          "C:\\Users\\tjdwo\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\powershell\\pwsh.exe",
+          "-Command",
+          "node --test"
+        ],
+        "cwd": "file:///C:/Users/tjdwo/AppData/Local/Temp/joeness-connection-ab-n1MRB6/loans-A",
+        "exitCode": 0,
+        "status": "completed"
+      },
+      {
+        "command": [
+          "C:\\Users\\tjdwo\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\powershell\\pwsh.exe",
+          "-Command",
+          "$expectedHashes = @{ 'AGENTS.md' = '21E2760AAD4542CAF8C51C5545EE50D02DEEDD4B921C6B247C9BADEAE152D925'; 'PRODUCT.md' = 'B7B43C522BD3BEE4C913DFA0BA64C7B2EB36D5911D1AAE6AAF69F2AF1457CCC0'; 'DESIGN.md' = 'EAADD1D42AEEDDFFCD2773FCB7D9FD6E8BBBD2F65676146529E10F07969BE405'; 'Library/report-note.md' = '2B12F912E80B8A16571AFD2080EB089E8F5CCB779D3ED61656FE572B9BEC7186'; 'data/sample.json' = '0A88CA6156B027EDF0A043971B2057EF1E9C7FEA80BBF077EEFDF7667AEAEAB0'; 'src/export.mjs' = '333FE274B0B26D671F32E4B9C5AEA0BC030C81CCDB8C44CF8EBEE12485E3B4F5'; 'tests/export.test.mjs' = '477831F00BF7E8D31B155655EFF96AF53A21E1D965457D88056456B1A58A12EE'; '.joeness/connection-details.md' = '84448AE9A360EDF2370E028EB46259A3C1CB1DB4024DCC5E300410C25193AE38' }; foreach ($entry in $expectedHashes.GetEnumerator()) { if ((Get-FileHash -Algorithm SHA256 -LiteralPath $entry.Key).Hash -ne $entry.Value) { throw ('Protected file changed: ' + $entry.Key) } }; Write-Output ('Protected original files match: ' + $expectedHashes.Count)"
+        ],
+        "cwd": "file:///C:/Users/tjdwo/AppData/Local/Temp/joeness-connection-ab-n1MRB6/loans-A",
+        "exitCode": 0,
+        "status": "completed"
+      },
+      {
+        "command": [
+          "C:\\Users\\tjdwo\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\powershell\\pwsh.exe",
+          "-Command",
+          "git diff -- src/report.mjs tests/report.test.mjs"
+        ],
+        "cwd": "file:///C:/Users/tjdwo/AppData/Local/Temp/joeness-connection-ab-n1MRB6/loans-A",
+        "exitCode": 0,
+        "status": "completed"
+      },
+      {
+        "command": [
+          "C:\\Users\\tjdwo\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\powershell\\pwsh.exe",
+          "-Command",
+          "git diff --check; git status --short; git diff --stat; Get-Content -Raw -LiteralPath ROADMAP.md; Get-Content -Raw -LiteralPath TASK.md; Get-Content -Raw -LiteralPath ISSUES.md"
+        ],
+        "cwd": "file:///C:/Users/tjdwo/AppData/Local/Temp/joeness-connection-ab-n1MRB6/loans-A",
+        "exitCode": 0,
+        "status": "completed"
+      },
+      {
+        "command": [
+          "C:\\Users\\tjdwo\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\powershell\\pwsh.exe",
+          "-Command",
+          "git diff --check"
+        ],
+        "cwd": "file:///C:/Users/tjdwo/AppData/Local/Temp/joeness-connection-ab-n1MRB6/loans-A",
+        "exitCode": 0,
+        "status": "completed"
+      }
+    ],
+    "report": "- 작업: 반납한 물건이 연체로 집계되는 오류를 수정했습니다.\n- 업데이트 파일: `src/report.mjs`, `tests/report.test.mjs`, `TASK.md`, `ROADMAP.md`, `ISSUES.md`.\n- 이슈: 연체 판정의 상태 조건과 날짜·상태 검증이 빠져 있었습니다.\n- 해결: 대여 중이면서 기한이 지난 항목만 연체로 계산하고, 잘못된 입력은 오류로 처리합니다.\n- 남은 문제: 기술 검사 완료. 사용자 수락은 아직 대기 중입니다.\n- 다음 작업: 수정된 실제 집계에 대한 사용자 검토·수락입니다.\n\n상세 보고\n\n실제 표본은 전체 3건·반납 1건·대여 중 2건·연체 1건입니다. 기존에는 연체가 2건으로 나왔습니다. CSV 포함 전체 검사 11개와 변경 형식 검사가 통과했습니다.\n\n보존 대상 8개 파일의 SHA-256이 작업 전과 같습니다. 기존 기록은 과거 상태로 남겼으며, 검사 근거는 [TASK.md](C:/Users/tjdwo/AppData/Local/Temp/joeness-connection-ab-n1MRB6/loans-A/TASK.md)에 정리했습니다. 메일 알림·벌금 계산·배포는 제외 범위입니다.",
+    "excludedPostCompletionTurns": 0
+  },
+  {
+    "id": "loans-B",
+    "thread": "01a149a3-c53c-7560-ae9e-90713b96a7dc",
+    "agent": "/root/loans_run_one",
+    "rollout": "rollout-2026-10-17T20-33-52-01a149a3-c53c-7560-ae9e-90713b96a7dc.jsonl",
+    "rolloutSha256": "8abf99f6dc551631d5d22cb2128878f3ee7f8e3c3c1571b85ad68da7fe032e15",
+    "runtime": [
+      {
+        "model": "gpt-6-astra",
+        "effort": "xhigh"
+      }
+    ],
+    "startedAt": 1792236832,
+    "completedAt": 1792237016,
+    "durationMs": 183763,
+    "tokens": {
+      "input_tokens": 421761,
+      "cached_input_tokens": 400128,
+      "cache_write_input_tokens": 0,
+      "output_tokens": 7351,
+      "reasoning_output_tokens": 1756,
+      "total_tokens": 429112
+    },
+    "uncachedInputTokens": 21633,
+    "itemCounts": {
+      "Reasoning": 7,
+      "AgentMessage": 4,
+      "CommandExecution": 12,
+      "FileChange": 3
+    },
+    "commands": [
+      {
+        "command": [
+          "C:\\Users\\tjdwo\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\powershell\\pwsh.exe",
+          "-Command",
+          "Get-Content -LiteralPath 'AGENTS.md' -Raw"
+        ],
+        "cwd": "file:///C:/Users/tjdwo/AppData/Local/Temp/joeness-connection-ab-n1MRB6/loans-B",
+        "exitCode": 0,
+        "status": "completed"
+      },
+      {
+        "command": [
+          "C:\\Users\\tjdwo\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\powershell\\pwsh.exe",
+          "-Command",
+          "Get-Content -LiteralPath 'ROADMAP.md' -Raw; Get-Content -LiteralPath 'TASK.md' -Raw; Get-Content -LiteralPath 'ISSUES.md' -Raw"
+        ],
+        "cwd": "file:///C:/Users/tjdwo/AppData/Local/Temp/joeness-connection-ab-n1MRB6/loans-B",
+        "exitCode": 0,
+        "status": "completed"
+      },
+      {
+        "command": [
+          "C:\\Users\\tjdwo\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\powershell\\pwsh.exe",
+          "-Command",
+          "rg --files -g '!node_modules' -g '!package-lock.json' -g '!AGENTS.md' -g '!ROADMAP.md' -g '!TASK.md' -g '!ISSUES.md'"
+        ],
+        "cwd": "file:///C:/Users/tjdwo/AppData/Local/Temp/joeness-connection-ab-n1MRB6/loans-B",
+        "exitCode": 0,
+        "status": "completed"
+      },
+      {
+        "command": [
+          "C:\\Users\\tjdwo\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\powershell\\pwsh.exe",
+          "-Command",
+          "Get-Content -LiteralPath 'package.json' -Raw; Get-Content -LiteralPath 'src/export.mjs' -Raw; Get-Content -LiteralPath 'tests/export.test.mjs' -Raw"
+        ],
+        "cwd": "file:///C:/Users/tjdwo/AppData/Local/Temp/joeness-connection-ab-n1MRB6/loans-B",
+        "exitCode": 0,
+        "status": "completed"
+      },
+      {
+        "command": [
+          "C:\\Users\\tjdwo\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\powershell\\pwsh.exe",
+          "-Command",
+          "Get-Content -LiteralPath 'PRODUCT.md' -Raw; Get-Content -LiteralPath 'src/report.mjs' -Raw; Get-Content -LiteralPath 'tests/report.test.mjs' -Raw; Get-Content -LiteralPath 'Library/report-note.md' -Raw; Get-Content -LiteralPath 'data/sample.json' -Raw"
+        ],
+        "cwd": "file:///C:/Users/tjdwo/AppData/Local/Temp/joeness-connection-ab-n1MRB6/loans-B",
+        "exitCode": 0,
+        "status": "completed"
+      },
+      {
+        "command": [
+          "C:\\Users\\tjdwo\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\powershell\\pwsh.exe",
+          "-Command",
+          "node --test; node --input-type=module -e \"import fs from 'node:fs'; import {summarize} from './src/report.mjs'; const rows = JSON.parse(fs.readFileSync('./data/sample.json', 'utf8')); console.log(JSON.stringify(summarize(rows, '2026-10-17')));\""
+        ],
+        "cwd": "file:///C:/Users/tjdwo/AppData/Local/Temp/joeness-connection-ab-n1MRB6/loans-B",
+        "exitCode": 0,
+        "status": "completed"
+      },
+      {
+        "command": [
+          "C:\\Users\\tjdwo\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\powershell\\pwsh.exe",
+          "-Command",
+          "Get-ChildItem -LiteralPath '.' -Force -Recurse -File | Where-Object { $_.Name -notin @('TASK.md','ROADMAP.md','ISSUES.md') -and $_.FullName -notmatch '[\\\\/]src[\\\\/]report\\.mjs$|[\\\\/]tests[\\\\/]report\\.test\\.mjs$' } | Get-FileHash -Algorithm SHA256 | Select-Object Path, Hash | ConvertTo-Json -Depth 3"
+        ],
+        "cwd": "file:///C:/Users/tjdwo/AppData/Local/Temp/joeness-connection-ab-n1MRB6/loans-B",
+        "exitCode": 0,
+        "status": "completed"
+      },
+      {
+        "command": [
+          "C:\\Users\\tjdwo\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\powershell\\pwsh.exe",
+          "-Command",
+          "node --test tests/report.test.mjs"
+        ],
+        "cwd": "file:///C:/Users/tjdwo/AppData/Local/Temp/joeness-connection-ab-n1MRB6/loans-B",
+        "exitCode": 1,
+        "status": "failed"
+      },
+      {
+        "command": [
+          "C:\\Users\\tjdwo\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\powershell\\pwsh.exe",
+          "-Command",
+          "node --test; node --input-type=module -e \"import fs from 'node:fs'; import {summarize} from './src/report.mjs'; const rows = JSON.parse(fs.readFileSync('./data/sample.json', 'utf8')); console.log(JSON.stringify(summarize(rows, '2026-10-17')));\""
+        ],
+        "cwd": "file:///C:/Users/tjdwo/AppData/Local/Temp/joeness-connection-ab-n1MRB6/loans-B",
+        "exitCode": 0,
+        "status": "completed"
+      },
+      {
+        "command": [
+          "C:\\Users\\tjdwo\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\powershell\\pwsh.exe",
+          "-Command",
+          "Get-ChildItem -LiteralPath '.' -Force -Recurse -File | Where-Object { $_.Name -notin @('TASK.md','ROADMAP.md','ISSUES.md') -and $_.FullName -notmatch '[\\\\/]src[\\\\/]report\\.mjs$|[\\\\/]tests[\\\\/]report\\.test\\.mjs$' } | Get-FileHash -Algorithm SHA256 | Select-Object Path, Hash | ConvertTo-Json -Depth 3"
+        ],
+        "cwd": "file:///C:/Users/tjdwo/AppData/Local/Temp/joeness-connection-ab-n1MRB6/loans-B",
+        "exitCode": 0,
+        "status": "completed"
+      },
+      {
+        "command": [
+          "C:\\Users\\tjdwo\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\powershell\\pwsh.exe",
+          "-Command",
+          "git --no-optional-locks diff --check; git --no-optional-locks status --short; git --no-optional-locks diff -- src/report.mjs"
+        ],
+        "cwd": "file:///C:/Users/tjdwo/AppData/Local/Temp/joeness-connection-ab-n1MRB6/loans-B",
+        "exitCode": 0,
+        "status": "completed"
+      },
+      {
+        "command": [
+          "C:\\Users\\tjdwo\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\powershell\\pwsh.exe",
+          "-Command",
+          "git --no-optional-locks diff --check; git --no-optional-locks status --short; Get-Content -LiteralPath 'ROADMAP.md' -Raw; Get-Content -LiteralPath 'ISSUES.md' -Raw"
+        ],
+        "cwd": "file:///C:/Users/tjdwo/AppData/Local/Temp/joeness-connection-ab-n1MRB6/loans-B",
+        "exitCode": 0,
+        "status": "completed"
+      }
+    ],
+    "report": "- 작업: 반납 연체 오집계와 날짜·상태 검증 누락을 수정했습니다.\n- 업데이트 파일: `src/report.mjs`, `tests/report.test.mjs`, `TASK.md`, `ROADMAP.md`, `ISSUES.md`.\n- 이슈: 기존 연체 계산이 반납 여부를 확인하지 않았습니다.\n- 해결: 실제 자료가 전체 3건·반납 1건·대여 중 2건·연체 1건으로 집계됩니다. CSV 포함 테스트 10/10 통과했습니다.\n- 남은 문제: 확인된 코드 결함 없음. 사용자 수락은 대기 중입니다.\n- 다음 작업: 수정된 실제 숫자를 검토해 L3 수락 여부를 결정합니다.\n\nCSV와 기존 자료 등 보존 대상 9개 파일은 SHA-256 비교로 원본 보존을 확인했습니다. 과거 기록을 유지하면서 현재 상태와 검사 근거를 갱신했습니다.",
+    "excludedPostCompletionTurns": 1
+  }
+]

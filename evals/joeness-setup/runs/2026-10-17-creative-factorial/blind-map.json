@@ -1,0 +1,77 @@
+{
+  "judge": "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-creative-iy4uE0\\blind-review",
+  "map": [
+    {
+      "label": "P1",
+      "id": "run04",
+      "task": "speaker",
+      "arm": "J",
+      "originalSha256": "794cd58dbf2cbc6b07fa3b9cd035c14198f98ad6239f7f4dead66fbca4b5077d",
+      "blindSha256": "794cd58dbf2cbc6b07fa3b9cd035c14198f98ad6239f7f4dead66fbca4b5077d",
+      "redacted": false
+    },
+    {
+      "label": "P2",
+      "id": "run07",
+      "task": "receipt",
+      "arm": "JL",
+      "originalSha256": "50371c2f7f1f25e747fe8ed9a396ec6a68298dd4338ff5f8b5f66067b29880c7",
+      "blindSha256": "9fdfb293ff893afbb89edd46128ec0f097d6c39bd756cb8a3be54a822fe30e58",
+      "redacted": true
+    },
+    {
+      "label": "P3",
+      "id": "run01",
+      "task": "receipt",
+      "arm": "A",
+      "originalSha256": "b8bf5e04079e28ad126ec6c5869beaaa79fe44599137c2ec757340be17f6381c",
+      "blindSha256": "b8bf5e04079e28ad126ec6c5869beaaa79fe44599137c2ec757340be17f6381c",
+      "redacted": false
+    },
+    {
+      "label": "P4",
+      "id": "run06",
+      "task": "speaker",
+      "arm": "L",
+      "originalSha256": "124c06755ff318520f477b90620bc914e173e2e8a8f929177acd8428e656ef68",
+      "blindSha256": "763cbe5e727ec4aec8482568b072fe3962d44d41838c9a2a1108646132834b0b",
+      "redacted": true
+    },
+    {
+      "label": "P5",
+      "id": "run03",
+      "task": "receipt",
+      "arm": "L",
+      "originalSha256": "f336e48cfb397ec231b6e66c4c2a25b136d756958f1689664fb2160cece5b5c4",
+      "blindSha256": "768c68546476f570987f3a25c4d9c7ccaa87a666a1a3a86faf0a197132b0e18b",
+      "redacted": true
+    },
+    {
+      "label": "P6",
+      "id": "run08",
+      "task": "speaker",
+      "arm": "A",
+      "originalSha256": "10900e60a2a62c610ec76c2761de52d86bd5605c6cd932c790d50bddf03e9fb1",
+      "blindSha256": "10900e60a2a62c610ec76c2761de52d86bd5605c6cd932c790d50bddf03e9fb1",
+      "redacted": false
+    },
+    {
+      "label": "P7",
+      "id": "run02",
+      "task": "speaker",
+      "arm": "JL",
+      "originalSha256": "1f925e43ed70523cdfd1f69e37a884bc5e7518589b8f9b1bebfad55bb2146faa",
+      "blindSha256": "3161aa91401ba4fe25ac076332f7127cb30ceb3a9b1d94a5a71a62a601030994",
+      "redacted": true
+    },
+    {
+      "label": "P8",
+      "id": "run05",
+      "task": "receipt",
+      "arm": "J",
+      "originalSha256": "10a966e7cc9d2ff2e89d99a40ea842a36ad36d73d619cffd32efd5a353c8b7c9",
+      "blindSha256": "10a966e7cc9d2ff2e89d99a40ea842a36ad36d73d619cffd32efd5a353c8b7c9",
+      "redacted": false
+    }
+  ]
+}

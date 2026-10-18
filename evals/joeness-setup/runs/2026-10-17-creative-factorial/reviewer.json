@@ -1,0 +1,201 @@
+{
+  "thread": "01a149c9-fff8-7ad1-998d-2a675054f60e",
+  "rollout": "rollout-2026-10-17T21-15-37-01a149c9-fff8-7ad1-998d-2a675054f60e.jsonl",
+  "rolloutSha256": "b33a9b3cbbd3e152542c6a888cf3de7398dd9a4bd44bda03332562329e764f4a",
+  "runtime": [
+    {
+      "model": "gpt-6-astra",
+      "effort": "xhigh"
+    }
+  ],
+  "report": "독립 평가를 완료했습니다. 8개 후보의 점수, 근거·반대 근거, 불확실성, 과제별 순위와 요청된 플래그를 [REVIEW.md](C:/Users/tjdwo/AppData/Local/Temp/joeness-creative-iy4uE0/blind-review/REVIEW.md)에 기록했습니다.",
+  "commands": [
+    {
+      "command": [
+        "C:\\Users\\tjdwo\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\powershell\\pwsh.exe",
+        "-Command",
+        "Get-Content -LiteralPath 'RUBRIC.md' -Raw"
+      ],
+      "cwd": "file:///C:/Users/tjdwo/AppData/Local/Temp/joeness-creative-iy4uE0/blind-review",
+      "exit": 0
+    },
+    {
+      "command": [
+        "C:\\Users\\tjdwo\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\powershell\\pwsh.exe",
+        "-Command",
+        "Get-Content -LiteralPath 'P3.md' -Raw"
+      ],
+      "cwd": "file:///C:/Users/tjdwo/AppData/Local/Temp/joeness-creative-iy4uE0/blind-review",
+      "exit": 0
+    },
+    {
+      "command": [
+        "C:\\Users\\tjdwo\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\powershell\\pwsh.exe",
+        "-Command",
+        "Get-Content -LiteralPath 'P7.md' -Raw"
+      ],
+      "cwd": "file:///C:/Users/tjdwo/AppData/Local/Temp/joeness-creative-iy4uE0/blind-review",
+      "exit": 0
+    },
+    {
+      "command": [
+        "C:\\Users\\tjdwo\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\powershell\\pwsh.exe",
+        "-Command",
+        "Get-Content -LiteralPath 'P2.md' -Raw"
+      ],
+      "cwd": "file:///C:/Users/tjdwo/AppData/Local/Temp/joeness-creative-iy4uE0/blind-review",
+      "exit": 0
+    },
+    {
+      "command": [
+        "C:\\Users\\tjdwo\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\powershell\\pwsh.exe",
+        "-Command",
+        "Get-Content -LiteralPath 'P5.md' -Raw"
+      ],
+      "cwd": "file:///C:/Users/tjdwo/AppData/Local/Temp/joeness-creative-iy4uE0/blind-review",
+      "exit": 0
+    },
+    {
+      "command": [
+        "C:\\Users\\tjdwo\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\powershell\\pwsh.exe",
+        "-Command",
+        "Get-Content -LiteralPath 'P1.md' -Raw"
+      ],
+      "cwd": "file:///C:/Users/tjdwo/AppData/Local/Temp/joeness-creative-iy4uE0/blind-review",
+      "exit": 0
+    },
+    {
+      "command": [
+        "C:\\Users\\tjdwo\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\powershell\\pwsh.exe",
+        "-Command",
+        "Get-Content -LiteralPath 'P4.md' -Raw"
+      ],
+      "cwd": "file:///C:/Users/tjdwo/AppData/Local/Temp/joeness-creative-iy4uE0/blind-review",
+      "exit": 0
+    },
+    {
+      "command": [
+        "C:\\Users\\tjdwo\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\powershell\\pwsh.exe",
+        "-Command",
+        "Get-Content -LiteralPath 'P8.md' -Raw"
+      ],
+      "cwd": "file:///C:/Users/tjdwo/AppData/Local/Temp/joeness-creative-iy4uE0/blind-review",
+      "exit": 0
+    },
+    {
+      "command": [
+        "C:\\Users\\tjdwo\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\powershell\\pwsh.exe",
+        "-Command",
+        "Get-Content -LiteralPath 'P6.md' -Raw"
+      ],
+      "cwd": "file:///C:/Users/tjdwo/AppData/Local/Temp/joeness-creative-iy4uE0/blind-review",
+      "exit": 0
+    },
+    {
+      "command": [
+        "C:\\Users\\tjdwo\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\powershell\\pwsh.exe",
+        "-Command",
+        "Get-Content -LiteralPath 'P2.md' -Raw"
+      ],
+      "cwd": "file:///C:/Users/tjdwo/AppData/Local/Temp/joeness-creative-iy4uE0/blind-review",
+      "exit": 0
+    },
+    {
+      "command": [
+        "C:\\Users\\tjdwo\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\powershell\\pwsh.exe",
+        "-Command",
+        "Get-Content -LiteralPath 'P3.md' -Raw"
+      ],
+      "cwd": "file:///C:/Users/tjdwo/AppData/Local/Temp/joeness-creative-iy4uE0/blind-review",
+      "exit": 0
+    },
+    {
+      "command": [
+        "C:\\Users\\tjdwo\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\powershell\\pwsh.exe",
+        "-Command",
+        "Get-Content -LiteralPath 'P4.md' -Raw"
+      ],
+      "cwd": "file:///C:/Users/tjdwo/AppData/Local/Temp/joeness-creative-iy4uE0/blind-review",
+      "exit": 0
+    },
+    {
+      "command": [
+        "C:\\Users\\tjdwo\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\powershell\\pwsh.exe",
+        "-Command",
+        "Get-Content -LiteralPath 'P5.md' -Raw"
+      ],
+      "cwd": "file:///C:/Users/tjdwo/AppData/Local/Temp/joeness-creative-iy4uE0/blind-review",
+      "exit": 0
+    },
+    {
+      "command": [
+        "C:\\Users\\tjdwo\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\powershell\\pwsh.exe",
+        "-Command",
+        "Get-Content -LiteralPath 'P6.md' -Raw"
+      ],
+      "cwd": "file:///C:/Users/tjdwo/AppData/Local/Temp/joeness-creative-iy4uE0/blind-review",
+      "exit": 0
+    },
+    {
+      "command": [
+        "C:\\Users\\tjdwo\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\powershell\\pwsh.exe",
+        "-Command",
+        "Get-Content -LiteralPath 'P7.md' -Raw"
+      ],
+      "cwd": "file:///C:/Users/tjdwo/AppData/Local/Temp/joeness-creative-iy4uE0/blind-review",
+      "exit": 0
+    },
+    {
+      "command": [
+        "C:\\Users\\tjdwo\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\powershell\\pwsh.exe",
+        "-Command",
+        "Get-Content -LiteralPath 'P1.md' -Raw"
+      ],
+      "cwd": "file:///C:/Users/tjdwo/AppData/Local/Temp/joeness-creative-iy4uE0/blind-review",
+      "exit": 0
+    },
+    {
+      "command": [
+        "C:\\Users\\tjdwo\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\powershell\\pwsh.exe",
+        "-Command",
+        "Get-Content -LiteralPath 'P8.md' -Raw"
+      ],
+      "cwd": "file:///C:/Users/tjdwo/AppData/Local/Temp/joeness-creative-iy4uE0/blind-review",
+      "exit": 0
+    },
+    {
+      "command": [
+        "C:\\Users\\tjdwo\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\powershell\\pwsh.exe",
+        "-Command",
+        "Get-Item -LiteralPath 'REVIEW.md' | Select-Object FullName, Length"
+      ],
+      "cwd": "file:///C:/Users/tjdwo/AppData/Local/Temp/joeness-creative-iy4uE0/blind-review",
+      "exit": 0
+    },
+    {
+      "command": [
+        "C:\\Users\\tjdwo\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\powershell\\pwsh.exe",
+        "-Command",
+        "Select-String -LiteralPath 'REVIEW.md' -Pattern '^\\| P[1-8] \\|','^## P[1-8]','^## 공통'"
+      ],
+      "cwd": "file:///C:/Users/tjdwo/AppData/Local/Temp/joeness-creative-iy4uE0/blind-review",
+      "exit": 0
+    }
+  ],
+  "writes": [
+    "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-creative-iy4uE0\\blind-review\\REVIEW.md"
+  ],
+  "inputHashes": {
+    "RUBRIC.md": "0fd4a8a63d8e791aae9a20362d477ccf5283dbd09c2d4406ed964c2e898d347c",
+    "P1.md": "794cd58dbf2cbc6b07fa3b9cd035c14198f98ad6239f7f4dead66fbca4b5077d",
+    "P2.md": "9fdfb293ff893afbb89edd46128ec0f097d6c39bd756cb8a3be54a822fe30e58",
+    "P3.md": "b8bf5e04079e28ad126ec6c5869beaaa79fe44599137c2ec757340be17f6381c",
+    "P4.md": "763cbe5e727ec4aec8482568b072fe3962d44d41838c9a2a1108646132834b0b",
+    "P5.md": "768c68546476f570987f3a25c4d9c7ccaa87a666a1a3a86faf0a197132b0e18b",
+    "P6.md": "10900e60a2a62c610ec76c2761de52d86bd5605c6cd932c790d50bddf03e9fb1",
+    "P7.md": "3161aa91401ba4fe25ac076332f7127cb30ceb3a9b1d94a5a71a62a601030994",
+    "P8.md": "10a966e7cc9d2ff2e89d99a40ea842a36ad36d73d619cffd32efd5a353c8b7c9"
+  },
+  "reviewSha256": "a9b079372645fe9cbb0b88f8ca42f63c0bf5faa952190e596fd7423895248519",
+  "blinding": "Condition mapping withheld. Explicit package names replaced; prose may reveal rule conflict. Not perfect blinding."
+}

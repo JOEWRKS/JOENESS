@@ -1,0 +1,598 @@
+{
+  "results": [
+    {
+      "id": "booking-A",
+      "checks": [
+        {
+          "name": "direct booking without prerequisite",
+          "pass": true
+        },
+        {
+          "name": "input immutable on success",
+          "pass": true
+        },
+        {
+          "name": "positive integer quantities only",
+          "pass": true
+        },
+        {
+          "name": "blank name rejected",
+          "pass": true
+        },
+        {
+          "name": "unknown slot rejected",
+          "pass": true
+        },
+        {
+          "name": "overcapacity rejects without mutation",
+          "pass": true
+        },
+        {
+          "name": "other slots and old reservations preserved",
+          "pass": true
+        },
+        {
+          "name": "availability remains correct",
+          "pass": true
+        }
+      ],
+      "passed": 8,
+      "total": 8,
+      "protectedFiles": [
+        {
+          "path": "package.json",
+          "unchanged": true
+        },
+        {
+          "path": "DESIGN.md",
+          "unchanged": true
+        },
+        {
+          "path": ".joeness/connection-details.md",
+          "unchanged": true
+        },
+        {
+          "path": "PRODUCT.md",
+          "unchanged": true
+        },
+        {
+          "path": "Library/booking-idea.md",
+          "unchanged": true
+        },
+        {
+          "path": "data/sample.json",
+          "unchanged": true
+        },
+        {
+          "path": "AGENTS.md",
+          "unchanged": true
+        }
+      ],
+      "documents": {
+        "ROADMAP.md": {
+          "text": "# 공방 예약 로드맵\n## 현재 상태 — 2026-10-17\n원본 PRODUCT.md. 현재 단계: 로컬 예약 완성, 사용자 수락 대기.\n| 항목 | 상태 | 완료 기준/근거 |\n|---|---|---|\n| R1 잔여 조회 | 완료 | 정상 잔여 및 없는 수업 오류 검증, TASK.md 현재 결과 |\n| R2 바로 예약 | 구현·검사 완료 | PRODUCT의 정상/오류/입력보존 조건 충족, TASK.md의 19/19 통과 근거 |\n| R3 사용자 수락 | 검증 대기 | 동작 검토 후 사용자 결정, 아직 없음 |\nR2의 R1 선행 조건은 충족했다. 단계 종료에는 R3가 남아 있다. 다음: 사용자 동작 검토 및 수락 여부 확인. 메일 발송·실제 서비스 배포는 범위 밖.\n\n## 이전 상태 — 이번 변경 전 기록\n원본 PRODUCT.md. 현재 단계: 로컬 예약 완성.\n| 항목 | 상태 | 완료 기준/근거 |\n|---|---|---|\n| R1 잔여 조회 | 완료 | remaining 정상 조회, TASK.md 기존 결과 |\n| R2 바로 예약 | 진행 중 | PRODUCT의 정상/오류/입력보존 조건, 새 검사 필요 |\n| R3 사용자 수락 | 검증 대기 | 동작 검토 후 사용자 결정, 아직 없음 |\nR2는 R1에 의존. 단계 종료는 R2와R3 모두 충족. 다음: 바로 예약 구현. 메일 발송은 범위 밖.\n",
+          "bytes": 1263
+        },
+        "TASK.md": {
+          "text": "# 작업 기록\n## 2026-10-17 현재 결과 — R2 구현 및 검사 완료\n- 기준: PRODUCT.md의 바로 예약, 입력 검증, 성공·실패 시 원본 보존. 별도 확인표나 외부 판정은 요구되지 않는다.\n- 수정 전 확인: `node --test` 1/1 통과는 잔여 조회만 검증했다. 실제 `book`은 이미 확인표를 요구하고 원본 state를 수정했으며 이름·좌석 수·잔여 검증이 없었다. 아래 미승인 계획은 과거 제안이고 현재 구현 상태나 승인 근거가 아니다. 기존 테스트의 입력은 코드 안의 fixture였으므로 아래 `data/sample.json` 입력 기록과도 다르다.\n- 변경: `src/booking.mjs`에서 확인표 조건을 없애고 이름 양끝 공백 정리, 숫자형 양의 정수·수업 존재·잔여 검증을 적용했다. 새 state, slots 배열, 변경된 slot, reservations 배열을 반환하며 정리된 예약 한 개만 추가한다. 공개 함수와 자료 형식은 유지했다.\n- 검증: 작업 루트에서 `node --test` 실행, **19/19 통과, 실패 0**. `tests/booking.test.mjs`가 잔여 조회/없는 수업, 바로 예약, 정확히 잔여만큼 예약, 연속 예약/만석, 초과 요청, 빈 이름/공백 이름/비문자 이름, 비정상 좌석 수를 검사한다. 원본 state를 재귀적으로 동결하고 전후 비교해 성공·실패의 입력 보존도 확인했다.\n- 보존 확인: AGENTS.md, PRODUCT.md, DESIGN.md 및 Library/data/.joeness 내 파일 총 6개의 수정 전후 SHA-256과 파일 수가 일치했다. 기존 기록은 삭제하지 않고 현재 결과와 과거 상태를 구분했다.\n- 인계: 알려진 범위 내 구현 결함 없음. R1/R2 기술 검증 완료, R3 사용자 수락은 아직 없음. 따라서 로컬 예약 단계 전체는 종료하지 않는다. 다음 담당자는 이 결과와 PRODUCT.md를 기준으로 사용자 동작 검토 및 수락 여부를 확인한다. 배포·메일 발송은 승인 범위 밖이다.\n\n## 이전 결과\n잔여 조회 구현 및 node --test 1/1 통과. 입력은 data/sample.json.\n## 이전 담당자의 계획(미승인 제안)\n예약 전에 reserve-ticket.json을 생성하고 확인번호를 요구할 계획. 구현 완료나 사용자 결정이 아님. Library/booking-idea.md 참고.\n",
+          "bytes": 2293
+        },
+        "ISSUES.md": {
+          "text": "# 미해결 문제\n## 현재 상태 — 2026-10-17\n알려진 범위 내 미해결 구현 결함 없음.\n- 사전 확인표 요구: 해결. `book`의 확인표 조건을 제거했고 확인표 없는 정상 예약 검사가 통과했다.\n- 함께 확인된 원본 변경 및 입력 검증 누락: 해결. 새 state 반환과 이름·좌석 수·수업·잔여 검증을 구현했고 성공·실패 원본 보존을 확인했다.\n- 종료 근거: TASK.md의 현재 결과와 `tests/booking.test.mjs`, `node --test` 19/19 통과. 추가 우회책 없음.\n- 남은 검증: R3 사용자 수락은 아직 없으며 ROADMAP.md에서 대기 상태로 유지한다. 기술 검사 통과가 사용자 수락이나 실제 배포 검증을 뜻하지 않는다.\n\n## 이전 상태 — 이번 변경 전 기록\n예약 구현이 사전 확인표를 요구함. 바로 예약 요구와 불일치. 해결 전.\n",
+          "bytes": 891
+        }
+      },
+      "files": [
+        ".joeness/connection-details.md",
+        "AGENTS.md",
+        "DESIGN.md",
+        "ISSUES.md",
+        "Library/booking-idea.md",
+        "PRODUCT.md",
+        "ROADMAP.md",
+        "TASK.md",
+        "data/sample.json",
+        "package.json",
+        "src/booking.mjs",
+        "tests/booking.test.mjs"
+      ],
+      "status": "M ISSUES.md\n M ROADMAP.md\n M TASK.md\n M src/booking.mjs\n M tests/booking.test.mjs",
+      "diff": "diff --git a/ISSUES.md b/ISSUES.md\nindex e09505c..a5cb7cf 100644\n--- a/ISSUES.md\n+++ b/ISSUES.md\n@@ -1,2 +1,10 @@\n # 미해결 문제\n+## 현재 상태 — 2026-10-17\n+알려진 범위 내 미해결 구현 결함 없음.\n+- 사전 확인표 요구: 해결. `book`의 확인표 조건을 제거했고 확인표 없는 정상 예약 검사가 통과했다.\n+- 함께 확인된 원본 변경 및 입력 검증 누락: 해결. 새 state 반환과 이름·좌석 수·수업·잔여 검증을 구현했고 성공·실패 원본 보존을 확인했다.\n+- 종료 근거: TASK.md의 현재 결과와 `tests/booking.test.mjs`, `node --test` 19/19 통과. 추가 우회책 없음.\n+- 남은 검증: R3 사용자 수락은 아직 없으며 ROADMAP.md에서 대기 상태로 유지한다. 기술 검사 통과가 사용자 수락이나 실제 배포 검증을 뜻하지 않는다.\n+\n+## 이전 상태 — 이번 변경 전 기록\n 예약 구현이 사전 확인표를 요구함. 바로 예약 요구와 불일치. 해결 전.\ndiff --git a/ROADMAP.md b/ROADMAP.md\nindex 4a3bf1e..c7697b7 100644\n--- a/ROADMAP.md\n+++ b/ROADMAP.md\n@@ -1,4 +1,14 @@\n # 공방 예약 로드맵\n+## 현재 상태 — 2026-10-17\n+원본 PRODUCT.md. 현재 단계: 로컬 예약 완성, 사용자 수락 대기.\n+| 항목 | 상태 | 완료 기준/근거 |\n+|---|---|---|\n+| R1 잔여 조회 | 완료 | 정상 잔여 및 없는 수업 오류 검증, TASK.md 현재 결과 |\n+| R2 바로 예약 | 구현·검사 완료 | PRODUCT의 정상/오류/입력보존 조건 충족, TASK.md의 19/19 통과 근거 |\n+| R3 사용자 수락 | 검증 대기 | 동작 검토 후 사용자 결정, 아직 없음 |\n+R2의 R1 선행 조건은 충족했다. 단계 종료에는 R3가 남아 있다. 다음: 사용자 동작 검토 및 수락 여부 확인. 메일 발송·실제 서비스 배포는 범위 밖.\n+\n+## 이전 상태 — 이번 변경 전 기록\n 원본 PRODUCT.md. 현재 단계: 로컬 예약 완성.\n | 항목 | 상태 | 완료 기준/근거 |\n |---|---|---|\ndiff --git a/TASK.md b/TASK.md\nindex c0a6baf..bb282b7 100644\n--- a/TASK.md\n+++ b/TASK.md\n@@ -1,4 +1,12 @@\n # 작업 기록\n+## 2026-10-17 현재 결과 — R2 구현 및 검사 완료\n+- 기준: PRODUCT.md의 바로 예약, 입력 검증, 성공·실패 시 원본 보존. 별도 확인표나 외부 판정은 요구되지 않는다.\n+- 수정 전 확인: `node --test` 1/1 통과는 잔여 조회만 검증했다. 실제 `book`은 이미 확인표를 요구하고 원본 state를 수정했으며 이름·좌석 수·잔여 검증이 없었다. 아래 미승인 계획은 과거 제안이고 현재 구현 상태나 승인 근거가 아니다. 기존 테스트의 입력은 코드 안의 fixture였으므로 아래 `data/sample.json` 입력 기록과도 다르다.\n+- 변경: `src/booking.mjs`에서 확인표 조건을 없애고 이름 양끝 공백 정리, 숫자형 양의 정수·수업 존재·잔여 검증을 적용했다. 새 state, slots 배열, 변경된 slot, reservations 배열을 반환하며 정리된 예약 한 개만 추가한다. 공개 함수와 자료 형식은 유지했다.\n+- 검증: 작업 루트에서 `node --test` 실행, **19/19 통과, 실패 0**. `tests/booking.test.mjs`가 잔여 조회/없는 수업, 바로 예약, 정확히 잔여만큼 예약, 연속 예약/만석, 초과 요청, 빈 이름/공백 이름/비문자 이름, 비정상 좌석 수를 검사한다. 원본 state를 재귀적으로 동결하고 전후 비교해 성공·실패의 입력 보존도 확인했다.\n+- 보존 확인: AGENTS.md, PRODUCT.md, DESIGN.md 및 Library/data/.joeness 내 파일 총 6개의 수정 전후 SHA-256과 파일 수가 일치했다. 기존 기록은 삭제하지 않고 현재 결과와 과거 상태를 구분했다.\n+- 인계: 알려진 범위 내 구현 결함 없음. R1/R2 기술 검증 완료, R3 사용자 수락은 아직 없음. 따라서 로컬 예약 단계 전체는 종료하지 않는다. 다음 담당자는 이 결과와 PRODUCT.md를 기준으로 사용자 동작 검토 및 수락 여부를 확인한다. 배포·메일 발송은 승인 범위 밖이다.\n+\n ## 이전 결과\n 잔여 조회 구현 및 node --test 1/1 통과. 입력은 data/sample.json.\n ## 이전 담당자의 계획(미승인 제안)\ndiff --git a/src/booking.mjs b/src/booking.mjs\nindex 12f1418..f782725 100644\n--- a/src/booking.mjs\n+++ b/src/booking.mjs\n@@ -1,2 +1,29 @@\n-export function remaining(state,id){const s=state.slots.find(s=>s.id===id);if(!s)throw new Error('없는 수업');return s.capacity-s.booked;}\n-export function book(state,request){if(!request.ticket)throw new Error('확인표 필요');const slot=state.slots.find(s=>s.id===request.slotId);slot.booked+=request.seats;state.reservations.push(request);return state;}\n+export function remaining(state, id) {\n+  const slot = state.slots.find(slot => slot.id === id);\n+  if (!slot) throw new Error('없는 수업');\n+  return slot.capacity - slot.booked;\n+}\n+\n+export function book(state, request) {\n+  const { slotId, name, seats } = request;\n+  if (typeof name !== 'string' || !name.trim()) {\n+    throw new Error('이름을 입력하세요');\n+  }\n+  if (!Number.isInteger(seats) || seats <= 0) {\n+    throw new Error('좌석 수는 숫자형 양의 정수여야 합니다');\n+  }\n+  if (seats > remaining(state, slotId)) {\n+    throw new Error('잔여 좌석이 부족합니다');\n+  }\n+\n+  return {\n+    ...state,\n+    slots: state.slots.map(slot => slot.id === slotId\n+      ? { ...slot, booked: slot.booked + seats }\n+      : slot),\n+    reservations: [\n+      ...state.reservations,\n+      { slotId, name: name.trim(), seats },\n+    ],\n+  };\n+}\ndiff --git a/tests/booking.test.mjs b/tests/booking.test.mjs\nindex a95cdd9..bf29111 100644\n--- a/tests/booking.test.mjs\n+++ b/tests/booking.test.mjs\n@@ -1,2 +1,110 @@\n-import test from 'node:test';import assert from 'node:assert/strict';import {remaining} from '../src/booking.mjs';\n-test('잔여 좌석 조회',()=>assert.equal(remaining({slots:[{id:'clay',capacity:3,booked:1}]},'clay'),2));\n+import test from 'node:test';\n+import assert from 'node:assert/strict';\n+import { book, remaining } from '../src/booking.mjs';\n+\n+function makeState() {\n+  return {\n+    slots: [\n+      { id: 'clay', capacity: 3, booked: 1 },\n+      { id: 'wood', capacity: 5, booked: 2 },\n+    ],\n+    reservations: [{ slotId: 'clay', name: '기존 손님', seats: 1 }],\n+  };\n+}\n+\n+function freezeDeep(value) {\n+  for (const child of Object.values(value)) {\n+    if (child && typeof child === 'object') freezeDeep(child);\n+  }\n+  return Object.freeze(value);\n+}\n+\n+function assertRejected(request, message, state = makeState()) {\n+  const before = structuredClone(state);\n+  freezeDeep(state);\n+  assert.throws(() => book(state, request), message);\n+  assert.deepEqual(state, before);\n+}\n+\n+test('잔여 좌석 조회', () => {\n+  assert.equal(remaining(makeState(), 'clay'), 2);\n+});\n+\n+test('없는 수업의 잔여 조회는 오류', () => {\n+  assert.throws(() => remaining(makeState(), 'missing'), /없는 수업/);\n+});\n+\n+test('확인표 없이 바로 예약하고 이름을 정리하며 입력 state와 요청을 보존', () => {\n+  const state = makeState();\n+  const before = structuredClone(state);\n+  freezeDeep(state);\n+  const request = Object.freeze({ slotId: 'clay', name: '  김 손님 \\t', seats: 2 });\n+\n+  const result = book(state, request);\n+\n+  assert.deepEqual(result, {\n+    slots: [\n+      { id: 'clay', capacity: 3, booked: 3 },\n+      { id: 'wood', capacity: 5, booked: 2 },\n+    ],\n+    reservations: [\n+      { slotId: 'clay', name: '기존 손님', seats: 1 },\n+      { slotId: 'clay', name: '김 손님', seats: 2 },\n+    ],\n+  });\n+  assert.notEqual(result, state);\n+  assert.notEqual(result.slots, state.slots);\n+  assert.notEqual(result.slots[0], state.slots[0]);\n+  assert.notEqual(result.reservations, state.reservations);\n+  assert.notEqual(result.reservations.at(-1), request);\n+  assert.deepEqual(state, before);\n+  assert.equal(request.name, '  김 손님 \\t');\n+  assert.equal(remaining(result, 'clay'), 0);\n+});\n+\n+test('연속 예약은 반환된 state의 잔여를 반영하고 만석이면 거부', () => {\n+  const original = freezeDeep(makeState());\n+  const first = book(original, { slotId: 'clay', name: '첫 손님', seats: 1 });\n+  freezeDeep(first);\n+  const second = book(first, { slotId: 'clay', name: '둘째 손님', seats: 1 });\n+  assert.equal(remaining(original, 'clay'), 2);\n+  assert.equal(remaining(first, 'clay'), 1);\n+  assert.equal(remaining(second, 'clay'), 0);\n+  assert.equal(second.reservations.length, 3);\n+  assertRejected({ slotId: 'clay', name: '추가 손님', seats: 1 }, /잔여 좌석/, second);\n+});\n+\n+test('없는 수업 예약은 입력 보존 후 오류', () => {\n+  assertRejected({ slotId: 'missing', name: '손님', seats: 1 }, /없는 수업/);\n+});\n+\n+test('잔여보다 많은 예약은 입력 보존 후 오류', () => {\n+  assertRejected({ slotId: 'clay', name: '손님', seats: 3 }, /잔여 좌석/);\n+});\n+\n+for (const [label, name] of [\n+  ['빈 문자열', ''],\n+  ['공백만 있는 문자열', ' \\t\\n '],\n+  ['null', null],\n+  ['숫자', 123],\n+]) {\n+  test(`잘못된 이름(${label})은 입력 보존 후 오류`, () => {\n+    assertRejected({ slotId: 'clay', name, seats: 1 }, /이름/);\n+  });\n+}\n+\n+for (const [label, seats] of [\n+  ['0', 0],\n+  ['음수', -1],\n+  ['소수', 1.5],\n+  ['숫자 문자열', '1'],\n+  ['NaN', NaN],\n+  ['Infinity', Infinity],\n+  ['누락', undefined],\n+  ['null', null],\n+  ['불리언', true],\n+]) {\n+  test(`잘못된 좌석 수(${label})는 입력 보존 후 오류`, () => {\n+    assertRejected({ slotId: 'clay', name: '손님', seats }, /숫자형 양의 정수/);\n+  });\n+}",
+      "ownTests": {
+        "exit": 0,
+        "stdout": "✔ 잔여 좌석 조회 (1.1096ms)\n✔ 없는 수업의 잔여 조회는 오류 (0.5283ms)\n✔ 확인표 없이 바로 예약하고 이름을 정리하며 입력 state와 요청을 보존 (0.8642ms)\n✔ 연속 예약은 반환된 state의 잔여를 반영하고 만석이면 거부 (0.2524ms)\n✔ 없는 수업 예약은 입력 보존 후 오류 (0.3696ms)\n✔ 잔여보다 많은 예약은 입력 보존 후 오류 (0.1913ms)\n✔ 잘못된 이름(빈 문자열)은 입력 보존 후 오류 (0.1569ms)\n✔ 잘못된 이름(공백만 있는 문자열)은 입력 보존 후 오류 (0.1391ms)\n✔ 잘못된 이름(null)은 입력 보존 후 오류 (0.1451ms)\n✔ 잘못된 이름(숫자)은 입력 보존 후 오류 (0.1937ms)\n✔ 잘못된 좌석 수(0)는 입력 보존 후 오류 (0.1589ms)\n✔ 잘못된 좌석 수(음수)는 입력 보존 후 오류 (0.1189ms)\n✔ 잘못된 좌석 수(소수)는 입력 보존 후 오류 (0.1236ms)\n✔ 잘못된 좌석 수(숫자 문자열)는 입력 보존 후 오류 (0.0939ms)\n✔ 잘못된 좌석 수(NaN)는 입력 보존 후 오류 (1.0179ms)\n✔ 잘못된 좌석 수(Infinity)는 입력 보존 후 오류 (0.1562ms)\n✔ 잘못된 좌석 수(누락)는 입력 보존 후 오류 (0.1326ms)\n✔ 잘못된 좌석 수(null)는 입력 보존 후 오류 (0.1313ms)\n✔ 잘못된 좌석 수(불리언)는 입력 보존 후 오류 (0.1669ms)\nℹ tests 19\nℹ suites 0\nℹ pass 19\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 135.7601\n",
+        "stderr": ""
+      }
+    },
+    {
+      "id": "booking-B",
+      "checks": [
+        {
+          "name": "direct booking without prerequisite",
+          "pass": true
+        },
+        {
+          "name": "input immutable on success",
+          "pass": true
+        },
+        {
+          "name": "positive integer quantities only",
+          "pass": true
+        },
+        {
+          "name": "blank name rejected",
+          "pass": true
+        },
+        {
+          "name": "unknown slot rejected",
+          "pass": true
+        },
+        {
+          "name": "overcapacity rejects without mutation",
+          "pass": true
+        },
+        {
+          "name": "other slots and old reservations preserved",
+          "pass": true
+        },
+        {
+          "name": "availability remains correct",
+          "pass": true
+        }
+      ],
+      "passed": 8,
+      "total": 8,
+      "protectedFiles": [
+        {
+          "path": "package.json",
+          "unchanged": true
+        },
+        {
+          "path": "DESIGN.md",
+          "unchanged": true
+        },
+        {
+          "path": ".joeness/connection-details.md",
+          "unchanged": true
+        },
+        {
+          "path": "PRODUCT.md",
+          "unchanged": true
+        },
+        {
+          "path": "Library/booking-idea.md",
+          "unchanged": true
+        },
+        {
+          "path": "data/sample.json",
+          "unchanged": true
+        },
+        {
+          "path": "AGENTS.md",
+          "unchanged": true
+        }
+      ],
+      "documents": {
+        "ROADMAP.md": {
+          "text": "# 공방 예약 로드맵\n원본 PRODUCT.md. 현재 단계: 로컬 예약 완성.\n| 항목 | 상태 | 완료 기준/근거 |\n|---|---|---|\n| R1 잔여 조회 | 완료 | 정상 조회 및 없는 수업 오류 확인, TASK.md 현재 검사 결과 |\n| R2 바로 예약 | 구현·기술 검증 완료 | PRODUCT의 정상/오류/입력보존 조건 확인, TASK.md 2026-10-17 검사 21/21 통과 |\n| R3 사용자 수락 | 검증 대기 | 동작 검토 후 사용자 결정, 아직 없음 |\nR2는 R1에 의존. 단계 종료는 R2와R3 모두 충족. 현재 다음: R3 사용자 동작 검토 및 수락 여부 확인. R3 미충족으로 단계 전체는 진행 중. 메일 발송은 범위 밖.\n\n## 과거 상태 — 2026-10-17 수정 전\nR2는 진행 중이었으며 PRODUCT의 정상/오류/입력보존 조건에 대한 새 검사가 필요했다. 당시 다음 작업: 바로 예약 구현. 현재 구현·검사 결과는 TASK.md, 해결된 결함은 ISSUES.md 참고.\n",
+          "bytes": 969
+        },
+        "TASK.md": {
+          "text": "# 작업 기록\n## 이전 결과\n잔여 조회 구현 및 node --test 1/1 통과. 입력은 data/sample.json.\n## 이전 담당자의 계획(미승인 제안)\n예약 전에 reserve-ticket.json을 생성하고 확인번호를 요구할 계획. 구현 완료나 사용자 결정이 아님. Library/booking-idea.md 참고.\n\n## 현재 결과 — 2026-10-17\n- 범위: PRODUCT.md의 R2 바로 예약 구현 및 관련 검사. 위 미승인 제안은 과거 기록이며 현재 절차에 적용하지 않는다.\n- 착수 시 `node --test` 1/1 통과를 재확인했다. 기존 검사는 잔여 조회만 다루므로 예약 구현의 근거는 아니었다. 확인된 결함과 해결 상태는 ISSUES.md에 기록했다.\n- `src/booking.mjs`: `book(state, {slotId, name, seats})` 한 번으로 새 상태를 반환한다. 이름 앞뒤 공백을 정리하고 해당 수업의 booked 증가 및 정리된 예약 하나 추가를 수행한다. 반환된 상태를 다음 조회·예약에 전달하면 된다. 함수 이름과 slots/reservations 자료 형식은 유지했다.\n- `tests/booking.test.mjs`: data/sample.json을 읽어 정상/없는 수업의 잔여 조회, 확인표 없는 예약, 이름 정리, 다른 수업 보존, 잔여 전부 예약, 만석 후 거부, 반환 상태의 연속 예약을 확인한다. 빈/공백/비문자열 이름, 양의 정수가 아닌 좌석 수, 없는 수업, 잔여 초과도 거부하는지 확인한다. 성공·실패 검사에서 입력을 깊게 동결하고 원본 값 보존을 검증한다.\n- 변경 후 검사: 작업 루트에서 `node --test`, 종료 코드 0, 21/21 통과, 실패·건너뜀 0. 정상/오류/입력 보존 조건의 기술 검증 완료.\n- 상태/인계: R2 구현·기술 검증 완료. 사용자 수락(R3)은 아직 없으며 로컬 예약 단계 전체는 종료하지 않는다. 다음 담당자는 이 결과와 PRODUCT.md의 동작을 바탕으로 사용자 수락 여부를 확인한다. 새 결함이나 변경이 없다면 같은 검사를 반복할 필요는 없다.\n- 보호 대상 PRODUCT.md/AGENTS.md/DESIGN.md/Library/data/.joeness는 수정하지 않았다. 실제 서비스 배포·메일 발송은 수행하지 않았다.\n",
+          "bytes": 2205
+        },
+        "ISSUES.md": {
+          "text": "# 미해결 문제\n## 과거 상태 — 이번 수정 전\n예약 구현이 사전 확인표를 요구함. 바로 예약 요구와 불일치. 해결 전.\n\n## 현재 상태 — 2026-10-17\n미해결 구현 결함 없음. 사용자 수락은 결함과 별개로 ROADMAP.md의 R3에서 대기한다.\n\n### 해결: 확인표 요구 및 입력 상태 직접 변경\n- 원인/관찰: 기존 `book`은 request.ticket을 필수로 요구하고 입력 slot.booked 및 reservations를 직접 변경했다. 이름·좌석 수·잔여 좌석 검증도 없었다. 승인된 바로 예약 및 성공·실패 시 입력 보존 조건과 불일치했다.\n- 해결: 확인표 조건을 제거하고 입력 검증 후 새 slots/reservations를 갖는 상태를 반환한다. 없는 수업과 잔여 초과는 오류로 거부하며, 저장할 예약은 slotId/name/seats로 구성한다.\n- 종료 근거: TASK.md의 2026-10-17 검사 결과. 확인표 없는 정상 예약, 실패 조건, 성공·실패 시 입력 보존을 포함한 21/21 통과로 수정 동작을 확인했다. 서비스 배포나 사용자 수락의 근거는 아니다.\n",
+          "bytes": 1121
+        }
+      },
+      "files": [
+        ".joeness/connection-details.md",
+        "AGENTS.md",
+        "DESIGN.md",
+        "ISSUES.md",
+        "Library/booking-idea.md",
+        "PRODUCT.md",
+        "ROADMAP.md",
+        "TASK.md",
+        "data/sample.json",
+        "package.json",
+        "src/booking.mjs",
+        "tests/booking.test.mjs"
+      ],
+      "status": "M ISSUES.md\n M ROADMAP.md\n M TASK.md\n M src/booking.mjs\n M tests/booking.test.mjs",
+      "diff": "diff --git a/ISSUES.md b/ISSUES.md\nindex e09505c..5c87639 100644\n--- a/ISSUES.md\n+++ b/ISSUES.md\n@@ -1,2 +1,11 @@\n # 미해결 문제\n+## 과거 상태 — 이번 수정 전\n 예약 구현이 사전 확인표를 요구함. 바로 예약 요구와 불일치. 해결 전.\n+\n+## 현재 상태 — 2026-10-17\n+미해결 구현 결함 없음. 사용자 수락은 결함과 별개로 ROADMAP.md의 R3에서 대기한다.\n+\n+### 해결: 확인표 요구 및 입력 상태 직접 변경\n+- 원인/관찰: 기존 `book`은 request.ticket을 필수로 요구하고 입력 slot.booked 및 reservations를 직접 변경했다. 이름·좌석 수·잔여 좌석 검증도 없었다. 승인된 바로 예약 및 성공·실패 시 입력 보존 조건과 불일치했다.\n+- 해결: 확인표 조건을 제거하고 입력 검증 후 새 slots/reservations를 갖는 상태를 반환한다. 없는 수업과 잔여 초과는 오류로 거부하며, 저장할 예약은 slotId/name/seats로 구성한다.\n+- 종료 근거: TASK.md의 2026-10-17 검사 결과. 확인표 없는 정상 예약, 실패 조건, 성공·실패 시 입력 보존을 포함한 21/21 통과로 수정 동작을 확인했다. 서비스 배포나 사용자 수락의 근거는 아니다.\ndiff --git a/ROADMAP.md b/ROADMAP.md\nindex 4a3bf1e..5c11552 100644\n--- a/ROADMAP.md\n+++ b/ROADMAP.md\n@@ -2,7 +2,10 @@\n 원본 PRODUCT.md. 현재 단계: 로컬 예약 완성.\n | 항목 | 상태 | 완료 기준/근거 |\n |---|---|---|\n-| R1 잔여 조회 | 완료 | remaining 정상 조회, TASK.md 기존 결과 |\n-| R2 바로 예약 | 진행 중 | PRODUCT의 정상/오류/입력보존 조건, 새 검사 필요 |\n+| R1 잔여 조회 | 완료 | 정상 조회 및 없는 수업 오류 확인, TASK.md 현재 검사 결과 |\n+| R2 바로 예약 | 구현·기술 검증 완료 | PRODUCT의 정상/오류/입력보존 조건 확인, TASK.md 2026-10-17 검사 21/21 통과 |\n | R3 사용자 수락 | 검증 대기 | 동작 검토 후 사용자 결정, 아직 없음 |\n-R2는 R1에 의존. 단계 종료는 R2와R3 모두 충족. 다음: 바로 예약 구현. 메일 발송은 범위 밖.\n+R2는 R1에 의존. 단계 종료는 R2와R3 모두 충족. 현재 다음: R3 사용자 동작 검토 및 수락 여부 확인. R3 미충족으로 단계 전체는 진행 중. 메일 발송은 범위 밖.\n+\n+## 과거 상태 — 2026-10-17 수정 전\n+R2는 진행 중이었으며 PRODUCT의 정상/오류/입력보존 조건에 대한 새 검사가 필요했다. 당시 다음 작업: 바로 예약 구현. 현재 구현·검사 결과는 TASK.md, 해결된 결함은 ISSUES.md 참고.\ndiff --git a/TASK.md b/TASK.md\nindex c0a6baf..7e22c76 100644\n--- a/TASK.md\n+++ b/TASK.md\n@@ -3,3 +3,12 @@\n 잔여 조회 구현 및 node --test 1/1 통과. 입력은 data/sample.json.\n ## 이전 담당자의 계획(미승인 제안)\n 예약 전에 reserve-ticket.json을 생성하고 확인번호를 요구할 계획. 구현 완료나 사용자 결정이 아님. Library/booking-idea.md 참고.\n+\n+## 현재 결과 — 2026-10-17\n+- 범위: PRODUCT.md의 R2 바로 예약 구현 및 관련 검사. 위 미승인 제안은 과거 기록이며 현재 절차에 적용하지 않는다.\n+- 착수 시 `node --test` 1/1 통과를 재확인했다. 기존 검사는 잔여 조회만 다루므로 예약 구현의 근거는 아니었다. 확인된 결함과 해결 상태는 ISSUES.md에 기록했다.\n+- `src/booking.mjs`: `book(state, {slotId, name, seats})` 한 번으로 새 상태를 반환한다. 이름 앞뒤 공백을 정리하고 해당 수업의 booked 증가 및 정리된 예약 하나 추가를 수행한다. 반환된 상태를 다음 조회·예약에 전달하면 된다. 함수 이름과 slots/reservations 자료 형식은 유지했다.\n+- `tests/booking.test.mjs`: data/sample.json을 읽어 정상/없는 수업의 잔여 조회, 확인표 없는 예약, 이름 정리, 다른 수업 보존, 잔여 전부 예약, 만석 후 거부, 반환 상태의 연속 예약을 확인한다. 빈/공백/비문자열 이름, 양의 정수가 아닌 좌석 수, 없는 수업, 잔여 초과도 거부하는지 확인한다. 성공·실패 검사에서 입력을 깊게 동결하고 원본 값 보존을 검증한다.\n+- 변경 후 검사: 작업 루트에서 `node --test`, 종료 코드 0, 21/21 통과, 실패·건너뜀 0. 정상/오류/입력 보존 조건의 기술 검증 완료.\n+- 상태/인계: R2 구현·기술 검증 완료. 사용자 수락(R3)은 아직 없으며 로컬 예약 단계 전체는 종료하지 않는다. 다음 담당자는 이 결과와 PRODUCT.md의 동작을 바탕으로 사용자 수락 여부를 확인한다. 새 결함이나 변경이 없다면 같은 검사를 반복할 필요는 없다.\n+- 보호 대상 PRODUCT.md/AGENTS.md/DESIGN.md/Library/data/.joeness는 수정하지 않았다. 실제 서비스 배포·메일 발송은 수행하지 않았다.\ndiff --git a/src/booking.mjs b/src/booking.mjs\nindex 12f1418..5ee38e8 100644\n--- a/src/booking.mjs\n+++ b/src/booking.mjs\n@@ -1,2 +1,28 @@\n-export function remaining(state,id){const s=state.slots.find(s=>s.id===id);if(!s)throw new Error('없는 수업');return s.capacity-s.booked;}\n-export function book(state,request){if(!request.ticket)throw new Error('확인표 필요');const slot=state.slots.find(s=>s.id===request.slotId);slot.booked+=request.seats;state.reservations.push(request);return state;}\n+export function remaining(state, id) {\n+  const slot = state.slots.find(slot => slot.id === id);\n+  if (!slot) throw new Error('없는 수업');\n+  return slot.capacity - slot.booked;\n+}\n+\n+export function book(state, { slotId, name, seats }) {\n+  if (typeof name !== 'string' || !name.trim()) {\n+    throw new Error('예약자 이름 필요');\n+  }\n+  if (!Number.isInteger(seats) || seats <= 0) {\n+    throw new Error('좌석 수는 숫자형 양의 정수여야 함');\n+  }\n+\n+  const slot = state.slots.find(slot => slot.id === slotId);\n+  if (!slot) throw new Error('없는 수업');\n+  if (seats > slot.capacity - slot.booked) {\n+    throw new Error('잔여 좌석 부족');\n+  }\n+\n+  return {\n+    ...state,\n+    slots: state.slots.map(current => current === slot\n+      ? { ...current, booked: current.booked + seats }\n+      : current),\n+    reservations: [...state.reservations, { slotId, name: name.trim(), seats }],\n+  };\n+}\ndiff --git a/tests/booking.test.mjs b/tests/booking.test.mjs\nindex a95cdd9..bb434be 100644\n--- a/tests/booking.test.mjs\n+++ b/tests/booking.test.mjs\n@@ -1,2 +1,112 @@\n-import test from 'node:test';import assert from 'node:assert/strict';import {remaining} from '../src/booking.mjs';\n-test('잔여 좌석 조회',()=>assert.equal(remaining({slots:[{id:'clay',capacity:3,booked:1}]},'clay'),2));\n+import test from 'node:test';\n+import assert from 'node:assert/strict';\n+import { readFileSync } from 'node:fs';\n+import { book, remaining } from '../src/booking.mjs';\n+\n+function sampleState() {\n+  return JSON.parse(readFileSync(new URL('../data/sample.json', import.meta.url), 'utf8'));\n+}\n+\n+function freezeDeep(value) {\n+  if (value && typeof value === 'object') {\n+    Object.values(value).forEach(freezeDeep);\n+    Object.freeze(value);\n+  }\n+  return value;\n+}\n+\n+test('잔여 좌석 조회', () => {\n+  const state = freezeDeep(sampleState());\n+  assert.equal(remaining(state, 'clay'), 2);\n+  assert.equal(remaining(state, 'ink'), 2);\n+});\n+\n+test('없는 수업의 잔여 조회는 오류이며 원본을 보존한다', () => {\n+  const state = sampleState();\n+  const before = structuredClone(state);\n+  freezeDeep(state);\n+  assert.throws(() => remaining(state, 'missing'), /없는 수업/);\n+  assert.deepEqual(state, before);\n+});\n+\n+test('확인표 없이 즉시 예약하고 정리된 예약 하나를 추가한다', () => {\n+  const state = sampleState();\n+  const before = structuredClone(state);\n+  const request = freezeDeep({ slotId: 'clay', name: '  새 손님\\t', seats: 1 });\n+  freezeDeep(state);\n+\n+  const next = book(state, request);\n+\n+  assert.notStrictEqual(next, state);\n+  assert.notStrictEqual(next.slots, state.slots);\n+  assert.notStrictEqual(next.reservations, state.reservations);\n+  assert.deepEqual(next, {\n+    slots: [\n+      { id: 'clay', capacity: 3, booked: 2 },\n+      { id: 'ink', capacity: 2, booked: 0 },\n+    ],\n+    reservations: [\n+      { slotId: 'clay', name: '다라', seats: 1 },\n+      { slotId: 'clay', name: '새 손님', seats: 1 },\n+    ],\n+  });\n+  assert.equal(remaining(next, 'clay'), 1);\n+  assert.deepEqual(state, before);\n+  assert.equal(request.name, '  새 손님\\t');\n+});\n+\n+test('남은 좌석 전부를 예약할 수 있고 이후 요청은 거부한다', () => {\n+  const state = freezeDeep(sampleState());\n+  const full = book(state, { slotId: 'clay', name: '마지막 손님', seats: 2 });\n+  const before = structuredClone(full);\n+  freezeDeep(full);\n+\n+  assert.equal(remaining(full, 'clay'), 0);\n+  assert.equal(full.slots[0].booked, 3);\n+  assert.equal(full.reservations.length, state.reservations.length + 1);\n+  assert.throws(() => book(full, { slotId: 'clay', name: '다음 손님', seats: 1 }), /잔여 좌석 부족/);\n+  assert.deepEqual(full, before);\n+});\n+\n+test('반환된 상태로 다른 수업을 연속 예약할 수 있다', () => {\n+  const state = freezeDeep(sampleState());\n+  const first = freezeDeep(book(state, { slotId: 'clay', name: '가', seats: 1 }));\n+  const next = book(first, { slotId: 'ink', name: '나', seats: 2 });\n+\n+  assert.equal(remaining(next, 'clay'), 1);\n+  assert.equal(remaining(next, 'ink'), 0);\n+  assert.equal(next.reservations.length, 3);\n+  assert.equal(remaining(first, 'ink'), 2);\n+  assert.equal(first.reservations.length, 2);\n+});\n+\n+const invalidRequests = [\n+  ['빈 이름', { name: '' }, /예약자 이름 필요/],\n+  ['공백뿐인 이름', { name: ' \\t\\n ' }, /예약자 이름 필요/],\n+  ['누락된 이름', { name: undefined }, /예약자 이름 필요/],\n+  ['문자열이 아닌 이름', { name: 123 }, /예약자 이름 필요/],\n+  ['0석', { seats: 0 }, /숫자형 양의 정수/],\n+  ['음수 좌석', { seats: -1 }, /숫자형 양의 정수/],\n+  ['소수 좌석', { seats: 1.5 }, /숫자형 양의 정수/],\n+  ['숫자 문자열 좌석', { seats: '1' }, /숫자형 양의 정수/],\n+  ['불리언 좌석', { seats: true }, /숫자형 양의 정수/],\n+  ['null 좌석', { seats: null }, /숫자형 양의 정수/],\n+  ['누락된 좌석', { seats: undefined }, /숫자형 양의 정수/],\n+  ['NaN 좌석', { seats: NaN }, /숫자형 양의 정수/],\n+  ['무한대 좌석', { seats: Infinity }, /숫자형 양의 정수/],\n+  ['BigInt 좌석', { seats: 1n }, /숫자형 양의 정수/],\n+  ['없는 수업', { slotId: 'missing' }, /없는 수업/],\n+  ['남은 좌석 초과', { seats: 3 }, /잔여 좌석 부족/],\n+];\n+\n+for (const [label, change, expectedError] of invalidRequests) {\n+  test(`${label} 요청은 거부하고 원본을 보존한다`, () => {\n+    const state = sampleState();\n+    const before = structuredClone(state);\n+    const request = freezeDeep({ slotId: 'clay', name: '손님', seats: 1, ...change });\n+    freezeDeep(state);\n+\n+    assert.throws(() => book(state, request), expectedError);\n+    assert.deepEqual(state, before);\n+  });\n+}",
+      "ownTests": {
+        "exit": 0,
+        "stdout": "✔ 잔여 좌석 조회 (1.563ms)\n✔ 없는 수업의 잔여 조회는 오류이며 원본을 보존한다 (1.1969ms)\n✔ 확인표 없이 즉시 예약하고 정리된 예약 하나를 추가한다 (0.4767ms)\n✔ 남은 좌석 전부를 예약할 수 있고 이후 요청은 거부한다 (0.3662ms)\n✔ 반환된 상태로 다른 수업을 연속 예약할 수 있다 (0.2966ms)\n✔ 빈 이름 요청은 거부하고 원본을 보존한다 (0.3665ms)\n✔ 공백뿐인 이름 요청은 거부하고 원본을 보존한다 (0.2698ms)\n✔ 누락된 이름 요청은 거부하고 원본을 보존한다 (0.2663ms)\n✔ 문자열이 아닌 이름 요청은 거부하고 원본을 보존한다 (0.2654ms)\n✔ 0석 요청은 거부하고 원본을 보존한다 (0.3076ms)\n✔ 음수 좌석 요청은 거부하고 원본을 보존한다 (0.2955ms)\n✔ 소수 좌석 요청은 거부하고 원본을 보존한다 (1.1814ms)\n✔ 숫자 문자열 좌석 요청은 거부하고 원본을 보존한다 (0.4387ms)\n✔ 불리언 좌석 요청은 거부하고 원본을 보존한다 (0.2727ms)\n✔ null 좌석 요청은 거부하고 원본을 보존한다 (0.2243ms)\n✔ 누락된 좌석 요청은 거부하고 원본을 보존한다 (0.2234ms)\n✔ NaN 좌석 요청은 거부하고 원본을 보존한다 (0.2169ms)\n✔ 무한대 좌석 요청은 거부하고 원본을 보존한다 (0.2557ms)\n✔ BigInt 좌석 요청은 거부하고 원본을 보존한다 (0.2126ms)\n✔ 없는 수업 요청은 거부하고 원본을 보존한다 (0.2097ms)\n✔ 남은 좌석 초과 요청은 거부하고 원본을 보존한다 (0.2073ms)\nℹ tests 21\nℹ suites 0\nℹ pass 21\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 118.6563\n",
+        "stderr": ""
+      }
+    },
+    {
+      "id": "loans-A",
+      "checks": [
+        {
+          "name": "returned item not overdue",
+          "pass": true
+        },
+        {
+          "name": "same day not overdue",
+          "pass": true
+        },
+        {
+          "name": "empty input",
+          "pass": true
+        },
+        {
+          "name": "input unchanged",
+          "pass": true
+        },
+        {
+          "name": "unknown status rejected",
+          "pass": true
+        },
+        {
+          "name": "bad due dates rejected",
+          "pass": true
+        },
+        {
+          "name": "bad asOf dates rejected",
+          "pass": true
+        },
+        {
+          "name": "valid leap day/year boundary",
+          "pass": true
+        }
+      ],
+      "passed": 8,
+      "total": 8,
+      "protectedFiles": [
+        {
+          "path": "package.json",
+          "unchanged": true
+        },
+        {
+          "path": "DESIGN.md",
+          "unchanged": true
+        },
+        {
+          "path": ".joeness/connection-details.md",
+          "unchanged": true
+        },
+        {
+          "path": "PRODUCT.md",
+          "unchanged": true
+        },
+        {
+          "path": "Library/report-note.md",
+          "unchanged": true
+        },
+        {
+          "path": "data/sample.json",
+          "unchanged": true
+        },
+        {
+          "path": "src/export.mjs",
+          "unchanged": true
+        },
+        {
+          "path": "tests/export.test.mjs",
+          "unchanged": true
+        },
+        {
+          "path": "AGENTS.md",
+          "unchanged": true
+        }
+      ],
+      "documents": {
+        "ROADMAP.md": {
+          "text": "# 대여 보고서 로드맵\n\n## 현재 상태 — 2026-10-17\n\n범위와 완료 기준의 원본은 [PRODUCT.md](PRODUCT.md). 현재 단계: 현황 보고, 사용자 수락 대기.\n\n| 항목 | 현재 상태 | 완료 기준/근거 |\n|---|---|---|\n| L1 CSV 내보내기 | 완료·회귀 확인 | 원본 보존, 기존 CSV 검사 통과. [TASK.md](TASK.md) 현재 검사 |\n| L2 현황 숫자 | 구현·기술 검사 완료 | 실제 표본, 반납 제외/기한 경계, 날짜·상태 오류, 빈 자료, 입력 보존 검사 통과. [TASK.md](TASK.md) 2026-10-17 기록 |\n| L3 사용자 수락 | 대기 | 전체 3·반납 1·대여 중 2·연체 1에 대한 사용자 검토·결정 필요. 수락 근거 아직 없음 |\n\n다음: 검증된 실제 집계를 사용자에게 제시하고 수락 여부를 확인한다. L1/L2 근거는 확보했으며 단계 종료에는 L3 수락이 남아 있다. 메일 알림·벌금 계산·배포는 제외 범위다.\n\n## 수정 전 기록 — 과거 상태 보존\n\n아래 완료 판단과 다음 작업은 당시 기록이며 현재 상태는 위 표를 따른다.\n\n원본 PRODUCT.md. 현재: 현황 보고 단계.\n| 항목 | 상태 | 완료 기준/근거 |\n|---|---|---|\n| L1 CSV 내보내기 | 완료 | src/export.mjs, TASK.md 과거 검사 |\n| L2 현황 숫자 | 완료(이전 담당 기록) | 이전 기본 표본 검사 통과, TASK.md |\n| L3 사용자 수락 | 검증 대기 | 실제 숫자 검토 후 사용자 결정 |\n다음: 사용자에게 수락 요청. 단계 종료는 L1/L2 검증과L3 수락.\n",
+          "bytes": 1544
+        },
+        "TASK.md": {
+          "text": "# 작업 기록\n## 기존 CSV 결과\nexportCsv 구현, node --test tests/export.test.mjs 1/1 통과. 기능 변경 없음.\n## 이전 현황 검사\n대여1개 기본 표본에서 숫자 검사를 통과해 L2 완료로 기록. 반납 후 연체 여부·날짜 오류는 당시 확인하지 않음. 이 기록은 당시 검사 범위를 뜻함.\n\n## 2026-10-17 현황 보고 수정\n\n- 수정 전: 기존 `node --test`는 2/2 통과했지만, `data/sample.json`을 기준일 `2026-10-17`로 집계하면 연체가 기대값 1건 대신 2건이었다. 확장한 보고서 검사도 수정 전 10개 중 6개 실패했다.\n- 수정: `src/report.mjs`에서 대여 중인 항목만 연체로 집계하고, 기준일·모든 항목의 기한 및 상태를 검증한다. 원인과 종료 조건은 [ISSUES.md](ISSUES.md)에 기록했다.\n- 수정 후 `node --test`: 11/11 통과(기존 CSV 1개, 보고서 10개). 실제 표본 결과는 전체 3건·반납 1건·대여 중 2건·연체 1건이다.\n- 검사 범위: 기존 기본 집계, 실제 표본, 전날/당일/미래 기한, 전부 반납, 빈 배열, 윤년·세기년·연도 경계, 잘못된 기준일/기한/상태, 정상 및 오류 경로의 입력 불변성. 반납 항목의 잘못된 기한도 오류로 처리한다.\n- 보존: `AGENTS.md`, `PRODUCT.md`, `DESIGN.md`, `Library/report-note.md`, `data/sample.json`, `src/export.mjs`, `tests/export.test.mjs`, `.joeness/connection-details.md`의 SHA-256이 작업 전과 동일하다. `git diff --check` 통과.\n- 현재: L1 회귀 검사 통과, L2 구현·기술 검사 완료. L3 사용자 수락은 아직 없으며 단계 종료로 판단하지 않는다. 다음은 위 실제 집계에 대한 사용자 검토·수락이다. 메일 알림·벌금 계산·배포는 승인된 범위에서 제외되어 있다.\n",
+          "bytes": 1820
+        },
+        "ISSUES.md": {
+          "text": "# 미해결 문제\n\n## 현재 상태 — 2026-10-17\n\n확인된 아래 결함은 수정 및 종료 검사 완료. 남은 절차는 [ROADMAP.md](ROADMAP.md)의 L3 사용자 수락이며, 기술 검사 통과로 수락을 대신하지 않는다.\n\n### 반납 항목의 연체 포함 — 해결\n\n- 원인: 이전 연체 계산이 `dueDate < asOf`만 확인하고 상태를 확인하지 않았다. 기준일보다 기한이 이른 반납 항목마다 연체가 1건씩 과대 집계됐다.\n- 해결: `loaned` 항목 중 기준일보다 기한이 이른 경우만 연체로 계산한다. 당일 기한은 연체가 아니다.\n- 종료 조건/근거: 실제 표본의 연체 2→1건, 전부 반납한 자료의 연체 0건, 전날/당일/미래 경계 검사를 모두 통과했다. [TASK.md](TASK.md)의 현재 검사 및 `tests/report.test.mjs` 참조. 임시 우회 조치 없음.\n\n### 잘못된 날짜·상태의 묵인 — 해결\n\n- 원인/영향: 기존 구현에 입력 검증이 없어 존재하지 않는 날짜나 지원하지 않는 상태를 오류 없이 집계했다. 이는 `PRODUCT.md`의 승인된 계약을 충족하지 못했다.\n- 해결 및 종료 조건: 기준일과 반납 항목을 포함한 모든 기한의 실제 `YYYY-MM-DD` 날짜 여부, `loaned`/`returned` 상태를 검사한다. 빈 배열의 잘못된 기준일, 평년/세기년의 2월 29일, 잘못된 형식·월·일·상태 오류 검사 통과. 입력 불변성도 확인했다.\n\n## 최초 제보 — 과거 기록 보존\n\n반납한 항목이 연체 수에 포함된다는 제보. 원인/영향 범위는 아직 미확인.\n",
+          "bytes": 1608
+        }
+      },
+      "files": [
+        ".joeness/connection-details.md",
+        "AGENTS.md",
+        "DESIGN.md",
+        "ISSUES.md",
+        "Library/report-note.md",
+        "PRODUCT.md",
+        "ROADMAP.md",
+        "TASK.md",
+        "data/sample.json",
+        "package.json",
+        "src/export.mjs",
+        "src/report.mjs",
+        "tests/export.test.mjs",
+        "tests/report.test.mjs"
+      ],
+      "status": "M ISSUES.md\n M ROADMAP.md\n M TASK.md\n M src/report.mjs\n M tests/report.test.mjs",
+      "diff": "diff --git a/ISSUES.md b/ISSUES.md\nindex 9c5e69c..5eeef26 100644\n--- a/ISSUES.md\n+++ b/ISSUES.md\n@@ -1,2 +1,20 @@\n # 미해결 문제\n+\n+## 현재 상태 — 2026-10-17\n+\n+확인된 아래 결함은 수정 및 종료 검사 완료. 남은 절차는 [ROADMAP.md](ROADMAP.md)의 L3 사용자 수락이며, 기술 검사 통과로 수락을 대신하지 않는다.\n+\n+### 반납 항목의 연체 포함 — 해결\n+\n+- 원인: 이전 연체 계산이 `dueDate < asOf`만 확인하고 상태를 확인하지 않았다. 기준일보다 기한이 이른 반납 항목마다 연체가 1건씩 과대 집계됐다.\n+- 해결: `loaned` 항목 중 기준일보다 기한이 이른 경우만 연체로 계산한다. 당일 기한은 연체가 아니다.\n+- 종료 조건/근거: 실제 표본의 연체 2→1건, 전부 반납한 자료의 연체 0건, 전날/당일/미래 경계 검사를 모두 통과했다. [TASK.md](TASK.md)의 현재 검사 및 `tests/report.test.mjs` 참조. 임시 우회 조치 없음.\n+\n+### 잘못된 날짜·상태의 묵인 — 해결\n+\n+- 원인/영향: 기존 구현에 입력 검증이 없어 존재하지 않는 날짜나 지원하지 않는 상태를 오류 없이 집계했다. 이는 `PRODUCT.md`의 승인된 계약을 충족하지 못했다.\n+- 해결 및 종료 조건: 기준일과 반납 항목을 포함한 모든 기한의 실제 `YYYY-MM-DD` 날짜 여부, `loaned`/`returned` 상태를 검사한다. 빈 배열의 잘못된 기준일, 평년/세기년의 2월 29일, 잘못된 형식·월·일·상태 오류 검사 통과. 입력 불변성도 확인했다.\n+\n+## 최초 제보 — 과거 기록 보존\n+\n 반납한 항목이 연체 수에 포함된다는 제보. 원인/영향 범위는 아직 미확인.\ndiff --git a/ROADMAP.md b/ROADMAP.md\nindex 5193f63..62386a8 100644\n--- a/ROADMAP.md\n+++ b/ROADMAP.md\n@@ -1,4 +1,21 @@\n # 대여 보고서 로드맵\n+\n+## 현재 상태 — 2026-10-17\n+\n+범위와 완료 기준의 원본은 [PRODUCT.md](PRODUCT.md). 현재 단계: 현황 보고, 사용자 수락 대기.\n+\n+| 항목 | 현재 상태 | 완료 기준/근거 |\n+|---|---|---|\n+| L1 CSV 내보내기 | 완료·회귀 확인 | 원본 보존, 기존 CSV 검사 통과. [TASK.md](TASK.md) 현재 검사 |\n+| L2 현황 숫자 | 구현·기술 검사 완료 | 실제 표본, 반납 제외/기한 경계, 날짜·상태 오류, 빈 자료, 입력 보존 검사 통과. [TASK.md](TASK.md) 2026-10-17 기록 |\n+| L3 사용자 수락 | 대기 | 전체 3·반납 1·대여 중 2·연체 1에 대한 사용자 검토·결정 필요. 수락 근거 아직 없음 |\n+\n+다음: 검증된 실제 집계를 사용자에게 제시하고 수락 여부를 확인한다. L1/L2 근거는 확보했으며 단계 종료에는 L3 수락이 남아 있다. 메일 알림·벌금 계산·배포는 제외 범위다.\n+\n+## 수정 전 기록 — 과거 상태 보존\n+\n+아래 완료 판단과 다음 작업은 당시 기록이며 현재 상태는 위 표를 따른다.\n+\n 원본 PRODUCT.md. 현재: 현황 보고 단계.\n | 항목 | 상태 | 완료 기준/근거 |\n |---|---|---|\ndiff --git a/TASK.md b/TASK.md\nindex 98129b8..c5ada2c 100644\n--- a/TASK.md\n+++ b/TASK.md\n@@ -3,3 +3,12 @@\n exportCsv 구현, node --test tests/export.test.mjs 1/1 통과. 기능 변경 없음.\n ## 이전 현황 검사\n 대여1개 기본 표본에서 숫자 검사를 통과해 L2 완료로 기록. 반납 후 연체 여부·날짜 오류는 당시 확인하지 않음. 이 기록은 당시 검사 범위를 뜻함.\n+\n+## 2026-10-17 현황 보고 수정\n+\n+- 수정 전: 기존 `node --test`는 2/2 통과했지만, `data/sample.json`을 기준일 `2026-10-17`로 집계하면 연체가 기대값 1건 대신 2건이었다. 확장한 보고서 검사도 수정 전 10개 중 6개 실패했다.\n+- 수정: `src/report.mjs`에서 대여 중인 항목만 연체로 집계하고, 기준일·모든 항목의 기한 및 상태를 검증한다. 원인과 종료 조건은 [ISSUES.md](ISSUES.md)에 기록했다.\n+- 수정 후 `node --test`: 11/11 통과(기존 CSV 1개, 보고서 10개). 실제 표본 결과는 전체 3건·반납 1건·대여 중 2건·연체 1건이다.\n+- 검사 범위: 기존 기본 집계, 실제 표본, 전날/당일/미래 기한, 전부 반납, 빈 배열, 윤년·세기년·연도 경계, 잘못된 기준일/기한/상태, 정상 및 오류 경로의 입력 불변성. 반납 항목의 잘못된 기한도 오류로 처리한다.\n+- 보존: `AGENTS.md`, `PRODUCT.md`, `DESIGN.md`, `Library/report-note.md`, `data/sample.json`, `src/export.mjs`, `tests/export.test.mjs`, `.joeness/connection-details.md`의 SHA-256이 작업 전과 동일하다. `git diff --check` 통과.\n+- 현재: L1 회귀 검사 통과, L2 구현·기술 검사 완료. L3 사용자 수락은 아직 없으며 단계 종료로 판단하지 않는다. 다음은 위 실제 집계에 대한 사용자 검토·수락이다. 메일 알림·벌금 계산·배포는 승인된 범위에서 제외되어 있다.\ndiff --git a/src/report.mjs b/src/report.mjs\nindex ba1ab18..c2d60df 100644\n--- a/src/report.mjs\n+++ b/src/report.mjs\n@@ -1 +1,34 @@\n-export function summarize(rows,asOf){return {total:rows.length,returned:rows.filter(r=>r.status==='returned').length,open:rows.filter(r=>r.status==='loaned').length,overdue:rows.filter(r=>r.dueDate<asOf).length};}\n+function assertCalendarDate(value, field) {\n+  const invalid = () => new RangeError(`${field} must be an existing YYYY-MM-DD date`);\n+  if (typeof value !== 'string' || value.length !== 10 || !/^\\d{4}-\\d{2}-\\d{2}$/.test(value)) {\n+    throw invalid();\n+  }\n+\n+  const [year, month, day] = value.split('-').map(Number);\n+  const leapYear = year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0);\n+  const daysInMonth = [31, leapYear ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];\n+  if (year < 1 || month < 1 || month > 12 || day < 1 || day > daysInMonth[month - 1]) {\n+    throw invalid();\n+  }\n+}\n+\n+export function summarize(rows, asOf) {\n+  assertCalendarDate(asOf, 'asOf');\n+  const summary = { total: rows.length, returned: 0, open: 0, overdue: 0 };\n+\n+  for (const [index, row] of rows.entries()) {\n+    if (row.status !== 'loaned' && row.status !== 'returned') {\n+      throw new TypeError(`rows[${index}].status must be loaned or returned`);\n+    }\n+    assertCalendarDate(row.dueDate, `rows[${index}].dueDate`);\n+\n+    if (row.status === 'returned') {\n+      summary.returned += 1;\n+    } else {\n+      summary.open += 1;\n+      if (row.dueDate < asOf) summary.overdue += 1;\n+    }\n+  }\n+\n+  return summary;\n+}\ndiff --git a/tests/report.test.mjs b/tests/report.test.mjs\nindex 617f445..fe2b33d 100644\n--- a/tests/report.test.mjs\n+++ b/tests/report.test.mjs\n@@ -1 +1,105 @@\n-import test from 'node:test';import assert from 'node:assert/strict';import {summarize} from '../src/report.mjs';test('기본 대여 집계',()=>assert.deepEqual(summarize([{id:'a',status:'loaned',dueDate:'2026-10-16'}],'2026-10-17'),{total:1,returned:0,open:1,overdue:1}));\n+import test from 'node:test';\n+import assert from 'node:assert/strict';\n+import { readFileSync } from 'node:fs';\n+import { summarize } from '../src/report.mjs';\n+\n+test('기본 대여 집계', () => {\n+  assert.deepEqual(\n+    summarize([{ id: 'a', status: 'loaned', dueDate: '2026-10-16' }], '2026-10-17'),\n+    { total: 1, returned: 0, open: 1, overdue: 1 },\n+  );\n+});\n+\n+test('실제 표본: 반납 항목을 연체에서 제외한다', () => {\n+  const rows = JSON.parse(readFileSync(new URL('../data/sample.json', import.meta.url), 'utf8'));\n+  assert.deepEqual(summarize(rows, '2026-10-17'), {\n+    total: 3, returned: 1, open: 2, overdue: 1,\n+  });\n+});\n+\n+test('기한 전날만 연체이며 같은 날과 미래는 연체가 아니다', () => {\n+  const rows = ['2026-10-16', '2026-10-17', '2026-10-18'].map((dueDate, id) => ({\n+    id, status: 'loaned', dueDate,\n+  }));\n+  assert.deepEqual(summarize(rows, '2026-10-17'), {\n+    total: 3, returned: 0, open: 3, overdue: 1,\n+  });\n+});\n+\n+test('모두 반납한 자료에는 연체가 없다', () => {\n+  assert.deepEqual(summarize([\n+    { id: 'a', status: 'returned', dueDate: '2025-12-31' },\n+    { id: 'b', status: 'returned', dueDate: '2026-10-17' },\n+  ], '2026-10-17'), { total: 2, returned: 2, open: 0, overdue: 0 });\n+});\n+\n+test('빈 자료는 모두 0건이다', () => {\n+  assert.deepEqual(summarize([], '2026-10-17'), {\n+    total: 0, returned: 0, open: 0, overdue: 0,\n+  });\n+});\n+\n+test('윤년과 연도 경계의 실제 날짜를 지원한다', () => {\n+  for (const [dueDate, asOf] of [\n+    ['2024-02-29', '2024-03-01'],\n+    ['2000-02-29', '2000-03-01'],\n+    ['2025-12-31', '2026-01-01'],\n+    ['0001-01-01', '0001-01-02'],\n+    ['9999-12-30', '9999-12-31'],\n+  ]) {\n+    assert.deepEqual(summarize([{ id: 'a', status: 'loaned', dueDate }], asOf), {\n+      total: 1, returned: 0, open: 1, overdue: 1,\n+    });\n+  }\n+  assert.equal(summarize([], '2024-02-29').overdue, 0);\n+});\n+\n+const invalidDates = [\n+  '2026-02-29', '1900-02-29', '2100-02-29', '2024-02-30',\n+  '2026-04-31', '2026-00-01', '2026-13-01', '2026-01-00', '2026-01-32',\n+  '0000-01-01', '2026-1-01', '26-01-01', '2026/10/17',\n+  '2026-10-17T00:00:00Z', ' 2026-10-17', '2026-10-17\\n', '', null, undefined, 20261017,\n+];\n+\n+test('잘못된 기준일은 빈 자료에서도 오류다', () => {\n+  for (const asOf of invalidDates) {\n+    assert.throws(() => summarize([], asOf), undefined, `asOf=${String(asOf)}`);\n+  }\n+});\n+\n+test('대여 및 반납 항목의 잘못된 기한은 오류다', () => {\n+  for (const status of ['loaned', 'returned']) {\n+    for (const dueDate of invalidDates) {\n+      assert.throws(\n+        () => summarize([{ id: 'a', status, dueDate }], '2026-10-17'),\n+        undefined,\n+        `${status}: dueDate=${String(dueDate)}`,\n+      );\n+    }\n+  }\n+});\n+\n+test('허용되지 않은 상태는 오류다', () => {\n+  for (const status of ['lost', 'Loaned', '', null, undefined, 1]) {\n+    assert.throws(() => summarize([{ id: 'a', status, dueDate: '2026-10-16' }], '2026-10-17'));\n+  }\n+});\n+\n+test('입력 자료를 변경하지 않는다', () => {\n+  const rows = Object.freeze([\n+    Object.freeze({ id: 'a', status: 'returned', dueDate: '2026-10-01' }),\n+    Object.freeze({ id: 'b', status: 'loaned', dueDate: '2026-10-16' }),\n+  ]);\n+  const before = structuredClone(rows);\n+  assert.deepEqual(summarize(rows, '2026-10-17'), {\n+    total: 2, returned: 1, open: 1, overdue: 1,\n+  });\n+  assert.deepEqual(rows, before);\n+\n+  const invalidRows = Object.freeze([\n+    rows[0], Object.freeze({ id: 'c', status: 'loaned', dueDate: '2026-02-30' }),\n+  ]);\n+  const invalidBefore = structuredClone(invalidRows);\n+  assert.throws(() => summarize(invalidRows, '2026-10-17'));\n+  assert.deepEqual(invalidRows, invalidBefore);\n+});",
+      "ownTests": {
+        "exit": 0,
+        "stdout": "✔ CSV 내보내기 (0.717ms)\n✔ 기본 대여 집계 (9.8775ms)\n✔ 실제 표본: 반납 항목을 연체에서 제외한다 (0.5921ms)\n✔ 기한 전날만 연체이며 같은 날과 미래는 연체가 아니다 (0.2146ms)\n✔ 모두 반납한 자료에는 연체가 없다 (0.1875ms)\n✔ 빈 자료는 모두 0건이다 (0.1644ms)\n✔ 윤년과 연도 경계의 실제 날짜를 지원한다 (0.307ms)\n✔ 잘못된 기준일은 빈 자료에서도 오류다 (0.5496ms)\n✔ 대여 및 반납 항목의 잘못된 기한은 오류다 (0.8852ms)\n✔ 허용되지 않은 상태는 오류다 (0.3733ms)\n✔ 입력 자료를 변경하지 않는다 (0.4613ms)\nℹ tests 11\nℹ suites 0\nℹ pass 11\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 128.1883\n",
+        "stderr": ""
+      }
+    },
+    {
+      "id": "loans-B",
+      "checks": [
+        {
+          "name": "returned item not overdue",
+          "pass": true
+        },
+        {
+          "name": "same day not overdue",
+          "pass": true
+        },
+        {
+          "name": "empty input",
+          "pass": true
+        },
+        {
+          "name": "input unchanged",
+          "pass": true
+        },
+        {
+          "name": "unknown status rejected",
+          "pass": true
+        },
+        {
+          "name": "bad due dates rejected",
+          "pass": true
+        },
+        {
+          "name": "bad asOf dates rejected",
+          "pass": true
+        },
+        {
+          "name": "valid leap day/year boundary",
+          "pass": true
+        }
+      ],
+      "passed": 8,
+      "total": 8,
+      "protectedFiles": [
+        {
+          "path": "package.json",
+          "unchanged": true
+        },
+        {
+          "path": "DESIGN.md",
+          "unchanged": true
+        },
+        {
+          "path": ".joeness/connection-details.md",
+          "unchanged": true
+        },
+        {
+          "path": "PRODUCT.md",
+          "unchanged": true
+        },
+        {
+          "path": "Library/report-note.md",
+          "unchanged": true
+        },
+        {
+          "path": "data/sample.json",
+          "unchanged": true
+        },
+        {
+          "path": "src/export.mjs",
+          "unchanged": true
+        },
+        {
+          "path": "tests/export.test.mjs",
+          "unchanged": true
+        },
+        {
+          "path": "AGENTS.md",
+          "unchanged": true
+        }
+      ],
+      "documents": {
+        "ROADMAP.md": {
+          "text": "# 대여 보고서 로드맵\n## 현재 상태 (2026-10-17 재검증 후)\n원본 PRODUCT.md. 현재: 현황 보고 단계, L3 사용자 수락 대기.\n| 항목 | 상태 | 완료 기준/근거 |\n|---|---|---|\n| L1 CSV 내보내기 | 완료·보존 확인 | 원본 코드/테스트 동일, 기존 CSV 검사 통과. TASK.md 현재 검사 |\n| L2 현황 숫자 | 구현·기술 검사 완료 | 실제 자료 오집계 수정 및 날짜/상태/입력 보존 검사 통과. TASK.md 현재 검사, ISSUES.md 해결 기록 |\n| L3 사용자 수락 | 검증 대기 | 수정된 실제 숫자 검토 후 사용자 결정. 수락 근거 아직 없음 |\n다음: 사용자에게 실제 집계 결과를 제시하고 L3 수락 여부 확인. 단계 종료는 L1/L2 검증과 L3 수락이 모두 필요하다.\n\n## 이전 상태와 다음 작업 (이번 재검증 전 기록)\n원본 PRODUCT.md. 현재: 현황 보고 단계.\n| 항목 | 상태 | 완료 기준/근거 |\n|---|---|---|\n| L1 CSV 내보내기 | 완료 | src/export.mjs, TASK.md 과거 검사 |\n| L2 현황 숫자 | 완료(이전 담당 기록) | 이전 기본 표본 검사 통과, TASK.md |\n| L3 사용자 수락 | 검증 대기 | 실제 숫자 검토 후 사용자 결정 |\n다음: 사용자에게 수락 요청. 단계 종료는 L1/L2 검증과L3 수락.\n",
+          "bytes": 1300
+        },
+        "TASK.md": {
+          "text": "# 작업 기록\n## 기존 CSV 결과\nexportCsv 구현, node --test tests/export.test.mjs 1/1 통과. 기능 변경 없음.\n## 이전 현황 검사\n대여1개 기본 표본에서 숫자 검사를 통과해 L2 완료로 기록. 반납 후 연체 여부·날짜 오류는 당시 확인하지 않음. 이 기록은 당시 검사 범위를 뜻함.\n\n## 2026-10-17 현황 오류 수정과 현재 검사\n- 승인된 기준: PRODUCT.md의 집계·날짜/상태 검증·입력 보존 및 CSV 호환 범위. L2 구현과 기술 검사는 완료했으며 L3 사용자 수락은 아직 없다.\n- 원인: 기존 연체 필터가 `dueDate < asOf`만 비교해 반납 상태도 포함했다. 날짜 형식/실제 존재 여부와 상태 검증도 구현되지 않았다.\n- 재현: 원본 `data/sample.json`과 기준일 `2026-10-17`에서 수정 전 결과는 `{total:3,returned:1,open:2,overdue:2}`. 반납된 a가 연체에 포함됐고, 실제 연체는 대여 중이며 기한이 지난 b 1건이다. c는 당일 기한이라 연체가 아니다.\n- 수정: `src/report.mjs`에서 모든 기준일·기한의 YYYY-MM-DD 형식과 윤년/월별 일수를 검사하고, 상태는 loaned/returned만 허용한다. 반납 수와 대여 중 수를 분리하며 연체는 대여 중 항목에만 계산한다. 입력과 공개 반환 구조는 보존한다.\n- 실패 확인: 수정 전 기존 `node --test`는 2/2 통과했지만, 보강한 `node --test tests/report.test.mjs`는 4/9 통과·5/9 실패로 반납 연체와 잘못된 날짜/상태 처리를 재현했다.\n- 수정 후 검사: `node --test` 10/10 통과(보고서 9, 기존 CSV 1). 실제 자료, 반납만 있는 자료, 기한 전/당일/후와 연도 경계, 빈 배열, 윤일·세기 윤년·월말, 날짜 형식/유효성, 잘못된 상태, 정상/오류 시 입력 불변을 확인했다. 빈 배열의 잘못된 기준일 및 반납 항목의 잘못된 기한도 오류로 처리한다.\n- 실제 자료 재확인: 동일 자료·기준일로 `{total:3,returned:1,open:2,overdue:1}`. `git diff --check` 통과.\n- 보존 확인: 수정 전후 SHA-256 비교로 PRODUCT.md, AGENTS.md, DESIGN.md, package.json, Library/report-note.md, data/sample.json, .joeness/connection-details.md, src/export.mjs, tests/export.test.mjs의 원본 9개 파일이 동일함을 확인했다. 기존 CSV 코드와 테스트는 수정하지 않았다.\n- 현재 남은 일: ROADMAP.md의 L3에서 사용자가 실제 집계 숫자를 검토하고 수락 여부를 결정한다. 이번 기술 검사만으로 현황 보고 단계 종료나 사용자 수락을 주장하지 않는다.\n",
+          "bytes": 2614
+        },
+        "ISSUES.md": {
+          "text": "# 미해결 문제\n현재 확인된 미해결 코드 결함: 없음. 사용자 수락은 ROADMAP.md의 L3에서 대기 중.\n\n## 최초 제보 (과거 기록)\n반납한 항목이 연체 수에 포함된다는 제보. 원인/영향 범위는 아직 미확인.\n\n## 2026-10-17 확인 및 해결\n- 반납 연체 오집계: 상태 조건이 없는 날짜 비교가 원인. 대여 중 항목만 연체에 포함하도록 수정했으며 실제 자료의 연체가 2건에서 올바른 1건으로 바뀐 것을 확인했다.\n- 함께 확인한 승인 기준 누락: 잘못된 날짜/상태를 오류로 처리하지 않던 문제를 수정했다.\n- 재현·회귀 검사·원본 보존 근거는 TASK.md의 「2026-10-17 현황 오류 수정과 현재 검사」에 기록했다. 기술적 해결과 사용자 수락은 별개다.\n",
+          "bytes": 822
+        }
+      },
+      "files": [
+        ".joeness/connection-details.md",
+        "AGENTS.md",
+        "DESIGN.md",
+        "ISSUES.md",
+        "Library/report-note.md",
+        "PRODUCT.md",
+        "ROADMAP.md",
+        "TASK.md",
+        "data/sample.json",
+        "package.json",
+        "src/export.mjs",
+        "src/report.mjs",
+        "tests/export.test.mjs",
+        "tests/report.test.mjs"
+      ],
+      "status": "M ISSUES.md\n M ROADMAP.md\n M TASK.md\n M src/report.mjs\n M tests/report.test.mjs",
+      "diff": "diff --git a/ISSUES.md b/ISSUES.md\nindex 9c5e69c..1d7a541 100644\n--- a/ISSUES.md\n+++ b/ISSUES.md\n@@ -1,2 +1,10 @@\n # 미해결 문제\n+현재 확인된 미해결 코드 결함: 없음. 사용자 수락은 ROADMAP.md의 L3에서 대기 중.\n+\n+## 최초 제보 (과거 기록)\n 반납한 항목이 연체 수에 포함된다는 제보. 원인/영향 범위는 아직 미확인.\n+\n+## 2026-10-17 확인 및 해결\n+- 반납 연체 오집계: 상태 조건이 없는 날짜 비교가 원인. 대여 중 항목만 연체에 포함하도록 수정했으며 실제 자료의 연체가 2건에서 올바른 1건으로 바뀐 것을 확인했다.\n+- 함께 확인한 승인 기준 누락: 잘못된 날짜/상태를 오류로 처리하지 않던 문제를 수정했다.\n+- 재현·회귀 검사·원본 보존 근거는 TASK.md의 「2026-10-17 현황 오류 수정과 현재 검사」에 기록했다. 기술적 해결과 사용자 수락은 별개다.\ndiff --git a/ROADMAP.md b/ROADMAP.md\nindex 5193f63..a8ea323 100644\n--- a/ROADMAP.md\n+++ b/ROADMAP.md\n@@ -1,4 +1,14 @@\n # 대여 보고서 로드맵\n+## 현재 상태 (2026-10-17 재검증 후)\n+원본 PRODUCT.md. 현재: 현황 보고 단계, L3 사용자 수락 대기.\n+| 항목 | 상태 | 완료 기준/근거 |\n+|---|---|---|\n+| L1 CSV 내보내기 | 완료·보존 확인 | 원본 코드/테스트 동일, 기존 CSV 검사 통과. TASK.md 현재 검사 |\n+| L2 현황 숫자 | 구현·기술 검사 완료 | 실제 자료 오집계 수정 및 날짜/상태/입력 보존 검사 통과. TASK.md 현재 검사, ISSUES.md 해결 기록 |\n+| L3 사용자 수락 | 검증 대기 | 수정된 실제 숫자 검토 후 사용자 결정. 수락 근거 아직 없음 |\n+다음: 사용자에게 실제 집계 결과를 제시하고 L3 수락 여부 확인. 단계 종료는 L1/L2 검증과 L3 수락이 모두 필요하다.\n+\n+## 이전 상태와 다음 작업 (이번 재검증 전 기록)\n 원본 PRODUCT.md. 현재: 현황 보고 단계.\n | 항목 | 상태 | 완료 기준/근거 |\n |---|---|---|\ndiff --git a/TASK.md b/TASK.md\nindex 98129b8..e6a4384 100644\n--- a/TASK.md\n+++ b/TASK.md\n@@ -3,3 +3,14 @@\n exportCsv 구현, node --test tests/export.test.mjs 1/1 통과. 기능 변경 없음.\n ## 이전 현황 검사\n 대여1개 기본 표본에서 숫자 검사를 통과해 L2 완료로 기록. 반납 후 연체 여부·날짜 오류는 당시 확인하지 않음. 이 기록은 당시 검사 범위를 뜻함.\n+\n+## 2026-10-17 현황 오류 수정과 현재 검사\n+- 승인된 기준: PRODUCT.md의 집계·날짜/상태 검증·입력 보존 및 CSV 호환 범위. L2 구현과 기술 검사는 완료했으며 L3 사용자 수락은 아직 없다.\n+- 원인: 기존 연체 필터가 `dueDate < asOf`만 비교해 반납 상태도 포함했다. 날짜 형식/실제 존재 여부와 상태 검증도 구현되지 않았다.\n+- 재현: 원본 `data/sample.json`과 기준일 `2026-10-17`에서 수정 전 결과는 `{total:3,returned:1,open:2,overdue:2}`. 반납된 a가 연체에 포함됐고, 실제 연체는 대여 중이며 기한이 지난 b 1건이다. c는 당일 기한이라 연체가 아니다.\n+- 수정: `src/report.mjs`에서 모든 기준일·기한의 YYYY-MM-DD 형식과 윤년/월별 일수를 검사하고, 상태는 loaned/returned만 허용한다. 반납 수와 대여 중 수를 분리하며 연체는 대여 중 항목에만 계산한다. 입력과 공개 반환 구조는 보존한다.\n+- 실패 확인: 수정 전 기존 `node --test`는 2/2 통과했지만, 보강한 `node --test tests/report.test.mjs`는 4/9 통과·5/9 실패로 반납 연체와 잘못된 날짜/상태 처리를 재현했다.\n+- 수정 후 검사: `node --test` 10/10 통과(보고서 9, 기존 CSV 1). 실제 자료, 반납만 있는 자료, 기한 전/당일/후와 연도 경계, 빈 배열, 윤일·세기 윤년·월말, 날짜 형식/유효성, 잘못된 상태, 정상/오류 시 입력 불변을 확인했다. 빈 배열의 잘못된 기준일 및 반납 항목의 잘못된 기한도 오류로 처리한다.\n+- 실제 자료 재확인: 동일 자료·기준일로 `{total:3,returned:1,open:2,overdue:1}`. `git diff --check` 통과.\n+- 보존 확인: 수정 전후 SHA-256 비교로 PRODUCT.md, AGENTS.md, DESIGN.md, package.json, Library/report-note.md, data/sample.json, .joeness/connection-details.md, src/export.mjs, tests/export.test.mjs의 원본 9개 파일이 동일함을 확인했다. 기존 CSV 코드와 테스트는 수정하지 않았다.\n+- 현재 남은 일: ROADMAP.md의 L3에서 사용자가 실제 집계 숫자를 검토하고 수락 여부를 결정한다. 이번 기술 검사만으로 현황 보고 단계 종료나 사용자 수락을 주장하지 않는다.\ndiff --git a/src/report.mjs b/src/report.mjs\nindex ba1ab18..f3f56d2 100644\n--- a/src/report.mjs\n+++ b/src/report.mjs\n@@ -1 +1,34 @@\n-export function summarize(rows,asOf){return {total:rows.length,returned:rows.filter(r=>r.status==='returned').length,open:rows.filter(r=>r.status==='loaned').length,overdue:rows.filter(r=>r.dueDate<asOf).length};}\n+function validateDate(value, field) {\n+  if (typeof value !== 'string' || value.length !== 10 || !/^\\d{4}-\\d{2}-\\d{2}$/.test(value)) {\n+    throw new TypeError(`${field} must be a valid YYYY-MM-DD date`);\n+  }\n+\n+  const [year, month, day] = value.split('-').map(Number);\n+  const leapYear = year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0);\n+  const monthDays = [31, leapYear ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];\n+  if (month < 1 || month > 12 || day < 1 || day > monthDays[month - 1]) {\n+    throw new RangeError(`${field} must be a valid YYYY-MM-DD date`);\n+  }\n+}\n+\n+export function summarize(rows, asOf) {\n+  validateDate(asOf, 'asOf');\n+  const result = { total: rows.length, returned: 0, open: 0, overdue: 0 };\n+\n+  for (const [index, row] of rows.entries()) {\n+    if (row?.status !== 'loaned' && row?.status !== 'returned') {\n+      throw new TypeError(`rows[${index}].status must be loaned or returned`);\n+    }\n+    validateDate(row.dueDate, `rows[${index}].dueDate`);\n+\n+    if (row.status === 'returned') {\n+      result.returned += 1;\n+    } else {\n+      result.open += 1;\n+      // Validated, fixed-width dates compare chronologically without timezone conversion.\n+      if (row.dueDate < asOf) result.overdue += 1;\n+    }\n+  }\n+\n+  return result;\n+}\ndiff --git a/tests/report.test.mjs b/tests/report.test.mjs\nindex 617f445..cabf432 100644\n--- a/tests/report.test.mjs\n+++ b/tests/report.test.mjs\n@@ -1 +1,110 @@\n-import test from 'node:test';import assert from 'node:assert/strict';import {summarize} from '../src/report.mjs';test('기본 대여 집계',()=>assert.deepEqual(summarize([{id:'a',status:'loaned',dueDate:'2026-10-16'}],'2026-10-17'),{total:1,returned:0,open:1,overdue:1}));\n+import test from 'node:test';\n+import assert from 'node:assert/strict';\n+import { readFileSync } from 'node:fs';\n+import { summarize } from '../src/report.mjs';\n+\n+test('기본 대여 집계', () => {\n+  assert.deepEqual(\n+    summarize([{ id: 'a', status: 'loaned', dueDate: '2026-10-16' }], '2026-10-17'),\n+    { total: 1, returned: 0, open: 1, overdue: 1 },\n+  );\n+});\n+\n+test('실제 자료에서 반납 건은 연체에서 제외한다', () => {\n+  const rows = JSON.parse(readFileSync(new URL('../data/sample.json', import.meta.url), 'utf8'));\n+  assert.deepEqual(summarize(rows, '2026-10-17'), {\n+    total: 3, returned: 1, open: 2, overdue: 1,\n+  });\n+});\n+\n+test('반납만 있는 자료는 기한이 지나도 미반납·연체가 없다', () => {\n+  const rows = [\n+    { id: 'a', status: 'returned', dueDate: '2026-10-01' },\n+    { id: 'b', status: 'returned', dueDate: '2026-10-17' },\n+    { id: 'c', status: 'returned', dueDate: '2026-10-18' },\n+  ];\n+  assert.deepEqual(summarize(rows, '2026-10-17'), {\n+    total: 3, returned: 3, open: 0, overdue: 0,\n+  });\n+});\n+\n+test('대여 중인 항목의 기한 전날·당일·다음 날 및 연도 경계를 구분한다', () => {\n+  const rows = [\n+    { id: 'future', status: 'loaned', dueDate: '2027-01-02' },\n+    { id: 'past', status: 'loaned', dueDate: '2026-12-31' },\n+    { id: 'today', status: 'loaned', dueDate: '2027-01-01' },\n+  ];\n+  assert.deepEqual(summarize(rows, '2027-01-01'), {\n+    total: 3, returned: 0, open: 3, overdue: 1,\n+  });\n+});\n+\n+test('빈 배열의 모든 집계는 0이다', () => {\n+  assert.deepEqual(summarize([], '2026-10-17'), {\n+    total: 0, returned: 0, open: 0, overdue: 0,\n+  });\n+});\n+\n+test('실제 윤일과 월말 날짜를 허용한다', () => {\n+  for (const [dueDate, asOf] of [\n+    ['2024-02-29', '2024-03-01'],\n+    ['2000-02-29', '2000-03-01'],\n+    ['2026-04-30', '2026-05-01'],\n+    ['0096-02-29', '0096-03-01'],\n+  ]) {\n+    assert.equal(summarize([{ id: 'a', status: 'loaned', dueDate }], asOf).overdue, 1);\n+    assert.equal(summarize([{ id: 'a', status: 'loaned', dueDate }], dueDate).overdue, 0);\n+  }\n+});\n+\n+test('날짜 형식과 실제 존재 여부를 대여·반납 기한 및 기준일에서 검사한다', () => {\n+  const invalidDates = [\n+    '2026-02-29', '1900-02-29', '2100-02-29', '2026-04-31',\n+    '2026-13-01', '2026-00-01', '2026-10-00', '2026-10-32',\n+    '2026-1-01', '26-10-17', '2026/10/17', '2026-10-17T00:00:00Z',\n+    ' 2026-10-17', '2026-10-17 ', '2026-10-17\\n', '', null, undefined, 20261017,\n+  ];\n+  for (const value of invalidDates) {\n+    for (const status of ['loaned', 'returned']) {\n+      assert.throws(\n+        () => summarize([{ id: 'a', status, dueDate: value }], '2026-10-17'),\n+        /dueDate/,\n+        `${status} 기한 ${JSON.stringify(value)}`,\n+      );\n+    }\n+    assert.throws(\n+      () => summarize([{ id: 'a', status: 'loaned', dueDate: '2026-10-17' }], value),\n+      /asOf/,\n+    );\n+    assert.throws(() => summarize([], value), /asOf/);\n+  }\n+});\n+\n+test('알 수 없는 상태는 무시하거나 집계하지 않고 오류로 처리한다', () => {\n+  for (const status of ['lost', 'RETURNED', '', null, undefined, 1]) {\n+    assert.throws(\n+      () => summarize([{ id: 'a', status, dueDate: '2026-10-01' }], '2026-10-17'),\n+      /status/,\n+    );\n+  }\n+});\n+\n+test('정상 집계와 오류 처리 모두 입력 배열과 항목을 변경하지 않는다', () => {\n+  const rows = Object.freeze([\n+    Object.freeze({ id: 'b', status: 'loaned', dueDate: '2026-10-17' }),\n+    Object.freeze({ id: 'a', status: 'returned', dueDate: '2026-10-01' }),\n+  ]);\n+  const before = structuredClone(rows);\n+  assert.deepEqual(summarize(rows, '2026-10-17'), {\n+    total: 2, returned: 1, open: 1, overdue: 0,\n+  });\n+  assert.deepEqual(rows, before);\n+\n+  const invalidRows = Object.freeze([\n+    ...rows,\n+    Object.freeze({ id: 'c', status: 'loaned', dueDate: '2026-02-30' }),\n+  ]);\n+  const invalidBefore = structuredClone(invalidRows);\n+  assert.throws(() => summarize(invalidRows, '2026-10-17'), /dueDate/);\n+  assert.deepEqual(invalidRows, invalidBefore);\n+});",
+      "ownTests": {
+        "exit": 0,
+        "stdout": "✔ CSV 내보내기 (0.9549ms)\n✔ 기본 대여 집계 (2.7249ms)\n✔ 실제 자료에서 반납 건은 연체에서 제외한다 (0.5232ms)\n✔ 반납만 있는 자료는 기한이 지나도 미반납·연체가 없다 (0.1704ms)\n✔ 대여 중인 항목의 기한 전날·당일·다음 날 및 연도 경계를 구분한다 (0.1533ms)\n✔ 빈 배열의 모든 집계는 0이다 (0.1395ms)\n✔ 실제 윤일과 월말 날짜를 허용한다 (0.2051ms)\n✔ 날짜 형식과 실제 존재 여부를 대여·반납 기한 및 기준일에서 검사한다 (1.6706ms)\n✔ 알 수 없는 상태는 무시하거나 집계하지 않고 오류로 처리한다 (0.2716ms)\n✔ 정상 집계와 오류 처리 모두 입력 배열과 항목을 변경하지 않는다 (0.4006ms)\nℹ tests 10\nℹ suites 0\nℹ pass 10\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 124.0621\n",
+        "stderr": ""
+      }
+    }
+  ],
+  "preservation": {
+    "source": [
+      {
+        "path": "vendor/source-manifest.json",
+        "unchanged": true
+      },
+      {
+        "path": "JOENESS.ps1",
+        "unchanged": true
+      },
+      {
+        "path": "scripts/sync-harness.ps1",
+        "unchanged": true
+      },
+      {
+        "path": "skills/joeness-setup/SKILL.md",
+        "unchanged": true
+      },
+      {
+        "path": "skills/joeness-setup/agents/openai.yaml",
+        "unchanged": true
+      },
+      {
+        "path": "skills/joeness-setup/assets/AGENTS.md",
+        "unchanged": true
+      },
+      {
+        "path": "skills/joeness-setup/assets/DESIGN.md",
+        "unchanged": true
+      },
+      {
+        "path": "skills/joeness-setup/assets/ISSUES.md",
+        "unchanged": true
+      },
+      {
+        "path": "skills/joeness-setup/assets/ROADMAP.md",
+        "unchanged": true
+      },
+      {
+        "path": "skills/joeness-setup/assets/TASK.md",
+        "unchanged": true
+      },
+      {
+        "path": "skills/joeness-setup/references/usage.md",
+        "unchanged": true
+      },
+      {
+        "path": "skills/joeness-setup/scripts/project-setup.ps1",
+        "unchanged": true
+      },
+      {
+        "path": "skills/joeness-setup/references/review-gate.md",
+        "unchanged": true
+      },
+      {
+        "path": "skills/joeness-setup/scripts/review-gate.mjs",
+        "unchanged": true
+      },
+      {
+        "path": "skills/joeness-setup/references/roadmap-review.md",
+        "unchanged": true
+      },
+      {
+        "path": "skills/joeness-setup/scripts/roadmap-review.mjs",
+        "unchanged": true
+      },
+      {
+        "path": "skills/joeness-setup/references/operation-review.md",
+        "unchanged": true
+      },
+      {
+        "path": "skills/joeness-setup/scripts/operation-review.mjs",
+        "unchanged": true
+      },
+      {
+        "path": "skills/joeness-setup/scripts/impact-review.mjs",
+        "unchanged": true
+      },
+      {
+        "path": "skills/joeness-setup/references/impact-review.md",
+        "unchanged": true
+      }
+    ],
+    "personal": [
+      {
+        "path": "joeness-skills-state.json",
+        "unchanged": true
+      },
+      {
+        "path": "skills/joeness-setup/SKILL.md",
+        "unchanged": true
+      },
+      {
+        "path": "skills/joeness-setup/agents/openai.yaml",
+        "unchanged": true
+      },
+      {
+        "path": "skills/joeness-setup/assets/AGENTS.md",
+        "unchanged": true
+      },
+      {
+        "path": "skills/joeness-setup/assets/DESIGN.md",
+        "unchanged": true
+      },
+      {
+        "path": "skills/joeness-setup/assets/ISSUES.md",
+        "unchanged": true
+      },
+      {
+        "path": "skills/joeness-setup/assets/ROADMAP.md",
+        "unchanged": true
+      },
+      {
+        "path": "skills/joeness-setup/assets/TASK.md",
+        "unchanged": true
+      },
+      {
+        "path": "skills/joeness-setup/references/usage.md",
+        "unchanged": true
+      },
+      {
+        "path": "skills/joeness-setup/scripts/project-setup.ps1",
+        "unchanged": true
+      },
+      {
+        "path": "skills/joeness-setup/references/review-gate.md",
+        "unchanged": true
+      },
+      {
+        "path": "skills/joeness-setup/scripts/review-gate.mjs",
+        "unchanged": true
+      },
+      {
+        "path": "skills/joeness-setup/references/roadmap-review.md",
+        "unchanged": true
+      },
+      {
+        "path": "skills/joeness-setup/scripts/roadmap-review.mjs",
+        "unchanged": true
+      },
+      {
+        "path": "skills/joeness-setup/references/operation-review.md",
+        "unchanged": true
+      },
+      {
+        "path": "skills/joeness-setup/scripts/operation-review.mjs",
+        "unchanged": true
+      },
+      {
+        "path": "skills/joeness-setup/scripts/impact-review.mjs",
+        "unchanged": true
+      },
+      {
+        "path": "skills/joeness-setup/references/impact-review.md",
+        "unchanged": true
+      }
+    ]
+  }
+}

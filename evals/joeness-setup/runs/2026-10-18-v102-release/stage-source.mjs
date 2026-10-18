@@ -1,0 +1,35 @@
+// Stage only this release and its bounded, relevant experiment evidence.
+import {readFileSync,readdirSync,statSync} from 'node:fs';
+import {execFileSync} from 'node:child_process';
+import {join} from 'node:path';
+import {createHash} from 'node:crypto';
+import assert from 'node:assert/strict';
+assert.equal(process.argv[2],'--stage-approved-source');
+const git=(args,opts={})=>execFileSync('git',args,opts);
+assert.equal(git(['diff','--cached','--name-only']).toString().trim(),'','Do not overwrite unrelated staging');
+const hash=p=>createHash('sha256').update(readFileSync(p)).digest('hex');
+assert.equal(hash('docs/ISSUES.md'),'d3c87c8fa0e2e34600ae12ff0b1c9ea1d503ca5a7f6a30db17ca8e8ea9b529c7');
+const runroot='evals/joeness-setup/runs/';
+const dirs=['2026-10-17-connection-ab','2026-10-17-creative-factorial','2026-10-17-rule-accumulation','2026-10-18-method-boundary','2026-10-18-v102-release'].map(d=>runroot+d);
+const walk=d=>readdirSync(d,{withFileTypes:true}).flatMap(x=>x.isDirectory()?walk(join(d,x.name)):[join(d,x.name)]);
+const files=dirs.flatMap(walk);
+assert.ok(files.every(p=>/\.(md|mjs|json)$/.test(p)),'Unexpected evidence type');
+assert.ok(files.reduce((n,p)=>n+statSync(p).size,0)<5e6,'Unexpected evidence growth');
+for(const p of files){const t=readFileSync(p,'utf8');if(p.endsWith('.json'))JSON.parse(t);assert.ok(!/-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----|\bsk-[A-Za-z0-9]{24,}|\bgh[pousr]_[A-Za-z0-9]{30,}/.test(t),'Potential credential: '+p);}
+const gates=JSON.parse(readFileSync(runroot+'2026-10-18-v102-release/local-gates.json'));
+assert.equal(gates.commands.length,7);assert.ok(gates.commands.every(c=>c.exit===0));
+assert.equal(hash('vendor/source-manifest.json'),gates.manifest_sha256);
+assert.equal(hash('skills/joeness-setup/assets/AGENTS.md'),gates.template_sha256);
+const source=['AGENTS.md','README.md','docs/CHANGELOG.md','docs/installation.md','scripts/sync-harness.ps1','skills/joeness-setup/assets/AGENTS.md','tests/joeness-release.tests.ps1','tests/joeness-setup-contract.tests.mjs','vendor/source-manifest.json'];
+git(['add','--',...source,...dirs]);
+const roadmap=readFileSync('docs/ROADMAP.md','utf8');
+const excluded=roadmap.split(/\r?\n/).filter(l=>l.startsWith('외부 도구 미해결 항목: [APP-001'));
+assert.equal(excluded.length,1);
+assert.ok(!git(['show','HEAD:docs/ROADMAP.md']).toString().includes(excluded[0]));
+const staged=roadmap.replace(excluded[0]+'\r\n\r\n','').replace(excluded[0]+'\n\n','');
+assert.ok(!staged.includes(excluded[0]));
+const blob=git(['hash-object','-w','--stdin','--path=docs/ROADMAP.md'],{input:Buffer.from(staged)}).toString().trim();
+git(['update-index','--cacheinfo','100644',blob,'docs/ROADMAP.md']);
+git(['diff','--cached','--check']);
+assert.equal(hash('docs/ISSUES.md'),'d3c87c8fa0e2e34600ae12ff0b1c9ea1d503ca5a7f6a30db17ca8e8ea9b529c7');
+console.log(JSON.stringify({evidenceFiles:files.length,evidenceBytes:files.reduce((n,p)=>n+statSync(p).size,0),sourceFiles:source.length,excluded:'docs/ISSUES.md and APP-001 paragraph'}));

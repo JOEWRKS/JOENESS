@@ -33,10 +33,10 @@ Adapt paths and agreed scope before applying this body.
   criteria and proof links, not common rules or full reports. A one-off review
   belongs in TASK, not a mandatory evaluation file. Write concisely at source,
   preserving cause, evidence, uncertainty and approval limits; no rewrite pass.
-- Before work, check the roadmap item/order and entry conditions. Open conditions
-  block dependent work, not independent authorized work. Change scope/order/
-  criteria only by authorized direction. Before completion, inspect every
-  required item's actual proof. Pending checks/holds stay open; authorized scope
+- Check approved outcomes/order and dependencies. Worker-chosen methods remain
+  replaceable unless explicitly required. Open conditions block dependent work only.
+  Change approved scope/order/criteria only by authorized direction. Before completion,
+  inspect every required item's actual proof. Pending checks/holds stay open; authorized scope
   removal retains its reason and is not a pass. Task, stage and user acceptance
   are separate. Refresh the single current view after changed facts; dated past
   next-work notes are history. Report required remainder separately from approved

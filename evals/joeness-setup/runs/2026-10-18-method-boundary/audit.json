@@ -1,0 +1,175 @@
+{
+  "probes": [
+    {
+      "id": "free",
+      "tests": {
+        "exit": 0,
+        "output": "TAP version 13\n# Subtest: search preserves records and order\nok 1 - search preserves records and order\n  ---\n  duration_ms: 1.2794\n  type: 'test'\n  ...\n# Subtest: search matches the beginning, middle, and end of titles\nok 2 - search matches the beginning, middle, and end of titles\n  ---\n  duration_ms: 0.142\n  type: 'test'\n  ...\n# Subtest: search ignores title and query letter case\nok 3 - search ignores title and query letter case\n  ---\n  duration_ms: 0.2931\n  type: 'test'\n  ...\n# Subtest: search trims surrounding query whitespace and preserves internal spaces\nok 4 - search trims surrounding query whitespace and preserves internal spaces\n  ---\n  duration_ms: 0.2215\n  type: 'test'\n  ...\n# Subtest: normalized search preserves record identity, input data, and result order\nok 5 - normalized search preserves record identity, input data, and result order\n  ---\n  duration_ms: 0.2507\n  type: 'test'\n  ...\n# Subtest: empty and whitespace-only queries return all records in input order\nok 6 - empty and whitespace-only queries return all records in input order\n  ---\n  duration_ms: 0.1405\n  type: 'test'\n  ...\n1..6\n# tests 6\n# suites 0\n# pass 6\n# fail 0\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 102.7109\n"
+      },
+      "probe": {
+        "exit": 0,
+        "script": "import assert from 'node:assert/strict';import {find} from './search.mjs';const rows=[{id:1,title:'Blue Alpha'},{id:2,title:'Alpha Blue'},{id:3,title:'Beta'}];const before=JSON.stringify(rows);assert.deepEqual(find(rows,'  alpha  ').map(x=>x.id),[1,2]);assert.equal(JSON.stringify(rows),before);console.log('required behavior and preservation PASS');",
+        "output": "required behavior and preservation PASS\n"
+      },
+      "productPreserved": true
+    },
+    {
+      "id": "fixed",
+      "tests": {
+        "exit": 0,
+        "output": "TAP version 13\n# Subtest: search ignores case in the query and title\nok 1 - search ignores case in the query and title\n  ---\n  duration_ms: 1.2863\n  type: 'test'\n  ...\n# Subtest: search ignores leading and trailing whitespace in the query\nok 2 - search ignores leading and trailing whitespace in the query\n  ---\n  duration_ms: 0.1463\n  type: 'test'\n  ...\n# Subtest: normalized search includes prefixes and excludes middle-only matches\nok 3 - normalized search includes prefixes and excludes middle-only matches\n  ---\n  duration_ms: 0.1253\n  type: 'test'\n  ...\n# Subtest: search preserves input values, record identity, and order\nok 4 - search preserves input values, record identity, and order\n  ---\n  duration_ms: 0.2639\n  type: 'test'\n  ...\n# Subtest: search returns no records for an unmatched query or empty input\nok 5 - search returns no records for an unmatched query or empty input\n  ---\n  duration_ms: 0.1336\n  type: 'test'\n  ...\n# Subtest: empty and whitespace-only queries preserve empty-prefix behavior\nok 6 - empty and whitespace-only queries preserve empty-prefix behavior\n  ---\n  duration_ms: 0.1397\n  type: 'test'\n  ...\n1..6\n# tests 6\n# suites 0\n# pass 6\n# fail 0\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 90.1594\n"
+      },
+      "probe": {
+        "exit": 0,
+        "script": "import assert from 'node:assert/strict';import {find} from './search.mjs';const rows=[{id:1,title:'Blue Alpha'},{id:2,title:'Alpha Blue'},{id:3,title:'Beta'}];const before=JSON.stringify(rows);assert.deepEqual(find(rows,'  alpha  ').map(x=>x.id),[2]);assert.equal(JSON.stringify(rows),before);console.log('required behavior and preservation PASS');",
+        "output": "required behavior and preservation PASS\n"
+      },
+      "productPreserved": true
+    }
+  ],
+  "source": [
+    {
+      "path": "SKILL.md",
+      "unchanged": true
+    },
+    {
+      "path": "agents/openai.yaml",
+      "unchanged": true
+    },
+    {
+      "path": "assets/AGENTS.md",
+      "unchanged": true
+    },
+    {
+      "path": "assets/DESIGN.md",
+      "unchanged": true
+    },
+    {
+      "path": "assets/ISSUES.md",
+      "unchanged": true
+    },
+    {
+      "path": "assets/ROADMAP.md",
+      "unchanged": true
+    },
+    {
+      "path": "assets/TASK.md",
+      "unchanged": true
+    },
+    {
+      "path": "references/usage.md",
+      "unchanged": true
+    },
+    {
+      "path": "scripts/project-setup.ps1",
+      "unchanged": true
+    },
+    {
+      "path": "references/review-gate.md",
+      "unchanged": true
+    },
+    {
+      "path": "scripts/review-gate.mjs",
+      "unchanged": true
+    },
+    {
+      "path": "references/roadmap-review.md",
+      "unchanged": true
+    },
+    {
+      "path": "scripts/roadmap-review.mjs",
+      "unchanged": true
+    },
+    {
+      "path": "references/operation-review.md",
+      "unchanged": true
+    },
+    {
+      "path": "scripts/operation-review.mjs",
+      "unchanged": true
+    },
+    {
+      "path": "scripts/impact-review.mjs",
+      "unchanged": true
+    },
+    {
+      "path": "references/impact-review.md",
+      "unchanged": true
+    }
+  ],
+  "personal": [
+    {
+      "path": "SKILL.md",
+      "unchanged": true
+    },
+    {
+      "path": "agents/openai.yaml",
+      "unchanged": true
+    },
+    {
+      "path": "assets/AGENTS.md",
+      "unchanged": true
+    },
+    {
+      "path": "assets/DESIGN.md",
+      "unchanged": true
+    },
+    {
+      "path": "assets/ISSUES.md",
+      "unchanged": true
+    },
+    {
+      "path": "assets/ROADMAP.md",
+      "unchanged": true
+    },
+    {
+      "path": "assets/TASK.md",
+      "unchanged": true
+    },
+    {
+      "path": "references/usage.md",
+      "unchanged": true
+    },
+    {
+      "path": "scripts/project-setup.ps1",
+      "unchanged": true
+    },
+    {
+      "path": "references/review-gate.md",
+      "unchanged": true
+    },
+    {
+      "path": "scripts/review-gate.mjs",
+      "unchanged": true
+    },
+    {
+      "path": "references/roadmap-review.md",
+      "unchanged": true
+    },
+    {
+      "path": "scripts/roadmap-review.mjs",
+      "unchanged": true
+    },
+    {
+      "path": "references/operation-review.md",
+      "unchanged": true
+    },
+    {
+      "path": "scripts/operation-review.mjs",
+      "unchanged": true
+    },
+    {
+      "path": "scripts/impact-review.mjs",
+      "unchanged": true
+    },
+    {
+      "path": "references/impact-review.md",
+      "unchanged": true
+    },
+    {
+      "path": "state",
+      "unchanged": true
+    }
+  ],
+  "planUnchanged": true
+}

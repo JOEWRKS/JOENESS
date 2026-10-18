@@ -1,0 +1,894 @@
+{
+  "source": [
+    {
+      "path": "vendor/source-manifest.json",
+      "before": "7e00a1b4981ba4a677c7214d287c17cb02e91faa42574a4c87c4bed356b2c36c",
+      "after": "7e00a1b4981ba4a677c7214d287c17cb02e91faa42574a4c87c4bed356b2c36c",
+      "unchanged": true
+    },
+    {
+      "path": "skills/joeness-setup/SKILL.md",
+      "before": "0f5db50f1f1ffc21359372cd49c72fcd05cc785869f995a7ac9e175f6696beba",
+      "after": "0f5db50f1f1ffc21359372cd49c72fcd05cc785869f995a7ac9e175f6696beba",
+      "unchanged": true
+    },
+    {
+      "path": "skills/joeness-setup/agents/openai.yaml",
+      "before": "cc275e468658c7793d6f1305aaae5c6f37a06d831a7f2c3f18313f668427ec5c",
+      "after": "cc275e468658c7793d6f1305aaae5c6f37a06d831a7f2c3f18313f668427ec5c",
+      "unchanged": true
+    },
+    {
+      "path": "skills/joeness-setup/assets/AGENTS.md",
+      "before": "a79d9f2cce804ea06942bcd507d32b2c7e449be17fcb6471f8b1273392b014eb",
+      "after": "a79d9f2cce804ea06942bcd507d32b2c7e449be17fcb6471f8b1273392b014eb",
+      "unchanged": true
+    },
+    {
+      "path": "skills/joeness-setup/assets/DESIGN.md",
+      "before": "3b5ec8a163f2da4a770b4206029dd85a538dea0807060314cf51bd145ff66a5d",
+      "after": "3b5ec8a163f2da4a770b4206029dd85a538dea0807060314cf51bd145ff66a5d",
+      "unchanged": true
+    },
+    {
+      "path": "skills/joeness-setup/assets/ISSUES.md",
+      "before": "44b5e1f7eea61716bdfa3b364b7eca9ffe60bc9c29f6e31b3a9bf753de6b8635",
+      "after": "44b5e1f7eea61716bdfa3b364b7eca9ffe60bc9c29f6e31b3a9bf753de6b8635",
+      "unchanged": true
+    },
+    {
+      "path": "skills/joeness-setup/assets/ROADMAP.md",
+      "before": "ac80bf15b82f5cb9b6200a4cf48f22739632352850395afe77d62ed1be3e3660",
+      "after": "ac80bf15b82f5cb9b6200a4cf48f22739632352850395afe77d62ed1be3e3660",
+      "unchanged": true
+    },
+    {
+      "path": "skills/joeness-setup/assets/TASK.md",
+      "before": "cbe9d10373067805dcc2659474a7b2b23e28df967bb3ee10500a4c15b6088ee0",
+      "after": "cbe9d10373067805dcc2659474a7b2b23e28df967bb3ee10500a4c15b6088ee0",
+      "unchanged": true
+    },
+    {
+      "path": "skills/joeness-setup/references/usage.md",
+      "before": "d7d4ea516c714260dcbc0678da8ab72359340a96cd1718b46906334949b8146a",
+      "after": "d7d4ea516c714260dcbc0678da8ab72359340a96cd1718b46906334949b8146a",
+      "unchanged": true
+    },
+    {
+      "path": "skills/joeness-setup/scripts/project-setup.ps1",
+      "before": "631334ba13683f97346d2b14d4aebedd671b16c9125e7dd4a26914d658788c8d",
+      "after": "631334ba13683f97346d2b14d4aebedd671b16c9125e7dd4a26914d658788c8d",
+      "unchanged": true
+    },
+    {
+      "path": "skills/joeness-setup/references/review-gate.md",
+      "before": "0422021f6a247d44a3c2980353dddac76dee613282ecf4315cd4d357ebdf8432",
+      "after": "0422021f6a247d44a3c2980353dddac76dee613282ecf4315cd4d357ebdf8432",
+      "unchanged": true
+    },
+    {
+      "path": "skills/joeness-setup/scripts/review-gate.mjs",
+      "before": "7ad13a9020a57aa0a6396348f8575229d7cac076a5d5a6c89178d26c3b6d9bd2",
+      "after": "7ad13a9020a57aa0a6396348f8575229d7cac076a5d5a6c89178d26c3b6d9bd2",
+      "unchanged": true
+    },
+    {
+      "path": "skills/joeness-setup/references/roadmap-review.md",
+      "before": "bfb8910df6814edd4fab15b18b1c88c6dcc1127eb9921488772bdb9ffc15a201",
+      "after": "bfb8910df6814edd4fab15b18b1c88c6dcc1127eb9921488772bdb9ffc15a201",
+      "unchanged": true
+    },
+    {
+      "path": "skills/joeness-setup/scripts/roadmap-review.mjs",
+      "before": "5dfb2d5a81df58d9e1c43651b43cc945356bbf61630b103877f9b8bcd13ba33f",
+      "after": "5dfb2d5a81df58d9e1c43651b43cc945356bbf61630b103877f9b8bcd13ba33f",
+      "unchanged": true
+    },
+    {
+      "path": "skills/joeness-setup/references/operation-review.md",
+      "before": "748d1631847ac23045406f6742b43a3a0bddb29ebfb32b3720f8f97c9546959c",
+      "after": "748d1631847ac23045406f6742b43a3a0bddb29ebfb32b3720f8f97c9546959c",
+      "unchanged": true
+    },
+    {
+      "path": "skills/joeness-setup/scripts/operation-review.mjs",
+      "before": "a1a6d80a7d57d4e9c3e66c49a6f877bf07836bac25d330bb466fc2a858679aad",
+      "after": "a1a6d80a7d57d4e9c3e66c49a6f877bf07836bac25d330bb466fc2a858679aad",
+      "unchanged": true
+    },
+    {
+      "path": "skills/joeness-setup/scripts/impact-review.mjs",
+      "before": "9cd8359daae4e0f68bcab688ae831e43d81a0b98bcb8ca10ed65a63d0e70cbc8",
+      "after": "9cd8359daae4e0f68bcab688ae831e43d81a0b98bcb8ca10ed65a63d0e70cbc8",
+      "unchanged": true
+    },
+    {
+      "path": "skills/joeness-setup/references/impact-review.md",
+      "before": "6d98aa307aaace44461699e66fdbc3d658f67f8b6c756812ad9faa23ed330a82",
+      "after": "6d98aa307aaace44461699e66fdbc3d658f67f8b6c756812ad9faa23ed330a82",
+      "unchanged": true
+    }
+  ],
+  "personal": [
+    {
+      "path": "joeness-skills-state.json",
+      "before": "7d6c878addf6e775a5ee9ce12fcd65cc244c528047493f2d00873fffd99921a1",
+      "after": "7d6c878addf6e775a5ee9ce12fcd65cc244c528047493f2d00873fffd99921a1",
+      "unchanged": true
+    },
+    {
+      "path": "skills/joeness-setup/SKILL.md",
+      "before": "0f5db50f1f1ffc21359372cd49c72fcd05cc785869f995a7ac9e175f6696beba",
+      "after": "0f5db50f1f1ffc21359372cd49c72fcd05cc785869f995a7ac9e175f6696beba",
+      "unchanged": true
+    },
+    {
+      "path": "skills/joeness-setup/agents/openai.yaml",
+      "before": "cc275e468658c7793d6f1305aaae5c6f37a06d831a7f2c3f18313f668427ec5c",
+      "after": "cc275e468658c7793d6f1305aaae5c6f37a06d831a7f2c3f18313f668427ec5c",
+      "unchanged": true
+    },
+    {
+      "path": "skills/joeness-setup/assets/AGENTS.md",
+      "before": "a79d9f2cce804ea06942bcd507d32b2c7e449be17fcb6471f8b1273392b014eb",
+      "after": "a79d9f2cce804ea06942bcd507d32b2c7e449be17fcb6471f8b1273392b014eb",
+      "unchanged": true
+    },
+    {
+      "path": "skills/joeness-setup/assets/DESIGN.md",
+      "before": "3b5ec8a163f2da4a770b4206029dd85a538dea0807060314cf51bd145ff66a5d",
+      "after": "3b5ec8a163f2da4a770b4206029dd85a538dea0807060314cf51bd145ff66a5d",
+      "unchanged": true
+    },
+    {
+      "path": "skills/joeness-setup/assets/ISSUES.md",
+      "before": "44b5e1f7eea61716bdfa3b364b7eca9ffe60bc9c29f6e31b3a9bf753de6b8635",
+      "after": "44b5e1f7eea61716bdfa3b364b7eca9ffe60bc9c29f6e31b3a9bf753de6b8635",
+      "unchanged": true
+    },
+    {
+      "path": "skills/joeness-setup/assets/ROADMAP.md",
+      "before": "ac80bf15b82f5cb9b6200a4cf48f22739632352850395afe77d62ed1be3e3660",
+      "after": "ac80bf15b82f5cb9b6200a4cf48f22739632352850395afe77d62ed1be3e3660",
+      "unchanged": true
+    },
+    {
+      "path": "skills/joeness-setup/assets/TASK.md",
+      "before": "cbe9d10373067805dcc2659474a7b2b23e28df967bb3ee10500a4c15b6088ee0",
+      "after": "cbe9d10373067805dcc2659474a7b2b23e28df967bb3ee10500a4c15b6088ee0",
+      "unchanged": true
+    },
+    {
+      "path": "skills/joeness-setup/references/usage.md",
+      "before": "d7d4ea516c714260dcbc0678da8ab72359340a96cd1718b46906334949b8146a",
+      "after": "d7d4ea516c714260dcbc0678da8ab72359340a96cd1718b46906334949b8146a",
+      "unchanged": true
+    },
+    {
+      "path": "skills/joeness-setup/scripts/project-setup.ps1",
+      "before": "631334ba13683f97346d2b14d4aebedd671b16c9125e7dd4a26914d658788c8d",
+      "after": "631334ba13683f97346d2b14d4aebedd671b16c9125e7dd4a26914d658788c8d",
+      "unchanged": true
+    },
+    {
+      "path": "skills/joeness-setup/references/review-gate.md",
+      "before": "0422021f6a247d44a3c2980353dddac76dee613282ecf4315cd4d357ebdf8432",
+      "after": "0422021f6a247d44a3c2980353dddac76dee613282ecf4315cd4d357ebdf8432",
+      "unchanged": true
+    },
+    {
+      "path": "skills/joeness-setup/scripts/review-gate.mjs",
+      "before": "7ad13a9020a57aa0a6396348f8575229d7cac076a5d5a6c89178d26c3b6d9bd2",
+      "after": "7ad13a9020a57aa0a6396348f8575229d7cac076a5d5a6c89178d26c3b6d9bd2",
+      "unchanged": true
+    },
+    {
+      "path": "skills/joeness-setup/references/roadmap-review.md",
+      "before": "bfb8910df6814edd4fab15b18b1c88c6dcc1127eb9921488772bdb9ffc15a201",
+      "after": "bfb8910df6814edd4fab15b18b1c88c6dcc1127eb9921488772bdb9ffc15a201",
+      "unchanged": true
+    },
+    {
+      "path": "skills/joeness-setup/scripts/roadmap-review.mjs",
+      "before": "5dfb2d5a81df58d9e1c43651b43cc945356bbf61630b103877f9b8bcd13ba33f",
+      "after": "5dfb2d5a81df58d9e1c43651b43cc945356bbf61630b103877f9b8bcd13ba33f",
+      "unchanged": true
+    },
+    {
+      "path": "skills/joeness-setup/references/operation-review.md",
+      "before": "748d1631847ac23045406f6742b43a3a0bddb29ebfb32b3720f8f97c9546959c",
+      "after": "748d1631847ac23045406f6742b43a3a0bddb29ebfb32b3720f8f97c9546959c",
+      "unchanged": true
+    },
+    {
+      "path": "skills/joeness-setup/scripts/operation-review.mjs",
+      "before": "a1a6d80a7d57d4e9c3e66c49a6f877bf07836bac25d330bb466fc2a858679aad",
+      "after": "a1a6d80a7d57d4e9c3e66c49a6f877bf07836bac25d330bb466fc2a858679aad",
+      "unchanged": true
+    },
+    {
+      "path": "skills/joeness-setup/scripts/impact-review.mjs",
+      "before": "9cd8359daae4e0f68bcab688ae831e43d81a0b98bcb8ca10ed65a63d0e70cbc8",
+      "after": "9cd8359daae4e0f68bcab688ae831e43d81a0b98bcb8ca10ed65a63d0e70cbc8",
+      "unchanged": true
+    },
+    {
+      "path": "skills/joeness-setup/references/impact-review.md",
+      "before": "6d98aa307aaace44461699e66fdbc3d658f67f8b6c756812ad9faa23ed330a82",
+      "after": "6d98aa307aaace44461699e66fdbc3d658f67f8b6c756812ad9faa23ed330a82",
+      "unchanged": true
+    }
+  ],
+  "planHashMatches": true,
+  "fixtureHashMatches": true,
+  "userIssuesUnchanged": true,
+  "common": [
+    {
+      "id": "run01",
+      "identicalWithinTask": true
+    },
+    {
+      "id": "run02",
+      "identicalWithinTask": true
+    },
+    {
+      "id": "run03",
+      "identicalWithinTask": true
+    },
+    {
+      "id": "run04",
+      "identicalWithinTask": true
+    },
+    {
+      "id": "run05",
+      "identicalWithinTask": true
+    },
+    {
+      "id": "run06",
+      "identicalWithinTask": true
+    },
+    {
+      "id": "run07",
+      "identicalWithinTask": true
+    },
+    {
+      "id": "run08",
+      "identicalWithinTask": true
+    }
+  ],
+  "runs": [
+    {
+      "id": "run01",
+      "thread": "01a149bc-3d10-7953-af6a-31a2ccb2c47c",
+      "rollout": "rollout-2026-10-17T21-00-35-01a149bc-3d10-7953-af6a-31a2ccb2c47c.jsonl",
+      "rolloutSha256Matches": true,
+      "runtime": [
+        {
+          "model": "gpt-6-astra",
+          "effort": "xhigh"
+        }
+      ],
+      "exactRuntime": true,
+      "inputReads": [
+        {
+          "path": "AGENTS.md",
+          "readCommandPresent": true
+        },
+        {
+          "path": "PRODUCT.md",
+          "readCommandPresent": true
+        },
+        {
+          "path": "SEED.md",
+          "readCommandPresent": true
+        },
+        {
+          "path": "FEEDBACK.md",
+          "readCommandPresent": true
+        },
+        {
+          "path": "ROADMAP.md",
+          "readCommandPresent": true
+        },
+        {
+          "path": "TASK.md",
+          "readCommandPresent": true
+        },
+        {
+          "path": "ISSUES.md",
+          "readCommandPresent": true
+        },
+        {
+          "path": "DESIGN.md",
+          "readCommandPresent": true
+        }
+      ],
+      "writes": [
+        "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-creative-iy4uE0\\run01\\PROPOSAL.md",
+        "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-creative-iy4uE0\\run01\\ROADMAP.md",
+        "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-creative-iy4uE0\\run01\\TASK.md"
+      ],
+      "writesInScope": true,
+      "shellRootsMatch": true,
+      "otherActionTypes": [],
+      "protectedFiles": [
+        {
+          "path": "PRODUCT.md",
+          "unchanged": true
+        },
+        {
+          "path": "SEED.md",
+          "unchanged": true
+        },
+        {
+          "path": "FEEDBACK.md",
+          "unchanged": true
+        },
+        {
+          "path": "DESIGN.md",
+          "unchanged": true
+        },
+        {
+          "path": "AGENTS.md",
+          "unchanged": true
+        }
+      ],
+      "outputSnapshotMatches": true,
+      "proposalSha256": "b8bf5e04079e28ad126ec6c5869beaaa79fe44599137c2ec757340be17f6381c"
+    },
+    {
+      "id": "run02",
+      "thread": "01a149bc-62ae-7b10-91bd-d62065c0b559",
+      "rollout": "rollout-2026-10-17T21-00-45-01a149bc-62ae-7b10-91bd-d62065c0b559.jsonl",
+      "rolloutSha256Matches": true,
+      "runtime": [
+        {
+          "model": "gpt-6-astra",
+          "effort": "xhigh"
+        }
+      ],
+      "exactRuntime": true,
+      "inputReads": [
+        {
+          "path": "AGENTS.md",
+          "readCommandPresent": true
+        },
+        {
+          "path": "PRODUCT.md",
+          "readCommandPresent": true
+        },
+        {
+          "path": "SEED.md",
+          "readCommandPresent": true
+        },
+        {
+          "path": "FEEDBACK.md",
+          "readCommandPresent": true
+        },
+        {
+          "path": "ROADMAP.md",
+          "readCommandPresent": true
+        },
+        {
+          "path": "TASK.md",
+          "readCommandPresent": true
+        },
+        {
+          "path": "ISSUES.md",
+          "readCommandPresent": true
+        },
+        {
+          "path": "DESIGN.md",
+          "readCommandPresent": true
+        }
+      ],
+      "writes": [
+        "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-creative-iy4uE0\\run02\\ISSUES.md",
+        "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-creative-iy4uE0\\run02\\PROPOSAL.md",
+        "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-creative-iy4uE0\\run02\\ROADMAP.md",
+        "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-creative-iy4uE0\\run02\\TASK.md"
+      ],
+      "writesInScope": true,
+      "shellRootsMatch": true,
+      "otherActionTypes": [],
+      "protectedFiles": [
+        {
+          "path": "PRODUCT.md",
+          "unchanged": true
+        },
+        {
+          "path": "SEED.md",
+          "unchanged": true
+        },
+        {
+          "path": "FEEDBACK.md",
+          "unchanged": true
+        },
+        {
+          "path": "DESIGN.md",
+          "unchanged": true
+        },
+        {
+          "path": "AGENTS.md",
+          "unchanged": true
+        }
+      ],
+      "outputSnapshotMatches": true,
+      "proposalSha256": "1f925e43ed70523cdfd1f69e37a884bc5e7518589b8f9b1bebfad55bb2146faa"
+    },
+    {
+      "id": "run03",
+      "thread": "01a149bc-8be2-7360-97a3-8f68ac7eaf4c",
+      "rollout": "rollout-2026-10-17T21-00-55-01a149bc-8be2-7360-97a3-8f68ac7eaf4c.jsonl",
+      "rolloutSha256Matches": true,
+      "runtime": [
+        {
+          "model": "gpt-6-astra",
+          "effort": "xhigh"
+        }
+      ],
+      "exactRuntime": true,
+      "inputReads": [
+        {
+          "path": "AGENTS.md",
+          "readCommandPresent": true
+        },
+        {
+          "path": "PRODUCT.md",
+          "readCommandPresent": true
+        },
+        {
+          "path": "SEED.md",
+          "readCommandPresent": true
+        },
+        {
+          "path": "FEEDBACK.md",
+          "readCommandPresent": true
+        },
+        {
+          "path": "ROADMAP.md",
+          "readCommandPresent": true
+        },
+        {
+          "path": "TASK.md",
+          "readCommandPresent": true
+        },
+        {
+          "path": "ISSUES.md",
+          "readCommandPresent": true
+        },
+        {
+          "path": "DESIGN.md",
+          "readCommandPresent": true
+        }
+      ],
+      "writes": [
+        "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-creative-iy4uE0\\run03\\PROPOSAL.md"
+      ],
+      "writesInScope": true,
+      "shellRootsMatch": true,
+      "otherActionTypes": [],
+      "protectedFiles": [
+        {
+          "path": "PRODUCT.md",
+          "unchanged": true
+        },
+        {
+          "path": "SEED.md",
+          "unchanged": true
+        },
+        {
+          "path": "FEEDBACK.md",
+          "unchanged": true
+        },
+        {
+          "path": "DESIGN.md",
+          "unchanged": true
+        },
+        {
+          "path": "AGENTS.md",
+          "unchanged": true
+        }
+      ],
+      "outputSnapshotMatches": true,
+      "proposalSha256": "f336e48cfb397ec231b6e66c4c2a25b136d756958f1689664fb2160cece5b5c4"
+    },
+    {
+      "id": "run04",
+      "thread": "01a149bf-ecd3-74e0-8fb3-973f8342a320",
+      "rollout": "rollout-2026-10-17T21-04-37-01a149bf-ecd3-74e0-8fb3-973f8342a320.jsonl",
+      "rolloutSha256Matches": true,
+      "runtime": [
+        {
+          "model": "gpt-6-astra",
+          "effort": "xhigh"
+        }
+      ],
+      "exactRuntime": true,
+      "inputReads": [
+        {
+          "path": "AGENTS.md",
+          "readCommandPresent": true
+        },
+        {
+          "path": "PRODUCT.md",
+          "readCommandPresent": true
+        },
+        {
+          "path": "SEED.md",
+          "readCommandPresent": true
+        },
+        {
+          "path": "FEEDBACK.md",
+          "readCommandPresent": true
+        },
+        {
+          "path": "ROADMAP.md",
+          "readCommandPresent": true
+        },
+        {
+          "path": "TASK.md",
+          "readCommandPresent": true
+        },
+        {
+          "path": "ISSUES.md",
+          "readCommandPresent": true
+        },
+        {
+          "path": "DESIGN.md",
+          "readCommandPresent": true
+        }
+      ],
+      "writes": [
+        "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-creative-iy4uE0\\run04\\ISSUES.md",
+        "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-creative-iy4uE0\\run04\\ROADMAP.md",
+        "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-creative-iy4uE0\\run04\\TASK.md",
+        "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-creative-iy4uE0\\run04\\PROPOSAL.md"
+      ],
+      "writesInScope": true,
+      "shellRootsMatch": true,
+      "otherActionTypes": [],
+      "protectedFiles": [
+        {
+          "path": "PRODUCT.md",
+          "unchanged": true
+        },
+        {
+          "path": "SEED.md",
+          "unchanged": true
+        },
+        {
+          "path": "FEEDBACK.md",
+          "unchanged": true
+        },
+        {
+          "path": "DESIGN.md",
+          "unchanged": true
+        },
+        {
+          "path": "AGENTS.md",
+          "unchanged": true
+        }
+      ],
+      "outputSnapshotMatches": true,
+      "proposalSha256": "794cd58dbf2cbc6b07fa3b9cd035c14198f98ad6239f7f4dead66fbca4b5077d"
+    },
+    {
+      "id": "run05",
+      "thread": "01a149c0-e6d7-70d3-9f08-77a7a76d0484",
+      "rollout": "rollout-2026-10-17T21-05-41-01a149c0-e6d7-70d3-9f08-77a7a76d0484.jsonl",
+      "rolloutSha256Matches": true,
+      "runtime": [
+        {
+          "model": "gpt-6-astra",
+          "effort": "xhigh"
+        }
+      ],
+      "exactRuntime": true,
+      "inputReads": [
+        {
+          "path": "AGENTS.md",
+          "readCommandPresent": true
+        },
+        {
+          "path": "PRODUCT.md",
+          "readCommandPresent": true
+        },
+        {
+          "path": "SEED.md",
+          "readCommandPresent": true
+        },
+        {
+          "path": "FEEDBACK.md",
+          "readCommandPresent": true
+        },
+        {
+          "path": "ROADMAP.md",
+          "readCommandPresent": true
+        },
+        {
+          "path": "TASK.md",
+          "readCommandPresent": true
+        },
+        {
+          "path": "ISSUES.md",
+          "readCommandPresent": true
+        },
+        {
+          "path": "DESIGN.md",
+          "readCommandPresent": true
+        }
+      ],
+      "writes": [
+        "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-creative-iy4uE0\\run05\\ROADMAP.md",
+        "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-creative-iy4uE0\\run05\\TASK.md",
+        "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-creative-iy4uE0\\run05\\PROPOSAL.md",
+        "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-creative-iy4uE0\\run05\\ISSUES.md"
+      ],
+      "writesInScope": true,
+      "shellRootsMatch": true,
+      "otherActionTypes": [],
+      "protectedFiles": [
+        {
+          "path": "PRODUCT.md",
+          "unchanged": true
+        },
+        {
+          "path": "SEED.md",
+          "unchanged": true
+        },
+        {
+          "path": "FEEDBACK.md",
+          "unchanged": true
+        },
+        {
+          "path": "DESIGN.md",
+          "unchanged": true
+        },
+        {
+          "path": "AGENTS.md",
+          "unchanged": true
+        }
+      ],
+      "outputSnapshotMatches": true,
+      "proposalSha256": "10a966e7cc9d2ff2e89d99a40ea842a36ad36d73d619cffd32efd5a353c8b7c9"
+    },
+    {
+      "id": "run06",
+      "thread": "01a149c1-5c33-77e2-94ab-306618d12113",
+      "rollout": "rollout-2026-10-17T21-06-11-01a149c1-5c33-77e2-94ab-306618d12113.jsonl",
+      "rolloutSha256Matches": true,
+      "runtime": [
+        {
+          "model": "gpt-6-astra",
+          "effort": "xhigh"
+        }
+      ],
+      "exactRuntime": true,
+      "inputReads": [
+        {
+          "path": "AGENTS.md",
+          "readCommandPresent": true
+        },
+        {
+          "path": "PRODUCT.md",
+          "readCommandPresent": true
+        },
+        {
+          "path": "SEED.md",
+          "readCommandPresent": true
+        },
+        {
+          "path": "FEEDBACK.md",
+          "readCommandPresent": true
+        },
+        {
+          "path": "ROADMAP.md",
+          "readCommandPresent": true
+        },
+        {
+          "path": "TASK.md",
+          "readCommandPresent": true
+        },
+        {
+          "path": "ISSUES.md",
+          "readCommandPresent": true
+        },
+        {
+          "path": "DESIGN.md",
+          "readCommandPresent": true
+        }
+      ],
+      "writes": [
+        "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-creative-iy4uE0\\run06\\ROADMAP.md",
+        "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-creative-iy4uE0\\run06\\PROPOSAL.md"
+      ],
+      "writesInScope": true,
+      "shellRootsMatch": true,
+      "otherActionTypes": [],
+      "protectedFiles": [
+        {
+          "path": "PRODUCT.md",
+          "unchanged": true
+        },
+        {
+          "path": "SEED.md",
+          "unchanged": true
+        },
+        {
+          "path": "FEEDBACK.md",
+          "unchanged": true
+        },
+        {
+          "path": "DESIGN.md",
+          "unchanged": true
+        },
+        {
+          "path": "AGENTS.md",
+          "unchanged": true
+        }
+      ],
+      "outputSnapshotMatches": true,
+      "proposalSha256": "124c06755ff318520f477b90620bc914e173e2e8a8f929177acd8428e656ef68"
+    },
+    {
+      "id": "run07",
+      "thread": "01a149c3-895f-7ef2-beb3-2a2980242f00",
+      "rollout": "rollout-2026-10-17T21-08-34-01a149c3-895f-7ef2-beb3-2a2980242f00.jsonl",
+      "rolloutSha256Matches": true,
+      "runtime": [
+        {
+          "model": "gpt-6-astra",
+          "effort": "xhigh"
+        }
+      ],
+      "exactRuntime": true,
+      "inputReads": [
+        {
+          "path": "AGENTS.md",
+          "readCommandPresent": true
+        },
+        {
+          "path": "PRODUCT.md",
+          "readCommandPresent": true
+        },
+        {
+          "path": "SEED.md",
+          "readCommandPresent": true
+        },
+        {
+          "path": "FEEDBACK.md",
+          "readCommandPresent": true
+        },
+        {
+          "path": "ROADMAP.md",
+          "readCommandPresent": true
+        },
+        {
+          "path": "TASK.md",
+          "readCommandPresent": true
+        },
+        {
+          "path": "ISSUES.md",
+          "readCommandPresent": true
+        },
+        {
+          "path": "DESIGN.md",
+          "readCommandPresent": true
+        }
+      ],
+      "writes": [
+        "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-creative-iy4uE0\\run07\\ROADMAP.md",
+        "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-creative-iy4uE0\\run07\\ISSUES.md",
+        "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-creative-iy4uE0\\run07\\PROPOSAL.md",
+        "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-creative-iy4uE0\\run07\\TASK.md"
+      ],
+      "writesInScope": true,
+      "shellRootsMatch": true,
+      "otherActionTypes": [],
+      "protectedFiles": [
+        {
+          "path": "PRODUCT.md",
+          "unchanged": true
+        },
+        {
+          "path": "SEED.md",
+          "unchanged": true
+        },
+        {
+          "path": "FEEDBACK.md",
+          "unchanged": true
+        },
+        {
+          "path": "DESIGN.md",
+          "unchanged": true
+        },
+        {
+          "path": "AGENTS.md",
+          "unchanged": true
+        }
+      ],
+      "outputSnapshotMatches": true,
+      "proposalSha256": "50371c2f7f1f25e747fe8ed9a396ec6a68298dd4338ff5f8b5f66067b29880c7"
+    },
+    {
+      "id": "run08",
+      "thread": "01a149c4-61ad-72d1-b639-fdacb257ca3f",
+      "rollout": "rollout-2026-10-17T21-09-29-01a149c4-61ad-72d1-b639-fdacb257ca3f.jsonl",
+      "rolloutSha256Matches": true,
+      "runtime": [
+        {
+          "model": "gpt-6-astra",
+          "effort": "xhigh"
+        }
+      ],
+      "exactRuntime": true,
+      "inputReads": [
+        {
+          "path": "AGENTS.md",
+          "readCommandPresent": true
+        },
+        {
+          "path": "PRODUCT.md",
+          "readCommandPresent": true
+        },
+        {
+          "path": "SEED.md",
+          "readCommandPresent": true
+        },
+        {
+          "path": "FEEDBACK.md",
+          "readCommandPresent": true
+        },
+        {
+          "path": "ROADMAP.md",
+          "readCommandPresent": true
+        },
+        {
+          "path": "TASK.md",
+          "readCommandPresent": true
+        },
+        {
+          "path": "ISSUES.md",
+          "readCommandPresent": true
+        },
+        {
+          "path": "DESIGN.md",
+          "readCommandPresent": true
+        }
+      ],
+      "writes": [
+        "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-creative-iy4uE0\\run08\\ROADMAP.md",
+        "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-creative-iy4uE0\\run08\\TASK.md",
+        "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-creative-iy4uE0\\run08\\PROPOSAL.md"
+      ],
+      "writesInScope": true,
+      "shellRootsMatch": true,
+      "otherActionTypes": [],
+      "protectedFiles": [
+        {
+          "path": "PRODUCT.md",
+          "unchanged": true
+        },
+        {
+          "path": "SEED.md",
+          "unchanged": true
+        },
+        {
+          "path": "FEEDBACK.md",
+          "unchanged": true
+        },
+        {
+          "path": "DESIGN.md",
+          "unchanged": true
+        },
+        {
+          "path": "AGENTS.md",
+          "unchanged": true
+        }
+      ],
+      "outputSnapshotMatches": true,
+      "proposalSha256": "10900e60a2a62c610ec76c2761de52d86bd5605c6cd932c790d50bddf03e9fb1"
+    }
+  ]
+}

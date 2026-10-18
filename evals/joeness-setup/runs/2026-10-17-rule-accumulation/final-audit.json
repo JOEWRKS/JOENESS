@@ -1,0 +1,520 @@
+{
+  "checks": {
+    "source": [
+      {
+        "path": "skills/joeness-setup/SKILL.md",
+        "expected": "0f5db50f1f1ffc21359372cd49c72fcd05cc785869f995a7ac9e175f6696beba",
+        "actual": "0f5db50f1f1ffc21359372cd49c72fcd05cc785869f995a7ac9e175f6696beba"
+      },
+      {
+        "path": "skills/joeness-setup/agents/openai.yaml",
+        "expected": "cc275e468658c7793d6f1305aaae5c6f37a06d831a7f2c3f18313f668427ec5c",
+        "actual": "cc275e468658c7793d6f1305aaae5c6f37a06d831a7f2c3f18313f668427ec5c"
+      },
+      {
+        "path": "skills/joeness-setup/assets/AGENTS.md",
+        "expected": "a79d9f2cce804ea06942bcd507d32b2c7e449be17fcb6471f8b1273392b014eb",
+        "actual": "a79d9f2cce804ea06942bcd507d32b2c7e449be17fcb6471f8b1273392b014eb"
+      },
+      {
+        "path": "skills/joeness-setup/assets/DESIGN.md",
+        "expected": "3b5ec8a163f2da4a770b4206029dd85a538dea0807060314cf51bd145ff66a5d",
+        "actual": "3b5ec8a163f2da4a770b4206029dd85a538dea0807060314cf51bd145ff66a5d"
+      },
+      {
+        "path": "skills/joeness-setup/assets/ISSUES.md",
+        "expected": "44b5e1f7eea61716bdfa3b364b7eca9ffe60bc9c29f6e31b3a9bf753de6b8635",
+        "actual": "44b5e1f7eea61716bdfa3b364b7eca9ffe60bc9c29f6e31b3a9bf753de6b8635"
+      },
+      {
+        "path": "skills/joeness-setup/assets/ROADMAP.md",
+        "expected": "ac80bf15b82f5cb9b6200a4cf48f22739632352850395afe77d62ed1be3e3660",
+        "actual": "ac80bf15b82f5cb9b6200a4cf48f22739632352850395afe77d62ed1be3e3660"
+      },
+      {
+        "path": "skills/joeness-setup/assets/TASK.md",
+        "expected": "cbe9d10373067805dcc2659474a7b2b23e28df967bb3ee10500a4c15b6088ee0",
+        "actual": "cbe9d10373067805dcc2659474a7b2b23e28df967bb3ee10500a4c15b6088ee0"
+      },
+      {
+        "path": "skills/joeness-setup/references/usage.md",
+        "expected": "d7d4ea516c714260dcbc0678da8ab72359340a96cd1718b46906334949b8146a",
+        "actual": "d7d4ea516c714260dcbc0678da8ab72359340a96cd1718b46906334949b8146a"
+      },
+      {
+        "path": "skills/joeness-setup/scripts/project-setup.ps1",
+        "expected": "631334ba13683f97346d2b14d4aebedd671b16c9125e7dd4a26914d658788c8d",
+        "actual": "631334ba13683f97346d2b14d4aebedd671b16c9125e7dd4a26914d658788c8d"
+      },
+      {
+        "path": "skills/joeness-setup/references/review-gate.md",
+        "expected": "0422021f6a247d44a3c2980353dddac76dee613282ecf4315cd4d357ebdf8432",
+        "actual": "0422021f6a247d44a3c2980353dddac76dee613282ecf4315cd4d357ebdf8432"
+      },
+      {
+        "path": "skills/joeness-setup/scripts/review-gate.mjs",
+        "expected": "7ad13a9020a57aa0a6396348f8575229d7cac076a5d5a6c89178d26c3b6d9bd2",
+        "actual": "7ad13a9020a57aa0a6396348f8575229d7cac076a5d5a6c89178d26c3b6d9bd2"
+      },
+      {
+        "path": "skills/joeness-setup/references/roadmap-review.md",
+        "expected": "bfb8910df6814edd4fab15b18b1c88c6dcc1127eb9921488772bdb9ffc15a201",
+        "actual": "bfb8910df6814edd4fab15b18b1c88c6dcc1127eb9921488772bdb9ffc15a201"
+      },
+      {
+        "path": "skills/joeness-setup/scripts/roadmap-review.mjs",
+        "expected": "5dfb2d5a81df58d9e1c43651b43cc945356bbf61630b103877f9b8bcd13ba33f",
+        "actual": "5dfb2d5a81df58d9e1c43651b43cc945356bbf61630b103877f9b8bcd13ba33f"
+      },
+      {
+        "path": "skills/joeness-setup/references/operation-review.md",
+        "expected": "748d1631847ac23045406f6742b43a3a0bddb29ebfb32b3720f8f97c9546959c",
+        "actual": "748d1631847ac23045406f6742b43a3a0bddb29ebfb32b3720f8f97c9546959c"
+      },
+      {
+        "path": "skills/joeness-setup/scripts/operation-review.mjs",
+        "expected": "a1a6d80a7d57d4e9c3e66c49a6f877bf07836bac25d330bb466fc2a858679aad",
+        "actual": "a1a6d80a7d57d4e9c3e66c49a6f877bf07836bac25d330bb466fc2a858679aad"
+      },
+      {
+        "path": "skills/joeness-setup/scripts/impact-review.mjs",
+        "expected": "9cd8359daae4e0f68bcab688ae831e43d81a0b98bcb8ca10ed65a63d0e70cbc8",
+        "actual": "9cd8359daae4e0f68bcab688ae831e43d81a0b98bcb8ca10ed65a63d0e70cbc8"
+      },
+      {
+        "path": "skills/joeness-setup/references/impact-review.md",
+        "expected": "6d98aa307aaace44461699e66fdbc3d658f67f8b6c756812ad9faa23ed330a82",
+        "actual": "6d98aa307aaace44461699e66fdbc3d658f67f8b6c756812ad9faa23ed330a82"
+      },
+      {
+        "path": "vendor/source-manifest.json",
+        "expected": "7e00a1b4981ba4a677c7214d287c17cb02e91faa42574a4c87c4bed356b2c36c",
+        "actual": "7e00a1b4981ba4a677c7214d287c17cb02e91faa42574a4c87c4bed356b2c36c"
+      }
+    ],
+    "personal": [
+      {
+        "path": "skills/joeness-setup/SKILL.md",
+        "expected": "0f5db50f1f1ffc21359372cd49c72fcd05cc785869f995a7ac9e175f6696beba",
+        "actual": "0f5db50f1f1ffc21359372cd49c72fcd05cc785869f995a7ac9e175f6696beba"
+      },
+      {
+        "path": "skills/joeness-setup/agents/openai.yaml",
+        "expected": "cc275e468658c7793d6f1305aaae5c6f37a06d831a7f2c3f18313f668427ec5c",
+        "actual": "cc275e468658c7793d6f1305aaae5c6f37a06d831a7f2c3f18313f668427ec5c"
+      },
+      {
+        "path": "skills/joeness-setup/assets/AGENTS.md",
+        "expected": "a79d9f2cce804ea06942bcd507d32b2c7e449be17fcb6471f8b1273392b014eb",
+        "actual": "a79d9f2cce804ea06942bcd507d32b2c7e449be17fcb6471f8b1273392b014eb"
+      },
+      {
+        "path": "skills/joeness-setup/assets/DESIGN.md",
+        "expected": "3b5ec8a163f2da4a770b4206029dd85a538dea0807060314cf51bd145ff66a5d",
+        "actual": "3b5ec8a163f2da4a770b4206029dd85a538dea0807060314cf51bd145ff66a5d"
+      },
+      {
+        "path": "skills/joeness-setup/assets/ISSUES.md",
+        "expected": "44b5e1f7eea61716bdfa3b364b7eca9ffe60bc9c29f6e31b3a9bf753de6b8635",
+        "actual": "44b5e1f7eea61716bdfa3b364b7eca9ffe60bc9c29f6e31b3a9bf753de6b8635"
+      },
+      {
+        "path": "skills/joeness-setup/assets/ROADMAP.md",
+        "expected": "ac80bf15b82f5cb9b6200a4cf48f22739632352850395afe77d62ed1be3e3660",
+        "actual": "ac80bf15b82f5cb9b6200a4cf48f22739632352850395afe77d62ed1be3e3660"
+      },
+      {
+        "path": "skills/joeness-setup/assets/TASK.md",
+        "expected": "cbe9d10373067805dcc2659474a7b2b23e28df967bb3ee10500a4c15b6088ee0",
+        "actual": "cbe9d10373067805dcc2659474a7b2b23e28df967bb3ee10500a4c15b6088ee0"
+      },
+      {
+        "path": "skills/joeness-setup/references/usage.md",
+        "expected": "d7d4ea516c714260dcbc0678da8ab72359340a96cd1718b46906334949b8146a",
+        "actual": "d7d4ea516c714260dcbc0678da8ab72359340a96cd1718b46906334949b8146a"
+      },
+      {
+        "path": "skills/joeness-setup/scripts/project-setup.ps1",
+        "expected": "631334ba13683f97346d2b14d4aebedd671b16c9125e7dd4a26914d658788c8d",
+        "actual": "631334ba13683f97346d2b14d4aebedd671b16c9125e7dd4a26914d658788c8d"
+      },
+      {
+        "path": "skills/joeness-setup/references/review-gate.md",
+        "expected": "0422021f6a247d44a3c2980353dddac76dee613282ecf4315cd4d357ebdf8432",
+        "actual": "0422021f6a247d44a3c2980353dddac76dee613282ecf4315cd4d357ebdf8432"
+      },
+      {
+        "path": "skills/joeness-setup/scripts/review-gate.mjs",
+        "expected": "7ad13a9020a57aa0a6396348f8575229d7cac076a5d5a6c89178d26c3b6d9bd2",
+        "actual": "7ad13a9020a57aa0a6396348f8575229d7cac076a5d5a6c89178d26c3b6d9bd2"
+      },
+      {
+        "path": "skills/joeness-setup/references/roadmap-review.md",
+        "expected": "bfb8910df6814edd4fab15b18b1c88c6dcc1127eb9921488772bdb9ffc15a201",
+        "actual": "bfb8910df6814edd4fab15b18b1c88c6dcc1127eb9921488772bdb9ffc15a201"
+      },
+      {
+        "path": "skills/joeness-setup/scripts/roadmap-review.mjs",
+        "expected": "5dfb2d5a81df58d9e1c43651b43cc945356bbf61630b103877f9b8bcd13ba33f",
+        "actual": "5dfb2d5a81df58d9e1c43651b43cc945356bbf61630b103877f9b8bcd13ba33f"
+      },
+      {
+        "path": "skills/joeness-setup/references/operation-review.md",
+        "expected": "748d1631847ac23045406f6742b43a3a0bddb29ebfb32b3720f8f97c9546959c",
+        "actual": "748d1631847ac23045406f6742b43a3a0bddb29ebfb32b3720f8f97c9546959c"
+      },
+      {
+        "path": "skills/joeness-setup/scripts/operation-review.mjs",
+        "expected": "a1a6d80a7d57d4e9c3e66c49a6f877bf07836bac25d330bb466fc2a858679aad",
+        "actual": "a1a6d80a7d57d4e9c3e66c49a6f877bf07836bac25d330bb466fc2a858679aad"
+      },
+      {
+        "path": "skills/joeness-setup/scripts/impact-review.mjs",
+        "expected": "9cd8359daae4e0f68bcab688ae831e43d81a0b98bcb8ca10ed65a63d0e70cbc8",
+        "actual": "9cd8359daae4e0f68bcab688ae831e43d81a0b98bcb8ca10ed65a63d0e70cbc8"
+      },
+      {
+        "path": "skills/joeness-setup/references/impact-review.md",
+        "expected": "6d98aa307aaace44461699e66fdbc3d658f67f8b6c756812ad9faa23ed330a82",
+        "actual": "6d98aa307aaace44461699e66fdbc3d658f67f8b6c756812ad9faa23ed330a82"
+      },
+      {
+        "path": "joeness-skills-state.json",
+        "expected": "7d6c878addf6e775a5ee9ce12fcd65cc244c528047493f2d00873fffd99921a1",
+        "actual": "7d6c878addf6e775a5ee9ce12fcd65cc244c528047493f2d00873fffd99921a1"
+      }
+    ],
+    "package": [
+      {
+        "path": "skills/joeness-setup/SKILL.md",
+        "expected": "0f5db50f1f1ffc21359372cd49c72fcd05cc785869f995a7ac9e175f6696beba",
+        "actual": "0f5db50f1f1ffc21359372cd49c72fcd05cc785869f995a7ac9e175f6696beba"
+      },
+      {
+        "path": "skills/joeness-setup/agents/openai.yaml",
+        "expected": "cc275e468658c7793d6f1305aaae5c6f37a06d831a7f2c3f18313f668427ec5c",
+        "actual": "cc275e468658c7793d6f1305aaae5c6f37a06d831a7f2c3f18313f668427ec5c"
+      },
+      {
+        "path": "skills/joeness-setup/assets/AGENTS.md",
+        "expected": "a79d9f2cce804ea06942bcd507d32b2c7e449be17fcb6471f8b1273392b014eb",
+        "actual": "a79d9f2cce804ea06942bcd507d32b2c7e449be17fcb6471f8b1273392b014eb"
+      },
+      {
+        "path": "skills/joeness-setup/assets/DESIGN.md",
+        "expected": "3b5ec8a163f2da4a770b4206029dd85a538dea0807060314cf51bd145ff66a5d",
+        "actual": "3b5ec8a163f2da4a770b4206029dd85a538dea0807060314cf51bd145ff66a5d"
+      },
+      {
+        "path": "skills/joeness-setup/assets/ISSUES.md",
+        "expected": "44b5e1f7eea61716bdfa3b364b7eca9ffe60bc9c29f6e31b3a9bf753de6b8635",
+        "actual": "44b5e1f7eea61716bdfa3b364b7eca9ffe60bc9c29f6e31b3a9bf753de6b8635"
+      },
+      {
+        "path": "skills/joeness-setup/assets/ROADMAP.md",
+        "expected": "ac80bf15b82f5cb9b6200a4cf48f22739632352850395afe77d62ed1be3e3660",
+        "actual": "ac80bf15b82f5cb9b6200a4cf48f22739632352850395afe77d62ed1be3e3660"
+      },
+      {
+        "path": "skills/joeness-setup/assets/TASK.md",
+        "expected": "cbe9d10373067805dcc2659474a7b2b23e28df967bb3ee10500a4c15b6088ee0",
+        "actual": "cbe9d10373067805dcc2659474a7b2b23e28df967bb3ee10500a4c15b6088ee0"
+      },
+      {
+        "path": "skills/joeness-setup/references/usage.md",
+        "expected": "d7d4ea516c714260dcbc0678da8ab72359340a96cd1718b46906334949b8146a",
+        "actual": "d7d4ea516c714260dcbc0678da8ab72359340a96cd1718b46906334949b8146a"
+      },
+      {
+        "path": "skills/joeness-setup/scripts/project-setup.ps1",
+        "expected": "631334ba13683f97346d2b14d4aebedd671b16c9125e7dd4a26914d658788c8d",
+        "actual": "631334ba13683f97346d2b14d4aebedd671b16c9125e7dd4a26914d658788c8d"
+      },
+      {
+        "path": "skills/joeness-setup/references/review-gate.md",
+        "expected": "0422021f6a247d44a3c2980353dddac76dee613282ecf4315cd4d357ebdf8432",
+        "actual": "0422021f6a247d44a3c2980353dddac76dee613282ecf4315cd4d357ebdf8432"
+      },
+      {
+        "path": "skills/joeness-setup/scripts/review-gate.mjs",
+        "expected": "7ad13a9020a57aa0a6396348f8575229d7cac076a5d5a6c89178d26c3b6d9bd2",
+        "actual": "7ad13a9020a57aa0a6396348f8575229d7cac076a5d5a6c89178d26c3b6d9bd2"
+      },
+      {
+        "path": "skills/joeness-setup/references/roadmap-review.md",
+        "expected": "bfb8910df6814edd4fab15b18b1c88c6dcc1127eb9921488772bdb9ffc15a201",
+        "actual": "bfb8910df6814edd4fab15b18b1c88c6dcc1127eb9921488772bdb9ffc15a201"
+      },
+      {
+        "path": "skills/joeness-setup/scripts/roadmap-review.mjs",
+        "expected": "5dfb2d5a81df58d9e1c43651b43cc945356bbf61630b103877f9b8bcd13ba33f",
+        "actual": "5dfb2d5a81df58d9e1c43651b43cc945356bbf61630b103877f9b8bcd13ba33f"
+      },
+      {
+        "path": "skills/joeness-setup/references/operation-review.md",
+        "expected": "748d1631847ac23045406f6742b43a3a0bddb29ebfb32b3720f8f97c9546959c",
+        "actual": "748d1631847ac23045406f6742b43a3a0bddb29ebfb32b3720f8f97c9546959c"
+      },
+      {
+        "path": "skills/joeness-setup/scripts/operation-review.mjs",
+        "expected": "a1a6d80a7d57d4e9c3e66c49a6f877bf07836bac25d330bb466fc2a858679aad",
+        "actual": "a1a6d80a7d57d4e9c3e66c49a6f877bf07836bac25d330bb466fc2a858679aad"
+      },
+      {
+        "path": "skills/joeness-setup/scripts/impact-review.mjs",
+        "expected": "9cd8359daae4e0f68bcab688ae831e43d81a0b98bcb8ca10ed65a63d0e70cbc8",
+        "actual": "9cd8359daae4e0f68bcab688ae831e43d81a0b98bcb8ca10ed65a63d0e70cbc8"
+      },
+      {
+        "path": "skills/joeness-setup/references/impact-review.md",
+        "expected": "6d98aa307aaace44461699e66fdbc3d658f67f8b6c756812ad9faa23ed330a82",
+        "actual": "6d98aa307aaace44461699e66fdbc3d658f67f8b6c756812ad9faa23ed330a82"
+      }
+    ],
+    "plan": {
+      "expected": "e455b41fbb4872011552c06a91a6f7e3c3fcf4d47403ec4c84725deb81d93409",
+      "actual": "e455b41fbb4872011552c06a91a6f7e3c3fcf4d47403ec4c84725deb81d93409"
+    },
+    "fixtures": {
+      "expected": "1b125490715670de6824c3a88c2dbd470e0aac864cafda66eb4e6e1c59a9dcb8",
+      "actual": "1b125490715670de6824c3a88c2dbd470e0aac864cafda66eb4e6e1c59a9dcb8"
+    },
+    "userIssues": {
+      "expected": "d3c87c8fa0e2e34600ae12ff0b1c9ea1d503ca5a7f6a30db17ca8e8ea9b529c7",
+      "actual": "d3c87c8fa0e2e34600ae12ff0b1c9ea1d503ca5a7f6a30db17ca8e8ea9b529c7"
+    }
+  },
+  "runs": [
+    {
+      "id": "g1",
+      "stage4SnapshotMatches": true,
+      "briefs": [
+        {
+          "stage": 1,
+          "unchanged": true
+        },
+        {
+          "stage": 2,
+          "unchanged": true
+        },
+        {
+          "stage": 3,
+          "unchanged": true
+        },
+        {
+          "stage": 4,
+          "unchanged": true
+        }
+      ],
+      "tests": {
+        "command": "node --test --test-reporter=tap",
+        "exit": 0,
+        "output": "TAP version 13\n# Subtest: balloons/pointercancel: preserve partial work and resume by grabbing its moved end\nok 1 - balloons/pointercancel: preserve partial work and resume by grabbing its moved end\n  ---\n  duration_ms: 6.9564\n  type: 'test'\n  ...\n# Subtest: balloons/lostpointercapture: preserve partial work and resume by grabbing its moved end\nok 2 - balloons/lostpointercapture: preserve partial work and resume by grabbing its moved end\n  ---\n  duration_ms: 2.872\n  type: 'test'\n  ...\n# Subtest: balloons/blur: preserve partial work and resume by grabbing its moved end\nok 3 - balloons/blur: preserve partial work and resume by grabbing its moved end\n  ---\n  duration_ms: 2.6214\n  type: 'test'\n  ...\n# Subtest: balloons/hidden: preserve partial work and resume by grabbing its moved end\nok 4 - balloons/hidden: preserve partial work and resume by grabbing its moved end\n  ---\n  duration_ms: 2.9397\n  type: 'test'\n  ...\n# Subtest: balloons/pagehide: preserve partial work and resume by grabbing its moved end\nok 5 - balloons/pagehide: preserve partial work and resume by grabbing its moved end\n  ---\n  duration_ms: 2.4532\n  type: 'test'\n  ...\n# Subtest: balloons/outside: preserve partial work and resume by grabbing its moved end\nok 6 - balloons/outside: preserve partial work and resume by grabbing its moved end\n  ---\n  duration_ms: 2.9045\n  type: 'test'\n  ...\n# Subtest: balloons/released-outside: preserve partial work and resume by grabbing its moved end\nok 7 - balloons/released-outside: preserve partial work and resume by grabbing its moved end\n  ---\n  duration_ms: 2.996\n  type: 'test'\n  ...\n# Subtest: balloons/document-exit: preserve partial work and resume by grabbing its moved end\nok 8 - balloons/document-exit: preserve partial work and resume by grabbing its moved end\n  ---\n  duration_ms: 3.0968\n  type: 'test'\n  ...\n# Subtest: balloons: complete twice with fresh controls, focus, and zero leaked progress\nok 9 - balloons: complete twice with fresh controls, focus, and zero leaked progress\n  ---\n  duration_ms: 4.7567\n  type: 'test'\n  ...\n# Subtest: coupons/pointercancel: preserve partial work and resume by grabbing its moved end\nok 10 - coupons/pointercancel: preserve partial work and resume by grabbing its moved end\n  ---\n  duration_ms: 2.325\n  type: 'test'\n  ...\n# Subtest: coupons/lostpointercapture: preserve partial work and resume by grabbing its moved end\nok 11 - coupons/lostpointercapture: preserve partial work and resume by grabbing its moved end\n  ---\n  duration_ms: 1.6999\n  type: 'test'\n  ...\n# Subtest: coupons/blur: preserve partial work and resume by grabbing its moved end\nok 12 - coupons/blur: preserve partial work and resume by grabbing its moved end\n  ---\n  duration_ms: 2.1394\n  type: 'test'\n  ...\n# Subtest: coupons/hidden: preserve partial work and resume by grabbing its moved end\nok 13 - coupons/hidden: preserve partial work and resume by grabbing its moved end\n  ---\n  duration_ms: 3.0252\n  type: 'test'\n  ...\n# Subtest: coupons/pagehide: preserve partial work and resume by grabbing its moved end\nok 14 - coupons/pagehide: preserve partial work and resume by grabbing its moved end\n  ---\n  duration_ms: 2.0693\n  type: 'test'\n  ...\n# Subtest: coupons/outside: preserve partial work and resume by grabbing its moved end\nok 15 - coupons/outside: preserve partial work and resume by grabbing its moved end\n  ---\n  duration_ms: 2.0163\n  type: 'test'\n  ...\n# Subtest: coupons/released-outside: preserve partial work and resume by grabbing its moved end\nok 16 - coupons/released-outside: preserve partial work and resume by grabbing its moved end\n  ---\n  duration_ms: 1.7577\n  type: 'test'\n  ...\n# Subtest: coupons/document-exit: preserve partial work and resume by grabbing its moved end\nok 17 - coupons/document-exit: preserve partial work and resume by grabbing its moved end\n  ---\n  duration_ms: 1.5064\n  type: 'test'\n  ...\n# Subtest: coupons: complete twice with fresh controls, focus, and zero leaked progress\nok 18 - coupons: complete twice with fresh controls, focus, and zero leaked progress\n  ---\n  duration_ms: 1.9741\n  type: 'test'\n  ...\n# Subtest: body presses visibly probe and a short direct drag immediately changes object shape\nok 19 - body presses visibly probe and a short direct drag immediately changes object shape\n  ---\n  duration_ms: 1.8437\n  type: 'test'\n  ...\n# Subtest: wrong motion gives tension, and opposite-facing knots have visibly opposite travel\nok 20 - wrong motion gives tension, and opposite-facing knots have visibly opposite travel\n  ---\n  duration_ms: 1.926\n  type: 'test'\n  ...\n# Subtest: click alone never clears, keyboard focus selects, and both keyboard directions matter\nok 21 - click alone never clears, keyboard focus selects, and both keyboard directions matter\n  ---\n  duration_ms: 2.2013\n  type: 'test'\n  ...\n# Subtest: tap then optional directional buttons works for a partial object as well as a fresh one\nok 22 - tap then optional directional buttons works for a partial object as well as a fresh one\n  ---\n  duration_ms: 2.0025\n  type: 'test'\n  ...\n# Subtest: quick drag can complete on pointerup even when the browser omits intermediate moves\nok 23 - quick drag can complete on pointerup even when the browser omits intermediate moves\n  ---\n  duration_ms: 1.584\n  type: 'test'\n  ...\n# Subtest: capture failure ends cleanly, and secondary pointer cannot take ownership\nok 24 - capture failure ends cleanly, and secondary pointer cannot take ownership\n  ---\n  duration_ms: 2.9121\n  type: 'test'\n  ...\n# Subtest: reset and scene switch ignore detached callbacks and deferred old capture loss\nok 25 - reset and scene switch ignore detached callbacks and deferred old capture loss\n  ---\n  duration_ms: 1.8481\n  type: 'test'\n  ...\n# Subtest: coupon first corner exists before input and its clipping changes during drag\nok 26 - coupon first corner exists before input and its clipping changes during drag\n  ---\n  duration_ms: 1.3949\n  type: 'test'\n  ...\n# Subtest: repeated scene changes do not accumulate shared listeners\nok 27 - repeated scene changes do not accumulate shared listeners\n  ---\n  duration_ms: 2.924\n  type: 'test'\n  ...\n# Subtest: original BRIEF.md bytes are preserved\nok 28 - original BRIEF.md bytes are preserved\n  ---\n  duration_ms: 1.6526\n  type: 'test'\n  ...\n# Subtest: entrypoint loads existing local classic scripts in dependency order\nok 29 - entrypoint loads existing local classic scripts in dependency order\n  ---\n  duration_ms: 1.9207\n  type: 'test'\n  ...\n# Subtest: prototype has no declared external resources or networking calls\nok 30 - prototype has no declared external resources or networking calls\n  ---\n  duration_ms: 2.102\n  type: 'test'\n  ...\n# Subtest: flash: direct contact and taps do not solve; motion gives continuous feedback\nok 31 - flash: direct contact and taps do not solve; motion gives continuous feedback\n  ---\n  duration_ms: 2.4168\n  type: 'test'\n  ...\n# Subtest: flash: wrong and perpendicular motion resist without progress\nok 32 - flash: wrong and perpendicular motion resist without progress\n  ---\n  duration_ms: 0.2429\n  type: 'test'\n  ...\n# Subtest: flash: released partial work stays at the moved end and resumes without jumping\nok 33 - flash: released partial work stays at the moved end and resumes without jumping\n  ---\n  duration_ms: 0.2505\n  type: 'test'\n  ...\n# Subtest: bonus: direct contact and taps do not solve; motion gives continuous feedback\nok 34 - bonus: direct contact and taps do not solve; motion gives continuous feedback\n  ---\n  duration_ms: 0.1603\n  type: 'test'\n  ...\n# Subtest: bonus: wrong and perpendicular motion resist without progress\nok 35 - bonus: wrong and perpendicular motion resist without progress\n  ---\n  duration_ms: 0.1611\n  type: 'test'\n  ...\n# Subtest: bonus: released partial work stays at the moved end and resumes without jumping\nok 36 - bonus: released partial work stays at the moved end and resumes without jumping\n  ---\n  duration_ms: 0.3744\n  type: 'test'\n  ...\n# Subtest: vip: direct contact and taps do not solve; motion gives continuous feedback\nok 37 - vip: direct contact and taps do not solve; motion gives continuous feedback\n  ---\n  duration_ms: 0.1731\n  type: 'test'\n  ...\n# Subtest: vip: wrong and perpendicular motion resist without progress\nok 38 - vip: wrong and perpendicular motion resist without progress\n  ---\n  duration_ms: 0.1403\n  type: 'test'\n  ...\n# Subtest: vip: released partial work stays at the moved end and resumes without jumping\nok 39 - vip: released partial work stays at the moved end and resumes without jumping\n  ---\n  duration_ms: 0.1942\n  type: 'test'\n  ...\n# Subtest: balloons: arbitrary order completes, disabled objects stay cleared, and fresh restarts are isolated\nok 40 - balloons: arbitrary order completes, disabled objects stay cleared, and fresh restarts are isolated\n  ---\n  duration_ms: 0.3546\n  type: 'test'\n  ...\n# Subtest: coupon-million: direct contact and taps do not solve; motion gives continuous feedback\nok 41 - coupon-million: direct contact and taps do not solve; motion gives continuous feedback\n  ---\n  duration_ms: 0.3303\n  type: 'test'\n  ...\n# Subtest: coupon-million: wrong and perpendicular motion resist without progress\nok 42 - coupon-million: wrong and perpendicular motion resist without progress\n  ---\n  duration_ms: 1.3658\n  type: 'test'\n  ...\n# Subtest: coupon-million: released partial work stays at the moved end and resumes without jumping\nok 43 - coupon-million: released partial work stays at the moved end and resumes without jumping\n  ---\n  duration_ms: 0.1551\n  type: 'test'\n  ...\n# Subtest: coupon-again: direct contact and taps do not solve; motion gives continuous feedback\nok 44 - coupon-again: direct contact and taps do not solve; motion gives continuous feedback\n  ---\n  duration_ms: 0.1232\n  type: 'test'\n  ...\n# Subtest: coupon-again: wrong and perpendicular motion resist without progress\nok 45 - coupon-again: wrong and perpendicular motion resist without progress\n  ---\n  duration_ms: 0.0821\n  type: 'test'\n  ...\n# Subtest: coupon-again: released partial work stays at the moved end and resumes without jumping\nok 46 - coupon-again: released partial work stays at the moved end and resumes without jumping\n  ---\n  duration_ms: 0.1691\n  type: 'test'\n  ...\n# Subtest: coupons: arbitrary order completes, disabled objects stay cleared, and fresh restarts are isolated\nok 47 - coupons: arbitrary order completes, disabled objects stay cleared, and fresh restarts are isolated\n  ---\n  duration_ms: 0.0721\n  type: 'test'\n  ...\n# Subtest: secondary pointers, malformed input, and unknown pieces cannot hijack a drag\nok 48 - secondary pointers, malformed input, and unknown pieces cannot hijack a drag\n  ---\n  duration_ms: 0.218\n  type: 'test'\n  ...\n# Subtest: body exploration produces a physical clue without solving or selecting\nok 49 - body exploration produces a physical clue without solving or selecting\n  ---\n  duration_ms: 0.1832\n  type: 'test'\n  ...\n# Subtest: left-facing knot and right-facing knot require different keys\nok 50 - left-facing knot and right-facing knot require different keys\n  ---\n  duration_ms: 0.1728\n  type: 'test'\n  ...\n# Subtest: coupon keys move the same diagonal fold; reverse keys cannot peel\nok 51 - coupon keys move the same diagonal fold; reverse keys cannot peel\n  ---\n  duration_ms: 0.1665\n  type: 'test'\n  ...\n# Subtest: floating point noise completes, but a one-pixel-short pull does not\nok 52 - floating point noise completes, but a one-pixel-short pull does not\n  ---\n  duration_ms: 0.1241\n  type: 'test'\n  ...\n# Subtest: stationary pointer samples after progress do not invent resistance\nok 53 - stationary pointer samples after progress do not invent resistance\n  ---\n  duration_ms: 0.1322\n  type: 'test'\n  ...\n# Subtest: two ad themes, counts, unknown scene fallback, and immutable configuration remain\nok 54 - two ad themes, counts, unknown scene fallback, and immutable configuration remain\n  ---\n  duration_ms: 1.6424\n  type: 'test'\n  ...\n# Subtest: all direct ends and their complete travel stay in the board at minimum width\nok 55 - all direct ends and their complete travel stay in the board at minimum width\n  ---\n  duration_ms: 0.3045\n  type: 'test'\n  ...\n# Subtest: coupon remainder reveals its initial corner and collapses to zero area at completion\nok 56 - coupon remainder reveals its initial corner and collapses to zero area at completion\n  ---\n  duration_ms: 0.5667\n  type: 'test'\n  ...\n# Subtest: opening UI has object cues, no detached tool, step guide, or prescribed solution arrow\nok 57 - opening UI has object cues, no detached tool, step guide, or prescribed solution arrow\n  ---\n  duration_ms: 1.4008\n  type: 'test'\n  ...\n1..57\n# tests 57\n# suites 0\n# pass 57\n# fail 0\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 193.322\n"
+      },
+      "syntax": [
+        {
+          "path": "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-growth-q9YLIn\\g1\\src\\app.js",
+          "exit": 0,
+          "output": ""
+        },
+        {
+          "path": "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-growth-q9YLIn\\g1\\src\\puzzle.js",
+          "exit": 0,
+          "output": ""
+        },
+        {
+          "path": "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-growth-q9YLIn\\g1\\src\\scenes.js",
+          "exit": 0,
+          "output": ""
+        },
+        {
+          "path": "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-growth-q9YLIn\\g1\\tests\\lifecycle.test.js",
+          "exit": 0,
+          "output": ""
+        },
+        {
+          "path": "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-growth-q9YLIn\\g1\\tests\\offline.test.js",
+          "exit": 0,
+          "output": ""
+        },
+        {
+          "path": "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-growth-q9YLIn\\g1\\tests\\puzzle.test.js",
+          "exit": 0,
+          "output": ""
+        },
+        {
+          "path": "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-growth-q9YLIn\\g1\\tests\\scenes.test.js",
+          "exit": 0,
+          "output": ""
+        }
+      ]
+    },
+    {
+      "id": "g2",
+      "stage4SnapshotMatches": true,
+      "briefs": [
+        {
+          "stage": 1,
+          "unchanged": true
+        },
+        {
+          "stage": 2,
+          "unchanged": true
+        },
+        {
+          "stage": 3,
+          "unchanged": true
+        },
+        {
+          "stage": 4,
+          "unchanged": true
+        }
+      ],
+      "tests": {
+        "command": "node --test --test-reporter=tap",
+        "exit": 0,
+        "output": "TAP version 13\n# Subtest: UI create → search → edit → cancel → delete → reload uses storage\nok 1 - UI create → search → edit → cancel → delete → reload uses storage\n  ---\n  duration_ms: 35.3105\n  type: 'test'\n  ...\n# Subtest: quota failure keeps draft and visible previous notes, retry succeeds\nok 2 - quota failure keeps draft and visible previous notes, retry succeeds\n  ---\n  duration_ms: 2.313\n  type: 'test'\n  ...\n# Subtest: failed deletion and failed edit retain persisted and visible content\nok 3 - failed deletion and failed edit retain persisted and visible content\n  ---\n  duration_ms: 1.0681\n  type: 'test'\n  ...\n# Subtest: damaged storage and denied storage disable writes without clearing data\nok 4 - damaged storage and denied storage disable writes without clearing data\n  ---\n  duration_ms: 0.6378\n  type: 'test'\n  ...\n# Subtest: other-tab change blocks stale save, reload preserves draft\nok 5 - other-tab change blocks stale save, reload preserves draft\n  ---\n  duration_ms: 1.9005\n  type: 'test'\n  ...\n# Subtest: draft replacement and cancel respect confirmation; unload detects unsaved input\nok 6 - draft replacement and cancel respect confirmation; unload detects unsaved input\n  ---\n  duration_ms: 0.6895\n  type: 'test'\n  ...\n# Subtest: HTML-like note content stays a literal text node\nok 7 - HTML-like note content stays a literal text node\n  ---\n  duration_ms: 0.4796\n  type: 'test'\n  ...\n# Subtest: new draft can be cancelled and rewritten without changing saved records\nok 8 - new draft can be cancelled and rewritten without changing saved records\n  ---\n  duration_ms: 1.2921\n  type: 'test'\n  ...\n# Subtest: blank new and edited input never changes storage and can be corrected\nok 9 - blank new and edited input never changes storage and can be corrected\n  ---\n  duration_ms: 1.2525\n  type: 'test'\n  ...\n# Subtest: cancel edit then create and edit again never reuses the cancelled edit target\nok 10 - cancel edit then create and edit again never reuses the cancelled edit target\n  ---\n  duration_ms: 1.4171\n  type: 'test'\n  ...\n# Subtest: reinitializing app during an edit restores only saved data and allows new writing\nok 11 - reinitializing app during an edit restores only saved data and allows new writing\n  ---\n  duration_ms: 1.0375\n  type: 'test'\n  ...\n# Subtest: returning editor values to their original text clears the discard warning\nok 12 - returning editor values to their original text clears the discard warning\n  ---\n  duration_ms: 0.6326\n  type: 'test'\n  ...\n# Subtest: malformed reload preserves raw data and current draft until an explicit valid reload\nok 13 - malformed reload preserves raw data and current draft until an explicit valid reload\n  ---\n  duration_ms: 0.7206\n  type: 'test'\n  ...\n# Subtest: export downloads all saved notes, excludes draft, and leaves stale-write detection intact\nok 14 - export downloads all saved notes, excludes draft, and leaves stale-write detection intact\n  ---\n  duration_ms: 1.8765\n  type: 'test'\n  ...\n# Subtest: file import previews counts, preserves an editing draft, and writes once only on apply\nok 15 - file import previews counts, preserves an editing draft, and writes once only on apply\n  ---\n  duration_ms: 2.3142\n  type: 'test'\n  ...\n# Subtest: duplicate, conflicting and empty imports never replace existing records\nok 16 - duplicate, conflicting and empty imports never replace existing records\n  ---\n  duration_ms: 2.0744\n  type: 'test'\n  ...\n# Subtest: invalid, oversized and unreadable files never partially save or erase previous preview safety\nok 17 - invalid, oversized and unreadable files never partially save or erase previous preview safety\n  ---\n  duration_ms: 1.1299\n  type: 'test'\n  ...\n# Subtest: cancelled and superseded asynchronous reads cannot apply an old file\nok 18 - cancelled and superseded asynchronous reads cannot apply an old file\n  ---\n  duration_ms: 0.6047\n  type: 'test'\n  ...\n# Subtest: quota failure and other-tab conflict keep import pending and preserve all previous data\nok 19 - quota failure and other-tab conflict keep import pending and preserve all previous data\n  ---\n  duration_ms: 1.6151\n  type: 'test'\n  ...\n# Subtest: editing while an import is pending refreshes merge plan instead of discarding the new save\nok 20 - editing while an import is pending refreshes merge plan instead of discarding the new save\n  ---\n  duration_ms: 0.8555\n  type: 'test'\n  ...\n# Subtest: malformed local storage blocks import and export without overwriting raw content\nok 21 - malformed local storage blocks import and export without overwriting raw content\n  ---\n  duration_ms: 0.3357\n  type: 'test'\n  ...\n# Subtest: paste once, record once, search content and edit only one resulting note\nok 22 - paste once, record once, search content and edit only one resulting note\n  ---\n  duration_ms: 1.3825\n  type: 'test'\n  ...\n# Subtest: invalid batch, quota failure and stale save retain the entire draft without partial writes\nok 23 - invalid batch, quota failure and stale save retain the entire draft without partial writes\n  ---\n  duration_ms: 1.6594\n  type: 'test'\n  ...\n# Subtest: legacy multiline labelled records survive capture, content edits and backup round trip\nok 24 - legacy multiline labelled records survive capture, content edits and backup round trip\n  ---\n  duration_ms: 2.1751\n  type: 'test'\n  ...\n# Subtest: plain UTF-8 text file previews, cancels and applies multiple notes without touching draft or existing records\nok 25 - plain UTF-8 text file previews, cancels and applies multiple notes without touching draft or existing records\n  ---\n  duration_ms: 2.5517\n  type: 'test'\n  ...\n# Subtest: invalid text file is atomic and malformed JSON never falls back to ordinary text\nok 26 - invalid text file is atomic and malformed JSON never falls back to ordinary text\n  ---\n  duration_ms: 0.5576\n  type: 'test'\n  ...\n# Subtest: plain text capture splits line endings, ignores blanks and preserves input order without categories\nok 27 - plain text capture splits line endings, ignores blanks and preserves input order without categories\n  ---\n  duration_ms: 17.9598\n  type: 'test'\n  ...\n# Subtest: capture validates the whole batch before allocating IDs and never mutates existing records on error\nok 28 - capture validates the whole batch before allocating IDs and never mutates existing records on error\n  ---\n  duration_ms: 0.7432\n  type: 'test'\n  ...\n# Subtest: add, edit and delete preserve immutable source and creation time\nok 29 - add, edit and delete preserve immutable source and creation time\n  ---\n  duration_ms: 0.2139\n  type: 'test'\n  ...\n# Subtest: blank, too long, missing and duplicate notes are rejected\nok 30 - blank, too long, missing and duplicate notes are rejected\n  ---\n  duration_ms: 0.3055\n  type: 'test'\n  ...\n# Subtest: search matches body and label, multiple words, normalization and newest first\nok 31 - search matches body and label, multiple words, normalization and newest first\n  ---\n  duration_ms: 0.5529\n  type: 'test'\n  ...\n# Subtest: new repository restores persisted notes, edits and deletions\nok 32 - new repository restores persisted notes, edits and deletions\n  ---\n  duration_ms: 1.7675\n  type: 'test'\n  ...\n# Subtest: corrupt, unknown and malformed storage fails closed without changing raw bytes\nok 33 - corrupt, unknown and malformed storage fails closed without changing raw bytes\n  ---\n  duration_ms: 0.367\n  type: 'test'\n  ...\n# Subtest: read denial and quota errors propagate without false success\nok 34 - read denial and quota errors propagate without false success\n  ---\n  duration_ms: 0.2695\n  type: 'test'\n  ...\n# Subtest: other-tab writes and deletion cause conflict, explicit reload enables next save\nok 35 - other-tab writes and deletion cause conflict, explicit reload enables next save\n  ---\n  duration_ms: 0.323\n  type: 'test'\n  ...\n# Subtest: failed reload revokes writes until valid data is explicitly loaded again\nok 36 - failed reload revokes writes until valid data is explicitly loaded again\n  ---\n  duration_ms: 0.3207\n  type: 'test'\n  ...\n# Subtest: local asset handler serves entry and modules with correct MIME without opening network\nok 37 - local asset handler serves entry and modules with correct MIME without opening network\n  ---\n  duration_ms: 8.1423\n  type: 'test'\n  ...\n# Subtest: local asset allowlist refuses project records and mutation requests\nok 38 - local asset allowlist refuses project records and mutation requests\n  ---\n  duration_ms: 0.7778\n  type: 'test'\n  ...\n# Subtest: export/import round trip preserves Unicode, IDs, labels and timestamps\nok 39 - export/import round trip preserves Unicode, IDs, labels and timestamps\n  ---\n  duration_ms: 12.0149\n  type: 'test'\n  ...\n# Subtest: malformed JSON, unsupported format/version and invalid members reject the entire file\nok 40 - malformed JSON, unsupported format/version and invalid members reject the entire file\n  ---\n  duration_ms: 0.8974\n  type: 'test'\n  ...\n# Subtest: oversized content is rejected before parsing\nok 41 - oversized content is rejected before parsing\n  ---\n  duration_ms: 6.833\n  type: 'test'\n  ...\n# Subtest: merge appends without mutating existing data, skips exact duplicate IDs\nok 42 - merge appends without mutating existing data, skips exact duplicate IDs\n  ---\n  duration_ms: 0.448\n  type: 'test'\n  ...\n# Subtest: same-ID different versions are preserved separately and repeat import does not duplicate the copy\nok 43 - same-ID different versions are preserved separately and repeat import does not duplicate the copy\n  ---\n  duration_ms: 0.2715\n  type: 'test'\n  ...\n# Subtest: generated IDs cannot steal another imported ID; failure leaves inputs untouched\nok 44 - generated IDs cannot steal another imported ID; failure leaves inputs untouched\n  ---\n  duration_ms: 0.3203\n  type: 'test'\n  ...\n# Subtest: empty import preserves every existing record and different IDs remain distinct\nok 45 - empty import preserves every existing record and different IDs remain distinct\n  ---\n  duration_ms: 0.1888\n  type: 'test'\n  ...\n1..45\n# tests 45\n# suites 0\n# pass 45\n# fail 0\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 200.6493\n"
+      },
+      "syntax": [
+        {
+          "path": "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-growth-q9YLIn\\g2\\app.js",
+          "exit": 0,
+          "output": ""
+        },
+        {
+          "path": "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-growth-q9YLIn\\g2\\notes.js",
+          "exit": 0,
+          "output": ""
+        },
+        {
+          "path": "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-growth-q9YLIn\\g2\\server.js",
+          "exit": 0,
+          "output": ""
+        },
+        {
+          "path": "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-growth-q9YLIn\\g2\\test\\app.test.js",
+          "exit": 0,
+          "output": ""
+        },
+        {
+          "path": "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-growth-q9YLIn\\g2\\test\\notes.test.js",
+          "exit": 0,
+          "output": ""
+        },
+        {
+          "path": "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-growth-q9YLIn\\g2\\test\\server.test.js",
+          "exit": 0,
+          "output": ""
+        },
+        {
+          "path": "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-growth-q9YLIn\\g2\\test\\transfer.test.js",
+          "exit": 0,
+          "output": ""
+        },
+        {
+          "path": "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-growth-q9YLIn\\g2\\transfer.js",
+          "exit": 0,
+          "output": ""
+        }
+      ]
+    },
+    {
+      "id": "g3",
+      "stage4SnapshotMatches": true,
+      "briefs": [
+        {
+          "stage": 1,
+          "unchanged": true
+        },
+        {
+          "stage": 2,
+          "unchanged": true
+        },
+        {
+          "stage": 3,
+          "unchanged": true
+        },
+        {
+          "stage": 4,
+          "unchanged": true
+        }
+      ],
+      "tests": {
+        "command": "node --test --test-reporter=tap",
+        "exit": 0,
+        "output": "TAP version 13\n# Subtest: independent objects begin full; selecting any object does not change another\nok 1 - independent objects begin full; selecting any object does not change another\n  ---\n  duration_ms: 2.0535\n  type: 'test'\n  ...\n# Subtest: one complete unplug removes the selected balloon, in any order\nok 2 - one complete unplug removes the selected balloon, in any order\n  ---\n  duration_ms: 0.4555\n  type: 'test'\n  ...\n# Subtest: short, wrong-direction and invalid pulls never accumulate hidden repetitions\nok 3 - short, wrong-direction and invalid pulls never accumulate hidden repetitions\n  ---\n  duration_ms: 0.1808\n  type: 'test'\n  ...\n# Subtest: cancel rolls back the held object, preserving another collected item\nok 4 - cancel rolls back the held object, preserving another collected item\n  ---\n  duration_ms: 0.1602\n  type: 'test'\n  ...\n# Subtest: invalid selection and a second simultaneous grab cannot corrupt state\nok 5 - invalid selection and a second simultaneous grab cannot corrupt state\n  ---\n  duration_ms: 0.495\n  type: 'test'\n  ...\n# Subtest: coupon destination depends on its lower edge, not a fixed drag distance\nok 6 - coupon destination depends on its lower edge, not a fixed drag distance\n  ---\n  duration_ms: 0.3203\n  type: 'test'\n  ...\n# Subtest: coupon approach reacts continuously and loses readiness after leaving the mouth\nok 7 - coupon approach reacts continuously and loses readiness after leaving the mouth\n  ---\n  duration_ms: 0.3202\n  type: 'test'\n  ...\n# Subtest: coupon overlap requires deliberate movement; invalid coordinates clear readiness\nok 8 - coupon overlap requires deliberate movement; invalid coordinates clear readiness\n  ---\n  duration_ms: 0.2131\n  type: 'test'\n  ...\n# Subtest: first screen exposes three separate stoppers, not a shared sequence handle\nok 9 - first screen exposes three separate stoppers, not a shared sequence handle\n  ---\n  duration_ms: 1.6839\n  type: 'test'\n  ...\n# Subtest: dragging third stopper changes only its own balloon and collects it once\nok 10 - dragging third stopper changes only its own balloon and collects it once\n  ---\n  duration_ms: 1.3732\n  type: 'test'\n  ...\n# Subtest: balloons: a tap, repeated clicks or a wrong-direction drag cannot solve\nok 11 - balloons: a tap, repeated clicks or a wrong-direction drag cannot solve\n  ---\n  duration_ms: 0.554\n  type: 'test'\n  ...\n# Subtest: balloons: a second pointer, other object and right button cannot take ownership\nok 12 - balloons: a second pointer, other object and right button cannot take ownership\n  ---\n  duration_ms: 0.3929\n  type: 'test'\n  ...\n# Subtest: balloons: pointercancel cancels preview and ignores late release, preserving other items\nok 13 - balloons: pointercancel cancels preview and ignores late release, preserving other items\n  ---\n  duration_ms: 0.4744\n  type: 'test'\n  ...\n# Subtest: balloons: lostpointercapture cancels preview and ignores late release, preserving other items\nok 14 - balloons: lostpointercapture cancels preview and ignores late release, preserving other items\n  ---\n  duration_ms: 0.4246\n  type: 'test'\n  ...\n# Subtest: balloons: blur cancels preview and ignores late release, preserving other items\nok 15 - balloons: blur cancels preview and ignores late release, preserving other items\n  ---\n  duration_ms: 0.3507\n  type: 'test'\n  ...\n# Subtest: balloons: pagehide cancels preview and ignores late release, preserving other items\nok 16 - balloons: pagehide cancels preview and ignores late release, preserving other items\n  ---\n  duration_ms: 0.3545\n  type: 'test'\n  ...\n# Subtest: balloons: hidden cancels preview and ignores late release, preserving other items\nok 17 - balloons: hidden cancels preview and ignores late release, preserving other items\n  ---\n  duration_ms: 0.3659\n  type: 'test'\n  ...\n# Subtest: balloons: resize cancels preview and ignores late release, preserving other items\nok 18 - balloons: resize cancels preview and ignores late release, preserving other items\n  ---\n  duration_ms: 0.3286\n  type: 'test'\n  ...\n# Subtest: balloons: scroll cancels preview and ignores late release, preserving other items\nok 19 - balloons: scroll cancels preview and ignores late release, preserving other items\n  ---\n  duration_ms: 0.2996\n  type: 'test'\n  ...\n# Subtest: balloons: window-exit cancels preview and ignores late release, preserving other items\nok 20 - balloons: window-exit cancels preview and ignores late release, preserving other items\n  ---\n  duration_ms: 0.4528\n  type: 'test'\n  ...\n# Subtest: balloons: all viewport edges cancel on movement and on release\nok 21 - balloons: all viewport edges cancel on movement and on release\n  ---\n  duration_ms: 2.9408\n  type: 'test'\n  ...\n# Subtest: balloons: two full plays and repeated restart restore every object\nok 22 - balloons: two full plays and repeated restart restore every object\n  ---\n  duration_ms: 0.656\n  type: 'test'\n  ...\n# Subtest: balloons: restart during manipulation invalidates old pointer events\nok 23 - balloons: restart during manipulation invalidates old pointer events\n  ---\n  duration_ms: 0.3388\n  type: 'test'\n  ...\n# Subtest: coupons: a tap, repeated clicks or a wrong-direction drag cannot solve\nok 24 - coupons: a tap, repeated clicks or a wrong-direction drag cannot solve\n  ---\n  duration_ms: 0.3164\n  type: 'test'\n  ...\n# Subtest: coupons: a second pointer, other object and right button cannot take ownership\nok 25 - coupons: a second pointer, other object and right button cannot take ownership\n  ---\n  duration_ms: 0.2715\n  type: 'test'\n  ...\n# Subtest: coupons: pointercancel cancels preview and ignores late release, preserving other items\nok 26 - coupons: pointercancel cancels preview and ignores late release, preserving other items\n  ---\n  duration_ms: 0.3072\n  type: 'test'\n  ...\n# Subtest: coupons: lostpointercapture cancels preview and ignores late release, preserving other items\nok 27 - coupons: lostpointercapture cancels preview and ignores late release, preserving other items\n  ---\n  duration_ms: 0.2914\n  type: 'test'\n  ...\n# Subtest: coupons: blur cancels preview and ignores late release, preserving other items\nok 28 - coupons: blur cancels preview and ignores late release, preserving other items\n  ---\n  duration_ms: 0.3106\n  type: 'test'\n  ...\n# Subtest: coupons: pagehide cancels preview and ignores late release, preserving other items\nok 29 - coupons: pagehide cancels preview and ignores late release, preserving other items\n  ---\n  duration_ms: 0.3101\n  type: 'test'\n  ...\n# Subtest: coupons: hidden cancels preview and ignores late release, preserving other items\nok 30 - coupons: hidden cancels preview and ignores late release, preserving other items\n  ---\n  duration_ms: 0.2734\n  type: 'test'\n  ...\n# Subtest: coupons: resize cancels preview and ignores late release, preserving other items\nok 31 - coupons: resize cancels preview and ignores late release, preserving other items\n  ---\n  duration_ms: 1.2724\n  type: 'test'\n  ...\n# Subtest: coupons: scroll cancels preview and ignores late release, preserving other items\nok 32 - coupons: scroll cancels preview and ignores late release, preserving other items\n  ---\n  duration_ms: 0.3464\n  type: 'test'\n  ...\n# Subtest: coupons: window-exit cancels preview and ignores late release, preserving other items\nok 33 - coupons: window-exit cancels preview and ignores late release, preserving other items\n  ---\n  duration_ms: 0.2682\n  type: 'test'\n  ...\n# Subtest: coupons: all viewport edges cancel on movement and on release\nok 34 - coupons: all viewport edges cancel on movement and on release\n  ---\n  duration_ms: 1.6694\n  type: 'test'\n  ...\n# Subtest: coupons: two full plays and repeated restart restore every object\nok 35 - coupons: two full plays and repeated restart restore every object\n  ---\n  duration_ms: 0.4606\n  type: 'test'\n  ...\n# Subtest: coupons: restart during manipulation invalidates old pointer events\nok 36 - coupons: restart during manipulation invalidates old pointer events\n  ---\n  duration_ms: 0.2901\n  type: 'test'\n  ...\n# Subtest: coupon follows both axes and highlights the mouth only when its edge fits\nok 37 - coupon follows both axes and highlights the mouth only when its edge fits\n  ---\n  duration_ms: 0.3588\n  type: 'test'\n  ...\n# Subtest: target geometry is read again after a layout change, not cached as magic pixels\nok 38 - target geometry is read again after a layout change, not cached as magic pixels\n  ---\n  duration_ms: 0.2601\n  type: 'test'\n  ...\n# Subtest: a fresh grab measures the reset pose, and collection preserves the final visual position\nok 39 - a fresh grab measures the reset pose, and collection preserves the final visual position\n  ---\n  duration_ms: 0.3999\n  type: 'test'\n  ...\n# Subtest: both scene changes cancel owned input and reject hidden scene events\nok 40 - both scene changes cancel owned input and reject hidden scene events\n  ---\n  duration_ms: 0.4375\n  type: 'test'\n  ...\n# Subtest: same-scene selection preserves progress and pointerout ignores other pointers/elements\nok 41 - same-scene selection preserves progress and pointerout ignores other pointers/elements\n  ---\n  duration_ms: 0.3164\n  type: 'test'\n  ...\n# Subtest: keyboard manipulates the same geometry; Space or Enter alone never solves\nok 42 - keyboard manipulates the same geometry; Space or Enter alone never solves\n  ---\n  duration_ms: 0.519\n  type: 'test'\n  ...\n# Subtest: keyboard Escape or focus loss returns the held object without progress\nok 43 - keyboard Escape or focus loss returns the held object without progress\n  ---\n  duration_ms: 0.737\n  type: 'test'\n  ...\n# Subtest: HTML retains local scripts, themes, reusable controls and restart outside finish\nok 44 - HTML retains local scripts, themes, reusable controls and restart outside finish\n  ---\n  duration_ms: 0.7455\n  type: 'test'\n  ...\n# Subtest: original BRIEF bytes are preserved\nok 45 - original BRIEF bytes are preserved\n  ---\n  duration_ms: 0.7266\n  type: 'test'\n  ...\n1..45\n# tests 45\n# suites 0\n# pass 45\n# fail 0\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 152.1873\n"
+      },
+      "syntax": [
+        {
+          "path": "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-growth-q9YLIn\\g3\\src\\app.js",
+          "exit": 0,
+          "output": ""
+        },
+        {
+          "path": "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-growth-q9YLIn\\g3\\src\\puzzle.js",
+          "exit": 0,
+          "output": ""
+        },
+        {
+          "path": "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-growth-q9YLIn\\g3\\src\\scenes.js",
+          "exit": 0,
+          "output": ""
+        },
+        {
+          "path": "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-growth-q9YLIn\\g3\\tests\\puzzle.test.js",
+          "exit": 0,
+          "output": ""
+        }
+      ]
+    },
+    {
+      "id": "g4",
+      "stage4SnapshotMatches": true,
+      "briefs": [
+        {
+          "stage": 1,
+          "unchanged": true
+        },
+        {
+          "stage": 2,
+          "unchanged": true
+        },
+        {
+          "stage": 3,
+          "unchanged": true
+        },
+        {
+          "stage": 4,
+          "unchanged": true
+        }
+      ],
+      "tests": {
+        "command": "node --test --test-reporter=tap",
+        "exit": 0,
+        "output": "TAP version 13\n# Subtest: 입력과 수정은 공백을 다듬고 식별자·생성일을 보존한다\nok 1 - 입력과 수정은 공백을 다듬고 식별자·생성일을 보존한다\n  ---\n  duration_ms: 4.596\n  type: 'test'\n  ...\n# Subtest: 빈 입력, 긴 입력, 알 수 없는 분류를 거부한다\nok 2 - 빈 입력, 긴 입력, 알 수 없는 분류를 거부한다\n  ---\n  duration_ms: 0.5441\n  type: 'test'\n  ...\n# Subtest: 여러 검색어 AND, 대소문자, 한글 정규화, 분류를 함께 적용한다\nok 3 - 여러 검색어 AND, 대소문자, 한글 정규화, 분류를 함께 적용한다\n  ---\n  duration_ms: 11.9821\n  type: 'test'\n  ...\n# Subtest: 검색 목록은 최근 수정 순이며 원본 배열 순서는 유지한다\nok 4 - 검색 목록은 최근 수정 순이며 원본 배열 순서는 유지한다\n  ---\n  duration_ms: 0.3114\n  type: 'test'\n  ...\n# Subtest: 추가·수정·삭제·복원 후 새 저장소 읽기로 보존을 검증한다\nok 5 - 추가·수정·삭제·복원 후 새 저장소 읽기로 보존을 검증한다\n  ---\n  duration_ms: 0.648\n  type: 'test'\n  ...\n# Subtest: 용량 초과와 저장소 접근 오류가 호출자에게 전달되고 기존 데이터는 유지된다\nok 6 - 용량 초과와 저장소 접근 오류가 호출자에게 전달되고 기존 데이터는 유지된다\n  ---\n  duration_ms: 0.612\n  type: 'test'\n  ...\n# Subtest: 다른 창에서 갱신된 데이터는 오래된 화면이 덮어쓰지 않는다\nok 7 - 다른 창에서 갱신된 데이터는 오래된 화면이 덮어쓰지 않는다\n  ---\n  duration_ms: 0.3243\n  type: 'test'\n  ...\n# Subtest: 손상, 미지원 버전, 중복 식별자와 잘못된 날짜를 거부한다\nok 8 - 손상, 미지원 버전, 중복 식별자와 잘못된 날짜를 거부한다\n  ---\n  duration_ms: 0.3992\n  type: 'test'\n  ...\n# Subtest: 분류는 문자열만 허용하고 배열의 암묵적 키 변환을 거부한다\nok 9 - 분류는 문자열만 허용하고 배열의 암묵적 키 변환을 거부한다\n  ---\n  duration_ms: 0.4641\n  type: 'test'\n  ...\n# Subtest: 백업은 왕복 보존하고 같은 메모를 반복 가져와도 늘어나지 않는다\nok 10 - 백업은 왕복 보존하고 같은 메모를 반복 가져와도 늘어나지 않는다\n  ---\n  duration_ms: 0.497\n  type: 'test'\n  ...\n# Subtest: 서로 다른 ID로 의도적으로 만든 동일한 내용의 기록도 모두 보존한다\nok 11 - 서로 다른 ID로 의도적으로 만든 동일한 내용의 기록도 모두 보존한다\n  ---\n  duration_ms: 0.2009\n  type: 'test'\n  ...\n# Subtest: 같은 ID의 다른 내용을 가져오면 사본으로 보존하고 재가져오기는 중복시키지 않는다\nok 12 - 같은 ID의 다른 내용을 가져오면 사본으로 보존하고 재가져오기는 중복시키지 않는다\n  ---\n  duration_ms: 1.0379\n  type: 'test'\n  ...\n# Subtest: 백업에 들어 있는 HTML은 문자열 그대로 왕복하며 실행 코드로 처리하지 않는다\nok 13 - 백업에 들어 있는 HTML은 문자열 그대로 왕복하며 실행 코드로 처리하지 않는다\n  ---\n  duration_ms: 0.1862\n  type: 'test'\n  ...\n# Subtest: 식별 가능한 파일 형식과 이전 파일 형식, UTF-8 BOM을 읽는다\nok 14 - 식별 가능한 파일 형식과 이전 파일 형식, UTF-8 BOM을 읽는다\n  ---\n  duration_ms: 0.4717\n  type: 'test'\n  ...\n# Subtest: 가져오기 계획은 추가·충돌·중복 수를 제공하고 입력 배열을 바꾸지 않는다\nok 15 - 가져오기 계획은 추가·충돌·중복 수를 제공하고 입력 배열을 바꾸지 않는다\n  ---\n  duration_ms: 0.2222\n  type: 'test'\n  ...\n# Subtest: 일반 글은 빈 줄을 건너뛰고 각 줄을 순서대로 별도 메모로 만든다\nok 16 - 일반 글은 빈 줄을 건너뛰고 각 줄을 순서대로 별도 메모로 만든다\n  ---\n  duration_ms: 0.5225\n  type: 'test'\n  ...\n# Subtest: 일반 글의 빈 입력·전체 길이·줄 길이·최대 메모 수를 전체 저장 전에 검증한다\nok 17 - 일반 글의 빈 입력·전체 길이·줄 길이·최대 메모 수를 전체 저장 전에 검증한다\n  ---\n  duration_ms: 91.1016\n  type: 'test'\n  ...\n# Subtest: 입력 → 저장 → 앱 재시작 → 검색 → 수정 → 삭제 → 되돌리기 이벤트 연결\nok 18 - 입력 → 저장 → 앱 재시작 → 검색 → 수정 → 삭제 → 되돌리기 이벤트 연결\n  ---\n  duration_ms: 28.354\n  type: 'test'\n  ...\n# Subtest: 저장 실패는 입력, 목록과 기존 저장 원문을 보존한다\nok 19 - 저장 실패는 입력, 목록과 기존 저장 원문을 보존한다\n  ---\n  duration_ms: 1.605\n  type: 'test'\n  ...\n# Subtest: 손상 원문은 보존하고 저장·가져오기·내보내기를 잠근다\nok 20 - 손상 원문은 보존하고 저장·가져오기·내보내기를 잠근다\n  ---\n  duration_ms: 1.2302\n  type: 'test'\n  ...\n# Subtest: 삭제 취소는 기록과 원문을 바꾸지 않는다\nok 21 - 삭제 취소는 기록과 원문을 바꾸지 않는다\n  ---\n  duration_ms: 1.3429\n  type: 'test'\n  ...\n# Subtest: 새 메모와 수정의 빈 입력을 거부하고 원본을 보존한 채 다시 저장할 수 있다\nok 22 - 새 메모와 수정의 빈 입력을 거부하고 원본을 보존한 채 다시 저장할 수 있다\n  ---\n  duration_ms: 1.4467\n  type: 'test'\n  ...\n# Subtest: 수정 취소는 원본을 보존하고 이후 새 입력은 별도 기록으로 저장한다\nok 23 - 수정 취소는 원본을 보존하고 이후 새 입력은 별도 기록으로 저장한다\n  ---\n  duration_ms: 3.2006\n  type: 'test'\n  ...\n# Subtest: 취소 확인을 거절하면 편집 내용과 대상이 유지되어 같은 기록을 수정한다\nok 24 - 취소 확인을 거절하면 편집 내용과 대상이 유지되어 같은 기록을 수정한다\n  ---\n  duration_ms: 1.6005\n  type: 'test'\n  ...\n# Subtest: 수정 중 앱 재시작은 저장 전 원본을 되살리고 편집 대상을 초기화한다\nok 25 - 수정 중 앱 재시작은 저장 전 원본을 되살리고 편집 대상을 초기화한다\n  ---\n  duration_ms: 2.1233\n  type: 'test'\n  ...\n# Subtest: 내용을 모두 지운 편집도 저장되지 않은 변경으로 떠나기 경고를 요청한다\nok 26 - 내용을 모두 지운 편집도 저장되지 않은 변경으로 떠나기 경고를 요청한다\n  ---\n  duration_ms: 2.5381\n  type: 'test'\n  ...\n# Subtest: 변경 없는 편집에는 떠나기 경고가 없고 본문을 수정하면 경고를 요청한다\nok 27 - 변경 없는 편집에는 떠나기 경고가 없고 본문을 수정하면 경고를 요청한다\n  ---\n  duration_ms: 2.1539\n  type: 'test'\n  ...\n# Subtest: 저장 실패 후 수정 취소와 새 작성이 원본을 덮어쓰지 않는다\nok 28 - 저장 실패 후 수정 취소와 새 작성이 원본을 덮어쓰지 않는다\n  ---\n  duration_ms: 1.6422\n  type: 'test'\n  ...\n# Subtest: 잘못된 필드가 섞인 저장 데이터는 한 건도 덮어쓰지 않고 잠근다\nok 29 - 잘못된 필드가 섞인 저장 데이터는 한 건도 덮어쓰지 않고 잠근다\n  ---\n  duration_ms: 5.7889\n  type: 'test'\n  ...\n# Subtest: 전체 저장 기록을 UTF-8 JSON으로 내보내 별도 저장 공간에 추가하고 재시작한다\nok 30 - 전체 저장 기록을 UTF-8 JSON으로 내보내 별도 저장 공간에 추가하고 재시작한다\n  ---\n  duration_ms: 5.7379\n  type: 'test'\n  ...\n# Subtest: 파일 가져오기 취소·손상·버전 불일치·다른 형식·크기 초과·읽기 실패는 원문을 유지한다\nok 31 - 파일 가져오기 취소·손상·버전 불일치·다른 형식·크기 초과·읽기 실패는 원문을 유지한다\n  ---\n  duration_ms: 1.6727\n  type: 'test'\n  ...\n# Subtest: 충돌 사본과 중복 수를 확인하고 원본 보존 후 반복 가져오기에서 늘어나지 않는다\nok 32 - 충돌 사본과 중복 수를 확인하고 원본 보존 후 반복 가져오기에서 늘어나지 않는다\n  ---\n  duration_ms: 2.0597\n  type: 'test'\n  ...\n# Subtest: 가져오기 저장 실패와 빈 백업은 기존 기록과 초안을 유지한다\nok 33 - 가져오기 저장 실패와 빈 백업은 기존 기록과 초안을 유지한다\n  ---\n  duration_ms: 1.7305\n  type: 'test'\n  ...\n# Subtest: 다른 창의 최신 저장 기록을 내보내고 손상된 저장소에서는 다운로드하지 않는다\nok 34 - 다른 창의 최신 저장 기록을 내보내고 손상된 저장소에서는 다운로드하지 않는다\n  ---\n  duration_ms: 1.9843\n  type: 'test'\n  ...\n# Subtest: 삭제 뒤 같은 ID의 다른 백업을 가져와도 삭제 원본을 사본으로 되돌린다\nok 35 - 삭제 뒤 같은 ID의 다른 백업을 가져와도 삭제 원본을 사본으로 되돌린다\n  ---\n  duration_ms: 1.4974\n  type: 'test'\n  ...\n# Subtest: 분류 선택 없이 여러 줄을 한 번 저장하고 내용으로 찾아 선택한 한 건만 수정한다\nok 36 - 분류 선택 없이 여러 줄을 한 번 저장하고 내용으로 찾아 선택한 한 건만 수정한다\n  ---\n  duration_ms: 2.8881\n  type: 'test'\n  ...\n# Subtest: 기존 여러 줄 메모는 나누지 않고 수정하며 분류·생성일·식별자를 보존한다\nok 37 - 기존 여러 줄 메모는 나누지 않고 수정하며 분류·생성일·식별자를 보존한다\n  ---\n  duration_ms: 1.4054\n  type: 'test'\n  ...\n# Subtest: 긴 붙여넣기도 줄별 한도 안이면 저장하고 실패한 묶음은 통째로 보존한다\nok 38 - 긴 붙여넣기도 줄별 한도 안이면 저장하고 실패한 묶음은 통째로 보존한다\n  ---\n  duration_ms: 1.606\n  type: 'test'\n  ...\n# Subtest: 일반 Enter와 한글 조합은 저장하지 않으며 Ctrl/⌘ Enter는 묶음을 저장한다\nok 39 - 일반 Enter와 한글 조합은 저장하지 않으며 Ctrl/⌘ Enter는 묶음을 저장한다\n  ---\n  duration_ms: 2.3557\n  type: 'test'\n  ...\n# Subtest: UTF-8 일반 글 파일은 전용 형식 없이 가져오고 초안·기존 기록·백업 이동을 보존한다\nok 40 - UTF-8 일반 글 파일은 전용 형식 없이 가져오고 초안·기존 기록·백업 이동을 보존한다\n  ---\n  duration_ms: 3.827\n  type: 'test'\n  ...\n# Subtest: 일반 글 파일 취소·빈 글·긴 줄·크기·읽기·저장 실패는 기존 원문과 초안을 보존한다\nok 41 - 일반 글 파일 취소·빈 글·긴 줄·크기·읽기·저장 실패는 기존 원문과 초안을 보존한다\n  ---\n  duration_ms: 2.4033\n  type: 'test'\n  ...\n# Subtest: 다른 창의 변경이 있으면 붙여넣기 묶음과 글 파일 모두 덮어쓰지 않는다\nok 42 - 다른 창의 변경이 있으면 붙여넣기 묶음과 글 파일 모두 덮어쓰지 않는다\n  ---\n  duration_ms: 1.8068\n  type: 'test'\n  ...\n1..42\n# tests 42\n# suites 0\n# pass 42\n# fail 0\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 232.7924\n"
+      },
+      "syntax": [
+        {
+          "path": "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-growth-q9YLIn\\g4\\app.js",
+          "exit": 0,
+          "output": ""
+        },
+        {
+          "path": "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-growth-q9YLIn\\g4\\model.js",
+          "exit": 0,
+          "output": ""
+        },
+        {
+          "path": "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-growth-q9YLIn\\g4\\test\\model.test.js",
+          "exit": 0,
+          "output": ""
+        },
+        {
+          "path": "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-growth-q9YLIn\\g4\\test\\ui-flow.test.js",
+          "exit": 0,
+          "output": ""
+        }
+      ]
+    }
+  ]
+}

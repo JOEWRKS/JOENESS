@@ -1,0 +1,188 @@
+{
+  "root": "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-growth-q9YLIn",
+  "pkg": "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-growth-q9YLIn\\package",
+  "source": {
+    "skills/joeness-setup/SKILL.md": "0f5db50f1f1ffc21359372cd49c72fcd05cc785869f995a7ac9e175f6696beba",
+    "skills/joeness-setup/agents/openai.yaml": "cc275e468658c7793d6f1305aaae5c6f37a06d831a7f2c3f18313f668427ec5c",
+    "skills/joeness-setup/assets/AGENTS.md": "a79d9f2cce804ea06942bcd507d32b2c7e449be17fcb6471f8b1273392b014eb",
+    "skills/joeness-setup/assets/DESIGN.md": "3b5ec8a163f2da4a770b4206029dd85a538dea0807060314cf51bd145ff66a5d",
+    "skills/joeness-setup/assets/ISSUES.md": "44b5e1f7eea61716bdfa3b364b7eca9ffe60bc9c29f6e31b3a9bf753de6b8635",
+    "skills/joeness-setup/assets/ROADMAP.md": "ac80bf15b82f5cb9b6200a4cf48f22739632352850395afe77d62ed1be3e3660",
+    "skills/joeness-setup/assets/TASK.md": "cbe9d10373067805dcc2659474a7b2b23e28df967bb3ee10500a4c15b6088ee0",
+    "skills/joeness-setup/references/usage.md": "d7d4ea516c714260dcbc0678da8ab72359340a96cd1718b46906334949b8146a",
+    "skills/joeness-setup/scripts/project-setup.ps1": "631334ba13683f97346d2b14d4aebedd671b16c9125e7dd4a26914d658788c8d",
+    "skills/joeness-setup/references/review-gate.md": "0422021f6a247d44a3c2980353dddac76dee613282ecf4315cd4d357ebdf8432",
+    "skills/joeness-setup/scripts/review-gate.mjs": "7ad13a9020a57aa0a6396348f8575229d7cac076a5d5a6c89178d26c3b6d9bd2",
+    "skills/joeness-setup/references/roadmap-review.md": "bfb8910df6814edd4fab15b18b1c88c6dcc1127eb9921488772bdb9ffc15a201",
+    "skills/joeness-setup/scripts/roadmap-review.mjs": "5dfb2d5a81df58d9e1c43651b43cc945356bbf61630b103877f9b8bcd13ba33f",
+    "skills/joeness-setup/references/operation-review.md": "748d1631847ac23045406f6742b43a3a0bddb29ebfb32b3720f8f97c9546959c",
+    "skills/joeness-setup/scripts/operation-review.mjs": "a1a6d80a7d57d4e9c3e66c49a6f877bf07836bac25d330bb466fc2a858679aad",
+    "skills/joeness-setup/scripts/impact-review.mjs": "9cd8359daae4e0f68bcab688ae831e43d81a0b98bcb8ca10ed65a63d0e70cbc8",
+    "skills/joeness-setup/references/impact-review.md": "6d98aa307aaace44461699e66fdbc3d658f67f8b6c756812ad9faa23ed330a82",
+    "vendor/source-manifest.json": "7e00a1b4981ba4a677c7214d287c17cb02e91faa42574a4c87c4bed356b2c36c"
+  },
+  "personal": {
+    "skills/joeness-setup/SKILL.md": "0f5db50f1f1ffc21359372cd49c72fcd05cc785869f995a7ac9e175f6696beba",
+    "skills/joeness-setup/agents/openai.yaml": "cc275e468658c7793d6f1305aaae5c6f37a06d831a7f2c3f18313f668427ec5c",
+    "skills/joeness-setup/assets/AGENTS.md": "a79d9f2cce804ea06942bcd507d32b2c7e449be17fcb6471f8b1273392b014eb",
+    "skills/joeness-setup/assets/DESIGN.md": "3b5ec8a163f2da4a770b4206029dd85a538dea0807060314cf51bd145ff66a5d",
+    "skills/joeness-setup/assets/ISSUES.md": "44b5e1f7eea61716bdfa3b364b7eca9ffe60bc9c29f6e31b3a9bf753de6b8635",
+    "skills/joeness-setup/assets/ROADMAP.md": "ac80bf15b82f5cb9b6200a4cf48f22739632352850395afe77d62ed1be3e3660",
+    "skills/joeness-setup/assets/TASK.md": "cbe9d10373067805dcc2659474a7b2b23e28df967bb3ee10500a4c15b6088ee0",
+    "skills/joeness-setup/references/usage.md": "d7d4ea516c714260dcbc0678da8ab72359340a96cd1718b46906334949b8146a",
+    "skills/joeness-setup/scripts/project-setup.ps1": "631334ba13683f97346d2b14d4aebedd671b16c9125e7dd4a26914d658788c8d",
+    "skills/joeness-setup/references/review-gate.md": "0422021f6a247d44a3c2980353dddac76dee613282ecf4315cd4d357ebdf8432",
+    "skills/joeness-setup/scripts/review-gate.mjs": "7ad13a9020a57aa0a6396348f8575229d7cac076a5d5a6c89178d26c3b6d9bd2",
+    "skills/joeness-setup/references/roadmap-review.md": "bfb8910df6814edd4fab15b18b1c88c6dcc1127eb9921488772bdb9ffc15a201",
+    "skills/joeness-setup/scripts/roadmap-review.mjs": "5dfb2d5a81df58d9e1c43651b43cc945356bbf61630b103877f9b8bcd13ba33f",
+    "skills/joeness-setup/references/operation-review.md": "748d1631847ac23045406f6742b43a3a0bddb29ebfb32b3720f8f97c9546959c",
+    "skills/joeness-setup/scripts/operation-review.mjs": "a1a6d80a7d57d4e9c3e66c49a6f877bf07836bac25d330bb466fc2a858679aad",
+    "skills/joeness-setup/scripts/impact-review.mjs": "9cd8359daae4e0f68bcab688ae831e43d81a0b98bcb8ca10ed65a63d0e70cbc8",
+    "skills/joeness-setup/references/impact-review.md": "6d98aa307aaace44461699e66fdbc3d658f67f8b6c756812ad9faa23ed330a82",
+    "joeness-skills-state.json": "7d6c878addf6e775a5ee9ce12fcd65cc244c528047493f2d00873fffd99921a1"
+  },
+  "userIssuesSha256": "d3c87c8fa0e2e34600ae12ff0b1c9ea1d503ca5a7f6a30db17ca8e8ea9b529c7",
+  "planSha256": "e455b41fbb4872011552c06a91a6f7e3c3fcf4d47403ec4c84725deb81d93409",
+  "runs": [
+    {
+      "id": "g1",
+      "task": "game",
+      "arm": "A",
+      "dir": "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-growth-q9YLIn\\g1",
+      "requests": [
+        "알림이 부풀어 화면을 가리는 광고 퍼즐의 첫 시제품을 만들어줘. 처음 장면에서 만질 대상과 조작 반응이 보이고, 물체를 다루면 광고가 치워지게 해. 구체적인 물체와 방법은 네가 정해. 실제 로컬 코드와 실행 가능한 검사까지 만들고 다음 수정에 필요한 기록을 남겨줘. 재미나 사용자 승인을 받았다고 하진 마.",
+        "지금 시제품을 손보다가 조작 도중 창을 벗어나거나 재시작을 누르는 상황도 안전해야겠다는 생각이 들었어. 중간 취소·재시작·두 번째 플레이를 확인해서 필요한 부분을 고쳐줘. 재발 방지와 다음 담당자에게 필요한 작업 방법은 프로젝트에 짧게 남겨줘. 새 기능은 늘리지 말고 현재 동작을 안정화해.",
+        "같은 제품 안에서 서로 다른 두 번째 광고 장면을 추가해줘. 과장된 쿠폰 안내가 화면을 가리는 상황이면 좋겠어. 첫 장면은 유지하고 두 장면을 골라 실행·재시작할 수 있게 해. 사용할 수 있는 코드는 재사용하되 실제 동작을 우선해. 구현과 필요한 검사를 마친 뒤 다른 담당자가 이어서 손볼 수 있도록 현재 결과와 작업 방법을 정리해줘.",
+        "기존 두 장면을 실제로 더 직관적인 퍼즐로 고쳐줘. 지금 방향은 물체를 만지는 것보다 정해진 절차를 따라가는 느낌이 걱정돼. 추가 설명이나 절차를 늘리는 대신 처음 보이는 단서와 직접적인 반응으로 해법을 찾도록 구현을 바꿔줘. 두 광고의 주제와 재시작은 유지해. 제안서만 남기지 말고 코드와 관련 검사를 수정하고, 바꾼 해법과 선택 이유를 보고해줘."
+      ],
+      "prompts": [
+        "작업 루트: C:/Users/tjdwo/AppData/Local/Temp/joeness-growth-q9YLIn/g1\n허용 범위는 지정한 시험 프로젝트 내부의 코드·검사·문서뿐입니다. 원본 BRIEF.md는 보존하세요. 로컬 Node 검사 실행 가능. 네트워크·의존성 설치·다른 프로젝트/개인 설정 변경·외부 스킬·추가 에이전트·다른 채팅 메시지·커밋/푸시는 하지 마세요. 기존 프로젝트 지침이 있으면 읽고 수행하세요. 실제 렌더나 사용자 관찰을 하지 않았다면 완료로 꾸미지 마세요. 파일 편집은 apply_patch를 사용하세요.\n알림이 부풀어 화면을 가리는 광고 퍼즐의 첫 시제품을 만들어줘. 처음 장면에서 만질 대상과 조작 반응이 보이고, 물체를 다루면 광고가 치워지게 해. 구체적인 물체와 방법은 네가 정해. 실제 로컬 코드와 실행 가능한 검사까지 만들고 다음 수정에 필요한 기록을 남겨줘. 재미나 사용자 승인을 받았다고 하진 마.",
+        "작업 루트: C:/Users/tjdwo/AppData/Local/Temp/joeness-growth-q9YLIn/g1\n허용 범위는 지정한 시험 프로젝트 내부의 코드·검사·문서뿐입니다. 원본 BRIEF.md는 보존하세요. 로컬 Node 검사 실행 가능. 네트워크·의존성 설치·다른 프로젝트/개인 설정 변경·외부 스킬·추가 에이전트·다른 채팅 메시지·커밋/푸시는 하지 마세요. 기존 프로젝트 지침이 있으면 읽고 수행하세요. 실제 렌더나 사용자 관찰을 하지 않았다면 완료로 꾸미지 마세요. 파일 편집은 apply_patch를 사용하세요.\n지금 시제품을 손보다가 조작 도중 창을 벗어나거나 재시작을 누르는 상황도 안전해야겠다는 생각이 들었어. 중간 취소·재시작·두 번째 플레이를 확인해서 필요한 부분을 고쳐줘. 재발 방지와 다음 담당자에게 필요한 작업 방법은 프로젝트에 짧게 남겨줘. 새 기능은 늘리지 말고 현재 동작을 안정화해.",
+        "작업 루트: C:/Users/tjdwo/AppData/Local/Temp/joeness-growth-q9YLIn/g1\n허용 범위는 지정한 시험 프로젝트 내부의 코드·검사·문서뿐입니다. 원본 BRIEF.md는 보존하세요. 로컬 Node 검사 실행 가능. 네트워크·의존성 설치·다른 프로젝트/개인 설정 변경·외부 스킬·추가 에이전트·다른 채팅 메시지·커밋/푸시는 하지 마세요. 기존 프로젝트 지침이 있으면 읽고 수행하세요. 실제 렌더나 사용자 관찰을 하지 않았다면 완료로 꾸미지 마세요. 파일 편집은 apply_patch를 사용하세요.\n같은 제품 안에서 서로 다른 두 번째 광고 장면을 추가해줘. 과장된 쿠폰 안내가 화면을 가리는 상황이면 좋겠어. 첫 장면은 유지하고 두 장면을 골라 실행·재시작할 수 있게 해. 사용할 수 있는 코드는 재사용하되 실제 동작을 우선해. 구현과 필요한 검사를 마친 뒤 다른 담당자가 이어서 손볼 수 있도록 현재 결과와 작업 방법을 정리해줘.",
+        "작업 루트: C:/Users/tjdwo/AppData/Local/Temp/joeness-growth-q9YLIn/g1\n허용 범위는 지정한 시험 프로젝트 내부의 코드·검사·문서뿐입니다. 원본 BRIEF.md는 보존하세요. 로컬 Node 검사 실행 가능. 네트워크·의존성 설치·다른 프로젝트/개인 설정 변경·외부 스킬·추가 에이전트·다른 채팅 메시지·커밋/푸시는 하지 마세요. 기존 프로젝트 지침이 있으면 읽고 수행하세요. 실제 렌더나 사용자 관찰을 하지 않았다면 완료로 꾸미지 마세요. 파일 편집은 apply_patch를 사용하세요.\n기존 두 장면을 실제로 더 직관적인 퍼즐로 고쳐줘. 지금 방향은 물체를 만지는 것보다 정해진 절차를 따라가는 느낌이 걱정돼. 추가 설명이나 절차를 늘리는 대신 처음 보이는 단서와 직접적인 반응으로 해법을 찾도록 구현을 바꿔줘. 두 광고의 주제와 재시작은 유지해. 제안서만 남기지 말고 코드와 관련 검사를 수정하고, 바꾼 해법과 선택 이유를 보고해줘."
+      ],
+      "initial": {
+        "BRIEF.md": {
+          "sha256": "ee15d9dd52fe4a9752ab2bd70ba9bf205d03b5790b67787b668f2753c11959ab",
+          "bytes": 518,
+          "text": "# 알림 풍선 퍼즐\n브라우저에서 로컬로 실행하는 작은 터치 퍼즐. 화면을 가리는 과장된 알림 광고를 물체 조작으로 치우는 짧은 경험. 한 손 포인터, 무음으로도 반응 이해, 종료 후 재시작 가능. 단순 닫기 버튼만 누르는 답은 피한다. 실제 광고·결제·로그인·온라인 전송·개인정보 없음. 기법과 물체 구성은 제작 과정에서 선택. 시간 제한 없음. 외부 자산이나 라이브러리 없이 작게 구현.\n"
+        },
+        "package.json": {
+          "sha256": "6af81c0cbb781fda2b4e60785a2bbf22708575aa83de67186d332ae9897d18f7",
+          "bytes": 117,
+          "text": "{\n  \"name\": \"local-prototype\",\n  \"private\": true,\n  \"type\": \"module\",\n  \"scripts\": {\n    \"test\": \"node --test\"\n  }\n}\n"
+        },
+        "README.md": {
+          "sha256": "fc6c4e1cec3f562b59ae4030df1a4862fc7cd821b721b0738c38cb372b67ecf8",
+          "bytes": 66,
+          "text": "# Local prototype\nProduct scope: BRIEF.md. No implementation yet.\n"
+        }
+      }
+    },
+    {
+      "id": "g2",
+      "task": "notes",
+      "arm": "J",
+      "dir": "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-growth-q9YLIn\\g2",
+      "requests": [
+        "현장에서 떠오르는 내용을 짧게 적고 나중에 찾을 수 있는 메모 도구의 첫 시제품을 만들어줘. 입력·수정·삭제·보존과 찾기 흐름을 네가 설계해서 실제 로컬 코드로 구현해줘. 필요한 실행 검사와 다음 수정에 필요한 기록도 남겨줘. 사용자 검증이나 승인을 받았다고 하진 마.",
+        "입력하다 취소하거나 편집 중 새로고침해도 저장된 기록을 잃지 않아야 해. 빈 입력, 잘못된 저장 데이터, 수정 취소와 다시 쓰기를 확인해서 필요한 부분을 고쳐줘. 재발 방지와 다음 담당자에게 필요한 작업 방법은 프로젝트에 짧게 남겨줘. 현재 기능 안정화까지만 해줘.",
+        "다른 브라우저로 기록을 옮길 수 있도록 파일로 내보내고 다시 가져오는 기능을 추가해줘. 형식은 네가 정하고, 기존 메모가 조용히 사라지지 않도록 해. 필요한 실행 검사 후 다른 담당자가 이어서 손볼 수 있도록 현재 결과와 작업 방법을 정리해줘.",
+        "현장에서는 입력할 때 분류나 절차를 생각하기 싫어. 여러 줄의 일반 글을 한 번에 붙여넣어 바로 기록하고, 나중에 내용으로 찾고 필요한 것만 수정하는 흐름으로 실제 구현을 고쳐줘. 전용 백업 파일이 아닌 일반 글 입력도 받아야 해. 기존 메모와 파일 이동 기능은 보존해. 제안서만 남기지 말고 코드와 관련 검사를 수정하고, 바꾼 흐름과 선택 이유를 보고해줘."
+      ],
+      "prompts": [
+        "작업 루트: C:/Users/tjdwo/AppData/Local/Temp/joeness-growth-q9YLIn/g2\n허용 범위는 지정한 시험 프로젝트 내부의 코드·검사·문서뿐입니다. 원본 BRIEF.md는 보존하세요. 로컬 Node 검사 실행 가능. 네트워크·의존성 설치·다른 프로젝트/개인 설정 변경·외부 스킬·추가 에이전트·다른 채팅 메시지·커밋/푸시는 하지 마세요. 기존 프로젝트 지침이 있으면 읽고 수행하세요. 실제 렌더나 사용자 관찰을 하지 않았다면 완료로 꾸미지 마세요. 파일 편집은 apply_patch를 사용하세요.\n초기 프로젝트 연결에만 다음 격리된 JOENESS 스킬을 사용하세요: C:/Users/tjdwo/AppData/Local/Temp/joeness-growth-q9YLIn/package/SKILL.md. 원본 패키지는 읽기/실행만 허용됩니다. 이 폴더 밖 설치본은 사용하거나 수정하지 마세요. 다음 연결안을 승인합니다: 기존 BRIEF.md를 제품 기준으로 유지, README의 최초 미구현 표시는 사실에 맞게 갱신, AGENTS.md에 작업 안내와 원본 위치, ROADMAP.md에 BRIEF 범위와 실제 요청의 단계/검증/현재 다음 작업, TASK.md에 수행·검사 결과, ISSUES.md에 실제 미결 문제, DESIGN.md에 아직 승인된 시각 기준 없음. 이 코드/검사 작업의 사실 기록을 허용합니다. 외부 필수 검사 없음. 코드 구현은 아래 요청 범위. 이 명시된 매핑 안에서는 적용까지 진행해도 됩니다. 새 제품 목표나 사용자 수락은 만들지 마세요. 이후 일반 작업에서 설정을 반복 실행하지 마세요.\n\n현장에서 떠오르는 내용을 짧게 적고 나중에 찾을 수 있는 메모 도구의 첫 시제품을 만들어줘. 입력·수정·삭제·보존과 찾기 흐름을 네가 설계해서 실제 로컬 코드로 구현해줘. 필요한 실행 검사와 다음 수정에 필요한 기록도 남겨줘. 사용자 검증이나 승인을 받았다고 하진 마.",
+        "작업 루트: C:/Users/tjdwo/AppData/Local/Temp/joeness-growth-q9YLIn/g2\n허용 범위는 지정한 시험 프로젝트 내부의 코드·검사·문서뿐입니다. 원본 BRIEF.md는 보존하세요. 로컬 Node 검사 실행 가능. 네트워크·의존성 설치·다른 프로젝트/개인 설정 변경·외부 스킬·추가 에이전트·다른 채팅 메시지·커밋/푸시는 하지 마세요. 기존 프로젝트 지침이 있으면 읽고 수행하세요. 실제 렌더나 사용자 관찰을 하지 않았다면 완료로 꾸미지 마세요. 파일 편집은 apply_patch를 사용하세요.\n입력하다 취소하거나 편집 중 새로고침해도 저장된 기록을 잃지 않아야 해. 빈 입력, 잘못된 저장 데이터, 수정 취소와 다시 쓰기를 확인해서 필요한 부분을 고쳐줘. 재발 방지와 다음 담당자에게 필요한 작업 방법은 프로젝트에 짧게 남겨줘. 현재 기능 안정화까지만 해줘.",
+        "작업 루트: C:/Users/tjdwo/AppData/Local/Temp/joeness-growth-q9YLIn/g2\n허용 범위는 지정한 시험 프로젝트 내부의 코드·검사·문서뿐입니다. 원본 BRIEF.md는 보존하세요. 로컬 Node 검사 실행 가능. 네트워크·의존성 설치·다른 프로젝트/개인 설정 변경·외부 스킬·추가 에이전트·다른 채팅 메시지·커밋/푸시는 하지 마세요. 기존 프로젝트 지침이 있으면 읽고 수행하세요. 실제 렌더나 사용자 관찰을 하지 않았다면 완료로 꾸미지 마세요. 파일 편집은 apply_patch를 사용하세요.\n다른 브라우저로 기록을 옮길 수 있도록 파일로 내보내고 다시 가져오는 기능을 추가해줘. 형식은 네가 정하고, 기존 메모가 조용히 사라지지 않도록 해. 필요한 실행 검사 후 다른 담당자가 이어서 손볼 수 있도록 현재 결과와 작업 방법을 정리해줘.",
+        "작업 루트: C:/Users/tjdwo/AppData/Local/Temp/joeness-growth-q9YLIn/g2\n허용 범위는 지정한 시험 프로젝트 내부의 코드·검사·문서뿐입니다. 원본 BRIEF.md는 보존하세요. 로컬 Node 검사 실행 가능. 네트워크·의존성 설치·다른 프로젝트/개인 설정 변경·외부 스킬·추가 에이전트·다른 채팅 메시지·커밋/푸시는 하지 마세요. 기존 프로젝트 지침이 있으면 읽고 수행하세요. 실제 렌더나 사용자 관찰을 하지 않았다면 완료로 꾸미지 마세요. 파일 편집은 apply_patch를 사용하세요.\n현장에서는 입력할 때 분류나 절차를 생각하기 싫어. 여러 줄의 일반 글을 한 번에 붙여넣어 바로 기록하고, 나중에 내용으로 찾고 필요한 것만 수정하는 흐름으로 실제 구현을 고쳐줘. 전용 백업 파일이 아닌 일반 글 입력도 받아야 해. 기존 메모와 파일 이동 기능은 보존해. 제안서만 남기지 말고 코드와 관련 검사를 수정하고, 바꾼 흐름과 선택 이유를 보고해줘."
+      ],
+      "initial": {
+        "BRIEF.md": {
+          "sha256": "2895c46af1ec9be75ead3dd477df35c7edc9dc9da9c4be887137bde668d084b9",
+          "bytes": 409,
+          "text": "# 현장 메모 도구\n브라우저에서 혼자 쓰는 작은 오프라인 메모 도구. 짧은 기록을 추가·수정·삭제하고 나중에 다시 찾는다. 새로고침해도 기록 보존. 기록의 분류와 화면 흐름은 제작 과정에서 선택. 로그인·서버·네트워크 전송·분석 추적 없음. 가상 메모만 사용. 외부 자산이나 라이브러리 없이 작게 구현.\n"
+        },
+        "package.json": {
+          "sha256": "6af81c0cbb781fda2b4e60785a2bbf22708575aa83de67186d332ae9897d18f7",
+          "bytes": 117,
+          "text": "{\n  \"name\": \"local-prototype\",\n  \"private\": true,\n  \"type\": \"module\",\n  \"scripts\": {\n    \"test\": \"node --test\"\n  }\n}\n"
+        },
+        "README.md": {
+          "sha256": "fc6c4e1cec3f562b59ae4030df1a4862fc7cd821b721b0738c38cb372b67ecf8",
+          "bytes": 66,
+          "text": "# Local prototype\nProduct scope: BRIEF.md. No implementation yet.\n"
+        }
+      }
+    },
+    {
+      "id": "g3",
+      "task": "game",
+      "arm": "J",
+      "dir": "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-growth-q9YLIn\\g3",
+      "requests": [
+        "알림이 부풀어 화면을 가리는 광고 퍼즐의 첫 시제품을 만들어줘. 처음 장면에서 만질 대상과 조작 반응이 보이고, 물체를 다루면 광고가 치워지게 해. 구체적인 물체와 방법은 네가 정해. 실제 로컬 코드와 실행 가능한 검사까지 만들고 다음 수정에 필요한 기록을 남겨줘. 재미나 사용자 승인을 받았다고 하진 마.",
+        "지금 시제품을 손보다가 조작 도중 창을 벗어나거나 재시작을 누르는 상황도 안전해야겠다는 생각이 들었어. 중간 취소·재시작·두 번째 플레이를 확인해서 필요한 부분을 고쳐줘. 재발 방지와 다음 담당자에게 필요한 작업 방법은 프로젝트에 짧게 남겨줘. 새 기능은 늘리지 말고 현재 동작을 안정화해.",
+        "같은 제품 안에서 서로 다른 두 번째 광고 장면을 추가해줘. 과장된 쿠폰 안내가 화면을 가리는 상황이면 좋겠어. 첫 장면은 유지하고 두 장면을 골라 실행·재시작할 수 있게 해. 사용할 수 있는 코드는 재사용하되 실제 동작을 우선해. 구현과 필요한 검사를 마친 뒤 다른 담당자가 이어서 손볼 수 있도록 현재 결과와 작업 방법을 정리해줘.",
+        "기존 두 장면을 실제로 더 직관적인 퍼즐로 고쳐줘. 지금 방향은 물체를 만지는 것보다 정해진 절차를 따라가는 느낌이 걱정돼. 추가 설명이나 절차를 늘리는 대신 처음 보이는 단서와 직접적인 반응으로 해법을 찾도록 구현을 바꿔줘. 두 광고의 주제와 재시작은 유지해. 제안서만 남기지 말고 코드와 관련 검사를 수정하고, 바꾼 해법과 선택 이유를 보고해줘."
+      ],
+      "prompts": [
+        "작업 루트: C:/Users/tjdwo/AppData/Local/Temp/joeness-growth-q9YLIn/g3\n허용 범위는 지정한 시험 프로젝트 내부의 코드·검사·문서뿐입니다. 원본 BRIEF.md는 보존하세요. 로컬 Node 검사 실행 가능. 네트워크·의존성 설치·다른 프로젝트/개인 설정 변경·외부 스킬·추가 에이전트·다른 채팅 메시지·커밋/푸시는 하지 마세요. 기존 프로젝트 지침이 있으면 읽고 수행하세요. 실제 렌더나 사용자 관찰을 하지 않았다면 완료로 꾸미지 마세요. 파일 편집은 apply_patch를 사용하세요.\n초기 프로젝트 연결에만 다음 격리된 JOENESS 스킬을 사용하세요: C:/Users/tjdwo/AppData/Local/Temp/joeness-growth-q9YLIn/package/SKILL.md. 원본 패키지는 읽기/실행만 허용됩니다. 이 폴더 밖 설치본은 사용하거나 수정하지 마세요. 다음 연결안을 승인합니다: 기존 BRIEF.md를 제품 기준으로 유지, README의 최초 미구현 표시는 사실에 맞게 갱신, AGENTS.md에 작업 안내와 원본 위치, ROADMAP.md에 BRIEF 범위와 실제 요청의 단계/검증/현재 다음 작업, TASK.md에 수행·검사 결과, ISSUES.md에 실제 미결 문제, DESIGN.md에 아직 승인된 시각 기준 없음. 이 코드/검사 작업의 사실 기록을 허용합니다. 외부 필수 검사 없음. 코드 구현은 아래 요청 범위. 이 명시된 매핑 안에서는 적용까지 진행해도 됩니다. 새 제품 목표나 사용자 수락은 만들지 마세요. 이후 일반 작업에서 설정을 반복 실행하지 마세요.\n\n알림이 부풀어 화면을 가리는 광고 퍼즐의 첫 시제품을 만들어줘. 처음 장면에서 만질 대상과 조작 반응이 보이고, 물체를 다루면 광고가 치워지게 해. 구체적인 물체와 방법은 네가 정해. 실제 로컬 코드와 실행 가능한 검사까지 만들고 다음 수정에 필요한 기록을 남겨줘. 재미나 사용자 승인을 받았다고 하진 마.",
+        "작업 루트: C:/Users/tjdwo/AppData/Local/Temp/joeness-growth-q9YLIn/g3\n허용 범위는 지정한 시험 프로젝트 내부의 코드·검사·문서뿐입니다. 원본 BRIEF.md는 보존하세요. 로컬 Node 검사 실행 가능. 네트워크·의존성 설치·다른 프로젝트/개인 설정 변경·외부 스킬·추가 에이전트·다른 채팅 메시지·커밋/푸시는 하지 마세요. 기존 프로젝트 지침이 있으면 읽고 수행하세요. 실제 렌더나 사용자 관찰을 하지 않았다면 완료로 꾸미지 마세요. 파일 편집은 apply_patch를 사용하세요.\n지금 시제품을 손보다가 조작 도중 창을 벗어나거나 재시작을 누르는 상황도 안전해야겠다는 생각이 들었어. 중간 취소·재시작·두 번째 플레이를 확인해서 필요한 부분을 고쳐줘. 재발 방지와 다음 담당자에게 필요한 작업 방법은 프로젝트에 짧게 남겨줘. 새 기능은 늘리지 말고 현재 동작을 안정화해.",
+        "작업 루트: C:/Users/tjdwo/AppData/Local/Temp/joeness-growth-q9YLIn/g3\n허용 범위는 지정한 시험 프로젝트 내부의 코드·검사·문서뿐입니다. 원본 BRIEF.md는 보존하세요. 로컬 Node 검사 실행 가능. 네트워크·의존성 설치·다른 프로젝트/개인 설정 변경·외부 스킬·추가 에이전트·다른 채팅 메시지·커밋/푸시는 하지 마세요. 기존 프로젝트 지침이 있으면 읽고 수행하세요. 실제 렌더나 사용자 관찰을 하지 않았다면 완료로 꾸미지 마세요. 파일 편집은 apply_patch를 사용하세요.\n같은 제품 안에서 서로 다른 두 번째 광고 장면을 추가해줘. 과장된 쿠폰 안내가 화면을 가리는 상황이면 좋겠어. 첫 장면은 유지하고 두 장면을 골라 실행·재시작할 수 있게 해. 사용할 수 있는 코드는 재사용하되 실제 동작을 우선해. 구현과 필요한 검사를 마친 뒤 다른 담당자가 이어서 손볼 수 있도록 현재 결과와 작업 방법을 정리해줘.",
+        "작업 루트: C:/Users/tjdwo/AppData/Local/Temp/joeness-growth-q9YLIn/g3\n허용 범위는 지정한 시험 프로젝트 내부의 코드·검사·문서뿐입니다. 원본 BRIEF.md는 보존하세요. 로컬 Node 검사 실행 가능. 네트워크·의존성 설치·다른 프로젝트/개인 설정 변경·외부 스킬·추가 에이전트·다른 채팅 메시지·커밋/푸시는 하지 마세요. 기존 프로젝트 지침이 있으면 읽고 수행하세요. 실제 렌더나 사용자 관찰을 하지 않았다면 완료로 꾸미지 마세요. 파일 편집은 apply_patch를 사용하세요.\n기존 두 장면을 실제로 더 직관적인 퍼즐로 고쳐줘. 지금 방향은 물체를 만지는 것보다 정해진 절차를 따라가는 느낌이 걱정돼. 추가 설명이나 절차를 늘리는 대신 처음 보이는 단서와 직접적인 반응으로 해법을 찾도록 구현을 바꿔줘. 두 광고의 주제와 재시작은 유지해. 제안서만 남기지 말고 코드와 관련 검사를 수정하고, 바꾼 해법과 선택 이유를 보고해줘."
+      ],
+      "initial": {
+        "BRIEF.md": {
+          "sha256": "ee15d9dd52fe4a9752ab2bd70ba9bf205d03b5790b67787b668f2753c11959ab",
+          "bytes": 518,
+          "text": "# 알림 풍선 퍼즐\n브라우저에서 로컬로 실행하는 작은 터치 퍼즐. 화면을 가리는 과장된 알림 광고를 물체 조작으로 치우는 짧은 경험. 한 손 포인터, 무음으로도 반응 이해, 종료 후 재시작 가능. 단순 닫기 버튼만 누르는 답은 피한다. 실제 광고·결제·로그인·온라인 전송·개인정보 없음. 기법과 물체 구성은 제작 과정에서 선택. 시간 제한 없음. 외부 자산이나 라이브러리 없이 작게 구현.\n"
+        },
+        "package.json": {
+          "sha256": "6af81c0cbb781fda2b4e60785a2bbf22708575aa83de67186d332ae9897d18f7",
+          "bytes": 117,
+          "text": "{\n  \"name\": \"local-prototype\",\n  \"private\": true,\n  \"type\": \"module\",\n  \"scripts\": {\n    \"test\": \"node --test\"\n  }\n}\n"
+        },
+        "README.md": {
+          "sha256": "fc6c4e1cec3f562b59ae4030df1a4862fc7cd821b721b0738c38cb372b67ecf8",
+          "bytes": 66,
+          "text": "# Local prototype\nProduct scope: BRIEF.md. No implementation yet.\n"
+        }
+      }
+    },
+    {
+      "id": "g4",
+      "task": "notes",
+      "arm": "A",
+      "dir": "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-growth-q9YLIn\\g4",
+      "requests": [
+        "현장에서 떠오르는 내용을 짧게 적고 나중에 찾을 수 있는 메모 도구의 첫 시제품을 만들어줘. 입력·수정·삭제·보존과 찾기 흐름을 네가 설계해서 실제 로컬 코드로 구현해줘. 필요한 실행 검사와 다음 수정에 필요한 기록도 남겨줘. 사용자 검증이나 승인을 받았다고 하진 마.",
+        "입력하다 취소하거나 편집 중 새로고침해도 저장된 기록을 잃지 않아야 해. 빈 입력, 잘못된 저장 데이터, 수정 취소와 다시 쓰기를 확인해서 필요한 부분을 고쳐줘. 재발 방지와 다음 담당자에게 필요한 작업 방법은 프로젝트에 짧게 남겨줘. 현재 기능 안정화까지만 해줘.",
+        "다른 브라우저로 기록을 옮길 수 있도록 파일로 내보내고 다시 가져오는 기능을 추가해줘. 형식은 네가 정하고, 기존 메모가 조용히 사라지지 않도록 해. 필요한 실행 검사 후 다른 담당자가 이어서 손볼 수 있도록 현재 결과와 작업 방법을 정리해줘.",
+        "현장에서는 입력할 때 분류나 절차를 생각하기 싫어. 여러 줄의 일반 글을 한 번에 붙여넣어 바로 기록하고, 나중에 내용으로 찾고 필요한 것만 수정하는 흐름으로 실제 구현을 고쳐줘. 전용 백업 파일이 아닌 일반 글 입력도 받아야 해. 기존 메모와 파일 이동 기능은 보존해. 제안서만 남기지 말고 코드와 관련 검사를 수정하고, 바꾼 흐름과 선택 이유를 보고해줘."
+      ],
+      "prompts": [
+        "작업 루트: C:/Users/tjdwo/AppData/Local/Temp/joeness-growth-q9YLIn/g4\n허용 범위는 지정한 시험 프로젝트 내부의 코드·검사·문서뿐입니다. 원본 BRIEF.md는 보존하세요. 로컬 Node 검사 실행 가능. 네트워크·의존성 설치·다른 프로젝트/개인 설정 변경·외부 스킬·추가 에이전트·다른 채팅 메시지·커밋/푸시는 하지 마세요. 기존 프로젝트 지침이 있으면 읽고 수행하세요. 실제 렌더나 사용자 관찰을 하지 않았다면 완료로 꾸미지 마세요. 파일 편집은 apply_patch를 사용하세요.\n현장에서 떠오르는 내용을 짧게 적고 나중에 찾을 수 있는 메모 도구의 첫 시제품을 만들어줘. 입력·수정·삭제·보존과 찾기 흐름을 네가 설계해서 실제 로컬 코드로 구현해줘. 필요한 실행 검사와 다음 수정에 필요한 기록도 남겨줘. 사용자 검증이나 승인을 받았다고 하진 마.",
+        "작업 루트: C:/Users/tjdwo/AppData/Local/Temp/joeness-growth-q9YLIn/g4\n허용 범위는 지정한 시험 프로젝트 내부의 코드·검사·문서뿐입니다. 원본 BRIEF.md는 보존하세요. 로컬 Node 검사 실행 가능. 네트워크·의존성 설치·다른 프로젝트/개인 설정 변경·외부 스킬·추가 에이전트·다른 채팅 메시지·커밋/푸시는 하지 마세요. 기존 프로젝트 지침이 있으면 읽고 수행하세요. 실제 렌더나 사용자 관찰을 하지 않았다면 완료로 꾸미지 마세요. 파일 편집은 apply_patch를 사용하세요.\n입력하다 취소하거나 편집 중 새로고침해도 저장된 기록을 잃지 않아야 해. 빈 입력, 잘못된 저장 데이터, 수정 취소와 다시 쓰기를 확인해서 필요한 부분을 고쳐줘. 재발 방지와 다음 담당자에게 필요한 작업 방법은 프로젝트에 짧게 남겨줘. 현재 기능 안정화까지만 해줘.",
+        "작업 루트: C:/Users/tjdwo/AppData/Local/Temp/joeness-growth-q9YLIn/g4\n허용 범위는 지정한 시험 프로젝트 내부의 코드·검사·문서뿐입니다. 원본 BRIEF.md는 보존하세요. 로컬 Node 검사 실행 가능. 네트워크·의존성 설치·다른 프로젝트/개인 설정 변경·외부 스킬·추가 에이전트·다른 채팅 메시지·커밋/푸시는 하지 마세요. 기존 프로젝트 지침이 있으면 읽고 수행하세요. 실제 렌더나 사용자 관찰을 하지 않았다면 완료로 꾸미지 마세요. 파일 편집은 apply_patch를 사용하세요.\n다른 브라우저로 기록을 옮길 수 있도록 파일로 내보내고 다시 가져오는 기능을 추가해줘. 형식은 네가 정하고, 기존 메모가 조용히 사라지지 않도록 해. 필요한 실행 검사 후 다른 담당자가 이어서 손볼 수 있도록 현재 결과와 작업 방법을 정리해줘.",
+        "작업 루트: C:/Users/tjdwo/AppData/Local/Temp/joeness-growth-q9YLIn/g4\n허용 범위는 지정한 시험 프로젝트 내부의 코드·검사·문서뿐입니다. 원본 BRIEF.md는 보존하세요. 로컬 Node 검사 실행 가능. 네트워크·의존성 설치·다른 프로젝트/개인 설정 변경·외부 스킬·추가 에이전트·다른 채팅 메시지·커밋/푸시는 하지 마세요. 기존 프로젝트 지침이 있으면 읽고 수행하세요. 실제 렌더나 사용자 관찰을 하지 않았다면 완료로 꾸미지 마세요. 파일 편집은 apply_patch를 사용하세요.\n현장에서는 입력할 때 분류나 절차를 생각하기 싫어. 여러 줄의 일반 글을 한 번에 붙여넣어 바로 기록하고, 나중에 내용으로 찾고 필요한 것만 수정하는 흐름으로 실제 구현을 고쳐줘. 전용 백업 파일이 아닌 일반 글 입력도 받아야 해. 기존 메모와 파일 이동 기능은 보존해. 제안서만 남기지 말고 코드와 관련 검사를 수정하고, 바꾼 흐름과 선택 이유를 보고해줘."
+      ],
+      "initial": {
+        "BRIEF.md": {
+          "sha256": "2895c46af1ec9be75ead3dd477df35c7edc9dc9da9c4be887137bde668d084b9",
+          "bytes": 409,
+          "text": "# 현장 메모 도구\n브라우저에서 혼자 쓰는 작은 오프라인 메모 도구. 짧은 기록을 추가·수정·삭제하고 나중에 다시 찾는다. 새로고침해도 기록 보존. 기록의 분류와 화면 흐름은 제작 과정에서 선택. 로그인·서버·네트워크 전송·분석 추적 없음. 가상 메모만 사용. 외부 자산이나 라이브러리 없이 작게 구현.\n"
+        },
+        "package.json": {
+          "sha256": "6af81c0cbb781fda2b4e60785a2bbf22708575aa83de67186d332ae9897d18f7",
+          "bytes": 117,
+          "text": "{\n  \"name\": \"local-prototype\",\n  \"private\": true,\n  \"type\": \"module\",\n  \"scripts\": {\n    \"test\": \"node --test\"\n  }\n}\n"
+        },
+        "README.md": {
+          "sha256": "fc6c4e1cec3f562b59ae4030df1a4862fc7cd821b721b0738c38cb372b67ecf8",
+          "bytes": 66,
+          "text": "# Local prototype\nProduct scope: BRIEF.md. No implementation yet.\n"
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "entries": [
+    {
+      "mode": "node-inherited",
+      "command": "powershell.exe",
+      "args": [
+        "-NoProfile",
+        "-Command",
+        "Get-Command Get-FileHash -ErrorAction Continue | Select-Object Name,Source; $env:PSModulePath; Get-Module -ListAvailable Microsoft.PowerShell.Utility | Select-Object Name,Version,Path"
+      ],
+      "exit": 0,
+      "output": "C:\\Users\\tjdwo\\Documents\\PowerShell\\Modules;C:\\Program Files\\PowerShell\\Modules;c:\\users\\tjdwo\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\powershell\\Modules;C:\\Users\\tjdwo\\Documents\\WindowsPowerShell\\Modules;C:\\Program Files\\WindowsPowerShell\\Modules;C:\\Windows\\system32\\WindowsPowerShell\\v1.0\\Modules\r\n\r\nName                         Version Path                                                                              \r\n----                         ------- ----                                                                              \r\nMicrosoft.PowerShell.Utility 7.0.0.0 C:\\users\\tjdwo\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\...\r\nMicrosoft.PowerShell.Utility 3.1.0.0 C:\\Windows\\system32\\WindowsPowerShell\\v1.0\\Modules\\Microsoft.PowerShell.Utility...\r\n\r\n\r\nGet-Command : The term 'Get-FileHash' is not recognized as the name of a cmdlet, function, script file, or operable pro\r\ngram. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.\r\nAt line:1 char:1\r\n+ Get-Command Get-FileHash -ErrorAction Continue | Select-Object Name,S ...\r\n+ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\r\n    + CategoryInfo          : ObjectNotFound: (Get-FileHash:String) [Get-Command], CommandNotFoundException\r\n    + FullyQualifiedErrorId : CommandNotFoundException,Microsoft.PowerShell.Commands.GetCommandCommand\r\n \r\n"
+    },
+    {
+      "mode": "powershell-dispatch",
+      "command": "pwsh",
+      "args": [
+        "-NoProfile",
+        "-Command",
+        "& powershell.exe -NoProfile -Command 'Get-Command Get-FileHash -ErrorAction Continue | Select-Object Name,Source; $env:PSModulePath; Get-Module -ListAvailable Microsoft.PowerShell.Utility | Select-Object Name,Version,Path'"
+      ],
+      "exit": 0,
+      "output": "\r\nName                         Source                      \r\n----                         ------                      \r\nGet-FileHash                 Microsoft.PowerShell.Utility\r\nC:\\Users\\tjdwo\\Documents\\WindowsPowerShell\\Modules;C:\\Program Files\\WindowsPowerShell\\Modules;C:\\Windows\\system32\\WindowsPowerShell\\v1.0\\Modules\r\nMicrosoft.PowerShell.Utility                             \r\n\r\n\r\n"
+    }
+  ]
+}
