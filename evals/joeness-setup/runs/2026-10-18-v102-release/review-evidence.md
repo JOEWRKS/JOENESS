@@ -1,6 +1,6 @@
 # JOENESS 1.0.2 — source, personal installation and publication
 
-Status: final-version local checks passed; awaiting source push/QA check before personal installation.
+Status: source committed/pushed, exact hosted Windows CI passed, personal1.0.2 installed and verified. QA final main/tag/Release remains pending.
 User authorized commit/push, personal update and new-version coordination with QA
 on 2026-10-18. QA confirmed version1.0.2 and the sequence below after checking the
 actual user message `01a14db2-1a1c-79c3-a5d2-cd08bd86c04c`.
@@ -28,8 +28,8 @@ publication here. Preserve existing JOENESS-v1.0.0 and JOENESS-v1.0.1 tags/Relea
 ## Sequence / current status
 
 1. Final-version local Windows workflow: all7 commands passed. [Exact outputs](local-gates.json): Node99/99, release contract, PS5/7 project safety27/27 each and both installation lifecycle suites. PSModulePath isolated for child shells; previous failed environment evidence retained in method-boundary.
-2. Source commit and working-branch push; QA exact source/CI check: pending.
-3. Verified backup, matching1.0.1 Remove →1.0.2 Apply/Check and installed proof: pending.
+2. Source commit `98342841161234f1ad5e267f6c633aff0e00a971` pushed to `codex/qa-recording-boundaries`; git ls-remote exact match. QA independently confirmed source17 hashes, the bounded behavioral probes and local7-command outputs. Hosted exact-commit [Windows run39104618549](https://github.com/JOEWRKS/JOENESS/actions/runs/39104618549) completed/success, directly rechecked by QA before personal transition.
+3. Verified backup, matching1.0.1 Remove →1.0.2 Apply/Check and installed proof: PASS. [Exact transition record](personal-install.json). Old Check current → Remove removed → new Check ready → Apply current → Check current, all exit0. Installed17-file hashes match manifest/state. Representative installed checks3/3 passed.
 4. QA final SHA/CI/install verification → main/tag/Release: pending.
 
 Personal transition uses the exact installed1.0.1 source `90db1b08ddaeccea7468c28bdc41f234ab7ccaaa`
@@ -37,6 +37,13 @@ and manifest `7e00a1b4981ba4a677c7214d287c17cb02e91faa42574a4c87c4bed356b2c36c`.
 `install-and-check.mjs` fails closed on drift/unknown ownership, backs up only
 17 managed files+state, preserves global AGENTS/config, and verifies the expected
 two-file delta (template+state). Partial transitions are not retried blindly.
+
+Verified personal backup: `C:/Users/tjdwo/.codex-install-backups/joeness-v102-20261018-73281c229fde`.
+The old17 managed files and ownership state are recoverable there; no credentials
+or whole-home backup. Only template/state changed. Other16 payload files and global
+AGENTS.md/config.toml unchanged. Other projects and skills were not targeted.
+The updated setup skill is available on the next request; existing project
+connections are not automatically rewritten and already-running turns need not reload it.
 
 Protected preflight tag identities (git ls-remote origin):
 - 1.0.0 object `e8d5170664ac2a68f30a6d44e14b961ee1e07a2e`, peeled `7a8f4e6b296f9aaa5a1ee198b0b69e3a206b630f`.
