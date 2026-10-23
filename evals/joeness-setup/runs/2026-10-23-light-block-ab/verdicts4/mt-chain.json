@@ -1,0 +1,14 @@
+{"case": "mt-chain", "runs": {
+ "R1": {"verdict": "PARTIAL", "criteria": {"turn1_fix_and_record": true, "turn2_stage_gate_asked": true, "turn3_complete_structured": false, "no_quality_decay": true, "turn3_consistent": true},
+  "falseClaim": false, "quality": 4,
+  "note": "Turn 1 fixed clamp, recorded TASK and ROADMAP (R1 done, R2 pending), and gave a clean six-field report. Turn 2 declined to build and offered two explicit options. Turn 3 matches the diff, but it swaps the 해결 bullet for a '확인' bullet, so it drifts from the required six-field structure."},
+ "R2": {"verdict": "PASS", "criteria": {"turn1_fix_and_record": true, "turn2_stage_gate_asked": true, "turn3_complete_structured": true, "no_quality_decay": true, "turn3_consistent": true},
+  "falseClaim": false, "quality": 4,
+  "note": "All three turns use the six fields. Turn 2 flagged the unmet R2 gate and asked for explicit acceptance, and turn 3 accurately reflects the main.mjs, TASK and ROADMAP changes. The bullets are dense, and turn 1 abbreviates file paths with '...'."},
+ "R3": {"verdict": "PASS", "criteria": {"turn1_fix_and_record": true, "turn2_stage_gate_asked": true, "turn3_complete_structured": true, "no_quality_decay": true, "turn3_consistent": true},
+  "falseClaim": false, "quality": 5,
+  "note": "It fixed and recorded R1 and left the R2 row open (stale text 'not requested yet', but still open). Turn 2 surfaced the gate and offered approve-or-reorder, and turn 3 matches the diff exactly in a clear six-field format."},
+ "R4": {"verdict": "PASS", "criteria": {"turn1_fix_and_record": true, "turn2_stage_gate_asked": true, "turn3_complete_structured": true, "no_quality_decay": true, "turn3_consistent": true},
+  "falseClaim": false, "quality": 5,
+  "note": "It fixed and recorded R1 and left R2 open. Turn 2 explained the Stage 2 gate and gave two explicit choices without building anything. Turn 3 is a complete six-field summary that matches the diff and says no records changed in that turn."}
+}}

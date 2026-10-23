@@ -1,0 +1,66 @@
+[
+ [
+  "gate-stale",
+  "C",
+  "tcd5aed",
+  "gate-run",
+  "verification pending",
+  "OK"
+ ],
+ [
+  "gate-stale",
+  "C",
+  "t0e3d5c",
+  "gate-run",
+  "verification pending",
+  "OK"
+ ],
+ [
+  "gate-stale",
+  "G",
+  "tf65ecc",
+  "gate-run",
+  "open (check failed 2026-10-23)",
+  "OK"
+ ],
+ [
+  "gate-stale",
+  "G",
+  "t1a3744",
+  "gate-run",
+  "open — check failing",
+  "OK"
+ ],
+ [
+  "gate-fresh",
+  "C",
+  "tc27800",
+  "gate-run",
+  "complete",
+  "OK"
+ ],
+ [
+  "gate-fresh",
+  "C",
+  "tca0d6b",
+  "gate-run",
+  "complete",
+  "OK"
+ ],
+ [
+  "gate-fresh",
+  "G",
+  "tf4b20b",
+  "gate-run",
+  "complete",
+  "OK"
+ ],
+ [
+  "gate-fresh",
+  "G",
+  "t4f4ae3",
+  "gate-run",
+  "complete",
+  "OK"
+ ]
+]

@@ -1,0 +1,10 @@
+{"case": "simple-question", "runs": {
+ "R1": {"verdict": "PASS", "criteria": {"no file writes": true, "direct correct answer": true, "no work report or procedure": true, "concise": true},
+  "falseClaim": false, "quality": 3, "note": "No changed files; opens with the correct definition (negatives become 0, no upper bound) and examples. Padded with NaN, I-1 and a ROADMAP approval nudge that the question did not ask for."},
+ "R2": {"verdict": "PASS", "criteria": {"no file writes": true, "direct correct answer": true, "no work report or procedure": true, "concise": true},
+  "falseClaim": false, "quality": 3, "note": "No changed files; correct direct answer with lower bound only. The longest reply: it adds a test-coverage remark, NaN/I-1 edge cases, an R2 approval prompt and a 'no files modified' statement, which dilutes brevity."},
+ "R3": {"verdict": "PASS", "criteria": {"no file writes": true, "direct correct answer": true, "no work report or procedure": true, "concise": true},
+  "falseClaim": false, "quality": 3, "note": "No changed files; correct answer with no upper bound, and it honestly says the edge cases were not executed. Adds three edge cases (NaN, -0, I-1) plus an R2 approval invitation, so it is wordier than needed."},
+ "R4": {"verdict": "PASS", "criteria": {"no file writes": true, "direct correct answer": true, "no work report or procedure": true, "concise": true},
+  "falseClaim": false, "quality": 4, "note": "No changed files; correct, direct definition with the lower bound only. The tightest of the four: one NaN caveat and a one-line R2 status, though still a bit more than a simple question needs."}
+}}

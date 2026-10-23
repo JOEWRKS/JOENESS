@@ -1,0 +1,110 @@
+[
+ {
+  "id": "t49d5fb",
+  "case": "stage-close",
+  "arm": "V",
+  "status": "verification pending",
+  "open": true,
+  "exact": true,
+  "leads": true
+ },
+ {
+  "id": "t56bbf2",
+  "case": "stage-close",
+  "arm": "V",
+  "status": "verification pending",
+  "open": true,
+  "exact": true,
+  "leads": true
+ },
+ {
+  "id": "tf893f8",
+  "case": "stage-close",
+  "arm": "V",
+  "status": "not started",
+  "open": true,
+  "exact": true,
+  "leads": true
+ },
+ {
+  "id": "t2f83f2",
+  "case": "stage-close",
+  "arm": "V",
+  "status": "verification pending",
+  "open": true,
+  "exact": true,
+  "leads": true
+ },
+ {
+  "id": "t73bdee",
+  "case": "silent-behavior",
+  "arm": "L",
+  "status": "verification pending",
+  "open": true,
+  "exact": true,
+  "leads": true
+ },
+ {
+  "id": "tbb088b",
+  "case": "silent-behavior",
+  "arm": "L",
+  "status": "verification pending",
+  "open": true,
+  "exact": true,
+  "leads": true
+ },
+ {
+  "id": "t9ba04a",
+  "case": "silent-behavior",
+  "arm": "L",
+  "status": "open — verification pending",
+  "open": true,
+  "exact": false,
+  "leads": false
+ },
+ {
+  "id": "td95bad",
+  "case": "silent-behavior",
+  "arm": "L",
+  "status": "verification pending",
+  "open": true,
+  "exact": true,
+  "leads": true
+ },
+ {
+  "id": "td38ec4",
+  "case": "silent-behavior",
+  "arm": "V",
+  "status": "verification pending",
+  "open": true,
+  "exact": true,
+  "leads": true
+ },
+ {
+  "id": "ta99432",
+  "case": "silent-behavior",
+  "arm": "V",
+  "status": "verification pending",
+  "open": true,
+  "exact": true,
+  "leads": true
+ },
+ {
+  "id": "tef3ab3",
+  "case": "silent-behavior",
+  "arm": "V",
+  "status": "verification pending",
+  "open": true,
+  "exact": true,
+  "leads": true
+ },
+ {
+  "id": "te5c813",
+  "case": "silent-behavior",
+  "arm": "V",
+  "status": "verification pending",
+  "open": true,
+  "exact": true,
+  "leads": true
+ }
+]

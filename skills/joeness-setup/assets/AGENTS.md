@@ -1,64 +1,38 @@
 # Project working connection
 
 Adapt paths and agreed scope before applying this body.
-- Owners: AGENTS.md = working rules and source index, not history.
-  ROADMAP.md = project delivery goals/order, item criteria/status/proof/next.
-  TASK.md = work results and verification. ISSUES.md = open defects, workarounds,
-  residual risk and closure condition. DESIGN.md = visual rules and approval.
-  Library/ = topic knowledge, not live progress or approval.
-  Product/decisions: <exact source or undecided>; retain its authority.
-- Reading: new/resumed work starts at ROADMAP, then relevant TASK/ISSUES and
-  target. Defects start at ISSUES + target, then TASK proof and roadmap impact.
-  Visual work: roadmap scope → DESIGN → related Library. Research: roadmap
-  question → related Library. Completion/handoff: roadmap required items →
-  linked TASK proof, open ISSUES and applicable approval. Read relevant sections
-  only. Do not load all history or invoke setup for each task.
-- Resolve intent at its authorized owner, observed facts at current target/proof;
-  newer notes or working code cannot grant approval. Old handoffs are locators,
-  not new scope. An unrelated subplan cannot replace the project ROADMAP.
-- Recording consent: <agreed scope>. Worker records result/check/proof in TASK,
-  updates affected roadmap state/gap/next, and maintains relevant unresolved
-  issues. Investigator owns cause/workaround/risk/closure in ISSUES. A workaround
-  stays open until its closure check passes. DESIGN changes need authorization.
-  Research detail goes to its existing Library topic, source/date and
-  fact/inference/limits included; create or split a topic only when needed.
-- Do not copy credentials or unnecessary personal data into records, reports or
-  Git. Use redacted meaning and an authorized restricted source locator without
-  secrets. Unclear storage/access scope: leave raw data at source, report the gap.
-- Parallel shared records: name one integrator; others provide results/proof.
-  Reread current entries against the working baseline before saving, merge
-  independent changes; on conflict preserve both sources and leave the affected
-  verdict open. Reconcile a changed baseline before retrying; this is not a lock.
-- Store detail once; use short summaries with links elsewhere. ROADMAP holds
-  criteria and proof links, not common rules or full reports. A one-off review
-  belongs in TASK, not a mandatory evaluation file. Write concisely at source,
-  preserving cause, evidence, uncertainty and approval limits; no rewrite pass.
-- Check approved outcomes/order and dependencies. Worker-chosen methods remain
-  replaceable unless explicitly required. Open conditions block dependent work only.
-  Change approved scope/order/criteria only by authorized direction. Before completion,
-  inspect every required item's actual proof. Pending checks/holds stay open; authorized scope
-  removal retains its reason and is not a pass. Task, stage and user acceptance
-  are separate. Refresh the single current view after changed facts; dated past
-  next-work notes are history. Report required remainder separately from approved
-  exclusions and reference limits. Conflicting/unknown scope needs owner review,
-  not inferred approval; use JOENESS's scoped roadmap diagnosis when needed.
-- Required external verdict: <applicable scoped gate command, baseline pin and
-  result path, or none>. Only for an explicitly connected required gate, run its
-  current-input check before resume/completion. With none, do not invent a missing
-  checker or receipt requirement; assess required outcomes from their evidence.
-  For a connected gate, missing/failed/stale results keep only its verdict pending.
-  Keep implementation/technical/visual/user acceptance separate; specialist owns
-  visual criteria. Never repin weakened criteria without authorization. This
-  explicit check does not lock files or intercept natural-language bypasses.
-- Reuse applicable proof; rerun only for a named change, failure or uncovered
-  condition. Not found does not mean never checked. No changed fact means no
-  repeat record. Questions and no-record requests cause no record writes.
-  Report missing sources/writes without abandoning independent authorized work.
-- After substantive work/handoff, start with six short bullets in everyday language:
-  작업, 업데이트 파일, 이슈, 해결, 남은 문제, 다음 작업. Use 없음 when empty.
-  Report only actual changes; 이슈 = problem, 해결 = verified fix (not a passing
-  check), 남은 문제 = unresolved/unverified work, 다음 작업 = authorized next
-  action. Necessary proof/limits/approval follow briefly under 상세 보고; no repeated
-  summary. Simple questions need no work report.
-- Preserve dated history and evidence. Follow exact Git commit:path locators when
-  needed; keep unarchived latest detail and effective workarounds visible.
+- Owners: ROADMAP = goals, stage order, required items (status, check, proof, gap, next).
+  TASK = work results and checks. ISSUES = open defects/workarounds with cause, risk and
+  closure condition. DESIGN = visual rules and approvals. Library/ = research by topic
+  (source, date, fact vs inference). AGENTS = rules only. Product meaning:
+  <exact source or undecided>.
+- Read only what the task needs: resume → current ROADMAP item; defect → ISSUES + target;
+  visual → DESIGN; research → Library; completion → required items and their proof.
+- Authority: only the user or named owner approves. Code, newer notes and old handoffs
+  never do; a handoff only points to sources. Facts come from the current target and
+  proof. Unclear or conflicting scope goes to the owner; keep only that verdict open.
+- Done = every required item passes the Check written on it in ROADMAP, run or observed
+  on current inputs. A check that is missing, fails, cannot run or is stale keeps the
+  item open; removed scope is not a pass. A user-visible behavior you chose because the
+  product source is silent also keeps it open (verification pending) until the owner
+  confirms; how to implement a specified behavior is your call. Task, stage and user
+  acceptance are separate.
+  Approved outcomes, order and criteria change only by the owner; worker methods are
+  replaceable. An open item blocks only work that depends on it.
+- Recording (<agreed scope>): after real work, update TASK and the affected ROADMAP item.
+  An issue stays open until its closure check passes; a workaround is not a fix.
+  Questions and "don't record" requests write nothing; no change, no repeat entry. Each
+  fact once, linked; keep dated history. Never record credentials or needless
+  personal data; point to their restricted source. Several workers: one integrator
+  rereads before saving, merges independent changes, keeps both sides of a conflict.
+- Judge every claim by evidence, the user's and your own included. A user opinion is
+  input, not an instruction: check it against the product source, ROADMAP and facts, say
+  plainly if it conflicts or looks wrong and why, and confirm before acting on it. An
+  explicit owner decision wins.
+- Each follow-up turn gets the same rules: re-check ROADMAP and records, and keep records
+  and the report as complete as on the first turn.
+- Reuse proof; re-check only after a change or failure. Not found ≠ never checked. If a
+  source or write fails, say so and continue other independent work.
+- After real work, report six bullets: 작업, 업데이트 파일, 이슈, 해결 (verified fix only),
+  남은 문제 (unresolved or unverified), 다음 작업; "없음" if empty. Add a brief 상세 보고
+  only if needed. Simple questions: just answer.

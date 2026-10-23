@@ -1,0 +1,194 @@
+{
+ "classify/R1": {
+  "id": "tf97e29",
+  "arm": "L"
+ },
+ "classify/R2": {
+  "id": "t9d2e2a",
+  "arm": "C"
+ },
+ "classify/R3": {
+  "id": "t90c5b6",
+  "arm": "L"
+ },
+ "classify/R4": {
+  "id": "ta9eb61",
+  "arm": "C"
+ },
+ "fake-approval/R1": {
+  "id": "tc3f9f3",
+  "arm": "L"
+ },
+ "fake-approval/R2": {
+  "id": "t8eda50",
+  "arm": "C"
+ },
+ "fake-approval/R3": {
+  "id": "t5fdc67",
+  "arm": "C"
+ },
+ "fake-approval/R4": {
+  "id": "t4e325b",
+  "arm": "L"
+ },
+ "fix-record/R1": {
+  "id": "t706c18",
+  "arm": "C"
+ },
+ "fix-record/R2": {
+  "id": "t35d80e",
+  "arm": "L"
+ },
+ "fix-record/R3": {
+  "id": "tdfdb3b",
+  "arm": "L"
+ },
+ "fix-record/R4": {
+  "id": "t83de58",
+  "arm": "C"
+ },
+ "mt-chain/R1": {
+  "id": "t8deb58",
+  "arm": "C"
+ },
+ "mt-chain/R2": {
+  "id": "tae1bd1",
+  "arm": "C"
+ },
+ "mt-chain/R3": {
+  "id": "tb66842",
+  "arm": "L"
+ },
+ "mt-chain/R4": {
+  "id": "tf3e53e",
+  "arm": "L"
+ },
+ "no-record/R1": {
+  "id": "t6982b3",
+  "arm": "L"
+ },
+ "no-record/R2": {
+  "id": "te16487",
+  "arm": "C"
+ },
+ "no-record/R3": {
+  "id": "t1a9d37",
+  "arm": "L"
+ },
+ "no-record/R4": {
+  "id": "t56547b",
+  "arm": "C"
+ },
+ "op-conflict/R1": {
+  "id": "t6f4536",
+  "arm": "C"
+ },
+ "op-conflict/R2": {
+  "id": "t2a6b36",
+  "arm": "L"
+ },
+ "op-conflict/R3": {
+  "id": "t7d793e",
+  "arm": "C"
+ },
+ "op-conflict/R4": {
+  "id": "tc4c7ea",
+  "arm": "L"
+ },
+ "op-weak-idea/R1": {
+  "id": "tfe81df",
+  "arm": "C"
+ },
+ "op-weak-idea/R2": {
+  "id": "ta9c47f",
+  "arm": "L"
+ },
+ "op-weak-idea/R3": {
+  "id": "taf8ebc",
+  "arm": "C"
+ },
+ "op-weak-idea/R4": {
+  "id": "t0c4085",
+  "arm": "L"
+ },
+ "secret/R1": {
+  "id": "t86d56e",
+  "arm": "L"
+ },
+ "secret/R2": {
+  "id": "t1a6bca",
+  "arm": "C"
+ },
+ "secret/R3": {
+  "id": "t52f0d9",
+  "arm": "C"
+ },
+ "secret/R4": {
+  "id": "tcbce31",
+  "arm": "L"
+ },
+ "simple-question/R1": {
+  "id": "t90dfab",
+  "arm": "C"
+ },
+ "simple-question/R2": {
+  "id": "t6c080d",
+  "arm": "L"
+ },
+ "simple-question/R3": {
+  "id": "t537ab8",
+  "arm": "L"
+ },
+ "simple-question/R4": {
+  "id": "tdd5596",
+  "arm": "C"
+ },
+ "stale-handoff/R1": {
+  "id": "t76bcb4",
+  "arm": "L"
+ },
+ "stale-handoff/R2": {
+  "id": "t9b82b8",
+  "arm": "C"
+ },
+ "stale-handoff/R3": {
+  "id": "tdfd4bf",
+  "arm": "C"
+ },
+ "stale-handoff/R4": {
+  "id": "te2733f",
+  "arm": "L"
+ },
+ "status/R1": {
+  "id": "t2409d3",
+  "arm": "C"
+ },
+ "status/R2": {
+  "id": "t8b8c62",
+  "arm": "C"
+ },
+ "status/R3": {
+  "id": "t913ab6",
+  "arm": "L"
+ },
+ "status/R4": {
+  "id": "t616f72",
+  "arm": "L"
+ },
+ "workaround/R1": {
+  "id": "t9af1d2",
+  "arm": "L"
+ },
+ "workaround/R2": {
+  "id": "t32ae0e",
+  "arm": "L"
+ },
+ "workaround/R3": {
+  "id": "tf06a3c",
+  "arm": "C"
+ },
+ "workaround/R4": {
+  "id": "ta15b96",
+  "arm": "C"
+ }
+}

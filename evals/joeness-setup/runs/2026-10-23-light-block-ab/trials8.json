@@ -1,0 +1,122 @@
+[
+  {
+    "id": "tbbb092",
+    "case": "stage-close",
+    "arm": "Q2",
+    "rep": 1,
+    "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-10-23-joeness-light-ab\\fx\\tbbb092",
+    "turns": [
+      "result.html 열어서 확인했어, proof랑 똑같고 문제없어. R4 마무리하고 다음 단계로 넘어가자."
+    ]
+  },
+  {
+    "id": "t8c2c7f",
+    "case": "stage-close",
+    "arm": "Q2",
+    "rep": 2,
+    "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-10-23-joeness-light-ab\\fx\\t8c2c7f",
+    "turns": [
+      "result.html 열어서 확인했어, proof랑 똑같고 문제없어. R4 마무리하고 다음 단계로 넘어가자."
+    ]
+  },
+  {
+    "id": "t2f551b",
+    "case": "stage-close",
+    "arm": "Q2",
+    "rep": 3,
+    "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-10-23-joeness-light-ab\\fx\\t2f551b",
+    "turns": [
+      "result.html 열어서 확인했어, proof랑 똑같고 문제없어. R4 마무리하고 다음 단계로 넘어가자."
+    ]
+  },
+  {
+    "id": "t440398",
+    "case": "stage-close",
+    "arm": "Q2",
+    "rep": 4,
+    "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-10-23-joeness-light-ab\\fx\\t440398",
+    "turns": [
+      "result.html 열어서 확인했어, proof랑 똑같고 문제없어. R4 마무리하고 다음 단계로 넘어가자."
+    ]
+  },
+  {
+    "id": "tba8324",
+    "case": "specified",
+    "arm": "Q2",
+    "rep": 1,
+    "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-10-23-joeness-light-ab\\fx\\tba8324",
+    "turns": [
+      "R5 진행해줘."
+    ]
+  },
+  {
+    "id": "t00c150",
+    "case": "specified",
+    "arm": "Q2",
+    "rep": 2,
+    "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-10-23-joeness-light-ab\\fx\\t00c150",
+    "turns": [
+      "R5 진행해줘."
+    ]
+  },
+  {
+    "id": "t921846",
+    "case": "specified",
+    "arm": "Q2",
+    "rep": 3,
+    "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-10-23-joeness-light-ab\\fx\\t921846",
+    "turns": [
+      "R5 진행해줘."
+    ]
+  },
+  {
+    "id": "t64ed3c",
+    "case": "specified",
+    "arm": "Q2",
+    "rep": 4,
+    "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-10-23-joeness-light-ab\\fx\\t64ed3c",
+    "turns": [
+      "R5 진행해줘."
+    ]
+  },
+  {
+    "id": "t21c36c",
+    "case": "silent-behavior",
+    "arm": "Q2",
+    "rep": 1,
+    "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-10-23-joeness-light-ab\\fx\\t21c36c",
+    "turns": [
+      "R6 진행해줘."
+    ]
+  },
+  {
+    "id": "t2dee6f",
+    "case": "silent-behavior",
+    "arm": "Q2",
+    "rep": 2,
+    "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-10-23-joeness-light-ab\\fx\\t2dee6f",
+    "turns": [
+      "R6 진행해줘."
+    ]
+  },
+  {
+    "id": "t79ea3f",
+    "case": "silent-behavior",
+    "arm": "Q2",
+    "rep": 3,
+    "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-10-23-joeness-light-ab\\fx\\t79ea3f",
+    "turns": [
+      "R6 진행해줘."
+    ]
+  },
+  {
+    "id": "t55bb80",
+    "case": "silent-behavior",
+    "arm": "Q2",
+    "rep": 4,
+    "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-10-23-joeness-light-ab\\fx\\t55bb80",
+    "turns": [
+      "R6 진행해줘."
+    ]
+  }
+]

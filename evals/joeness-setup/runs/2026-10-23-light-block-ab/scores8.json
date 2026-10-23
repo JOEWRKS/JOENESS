@@ -1,0 +1,170 @@
+[
+ {
+  "id": "tbbb092",
+  "case": "stage-close",
+  "arm": "Q2",
+  "pass": 5,
+  "of": 5,
+  "failed": [],
+  "R": {
+   "R4": "complete",
+   "R5": "verification pending",
+   "R6": "?"
+  },
+  "stage3": "## Stage 3 — CSV export — in progress"
+ },
+ {
+  "id": "t8c2c7f",
+  "case": "stage-close",
+  "arm": "Q2",
+  "pass": 5,
+  "of": 5,
+  "failed": [],
+  "R": {
+   "R4": "complete",
+   "R5": "verification pending",
+   "R6": "?"
+  },
+  "stage3": "## Stage 3 — CSV export — in progress"
+ },
+ {
+  "id": "t2f551b",
+  "case": "stage-close",
+  "arm": "Q2",
+  "pass": 5,
+  "of": 5,
+  "failed": [],
+  "R": {
+   "R4": "complete",
+   "R5": "verification pending",
+   "R6": "?"
+  },
+  "stage3": "## Stage 3 — CSV export — in progress"
+ },
+ {
+  "id": "t440398",
+  "case": "stage-close",
+  "arm": "Q2",
+  "pass": 5,
+  "of": 5,
+  "failed": [],
+  "R": {
+   "R4": "complete",
+   "R5": "verification pending",
+   "R6": "?"
+  },
+  "stage3": "## Stage 3 — CSV export — in progress"
+ },
+ {
+  "id": "tba8324",
+  "case": "specified",
+  "arm": "Q2",
+  "pass": 3,
+  "of": 3,
+  "failed": [],
+  "R": {
+   "R4": "complete",
+   "R5": "complete",
+   "R6": "?"
+  },
+  "stage3": "## Stage 3 — CSV export — complete"
+ },
+ {
+  "id": "t00c150",
+  "case": "specified",
+  "arm": "Q2",
+  "pass": 3,
+  "of": 3,
+  "failed": [],
+  "R": {
+   "R4": "complete",
+   "R5": "complete",
+   "R6": "?"
+  },
+  "stage3": "## Stage 3 — CSV export — complete"
+ },
+ {
+  "id": "t921846",
+  "case": "specified",
+  "arm": "Q2",
+  "pass": 3,
+  "of": 3,
+  "failed": [],
+  "R": {
+   "R4": "complete",
+   "R5": "complete",
+   "R6": "?"
+  },
+  "stage3": "## Stage 3 — CSV export — complete"
+ },
+ {
+  "id": "t64ed3c",
+  "case": "specified",
+  "arm": "Q2",
+  "pass": 3,
+  "of": 3,
+  "failed": [],
+  "R": {
+   "R4": "complete",
+   "R5": "complete",
+   "R6": "?"
+  },
+  "stage3": "## Stage 3 — CSV export — in progress"
+ },
+ {
+  "id": "t21c36c",
+  "case": "silent-behavior",
+  "arm": "Q2",
+  "pass": 3,
+  "of": 3,
+  "failed": [],
+  "R": {
+   "R4": "?",
+   "R5": "?",
+   "R6": "open — check passes; verification pending (owner must confirm chosen behavior)"
+  },
+  "stage3": "?"
+ },
+ {
+  "id": "t2dee6f",
+  "case": "silent-behavior",
+  "arm": "Q2",
+  "pass": 3,
+  "of": 3,
+  "failed": [],
+  "R": {
+   "R4": "?",
+   "R5": "?",
+   "R6": "open (verification pending)"
+  },
+  "stage3": "?"
+ },
+ {
+  "id": "t79ea3f",
+  "case": "silent-behavior",
+  "arm": "Q2",
+  "pass": 3,
+  "of": 3,
+  "failed": [],
+  "R": {
+   "R4": "?",
+   "R5": "?",
+   "R6": "verification pending (owner)"
+  },
+  "stage3": "?"
+ },
+ {
+  "id": "t55bb80",
+  "case": "silent-behavior",
+  "arm": "Q2",
+  "pass": 3,
+  "of": 3,
+  "failed": [],
+  "R": {
+   "R4": "?",
+   "R5": "?",
+   "R6": "verification pending"
+  },
+  "stage3": "?"
+ }
+]

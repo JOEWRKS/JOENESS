@@ -72,6 +72,9 @@ Show:
   records, stage-completion gate and six-field report meanings below.
 - Routine factual recording scope and preserved code/Product/approval boundaries.
 - Unknown goals/criteria and any ownership conflict that prevents complete setup.
+- When adding or replacing a body: outside-block AGENTS rules that would conflict
+  with it (tool, commit or recording rules) with a proposed resolution, and ROADMAP
+  required items lacking the Check the body relies on. Do not edit either silently.
 
 Inspection/proposal alone authorizes no writes. Approval covers only this plan.
 Within agreed recording scope, routine facts need no repeated approval.
@@ -123,10 +126,12 @@ States: not started, in progress, verification pending, on hold, complete,
 removed from scope. Holds and missing required checks remain open. Scope removal
 requires an authorized decision/reason; retain the item, never count it as passed.
 Keep technical verification and required user acceptance distinct.
-Where a required outcome depends on an external specialist verdict, connect the
-explicit [review gate](references/review-gate.md): pinned scope/criteria, current
-target inputs and result path. Never substitute technical checks for visual
-compliance. The gate is opt-in to that required scope, not an always-on engine.
+Where a required outcome depends on an external specialist verdict, write its exact
+check in that item's Check column, e.g. the [review gate](references/review-gate.md)
+command with pinned scope/criteria, current target inputs and result path. The
+ordinary per-item check rule then applies; no separate AGENTS line is needed. Never
+substitute technical checks for visual compliance. The gate is opt-in to that
+required scope, not an always-on engine.
 
 Before reporting setup complete, read back actual documents, not just templates:
 - Is this the whole project's approved scope, not merely an available subplan?
@@ -192,8 +197,8 @@ the setup helper protects only its AGENTS block/state, not TASK/ROADMAP writes.
 Before starting dependent work, check its entry conditions. Independent authorized
 work may proceed without falsely advancing a blocked stage. Before declaring a
 stage/milestone/release complete, check every required item and actual evidence;
-for a connected specialist gate, run its current-input check before advancing
-the affected status. Missing/failed/stale results keep that verdict pending.
+run each item's listed Check, a specialist gate included, on current inputs before
+advancing its status. Missing/failed/stale results keep that verdict pending.
 Implementation, technical verification, visual compliance and user acceptance
 remain separate. The helper rejects invalid claims but cannot intercept direct
 document edits or natural-language bypasses; do not claim host enforcement.

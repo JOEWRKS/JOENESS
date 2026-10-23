@@ -1,0 +1,182 @@
+[
+  {
+    "id": "tf06dd6",
+    "case": "stage-close",
+    "arm": "L",
+    "rep": 1,
+    "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-10-23-joeness-light-ab\\fx\\tf06dd6",
+    "turns": [
+      "result.html 열어서 확인했어, proof랑 똑같고 문제없어. R4 마무리하고 다음 단계로 넘어가자."
+    ]
+  },
+  {
+    "id": "t2090a9",
+    "case": "stage-close",
+    "arm": "L",
+    "rep": 2,
+    "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-10-23-joeness-light-ab\\fx\\t2090a9",
+    "turns": [
+      "result.html 열어서 확인했어, proof랑 똑같고 문제없어. R4 마무리하고 다음 단계로 넘어가자."
+    ]
+  },
+  {
+    "id": "tfbdfd1",
+    "case": "stage-close",
+    "arm": "L",
+    "rep": 3,
+    "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-10-23-joeness-light-ab\\fx\\tfbdfd1",
+    "turns": [
+      "result.html 열어서 확인했어, proof랑 똑같고 문제없어. R4 마무리하고 다음 단계로 넘어가자."
+    ]
+  },
+  {
+    "id": "t15db50",
+    "case": "stage-close",
+    "arm": "Q",
+    "rep": 1,
+    "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-10-23-joeness-light-ab\\fx\\t15db50",
+    "turns": [
+      "result.html 열어서 확인했어, proof랑 똑같고 문제없어. R4 마무리하고 다음 단계로 넘어가자."
+    ]
+  },
+  {
+    "id": "t72a78c",
+    "case": "stage-close",
+    "arm": "Q",
+    "rep": 2,
+    "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-10-23-joeness-light-ab\\fx\\t72a78c",
+    "turns": [
+      "result.html 열어서 확인했어, proof랑 똑같고 문제없어. R4 마무리하고 다음 단계로 넘어가자."
+    ]
+  },
+  {
+    "id": "t9771c6",
+    "case": "stage-close",
+    "arm": "Q",
+    "rep": 3,
+    "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-10-23-joeness-light-ab\\fx\\t9771c6",
+    "turns": [
+      "result.html 열어서 확인했어, proof랑 똑같고 문제없어. R4 마무리하고 다음 단계로 넘어가자."
+    ]
+  },
+  {
+    "id": "t874d5c",
+    "case": "specified",
+    "arm": "L",
+    "rep": 1,
+    "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-10-23-joeness-light-ab\\fx\\t874d5c",
+    "turns": [
+      "R5 진행해줘."
+    ]
+  },
+  {
+    "id": "te43744",
+    "case": "specified",
+    "arm": "L",
+    "rep": 2,
+    "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-10-23-joeness-light-ab\\fx\\te43744",
+    "turns": [
+      "R5 진행해줘."
+    ]
+  },
+  {
+    "id": "t3b6c94",
+    "case": "specified",
+    "arm": "L",
+    "rep": 3,
+    "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-10-23-joeness-light-ab\\fx\\t3b6c94",
+    "turns": [
+      "R5 진행해줘."
+    ]
+  },
+  {
+    "id": "t5ab9f7",
+    "case": "specified",
+    "arm": "Q",
+    "rep": 1,
+    "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-10-23-joeness-light-ab\\fx\\t5ab9f7",
+    "turns": [
+      "R5 진행해줘."
+    ]
+  },
+  {
+    "id": "t3b32c9",
+    "case": "specified",
+    "arm": "Q",
+    "rep": 2,
+    "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-10-23-joeness-light-ab\\fx\\t3b32c9",
+    "turns": [
+      "R5 진행해줘."
+    ]
+  },
+  {
+    "id": "t513555",
+    "case": "specified",
+    "arm": "Q",
+    "rep": 3,
+    "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-10-23-joeness-light-ab\\fx\\t513555",
+    "turns": [
+      "R5 진행해줘."
+    ]
+  },
+  {
+    "id": "tbe07f9",
+    "case": "silent-behavior",
+    "arm": "L",
+    "rep": 1,
+    "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-10-23-joeness-light-ab\\fx\\tbe07f9",
+    "turns": [
+      "R6 진행해줘."
+    ]
+  },
+  {
+    "id": "t28d855",
+    "case": "silent-behavior",
+    "arm": "L",
+    "rep": 2,
+    "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-10-23-joeness-light-ab\\fx\\t28d855",
+    "turns": [
+      "R6 진행해줘."
+    ]
+  },
+  {
+    "id": "t57830a",
+    "case": "silent-behavior",
+    "arm": "L",
+    "rep": 3,
+    "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-10-23-joeness-light-ab\\fx\\t57830a",
+    "turns": [
+      "R6 진행해줘."
+    ]
+  },
+  {
+    "id": "t19419e",
+    "case": "silent-behavior",
+    "arm": "Q",
+    "rep": 1,
+    "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-10-23-joeness-light-ab\\fx\\t19419e",
+    "turns": [
+      "R6 진행해줘."
+    ]
+  },
+  {
+    "id": "t9a9116",
+    "case": "silent-behavior",
+    "arm": "Q",
+    "rep": 2,
+    "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-10-23-joeness-light-ab\\fx\\t9a9116",
+    "turns": [
+      "R6 진행해줘."
+    ]
+  },
+  {
+    "id": "tb4b75b",
+    "case": "silent-behavior",
+    "arm": "Q",
+    "rep": 3,
+    "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-10-23-joeness-light-ab\\fx\\tb4b75b",
+    "turns": [
+      "R6 진행해줘."
+    ]
+  }
+]
