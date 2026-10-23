@@ -1,0 +1,250 @@
+{
+ "l51bdda9": {
+  "arm": "B3",
+  "turns": [
+   {
+    "turn": "turn00",
+    "p7_stage": null,
+    "cur_mentions_p7": false,
+    "next_mentions_p7": false,
+    "next_says_nothing_left": true,
+    "S1_ok": true
+   },
+   {
+    "turn": "turn01",
+    "p7_stage": null,
+    "cur_mentions_p7": false,
+    "next_mentions_p7": false,
+    "next_says_nothing_left": true,
+    "S1_ok": true
+   },
+   {
+    "turn": "turn02",
+    "p7_stage": null,
+    "cur_mentions_p7": false,
+    "next_mentions_p7": false,
+    "next_says_nothing_left": true,
+    "S1_ok": true
+   },
+   {
+    "turn": "turn03",
+    "p7_stage": "### P7 — 흑 장목 금지 규칙 — verification pending (구현·기술 검사 완료, 담당자",
+    "cur_mentions_p7": true,
+    "next_mentions_p7": false,
+    "next_says_nothing_left": true,
+    "S1_ok": false
+   },
+   {
+    "turn": "turn04",
+    "p7_stage": "### P7 — 흑 장목 금지 규칙 — verification pending (구현·기술 검사 완료, 담당자",
+    "cur_mentions_p7": true,
+    "next_mentions_p7": false,
+    "next_says_nothing_left": true,
+    "S1_ok": false
+   },
+   {
+    "turn": "turn05",
+    "p7_stage": "### P7 — 흑 장목 금지 규칙 — verification pending (구현·기술 검사 완료, 담당자",
+    "cur_mentions_p7": true,
+    "next_mentions_p7": false,
+    "next_says_nothing_left": true,
+    "S1_ok": false
+   },
+   {
+    "turn": "turn06",
+    "p7_stage": "### P7 — 흑 장목 금지 규칙 — verification pending (구현·기술 검사 완료, 담당자",
+    "cur_mentions_p7": true,
+    "next_mentions_p7": false,
+    "next_says_nothing_left": true,
+    "S1_ok": false
+   }
+  ],
+  "S1_ok_after_P7": "0/4"
+ },
+ "l5699546": {
+  "arm": "B3",
+  "turns": [
+   {
+    "turn": "turn00",
+    "p7_stage": null,
+    "cur_mentions_p7": false,
+    "next_mentions_p7": false,
+    "next_says_nothing_left": true,
+    "S1_ok": true
+   },
+   {
+    "turn": "turn01",
+    "p7_stage": null,
+    "cur_mentions_p7": false,
+    "next_mentions_p7": false,
+    "next_says_nothing_left": true,
+    "S1_ok": true
+   },
+   {
+    "turn": "turn02",
+    "p7_stage": null,
+    "cur_mentions_p7": false,
+    "next_mentions_p7": false,
+    "next_says_nothing_left": true,
+    "S1_ok": true
+   },
+   {
+    "turn": "turn03",
+    "p7_stage": "### P7 — 흑 장목 금지 규칙 — verification pending (구현·기술 검사 완료, 담당자",
+    "cur_mentions_p7": true,
+    "next_mentions_p7": true,
+    "next_says_nothing_left": true,
+    "S1_ok": false
+   },
+   {
+    "turn": "turn04",
+    "p7_stage": "### P7 — 흑 장목 금지 규칙 — verification pending (구현·기술 검사 완료, 담당자",
+    "cur_mentions_p7": true,
+    "next_mentions_p7": true,
+    "next_says_nothing_left": true,
+    "S1_ok": false
+   },
+   {
+    "turn": "turn05",
+    "p7_stage": "### P7 — 흑 장목 금지 규칙 — verification pending (구현·기술 검사 완료, 담당자",
+    "cur_mentions_p7": true,
+    "next_mentions_p7": true,
+    "next_says_nothing_left": true,
+    "S1_ok": false
+   },
+   {
+    "turn": "turn06",
+    "p7_stage": "### P7 — 흑 장목 금지 규칙 — verification pending (구현·기술 검사 완료, 담당자",
+    "cur_mentions_p7": true,
+    "next_mentions_p7": true,
+    "next_says_nothing_left": true,
+    "S1_ok": false
+   }
+  ],
+  "S1_ok_after_P7": "0/4"
+ },
+ "l600a54f": {
+  "arm": "S",
+  "turns": [
+   {
+    "turn": "turn00",
+    "p7_stage": null,
+    "cur_mentions_p7": false,
+    "next_mentions_p7": false,
+    "next_says_nothing_left": true,
+    "S1_ok": true
+   },
+   {
+    "turn": "turn01",
+    "p7_stage": null,
+    "cur_mentions_p7": false,
+    "next_mentions_p7": false,
+    "next_says_nothing_left": true,
+    "S1_ok": true
+   },
+   {
+    "turn": "turn02",
+    "p7_stage": null,
+    "cur_mentions_p7": false,
+    "next_mentions_p7": false,
+    "next_says_nothing_left": true,
+    "S1_ok": true
+   },
+   {
+    "turn": "turn03",
+    "p7_stage": "### P7 — 흑 장목 금지 규칙 — in progress",
+    "cur_mentions_p7": true,
+    "next_mentions_p7": true,
+    "next_says_nothing_left": false,
+    "S1_ok": true
+   },
+   {
+    "turn": "turn04",
+    "p7_stage": "### P7 — 흑 장목 금지 규칙 — in progress",
+    "cur_mentions_p7": true,
+    "next_mentions_p7": true,
+    "next_says_nothing_left": false,
+    "S1_ok": true
+   },
+   {
+    "turn": "turn05",
+    "p7_stage": "### P7 — 흑 장목 금지 규칙 — in progress",
+    "cur_mentions_p7": true,
+    "next_mentions_p7": true,
+    "next_says_nothing_left": false,
+    "S1_ok": true
+   },
+   {
+    "turn": "turn06",
+    "p7_stage": "### P7 — 흑 장목 금지 규칙 — in progress",
+    "cur_mentions_p7": true,
+    "next_mentions_p7": true,
+    "next_says_nothing_left": false,
+    "S1_ok": true
+   }
+  ],
+  "S1_ok_after_P7": "4/4"
+ },
+ "l6d36b79": {
+  "arm": "S",
+  "turns": [
+   {
+    "turn": "turn00",
+    "p7_stage": null,
+    "cur_mentions_p7": false,
+    "next_mentions_p7": false,
+    "next_says_nothing_left": true,
+    "S1_ok": true
+   },
+   {
+    "turn": "turn01",
+    "p7_stage": null,
+    "cur_mentions_p7": false,
+    "next_mentions_p7": false,
+    "next_says_nothing_left": true,
+    "S1_ok": true
+   },
+   {
+    "turn": "turn02",
+    "p7_stage": null,
+    "cur_mentions_p7": false,
+    "next_mentions_p7": false,
+    "next_says_nothing_left": true,
+    "S1_ok": true
+   },
+   {
+    "turn": "turn03",
+    "p7_stage": "### P7 — 흑 장목 금지 규칙 — verification pending (구현·기술 검사 완료, 담당자",
+    "cur_mentions_p7": true,
+    "next_mentions_p7": false,
+    "next_says_nothing_left": false,
+    "S1_ok": true
+   },
+   {
+    "turn": "turn04",
+    "p7_stage": "### P7 — 흑 장목 금지 규칙 — verification pending (구현·기술 검사 완료, 담당자",
+    "cur_mentions_p7": true,
+    "next_mentions_p7": false,
+    "next_says_nothing_left": false,
+    "S1_ok": true
+   },
+   {
+    "turn": "turn05",
+    "p7_stage": "### P7 — 흑 장목 금지 규칙 — verification pending (구현·기술 검사 완료, 담당자",
+    "cur_mentions_p7": true,
+    "next_mentions_p7": false,
+    "next_says_nothing_left": false,
+    "S1_ok": true
+   },
+   {
+    "turn": "turn06",
+    "p7_stage": "### P7 — 흑 장목 금지 규칙 — verification pending (구현·기술 검사 완료, 담당자",
+    "cur_mentions_p7": true,
+    "next_mentions_p7": false,
+    "next_says_nothing_left": false,
+    "S1_ok": true
+   }
+  ],
+  "S1_ok_after_P7": "4/4"
+ }
+}
