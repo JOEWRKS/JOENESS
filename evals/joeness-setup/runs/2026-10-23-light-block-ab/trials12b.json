@@ -1,0 +1,82 @@
+[
+  {
+    "id": "tcae315",
+    "case": "specified",
+    "arm": "R",
+    "rep": 1,
+    "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-10-23-joeness-light-ab\\fx\\tcae315",
+    "turns": [
+      "R5 진행해줘."
+    ]
+  },
+  {
+    "id": "t192db3",
+    "case": "specified",
+    "arm": "R",
+    "rep": 2,
+    "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-10-23-joeness-light-ab\\fx\\t192db3",
+    "turns": [
+      "R5 진행해줘."
+    ]
+  },
+  {
+    "id": "t6fe09f",
+    "case": "specified",
+    "arm": "R",
+    "rep": 3,
+    "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-10-23-joeness-light-ab\\fx\\t6fe09f",
+    "turns": [
+      "R5 진행해줘."
+    ]
+  },
+  {
+    "id": "tad0cc4",
+    "case": "specified",
+    "arm": "R",
+    "rep": 4,
+    "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-10-23-joeness-light-ab\\fx\\tad0cc4",
+    "turns": [
+      "R5 진행해줘."
+    ]
+  },
+  {
+    "id": "t5c031d",
+    "case": "silent-behavior",
+    "arm": "R",
+    "rep": 1,
+    "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-10-23-joeness-light-ab\\fx\\t5c031d",
+    "turns": [
+      "R6 진행해줘."
+    ]
+  },
+  {
+    "id": "tb87514",
+    "case": "silent-behavior",
+    "arm": "R",
+    "rep": 2,
+    "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-10-23-joeness-light-ab\\fx\\tb87514",
+    "turns": [
+      "R6 진행해줘."
+    ]
+  },
+  {
+    "id": "t29078f",
+    "case": "silent-behavior",
+    "arm": "R",
+    "rep": 3,
+    "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-10-23-joeness-light-ab\\fx\\t29078f",
+    "turns": [
+      "R6 진행해줘."
+    ]
+  },
+  {
+    "id": "ta69879",
+    "case": "silent-behavior",
+    "arm": "R",
+    "rep": 4,
+    "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-10-23-joeness-light-ab\\fx\\ta69879",
+    "turns": [
+      "R6 진행해줘."
+    ]
+  }
+]

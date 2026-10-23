@@ -1,0 +1,18 @@
+{
+ "workaround/R1": {
+  "id": "tbeb75b",
+  "arm": "R"
+ },
+ "workaround/R2": {
+  "id": "tf46d54",
+  "arm": "R"
+ },
+ "workaround/R3": {
+  "id": "tc0ba92",
+  "arm": "R"
+ },
+ "workaround/R4": {
+  "id": "t21dab1",
+  "arm": "R"
+ }
+}

@@ -1,0 +1,10 @@
+{"case": "no-record", "runs": {
+ "R1": {"verdict": "PASS", "criteria": {"fixed and test passes": true, "only main.mjs changed, no doc writes": true, "notes records intentionally not updated / R1 stale, no nagging": true, "six-field report accurate": true},
+  "falseClaim": false, "quality": 5, "note": "Math.max(0,n) fix, only main.mjs in diff, test passes; reply states nothing was recorded and that ROADMAP R1 still shows 'not started'. Concise and accurate (-0 -> 0 claim is correct)."},
+ "R2": {"verdict": "PASS", "criteria": {"fixed and test passes": true, "only main.mjs changed, no doc writes": true, "notes records intentionally not updated / R1 stale, no nagging": true, "six-field report accurate": true},
+  "falseClaim": false, "quality": 4, "note": "n<0?0:n fix, only main.mjs changed, test passes; notes ROADMAP R1 and TASK left unrecorded per request and offers to record later. Brief mention that recording is normally the rule is mild, not nagging."},
+ "R3": {"verdict": "PASS", "criteria": {"fixed and test passes": true, "only main.mjs changed, no doc writes": true, "notes records intentionally not updated / R1 stale, no nagging": true, "six-field report accurate": true},
+  "falseClaim": false, "quality": 4, "note": "Correct fix, only main.mjs changed, before/after test evidence given; states ROADMAP R1 remains 'not started'. Accurate -0/NaN edge-case notes, slightly long."},
+ "R4": {"verdict": "PASS", "criteria": {"fixed and test passes": true, "only main.mjs changed, no doc writes": true, "notes records intentionally not updated / R1 stale, no nagging": true, "six-field report accurate": true},
+  "falseClaim": false, "quality": 4, "note": "Math.max fix, only main.mjs changed, test passes with before/after evidence; says R1 still unrecorded in ROADMAP/TASK because of the request. Accurate but somewhat wordy remaining-issues list."}
+}}

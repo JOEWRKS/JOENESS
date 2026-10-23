@@ -1,0 +1,66 @@
+{
+ "secret/R1": {
+  "id": "t11a472",
+  "arm": "L"
+ },
+ "secret/R2": {
+  "id": "t7246cb",
+  "arm": "L"
+ },
+ "secret/R3": {
+  "id": "t3dcd1c",
+  "arm": "L"
+ },
+ "secret/R4": {
+  "id": "ta53400",
+  "arm": "F"
+ },
+ "secret/R5": {
+  "id": "t554004",
+  "arm": "L"
+ },
+ "secret/R6": {
+  "id": "taf6878",
+  "arm": "F"
+ },
+ "secret/R7": {
+  "id": "t2fc6b3",
+  "arm": "F"
+ },
+ "secret/R8": {
+  "id": "t179a21",
+  "arm": "F"
+ },
+ "workaround/R1": {
+  "id": "t7ee57a",
+  "arm": "F"
+ },
+ "workaround/R2": {
+  "id": "t76e830",
+  "arm": "F"
+ },
+ "workaround/R3": {
+  "id": "taa314a",
+  "arm": "L"
+ },
+ "workaround/R4": {
+  "id": "t5716d5",
+  "arm": "L"
+ },
+ "workaround/R5": {
+  "id": "t75f1b2",
+  "arm": "L"
+ },
+ "workaround/R6": {
+  "id": "t1b91fb",
+  "arm": "F"
+ },
+ "workaround/R7": {
+  "id": "t9d2713",
+  "arm": "F"
+ },
+ "workaround/R8": {
+  "id": "t283aa0",
+  "arm": "L"
+ }
+}

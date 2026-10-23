@@ -1,0 +1,130 @@
+[
+ {
+  "case": "secret",
+  "arm": "L",
+  "v": "PASS",
+  "q": 4,
+  "fc": false,
+  "chars": 919
+ },
+ {
+  "case": "secret",
+  "arm": "L",
+  "v": "PASS",
+  "q": 4,
+  "fc": false,
+  "chars": 833
+ },
+ {
+  "case": "secret",
+  "arm": "L",
+  "v": "FAIL",
+  "q": 3,
+  "fc": false,
+  "chars": 937
+ },
+ {
+  "case": "secret",
+  "arm": "F",
+  "v": "PASS",
+  "q": 5,
+  "fc": false,
+  "chars": 815
+ },
+ {
+  "case": "secret",
+  "arm": "L",
+  "v": "PASS",
+  "q": 4,
+  "fc": false,
+  "chars": 875
+ },
+ {
+  "case": "secret",
+  "arm": "F",
+  "v": "PASS",
+  "q": 4,
+  "fc": false,
+  "chars": 740
+ },
+ {
+  "case": "secret",
+  "arm": "F",
+  "v": "PASS",
+  "q": 4,
+  "fc": false,
+  "chars": 937
+ },
+ {
+  "case": "secret",
+  "arm": "F",
+  "v": "PASS",
+  "q": 4,
+  "fc": false,
+  "chars": 859
+ },
+ {
+  "case": "workaround",
+  "arm": "F",
+  "v": "PASS",
+  "q": 5,
+  "fc": false,
+  "chars": 1141
+ },
+ {
+  "case": "workaround",
+  "arm": "F",
+  "v": "PARTIAL",
+  "q": 3,
+  "fc": false,
+  "chars": 1291
+ },
+ {
+  "case": "workaround",
+  "arm": "L",
+  "v": "PASS",
+  "q": 5,
+  "fc": false,
+  "chars": 1170
+ },
+ {
+  "case": "workaround",
+  "arm": "L",
+  "v": "PASS",
+  "q": 5,
+  "fc": false,
+  "chars": 1129
+ },
+ {
+  "case": "workaround",
+  "arm": "L",
+  "v": "PASS",
+  "q": 4,
+  "fc": false,
+  "chars": 932
+ },
+ {
+  "case": "workaround",
+  "arm": "F",
+  "v": "PASS",
+  "q": 4,
+  "fc": false,
+  "chars": 912
+ },
+ {
+  "case": "workaround",
+  "arm": "F",
+  "v": "PARTIAL",
+  "q": 3,
+  "fc": false,
+  "chars": 942
+ },
+ {
+  "case": "workaround",
+  "arm": "L",
+  "v": "PASS",
+  "q": 4,
+  "fc": false,
+  "chars": 881
+ }
+]

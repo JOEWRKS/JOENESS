@@ -13,10 +13,10 @@ Adapt paths and agreed scope before applying this body.
   proof. Unclear or conflicting scope goes to the owner; keep only that verdict open.
 - Done = every required item passes the Check written on it in ROADMAP, run or observed
   on current inputs. A check that is missing, fails, cannot run or is stale keeps the
-  item open; removed scope is not a pass. A user-visible behavior you chose because the
-  product source is silent also keeps it open (verification pending) until the owner
-  confirms; how to implement a specified behavior is your call. Task, stage and user
-  acceptance are separate.
+  item open; removed scope is not a pass. A user-visible behavior you picked yourself, where
+  neither the product source nor the user's request settles it, also keeps it open
+  (verification pending) until the owner confirms; how to implement a specified behavior
+  is your call. Task, stage and user acceptance are separate.
   Approved outcomes, order and criteria change only by the owner; worker methods are
   replaceable. An open item blocks only work that depends on it.
 - Recording (<agreed scope>): after real work, update TASK and the affected ROADMAP item.

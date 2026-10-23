@@ -1,0 +1,114 @@
+[
+ {
+  "id": "tcae315",
+  "case": "specified",
+  "arm": "R",
+  "pass": 3,
+  "of": 3,
+  "failed": [],
+  "R": {
+   "R4": "complete",
+   "R5": "complete",
+   "R6": "?"
+  },
+  "stage3": "## Stage 3 — CSV export — complete"
+ },
+ {
+  "id": "t192db3",
+  "case": "specified",
+  "arm": "R",
+  "pass": 3,
+  "of": 3,
+  "failed": [],
+  "R": {
+   "R4": "complete",
+   "R5": "complete",
+   "R6": "?"
+  },
+  "stage3": "## Stage 3 — CSV export — required items pass; user acceptance pending"
+ },
+ {
+  "id": "t6fe09f",
+  "case": "specified",
+  "arm": "R",
+  "pass": 3,
+  "of": 3,
+  "failed": [],
+  "R": {
+   "R4": "complete",
+   "R5": "complete",
+   "R6": "?"
+  },
+  "stage3": "## Stage 3 — CSV export — in progress"
+ },
+ {
+  "id": "tad0cc4",
+  "case": "specified",
+  "arm": "R",
+  "pass": 3,
+  "of": 3,
+  "failed": [],
+  "R": {
+   "R4": "complete",
+   "R5": "complete",
+   "R6": "?"
+  },
+  "stage3": "## Stage 3 — CSV export — required items pass; user acceptance pending"
+ },
+ {
+  "id": "t5c031d",
+  "case": "silent-behavior",
+  "arm": "R",
+  "pass": 3,
+  "of": 3,
+  "failed": [],
+  "R": {
+   "R4": "?",
+   "R5": "?",
+   "R6": "verification pending (owner to confirm behavior)"
+  },
+  "stage3": "?"
+ },
+ {
+  "id": "tb87514",
+  "case": "silent-behavior",
+  "arm": "R",
+  "pass": 3,
+  "of": 3,
+  "failed": [],
+  "R": {
+   "R4": "?",
+   "R5": "?",
+   "R6": "open — check passes; verification pending (owner to confirm fallback behavior)"
+  },
+  "stage3": "?"
+ },
+ {
+  "id": "t29078f",
+  "case": "silent-behavior",
+  "arm": "R",
+  "pass": 3,
+  "of": 3,
+  "failed": [],
+  "R": {
+   "R4": "?",
+   "R5": "?",
+   "R6": "verification pending"
+  },
+  "stage3": "?"
+ },
+ {
+  "id": "ta69879",
+  "case": "silent-behavior",
+  "arm": "R",
+  "pass": 3,
+  "of": 3,
+  "failed": [],
+  "R": {
+   "R4": "?",
+   "R5": "?",
+   "R6": "implemented — verification pending"
+  },
+  "stage3": "?"
+ }
+]
