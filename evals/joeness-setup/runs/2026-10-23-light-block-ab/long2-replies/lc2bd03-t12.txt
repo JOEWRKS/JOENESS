@@ -1,0 +1,1 @@
+T12 summary: full day report, accurate; lists R1 count drift 11 vs 12 due to no-record request; residual stale entry; no writes.

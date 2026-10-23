@@ -1,0 +1,1 @@
+T7 R2: isDoubleFour +9 tests, 103/103; read RIF rules, Library S3; ISSUES RENJU-01 open (R1 lacks 9.3 exception); R1 row limitation; TASK #p8-r2.

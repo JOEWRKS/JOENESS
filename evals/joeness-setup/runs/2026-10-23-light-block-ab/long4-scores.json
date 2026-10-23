@@ -1,0 +1,58 @@
+{
+ "lc3a41f": {
+  "arm": "B",
+  "own_new_entry_turns": 0,
+  "appended_to_own_entry_turns": 0,
+  "appended_to_old_entry_turns": 7,
+  "S1_ok": "13/13"
+ },
+ "lc3c86d": {
+  "arm": "B",
+  "own_new_entry_turns": 0,
+  "appended_to_own_entry_turns": 0,
+  "appended_to_old_entry_turns": 8,
+  "S1_ok": "13/13"
+ },
+ "l43a7f1c": {
+  "arm": "T",
+  "own_new_entry_turns": 7,
+  "appended_to_own_entry_turns": 0,
+  "appended_to_old_entry_turns": 0,
+  "S1_ok": "13/13"
+ },
+ "l404fa8d": {
+  "arm": "T",
+  "own_new_entry_turns": 7,
+  "appended_to_own_entry_turns": 0,
+  "appended_to_old_entry_turns": 0,
+  "S1_ok": "13/13"
+ },
+ "l452f286": {
+  "arm": "F",
+  "own_new_entry_turns": 7,
+  "appended_to_own_entry_turns": 0,
+  "appended_to_old_entry_turns": 0,
+  "S1_ok": "13/13"
+ },
+ "l429c839": {
+  "arm": "F",
+  "own_new_entry_turns": 7,
+  "appended_to_own_entry_turns": 0,
+  "appended_to_old_entry_turns": 0,
+  "S1_ok": "13/13"
+ },
+ "l4338ce1": {
+  "arm": "L",
+  "own_new_entry_turns": 7,
+  "appended_to_own_entry_turns": 0,
+  "appended_to_old_entry_turns": 0,
+  "S1_ok": "13/13"
+ },
+ "l43ca7a7": {
+  "arm": "L",
+  "own_new_entry_turns": 4,
+  "appended_to_own_entry_turns": 4,
+  "appended_to_old_entry_turns": 0,
+  "S1_ok": "13/13"
+ }
+}

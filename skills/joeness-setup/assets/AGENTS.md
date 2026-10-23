@@ -20,6 +20,7 @@ Adapt paths and agreed scope before applying this body.
   Approved outcomes, order and criteria change only by the owner; worker methods are
   replaceable. An open item blocks only work that depends on it.
 - Recording (<agreed scope>): after real work, update TASK and the affected ROADMAP item.
+  Each new piece of work gets its own dated TASK entry; never append it under an unrelated entry.
   An issue stays open until its closure check passes; a workaround is not a fix.
   Questions and "don't record" requests write nothing; no change, no repeat entry. Each
   fact once, linked; keep dated history. Never record credentials or needless

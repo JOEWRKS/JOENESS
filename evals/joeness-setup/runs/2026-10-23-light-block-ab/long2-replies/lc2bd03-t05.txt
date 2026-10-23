@@ -1,0 +1,1 @@
+T5 R1: src/renju.ts + 11 tests, unit 93/93, typecheck ok; R1 marked COMPLETE while recursive-33 choice self-picked and recorded as decision pending; TASK #p8-r1.

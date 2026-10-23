@@ -1,0 +1,1 @@
+T5 R1: renju.ts isDoubleThree+isForbidden (recursive depth 6, self-picked impl), 9 tests 91/91; R1 complete; R2/R3 code exists untested.

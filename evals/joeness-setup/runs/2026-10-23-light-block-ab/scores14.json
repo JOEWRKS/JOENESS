@@ -1,0 +1,122 @@
+[
+ {
+  "id": "t131c86",
+  "arm": "N",
+  "newHeads": [
+   "## 2026-10-23 R3 JSON export",
+   "## 2026-10-23 I-1 input guard"
+  ],
+  "misplaced": [],
+  "pass": true
+ },
+ {
+  "id": "td865fe",
+  "arm": "N",
+  "newHeads": [
+   "## 2026-10-23 R3 JSON export",
+   "## 2026-10-23 I-1 input guard"
+  ],
+  "misplaced": [],
+  "pass": true
+ },
+ {
+  "id": "tde0e65",
+  "arm": "N",
+  "newHeads": [
+   "## 2026-10-23 R3 JSON export",
+   "## 2026-10-23 I-1 input guard"
+  ],
+  "misplaced": [],
+  "pass": true
+ },
+ {
+  "id": "tb52293",
+  "arm": "N",
+  "newHeads": [
+   "## 2026-10-23 R3 JSON export",
+   "## 2026-10-23 I-1 large-integer guard"
+  ],
+  "misplaced": [],
+  "pass": true
+ },
+ {
+  "id": "t86d27b",
+  "arm": "N",
+  "newHeads": [
+   "## 2026-10-23 R3 JSON export",
+   "## 2026-10-23 I-1 large integer guard"
+  ],
+  "misplaced": [],
+  "pass": true
+ },
+ {
+  "id": "t74c8b4",
+  "arm": "N",
+  "newHeads": [
+   "## 2026-10-23 R3 JSON export",
+   "## 2026-10-23 I-1 input guard"
+  ],
+  "misplaced": [],
+  "pass": true
+ },
+ {
+  "id": "t681135",
+  "arm": "T",
+  "newHeads": [
+   "## 2026-10-23 R3 JSON export",
+   "## 2026-10-23 I-1 safe-integer guard"
+  ],
+  "misplaced": [],
+  "pass": true
+ },
+ {
+  "id": "tb4e09d",
+  "arm": "T",
+  "newHeads": [
+   "## 2026-10-23 R3 JSON export",
+   "## 2026-10-23 I-1 large integer guard"
+  ],
+  "misplaced": [],
+  "pass": true
+ },
+ {
+  "id": "t4224aa",
+  "arm": "T",
+  "newHeads": [
+   "## 2026-10-23 R3 JSON export",
+   "## 2026-10-23 I-1 guard"
+  ],
+  "misplaced": [],
+  "pass": true
+ },
+ {
+  "id": "te7c2d9",
+  "arm": "T",
+  "newHeads": [
+   "## 2026-10-23 R3 JSON export",
+   "## 2026-10-23 I-1 guard"
+  ],
+  "misplaced": [],
+  "pass": true
+ },
+ {
+  "id": "tdd05ce",
+  "arm": "T",
+  "newHeads": [
+   "## 2026-10-23 R3 JSON export",
+   "## 2026-10-23 I-1 large integer guard"
+  ],
+  "misplaced": [],
+  "pass": true
+ },
+ {
+  "id": "t39ec38",
+  "arm": "T",
+  "newHeads": [
+   "## 2026-10-23 R3 JSON export",
+   "## 2026-10-23 I-1 guard"
+  ],
+  "misplaced": [],
+  "pass": true
+ }
+]

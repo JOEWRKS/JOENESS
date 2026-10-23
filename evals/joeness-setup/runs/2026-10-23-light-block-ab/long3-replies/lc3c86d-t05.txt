@@ -1,0 +1,1 @@
+T5 R1: isDoubleThree 8 tests 90/90 (vitest cache redirected to scratchpad to avoid shared node_modules); non-recursive, flagged; R1 complete; TASK tail record.

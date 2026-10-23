@@ -1,0 +1,1 @@
+T7 R2: isDoubleFour + 9 tests, 102/102; same-line 44 counted (self-picked, not flagged); R2 complete; TASK #p8-r2.

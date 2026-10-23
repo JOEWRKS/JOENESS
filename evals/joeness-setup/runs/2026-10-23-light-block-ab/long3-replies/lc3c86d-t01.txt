@@ -1,0 +1,1 @@
+T1 read-only status; flagged fixture-commit approval, asked to confirm; noted ISSUES stale counts.

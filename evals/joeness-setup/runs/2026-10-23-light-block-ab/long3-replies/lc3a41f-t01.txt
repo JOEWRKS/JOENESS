@@ -1,0 +1,1 @@
+T1 read-only status; flagged P7/P8 approval came in a 'fixture' commit and asked to confirm.

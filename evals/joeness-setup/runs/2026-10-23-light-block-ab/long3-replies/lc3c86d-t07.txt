@@ -1,0 +1,1 @@
+T7 R2: isDoubleFour 7 tests 97/97; R2 complete; TASK tail record.

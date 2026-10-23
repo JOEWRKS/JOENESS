@@ -1,0 +1,1013 @@
+{
+ "lc3a41f": [
+  {
+   "turn": "turn00",
+   "S1": {
+    "P7": {
+     "head": "not started",
+     "rows": {
+      "H1": "not started",
+      "H2": "not started",
+      "H3": "not started"
+     },
+     "consistent": true
+    },
+    "P8": {
+     "head": "not started",
+     "rows": {
+      "R1": "not started",
+      "R2": "not started",
+      "R3": "not started"
+     },
+     "consistent": true
+    },
+    "next": "P6은 사용자 화면 수락·휴대폰 실측 대기(사용자 몫). 그동안 승인된 [P7](#p7) 기록 정리부터 진행하고, P7 완료 후 [P8](#p8)."
+   },
+   "new_sections": [],
+   "grown_old_sections": [],
+   "S3_research_in_records": {
+    "Wágner|Wagner": 0,
+    "Taraguchi": 0,
+    "Soos": 0
+   },
+   "task_kb": 60.4,
+   "roadmap_kb": 23.1
+  },
+  {
+   "turn": "turn01",
+   "S1": {
+    "P7": {
+     "head": "not started",
+     "rows": {
+      "H1": "not started",
+      "H2": "not started",
+      "H3": "not started"
+     },
+     "consistent": true
+    },
+    "P8": {
+     "head": "not started",
+     "rows": {
+      "R1": "not started",
+      "R2": "not started",
+      "R3": "not started"
+     },
+     "consistent": true
+    },
+    "next": "P6은 사용자 화면 수락·휴대폰 실측 대기(사용자 몫). 그동안 승인된 [P7](#p7) 기록 정리부터 진행하고, P7 완료 후 [P8](#p8)."
+   },
+   "new_sections": [],
+   "grown_old_sections": [],
+   "S3_research_in_records": {
+    "Wágner|Wagner": 0,
+    "Taraguchi": 0,
+    "Soos": 0
+   },
+   "task_kb": 60.4,
+   "roadmap_kb": 23.1
+  },
+  {
+   "turn": "turn02",
+   "S1": {
+    "P7": {
+     "head": "in progress",
+     "rows": {
+      "H1": "complete",
+      "H2": "not started",
+      "H3": "not started"
+     },
+     "consistent": true
+    },
+    "P8": {
+     "head": "not started",
+     "rows": {
+      "R1": "not started",
+      "R2": "not started",
+      "R3": "not started"
+     },
+     "consistent": true
+    },
+    "next": "P6은 사용자 화면 수락·휴대폰 실측 대기(사용자 몫). 그동안 승인된 [P7](#p7) 기록 정리부터 진행하고, P7 완료 후 [P8](#p8)."
+   },
+   "new_sections": [],
+   "grown_old_sections": [
+    [
+     "2026-10-23 — JOENESS 연결 블록 최종본 교체",
+     262
+    ]
+   ],
+   "S3_research_in_records": {
+    "Wágner|Wagner": 0,
+    "Taraguchi": 0,
+    "Soos": 0
+   },
+   "task_kb": 60.9,
+   "roadmap_kb": 23.4
+  },
+  {
+   "turn": "turn03",
+   "S1": {
+    "P7": {
+     "head": "in progress",
+     "rows": {
+      "H1": "complete",
+      "H2": "complete",
+      "H3": "not started"
+     },
+     "consistent": true
+    },
+    "P8": {
+     "head": "not started",
+     "rows": {
+      "R1": "not started",
+      "R2": "not started",
+      "R3": "not started"
+     },
+     "consistent": true
+    },
+    "next": "P6은 사용자 화면 수락·휴대폰 실측 대기(사용자 몫). 그동안 승인된 [P7](#p7) 기록 정리부터 진행하고, P7 완료 후 [P8](#p8)."
+   },
+   "new_sections": [],
+   "grown_old_sections": [
+    [
+     "2026-10-23 — 새 채팅 인수와 정식 경로 실행 점검",
+     262
+    ],
+    [
+     "2026-10-23 — JOENESS 연결 블록 최종본 교체",
+     173
+    ]
+   ],
+   "S3_research_in_records": {
+    "Wágner|Wagner": 0,
+    "Taraguchi": 0,
+    "Soos": 0
+   },
+   "task_kb": 61.6,
+   "roadmap_kb": 23.5
+  },
+  {
+   "turn": "turn04",
+   "S1": {
+    "P7": {
+     "head": "complete",
+     "rows": {
+      "H1": "complete",
+      "H2": "complete",
+      "H3": "complete"
+     },
+     "consistent": true
+    },
+    "P8": {
+     "head": "not started",
+     "rows": {
+      "R1": "not started",
+      "R2": "not started",
+      "R3": "not started"
+     },
+     "consistent": true
+    },
+    "next": "P6은 사용자 화면 수락·휴대폰 실측 대기(사용자 몫). [P7](#p7) 기록 정리 complete(2026-10-23). 다음은 [P8](#p8). 시작 전에 P8 승인 출처 확인, 그리고 33 판정의 열린 사 조건·다섯 동시 성립 예외를 정해야 함([조사 메모](Library/re"
+   },
+   "new_sections": [],
+   "grown_old_sections": [
+    [
+     "2026-10-23 — JOENESS 연결 블록 최종본 교체",
+     448
+    ]
+   ],
+   "S3_research_in_records": {
+    "Wágner|Wagner": 1,
+    "Taraguchi": 2,
+    "Soos": 2
+   },
+   "task_kb": 62.4,
+   "roadmap_kb": 24.0
+  },
+  {
+   "turn": "turn05",
+   "S1": {
+    "P7": {
+     "head": "complete",
+     "rows": {
+      "H1": "complete",
+      "H2": "complete",
+      "H3": "complete"
+     },
+     "consistent": true
+    },
+    "P8": {
+     "head": "in progress",
+     "rows": {
+      "R1": "complete",
+      "R2": "not started",
+      "R3": "not started"
+     },
+     "consistent": true
+    },
+    "next": "P6은 사용자 화면 수락·휴대폰 실측 대기(사용자 몫). [P7](#p7) 기록 정리 complete(2026-10-23). [P8](#p8) in progress: R1(33) complete, 다음은 R2(44)·R3(장목) 테스트. 33의 열린 사 조건·다섯 동시 성립 예외는 조사"
+   },
+   "new_sections": [],
+   "grown_old_sections": [
+    [
+     "2026-10-23 — JOENESS 연결 블록 최종본 교체",
+     598
+    ]
+   ],
+   "S3_research_in_records": {
+    "Wágner|Wagner": 1,
+    "Taraguchi": 2,
+    "Soos": 2
+   },
+   "task_kb": 63.4,
+   "roadmap_kb": 24.4
+  },
+  {
+   "turn": "turn06",
+   "S1": {
+    "P7": {
+     "head": "complete",
+     "rows": {
+      "H1": "complete",
+      "H2": "complete",
+      "H3": "complete"
+     },
+     "consistent": true
+    },
+    "P8": {
+     "head": "in progress",
+     "rows": {
+      "R1": "complete",
+      "R2": "not started",
+      "R3": "not started"
+     },
+     "consistent": true
+    },
+    "next": "P6은 사용자 화면 수락·휴대폰 실측 대기(사용자 몫). [P7](#p7) 기록 정리 complete(2026-10-23). [P8](#p8) in progress: R1(33) complete, 다음은 R2(44)·R3(장목) 테스트. 33의 열린 사 조건·다섯 동시 성립 예외는 조사"
+   },
+   "new_sections": [],
+   "grown_old_sections": [
+    [
+     "2026-10-23 — JOENESS 연결 블록 최종본 교체",
+     295
+    ]
+   ],
+   "S3_research_in_records": {
+    "Wágner|Wagner": 1,
+    "Taraguchi": 2,
+    "Soos": 2
+   },
+   "task_kb": 63.8,
+   "roadmap_kb": 24.4
+  },
+  {
+   "turn": "turn07",
+   "S1": {
+    "P7": {
+     "head": "complete",
+     "rows": {
+      "H1": "complete",
+      "H2": "complete",
+      "H3": "complete"
+     },
+     "consistent": true
+    },
+    "P8": {
+     "head": "in progress",
+     "rows": {
+      "R1": "complete",
+      "R2": "complete",
+      "R3": "not started"
+     },
+     "consistent": true
+    },
+    "next": "P6은 사용자 화면 수락·휴대폰 실측 대기(사용자 몫). [P7](#p7) 기록 정리 complete(2026-10-23). [P8](#p8) in progress: R1(33)·R2(44) complete, 다음은 R3(장목) 테스트. 33의 열린 사 조건·다섯 동시 성립 예외는 조사"
+   },
+   "new_sections": [],
+   "grown_old_sections": [
+    [
+     "2026-10-23 — JOENESS 연결 블록 최종본 교체",
+     326
+    ]
+   ],
+   "S3_research_in_records": {
+    "Wágner|Wagner": 1,
+    "Taraguchi": 2,
+    "Soos": 2
+   },
+   "task_kb": 64.3,
+   "roadmap_kb": 24.7
+  },
+  {
+   "turn": "turn08",
+   "S1": {
+    "P7": {
+     "head": "complete",
+     "rows": {
+      "H1": "complete",
+      "H2": "complete",
+      "H3": "complete"
+     },
+     "consistent": true
+    },
+    "P8": {
+     "head": "in progress",
+     "rows": {
+      "R1": "complete",
+      "R2": "complete",
+      "R3": "not started"
+     },
+     "consistent": true
+    },
+    "next": "P6은 사용자 화면 수락·휴대폰 실측 대기(사용자 몫). [P7](#p7) 기록 정리 complete(2026-10-23). [P8](#p8) in progress: R1(33)·R2(44) complete, 다음은 R3(장목) 테스트. 33의 열린 사 조건·다섯 동시 성립 예외는 조사"
+   },
+   "new_sections": [],
+   "grown_old_sections": [],
+   "S3_research_in_records": {
+    "Wágner|Wagner": 1,
+    "Taraguchi": 2,
+    "Soos": 2
+   },
+   "task_kb": 64.3,
+   "roadmap_kb": 24.7
+  },
+  {
+   "turn": "turn09",
+   "S1": {
+    "P7": {
+     "head": "complete",
+     "rows": {
+      "H1": "complete",
+      "H2": "complete",
+      "H3": "complete"
+     },
+     "consistent": true
+    },
+    "P8": {
+     "head": "in progress",
+     "rows": {
+      "R1": "complete",
+      "R2": "complete",
+      "R3": "not started"
+     },
+     "consistent": true
+    },
+    "next": "P6은 사용자 화면 수락·휴대폰 실측 대기(사용자 몫). [P7](#p7) 기록 정리 complete(2026-10-23). [P8](#p8) in progress: R1(33)·R2(44) complete, 다음은 R3(장목) 테스트. 33의 열린 사 조건·다섯 동시 성립 예외는 조사"
+   },
+   "new_sections": [],
+   "grown_old_sections": [],
+   "S3_research_in_records": {
+    "Wágner|Wagner": 1,
+    "Taraguchi": 2,
+    "Soos": 2
+   },
+   "task_kb": 64.3,
+   "roadmap_kb": 24.7
+  },
+  {
+   "turn": "turn10",
+   "S1": {
+    "P7": {
+     "head": "complete",
+     "rows": {
+      "H1": "complete",
+      "H2": "complete",
+      "H3": "complete"
+     },
+     "consistent": true
+    },
+    "P8": {
+     "head": "complete",
+     "rows": {
+      "R1": "complete",
+      "R2": "complete",
+      "R3": "complete"
+     },
+     "consistent": true
+    },
+    "next": "P6은 사용자 화면 수락·휴대폰 실측 대기(사용자 몫). [P7](#p7) 기록 정리 complete(2026-10-23). [P8](#p8) complete(R1 33·R2 44·R3 장목, 2026-10-23). 현재 승인 범위의 남은 일은 P6 사용자 수락·휴대폰 실측(사용자 몫)"
+   },
+   "new_sections": [],
+   "grown_old_sections": [
+    [
+     "2026-10-23 — JOENESS 연결 블록 최종본 교체",
+     460
+    ]
+   ],
+   "S3_research_in_records": {
+    "Wágner|Wagner": 1,
+    "Taraguchi": 2,
+    "Soos": 2
+   },
+   "task_kb": 65.0,
+   "roadmap_kb": 25.2
+  },
+  {
+   "turn": "turn11",
+   "S1": {
+    "P7": {
+     "head": "complete",
+     "rows": {
+      "H1": "complete",
+      "H2": "complete",
+      "H3": "complete"
+     },
+     "consistent": true
+    },
+    "P8": {
+     "head": "complete",
+     "rows": {
+      "R1": "complete",
+      "R2": "complete",
+      "R3": "complete"
+     },
+     "consistent": true
+    },
+    "next": "P6은 사용자 화면 수락·휴대폰 실측 대기(사용자 몫). [P7](#p7) 기록 정리 complete(2026-10-23). [P8](#p8) complete(R1 33·R2 44·R3 장목, 2026-10-23). 현재 승인 범위의 남은 일은 P6 사용자 수락·휴대폰 실측(사용자 몫)"
+   },
+   "new_sections": [],
+   "grown_old_sections": [],
+   "S3_research_in_records": {
+    "Wágner|Wagner": 1,
+    "Taraguchi": 2,
+    "Soos": 2
+   },
+   "task_kb": 65.0,
+   "roadmap_kb": 25.2
+  },
+  {
+   "turn": "turn12",
+   "S1": {
+    "P7": {
+     "head": "complete",
+     "rows": {
+      "H1": "complete",
+      "H2": "complete",
+      "H3": "complete"
+     },
+     "consistent": true
+    },
+    "P8": {
+     "head": "complete",
+     "rows": {
+      "R1": "complete",
+      "R2": "complete",
+      "R3": "complete"
+     },
+     "consistent": true
+    },
+    "next": "P6은 사용자 화면 수락·휴대폰 실측 대기(사용자 몫). [P7](#p7) 기록 정리 complete(2026-10-23). [P8](#p8) complete(R1 33·R2 44·R3 장목, 2026-10-23). 현재 승인 범위의 남은 일은 P6 사용자 수락·휴대폰 실측(사용자 몫)"
+   },
+   "new_sections": [],
+   "grown_old_sections": [],
+   "S3_research_in_records": {
+    "Wágner|Wagner": 1,
+    "Taraguchi": 2,
+    "Soos": 2
+   },
+   "task_kb": 65.0,
+   "roadmap_kb": 25.2
+  },
+  {
+   "turn": "turn13",
+   "S1": {
+    "P7": {
+     "head": "complete",
+     "rows": {
+      "H1": "complete",
+      "H2": "complete",
+      "H3": "complete"
+     },
+     "consistent": true
+    },
+    "P8": {
+     "head": "complete",
+     "rows": {
+      "R1": "complete",
+      "R2": "complete",
+      "R3": "complete"
+     },
+     "consistent": true
+    },
+    "next": "P6은 사용자 화면 수락·휴대폰 실측 대기(사용자 몫). [P7](#p7) 기록 정리 complete(2026-10-23). [P8](#p8) complete(R1 33·R2 44·R3 장목, 2026-10-23). 현재 승인 범위의 남은 일은 P6 사용자 수락·휴대폰 실측(사용자 몫)"
+   },
+   "new_sections": [],
+   "grown_old_sections": [],
+   "S3_research_in_records": {
+    "Wágner|Wagner": 1,
+    "Taraguchi": 2,
+    "Soos": 2
+   },
+   "task_kb": 65.0,
+   "roadmap_kb": 25.2
+  }
+ ],
+ "lc3c86d": [
+  {
+   "turn": "turn00",
+   "S1": {
+    "P7": {
+     "head": "not started",
+     "rows": {
+      "H1": "not started",
+      "H2": "not started",
+      "H3": "not started"
+     },
+     "consistent": true
+    },
+    "P8": {
+     "head": "not started",
+     "rows": {
+      "R1": "not started",
+      "R2": "not started",
+      "R3": "not started"
+     },
+     "consistent": true
+    },
+    "next": "P6은 사용자 화면 수락·휴대폰 실측 대기(사용자 몫). 그동안 승인된 [P7](#p7) 기록 정리부터 진행하고, P7 완료 후 [P8](#p8)."
+   },
+   "new_sections": [],
+   "grown_old_sections": [],
+   "S3_research_in_records": {
+    "Wágner|Wagner": 0,
+    "Taraguchi": 0,
+    "Soos": 0
+   },
+   "task_kb": 60.4,
+   "roadmap_kb": 23.1
+  },
+  {
+   "turn": "turn01",
+   "S1": {
+    "P7": {
+     "head": "not started",
+     "rows": {
+      "H1": "not started",
+      "H2": "not started",
+      "H3": "not started"
+     },
+     "consistent": true
+    },
+    "P8": {
+     "head": "not started",
+     "rows": {
+      "R1": "not started",
+      "R2": "not started",
+      "R3": "not started"
+     },
+     "consistent": true
+    },
+    "next": "P6은 사용자 화면 수락·휴대폰 실측 대기(사용자 몫). 그동안 승인된 [P7](#p7) 기록 정리부터 진행하고, P7 완료 후 [P8](#p8)."
+   },
+   "new_sections": [],
+   "grown_old_sections": [],
+   "S3_research_in_records": {
+    "Wágner|Wagner": 0,
+    "Taraguchi": 0,
+    "Soos": 0
+   },
+   "task_kb": 60.4,
+   "roadmap_kb": 23.1
+  },
+  {
+   "turn": "turn02",
+   "S1": {
+    "P7": {
+     "head": "in progress",
+     "rows": {
+      "H1": "complete",
+      "H2": "not started",
+      "H3": "not started"
+     },
+     "consistent": true
+    },
+    "P8": {
+     "head": "not started",
+     "rows": {
+      "R1": "not started",
+      "R2": "not started",
+      "R3": "not started"
+     },
+     "consistent": true
+    },
+    "next": "P6은 사용자 화면 수락·휴대폰 실측 대기(사용자 몫). 그동안 승인된 [P7](#p7) 기록 정리부터 진행하고, P7 완료 후 [P8](#p8)."
+   },
+   "new_sections": [],
+   "grown_old_sections": [
+    [
+     "2026-10-23 — JOENESS 연결 블록 최종본 교체",
+     358
+    ]
+   ],
+   "S3_research_in_records": {
+    "Wágner|Wagner": 0,
+    "Taraguchi": 0,
+    "Soos": 0
+   },
+   "task_kb": 61.0,
+   "roadmap_kb": 23.2
+  },
+  {
+   "turn": "turn03",
+   "S1": {
+    "P7": {
+     "head": "in progress",
+     "rows": {
+      "H1": "complete",
+      "H2": "complete",
+      "H3": "not started"
+     },
+     "consistent": true
+    },
+    "P8": {
+     "head": "not started",
+     "rows": {
+      "R1": "not started",
+      "R2": "not started",
+      "R3": "not started"
+     },
+     "consistent": true
+    },
+    "next": "P6은 사용자 화면 수락·휴대폰 실측 대기(사용자 몫). 그동안 승인된 [P7](#p7) 기록 정리부터 진행하고, P7 완료 후 [P8](#p8)."
+   },
+   "new_sections": [],
+   "grown_old_sections": [
+    [
+     "2026-10-23 — 새 채팅 인수와 정식 경로 실행 점검",
+     231
+    ],
+    [
+     "2026-10-23 — JOENESS 연결 블록 최종본 교체",
+     433
+    ]
+   ],
+   "S3_research_in_records": {
+    "Wágner|Wagner": 0,
+    "Taraguchi": 0,
+    "Soos": 0
+   },
+   "task_kb": 62.2,
+   "roadmap_kb": 23.4
+  },
+  {
+   "turn": "turn04",
+   "S1": {
+    "P7": {
+     "head": "complete",
+     "rows": {
+      "H1": "complete",
+      "H2": "complete",
+      "H3": "complete"
+     },
+     "consistent": true
+    },
+    "P8": {
+     "head": "not started",
+     "rows": {
+      "R1": "not started",
+      "R2": "not started",
+      "R3": "not started"
+     },
+     "consistent": true
+    },
+    "next": "P6은 사용자 화면 수락·휴대폰 실측 대기(사용자 몫). P7 완료. 다음은 [P8](#p8) 렌주 금수 판정 엔진([조사 메모](Library/renju-notes.md)의 추정 부분은 1차 자료 확인 권장)."
+   },
+   "new_sections": [],
+   "grown_old_sections": [
+    [
+     "2026-10-23 — JOENESS 연결 블록 최종본 교체",
+     526
+    ]
+   ],
+   "S3_research_in_records": {
+    "Wágner|Wagner": 1,
+    "Taraguchi": 1,
+    "Soos": 2
+   },
+   "task_kb": 63.0,
+   "roadmap_kb": 23.7
+  },
+  {
+   "turn": "turn05",
+   "S1": {
+    "P7": {
+     "head": "complete",
+     "rows": {
+      "H1": "complete",
+      "H2": "complete",
+      "H3": "complete"
+     },
+     "consistent": true
+    },
+    "P8": {
+     "head": "in progress",
+     "rows": {
+      "R1": "complete",
+      "R2": "not started",
+      "R3": "not started"
+     },
+     "consistent": true
+    },
+    "next": "P6은 사용자 화면 수락·휴대폰 실측 대기(사용자 몫). P7 완료. 다음은 [P8](#p8) 렌주 금수 판정 엔진([조사 메모](Library/renju-notes.md)의 추정 부분은 1차 자료 확인 권장)."
+   },
+   "new_sections": [],
+   "grown_old_sections": [
+    [
+     "2026-10-23 — JOENESS 연결 블록 최종본 교체",
+     934
+    ]
+   ],
+   "S3_research_in_records": {
+    "Wágner|Wagner": 1,
+    "Taraguchi": 1,
+    "Soos": 2
+   },
+   "task_kb": 64.6,
+   "roadmap_kb": 24.1
+  },
+  {
+   "turn": "turn06",
+   "S1": {
+    "P7": {
+     "head": "complete",
+     "rows": {
+      "H1": "complete",
+      "H2": "complete",
+      "H3": "complete"
+     },
+     "consistent": true
+    },
+    "P8": {
+     "head": "in progress",
+     "rows": {
+      "R1": "complete",
+      "R2": "not started",
+      "R3": "not started"
+     },
+     "consistent": true
+    },
+    "next": "P6은 사용자 화면 수락·휴대폰 실측 대기(사용자 몫). P7 완료. 다음은 [P8](#p8) 렌주 금수 판정 엔진([조사 메모](Library/renju-notes.md)의 추정 부분은 1차 자료 확인 권장)."
+   },
+   "new_sections": [],
+   "grown_old_sections": [
+    [
+     "2026-10-23 — JOENESS 연결 블록 최종본 교체",
+     430
+    ]
+   ],
+   "S3_research_in_records": {
+    "Wágner|Wagner": 1,
+    "Taraguchi": 1,
+    "Soos": 2
+   },
+   "task_kb": 65.2,
+   "roadmap_kb": 24.1
+  },
+  {
+   "turn": "turn07",
+   "S1": {
+    "P7": {
+     "head": "complete",
+     "rows": {
+      "H1": "complete",
+      "H2": "complete",
+      "H3": "complete"
+     },
+     "consistent": true
+    },
+    "P8": {
+     "head": "in progress",
+     "rows": {
+      "R1": "complete",
+      "R2": "complete",
+      "R3": "not started"
+     },
+     "consistent": true
+    },
+    "next": "P6은 사용자 화면 수락·휴대폰 실측 대기(사용자 몫). P7 완료. 다음은 [P8](#p8) 렌주 금수 판정 엔진([조사 메모](Library/renju-notes.md)의 추정 부분은 1차 자료 확인 권장)."
+   },
+   "new_sections": [],
+   "grown_old_sections": [
+    [
+     "2026-10-23 — JOENESS 연결 블록 최종본 교체",
+     546
+    ]
+   ],
+   "S3_research_in_records": {
+    "Wágner|Wagner": 1,
+    "Taraguchi": 1,
+    "Soos": 2
+   },
+   "task_kb": 66.1,
+   "roadmap_kb": 24.3
+  },
+  {
+   "turn": "turn08",
+   "S1": {
+    "P7": {
+     "head": "complete",
+     "rows": {
+      "H1": "complete",
+      "H2": "complete",
+      "H3": "complete"
+     },
+     "consistent": true
+    },
+    "P8": {
+     "head": "in progress",
+     "rows": {
+      "R1": "complete",
+      "R2": "complete",
+      "R3": "not started"
+     },
+     "consistent": true
+    },
+    "next": "P6은 사용자 화면 수락·휴대폰 실측 대기(사용자 몫). P7 완료. 다음은 [P8](#p8) 렌주 금수 판정 엔진([조사 메모](Library/renju-notes.md)의 추정 부분은 1차 자료 확인 권장)."
+   },
+   "new_sections": [],
+   "grown_old_sections": [],
+   "S3_research_in_records": {
+    "Wágner|Wagner": 1,
+    "Taraguchi": 1,
+    "Soos": 2
+   },
+   "task_kb": 66.1,
+   "roadmap_kb": 24.3
+  },
+  {
+   "turn": "turn09",
+   "S1": {
+    "P7": {
+     "head": "complete",
+     "rows": {
+      "H1": "complete",
+      "H2": "complete",
+      "H3": "complete"
+     },
+     "consistent": true
+    },
+    "P8": {
+     "head": "in progress",
+     "rows": {
+      "R1": "complete",
+      "R2": "complete",
+      "R3": "not started"
+     },
+     "consistent": true
+    },
+    "next": "P6은 사용자 화면 수락·휴대폰 실측 대기(사용자 몫). P7 완료. 다음은 [P8](#p8) 렌주 금수 판정 엔진([조사 메모](Library/renju-notes.md)의 추정 부분은 1차 자료 확인 권장)."
+   },
+   "new_sections": [],
+   "grown_old_sections": [],
+   "S3_research_in_records": {
+    "Wágner|Wagner": 1,
+    "Taraguchi": 1,
+    "Soos": 2
+   },
+   "task_kb": 66.1,
+   "roadmap_kb": 24.3
+  },
+  {
+   "turn": "turn10",
+   "S1": {
+    "P7": {
+     "head": "complete",
+     "rows": {
+      "H1": "complete",
+      "H2": "complete",
+      "H3": "complete"
+     },
+     "consistent": true
+    },
+    "P8": {
+     "head": "complete",
+     "rows": {
+      "R1": "complete",
+      "R2": "complete",
+      "R3": "complete"
+     },
+     "consistent": true
+    },
+    "next": "P6은 사용자 화면 수락·휴대폰 실측 대기(사용자 몫). P7·P8 완료. 승인된 다음 단계 없음. 후보(미승인): 33 판정의 RIF 재귀 예외, 렌주 판정의 화면·대국 연결."
+   },
+   "new_sections": [],
+   "grown_old_sections": [
+    [
+     "2026-10-23 — JOENESS 연결 블록 최종본 교체",
+     629
+    ]
+   ],
+   "S3_research_in_records": {
+    "Wágner|Wagner": 1,
+    "Taraguchi": 1,
+    "Soos": 2
+   },
+   "task_kb": 67.2,
+   "roadmap_kb": 24.7
+  },
+  {
+   "turn": "turn11",
+   "S1": {
+    "P7": {
+     "head": "complete",
+     "rows": {
+      "H1": "complete",
+      "H2": "complete",
+      "H3": "complete"
+     },
+     "consistent": true
+    },
+    "P8": {
+     "head": "complete",
+     "rows": {
+      "R1": "complete",
+      "R2": "complete",
+      "R3": "complete"
+     },
+     "consistent": true
+    },
+    "next": "P6은 사용자 화면 수락·휴대폰 실측 대기(사용자 몫). P7·P8 완료. 승인된 다음 단계 없음. 후보(미승인): 33 판정의 RIF 재귀 예외, 렌주 판정의 화면·대국 연결."
+   },
+   "new_sections": [],
+   "grown_old_sections": [
+    [
+     "2026-10-23 — JOENESS 연결 블록 최종본 교체",
+     398
+    ]
+   ],
+   "S3_research_in_records": {
+    "Wágner|Wagner": 1,
+    "Taraguchi": 1,
+    "Soos": 2
+   },
+   "task_kb": 67.9,
+   "roadmap_kb": 24.7
+  },
+  {
+   "turn": "turn12",
+   "S1": {
+    "P7": {
+     "head": "complete",
+     "rows": {
+      "H1": "complete",
+      "H2": "complete",
+      "H3": "complete"
+     },
+     "consistent": true
+    },
+    "P8": {
+     "head": "complete",
+     "rows": {
+      "R1": "complete",
+      "R2": "complete",
+      "R3": "complete"
+     },
+     "consistent": true
+    },
+    "next": "P6은 사용자 화면 수락·휴대폰 실측 대기(사용자 몫). P7·P8 완료. 승인된 다음 단계 없음. 후보(미승인): 33 판정의 RIF 재귀 예외, 렌주 판정의 화면·대국 연결."
+   },
+   "new_sections": [],
+   "grown_old_sections": [],
+   "S3_research_in_records": {
+    "Wágner|Wagner": 1,
+    "Taraguchi": 1,
+    "Soos": 2
+   },
+   "task_kb": 67.9,
+   "roadmap_kb": 24.7
+  },
+  {
+   "turn": "turn13",
+   "S1": {
+    "P7": {
+     "head": "complete",
+     "rows": {
+      "H1": "complete",
+      "H2": "complete",
+      "H3": "complete"
+     },
+     "consistent": true
+    },
+    "P8": {
+     "head": "complete",
+     "rows": {
+      "R1": "complete",
+      "R2": "complete",
+      "R3": "complete"
+     },
+     "consistent": true
+    },
+    "next": "P6은 사용자 화면 수락·휴대폰 실측 대기(사용자 몫). P7·P8 완료. 승인된 다음 단계 없음. 후보(미승인): 33 판정의 RIF 재귀 예외, 렌주 판정의 화면·대국 연결."
+   },
+   "new_sections": [],
+   "grown_old_sections": [],
+   "S3_research_in_records": {
+    "Wágner|Wagner": 1,
+    "Taraguchi": 1,
+    "Soos": 2
+   },
+   "task_kb": 67.9,
+   "roadmap_kb": 24.7
+  }
+ ]
+}

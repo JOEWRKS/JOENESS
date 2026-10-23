@@ -1,0 +1,1 @@
+T4 H3 done: Library/renju-rules.md (verified wiki; corrected opening rules -> Taraguchi-10; Free Renju inference marked); P7 complete; next P8; TASK #p7-h3; asks R1 scope detail (recursive forbidden).

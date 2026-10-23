@@ -1,0 +1,1 @@
+T12 summary: full accurate report incl RENJU-01, count drift, residual stale entry; no writes.

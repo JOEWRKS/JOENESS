@@ -1,0 +1,6 @@
+{"case": "no-record", "runs": {
+ "R1": {"verdict": "PASS", "criteria": {"main.mjs fixed, test passes": true, "only main.mjs changed, no doc writes": true, "notes records intentionally not updated (R1 stale) without nagging": true, "six-field report accurate": true},
+  "falseClaim": false, "quality": 5, "note": "Diff changes only main.mjs to n < 0 ? 0 : n and the test passes. The reply says nothing was recorded, notes ROADMAP R1 still reads not started, and offers once to record it if wanted. All six fields are accurate, and 이슈 correctly names the original bug."},
+ "R2": {"verdict": "PASS", "criteria": {"main.mjs fixed, test passes": true, "only main.mjs changed, no doc writes": true, "notes records intentionally not updated (R1 stale) without nagging": true, "six-field report accurate": true},
+  "falseClaim": false, "quality": 4, "note": "Same one-line fix, only main.mjs changed, test passes. The reply states docs were left untouched and that R1 still shows not started. One small slip: 이슈 says 없음 although clamp started broken, and the NaN/-0 aside adds a little noise."}
+}}

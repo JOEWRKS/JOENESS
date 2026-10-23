@@ -1,0 +1,1 @@
+T5 R1: renju.ts isDoubleThree +12 tests, 94/94, tsc ok; R1 COMPLETE; non-recursive left as limitation, asks decision; TASK #p8-r1.

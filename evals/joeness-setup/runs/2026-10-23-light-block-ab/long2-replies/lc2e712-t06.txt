@@ -1,0 +1,1 @@
+T6 check script: package.json, README, TASK #check-script own entry; ROADMAP untouched; 94/94.

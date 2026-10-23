@@ -1,0 +1,1 @@
+T12 next: P6, renju mode decision A-C, optional cleanups; no writes.

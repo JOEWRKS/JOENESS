@@ -1,0 +1,1 @@
+T1 read-only status: P6 verification pending, P7 not started (H1-H3), P8 after P7; no changes; noted CRLF diffs in 5 files.

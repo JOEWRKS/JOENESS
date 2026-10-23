@@ -1,0 +1,134 @@
+[
+  {
+    "id": "t131c86",
+    "case": "own-entry",
+    "arm": "N",
+    "rep": 1,
+    "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-10-23-joeness-light-ab\\fx\\t131c86",
+    "turns": [
+      "R3 JSON 내보내기 구현해줘.",
+      "이제 I-1도 처리하자. MAX_SAFE_INTEGER 넘는 입력은 clamp에서 RangeError 던지게 하고, 경계 테스트도 넣어서 닫아줘."
+    ]
+  },
+  {
+    "id": "td865fe",
+    "case": "own-entry",
+    "arm": "N",
+    "rep": 2,
+    "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-10-23-joeness-light-ab\\fx\\td865fe",
+    "turns": [
+      "R3 JSON 내보내기 구현해줘.",
+      "이제 I-1도 처리하자. MAX_SAFE_INTEGER 넘는 입력은 clamp에서 RangeError 던지게 하고, 경계 테스트도 넣어서 닫아줘."
+    ]
+  },
+  {
+    "id": "tde0e65",
+    "case": "own-entry",
+    "arm": "N",
+    "rep": 3,
+    "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-10-23-joeness-light-ab\\fx\\tde0e65",
+    "turns": [
+      "R3 JSON 내보내기 구현해줘.",
+      "이제 I-1도 처리하자. MAX_SAFE_INTEGER 넘는 입력은 clamp에서 RangeError 던지게 하고, 경계 테스트도 넣어서 닫아줘."
+    ]
+  },
+  {
+    "id": "tb52293",
+    "case": "own-entry",
+    "arm": "N",
+    "rep": 4,
+    "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-10-23-joeness-light-ab\\fx\\tb52293",
+    "turns": [
+      "R3 JSON 내보내기 구현해줘.",
+      "이제 I-1도 처리하자. MAX_SAFE_INTEGER 넘는 입력은 clamp에서 RangeError 던지게 하고, 경계 테스트도 넣어서 닫아줘."
+    ]
+  },
+  {
+    "id": "t86d27b",
+    "case": "own-entry",
+    "arm": "N",
+    "rep": 5,
+    "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-10-23-joeness-light-ab\\fx\\t86d27b",
+    "turns": [
+      "R3 JSON 내보내기 구현해줘.",
+      "이제 I-1도 처리하자. MAX_SAFE_INTEGER 넘는 입력은 clamp에서 RangeError 던지게 하고, 경계 테스트도 넣어서 닫아줘."
+    ]
+  },
+  {
+    "id": "t74c8b4",
+    "case": "own-entry",
+    "arm": "N",
+    "rep": 6,
+    "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-10-23-joeness-light-ab\\fx\\t74c8b4",
+    "turns": [
+      "R3 JSON 내보내기 구현해줘.",
+      "이제 I-1도 처리하자. MAX_SAFE_INTEGER 넘는 입력은 clamp에서 RangeError 던지게 하고, 경계 테스트도 넣어서 닫아줘."
+    ]
+  },
+  {
+    "id": "t681135",
+    "case": "own-entry",
+    "arm": "T",
+    "rep": 1,
+    "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-10-23-joeness-light-ab\\fx\\t681135",
+    "turns": [
+      "R3 JSON 내보내기 구현해줘.",
+      "이제 I-1도 처리하자. MAX_SAFE_INTEGER 넘는 입력은 clamp에서 RangeError 던지게 하고, 경계 테스트도 넣어서 닫아줘."
+    ]
+  },
+  {
+    "id": "tb4e09d",
+    "case": "own-entry",
+    "arm": "T",
+    "rep": 2,
+    "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-10-23-joeness-light-ab\\fx\\tb4e09d",
+    "turns": [
+      "R3 JSON 내보내기 구현해줘.",
+      "이제 I-1도 처리하자. MAX_SAFE_INTEGER 넘는 입력은 clamp에서 RangeError 던지게 하고, 경계 테스트도 넣어서 닫아줘."
+    ]
+  },
+  {
+    "id": "t4224aa",
+    "case": "own-entry",
+    "arm": "T",
+    "rep": 3,
+    "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-10-23-joeness-light-ab\\fx\\t4224aa",
+    "turns": [
+      "R3 JSON 내보내기 구현해줘.",
+      "이제 I-1도 처리하자. MAX_SAFE_INTEGER 넘는 입력은 clamp에서 RangeError 던지게 하고, 경계 테스트도 넣어서 닫아줘."
+    ]
+  },
+  {
+    "id": "te7c2d9",
+    "case": "own-entry",
+    "arm": "T",
+    "rep": 4,
+    "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-10-23-joeness-light-ab\\fx\\te7c2d9",
+    "turns": [
+      "R3 JSON 내보내기 구현해줘.",
+      "이제 I-1도 처리하자. MAX_SAFE_INTEGER 넘는 입력은 clamp에서 RangeError 던지게 하고, 경계 테스트도 넣어서 닫아줘."
+    ]
+  },
+  {
+    "id": "tdd05ce",
+    "case": "own-entry",
+    "arm": "T",
+    "rep": 5,
+    "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-10-23-joeness-light-ab\\fx\\tdd05ce",
+    "turns": [
+      "R3 JSON 내보내기 구현해줘.",
+      "이제 I-1도 처리하자. MAX_SAFE_INTEGER 넘는 입력은 clamp에서 RangeError 던지게 하고, 경계 테스트도 넣어서 닫아줘."
+    ]
+  },
+  {
+    "id": "t39ec38",
+    "case": "own-entry",
+    "arm": "T",
+    "rep": 6,
+    "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-10-23-joeness-light-ab\\fx\\t39ec38",
+    "turns": [
+      "R3 JSON 내보내기 구현해줘.",
+      "이제 I-1도 처리하자. MAX_SAFE_INTEGER 넘는 입력은 clamp에서 RangeError 던지게 하고, 경계 테스트도 넣어서 닫아줘."
+    ]
+  }
+]

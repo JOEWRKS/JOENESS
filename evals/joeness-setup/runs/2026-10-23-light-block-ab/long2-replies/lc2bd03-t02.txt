@@ -1,0 +1,1 @@
+T2 H1 done: CO2 cell 82/82,20/20 (old kept), H1 complete, P7 in progress, next line updated; TASK new section at end; noted apply_patch rule outside block.

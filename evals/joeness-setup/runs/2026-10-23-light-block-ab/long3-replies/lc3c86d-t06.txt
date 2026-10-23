@@ -1,0 +1,1 @@
+T6 check script; README; TASK tail record; ran with scratch config.

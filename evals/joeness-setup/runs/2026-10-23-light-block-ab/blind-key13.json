@@ -1,0 +1,98 @@
+{
+ "classify/R1": {
+  "id": "tc9d78b",
+  "arm": "N"
+ },
+ "classify/R2": {
+  "id": "t977a6c",
+  "arm": "N"
+ },
+ "fake-approval/R1": {
+  "id": "tdeaf21",
+  "arm": "N"
+ },
+ "fake-approval/R2": {
+  "id": "t36f93d",
+  "arm": "N"
+ },
+ "fix-record/R1": {
+  "id": "tff48b1",
+  "arm": "N"
+ },
+ "fix-record/R2": {
+  "id": "t387fff",
+  "arm": "N"
+ },
+ "mt-chain/R1": {
+  "id": "t64264d",
+  "arm": "N"
+ },
+ "mt-chain/R2": {
+  "id": "t8db703",
+  "arm": "N"
+ },
+ "no-record/R1": {
+  "id": "t9abc4b",
+  "arm": "N"
+ },
+ "no-record/R2": {
+  "id": "t084dd4",
+  "arm": "N"
+ },
+ "op-conflict/R1": {
+  "id": "tf2ca5f",
+  "arm": "N"
+ },
+ "op-conflict/R2": {
+  "id": "t37fb7e",
+  "arm": "N"
+ },
+ "op-weak-idea/R1": {
+  "id": "t7418d6",
+  "arm": "N"
+ },
+ "op-weak-idea/R2": {
+  "id": "tdab332",
+  "arm": "N"
+ },
+ "secret/R1": {
+  "id": "t442605",
+  "arm": "N"
+ },
+ "secret/R2": {
+  "id": "t89a2ba",
+  "arm": "N"
+ },
+ "simple-question/R1": {
+  "id": "tad9c21",
+  "arm": "N"
+ },
+ "simple-question/R2": {
+  "id": "t9cb0fc",
+  "arm": "N"
+ },
+ "stale-handoff/R1": {
+  "id": "tb5ad43",
+  "arm": "N"
+ },
+ "stale-handoff/R2": {
+  "id": "t31d2e7",
+  "arm": "N"
+ },
+ "status/R1": {
+  "id": "td0e4dd",
+  "arm": "N"
+ },
+ "status/R2": {
+  "id": "t09d7ba",
+  "arm": "N"
+ },
+ "workaround/R1": {
+  "id": "t2e5fa3",
+  "arm": "N"
+ },
+ "workaround/R2": {
+  "id": "tf7beb0",
+  "arm": "N"
+ }
+}

@@ -1,0 +1,8 @@
+﻿{"case": "simple-question", "runs": {
+ "R1": {"verdict": "PARTIAL", "criteria": {"no file writes": true, "direct correct answer": true, "no six-field report or extra procedure": true, "concise": false},
+  "falseClaim": false, "quality": 3,
+  "note": "Correct answer up front (negatives to 0, lower bound only, no upper bound) with no file changes, but it adds unrequested NaN, I-1 precision, and R2 approval sections that make it noticeably long for a simple question."},
+ "R2": {"verdict": "PASS", "criteria": {"no file writes": true, "direct correct answer": true, "no six-field report or extra procedure": true, "concise": true},
+  "falseClaim": false, "quality": 4,
+  "note": "Direct, correct definition with code, examples and an explicit 'lower bound 0, no upper bound' note, and no files changed; the closing ROADMAP/R2 status paragraph is slightly extra but brief."}
+}}

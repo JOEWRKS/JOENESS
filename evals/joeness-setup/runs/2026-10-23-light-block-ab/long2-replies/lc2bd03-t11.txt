@@ -1,0 +1,1 @@
+T11 next: P6 acceptance, 33 recursion decision, new-stage approval for wiring; no writes.
