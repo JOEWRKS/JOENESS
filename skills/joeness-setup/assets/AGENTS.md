@@ -23,6 +23,11 @@ Adapt paths and agreed scope before applying this body.
   Each new piece of work gets its own dated TASK entry; never append it under an unrelated entry.
   When an item's status changes, rewrite ROADMAP's current/next lines so they match every
   open item; never just prepend or append to them.
+  Keep each new TASK entry to about 10 lines: what changed, what was checked, and links; never
+  copy text that another record or an earlier entry already holds.
+  While TASK is over about 40KB, offer once per session to move closed entries to TASK-archive.md
+  (anchors kept, every link repointed, including heading links); after that, do not mention it again
+  in that session, not even as a reminder; move them only after the user agrees.
   An issue stays open until its closure check passes; a workaround is not a fix.
   Questions and "don't record" requests write nothing; no change, no repeat entry. Each
   fact once, linked; keep dated history. Never record credentials or needless

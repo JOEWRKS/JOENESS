@@ -1,10 +1,10 @@
 # JOENESS 제품 로드맵
 
-기준: 2026-10-24. 이 문서는 **JOENESS 제품의 개발·출시 준비**를 다룬다. `skills/joeness-setup/assets/ROADMAP.md`는 사용자의 *각 프로젝트*에 쓰는 참고 서식이며 이 문서와 다르다.
+기준: 2026-10-25. 이 문서는 **JOENESS 제품의 개발·출시 준비**를 다룬다. `skills/joeness-setup/assets/ROADMAP.md`는 사용자의 *각 프로젝트*에 쓰는 참고 서식이며 이 문서와 다르다.
 
 ## 현재 작업 — 1.1.0 경량 연결문 출시 준비 (2026-10-24)
 
-승인: 사용자가 경량 연결문과 두 기록 규칙(자기 TASK 항목, ROADMAP 상태 줄 다시 쓰기)을 공용 블록에 유지하기로 확정하고 출시 준비를 요청. 커밋·푸시·개인 설치·QA 발행은 각각 별도 승인. [진행 근거](../evals/joeness-setup/runs/2026-10-24-v110-release/review-evidence.md).
+승인: 사용자가 경량 연결문과 두 기록 규칙(자기 TASK 항목, ROADMAP 상태 줄 다시 쓰기)을 공용 블록에 유지하기로 확정하고 출시 준비를 요청. 2026-10-25에 TASK 크기 규칙 두 가지(항목 약 10줄, 40KB 초과 시 세션당 한 번 보관 제안)를 추가하기로 결정. [근거](../evals/joeness-setup/runs/2026-10-24-task-size-ab/report.md). 커밋·푸시·개인 설치·QA 발행은 각각 별도 승인. [진행 근거](../evals/joeness-setup/runs/2026-10-24-v110-release/review-evidence.md).
 
 | ID | 필수 결과 | 상태 | 완료 조건 |
 |---|---|---|---|

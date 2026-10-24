@@ -11,24 +11,31 @@ item changes) in the shared body, and move to release preparation. Commit/push,
 personal installation update and QA publication each need separate approval.
 QA owns main/tag/Release; preserve existing JOENESS-v1.0.0–v1.0.2 tags/Releases.
 
+User decision on 2026-10-24/25: add two TASK size rules to the shared body. The first
+keeps each new TASK entry to about 10 lines with no copied text. The second offers,
+once per session while TASK is over about 40KB, to move closed entries to TASK-archive.md,
+and moves them only after the user agrees. Evidence: [TASK size A/B](../2026-10-24-task-size-ab/report.md).
+
 ## Scope
 
 - Within the 17-file payload only `assets/AGENTS.md`, `assets/ROADMAP.md` and
   `SKILL.md` change against 1.0.2 (`1b3d5a0`); the other 14 files and F01–F06
   executable contracts are unchanged. Installer/test version pins change to 1.1.0
   without altered checks or behavioral expectations.
-- Connection body: 4,907 bytes / 649 words / 64 lines → 3,144 bytes / 494 words /
-  41 lines. Template SHA-256 `0f2ad4d33b9504a96b085c020ce735201994b6dfe156b47829a890ed1027dfbf`.
+- Connection body: 4,907 bytes / 649 words / 64 lines → 3,586 bytes / 568 words /
+  46 lines. Template SHA-256 `4ded5ac9c1185393708d4e70195168463d6389c627f5eaa1397effeee8df4504`.
 - Manifest SHA-256 (working tree, version 1.1.0):
-  `1346f5659499fdd6860ea63ae04510179f6ef9980143a524c2baf2bf64003c27`.
+  `acef856fad8cb1360e3f67a0ee2ca8f896fc5c6d1ca4e0fd6b89f6dd7d909eca`.
 - Behavior evidence: [light-block A/B report](../2026-10-23-light-block-ab/report.md),
   phases 1–21 (Claude A/B including long-context reproductions on a copy of real
   project records; Codex gpt-6-astra/xhigh checks in phases 20–21 showing no added
   effect and no regression for the two recording rules). Small samples (2–4 runs
-  per arm); no general performance or token claim.
+  per arm); no general performance or token claim. TASK size rules:
+  [TASK size A/B](../2026-10-24-task-size-ab/report.md), phases 22–29 on copies of
+  four real projects (Claude only, 3–6 runs per arm, blind grading in 28–29).
 - Existing project connections are not updated automatically.
 
-## Local gates (2026-10-24)
+## Local gates (2026-10-24, rerun 2026-10-25 after the TASK size rules)
 
 | Gate | Result |
 |---|---|
