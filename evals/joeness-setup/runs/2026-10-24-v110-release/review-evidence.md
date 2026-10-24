@@ -32,7 +32,8 @@ and moves them only after the user agrees. Evidence: [TASK size A/B](../2026-10-
   effect and no regression for the two recording rules). Small samples (2–4 runs
   per arm); no general performance or token claim. TASK size rules:
   [TASK size A/B](../2026-10-24-task-size-ab/report.md), phases 22–29 on copies of
-  four real projects (Claude only, 3–6 runs per arm, blind grading in 28–29).
+  four real projects (Claude, 3–6 runs per arm, blind grading in 28–29), plus a short Codex
+  gpt-6-astra/xhigh check in phase 30 (2 runs per arm, 2 turns).
 - Existing project connections are not updated automatically.
 
 ## Local gates (2026-10-24, rerun 2026-10-25 after the TASK size rules)
