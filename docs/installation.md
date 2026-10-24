@@ -1,6 +1,6 @@
 # JOENESS 설치·업데이트·복구
 
-현재 소스: **1.0.2**. 작업자 방법 선택과 필수 요건을 구분한 연결문 수정판. [소스·개인 설치·배포 상태](../evals/joeness-setup/runs/2026-10-18-v102-release/review-evidence.md)를 구분해서 확인. 기존 `JOENESS-v1.0.0`·`JOENESS-v1.0.1` 태그 변경 없음; 기존 프로젝트 연결은 자동 갱신하지 않음.
+현재 소스: **1.1.0**. 경량 연결문과 기록 규칙을 보강한 판. [소스·개인 설치·배포 상태](../evals/joeness-setup/runs/2026-10-24-v110-release/review-evidence.md)를 구분해서 확인. 기존 `JOENESS-v1.0.0`~`JOENESS-v1.0.2` 태그 변경 없음; 기존 프로젝트 연결은 자동 갱신하지 않음.
 
 ## 핵심 기준
 
@@ -8,7 +8,7 @@
 |---|---|
 | 설치 진입점 | 저장소 루트의 `JOENESS.ps1` |
 | 버전 원본 | `vendor/source-manifest.json`의 `release.version` |
-| 현재 소스 버전 | 1.0.2 |
+| 현재 소스 버전 | 1.1.0 |
 | 설치본 식별 | 버전과 manifest 해시 함께 대조 |
 | 갱신 범위 | 저장소 갱신과 개인 설치 갱신은 별도 |
 

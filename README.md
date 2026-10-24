@@ -1,4 +1,4 @@
-# JOENESS 1.0.2
+# JOENESS 1.1.0
 
 [English](#english) | [한국어](#korean)
 
@@ -16,7 +16,7 @@ Three-point summary:
 2. Dedicated documents for plans, results, issues, and design, with task-specific reading priorities.
 3. Six-field summary first; supporting evidence only where needed.
 
-Source version: **1.0.2**. [Validation and publication status](evals/joeness-setup/runs/2026-10-18-v102-release/review-evidence.md). No automatic update of personal installations or existing project connections.
+Source version: **1.1.0**. [Validation and publication status](evals/joeness-setup/runs/2026-10-24-v110-release/review-evidence.md). No automatic update of personal installations or existing project connections.
 
 ## 2. Design Purpose
 
@@ -131,7 +131,7 @@ JOENESS used throughout the workflow. **Standalone use supported for each tool.*
 2. 계획·결과·문제·디자인의 기록 위치와 읽기 우선순위 구분.
 3. 작업 결과를 여섯 항목으로 선요약. 필요한 근거만 후술.
 
-소스 버전: **1.0.2**. [검증·게시 상태](evals/joeness-setup/runs/2026-10-18-v102-release/review-evidence.md). 개인 설치·기존 프로젝트 연결 자동 갱신 없음.
+소스 버전: **1.1.0**. [검증·게시 상태](evals/joeness-setup/runs/2026-10-24-v110-release/review-evidence.md). 개인 설치·기존 프로젝트 연결 자동 갱신 없음.
 
 ## 2. 설계 목적
 

@@ -1,8 +1,19 @@
 # JOENESS 제품 로드맵
 
-기준: 2026-10-17. 이 문서는 **JOENESS 제품의 개발·출시 준비**를 다룬다. `skills/joeness-setup/assets/ROADMAP.md`는 사용자의 *각 프로젝트*에 쓰는 참고 서식이며 이 문서와 다르다.
+기준: 2026-10-24. 이 문서는 **JOENESS 제품의 개발·출시 준비**를 다룬다. `skills/joeness-setup/assets/ROADMAP.md`는 사용자의 *각 프로젝트*에 쓰는 참고 서식이며 이 문서와 다르다.
 
-## 현재 작업 — 1.0.2 게시·개인 설치·QA 배포 (2026-10-18)
+## 현재 작업 — 1.1.0 경량 연결문 출시 준비 (2026-10-24)
+
+승인: 사용자가 경량 연결문과 두 기록 규칙(자기 TASK 항목, ROADMAP 상태 줄 다시 쓰기)을 공용 블록에 유지하기로 확정하고 출시 준비를 요청. 커밋·푸시·개인 설치·QA 발행은 각각 별도 승인. [진행 근거](../evals/joeness-setup/runs/2026-10-24-v110-release/review-evidence.md).
+
+| ID | 필수 결과 | 상태 | 완료 조건 |
+|---|---|---|---|
+| L1 | 버전 고정·로컬 전체 검사 | 진행 중 | manifest·설치기·README·설치 문서·테스트 고정값 1.1.0 정합, 변경 3파일 외 payload 14파일 불변, Node 테스트와 PowerShell 3묶음 통과 |
+| L2 | 소스 커밋·작업 브랜치 push | 미시작 | 사용자 승인 뒤 커밋·push, 원격 일치와 Windows workflow 성공 |
+| L3 | 개인 설치 갱신 | 미시작 | 사용자 승인 뒤 백업·Apply·Check current, 설치 17파일 해시 대조 |
+| L4 | QA 정식 발행 | 미시작 | QA 담당이 main CI·설치 대조 후 `JOENESS-v1.1.0` 발행. 기존 태그 보존 |
+
+## 이전 작업 — 1.0.2 게시·개인 설치·QA 배포 (2026-10-18)
 
 승인: 사용자 커밋·푸시·개인 설치 갱신·새 버전 QA 조율 요청. 담당은 소스/설치, QA는 독립검사/main/tag/Release 소유. 기존 태그·사용자 프로젝트 보존. [진행 근거](../evals/joeness-setup/runs/2026-10-18-v102-release/review-evidence.md).
 
