@@ -29,8 +29,9 @@ and moves them only after the user agrees. Evidence: [TASK size A/B](../2026-10-
 - Behavior evidence: [light-block A/B report](../2026-10-23-light-block-ab/report.md),
   phases 1–21 (Claude A/B including long-context reproductions on a copy of real
   project records; Codex gpt-6-astra/xhigh checks in phases 20–21 showing no added
-  effect and no regression for the two recording rules). Small samples (2–4 runs
-  per arm); no general performance or token claim. TASK size rules:
+  effect and no regression for the two recording rules; phase 31 long-session blind
+  A/B keeps the follow-up-turn line: without it turns 5–8 fell from 96% to 89%).
+  Small samples (2–6 runs per arm); no general performance or token claim. TASK size rules:
   [TASK size A/B](../2026-10-24-task-size-ab/report.md), phases 22–29 on copies of
   four real projects (Claude, 3–6 runs per arm, blind grading in 28–29), plus a short Codex
   gpt-6-astra/xhigh check in phase 30 (2 runs per arm, 2 turns).
