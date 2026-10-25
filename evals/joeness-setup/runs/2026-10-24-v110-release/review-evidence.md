@@ -2,7 +2,9 @@
 
 Status: 1.1.0 source committed (`cd1ff7558ab1eb191924dc956ef119a930e72cdc`), pushed to
 `codex/joeness-v110-light` with the exact-commit Windows workflow passing, and installed
-personally on 2026-10-25. QA publication (main/tag/Release) is not done yet.
+personally on 2026-10-25. QA publication (main/tag/Release) completed at
+`9b470789f49ef79e51c67457d2e39fc20b79ec08`. Later documentation commits do not
+change the released payload or move the tag.
 
 User decision on 2026-10-24: keep the light connection body with both recording
 rules (own TASK entry per piece of work; rewrite ROADMAP current/next lines when an
@@ -69,7 +71,29 @@ User decision on 2026-10-25: commit, fix the version, push, and update the local
 4. Existing project connections are updated one at a time at the user's request. AI-Gomoku was
    asked to bring its block to 1.1.0.
 
+## QA publication (2026-10-25)
+
+- Authorization: user request to coordinate main, tag and Release publication with the QA owner.
+- Published commit: `9b470789f49ef79e51c67457d2e39fc20b79ec08`; main fast-forward
+  from `1b3d5a0a53766214c7561ce47773f6ae5796de11`.
+- Exact published-commit Windows gates: [branch run 40113669247](https://github.com/JOEWRKS/JOENESS/actions/runs/40113669247)
+  and [main run 40114757523](https://github.com/JOEWRKS/JOENESS/actions/runs/40114757523), completed/success.
+- Annotated tag: `JOENESS-v1.1.0`, object `88835597dc664f80330bf5ffb0c150e6752198e9`,
+  peeled to the published commit above. Tag target retained through subsequent documentation updates.
+- [Release 422866848](https://github.com/JOEWRKS/JOENESS/releases/tag/JOENESS-v1.1.0):
+  published 2026-10-25 02:08:35 KST; non-draft, non-prerelease. Existing v1.0.0–v1.0.2
+  tag objects, targets and Release records preserved.
+- QA publication evidence: local release contract PASS; Node 99/99; personal Check current;
+  all 17 installed files match the manifest. Source and personal payload hashes independently
+  rechecked during this documentation correction. No install or project-connection change in this correction.
+- Evidence-only commits `aa4d184`, `e977d0e`, `bf53ca9` after publication:
+  AGENTS, product ROADMAP and reinforcement A/B report only; released payload unchanged.
+  [Windows run 40194104152](https://github.com/JOEWRKS/JOENESS/actions/runs/40194104152)
+  for `bf53ca9eac48f9b3ad4a5a899aff598c1ec522d5`: completed/success.
+- Scope: package publication and record consistency. Existing bounded A/B limitations retained;
+  no general model-performance, creativity or token-efficiency claim.
+
 ## Remaining
 
-1. QA publication of `JOENESS-v1.1.0` (main fast-forward, tag, Release) by the QA owner after
-   checking the exact SHA, CI and this installation. Preserve existing v1.0.0–v1.0.2 tags/Releases.
+No remaining 1.1.0 publication action. Existing project connections require their own
+approved update; the 1.1.x reinforcement decisions remain in the product roadmap.

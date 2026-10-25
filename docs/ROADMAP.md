@@ -26,7 +26,7 @@
 | L1 | 버전 고정·로컬 전체 검사 | 완료 | 1.1.0 정합, 변경 3파일 외 payload 14파일 불변, Node 99/99·PowerShell 3묶음 통과 |
 | L2 | 소스 커밋·작업 브랜치 push | 완료 | cd1ff75를 `codex/joeness-v110-light`에 push, 원격 일치, Windows 40113059267 성공 |
 | L3 | 개인 설치 갱신 | 완료 | 백업 뒤 1.0.2 Remove·1.1.0 Apply/Check current, 설치 17파일 해시 일치, 변경 3파일+state |
-| L4 | QA 정식 발행 | 대기 | 사용자가 QA 담당에게 요청. QA가 main CI·설치 대조 후 `JOENESS-v1.1.0` 발행. 기존 태그 보존 |
+| L4 | QA 정식 발행 | 완료 | 배포 `9b47078`, main Windows CI40114757523 성공, `JOENESS-v1.1.0`·Release422866848 발행·재조회 확인. 후속 문서 커밋과 배포 태그 구분, 기존 태그·Release 보존 |
 
 ## 이전 작업 — 1.0.2 게시·개인 설치·QA 배포 (2026-10-18)
 
