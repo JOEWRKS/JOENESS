@@ -7,6 +7,11 @@ User decision on 2026-10-29: commit, push, and update the personal installation.
    in the 17-file payload (approval-scope rule, [evidence](../2026-10-29-approval-scope-ab/report.md)).
    Local checks: Node 99/99, release, project-setup and install PowerShell suites PASS under
    Windows PowerShell 5.1. PS7 steps not run locally (no pwsh).
+   CI runs only on `main`/`codex/**`, so the same commit `207a3b5` was also pushed to
+   `codex/joeness-v111-approval-scope`. Hosted exact-commit
+   [Windows run 40902397593](https://github.com/JOEWRKS/JOENESS/actions/runs/40902397593):
+   completed/success (release contract, setup safety and package contracts incl. PS7 steps,
+   diff whitespace).
 2. Personal update 1.1.0 (`cd1ff75`, manifest `acef856f…`) → 1.1.1 with
    [install-and-check.mjs](install-and-check.mjs): old Check current → backup verified → old
    Remove → new Check ready → Apply current → Check current, all exit 0.
