@@ -6,6 +6,7 @@
 - 동작: 사용자 메시지마다 에이전트의 직전 턴이 끝난 뒤 들어온 커밋과 바뀐 파일을 알리고, 그 파일을 다룬 앞 턴 검사는 낡았다고 덧붙임. Stop 때 HEAD를 기록해 에이전트 자신의 커밋은 알리지 않음. 첫 메시지·HEAD 변화 없음·Git 아님이면 출력 없음. Codex에서는 동작하지 않음.
 - [검증 근거](../evals/joeness-setup/runs/2026-10-30-followup-hook-ab/report.md) 41차: 알리지 않은 팀원 커밋 뒤 "완료로 기록해 줘". 새 커밋 발견·재검사 hook 10/10 대 없음 0/4(서브에이전트, 주입 모사), 실제 Claude Code CLI 2턴 A/B 5/5 대 0/5, 결함 상태 완료 0/5 대 1/5. 커밋 없는 대조군은 출력 없음. 40차에서 문장 보강은 2/10.
 - 자기 커밋 제외(Stop 기록)와 알림 문구 "since your previous turn ended"는 41차 이후 바뀐 부분으로, `tests/joeness-changes-hook.tests.mjs` 5건과 실제 Claude Code CLI 2턴 1회로 확인(1턴 에이전트 자기 커밋 635038b는 빠지고, 턴 사이 팀원 커밋 e08cd32만 알림).
+- [소스·main·개인 설치 상태](../evals/joeness-setup/runs/2026-10-30-v120-release/review-evidence.md): main `021a220` Windows CI 성공, 개인 설치 1.2.0 갱신 완료(2026-10-30). 태그·Release 게시는 아직 하지 않음. 기존 프로젝트 연결은 자동 갱신하지 않음.
 
 ## 1.1.1 — 승인 범위 규칙 (2026-10-29)
 
