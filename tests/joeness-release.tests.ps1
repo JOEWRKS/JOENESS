@@ -79,7 +79,7 @@ function Test-MinimalCurrentTree {
     Assert-ExactNames (Join-Path $RepoRoot '.github') @('workflows') '.github only has workflows'
     Assert-ExactNames (Join-Path $RepoRoot '.github/workflows') @('windows-ci.yml') 'one release workflow'
     Assert-ExactNames (Join-Path $RepoRoot 'scripts') @('sync-harness.ps1') 'one package script'
-    Assert-ExactNames (Join-Path $RepoRoot 'tests') @('joeness-release.tests.ps1','joeness-install.tests.ps1','joeness-project-setup.tests.ps1','joeness-setup-contract.tests.mjs','joeness-setup-fixtures.tests.mjs','joeness-review-gate.tests.mjs','joeness-roadmap-review.tests.mjs','joeness-operation-review.tests.mjs','joeness-impact-review.tests.mjs') 'current test surface'
+    Assert-ExactNames (Join-Path $RepoRoot 'tests') @('joeness-release.tests.ps1','joeness-install.tests.ps1','joeness-project-setup.tests.ps1','joeness-setup-contract.tests.mjs','joeness-setup-fixtures.tests.mjs','joeness-review-gate.tests.mjs','joeness-roadmap-review.tests.mjs','joeness-operation-review.tests.mjs','joeness-impact-review.tests.mjs','joeness-changes-hook.tests.mjs') 'current test surface'
     Assert-ExactNames (Join-Path $RepoRoot 'vendor') @('source-manifest.json') 'one active manifest'
     Assert-ExactNames (Join-Path $RepoRoot 'evals/experiments') @('joeness-astra-independent-judgment-ab-plan-v1.json','joeness-astra-independent-judgment-ab-run-2026-09-26.json','joeness-astra-independent-judgment-ab-invalid-preflight-2026-09-26.json','joeness-astra-independent-judgment-ab-results-2026-09-26.json') 'bounded A/B evidence remains'
     foreach ($removed in @('astra-judgment-core.md','JOENESS-0.1.ps1','harness.ps1','common-core.md','TASKS.md')) {
@@ -104,7 +104,7 @@ function Test-ManifestAndEvidence {
     $manifest = [IO.File]::ReadAllText((Join-Path $RepoRoot 'vendor/source-manifest.json')) | ConvertFrom-Json
     Assert-Equal $manifest.schemaVersion 3 'manifest schema is v3'
     Assert-Equal $manifest.release.name 'JOENESS' 'release name'
-    Assert-Equal $manifest.release.version '1.1.1' 'release identity'
+    Assert-Equal $manifest.release.version '1.2.0' 'release identity'
     Assert-Equal $manifest.release.entrypoint 'JOENESS.ps1' 'entrypoint'
     Assert-Equal $manifest.target.model 'gpt-6-astra' 'target model'
     Assert-Equal $manifest.target.reasoningEffort 'xhigh' 'target reasoning'

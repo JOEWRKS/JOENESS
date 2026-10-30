@@ -2,7 +2,7 @@
   "schemaVersion": 3,
   "release": {
     "name": "JOENESS",
-    "version": "1.1.1",
+    "version": "1.2.0",
     "entrypoint": "JOENESS.ps1"
   },
   "target": {
@@ -17,7 +17,7 @@
       "files": [
         {
           "path": "SKILL.md",
-          "sha256": "6212bc10eabe3ab29598746336bc29648b708779752cebd5f2500a9229d9f72e"
+          "sha256": "af3777ff77e3bd294afa4f49ee48d14af09a3cc92e9a6fd44c907a48bcc4f681"
         },
         {
           "path": "agents/openai.yaml",
@@ -45,7 +45,7 @@
         },
         {
           "path": "references/usage.md",
-          "sha256": "d7d4ea516c714260dcbc0678da8ab72359340a96cd1718b46906334949b8146a"
+          "sha256": "bb1d83b776b3775723dffb9ac16863cbe7967caa2b2b9c191a34fa1af4f49f48"
         },
         {
           "path": "scripts/project-setup.ps1",
@@ -82,6 +82,14 @@
         {
           "path": "references/impact-review.md",
           "sha256": "6d98aa307aaace44461699e66fdbc3d658f67f8b6c756812ad9faa23ed330a82"
+        },
+        {
+          "path": "references/changes-hook.md",
+          "sha256": "a108b253f9502351880bc8143c8fd3b198ef31ba80bf0b81b9f35a5553febade"
+        },
+        {
+          "path": "scripts/changes-hook.mjs",
+          "sha256": "fd717c1cd7bfd91069456ea7f24288b9018bd222d0758f537ddda3507b451b4f"
         }
       ]
     }

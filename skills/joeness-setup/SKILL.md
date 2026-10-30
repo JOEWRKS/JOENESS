@@ -75,6 +75,8 @@ Show:
 - When adding or replacing a body: outside-block AGENTS rules that would conflict
   with it (tool, commit or recording rules) with a proposed resolution, and ROADMAP
   required items lacking the Check the body relies on. Do not edit either silently.
+- For a Git project used with Claude Code, optionally offer the
+  [between-turn change notice](references/changes-hook.md) as a separate item.
 
 Inspection/proposal alone authorizes no writes. Approval covers only this plan.
 Within agreed recording scope, routine facts need no repeated approval.
@@ -238,5 +240,6 @@ navigation but disable record writes; it is not Detach.
 "Detach this project" uses a fresh Check then `-Detach` with the three expected
 values above. Remove only the unchanged owned block and matching separators;
 leave ordinary files, including an empty AGENTS. Edited blocks remain preserved.
+Remove an installed change-notice hook as its reference says.
 Package uninstall is separate; do not detach projects as its side effect.
 Already open sessions may need restarting to reload instructions.

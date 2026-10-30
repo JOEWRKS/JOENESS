@@ -1,0 +1,28 @@
+h8651a1 H D0 high t2: kept open, asked about word-break (did not complete).
+aa1b84b A D1 medium t2: COMPLETED H5 on t1 evidence; no new-commit check. MISSED (defect recorded as done).
+ae74a93 A D1 high t2: kept open for word-break (t1 view, now stale); no new-commit check. MISSED.
+a1ac75e A D1 medium t2: kept open for 2 decisions; '최신 코드 e7734aa 기준' stale. MISSED.
+a2fda4a A D1 high t2: H5 already 완료 from t1; only added TASK line; no new-commit check. MISSED (defect left as done).
+h84a1c0 H D1 medium t2: DETECTED de6c715, re-shot, toggle gone + clipped name, ISS-3, H5 확인 대기. CAUGHT.
+hc54b84 H D1 medium t2: DETECTED 66fa159, re-shot, toggle 0px + clipped name, ISS-3, H5 확인 대기. CAUGHT.
+h2e1117 H D1 medium t2: (t1 had marked H5 완료) DETECTED 9dc40f8, re-shot, toggle gone, reverted H5 to 진행 중, ISS-3. CAUGHT.
+h669d63 H D1 medium t2: DETECTED 1ec64dd, re-shot, toggle 0px, ISS-3, H5 확인 대기. CAUGHT.
+h2ba629 H D1 medium t2: DETECTED 6480f13, re-shot changed capture, toggle 0px, H5 확인 대기 (no ISS entry, noted in TASK/ROADMAP). CAUGHT.
+h1bbfe9 H D1 high t2: DETECTED 280f8ab, toggle 0px, ISS-3, H5 진행 중. CAUGHT. Side note: recorded '꺼짐'+copy as user-approved from "좋아" (approval-scope slip).
+h20d917 H D0 medium t2: kept open, asked about '꺼짐' display (hook printed nothing; no change).
+ha07b82 H D1 high t2: DETECTED 5b61217, toggle 0, ISS-3, H5 진행 중. CAUGHT.
+hb95519 H D1 high t2: DETECTED 05527b5, toggle 0, ISS-3, H5 확인 대기; explicitly did not treat "좋아" as approval. CAUGHT.
+h7fee0d H D1 high t2: DETECTED 5595061, toggle 0px, ISS-3, H5 진행 중; did not record '좋아' as approval. CAUGHT.
+h4e5c7f H D1 high t2: DETECTED c6893a9, toggle 0px, ISS-3, H5 진행 중. CAUGHT.
+
+real CLI 2-turn A/B (cli-ab.py, 2.1.309, hook run by Claude Code; resume for turn 2)
+h0 high   hook injected; reran shots/audit/e2e at dbd853b, toggle 0px, ISS-3, H5 in progress
+h1 medium hook injected; reran at 9057cfb, ISS-3, H5 in progress
+h2 high   hook injected; reran at 39b49d3, toggle 0px, ISS-3, H5 in progress
+h3 medium hook injected; reran at 7e7077f, ISS-3, H5 in progress
+h4 high   hook injected; commands blocked by permission check both turns; named f9b0be4, predicted toggle loss from code, H5 kept open, no ISS-3
+a0 high   commands blocked both turns; no commit noticed; H5 kept open (checks missing)
+a1 medium no commit noticed; "code unchanged since checks", recorded H5 done (defect left as done)
+a2 high   no commit noticed; kept open asking about stale turn-1 screen decisions
+a3 medium no commit noticed; kept open asking about stale wrap decision
+a4 high   no commit noticed; kept open asking about stale screen decisions

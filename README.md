@@ -1,4 +1,4 @@
-# JOENESS 1.1.1
+# JOENESS 1.2.0
 
 [English](#english) | [한국어](#korean)
 
@@ -16,7 +16,7 @@ Three-point summary:
 2. Dedicated documents for plans, results, issues, and design, with task-specific reading priorities.
 3. Six-field summary first; supporting evidence only where needed.
 
-Source version: **1.1.1** (adds an approval-scope rule, [evidence](evals/joeness-setup/runs/2026-10-29-approval-scope-ab/report.md); personally installed, not yet published: [status](evals/joeness-setup/runs/2026-10-29-v111-release/review-evidence.md)). 1.1.0 [validation and publication status](evals/joeness-setup/runs/2026-10-24-v110-release/review-evidence.md). No automatic update of personal installations or existing project connections.
+Source version: **1.2.0** (adds an optional Claude Code hook that setup can offer: it tells the agent about commits that landed between turns, [evidence](evals/joeness-setup/runs/2026-10-30-followup-hook-ab/report.md); not installed or published). 1.1.1 (adds an approval-scope rule, [evidence](evals/joeness-setup/runs/2026-10-29-approval-scope-ab/report.md); personally installed, not yet published: [status](evals/joeness-setup/runs/2026-10-29-v111-release/review-evidence.md)). 1.1.0 [validation and publication status](evals/joeness-setup/runs/2026-10-24-v110-release/review-evidence.md). No automatic update of personal installations or existing project connections.
 
 ## 2. Design Purpose
 
@@ -131,7 +131,7 @@ JOENESS used throughout the workflow. **Standalone use supported for each tool.*
 2. 계획·결과·문제·디자인의 기록 위치와 읽기 우선순위 구분.
 3. 작업 결과를 여섯 항목으로 선요약. 필요한 근거만 후술.
 
-소스 버전: **1.1.1**(승인 범위 규칙 추가, [근거](evals/joeness-setup/runs/2026-10-29-approval-scope-ab/report.md); 개인 설치 완료·게시 전: [상태](evals/joeness-setup/runs/2026-10-29-v111-release/review-evidence.md)). 1.1.0 [검증·게시 상태](evals/joeness-setup/runs/2026-10-24-v110-release/review-evidence.md). 개인 설치·기존 프로젝트 연결 자동 갱신 없음.
+소스 버전: **1.2.0**(셋업이 선택으로 제안하는 Claude Code hook 추가: 턴 사이에 들어온 커밋을 에이전트에 알림, [근거](evals/joeness-setup/runs/2026-10-30-followup-hook-ab/report.md); 개인 설치·게시 전). 1.1.1(승인 범위 규칙 추가, [근거](evals/joeness-setup/runs/2026-10-29-approval-scope-ab/report.md); 개인 설치 완료·게시 전: [상태](evals/joeness-setup/runs/2026-10-29-v111-release/review-evidence.md)). 1.1.0 [검증·게시 상태](evals/joeness-setup/runs/2026-10-24-v110-release/review-evidence.md). 개인 설치·기존 프로젝트 연결 자동 갱신 없음.
 
 ## 2. 설계 목적
 
