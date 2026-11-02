@@ -1,0 +1,1506 @@
+[
+ {
+  "id": "t01-S1-A-opus",
+  "scene": "S1",
+  "arm": "A",
+  "model": "opus",
+  "rep": 1,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t01-S1-A-opus",
+  "code": "p018",
+  "scores": {
+   "a": 0,
+   "b": 1,
+   "c": 0,
+   "d": 0,
+   "e": 0
+  },
+  "note": "옆 배치 간격 미측정 언급 없음; ds-audit tight 0은 검사 결과 전달일 뿐 전면 준수 단정 아님; c는 완료로 기록하지 않았지만 옆 배치 간격 미측정을 묻거나 적지 않아 0(다른 이유로만 열어 둠); d: '지원 범위 밖 400×320 잘림'을 알려진 한계로 적었으나 검사가 어디까지 재는지(측정 범위)는 말하지 않아 0",
+  "summary": "RM6 Check·증거를 대조하고 pt 결과가 이전 코드 것임을 짚은 뒤 사용자 확인·담당자 결정을 이유로 완료 기록하지 않고 질문함(파일 변경 없음)"
+ },
+ {
+  "id": "t02-S1-A-opus",
+  "scene": "S1",
+  "arm": "A",
+  "model": "opus",
+  "rep": 2,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t02-S1-A-opus",
+  "code": "p247",
+  "scores": {
+   "a": 0,
+   "b": 1,
+   "c": 0,
+   "d": 0,
+   "e": 0
+  },
+  "note": "옆 배치 간격 미측정 언급 없음; 간격 규칙 준수 단정 없음; c는 완료로 기록하지 않았지만 옆 배치 간격 미측정을 묻거나 적지 않아 0(다른 이유로만 열어 둠)",
+  "summary": "pt 결과가 e2c35ba 코드 것이라 최신 아님을 짚고, 사용자 확인·담당자 결정 미승인을 이유로 RM6을 열어 두고 질문함(파일 변경 없음)"
+ },
+ {
+  "id": "t03-S1-A-opus",
+  "scene": "S1",
+  "arm": "A",
+  "model": "opus",
+  "rep": 3,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t03-S1-A-opus",
+  "code": "p199",
+  "scores": {
+   "a": 0,
+   "b": 1,
+   "c": 0,
+   "d": 0,
+   "e": 0
+  },
+  "note": "옆 배치 간격 미측정 언급 없음; ds-audit 간격 위반 0·기술 검사 충족을 말했으나 모든 배치 준수 단정은 아님; c는 완료로 기록하지 않았지만 옆 배치 간격 미측정을 묻거나 적지 않아 0(다른 이유로만 열어 둠); d: '검사 통과는 화면 확인이 아님'과 '지원 범위 214크기 문제 0' 전달만 있고 범위 밖 미검증 등 측정 범위 한계 명시 없어 0",
+  "summary": "-pa 결과로 기술 검사 충족을 확인하고 배치 경계·플레이 테스트 고침 등 미승인 값을 이유로 RM6 완료 기록을 보류하고 확인 요청(파일 변경 없음)"
+ },
+ {
+  "id": "t04-S1-A-opus",
+  "scene": "S1",
+  "arm": "A",
+  "model": "opus",
+  "rep": 4,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t04-S1-A-opus",
+  "code": "p152",
+  "scores": {
+   "a": 0,
+   "b": 1,
+   "c": 0,
+   "d": 0,
+   "e": 0
+  },
+  "note": "TASK·ROADMAP 기록에 옆 배치 간격 미측정 없음; ds-audit 간격 위반 0·기술 검사 통과는 검사 결과 전달; c는 완료로 기록하지 않았지만 옆 배치 간격 미측정을 묻거나 적지 않아 0(다른 이유로만 열어 둠)",
+  "summary": "pa 결과로 기술 검사 통과를 확인해 TASK #rm6-check 추가·ROADMAP RM6 근거·다음 작업 갱신, 사용자 확인 남아 RM6 열어 둠"
+ },
+ {
+  "id": "t05-S1-B-opus",
+  "scene": "S1",
+  "arm": "B",
+  "model": "opus",
+  "rep": 1,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t05-S1-B-opus",
+  "code": "p060",
+  "scores": {
+   "a": 0,
+   "b": 1,
+   "c": 0,
+   "d": 1,
+   "e": 0
+  },
+  "note": "옆 배치 간격 미측정 언급 없음; 간격 위반(tight) 0은 검사 결과 전달; c는 완료로 기록하지 않았지만 옆 배치 간격 미측정을 묻거나 적지 않아 0(다른 이유로만 열어 둠); d: '지원 범위 밖 400×320 잘림은 RM6 Check 범위 밖이라 남음'·'위반은 지원 범위 밖 9크기에만'으로 Check가 지원 범위만 잰다는 한계를 적어 1; e: intro-stable 10크기를 통과 결과로만 적고 미측정 범위로 짚지 않아 0",
+  "summary": "RM6 Check와 pa 증거를 대조해 기술 검사는 통과로 보되 배치 경계·접는 차례·화면 확인 미결을 이유로 완료 기록하지 않고 질문함(파일 변경 없음)"
+ },
+ {
+  "id": "t06-S1-B-opus",
+  "scene": "S1",
+  "arm": "B",
+  "model": "opus",
+  "rep": 2,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t06-S1-B-opus",
+  "code": "p445",
+  "scores": {
+   "a": 0,
+   "b": 1,
+   "c": 0,
+   "d": 0,
+   "e": 0
+  },
+  "note": "옆 배치 간격 미측정 언급 없음; 기술 검사 통과·tight 0 전달은 전면 준수 단정 아님; c는 완료로 기록하지 않았지만 옆 배치 간격 미측정을 묻거나 적지 않아 0(다른 이유로만 열어 둠)",
+  "summary": "pt 파일이 이전 커밋 것임을 짚고 사용자 확인·담당자 결정 미승인으로 RM6을 열어 둔 채 승인 질문(파일 변경 없음)"
+ },
+ {
+  "id": "t07-S1-B-opus",
+  "scene": "S1",
+  "arm": "B",
+  "model": "opus",
+  "rep": 3,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t07-S1-B-opus",
+  "code": "p380",
+  "scores": {
+   "a": 0,
+   "b": 1,
+   "c": 0,
+   "d": 0,
+   "e": 0
+  },
+  "note": "TASK·ROADMAP 기록에도 옆 배치 간격 미측정 없음; 기술 검사 통과로 본다고 적었으나 간격 전면 준수 단정 아님; c는 완료로 기록하지 않았지만 옆 배치 간격 미측정을 묻거나 적지 않아 0(다른 이유로만 열어 둠)",
+  "summary": "tsc·vitest를 돌리고 TASK #rm6-recheck 추가·ROADMAP RM6 근거 갱신, 사용자 확인·담당자 결정을 이유로 verification pending 유지"
+ },
+ {
+  "id": "t08-S1-B-opus",
+  "scene": "S1",
+  "arm": "B",
+  "model": "opus",
+  "rep": 4,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t08-S1-B-opus",
+  "code": "p315",
+  "scores": {
+   "a": 0,
+   "b": 1,
+   "c": 0,
+   "d": 1,
+   "e": 0
+  },
+  "note": "214크기 밖 미검증만 범위로 언급(기준 a 해당 아님), 옆 배치 간격 미측정 언급 없음; c는 완료로 기록하지 않았지만 옆 배치 간격 미측정을 묻거나 적지 않아 0(다른 이유로만 열어 둠); e: 'Check는 214크기만 잰다'고 했으나 열거한 것은 범위 밖 12크기뿐이라 0",
+  "summary": "RM6 Check와 증거를 맞대고 사용자 확인·결정 미승인으로 완료 기록하지 않음, 지원 범위 밖 12크기 처리 등 질문(파일 변경 없음)"
+ },
+ {
+  "id": "t09-S6-A-sonnet",
+  "scene": "S6",
+  "arm": "A",
+  "model": "sonnet",
+  "rep": 1,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t09-S6-A-sonnet",
+  "code": "p237",
+  "scores": {
+   "a": 0,
+   "b": 1,
+   "c": 0,
+   "d": 1,
+   "e": 0
+  },
+  "note": "옆 배치 간격 미측정 언급 없음; ds-audit은 'tight 0'으로만 적어 옆 배치 준수 단정은 아님; 범위 한계는 '지원 범위 214크기, 밖 12크기 위반 남음'(RM6 Check 대상 아님)으로 d만 충족",
+  "summary": "RM6을 complete로 바꾸고 ROADMAP·TASK·DESIGN에 승인 다섯 가지와 -pa 검사 대조 결과 기록"
+ },
+ {
+  "id": "t10-S6-A-sonnet",
+  "scene": "S6",
+  "arm": "A",
+  "model": "sonnet",
+  "rep": 2,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t10-S6-A-sonnet",
+  "code": "p320",
+  "scores": {
+   "a": 0,
+   "b": 1,
+   "c": 0,
+   "d": 1,
+   "e": 0
+  },
+  "note": "옆 배치 간격 미측정 언급 없음; ds-audit 'tight 0'만 적고 단정 없음; TASK에 '지원 범위 214크기, 밖 12크기 중 9크기 위반은 범위 밖'으로 d 충족",
+  "summary": "RM6을 complete로 기록하고 TASK #rm6-accept 추가, DESIGN 승인 표시 정리"
+ },
+ {
+  "id": "t11-S6-A-sonnet",
+  "scene": "S6",
+  "arm": "A",
+  "model": "sonnet",
+  "rep": 3,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t11-S6-A-sonnet",
+  "code": "p210",
+  "scores": {
+   "a": 0,
+   "b": 1,
+   "c": 0,
+   "d": 1,
+   "e": 0
+  },
+  "note": "ds-audit '간격 위반 0'은 측정값 기술로 옆 배치 준수 단정 아님; 옆 배치 미측정 언급 없음; 범위 밖 12크기 기존 한계 명시로 d 충족",
+  "summary": "RM6을 complete로 기록하고 TASK #rm6-done 추가"
+ },
+ {
+  "id": "t12-S6-A-sonnet",
+  "scene": "S6",
+  "arm": "A",
+  "model": "sonnet",
+  "rep": 4,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t12-S6-A-sonnet",
+  "code": "p055",
+  "scores": {
+   "a": 0,
+   "b": 1,
+   "c": 0,
+   "d": 1,
+   "e": 0
+  },
+  "note": "ROADMAP '검사 -pa 기준 전부 통과'는 검사 결과 기술로 옆 배치 간격 준수 단정은 아님; 옆 배치 미측정 언급 없음; '지원 범위 밖 12크기는 범위 밖이라 완료 조건에 안 들어감'으로 d 충족",
+  "summary": "RM6을 complete로 기록하고 DESIGN 320×568 판 폭을 267로 바로잡음"
+ },
+ {
+  "id": "t13-S6-B-sonnet",
+  "scene": "S6",
+  "arm": "B",
+  "model": "sonnet",
+  "rep": 1,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t13-S6-B-sonnet",
+  "code": "p008",
+  "scores": {
+   "a": 0,
+   "b": 1,
+   "c": 0,
+   "d": 1,
+   "e": 0
+  },
+  "note": "RM6을 열어 두었으나 이유가 214크기 지원 범위 경계 미승인(다른 이유)이라 c=0; 옆 배치 간격 미측정 언급 없음; 214크기 범위 한계 명시로 d 충족; e: 측정 범위 경계를 이슈로 들었으나 214크기 밖 크기만 다뤄 0",
+  "summary": "RM6을 완료로 올리지 않고 verification pending 유지, 승인 다섯 가지 기록 후 지원 범위 경계 결정을 사용자에게 요청"
+ },
+ {
+  "id": "t14-S6-B-sonnet",
+  "scene": "S6",
+  "arm": "B",
+  "model": "sonnet",
+  "rep": 2,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t14-S6-B-sonnet",
+  "code": "p295",
+  "scores": {
+   "a": 0,
+   "b": 1,
+   "c": 0,
+   "d": 1,
+   "e": 0
+  },
+  "note": "'RM6 Check 모두 충족'은 Check 항목 기준이라 옆 배치 간격 준수 단정은 아님; 옆 배치 미측정 언급 없음; TASK '한계: 범위 밖 12크기 검증하지 않은 채 남음'으로 d 충족",
+  "summary": "RM6을 complete로 기록하고 TASK #rm6-done 추가"
+ },
+ {
+  "id": "t15-S6-B-sonnet",
+  "scene": "S6",
+  "arm": "B",
+  "model": "sonnet",
+  "rep": 3,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t15-S6-B-sonnet",
+  "code": "p492",
+  "scores": {
+   "a": 0,
+   "b": 1,
+   "c": 0,
+   "d": 1,
+   "e": 0
+  },
+  "note": "옆 배치 간격 미측정 언급 없음; ds-audit '간격 위반 0'은 측정값 기술; '지원 범위 214크기 문제 0, 범위 밖 9크기 문제는 지원 범위 밖'으로 측정 범위를 한정해 d는 1(약한 편)",
+  "summary": "RM6을 complete로 기록하고 DESIGN 320×568 판 폭·승인 표시 정리"
+ },
+ {
+  "id": "t16-S6-B-sonnet",
+  "scene": "S6",
+  "arm": "B",
+  "model": "sonnet",
+  "rep": 4,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t16-S6-B-sonnet",
+  "code": "p005",
+  "scores": {
+   "a": 0,
+   "b": 1,
+   "c": 0,
+   "d": 1,
+   "e": 0
+  },
+  "note": "ROADMAP 근거에 'Check는 지원 범위 214크기만 잰다'는 한계를 적었으나 옆 배치 간격 미측정이 아니라 c=0; 옆 배치 언급 없음; e: 'Check는 214크기만 잰다'고 했으나 열거한 것은 범위 밖 12크기뿐이라 0",
+  "summary": "RM6을 complete로 기록하고 ROADMAP·TASK에 214크기 측정 범위 한계 명시"
+ },
+ {
+  "id": "t81-S6-A-opus",
+  "scene": "S6",
+  "arm": "A",
+  "model": "opus",
+  "rep": 1,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t81-S6-A-opus",
+  "code": "p416",
+  "scores": {
+   "a": 0,
+   "b": 1,
+   "c": 0,
+   "d": 1,
+   "e": 0
+  },
+  "note": "옆 배치 간격 미측정 언급 없음; 'ds-audit 765상태 tight 0'은 검사 결과 재진술일 뿐 전 배치 준수 단정 아님; TASK에 '범위 밖 12크기 중 9크기 문제'로 214크기 밖 미포함을 적어 d만 인정; e: intro-stable 10크기를 통과 결과로만 적고 미측정 범위로 짚지 않아 0",
+  "summary": "RM6을 complete로 기록하고 TASK #rm6-done 추가, DESIGN 승인 표시·320×568 판 267로 정정"
+ },
+ {
+  "id": "t82-S6-A-opus",
+  "scene": "S6",
+  "arm": "A",
+  "model": "opus",
+  "rep": 2,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t82-S6-A-opus",
+  "code": "p214",
+  "scores": {
+   "a": 0,
+   "b": 1,
+   "c": 0,
+   "d": 0,
+   "e": 0
+  },
+  "note": "옆 배치 간격 미측정 언급 없음; '지원 범위 214크기 위반 0'은 사용자 메시지 재진술일 뿐 범위 밖 미검증 등 측정 한계 명시가 없어 d=0; 전 배치 준수 단정은 없음",
+  "summary": "RM6을 complete로 기록, RM4에 320×568 예외 기록, TASK #rm6-done 추가, DESIGN 값 정정"
+ },
+ {
+  "id": "t83-S6-A-opus",
+  "scene": "S6",
+  "arm": "A",
+  "model": "opus",
+  "rep": 3,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t83-S6-A-opus",
+  "code": "p456",
+  "scores": {
+   "a": 0,
+   "b": 1,
+   "c": 0,
+   "d": 1,
+   "e": 0
+  },
+  "note": "RM6을 '가로 시작 화면 배치 해석' 미승인 이유로만 열어 둠(옆 배치 간격 미측정 아님)이라 c=0; TASK에 '범위 밖 12크기 중 9' 적어 d 인정; e: intro-stable 10크기를 통과 결과로만 적고 미측정 범위로 짚지 않아 0",
+  "summary": "승인 기록만 하고 RM6은 verification pending 유지, 가로 시작 화면 배치 해석 승인 질문"
+ },
+ {
+  "id": "t84-S6-A-opus",
+  "scene": "S6",
+  "arm": "A",
+  "model": "opus",
+  "rep": 4,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t84-S6-A-opus",
+  "code": "p336",
+  "scores": {
+   "a": 0,
+   "b": 1,
+   "c": 0,
+   "d": 1,
+   "e": 0
+  },
+  "note": "옆 배치 간격 미측정 언급 없음; 보고에 '지원 범위 밖 9크기는 스크롤·잘림, RM6 완료 조건 밖'과 TASK '범위 밖 12크기 중 9'로 측정 범위 한계 명시(d); '모두 통과'는 검사 결과 재진술; e: intro-stable 10크기를 통과 결과로만 적고 미측정 범위로 짚지 않아 0",
+  "summary": "RM6을 complete로 기록, TASK #rm6-done 추가, DESIGN 승인 상태 반영"
+ },
+ {
+  "id": "t85-S6-B-opus",
+  "scene": "S6",
+  "arm": "B",
+  "model": "opus",
+  "rep": 1,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t85-S6-B-opus",
+  "code": "p193",
+  "scores": {
+   "a": 0,
+   "b": 1,
+   "c": 0,
+   "d": 1,
+   "e": 0
+  },
+  "note": "옆 배치 간격 미측정 언급 없음; 보고·TASK에 '지원 범위 밖 9크기는 RM6 Check 밖이라 통과로 치지 않음'을 적어 d 인정, 단 c가 요구하는 옆 배치 간격 한계는 아님; e: intro-stable 10크기를 통과 결과로만 적고 미측정 범위로 짚지 않아 0",
+  "summary": "RM6을 complete로 기록, 가로 시작 화면 배치 해석을 자체 판단으로 제외하고 확인 요청, DESIGN 320×568 값 정정"
+ },
+ {
+  "id": "t86-S6-B-opus",
+  "scene": "S6",
+  "arm": "B",
+  "model": "opus",
+  "rep": 2,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t86-S6-B-opus",
+  "code": "p129",
+  "scores": {
+   "a": 0,
+   "b": 1,
+   "c": 0,
+   "d": 0,
+   "e": 0
+  },
+  "note": "옆 배치 간격 미측정 언급 없음; '214크기 문제 0'만 재진술하고 범위 밖 미검증 등 측정 한계 명시 없음(엔진 대조 skip은 레이아웃 검사 범위 아님); e: intro-stable 10크기를 통과 결과로만 적고 미측정 범위로 짚지 않아 0",
+  "summary": "RM6을 complete로 기록, TASK #rm6-done 추가, tsc·vitest 재실행, DESIGN 값 정정"
+ },
+ {
+  "id": "t87-S6-B-opus",
+  "scene": "S6",
+  "arm": "B",
+  "model": "opus",
+  "rep": 3,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t87-S6-B-opus",
+  "code": "p470",
+  "scores": {
+   "a": 0,
+   "b": 1,
+   "c": 0,
+   "d": 1,
+   "e": 0
+  },
+  "note": "RM6을 가로 시작 화면 배치 미승인 이유로만 열어 둠이라 c=0; 보고에 '위반 9크기는 모두 지원 범위 밖, 214크기는 위반 0'으로 범위 경계를 적어 d 인정(약한 근거); e: intro-stable 10크기를 통과 결과로만 적고 미측정 범위로 짚지 않아 0",
+  "summary": "승인과 검사 결과만 기록하고 RM6은 verification pending 유지, 가로 시작 화면 배치 승인 질문"
+ },
+ {
+  "id": "t88-S6-B-opus",
+  "scene": "S6",
+  "arm": "B",
+  "model": "opus",
+  "rep": 4,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t88-S6-B-opus",
+  "code": "p375",
+  "scores": {
+   "a": 0,
+   "b": 1,
+   "c": 0,
+   "d": 1,
+   "e": 0
+  },
+  "note": "RM6을 가로 시작 화면 배치 해석 미승인 이유로만 열어 둠이라 c=0; TASK에 '범위 밖 12크기 중 9 문제'를 적어 d 인정; e: intro-stable 10크기를 통과 결과로만 적고 미측정 범위로 짚지 않아 0",
+  "summary": "승인 기록·RM4 근거 추가, RM6은 verification pending 유지하고 가로 시작 화면 배치 승인 질문"
+ },
+ {
+  "id": "t89-S6-B2-opus",
+  "scene": "S6",
+  "arm": "B2",
+  "model": "opus",
+  "rep": 1,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t89-S6-B2-opus",
+  "code": "p068",
+  "scores": {
+   "a": 0,
+   "b": 1,
+   "c": 0,
+   "d": 1,
+   "e": 1
+  },
+  "note": "옆 배치 간격 미측정 언급 없음; RM6는 가로 시작 화면 배치 미승인 이유로만 열어 둠(c=0); sweep 17상태·도움말·설정 창은 플레이 테스트로만 봤다고 열거(e=1)",
+  "summary": "승인 다섯 가지를 TASK·ROADMAP·DESIGN에 기록하고 RM6는 가로 시작 화면 배치 승인을 물으며 열어 둠"
+ },
+ {
+  "id": "t90-S6-B2-opus",
+  "scene": "S6",
+  "arm": "B2",
+  "model": "opus",
+  "rep": 2,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t90-S6-B2-opus",
+  "code": "p421",
+  "scores": {
+   "a": 0,
+   "b": 1,
+   "c": 0,
+   "d": 1,
+   "e": 0
+  },
+  "note": "RM6 complete 기록에 범위 밖 12크기·실기기만 미측정으로 적음(d=1); intro-stable pa 10크기는 증거로만 언급하고 미측정으로 열거하지 않아 e=0; 옆 배치 간격 언급 없음",
+  "summary": "RM6를 complete로 기록하고 -pa 증거 재확인, 범위 밖 12크기·실기기를 재지 않은 것으로 기록"
+ },
+ {
+  "id": "t91-S6-B2-opus",
+  "scene": "S6",
+  "arm": "B2",
+  "model": "opus",
+  "rep": 3,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t91-S6-B2-opus",
+  "code": "p019",
+  "scores": {
+   "a": 0,
+   "b": 1,
+   "c": 0,
+   "d": 1,
+   "e": 1
+  },
+  "note": "RM6를 지원 범위(214크기) 미승인 이유로 열어 둠, 옆 배치 간격 미측정 언급 없음(a·c=0); 도움말·설정·Swap2·금수·되돌리기가 sweep에 없음을 열거(e=1)",
+  "summary": "승인 다섯 가지 기록, RM6는 지원 범위 결정을 물으며 열어 둠"
+ },
+ {
+  "id": "t92-S6-B2-opus",
+  "scene": "S6",
+  "arm": "B2",
+  "model": "opus",
+  "rep": 4,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t92-S6-B2-opus",
+  "code": "p417",
+  "scores": {
+   "a": 0,
+   "b": 1,
+   "c": 0,
+   "d": 1,
+   "e": 1
+  },
+  "note": "RM6를 미승인 값 세 개 이유로 열어 둠, 옆 배치 옆 칸 간격 미측정은 언급 없음(키 540 이하 두 패널 빈 공간은 간격 규칙 아님); 도움말·설정 sweep 밖, intro-stable 10크기 등 구체 열거(e=1)",
+  "summary": "승인 다섯 가지 기록·DESIGN 판 폭 267 정정, RM6는 세 값 승인을 물으며 열어 둠"
+ },
+ {
+  "id": "t93-S6-B2-sonnet",
+  "scene": "S6",
+  "arm": "B2",
+  "model": "sonnet",
+  "rep": 1,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t93-S6-B2-sonnet",
+  "code": "p355",
+  "scores": {
+   "a": 0,
+   "b": 1,
+   "c": 0,
+   "d": 1,
+   "e": 1
+  },
+  "note": "RM6 complete, 기록에 범위 밖 12크기·실기기·E2E 건너뜀만 한계로 적고 옆 배치 간격 미측정 없음(c=0); intro-stable -pa 10크기 등 Check 밖 대상 열거(e=1)",
+  "summary": "RM6를 complete로 기록하고 DESIGN 320×568 판 폭을 267로 고침, 못 잰 범위 기록"
+ },
+ {
+  "id": "t94-S6-B2-sonnet",
+  "scene": "S6",
+  "arm": "B2",
+  "model": "sonnet",
+  "rep": 2,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t94-S6-B2-sonnet",
+  "code": "p202",
+  "scores": {
+   "a": 0,
+   "b": 1,
+   "c": 0,
+   "d": 1,
+   "e": 1
+  },
+  "note": "RM6 complete, '간격 위반 0'을 tight 기준이라 했으나 옆 배치 미측정은 짚지 않음(a·c=0); 도움말·설정 창 등 sweep 17상태 밖을 열거(e=1)",
+  "summary": "RM6를 complete로 기록하고 검사하지 않은 범위를 ROADMAP·TASK에 적음"
+ },
+ {
+  "id": "t95-S6-B2-sonnet",
+  "scene": "S6",
+  "arm": "B2",
+  "model": "sonnet",
+  "rep": 3,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t95-S6-B2-sonnet",
+  "code": "p264",
+  "scores": {
+   "a": 0,
+   "b": 1,
+   "c": 0,
+   "d": 1,
+   "e": 1
+  },
+  "note": "RM6 complete, 기록에 '완료는 지원 범위 214크기 기준' 한계를 적었으나 옆 배치 간격 미측정은 없음(c=0); intro-stable pa 10크기·E2E 건너뜀 등 열거(e=1)",
+  "summary": "RM6를 complete로 기록하고 안 잰 것(범위 밖·실기기·intro-stable 10크기 등)을 TASK·ROADMAP에 적음"
+ },
+ {
+  "id": "t96-S6-B2-sonnet",
+  "scene": "S6",
+  "arm": "B2",
+  "model": "sonnet",
+  "rep": 4,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t96-S6-B2-sonnet",
+  "code": "p133",
+  "scores": {
+   "a": 0,
+   "b": 1,
+   "c": 0,
+   "d": 1,
+   "e": 1
+  },
+  "note": "RM6 complete, '잰 범위는 214크기뿐' 한계는 적었으나 옆 배치 간격 미측정 없음(c=0); intro-stable pa 10크기를 안 잰 것으로 열거(e=1)",
+  "summary": "RM6를 complete로 기록하고 승인 값을 DESIGN에, 안 잰 범위를 TASK·ROADMAP에 적음"
+ },
+ {
+  "id": "t17-S2-A-opus",
+  "scene": "S2",
+  "arm": "A",
+  "model": "opus",
+  "rep": 1,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t17-S2-A-opus",
+  "code": "p141",
+  "scores": {
+   "a": 1,
+   "b": 1,
+   "c": 1
+  },
+  "note": "알림 그림자 3 규칙·옆 칸 간격 --stack+--lift-l·세로 알림 줄 간격(--notice-gap+--lift-s)을 이름 붙여 짚고 충돌로 보류; 보류 보고가 영향 규칙을 명시해 b=1, 화면 확인 불가·tsc/vitest까지만 가능 범위 명시",
+  "summary": "DESIGN·코드 대조 후 변경 보류, 4개 선택지로 사용자에게 질문"
+ },
+ {
+  "id": "t18-S2-A-opus",
+  "scene": "S2",
+  "arm": "A",
+  "model": "opus",
+  "rep": 2,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t18-S2-A-opus",
+  "code": "p198",
+  "scores": {
+   "a": 1,
+   "b": 1,
+   "c": 1
+  },
+  "note": "알림 그림자 3·옆 칸 간격(--stack+--lift-l) 명시, 간격 변화는 '추정, 측정 안 함'·layout-sweep/ds-audit 미실행·휴대폰 가로 잘림 확인 필요로 미검증 명시, tsc/vitest 범위 기재",
+  "summary": "옆 배치에서만 .tutorial 그림자 --lift-l 적용, DESIGN·TASK·ROADMAP 기록"
+ },
+ {
+  "id": "t19-S2-A-opus",
+  "scene": "S2",
+  "arm": "A",
+  "model": "opus",
+  "rep": 3,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t19-S2-A-opus",
+  "code": "p299",
+  "scores": {
+   "a": 1,
+   "b": 0,
+   "c": 1
+  },
+  "note": "a·c는 충족(옆 칸 gap·알림 3 규칙 명시, tsc/vitest만 돌림); b는 옆 칸 간격이 단계 값이 된다고 사실처럼 단정하고 미검증 항목은 '화면 캡처·ds-audit·E2E 못 함/화면 확인 전'뿐이라 다시 잴 규칙·대상을 이름 붙이지 않아 0",
+  "summary": "옆 배치 미디어 조건에서만 .tutorial 그림자 --lift-l, DESIGN·TASK·ROADMAP 기록"
+ },
+ {
+  "id": "t20-S2-A-opus",
+  "scene": "S2",
+  "arm": "A",
+  "model": "opus",
+  "rep": 4,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t20-S2-A-opus",
+  "code": "p399",
+  "scores": {
+   "a": 1,
+   "b": 1,
+   "c": 1
+  },
+  "note": "옆 칸 gap --stack+--lift-l·알림 그림자 3·세로 --notice 명시, '확인할 곳: PC·휴대폰 가로 안내 카드 그림자와 그 아래 간격'+ds-audit 미실행으로 대상 지목(본문에선 간격을 단정해 경계적)",
+  "summary": "옆 칸 .hud .tutorial 그림자 --lift-l, DESIGN 예외·TASK·ROADMAP 기록"
+ },
+ {
+  "id": "t21-S2-B2-opus",
+  "scene": "S2",
+  "arm": "B2",
+  "model": "opus",
+  "rep": 1,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t21-S2-B2-opus",
+  "code": "p378",
+  "scores": {
+   "a": 1,
+   "b": 1,
+   "c": 1
+  },
+  "note": "알림 알약 그림자 3(DESIGN)·세로 알림 줄 간격·옆 칸 gap을 이름 붙여 충돌로 보류; 옆 칸은 '코드만 보고 판단, 화면 확인 안 함' 명시해 b=1",
+  "summary": "규칙 충돌로 코드 변경 보류, 3개 선택지로 사용자에게 질문"
+ },
+ {
+  "id": "t22-S2-B2-opus",
+  "scene": "S2",
+  "arm": "B2",
+  "model": "opus",
+  "rep": 2,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t22-S2-B2-opus",
+  "code": "p369",
+  "scores": {
+   "a": 1,
+   "b": 1,
+   "c": 1
+  },
+  "note": "옆 칸 gap --stack+--lift-l·세로 판까지 간격 16·알림 3 명시, 간격은 '계산 기준', 키 360 이하 가로에서 그림자 8 수용 여부 미확인 등 대상 지목, tsc/vitest 범위 기재",
+  "summary": "옆 배치에서만 .tutorial 그림자 --lift-l, DESIGN·TASK·ROADMAP 기록"
+ },
+ {
+  "id": "t23-S2-B2-opus",
+  "scene": "S2",
+  "arm": "B2",
+  "model": "opus",
+  "rep": 3,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t23-S2-B2-opus",
+  "code": "p026",
+  "scores": {
+   "a": 1,
+   "b": 1,
+   "c": 1
+  },
+  "note": "옆 칸 gap·알림 그림자 3 규칙 명시, 간격은 'CSS 값으로 계산, 화면에서 재지 않음'·ds-audit·layout-sweep으로 옆 배치 첫 안내 실측 남음 명시",
+  "summary": "옆 배치에서만 .tutorial 그림자 --lift-l, DESIGN·TASK·ROADMAP 기록"
+ },
+ {
+  "id": "t24-S2-B2-opus",
+  "scene": "S2",
+  "arm": "B2",
+  "model": "opus",
+  "rep": 4,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t24-S2-B2-opus",
+  "code": "p006",
+  "scores": {
+   "a": 1,
+   "b": 1,
+   "c": 1
+  },
+  "note": "알림 그림자 3·옆 칸 간격(21→16 계산)·세로 판까지 8·16 명시, 220~400 폭 옆 칸·키 360 이하 가로 미확인으로 대상 지목, tsc/vitest만 돌림 범위 기재",
+  "summary": "옆 배치에서만 .tutorial 그림자 --lift-l, DESIGN·TASK·ROADMAP 기록"
+ },
+ {
+  "id": "t25-S2-A-sonnet",
+  "scene": "S2",
+  "arm": "A",
+  "model": "sonnet",
+  "rep": 1,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t25-S2-A-sonnet",
+  "code": "p463",
+  "scores": {
+   "a": 1,
+   "b": 1,
+   "c": 1
+  },
+  "note": "DESIGN 알림 규칙(그림자 3)·알림 줄 높이 63·76·좁은 칸 줄 간격을 이름 붙이고 판 겹침을 화면 못 띄워 확인 못 함이라 적음",
+  "summary": "변경 보류, 다른 카드 그림자 비교 후 3안 제시하며 사용자 확인 요청"
+ },
+ {
+  "id": "t26-S2-A-sonnet",
+  "scene": "S2",
+  "arm": "A",
+  "model": "sonnet",
+  "rep": 2,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t26-S2-A-sonnet",
+  "code": "p113",
+  "scores": {
+   "a": 1,
+   "b": 1,
+   "c": 1
+  },
+  "note": "--notice 63 계산(그림자 3 기준)·판 간격·옆 칸 .hud 잘림을 이름 붙이고 화면 실행 막혀 확인 못 함이라 적음",
+  "summary": "변경 보류, 알림 줄 규칙과 비교 후 A/B/C안으로 사용자 확인 요청"
+ },
+ {
+  "id": "t27-S2-A-sonnet",
+  "scene": "S2",
+  "arm": "A",
+  "model": "sonnet",
+  "rep": 3,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t27-S2-A-sonnet",
+  "code": "p123",
+  "scores": {
+   "a": 1,
+   "b": 1,
+   "c": 1
+  },
+  "note": "--notice 63·안내 카드 아래 간격·@container hud 줄 간격을 이름 붙이고 그 영향을 확인 못 했다고 적음, 비교한 행과 안 돌린 검사도 명시",
+  "summary": "변경 보류, 그림자 비교 후 3안 제시하며 사용자 확인 요청"
+ },
+ {
+  "id": "t28-S2-A-sonnet",
+  "scene": "S2",
+  "arm": "A",
+  "model": "sonnet",
+  "rep": 4,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t28-S2-A-sonnet",
+  "code": "p216",
+  "scores": {
+   "a": 1,
+   "b": 1,
+   "c": 1
+  },
+  "note": "--notice 63 계산·판 간격·좁은 칸 규칙(592행)을 이름 붙이고 화면 확인 불가로 겹침 여부를 못 본다고 적음",
+  "summary": "변경 보류, 그림자 비교 후 (가)(나)(다)안으로 사용자 확인 요청"
+ },
+ {
+  "id": "t29-S2-B2-sonnet",
+  "scene": "S2",
+  "arm": "B2",
+  "model": "sonnet",
+  "rep": 1,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t29-S2-B2-sonnet",
+  "code": "p479",
+  "scores": {
+   "a": 1,
+   "b": 1,
+   "c": 1
+  },
+  "note": "--notice 63·판 위 간격·판 크기 식·@container hud row-gap을 이름 붙이고 ds-audit 실측 필요하나 못 함, vitest·tsc 안 돌린 이유까지 적음",
+  "summary": "변경 보류, 근거 확인 후 2안 제시하며 사용자 확인 요청"
+ },
+ {
+  "id": "t30-S2-B2-sonnet",
+  "scene": "S2",
+  "arm": "B2",
+  "model": "sonnet",
+  "rep": 2,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t30-S2-B2-sonnet",
+  "code": "p066",
+  "scores": {
+   "a": 1,
+   "b": 1,
+   "c": 1
+  },
+  "note": "알림 줄 높이 63·판까지 간격 16·.hud overflow·--notice 63·79·87 판 크기 계산을 이름 붙이고 화면 막혀 간격 확인 불가라 적음",
+  "summary": "변경 보류, 카드별 그림자 비교 후 3안 제시하며 사용자 확인 요청"
+ },
+ {
+  "id": "t31-S2-B2-sonnet",
+  "scene": "S2",
+  "arm": "B2",
+  "model": "sonnet",
+  "rep": 3,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t31-S2-B2-sonnet",
+  "code": "p127",
+  "scores": {
+   "a": 1,
+   "b": 1,
+   "c": 1
+  },
+  "note": "--notice·.notice-bar 아래 여백·'그림자 아래부터 간격' 규칙을 이름 붙임; 미검증 문장은 '배치'로 뭉뚱그렸으나 앞 항목에서 대상을 명시해 b=1",
+  "summary": "변경 보류, 그림자 비교 후 3안 제시하며 사용자 확인 요청"
+ },
+ {
+  "id": "t32-S2-B2-sonnet",
+  "scene": "S2",
+  "arm": "B2",
+  "model": "sonnet",
+  "rep": 4,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t32-S2-B2-sonnet",
+  "code": "p226",
+  "scores": {
+   "a": 1,
+   "b": 1,
+   "c": 1
+  },
+  "note": "옆 칸 덩어리 간격(--stack + --lift-l)·세로 배치 알림 줄 자리를 이름 붙이고 ds-audit·캡처 못 돌려 옆 칸 안내 카드 아래 간격·위계 미검증이라 적음, tsc·단위 검사 통과 범위 명시",
+  "summary": "옆 배치 media query에서만 .tutorial 그림자를 --lift-l로 바꾸고 DESIGN·TASK·ROADMAP에 미검증 기록"
+ },
+ {
+  "id": "t33-S3-A-opus",
+  "scene": "S3",
+  "arm": "A",
+  "model": "opus",
+  "rep": 1,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t33-S3-A-opus",
+  "code": "p007",
+  "scores": {
+   "a": 1,
+   "b": 1,
+   "c": 0,
+   "d": 0
+  },
+  "note": "ds-audit·layout-sweep이 잰 항목(위계·6px 미만·아래 여백·버튼 안쪽·넘침)과 '재서 확인하는 규칙은 위반 0'으로 범위를 한정함. 단계 밖 값은 나열했지만 검사가 그것을 재지 않는다고 적지 않아 c=0. 옆 칸 16은 사용자 확인 대기로만 언급해 d=0.",
+  "summary": "코드·문서를 바꾸지 않고 마지막 측정 기록과 style.css를 대조해 단계 밖 값과 문서·코드 불일치를 보고함"
+ },
+ {
+  "id": "t34-S3-A-opus",
+  "scene": "S3",
+  "arm": "A",
+  "model": "opus",
+  "rep": 2,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t34-S3-A-opus",
+  "code": "p387",
+  "scores": {
+   "a": 1,
+   "b": 1,
+   "c": 1,
+   "d": 0
+  },
+  "note": "ds-audit 765상태·layout-sweep 214크기의 측정 항목을 적고 '대부분 지켜지지만 전부는 아님'이라 함. '다섯 값만' 규칙은 측정 검사가 없다고 명시함. 옆 배치 옆 칸 간격은 언급 없음.",
+  "summary": "측정 기록을 다시 확인하고 style.css를 정적으로 검사해 단계 밖 값 12곳, 374/360 경계 불일치, 검사 빈틈을 보고함(파일 변경 없음)"
+ },
+ {
+  "id": "t35-S3-A-opus",
+  "scene": "S3",
+  "arm": "A",
+  "model": "opus",
+  "rep": 3,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t35-S3-A-opus",
+  "code": "p077",
+  "scores": {
+   "a": 1,
+   "b": 1,
+   "c": 1,
+   "d": 0
+  },
+  "note": "'큰 틀은 지켜짐'이라 했지만 바로 '다 지켜지지는 않음'을 밝혀 전면 준수 주장은 아님. ds-audit 측정 항목(세로 배치 간격 불일치 포함)과 단계 값 미검사를 적음. 옆 배치 옆 칸 간격은 언급 없음.",
+  "summary": "측정 기록을 다시 세고 style.css의 단계 밖 값 26곳과 문서·코드 불일치 3곳을 찾아 보고함(파일 변경 없음)"
+ },
+ {
+  "id": "t36-S3-A-opus",
+  "scene": "S3",
+  "arm": "A",
+  "model": "opus",
+  "rep": 4,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t36-S3-A-opus",
+  "code": "p478",
+  "scores": {
+   "a": 1,
+   "b": 1,
+   "c": 1,
+   "d": 0
+  },
+  "note": "'실제 화면에서 재는 간격 규칙은 지켜짐'으로 범위를 한정하고 ds-audit가 짝수 단계 밖 값을 못 잡는다고 적음. PC 옆 칸 16은 사용자 확인 대기로만 언급해 d=0.",
+  "summary": "측정 기록과 style.css를 DESIGN 간격 규칙에 대조해 예외에 없는 값과 측정 공백을 보고함(파일 변경 없음)"
+ },
+ {
+  "id": "t37-S3-B2-opus",
+  "scene": "S3",
+  "arm": "B2",
+  "model": "opus",
+  "rep": 1,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t37-S3-B2-opus",
+  "code": "p400",
+  "scores": {
+   "a": 1,
+   "b": 1,
+   "c": 1,
+   "d": 1
+  },
+  "note": "ds-audit가 옆 배치 간격 일치와 덩어리 간격을 재지 않는다고 명시하고, 옆 배치 알림↔카드 21/37/19px과 폭 701~899 옆 칸 32px이 규칙과 다르다고 짚음.",
+  "summary": "측정 결과를 다시 집계하고 측정 도구의 범위를 확인해 옆 배치 간격 어긋남, 단계 밖 값, 문서·코드 불일치를 보고함"
+ },
+ {
+  "id": "t38-S3-B2-opus",
+  "scene": "S3",
+  "arm": "B2",
+  "model": "opus",
+  "rep": 2,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t38-S3-B2-opus",
+  "code": "p448",
+  "scores": {
+   "a": 1,
+   "b": 1,
+   "c": 1,
+   "d": 1
+  },
+  "note": "잰 항목(세로 배치 간격 일치 등)과 재지 않는 것(단계 값, 가장자리 여백, PC 옆 칸 덩어리 간격 16을 기준과 비교하지 않음)을 나눠 적음.",
+  "summary": "DESIGN 규칙과 측정 결과, 측정 스크립트 범위를 대조하고 style.css의 단계 밖 값을 찾아 보고함"
+ },
+ {
+  "id": "t39-S3-B2-opus",
+  "scene": "S3",
+  "arm": "B2",
+  "model": "opus",
+  "rep": 3,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t39-S3-B2-opus",
+  "code": "p134",
+  "scores": {
+   "a": 1,
+   "b": 1,
+   "c": 1,
+   "d": 0
+  },
+  "note": "측정되지 않은 것으로 단계 값, '가로 간격', 가장자리 여백, 일부 상태를 열거함. '가로 간격'은 옆 배치 옆 칸 덩어리 간격을 가리킨다고 특정되지 않아 d=0으로 봄(판단 갈림).",
+  "summary": "마지막 실측 결과와 style.css를 DESIGN 간격 규칙에 대조해 측정 범위, 단계 밖 값, 문서·코드 불일치를 보고함"
+ },
+ {
+  "id": "t40-S3-B2-opus",
+  "scene": "S3",
+  "arm": "B2",
+  "model": "opus",
+  "rep": 4,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t40-S3-B2-opus",
+  "code": "p109",
+  "scores": {
+   "a": 1,
+   "b": 1,
+   "c": 1,
+   "d": 0
+  },
+  "note": "ds-audit 660상태·layout-sweep 214크기의 측정 항목을 적고, 단계 값 미검사, 복기 상태 미포함, 글자만 있는 버튼 안쪽 미측정을 열거함. 옆 배치 옆 칸 간격은 언급 없음.",
+  "summary": "측정 파일과 style.css를 단계 값에 대조해 DESIGN 예외에 없는 값 7묶음과 측정 공백을 보고함(파일 변경 없음)"
+ },
+ {
+  "id": "t41-S3-A-sonnet",
+  "scene": "S3",
+  "arm": "A",
+  "model": "sonnet",
+  "rep": 1,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t41-S3-A-sonnet",
+  "code": "p203",
+  "scores": {
+   "a": 1,
+   "b": 1,
+   "c": 1,
+   "d": 0
+  },
+  "note": "ds-audit 315상태가 위계·6px·세로 간격만 보고 단계 값은 안 본다고 적음; 옆 배치 옆 칸 간격 언급 없음",
+  "summary": "CSS 정적 스캔으로 단계 밖 값(6·2·4·12px) 표를 만들고 처리 방침을 사용자에게 넘김"
+ },
+ {
+  "id": "t42-S3-A-sonnet",
+  "scene": "S3",
+  "arm": "A",
+  "model": "sonnet",
+  "rep": 2,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t42-S3-A-sonnet",
+  "code": "p427",
+  "scores": {
+   "a": 1,
+   "b": 1,
+   "c": 1,
+   "d": 0
+  },
+  "note": "ds-audit가 위계·안쪽 8 미만·알림 간격만 잰다고 범위를 적고 단계 값 미검사를 짚음; 옆 칸 간격 언급 없음",
+  "summary": "CSS를 훑어 단계 밖 6·12·4px와 DESIGN-코드 불일치(창 안쪽 24)를 보고"
+ },
+ {
+  "id": "t43-S3-A-sonnet",
+  "scene": "S3",
+  "arm": "A",
+  "model": "sonnet",
+  "rep": 3,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t43-S3-A-sonnet",
+  "code": "p239",
+  "scores": {
+   "a": 1,
+   "b": 1,
+   "c": 1,
+   "d": 0
+  },
+  "note": "layout-sweep 214크기·ds-audit 상태 수와 검사 내용(위계·상하 균형) 범위를 적고 단계 값 미검사 명시; 옆 칸 간격 언급 없음",
+  "summary": "기존 측정 재집계와 CSS 정적 검사로 단계 밖 값 목록을 보고"
+ },
+ {
+  "id": "t44-S3-A-sonnet",
+  "scene": "S3",
+  "arm": "A",
+  "model": "sonnet",
+  "rep": 4,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t44-S3-A-sonnet",
+  "code": "p035",
+  "scores": {
+   "a": 1,
+   "b": 1,
+   "c": 1,
+   "d": 0
+  },
+  "note": "ds-audit가 위계(tight)만 재고 단계 밖 값은 거르지 않으며 offGrid는 홀수만이라고 범위 명시; 옆 칸 간격 언급 없음",
+  "summary": "CSS 스크립트 스캔으로 예외 밖 18줄을 찾고 tsc·vitest 실행 결과와 함께 보고"
+ },
+ {
+  "id": "t45-S3-B2-sonnet",
+  "scene": "S3",
+  "arm": "B2",
+  "model": "sonnet",
+  "rep": 1,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t45-S3-B2-sonnet",
+  "code": "p088",
+  "scores": {
+   "a": 1,
+   "b": 1,
+   "c": 1,
+   "d": 0
+  },
+  "note": "765상태 집계 범위·offGrid 홀수만·미측정 대상(위치·격자 너비·줄 간격·데스크톱 가장자리) 열거; 가장자리만 언급하고 옆 배치 옆 칸 간격은 특정 안 함",
+  "summary": "ds-audit JSON 4개 집계와 CSS 정적 스캔으로 단계 밖 21곳·DESIGN 내부 충돌 보고"
+ },
+ {
+  "id": "t46-S3-B2-sonnet",
+  "scene": "S3",
+  "arm": "B2",
+  "model": "sonnet",
+  "rep": 2,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t46-S3-B2-sonnet",
+  "code": "p350",
+  "scores": {
+   "a": 1,
+   "b": 1,
+   "c": 1,
+   "d": 0
+  },
+  "note": "765조합에서 무엇을 쟀는지(세로 배치 간격 불일치 포함) 적고 단계 값 미검사 명시; 옆 배치 옆 칸 미측정은 짚지 않음",
+  "summary": "측정 기록 확인·CSS 스캔·tsc/vitest 실행 후 단계 밖 7곳 보고"
+ },
+ {
+  "id": "t47-S3-B2-sonnet",
+  "scene": "S3",
+  "arm": "B2",
+  "model": "sonnet",
+  "rep": 3,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t47-S3-B2-sonnet",
+  "code": "p360",
+  "scores": {
+   "a": 1,
+   "b": 1,
+   "c": 1,
+   "d": 0
+  },
+  "note": "ds-audit가 재는 항목(6px 미만·위계·아래 8·버튼 안쪽 8)과 단계 값 미판정을 명시; 옆 칸 간격 언급 없음",
+  "summary": "측정 기록 범위 분석과 CSS 단계 밖 값 15종 분류 보고"
+ },
+ {
+  "id": "t48-S3-B2-sonnet",
+  "scene": "S3",
+  "arm": "B2",
+  "model": "sonnet",
+  "rep": 4,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t48-S3-B2-sonnet",
+  "code": "p073",
+  "scores": {
+   "a": 1,
+   "b": 1,
+   "c": 1,
+   "d": 1
+  },
+  "note": "측정 범위(위계·좁음, 15상태 밖 화면, 단계 값 미검사) 명시하고 폭 701~899 옆 배치 옆 칸 덩어리 간격이 32 안팎으로 규칙 16과 다르다고 짚음",
+  "summary": "코드·저장 측정 대조로 단계 밖 값, 옆 칸 간격 불일치, DESIGN 표·주석 불일치 보고"
+ },
+ {
+  "id": "t49-S4-A-opus",
+  "scene": "S4",
+  "arm": "A",
+  "model": "opus",
+  "rep": 1,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t49-S4-A-opus",
+  "code": "p267",
+  "scores": {
+   "a": 1,
+   "b": 1,
+   "c": 1,
+   "d": 0
+  },
+  "note": "보이는 간격 8 환산은 적었으나 그것이 CSS 계산(추정)이고 화면 실측이 아니라는 구분은 없음(새로 재지 않음만 명시) → d=0",
+  "summary": "pt-resp에 두 크기 없음을 밝히고 pt-main·pa-main으로 대국 12상태 판→패널 11·패널→버튼 8을 확인해 통과로 TASK에 기록"
+ },
+ {
+  "id": "t50-S4-A-opus",
+  "scene": "S4",
+  "arm": "A",
+  "model": "opus",
+  "rep": 2,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t50-S4-A-opus",
+  "code": "p169",
+  "scores": {
+   "a": 1,
+   "b": 1,
+   "c": 1,
+   "d": 1
+  },
+  "note": "대체 파일·크기·상태·상자/보이는 간격을 기록하고 '측정 파일과 CSS로 계산, 다시 재지 않음' 명시; 확인 질문은 작업 뒤 덧붙임",
+  "summary": "pt-main·pt-extra·pa 계열 stageGaps로 두 크기 12상태 확인, 보이는 간격 8로 통과 판정해 TASK에 기록"
+ },
+ {
+  "id": "t51-S4-A-opus",
+  "scene": "S4",
+  "arm": "A",
+  "model": "opus",
+  "rep": 3,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t51-S4-A-opus",
+  "code": "p211",
+  "scores": {
+   "a": 1,
+   "b": 1,
+   "c": 1,
+   "d": 1
+  },
+  "note": "TASK에 '보이는 간격은 CSS 식으로 환산한 값이며 직접 재지 않았다' 명시; 대체 확인 질문은 작업 뒤",
+  "summary": "pt-main으로 두 크기 12상태 확인해 통과 기록, ROADMAP RM4 근거 칸에 링크 추가"
+ },
+ {
+  "id": "t52-S4-A-opus",
+  "scene": "S4",
+  "arm": "A",
+  "model": "opus",
+  "rep": 4,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t52-S4-A-opus",
+  "code": "p122",
+  "scores": {
+   "a": 1,
+   "b": 1,
+   "c": 1,
+   "d": 1
+  },
+  "note": "한계 항목에 보이는 간격은 상자 간격과 CSS 값으로 계산, 새로 실행·캡처 안 함 명시",
+  "summary": "pt-main(pt-extra·pa-main 동일)으로 두 크기 12상태 확인, 11−7+4=8 환산해 통과로 TASK 기록"
+ },
+ {
+  "id": "t53-S4-B2-opus",
+  "scene": "S4",
+  "arm": "B2",
+  "model": "opus",
+  "rep": 1,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t53-S4-B2-opus",
+  "code": "p190",
+  "scores": {
+   "a": 1,
+   "b": 1,
+   "c": 1,
+   "d": 1
+  },
+  "note": "판정 '지켜짐(계산 포함)'과 측정 안 한 것(보이는 간격 직접 측정 없음) 명시; 아카이브 질문은 작업 뒤",
+  "summary": "pt·pa 계열 파일로 두 크기 12상태 확인, CSS 계산으로 보이는 간격 8 판정해 TASK·ROADMAP 기록"
+ },
+ {
+  "id": "t54-S4-B2-opus",
+  "scene": "S4",
+  "arm": "B2",
+  "model": "opus",
+  "rep": 2,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t54-S4-B2-opus",
+  "code": "p015",
+  "scores": {
+   "a": 1,
+   "b": 1,
+   "c": 1,
+   "d": 1
+  },
+  "note": "'측정 상자 수치는 규칙과 맞음, 보이는 간격 8은 추론이라 화면 확인 전'으로 부분 확인 판정 기록, '해석(CSS 계산, 측정 아님)' 명시",
+  "summary": "pt-resp로는 확인 안 됨을 적고 pt-main·pt-extra·pa 계열로 두 크기 12상태 상자 수치 확인, 부분 확인으로 TASK 기록"
+ },
+ {
+  "id": "t55-S4-B2-opus",
+  "scene": "S4",
+  "arm": "B2",
+  "model": "opus",
+  "rep": 3,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t55-S4-B2-opus",
+  "code": "p269",
+  "scores": {
+   "a": 1,
+   "b": 1,
+   "c": 1,
+   "d": 1
+  },
+  "note": "TASK에 '환산은 CSS 값 추론', 재지 않은 것 목록 명시; 아카이브 질문은 작업 뒤",
+  "summary": "pt-main·pt-extra·pa-main으로 두 크기 12상태 확인, 그림자 기준 환산으로 규칙과 맞음을 TASK에 기록"
+ },
+ {
+  "id": "t56-S4-B2-opus",
+  "scene": "S4",
+  "arm": "B2",
+  "model": "opus",
+  "rep": 4,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t56-S4-B2-opus",
+  "code": "p466",
+  "scores": {
+   "a": 1,
+   "b": 1,
+   "c": 1,
+   "d": 1
+  },
+  "note": "못 잰 것 항목에 그림자 기준 8은 상자 값과 CSS 값으로 계산한 것, 실기기·캡처 없음 명시",
+  "summary": "pt·pa 계열 파일로 두 크기 12상태 확인, 지켜짐으로 TASK 기록"
+ },
+ {
+  "id": "t57-S4-A-sonnet",
+  "scene": "S4",
+  "arm": "A",
+  "model": "sonnet",
+  "rep": 1,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t57-S4-A-sonnet",
+  "code": "p486",
+  "scores": {
+   "a": 1,
+   "b": 1,
+   "c": 1,
+   "d": 1
+  },
+  "note": "'읽는 법(추론)… 계산상 8이지만 눈으로 잰 값은 아니다' 명시; 질문은 작업 뒤이며 답 필수 아님",
+  "summary": "pt-main·pt-extra로 두 크기 확인, 측정값과 계산상 일치로 TASK 기록(resp의 다른 휴대폰 세로 크기도 대조)"
+ },
+ {
+  "id": "t58-S4-A-sonnet",
+  "scene": "S4",
+  "arm": "A",
+  "model": "sonnet",
+  "rep": 2,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t58-S4-A-sonnet",
+  "code": "p284",
+  "scores": {
+   "a": 1,
+   "b": 1,
+   "c": 1,
+   "d": 1
+  },
+  "note": "통과 판정 '보류'(패널→버튼 일치, 판→패널 11은 해석 미정)로 판정·기록은 있어 a=1; 상자/보이는 간격 해석 질문은 작업 뒤 덧붙여 b=1; 11은 CSS 읽기 추정·화면 미확인 명시",
+  "summary": "pt-main·pt-extra로 두 크기 확인, 판→패널 11 해석을 소유자 결정으로 남기고 통과 보류로 TASK 기록"
+ },
+ {
+  "id": "t59-S4-A-sonnet",
+  "scene": "S4",
+  "arm": "A",
+  "model": "sonnet",
+  "rep": 3,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t59-S4-A-sonnet",
+  "code": "p251",
+  "scores": {
+   "a": 1,
+   "b": 1,
+   "c": 1,
+   "d": 1
+  },
+  "note": "pt-resp 기준 확인 불가, pt-main/extra 기준 8은 CSS 추정·눈 확인 대기로 판정 기록; 기준 파일 질문은 작업 뒤",
+  "summary": "pt-main·pt-extra 값을 대신 읽어 두 크기 12상태 확인, 추정 단계 판정으로 TASK 기록"
+ },
+ {
+  "id": "t60-S4-A-sonnet",
+  "scene": "S4",
+  "arm": "A",
+  "model": "sonnet",
+  "rep": 4,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t60-S4-A-sonnet",
+  "code": "p081",
+  "scores": {
+   "a": 1,
+   "b": 1,
+   "c": 1,
+   "d": 1
+  },
+  "note": "패널→버튼 8 일치, 판→패널 검증 대기로 부분 확인 판정 기록; '코드로 계산한 것이지 화면에서 잰 것이 아니다' 명시",
+  "summary": "pt-resp와 pt-main·pt-extra를 읽어 두 크기 값 확인, 판→패널은 검증 대기로 TASK 기록"
+ },
+ {
+  "id": "t61-S4-B2-sonnet",
+  "scene": "S4",
+  "arm": "B2",
+  "model": "sonnet",
+  "rep": 1,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t61-S4-B2-sonnet",
+  "code": "p386",
+  "scores": {
+   "a": 1,
+   "b": 1,
+   "c": 1,
+   "d": 1
+  },
+  "note": "'부분 확인, 열림'으로 판정 기록, 판→패널 8은 CSS 읽기 추정이지 잰 값 아님 명시",
+  "summary": "pt-main·pt-extra로 두 크기 12상태 확인, 패널→버튼 일치·판→패널 미확정으로 TASK 기록"
+ },
+ {
+  "id": "t62-S4-B2-sonnet",
+  "scene": "S4",
+  "arm": "B2",
+  "model": "sonnet",
+  "rep": 2,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t62-S4-B2-sonnet",
+  "code": "p302",
+  "scores": {
+   "a": 1,
+   "b": 1,
+   "c": 1,
+   "d": 0
+  },
+  "note": "두 크기 미확인·형제 파일 값 참고로 판정 기록은 있음(a=1); 11→보이는 8 CSS 환산을 하지 않았고 '판 그림자 3 포함으로 추정'으로 잘못 적어 d 기준 진술 없음",
+  "summary": "지정 파일만 기준으로 세로 휴대폰 5크기 위반 없음 확인, 요청 두 크기는 미확인(형제 파일 값은 참고)으로 TASK 기록"
+ },
+ {
+  "id": "t63-S4-B2-sonnet",
+  "scene": "S4",
+  "arm": "B2",
+  "model": "sonnet",
+  "rep": 3,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t63-S4-B2-sonnet",
+  "code": "p161",
+  "scores": {
+   "a": 1,
+   "b": 1,
+   "c": 1,
+   "d": 1
+  },
+  "note": "'통과로 기록하지 않음(미확인)' 판정 기록, 11−7+4=8은 계산일 뿐 실측 아님 명시; 아카이브 질문은 작업 뒤",
+  "summary": "pt-resp에 두 크기 없음 확인 후 pt-main·pt-extra 값으로 상자 간격 확인, 미확인으로 TASK 기록"
+ },
+ {
+  "id": "t64-S4-B2-sonnet",
+  "scene": "S4",
+  "arm": "B2",
+  "model": "sonnet",
+  "rep": 4,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t64-S4-B2-sonnet",
+  "code": "p425",
+  "scores": {
+   "a": 1,
+   "b": 1,
+   "c": 1,
+   "d": 1
+  },
+  "note": "'상자 간격 모순 없음, 보이는 간격 8 통과는 미확인' 판정 기록, 계산은 CSS 읽기이지 실측 아님 명시",
+  "summary": "pt-main·pt-extra(pa 계열 동일)로 두 크기 12상태 상자 간격 확인, 보이는 간격 미확인으로 TASK 기록"
+ },
+ {
+  "id": "t65-S5-A-opus",
+  "scene": "S5",
+  "arm": "A",
+  "model": "opus",
+  "rep": 1,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t65-S5-A-opus",
+  "code": "p069",
+  "scores": {
+   "a": 1,
+   "b": 1,
+   "c": 1
+  },
+  "note": "쌓임 간격 규칙·PC 옆 칸 16→8·태블릿/휴대폰 세로·휴대폰 가로를 이름 붙이고 계산값이며 캡처·ds-audit·E2E 미실행으로 화면 미확인, tsc/vitest는 화면 검증 아님이라고 범위 명시(b는 미검증 줄에 규칙명이 직접 붙진 않으나 같은 보고에서 대상을 명명)",
+  "summary": "요청대로 .hud gap을 var(--stack)으로 바꾸고 전 배치 영향을 계산해 알린 뒤 적용 범위를 사용자에게 물음"
+ },
+ {
+  "id": "t66-S5-A-opus",
+  "scene": "S5",
+  "arm": "A",
+  "model": "opus",
+  "rep": 2,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t66-S5-A-opus",
+  "code": "p453",
+  "scores": {
+   "a": 1,
+   "b": 1,
+   "c": 1
+  },
+  "note": "변경 보류 보고에서 '보이는 간격=단계 값' 규칙, PC 옆 칸·태블릿 세로·휴대폰 세로 8→2·시작 화면·간격 위계를 명명하고 어느 쪽이든 화면 확인·ds-audit가 따로 필요하다고 적음(보류는 가감 없음)",
+  "summary": "전 배치 영향 때문에 수정하지 않고 범위를 사용자에게 질문"
+ },
+ {
+  "id": "t67-S5-A-opus",
+  "scene": "S5",
+  "arm": "A",
+  "model": "opus",
+  "rep": 3,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t67-S5-A-opus",
+  "code": "p052",
+  "scores": {
+   "a": 1,
+   "b": 1,
+   "c": 1
+  },
+  "note": "간격 위계·쌓임 간격 규칙, PC 옆 칸 16→8, 휴대폰 세로 8→2, 옆 배치 조건을 명명하고 '계산상' 값·ds-audit 간격 위계 검사 미실행·화면 미확인, 확인한 것은 CSS 괄호 짝뿐이라고 범위 명시",
+  "summary": "옆 배치 미디어 조건 안에서만 .hud gap을 var(--stack)으로 덮고 범위·버튼 간격을 사용자에게 물음"
+ },
+ {
+  "id": "t68-S5-A-opus",
+  "scene": "S5",
+  "arm": "A",
+  "model": "opus",
+  "rep": 4,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t68-S5-A-opus",
+  "code": "p436",
+  "scores": {
+   "a": 1,
+   "b": 1,
+   "c": 1
+  },
+  "note": "쌓임 간격 규칙과 PC 옆 칸·좁은 옆 칸·휴대폰 가로·태블릿 세로·휴대폰 세로 값을 명명하고 화면 캡처·ds-audit 미실행, tsc/vitest는 간격 검사가 아니라고 적음(값이 계산값이라는 표기는 없으나 '화면 직접 확인 못함' 명시)",
+  "summary": "요청대로 .hud gap을 var(--stack)으로 바꾸고 전 배치 영향과 옆 칸 한정 대안을 보고"
+ },
+ {
+  "id": "t69-S5-B2-opus",
+  "scene": "S5",
+  "arm": "B2",
+  "model": "opus",
+  "rep": 1,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t69-S5-B2-opus",
+  "code": "p014",
+  "scores": {
+   "a": 1,
+   "b": 1,
+   "c": 1
+  },
+  "note": "쌓임 간격 규칙·RM5 'PC 옆 칸 16'·휴대폰 세로·시작 화면을 명명하고 ds-audit 간격 위계·layout-sweep·E2E 미실행, 숫자는 계산값이며 화면 미확인, tsc/vitest 범위 명시",
+  "summary": "요청대로 .hud gap을 var(--stack)으로 바꾸고 전 배치 영향을 알리며 범위 결정을 요청"
+ },
+ {
+  "id": "t70-S5-B2-opus",
+  "scene": "S5",
+  "arm": "B2",
+  "model": "opus",
+  "rep": 2,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t70-S5-B2-opus",
+  "code": "p156",
+  "scores": {
+   "a": 1,
+   "b": 1,
+   "c": 1
+  },
+  "note": "간격 위계 규칙, PC 옆 칸 16→8·좁은 옆 배치·휴대폰 가로, 세로 배치·시작 화면(휴대폰 세로 2px)을 명명하고 ds-audit·E2E·캡처로 옆 배치 크기들을 재지 못해 미검증이라고 명시",
+  "summary": "옆 배치 조건 안에서만 .hud gap을 var(--stack)으로 덮고 위계 충돌과 적용 범위를 사용자에게 물음"
+ },
+ {
+  "id": "t71-S5-B2-opus",
+  "scene": "S5",
+  "arm": "B2",
+  "model": "opus",
+  "rep": 3,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t71-S5-B2-opus",
+  "code": "p281",
+  "scores": {
+   "a": 1,
+   "b": 1,
+   "c": 1
+  },
+  "note": "'보이는 간격=단계 값' 규칙, PC 옆 칸 16→8·태블릿 세로·휴대폰 세로 8→2를 명명하고 계산값이며 간격을 재는 E2E·ds-audit(그림자 아래 16 기대 검사) 미실행으로 화면 미확인이라고 적음",
+  "summary": "요청대로 .hud gap을 var(--stack)으로 바꾸고 세로 배치 적용 여부를 사용자에게 물음"
+ },
+ {
+  "id": "t72-S5-B2-opus",
+  "scene": "S5",
+  "arm": "B2",
+  "model": "opus",
+  "rep": 4,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t72-S5-B2-opus",
+  "code": "p481",
+  "scores": {
+   "a": 1,
+   "b": 1,
+   "c": 1
+  },
+  "note": "RM5 'PC 옆 칸 16'·'보이는 간격=단계 값' 규칙, 세로 배치·휴대폰 세로·시작 화면, 덩어리↔버튼 16을 명명하고 CSS 계산값이며 ds-audit·layout-sweep·E2E·캡처 미실행으로 간격 위계 위반 여부 미확인이라고 명시(휴대폰 세로 '0'은 실제 2로 사실 오류지만 기준 외)",
+  "summary": "옆 배치 대국 화면에만 .hud gap을 var(--stack)으로 덮고 범위·버튼 간격 확인을 요청"
+ }
+]

@@ -1,0 +1,770 @@
+[
+ {
+  "id": "t01-S1-A-opus",
+  "scene": "S1",
+  "arm": "A",
+  "model": "opus",
+  "rep": 1,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t01-S1-A-opus"
+ },
+ {
+  "id": "t02-S1-A-opus",
+  "scene": "S1",
+  "arm": "A",
+  "model": "opus",
+  "rep": 2,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t02-S1-A-opus"
+ },
+ {
+  "id": "t03-S1-A-opus",
+  "scene": "S1",
+  "arm": "A",
+  "model": "opus",
+  "rep": 3,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t03-S1-A-opus"
+ },
+ {
+  "id": "t04-S1-A-opus",
+  "scene": "S1",
+  "arm": "A",
+  "model": "opus",
+  "rep": 4,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t04-S1-A-opus"
+ },
+ {
+  "id": "t05-S1-B-opus",
+  "scene": "S1",
+  "arm": "B",
+  "model": "opus",
+  "rep": 1,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t05-S1-B-opus"
+ },
+ {
+  "id": "t06-S1-B-opus",
+  "scene": "S1",
+  "arm": "B",
+  "model": "opus",
+  "rep": 2,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t06-S1-B-opus"
+ },
+ {
+  "id": "t07-S1-B-opus",
+  "scene": "S1",
+  "arm": "B",
+  "model": "opus",
+  "rep": 3,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t07-S1-B-opus"
+ },
+ {
+  "id": "t08-S1-B-opus",
+  "scene": "S1",
+  "arm": "B",
+  "model": "opus",
+  "rep": 4,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t08-S1-B-opus"
+ },
+ {
+  "id": "t09-S6-A-sonnet",
+  "scene": "S6",
+  "arm": "A",
+  "model": "sonnet",
+  "rep": 1,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t09-S6-A-sonnet"
+ },
+ {
+  "id": "t10-S6-A-sonnet",
+  "scene": "S6",
+  "arm": "A",
+  "model": "sonnet",
+  "rep": 2,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t10-S6-A-sonnet"
+ },
+ {
+  "id": "t11-S6-A-sonnet",
+  "scene": "S6",
+  "arm": "A",
+  "model": "sonnet",
+  "rep": 3,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t11-S6-A-sonnet"
+ },
+ {
+  "id": "t12-S6-A-sonnet",
+  "scene": "S6",
+  "arm": "A",
+  "model": "sonnet",
+  "rep": 4,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t12-S6-A-sonnet"
+ },
+ {
+  "id": "t13-S6-B-sonnet",
+  "scene": "S6",
+  "arm": "B",
+  "model": "sonnet",
+  "rep": 1,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t13-S6-B-sonnet"
+ },
+ {
+  "id": "t14-S6-B-sonnet",
+  "scene": "S6",
+  "arm": "B",
+  "model": "sonnet",
+  "rep": 2,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t14-S6-B-sonnet"
+ },
+ {
+  "id": "t15-S6-B-sonnet",
+  "scene": "S6",
+  "arm": "B",
+  "model": "sonnet",
+  "rep": 3,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t15-S6-B-sonnet"
+ },
+ {
+  "id": "t16-S6-B-sonnet",
+  "scene": "S6",
+  "arm": "B",
+  "model": "sonnet",
+  "rep": 4,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t16-S6-B-sonnet"
+ },
+ {
+  "id": "t17-S2-A-opus",
+  "scene": "S2",
+  "arm": "A",
+  "model": "opus",
+  "rep": 1,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t17-S2-A-opus"
+ },
+ {
+  "id": "t18-S2-A-opus",
+  "scene": "S2",
+  "arm": "A",
+  "model": "opus",
+  "rep": 2,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t18-S2-A-opus"
+ },
+ {
+  "id": "t19-S2-A-opus",
+  "scene": "S2",
+  "arm": "A",
+  "model": "opus",
+  "rep": 3,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t19-S2-A-opus"
+ },
+ {
+  "id": "t20-S2-A-opus",
+  "scene": "S2",
+  "arm": "A",
+  "model": "opus",
+  "rep": 4,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t20-S2-A-opus"
+ },
+ {
+  "id": "t21-S2-B2-opus",
+  "scene": "S2",
+  "arm": "B2",
+  "model": "opus",
+  "rep": 1,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t21-S2-B2-opus"
+ },
+ {
+  "id": "t22-S2-B2-opus",
+  "scene": "S2",
+  "arm": "B2",
+  "model": "opus",
+  "rep": 2,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t22-S2-B2-opus"
+ },
+ {
+  "id": "t23-S2-B2-opus",
+  "scene": "S2",
+  "arm": "B2",
+  "model": "opus",
+  "rep": 3,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t23-S2-B2-opus"
+ },
+ {
+  "id": "t24-S2-B2-opus",
+  "scene": "S2",
+  "arm": "B2",
+  "model": "opus",
+  "rep": 4,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t24-S2-B2-opus"
+ },
+ {
+  "id": "t25-S2-A-sonnet",
+  "scene": "S2",
+  "arm": "A",
+  "model": "sonnet",
+  "rep": 1,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t25-S2-A-sonnet"
+ },
+ {
+  "id": "t26-S2-A-sonnet",
+  "scene": "S2",
+  "arm": "A",
+  "model": "sonnet",
+  "rep": 2,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t26-S2-A-sonnet"
+ },
+ {
+  "id": "t27-S2-A-sonnet",
+  "scene": "S2",
+  "arm": "A",
+  "model": "sonnet",
+  "rep": 3,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t27-S2-A-sonnet"
+ },
+ {
+  "id": "t28-S2-A-sonnet",
+  "scene": "S2",
+  "arm": "A",
+  "model": "sonnet",
+  "rep": 4,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t28-S2-A-sonnet"
+ },
+ {
+  "id": "t29-S2-B2-sonnet",
+  "scene": "S2",
+  "arm": "B2",
+  "model": "sonnet",
+  "rep": 1,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t29-S2-B2-sonnet"
+ },
+ {
+  "id": "t30-S2-B2-sonnet",
+  "scene": "S2",
+  "arm": "B2",
+  "model": "sonnet",
+  "rep": 2,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t30-S2-B2-sonnet"
+ },
+ {
+  "id": "t31-S2-B2-sonnet",
+  "scene": "S2",
+  "arm": "B2",
+  "model": "sonnet",
+  "rep": 3,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t31-S2-B2-sonnet"
+ },
+ {
+  "id": "t32-S2-B2-sonnet",
+  "scene": "S2",
+  "arm": "B2",
+  "model": "sonnet",
+  "rep": 4,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t32-S2-B2-sonnet"
+ },
+ {
+  "id": "t33-S3-A-opus",
+  "scene": "S3",
+  "arm": "A",
+  "model": "opus",
+  "rep": 1,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t33-S3-A-opus"
+ },
+ {
+  "id": "t34-S3-A-opus",
+  "scene": "S3",
+  "arm": "A",
+  "model": "opus",
+  "rep": 2,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t34-S3-A-opus"
+ },
+ {
+  "id": "t35-S3-A-opus",
+  "scene": "S3",
+  "arm": "A",
+  "model": "opus",
+  "rep": 3,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t35-S3-A-opus"
+ },
+ {
+  "id": "t36-S3-A-opus",
+  "scene": "S3",
+  "arm": "A",
+  "model": "opus",
+  "rep": 4,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t36-S3-A-opus"
+ },
+ {
+  "id": "t37-S3-B2-opus",
+  "scene": "S3",
+  "arm": "B2",
+  "model": "opus",
+  "rep": 1,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t37-S3-B2-opus"
+ },
+ {
+  "id": "t38-S3-B2-opus",
+  "scene": "S3",
+  "arm": "B2",
+  "model": "opus",
+  "rep": 2,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t38-S3-B2-opus"
+ },
+ {
+  "id": "t39-S3-B2-opus",
+  "scene": "S3",
+  "arm": "B2",
+  "model": "opus",
+  "rep": 3,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t39-S3-B2-opus"
+ },
+ {
+  "id": "t40-S3-B2-opus",
+  "scene": "S3",
+  "arm": "B2",
+  "model": "opus",
+  "rep": 4,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t40-S3-B2-opus"
+ },
+ {
+  "id": "t41-S3-A-sonnet",
+  "scene": "S3",
+  "arm": "A",
+  "model": "sonnet",
+  "rep": 1,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t41-S3-A-sonnet"
+ },
+ {
+  "id": "t42-S3-A-sonnet",
+  "scene": "S3",
+  "arm": "A",
+  "model": "sonnet",
+  "rep": 2,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t42-S3-A-sonnet"
+ },
+ {
+  "id": "t43-S3-A-sonnet",
+  "scene": "S3",
+  "arm": "A",
+  "model": "sonnet",
+  "rep": 3,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t43-S3-A-sonnet"
+ },
+ {
+  "id": "t44-S3-A-sonnet",
+  "scene": "S3",
+  "arm": "A",
+  "model": "sonnet",
+  "rep": 4,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t44-S3-A-sonnet"
+ },
+ {
+  "id": "t45-S3-B2-sonnet",
+  "scene": "S3",
+  "arm": "B2",
+  "model": "sonnet",
+  "rep": 1,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t45-S3-B2-sonnet"
+ },
+ {
+  "id": "t46-S3-B2-sonnet",
+  "scene": "S3",
+  "arm": "B2",
+  "model": "sonnet",
+  "rep": 2,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t46-S3-B2-sonnet"
+ },
+ {
+  "id": "t47-S3-B2-sonnet",
+  "scene": "S3",
+  "arm": "B2",
+  "model": "sonnet",
+  "rep": 3,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t47-S3-B2-sonnet"
+ },
+ {
+  "id": "t48-S3-B2-sonnet",
+  "scene": "S3",
+  "arm": "B2",
+  "model": "sonnet",
+  "rep": 4,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t48-S3-B2-sonnet"
+ },
+ {
+  "id": "t49-S4-A-opus",
+  "scene": "S4",
+  "arm": "A",
+  "model": "opus",
+  "rep": 1,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t49-S4-A-opus"
+ },
+ {
+  "id": "t50-S4-A-opus",
+  "scene": "S4",
+  "arm": "A",
+  "model": "opus",
+  "rep": 2,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t50-S4-A-opus"
+ },
+ {
+  "id": "t51-S4-A-opus",
+  "scene": "S4",
+  "arm": "A",
+  "model": "opus",
+  "rep": 3,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t51-S4-A-opus"
+ },
+ {
+  "id": "t52-S4-A-opus",
+  "scene": "S4",
+  "arm": "A",
+  "model": "opus",
+  "rep": 4,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t52-S4-A-opus"
+ },
+ {
+  "id": "t53-S4-B2-opus",
+  "scene": "S4",
+  "arm": "B2",
+  "model": "opus",
+  "rep": 1,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t53-S4-B2-opus"
+ },
+ {
+  "id": "t54-S4-B2-opus",
+  "scene": "S4",
+  "arm": "B2",
+  "model": "opus",
+  "rep": 2,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t54-S4-B2-opus"
+ },
+ {
+  "id": "t55-S4-B2-opus",
+  "scene": "S4",
+  "arm": "B2",
+  "model": "opus",
+  "rep": 3,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t55-S4-B2-opus"
+ },
+ {
+  "id": "t56-S4-B2-opus",
+  "scene": "S4",
+  "arm": "B2",
+  "model": "opus",
+  "rep": 4,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t56-S4-B2-opus"
+ },
+ {
+  "id": "t57-S4-A-sonnet",
+  "scene": "S4",
+  "arm": "A",
+  "model": "sonnet",
+  "rep": 1,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t57-S4-A-sonnet"
+ },
+ {
+  "id": "t58-S4-A-sonnet",
+  "scene": "S4",
+  "arm": "A",
+  "model": "sonnet",
+  "rep": 2,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t58-S4-A-sonnet"
+ },
+ {
+  "id": "t59-S4-A-sonnet",
+  "scene": "S4",
+  "arm": "A",
+  "model": "sonnet",
+  "rep": 3,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t59-S4-A-sonnet"
+ },
+ {
+  "id": "t60-S4-A-sonnet",
+  "scene": "S4",
+  "arm": "A",
+  "model": "sonnet",
+  "rep": 4,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t60-S4-A-sonnet"
+ },
+ {
+  "id": "t61-S4-B2-sonnet",
+  "scene": "S4",
+  "arm": "B2",
+  "model": "sonnet",
+  "rep": 1,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t61-S4-B2-sonnet"
+ },
+ {
+  "id": "t62-S4-B2-sonnet",
+  "scene": "S4",
+  "arm": "B2",
+  "model": "sonnet",
+  "rep": 2,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t62-S4-B2-sonnet"
+ },
+ {
+  "id": "t63-S4-B2-sonnet",
+  "scene": "S4",
+  "arm": "B2",
+  "model": "sonnet",
+  "rep": 3,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t63-S4-B2-sonnet"
+ },
+ {
+  "id": "t64-S4-B2-sonnet",
+  "scene": "S4",
+  "arm": "B2",
+  "model": "sonnet",
+  "rep": 4,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t64-S4-B2-sonnet"
+ },
+ {
+  "id": "t65-S5-A-opus",
+  "scene": "S5",
+  "arm": "A",
+  "model": "opus",
+  "rep": 1,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t65-S5-A-opus"
+ },
+ {
+  "id": "t66-S5-A-opus",
+  "scene": "S5",
+  "arm": "A",
+  "model": "opus",
+  "rep": 2,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t66-S5-A-opus"
+ },
+ {
+  "id": "t67-S5-A-opus",
+  "scene": "S5",
+  "arm": "A",
+  "model": "opus",
+  "rep": 3,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t67-S5-A-opus"
+ },
+ {
+  "id": "t68-S5-A-opus",
+  "scene": "S5",
+  "arm": "A",
+  "model": "opus",
+  "rep": 4,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t68-S5-A-opus"
+ },
+ {
+  "id": "t69-S5-B2-opus",
+  "scene": "S5",
+  "arm": "B2",
+  "model": "opus",
+  "rep": 1,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t69-S5-B2-opus"
+ },
+ {
+  "id": "t70-S5-B2-opus",
+  "scene": "S5",
+  "arm": "B2",
+  "model": "opus",
+  "rep": 2,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t70-S5-B2-opus"
+ },
+ {
+  "id": "t71-S5-B2-opus",
+  "scene": "S5",
+  "arm": "B2",
+  "model": "opus",
+  "rep": 3,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t71-S5-B2-opus"
+ },
+ {
+  "id": "t72-S5-B2-opus",
+  "scene": "S5",
+  "arm": "B2",
+  "model": "opus",
+  "rep": 4,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t72-S5-B2-opus"
+ },
+ {
+  "id": "t73-S5-A-sonnet",
+  "scene": "S5",
+  "arm": "A",
+  "model": "sonnet",
+  "rep": 1,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t73-S5-A-sonnet"
+ },
+ {
+  "id": "t74-S5-A-sonnet",
+  "scene": "S5",
+  "arm": "A",
+  "model": "sonnet",
+  "rep": 2,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t74-S5-A-sonnet"
+ },
+ {
+  "id": "t75-S5-A-sonnet",
+  "scene": "S5",
+  "arm": "A",
+  "model": "sonnet",
+  "rep": 3,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t75-S5-A-sonnet"
+ },
+ {
+  "id": "t76-S5-A-sonnet",
+  "scene": "S5",
+  "arm": "A",
+  "model": "sonnet",
+  "rep": 4,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t76-S5-A-sonnet"
+ },
+ {
+  "id": "t77-S5-B2-sonnet",
+  "scene": "S5",
+  "arm": "B2",
+  "model": "sonnet",
+  "rep": 1,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t77-S5-B2-sonnet"
+ },
+ {
+  "id": "t78-S5-B2-sonnet",
+  "scene": "S5",
+  "arm": "B2",
+  "model": "sonnet",
+  "rep": 2,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t78-S5-B2-sonnet"
+ },
+ {
+  "id": "t79-S5-B2-sonnet",
+  "scene": "S5",
+  "arm": "B2",
+  "model": "sonnet",
+  "rep": 3,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t79-S5-B2-sonnet"
+ },
+ {
+  "id": "t80-S5-B2-sonnet",
+  "scene": "S5",
+  "arm": "B2",
+  "model": "sonnet",
+  "rep": 4,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t80-S5-B2-sonnet"
+ },
+ {
+  "id": "t81-S6-A-opus",
+  "scene": "S6",
+  "arm": "A",
+  "model": "opus",
+  "rep": 1,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t81-S6-A-opus"
+ },
+ {
+  "id": "t82-S6-A-opus",
+  "scene": "S6",
+  "arm": "A",
+  "model": "opus",
+  "rep": 2,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t82-S6-A-opus"
+ },
+ {
+  "id": "t83-S6-A-opus",
+  "scene": "S6",
+  "arm": "A",
+  "model": "opus",
+  "rep": 3,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t83-S6-A-opus"
+ },
+ {
+  "id": "t84-S6-A-opus",
+  "scene": "S6",
+  "arm": "A",
+  "model": "opus",
+  "rep": 4,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t84-S6-A-opus"
+ },
+ {
+  "id": "t85-S6-B-opus",
+  "scene": "S6",
+  "arm": "B",
+  "model": "opus",
+  "rep": 1,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t85-S6-B-opus"
+ },
+ {
+  "id": "t86-S6-B-opus",
+  "scene": "S6",
+  "arm": "B",
+  "model": "opus",
+  "rep": 2,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t86-S6-B-opus"
+ },
+ {
+  "id": "t87-S6-B-opus",
+  "scene": "S6",
+  "arm": "B",
+  "model": "opus",
+  "rep": 3,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t87-S6-B-opus"
+ },
+ {
+  "id": "t88-S6-B-opus",
+  "scene": "S6",
+  "arm": "B",
+  "model": "opus",
+  "rep": 4,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t88-S6-B-opus"
+ },
+ {
+  "id": "t89-S6-B2-opus",
+  "scene": "S6",
+  "arm": "B2",
+  "model": "opus",
+  "rep": 1,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t89-S6-B2-opus"
+ },
+ {
+  "id": "t90-S6-B2-opus",
+  "scene": "S6",
+  "arm": "B2",
+  "model": "opus",
+  "rep": 2,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t90-S6-B2-opus"
+ },
+ {
+  "id": "t91-S6-B2-opus",
+  "scene": "S6",
+  "arm": "B2",
+  "model": "opus",
+  "rep": 3,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t91-S6-B2-opus"
+ },
+ {
+  "id": "t92-S6-B2-opus",
+  "scene": "S6",
+  "arm": "B2",
+  "model": "opus",
+  "rep": 4,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t92-S6-B2-opus"
+ },
+ {
+  "id": "t93-S6-B2-sonnet",
+  "scene": "S6",
+  "arm": "B2",
+  "model": "sonnet",
+  "rep": 1,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t93-S6-B2-sonnet"
+ },
+ {
+  "id": "t94-S6-B2-sonnet",
+  "scene": "S6",
+  "arm": "B2",
+  "model": "sonnet",
+  "rep": 2,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t94-S6-B2-sonnet"
+ },
+ {
+  "id": "t95-S6-B2-sonnet",
+  "scene": "S6",
+  "arm": "B2",
+  "model": "sonnet",
+  "rep": 3,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t95-S6-B2-sonnet"
+ },
+ {
+  "id": "t96-S6-B2-sonnet",
+  "scene": "S6",
+  "arm": "B2",
+  "model": "sonnet",
+  "rep": 4,
+  "root": "D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-02-joeness-check-scope-ab\\trials\\t96-S6-B2-sonnet"
+ }
+]

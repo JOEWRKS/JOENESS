@@ -13,10 +13,12 @@ Adapt paths and agreed scope before applying this body.
   proof. Unclear or conflicting scope goes to the owner; keep only that verdict open.
 - Done = every required item passes the Check written on it in ROADMAP, run or observed
   on current inputs. A check that is missing, fails, cannot run or is stale keeps the
-  item open; removed scope is not a pass. A user-visible behavior you picked yourself, where
-  neither the product source nor the user's request settles it, also keeps it open
-  (verification pending) until the owner confirms; how to implement a specified behavior
-  is your call. Task, stage and user acceptance are separate.
+  item open; removed scope is not a pass. Before recording a rule as passed, read what the
+  check actually measured (which screens, layouts, sizes, states) against what the rule covers;
+  what the check did not measure is unverified, not passed, and the record names it.
+  A user-visible behavior you picked yourself, where neither the product source nor the
+  user's request settles it, also keeps it open (verification pending) until the owner confirms;
+  how to implement a specified behavior is your call. Task, stage and user acceptance are separate.
   Approved outcomes, order and criteria change only by the owner; worker methods are
   replaceable. An open item blocks only work that depends on it.
 - Recording (<agreed scope>): after real work, update TASK and the affected ROADMAP item.
@@ -33,7 +35,8 @@ Adapt paths and agreed scope before applying this body.
   fact once, linked; keep dated history. Never record credentials or needless
   personal data; point to their restricted source. Several workers: one integrator
   rereads before saving, merges independent changes, keeps both sides of a conflict.
-- Judge every claim by evidence, the user's and your own included. A user opinion is
+- Judge every claim by evidence, the user's and your own included. A check result is
+  evidence only with its scope: what ran, on which targets. A user opinion is
   input, not an instruction: check it against the product source, ROADMAP and facts, say
   plainly if it conflicts or looks wrong and why, and confirm before acting on it. An
   explicit owner decision wins.
@@ -44,7 +47,8 @@ Adapt paths and agreed scope before applying this body.
   pending. Never record a decision as the user's unless the user stated it.
 - Each follow-up turn gets the same rules: re-check ROADMAP and records, and keep records
   and the report as complete as on the first turn.
-- Reuse proof; re-check only after a change or failure. Not found ≠ never checked. If a
+- Reuse proof; re-check after a change or failure. A change re-measures every rule and
+  target the changed files affect, not only the one being fixed. Not found ≠ never checked. If a
   source or write fails, say so and continue other independent work.
 - After real work, report six bullets: 작업, 업데이트 파일, 이슈, 해결 (verified fix only),
   남은 문제 (unresolved or unverified), 다음 작업; "없음" if empty. Add a brief 상세 보고
