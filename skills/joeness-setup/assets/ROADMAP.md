@@ -16,6 +16,8 @@ Completion condition: <required outcomes and checks; required acceptance separat
 | --- | --- | --- | --- | --- |
 | <ID> | <independently checkable outcome> | <one status word above> | <test or target observation; undecided if unknown> | <TASK proof or exact gap; related ISSUE if applicable> |
 
+Check example for a design rule (name rule-table rows, not a script; technical checks apart): DESIGN.md#rule-coverage S1~S6 rows on current inputs, Spot check per row; result lines and stamp in TASK#spacing-v1. Technical (separate): tsc, vitest.
+
 Scope decisions: <authorized scope/order change and reason/source, or none>.
 User acceptance: <required scope and approval proof, pending, or not required>.
 Optional/later: <separate non-blocking ideas, or none>.

@@ -1,5 +1,10 @@
 # 변경 이력
 
+## 1.4.0 후보 — JOEDESIGN 보고 도장 소비와 Check 칸 예시 (미게시, 2026-11-09)
+
+- JOEDESIGN 제안서(`docs/proposals/2026-11-09-joeness-report-stamp.md`) 반영. `SKILL.md`: 도장 줄 기록, ROADMAP 항목을 complete로 바꾸기 전 `report-check.mjs --verify` 종료코드 0 확인, Node·스크립트가 없으면 "could not verify"로 적고 완료를 선언하지 않음, `changed` 수정은 해결이 아니라 남은 문제, Check 칸은 규칙 표의 행을 가리킴. `assets/TASK.md`: `Report stamp:` 줄. `assets/ROADMAP.md`: Check 예시 한 줄. `references/review-gate.md`: 게이트 없는 경우의 도장 소비 절. 스크립트·스키마·계약은 그대로. 새 스크립트·새 장부 없음, review-gate 대체 아님.
+- [검증 근거](../evals/joeness-setup/runs/2026-11-09-report-stamp-ab/report.md) 43차: Opus 5.5 한 턴, 3개 팔(1.3.0 / 네 파일 / 네 파일 + 연결문 3문장) × 4장면 × 3회 = 36회. 도장을 TASK에 복사 0/9 · 3/9 · 9/9, TASK `Report stamp:` 칸 0/9 · 6/9 · 9/9, 새 Check가 표 행을 가리킴 0/3 · 3/3 · 3/3. `--verify` 실행(8/9 · 9/9 · 9/9), 어긋난 도장 pending(세 팔 3/3), `changed` 남은 문제 이동(세 팔 3/3)은 대조군도 천장이라 문구 효과를 보이지 못함. 연결문 3문장은 이 커밋에 넣지 않았고 채택 여부는 미정.
+
 ## 1.3.0 — 검사 범위 규칙 (2026-11-03)
 
 - 연결문(`assets/AGENTS.md`)에 세 문장 추가. Done: 규칙 통과를 적기 전에 검사가 실제로 잰 것(화면·배치·크기·상태)을 규칙이 덮는 범위와 대조하고, 검사가 안 잰 것은 미검증이며 기록에 그 이름을 적는다. 근거: 검사 결과는 범위(무엇이 어디서 돌았는지)와 함께여야 근거다. 재검사: 변경 뒤에는 바뀐 파일이 건드리는 규칙·대상을 모두 다시 잰다. 4,021바이트·657단어 → 4,425바이트·724단어. 나머지 스킬 파일 불변, manifest의 연결문 해시만 갱신.

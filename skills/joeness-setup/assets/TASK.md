@@ -8,6 +8,7 @@ Changed files: <actual paths and purpose, or none>.
 Check / target / result: <executed check and observed result, or unverified>.
 Evidence: <exact proof locator>.
 Limits: <missing verification or acceptance boundary, or none>.
+Report stamp: <report-check: ok N chars sha8 and the saved report's path, or none ran / not stamped>.
 Required specialist verdict: <scope/current gate result and proof, or not applicable>.
 Completion boundaries: <implementation / technical / visual / user acceptance; unknown stays unverified>.
 Related issue / knowledge: <ISSUES item or Library topic; do not copy detail>.

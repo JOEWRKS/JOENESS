@@ -1,0 +1,7 @@
+[
+  ["what the check did not measure is unverified, not passed, and the record names it.\n",
+   "what the check did not measure is unverified, not passed, and the record names it.\n  Before an item with a saved JOEDESIGN report becomes complete, run\n  `node <joedesign>/scripts/report-check.mjs --verify <file>` and require exit 0; a missing or mismatched\n  stamp, or no Node or script, keeps it verification pending and the record says so.\n"],
+  ["  Each new piece of work gets its own dated TASK entry; never append it under an unrelated entry.\n",
+   "  Each new piece of work gets its own dated TASK entry; never append it under an unrelated entry.\n  Copy a design report's stamp line to TASK `Report stamp:` (`none ran` if no design check), and write a\n  design rule's ROADMAP Check as rows of the DESIGN rule table, not a script name; technical checks apart.\n"],
+  ["해결 (verified fix only),", "해결 (verified fix only; a fix marked `changed` goes under 남은 문제),"]
+]

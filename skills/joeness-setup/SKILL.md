@@ -134,6 +134,11 @@ command with pinned scope/criteria, current target inputs and result path. The
 ordinary per-item check rule then applies; no separate AGENTS line is needed. Never
 substitute technical checks for visual compliance. The gate is opt-in to that
 required scope, not an always-on engine.
+Without a gate, a design-rule Check names rows of the DESIGN rule-coverage table
+(which rule, which layouts, sizes, states), not a script: one script that measures
+one layout cannot stand in for a rule covering two. Example:
+`DESIGN.md#rule-coverage S1~S6 rows on current inputs, Spot check per row; result
+lines and stamp in TASK#spacing-v1. Technical (separate): tsc, vitest`.
 
 Before reporting setup complete, read back actual documents, not just templates:
 - Is this the whole project's approved scope, not merely an available subplan?
@@ -226,8 +231,20 @@ user's language (Korean: 작업, 업데이트 파일, 이슈, 해결, 남은 문
 Use everyday words, noun phrases or short sentences, not paragraphs.
 Name only files actually changed, by purpose; use 없음 for empty fields.
 이슈 = encountered problem; 해결 = verified fix, not a passing check;
-남은 문제 = unresolved/unverified work. Next work comes from authorized scope
+남은 문제 = unresolved/unverified work. A fix marked `changed` in a design results
+list goes under 남은 문제, never 해결. Next work comes from authorized scope
 or ROADMAP. Put IDs, exact paths and necessary evidence after the opening.
+
+A JOEDESIGN report ends with a stamp line, `report-check: ok <chars> chars <sha8>`.
+Save the sent report with that line in a file TASK names (e.g.
+`work/reports/<date>-<id>.md`) and copy the line to TASK `Report stamp:`; a turn
+with no design check writes `none ran`. Before changing a ROADMAP item to complete,
+run `node <joedesign>/scripts/report-check.mjs --verify <file>` on each report its
+TASK entry names and require exit 0. A missing or mismatched stamp makes it an
+unchecked report: the item stays verification pending. Without Node or the script,
+write "could not verify" and do not declare completion. The stamp shows only that
+the checked text is the saved text in the required form; it does not show that the
+numbers are true, stop a rewrite of both, or grant approval or visual acceptance.
 
 Add 상세 보고 only for a material cause, proof, verification limit, scope or
 acceptance boundary not conveyed above. Keep it brief; no repetition, extra

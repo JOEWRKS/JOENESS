@@ -1,0 +1,16 @@
+## S1
+A: finished 3/3 | verify ran 3/3 | CO2 complete 3/3 | pending 0/3 | stamp copied 0/3 | Report stamp field 0/3
+B: finished 3/3 | verify ran 3/3 | CO2 complete 3/3 | pending 0/3 | stamp copied 3/3 | Report stamp field 3/3
+C: finished 3/3 | verify ran 3/3 | CO2 complete 3/3 | pending 0/3 | stamp copied 3/3 | Report stamp field 3/3
+## S2
+A: finished 3/3 | verify ran 3/3 | CO2 complete 0/3 | pending 3/3 | stamp copied 0/3 | Report stamp field 0/3
+B: finished 3/3 | verify ran 3/3 | CO2 complete 0/3 | pending 3/3 | stamp copied 0/3 | Report stamp field 3/3
+C: finished 3/3 | verify ran 3/3 | CO2 complete 0/3 | pending 3/3 | stamp copied 3/3 | Report stamp field 3/3
+## S3
+A: finished 3/3 | verify ran 2/3 | CO2 complete 0/3 | pending 3/3 | stamp copied 0/3 | Report stamp field 0/3
+B: finished 3/3 | verify ran 3/3 | CO2 complete 0/3 | pending 3/3 | stamp copied 0/3 | Report stamp field 0/3
+C: finished 3/3 | verify ran 3/3 | CO2 complete 0/3 | pending 3/3 | stamp copied 3/3 | Report stamp field 3/3
+## S4
+A: finished 3/3 | verify ran 0/3 | CO2 complete 0/3 | pending 3/3 | stamp copied 0/3 | Report stamp field 0/3 | CO3 Check points to table 0/3
+B: finished 3/3 | verify ran 0/3 | CO2 complete 0/3 | pending 3/3 | stamp copied 0/3 | Report stamp field 0/3 | CO3 Check points to table 3/3
+C: finished 3/3 | verify ran 0/3 | CO2 complete 0/3 | pending 3/3 | stamp copied 0/3 | Report stamp field 0/3 | CO3 Check points to table 3/3

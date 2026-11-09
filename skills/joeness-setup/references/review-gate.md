@@ -114,6 +114,15 @@ exact output, supply a separately pinned `--acceptance <json>
 and `input_fingerprints:{check_id:currentFingerprint}` for every required check.
 Missing, changed or mismatched acceptance cannot complete a scope requiring it.
 
+## Report stamp without a gate
+
+Where no gate is pinned, a saved JOEDESIGN report is consumed with
+`node <joedesign>/scripts/report-check.mjs --verify <file>` before the item
+becomes complete. The script stays in the JOEDESIGN package. Nonzero exit, a
+missing stamp, or no Node/script keeps verification pending, as above. This does
+not replace this gate where one is required: a stamp proves text identity and
+form only, never measurements, a PASS result, approval or visual acceptance.
+
 ## Enforcement limits
 
 This helper refuses an invalid completion claim with a nonzero exit; consumers
