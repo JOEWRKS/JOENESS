@@ -4,6 +4,7 @@
 
 - JOEDESIGN 제안서(`docs/proposals/2026-11-09-joeness-report-stamp.md`) 반영. `SKILL.md`: 도장 줄 기록, ROADMAP 항목을 complete로 바꾸기 전 `report-check.mjs --verify` 종료코드 0 확인, Node·스크립트가 없으면 "could not verify"로 적고 완료를 선언하지 않음, `changed` 수정은 해결이 아니라 남은 문제, Check 칸은 규칙 표의 행을 가리킴. `assets/TASK.md`: `Report stamp:` 줄. `assets/ROADMAP.md`: Check 예시 한 줄. `references/review-gate.md`: 게이트 없는 경우의 도장 소비 절. 스크립트·스키마·계약은 그대로. 새 스크립트·새 장부 없음, review-gate 대체 아님.
 - [검증 근거](../evals/joeness-setup/runs/2026-11-09-report-stamp-ab/report.md) 43차: Opus 5.5 한 턴, 3개 팔(1.3.0 / 네 파일 / 네 파일 + 연결문 3문장) × 4장면 × 3회 = 36회. 도장을 TASK에 복사 0/9 · 3/9 · 9/9, TASK `Report stamp:` 칸 0/9 · 6/9 · 9/9, 새 Check가 표 행을 가리킴 0/3 · 3/3 · 3/3. `--verify` 실행(8/9 · 9/9 · 9/9), 어긋난 도장 pending(세 팔 3/3), `changed` 남은 문제 이동(세 팔 3/3)은 대조군도 천장이라 문구 효과를 보이지 못함. 사용자 승인("둘 다 승인", 2026-11-10)으로 C팔 연결문(`assets/AGENTS.md`) 3문장도 넣음: Done에 저장된 JOEDESIGN 보고는 `--verify` 종료코드 0 전에 완료 불가, 기록에 도장 줄 복사와 Check 칸은 규칙 표 행, 보고의 해결 정의에 `changed`는 남은 문제. 4,425바이트·711단어 → 4,946바이트·793단어. 시험한 C 본문과 바이트 일치.
+- [소스·main·개인 설치·게시 상태](../evals/joeness-setup/runs/2026-11-10-v140-release/review-evidence.md): main `696c32a` Windows CI 성공, 게시 [JOENESS-v1.4.0](https://github.com/JOEWRKS/JOENESS/releases/tag/JOENESS-v1.4.0)(2026-11-10), Codex 개인 설치 1.4.0 갱신(백업·바이트 대조·대표 검사 통과), Claude Code 클론 갱신. 기존 프로젝트 연결은 자동 갱신하지 않음.
 
 ## 1.3.0 — 검사 범위 규칙 (2026-11-03)
 
