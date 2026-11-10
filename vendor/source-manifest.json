@@ -2,7 +2,7 @@
   "schemaVersion": 3,
   "release": {
     "name": "JOENESS",
-    "version": "1.3.0",
+    "version": "1.4.0",
     "entrypoint": "JOENESS.ps1"
   },
   "target": {
@@ -25,7 +25,7 @@
         },
         {
           "path": "assets/AGENTS.md",
-          "sha256": "b623c0d6c8f684369926bf14df7012658f091f278e342e077f80b576076ba8ed"
+          "sha256": "701b28992ffd863a3b2d5c262af4771a85681df1ef6531cff67916e2ca8bd2aa"
         },
         {
           "path": "assets/DESIGN.md",

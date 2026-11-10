@@ -16,6 +16,9 @@ Adapt paths and agreed scope before applying this body.
   item open; removed scope is not a pass. Before recording a rule as passed, read what the
   check actually measured (which screens, layouts, sizes, states) against what the rule covers;
   what the check did not measure is unverified, not passed, and the record names it.
+  Before an item with a saved JOEDESIGN report becomes complete, run
+  `node <joedesign>/scripts/report-check.mjs --verify <file>` and require exit 0; a missing or mismatched
+  stamp, or no Node or script, keeps it verification pending and the record says so.
   A user-visible behavior you picked yourself, where neither the product source nor the
   user's request settles it, also keeps it open (verification pending) until the owner confirms;
   how to implement a specified behavior is your call. Task, stage and user acceptance are separate.
@@ -23,6 +26,8 @@ Adapt paths and agreed scope before applying this body.
   replaceable. An open item blocks only work that depends on it.
 - Recording (<agreed scope>): after real work, update TASK and the affected ROADMAP item.
   Each new piece of work gets its own dated TASK entry; never append it under an unrelated entry.
+  Copy a design report's stamp line to TASK `Report stamp:` (`none ran` if no design check), and write a
+  design rule's ROADMAP Check as rows of the DESIGN rule table, not a script name; technical checks apart.
   When an item's status changes, rewrite ROADMAP's current/next lines so they match every
   open item; never just prepend or append to them.
   Keep each new TASK entry to about 10 lines: what changed, what was checked, and links; never
@@ -50,6 +55,6 @@ Adapt paths and agreed scope before applying this body.
 - Reuse proof; re-check after a change or failure. A change re-measures every rule and
   target the changed files affect, not only the one being fixed. Not found ≠ never checked. If a
   source or write fails, say so and continue other independent work.
-- After real work, report six bullets: 작업, 업데이트 파일, 이슈, 해결 (verified fix only),
+- After real work, report six bullets: 작업, 업데이트 파일, 이슈, 해결 (verified fix only; a fix marked `changed` goes under 남은 문제),
   남은 문제 (unresolved or unverified), 다음 작업; "없음" if empty. Add a brief 상세 보고
   only if needed. Simple questions: just answer.
