@@ -1,5 +1,13 @@
 # 변경 이력
 
+## 1.4.1 — 통합 시험 결함 3건 (후보, 미게시)
+
+- 계기: 2026-11-12 JOEFLOW 1.7.0 통합 시험(JOENESS 연결 → JOEFLOW 정의 → JOEDESIGN 구현·보고 → 도장 소비)에서 나온 JOENESS 결함 3건.
+- `<joedesign>` 자리: 연결문·SKILL.md·review-gate.md에 "커밋 파일에는 글자 그대로, 실행할 때 `JOEDESIGN_HOME` 또는 설치된 joedesign 스킬 폴더로 푼다". `project-setup.ps1 -Apply`는 드라이브·UNC·사용자 홈 경로가 든 본문을 막고, `-Check`는 기존 블록의 그런 경로를 `warnings`로 알린다(차단 아님). 연결문 4,946바이트·793단어 → 5,148바이트·823단어.
+- `assets/DESIGN.md`에 `## Rule coverage` 표(JOEDESIGN Rule Coverage 7열 + Result 링크). DESIGN.md 하나·규칙 표 하나 규칙(JOEDESIGN 템플릿을 쓰면 그 표에 Result 열 추가).
+- `assets/ROADMAP.md`에 `Product revision / approval:` 줄(JOEFLOW면 `approval_status.py`의 `definition_revision`·`approval_status`·`approved_revision`, revision 기록이 없으면 `none`).
+- [후보 보고서](../evals/joeness-setup/runs/2026-11-12-v141-candidate/report.md): 테스트 1.4.0 104/104 → 후보 106/106(+ PowerShell 28 cases), 행동 A/B 없음. 버전 문자열은 1.4.0 그대로, manifest 파일 해시만 갱신. push·태그·Release·개인 설치 안 함.
+
 ## 1.4.0 — JOEDESIGN 보고 도장 소비와 Check 칸 예시 (2026-11-10)
 
 - JOEDESIGN 제안서(`docs/proposals/2026-11-09-joeness-report-stamp.md`) 반영. `SKILL.md`: 도장 줄 기록, ROADMAP 항목을 complete로 바꾸기 전 `report-check.mjs --verify` 종료코드 0 확인, Node·스크립트가 없으면 "could not verify"로 적고 완료를 선언하지 않음, `changed` 수정은 해결이 아니라 남은 문제, Check 칸은 규칙 표의 행을 가리킴. `assets/TASK.md`: `Report stamp:` 줄. `assets/ROADMAP.md`: Check 예시 한 줄. `references/review-gate.md`: 게이트 없는 경우의 도장 소비 절. 스크립트·스키마·계약은 그대로. 새 스크립트·새 장부 없음, review-gate 대체 아님.

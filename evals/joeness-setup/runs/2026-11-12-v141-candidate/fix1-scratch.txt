@@ -1,0 +1,12 @@
+--- absolute path substituted
+check: status=ready warnings=0
+apply: status=blocked blockers=Invalid managed body: machine-specific path E:\tools\skills\joedesign/scripts/report-check.mjs; keep <joedesign> literal and resolve it at run time
+AGENTS.md exists: False
+--- shipped body
+check: status=ready warnings=0
+apply: status=current blockers=
+recheck: status=current warnings=0
+AGENTS.md:20: Before an item with a saved JOEDESIGN report becomes complete, run
+AGENTS.md:21: `node <joedesign>/scripts/report-check.mjs --verify <file>` and require exit 0; a missing or mismatched
+AGENTS.md:23: Keep `<joedesign>` literal here and in records; at run time it is this machine's JOEDESIGN
+AGENTS.md:24: skill folder (`JOEDESIGN_HOME` if set, else the installed joedesign skill). Never commit an absolute path.

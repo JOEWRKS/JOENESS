@@ -1,0 +1,13 @@
+committed: .joeness/setup-state.json AGENTS.md DESIGN.md ROADMAP.md 
+check: current warnings 0
+DESIGN headings:
+10:## Rule coverage
+DESIGN table header:
+17:| Rule | Check | Spot check | Layouts | Sizes | States | Unmeasured | Result |
+ROADMAP anchor refs:
+DESIGN.md#rule-coverage
+ROADMAP authority lines:
+4:Product authority: <existing source/section, or undecided>.
+5:Product revision / approval: <revision and approval status as the product source reports them, with date read (JOEFLOW: approval_status.py definition_revision, approval_status, approved_revision); none if the source has no revision record>.
+machine paths in committed files:
+none
