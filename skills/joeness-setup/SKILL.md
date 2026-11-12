@@ -240,7 +240,11 @@ Save the sent report with that line in a file TASK names (e.g.
 `work/reports/<date>-<id>.md`) and copy the line to TASK `Report stamp:`; a turn
 with no design check writes `none ran`. Before changing a ROADMAP item to complete,
 run `node <joedesign>/scripts/report-check.mjs --verify <file>` on each report its
-TASK entry names and require exit 0. A missing or mismatched stamp makes it an
+TASK entry names and require exit 0. `<joedesign>` stays literal in AGENTS, ROADMAP
+and TASK: resolve it only when running, to `JOEDESIGN_HOME` if set, else the installed
+joedesign skill folder on this machine. Never write an absolute or user-home path into
+a committed project file; `-Apply` refuses a managed body that holds one and `-Check`
+lists any in a current block under `warnings`. A missing or mismatched stamp makes it an
 unchecked report: the item stays verification pending. Without Node or the script,
 write "could not verify" and do not declare completion. The stamp shows only that
 the checked text is the saved text in the required form; it does not show that the

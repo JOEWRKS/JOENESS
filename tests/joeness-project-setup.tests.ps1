@@ -286,4 +286,31 @@ Case 'RealGitCloneRebindsCheckoutEolButNotContentEdits' {
  Eq (Invoke-JoenessProjectSetup -Check -ProjectPath $p).blockState edited realContentDrift
  Eq (Detach $p).status blocked protectRealEdit
 }
+Case 'MachinePathsStayOutOfCommittedConnection' {
+ param($p)
+ foreach($bad in @('Run node C:\Users\me\.codex\skills\joedesign\scripts\report-check.mjs --verify x','Run node D:/tools/joedesign/scripts/report-check.mjs','Run node /Users/me/joedesign/scripts/report-check.mjs','Run node /home/me/joedesign/x.mjs','Run node \\server\share\joedesign\x.mjs')) {
+  $r=Apply $p $bad
+  Eq $r.status blocked "rejects $bad"
+  if(-not(($r.blockers -join ' ').Contains('machine-specific path'))){throw "blocker names the path for $bad"}
+  Eq (Test-Path (Join-Path $p AGENTS.md)) $false "nothing written for $bad"
+ }
+ $ok=Apply $p 'Run `node <joedesign>/scripts/report-check.mjs --verify <file>`; see https://example.invalid/a and S1~S6 rows.'
+ Eq $ok.status current placeholderAccepted
+ $c=Invoke-JoenessProjectSetup -Check -ProjectPath $p
+ Eq $c.status current check
+ Eq @($c.warnings).Count 0 noWarning
+ # A block applied by an older helper may already hold a machine path: Check warns, does not block.
+ $a=Join-Path $p AGENTS.md; $s=Join-Path $p .joeness/setup-state.json
+ $old='<!-- JOENESS-SETUP:BEGIN -->'+"`n"+'node C:\Users\me\joedesign\scripts\report-check.mjs'+"`n"+'<!-- JOENESS-SETUP:END -->'
+ $bytes=$utf8.GetBytes($old)
+ [IO.File]::WriteAllText($a,$old+"`n",$utf8)
+ $state=[ordered]@{schemaVersion=1;toolVersion='0.2';targetRelativePath='AGENTS.md';appliedBlockBase64=[Convert]::ToBase64String($bytes);appliedBlockSha256=Get-SetupHash $bytes;ownedBoundary=[ordered]@{prefixBase64='';suffixBase64=[Convert]::ToBase64String($utf8.GetBytes("`n"))}}
+ [IO.File]::WriteAllText($s,($state|ConvertTo-Json -Depth 5 -Compress)+"`n",$utf8)
+ $w=Invoke-JoenessProjectSetup -Check -ProjectPath $p
+ Eq $w.status current legacyStillCurrent
+ Eq @($w.warnings).Count 1 legacyWarned
+ if(-not $w.warnings[0].Contains('C:\Users\me')){throw 'warning names the path'}
+ Eq (Apply $p 'Run `node <joedesign>/scripts/report-check.mjs`.').status current reapplyFixes
+ Eq @((Invoke-JoenessProjectSetup -Check -ProjectPath $p).warnings).Count 0 fixedNoWarning
+}
 Write-Host "PASS $script:passed project safety cases"

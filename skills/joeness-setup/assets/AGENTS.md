@@ -19,6 +19,8 @@ Adapt paths and agreed scope before applying this body.
   Before an item with a saved JOEDESIGN report becomes complete, run
   `node <joedesign>/scripts/report-check.mjs --verify <file>` and require exit 0; a missing or mismatched
   stamp, or no Node or script, keeps it verification pending and the record says so.
+  Keep `<joedesign>` literal here and in records; at run time it is this machine's JOEDESIGN
+  skill folder (`JOEDESIGN_HOME` if set, else the installed joedesign skill). Never commit an absolute path.
   A user-visible behavior you picked yourself, where neither the product source nor the
   user's request settles it, also keeps it open (verification pending) until the owner confirms;
   how to implement a specified behavior is your call. Task, stage and user acceptance are separate.

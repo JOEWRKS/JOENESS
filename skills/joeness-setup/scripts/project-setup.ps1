@@ -92,6 +92,10 @@ function Invoke-SetupTransaction($Entries,[scriptblock]$AfterWrite,[scriptblock]
   return [pscustomobject]@{Status=$status;Changed=@($unresolved);Rollback=$rollback;Unresolved=@($unresolved);Error=$message}
  }
 }
+# Machine-specific paths (drive letters, UNC shares, user homes) must not reach a committed AGENTS.md.
+function Get-SetupMachinePaths([string]$Text) {
+ @([regex]::Matches($Text,'(?<![A-Za-z0-9])[A-Za-z]:[\\/][^\s`''"<>|]*|(?<![\\A-Za-z0-9])\\\\[A-Za-z0-9._$-]+\\[^\s`''"<>|]*|(?<![A-Za-z0-9._~-])/(?:Users|home)/[^\s`''"<>|]+')|ForEach-Object {$_.Value})
+}
 function New-SetupEntry($Before,[byte[]]$Bytes,[string]$Label,[switch]$Delete) {
  $hash=if($Delete){'absent'}else{Get-SetupHash $Bytes}
  [pscustomobject]@{Path=$Before.Path;Before=$Before;Bytes=$Bytes;NewHash=$hash;Label=$Label}
@@ -196,7 +200,7 @@ function Invoke-JoenessProjectSetup {
   [scriptblock]$AfterWrite
  )
  $action=if($Apply){'apply'}elseif($Detach){'detach'}elseif($Relocate){'relocate'}else{'check'}
- $r=[ordered]@{action=$action;status='blocked';verificationScope='managed-connection-only';projectRoot=$null;target='AGENTS.md';targetHash='absent';statePath='.joeness/setup-state.json';stateHash='absent';blockState='malformed';changedTargets=@();blockers=@();rollback=$null;unresolvedTargets=@()}
+ $r=[ordered]@{action=$action;status='blocked';verificationScope='managed-connection-only';projectRoot=$null;target='AGENTS.md';targetHash='absent';statePath='.joeness/setup-state.json';stateHash='absent';blockState='malformed';changedTargets=@();blockers=@();warnings=@();rollback=$null;unresolvedTargets=@()}
  try {
   $root=Resolve-SetupRoot $ProjectPath; $r.projectRoot=$root
   $o=Read-SetupObservation $root
@@ -219,6 +223,10 @@ function Invoke-JoenessProjectSetup {
    if($o.BlockState -eq 'clean' -and -not(Test-SetupInitialWindow $o.Text $o.Start $o.Length)){
     $r.blockers=@('Managed block is beyond the observed 32 KiB initial AGENTS.md window; relocate before relying on automatic delivery')
     return [pscustomobject]$r
+   }
+   if($o.BlockState -eq 'clean'){
+    $found=@(Get-SetupMachinePaths $o.Text.Substring($o.Start,$o.Length))
+    if($found.Count){$r.warnings=@('Managed block holds a machine-specific path ('+$found[0]+'); re-apply with the literal <joedesign> placeholder')}
    }
    $r.status=if($o.BlockState -eq 'clean'){'current'}else{'ready'}
    return [pscustomobject]$r
@@ -267,6 +275,8 @@ function Invoke-JoenessProjectSetup {
   }else{
    $body=$script:SetupUtf8.GetString([Convert]::FromBase64String($ManagedBodyBase64))
    if([string]::IsNullOrWhiteSpace($body) -or $body.Contains('JOENESS-SETUP:') -or $body.Contains('JOEWRKS-PROJECT:') -or $body.Contains([char]0)){throw 'Invalid managed body'}
+   $found=@(Get-SetupMachinePaths $body)
+   if($found.Count){throw ('Invalid managed body: machine-specific path '+$found[0]+'; keep <joedesign> literal and resolve it at run time')}
    $nl=if($before.Contains("`r`n")){"`r`n"}else{"`n"}
    $body=$body -replace "\r\n|\r|\n",$nl
    $block=$script:SetupBegin+$nl+$body.TrimEnd("`r","`n")+$nl+$script:SetupEnd

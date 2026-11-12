@@ -103,6 +103,16 @@ test('record assets separate execution, unresolved risk and visual authority',()
   for(const field of ['Authority / version:','Approved scope:','Proposed changes:']) assert.ok(design.includes(field),field);
 });
 
+test('connection body keeps the JOEDESIGN path a run-time placeholder',()=>{
+  const body=read('skills/joeness-setup/assets/AGENTS.md').toString();
+  assert.ok(body.includes('node <joedesign>/scripts/report-check.mjs --verify <file>'));
+  assert.match(body,/Keep `<joedesign>` literal/);
+  assert.ok(body.includes('JOEDESIGN_HOME'));
+  assert.doesNotMatch(body,/(?<![A-Za-z0-9])[A-Za-z]:[\\/]|\/(Users|home)\//);
+  for(const p of ['SKILL.md','references/review-gate.md'])
+    assert.ok(read('skills/joeness-setup/'+p).toString().includes('JOEDESIGN_HOME'),p);
+});
+
 // Wording-level regression only; these checks do not prove redaction or atomic writes.
 test('setup and normal-session connection carry scoped recording safeguards',()=>{
   for (const path of ['SKILL.md','assets/AGENTS.md']) {

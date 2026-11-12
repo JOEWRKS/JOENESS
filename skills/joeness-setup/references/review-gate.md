@@ -118,7 +118,9 @@ Missing, changed or mismatched acceptance cannot complete a scope requiring it.
 
 Where no gate is pinned, a saved JOEDESIGN report is consumed with
 `node <joedesign>/scripts/report-check.mjs --verify <file>` before the item
-becomes complete. The script stays in the JOEDESIGN package. Nonzero exit, a
+becomes complete. The script stays in the JOEDESIGN package; `<joedesign>` stays
+literal in committed files and resolves at run time (`JOEDESIGN_HOME`, else the
+installed joedesign skill folder). Nonzero exit, a
 missing stamp, or no Node/script keeps verification pending, as above. This does
 not replace this gate where one is required: a stamp proves text identity and
 form only, never measurements, a PASS result, approval or visual acceptance.
