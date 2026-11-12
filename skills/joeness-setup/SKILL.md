@@ -42,7 +42,11 @@ truthfully. Do not invent issues, visual approval, goals or a staged sequence.
 
 Existing Product/decision authorities retain product meaning; do not create a
 mandatory PRODUCT.md or replace them with ROADMAP. DESIGN may link an existing
-approved visual source without copying it. Canonical file names do not permit
+approved visual source without copying it. A project keeps one DESIGN.md with
+one `## Rule coverage` table (rule, check, spot check, layouts, sizes, states,
+unmeasured, result link): this asset's table, or, where JOEDESIGN's DESIGN template
+is already used, its Rule Coverage table with a Result column added; do not
+duplicate rules across two tables or files. Canonical file names do not permit
 overwriting an occupied file or bypassing project instructions.
 
 For each existing source, check project, goal, scope and currency before using

@@ -103,6 +103,19 @@ test('record assets separate execution, unresolved risk and visual authority',()
   for(const field of ['Authority / version:','Approved scope:','Proposed changes:']) assert.ok(design.includes(field),field);
 });
 
+test('design asset carries the rule-coverage table that ROADMAP design Checks name',()=>{
+  const design=read('skills/joeness-setup/assets/DESIGN.md').toString();
+  assert.match(design,/^## Rule coverage$/m, 'heading gives the DESIGN.md#rule-coverage anchor');
+  const rows=design.split(/\r?\n/).filter(line=>line.startsWith('|'));
+  assert.ok(rows.length>=3,'header, separator and placeholder row');
+  // Same leading columns as JOEDESIGN templates/DESIGN.md Rule Coverage, plus a Result link.
+  assert.deepEqual(rows[0].split('|').slice(1,-1).map(s=>s.trim()),
+    ['Rule','Check','Spot check','Layouts','Sizes','States','Unmeasured','Result']);
+  assert.ok(design.includes("JOEDESIGN's DESIGN template"),'which-template rule is stated');
+  assert.ok(read('skills/joeness-setup/assets/ROADMAP.md').toString().includes('DESIGN.md#rule-coverage'));
+  assert.ok(read('skills/joeness-setup/SKILL.md').toString().includes('one `## Rule coverage` table'));
+});
+
 test('connection body keeps the JOEDESIGN path a run-time placeholder',()=>{
   const body=read('skills/joeness-setup/assets/AGENTS.md').toString();
   assert.ok(body.includes('node <joedesign>/scripts/report-check.mjs --verify <file>'));
