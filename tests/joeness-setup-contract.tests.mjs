@@ -89,6 +89,11 @@ test('roadmap asset exposes per-outcome checks without embedding operating proce
   assert.ok(rows.length >= 3, 'per-outcome table includes header, separator and data row');
   assert.deepEqual(rows[0].split('|').slice(1,-1).map(s=>s.trim()),
     ['ID','Required outcome','Status','Check / completion criterion','Evidence or gap']);
+  const lines=roadmap.split(/\r?\n/);
+  const authority=lines.findIndex(l=>l.startsWith('Product authority:'));
+  assert.ok(lines[authority+1].startsWith('Product revision / approval:'),'revision/approval sits under Product authority');
+  for(const key of ['definition_revision','approval_status','approved_revision','none if the source has no revision record'])
+    assert.ok(lines[authority+1].includes(key),key);
   for(const field of ['Project scope:','Product authority:','Current stage:','Next eligible work:',
     'Entry condition:','Completion condition:','Scope decisions:']) assert.ok(roadmap.includes(field),field);
   assert.doesNotMatch(roadmap,/Before (claiming|selecting)|worker .*updates|relevant task\/report index|Priority follows/);

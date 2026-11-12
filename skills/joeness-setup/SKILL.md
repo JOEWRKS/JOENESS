@@ -120,7 +120,12 @@ application truthfully; block success cannot hide an unfinished document transfe
 ## Roadmap and suitability check
 
 ROADMAP states project scope and Product source, current stage and next eligible
-work. Each stage has an entry condition and completion condition. Each required
+work. Beside Product source it records the product definition's revision and
+approval status as that source reports them, with the date read (a JOEFLOW project
+copies `approval_status.py` `definition_revision`, `approval_status`,
+`approved_revision`); a source without revisions gets `none`. JOENESS records the
+reading only; the product source owns approval. Each stage has an entry condition
+and completion condition. Each required
 outcome has an ID, status, check/criterion and proof or exact gap. Separate checks
 that can independently pass; do not turn every implementation step into a gate.
 Use the approved order. A small project can have one stage. With unknown goals,
