@@ -1,0 +1,73 @@
+diff --git a/ROADMAP.md b/ROADMAP.md
+index a6a4e5a..ff4e885 100644
+--- a/ROADMAP.md
++++ b/ROADMAP.md
+@@ -1,24 +1,23 @@
+ # Project roadmap
+ 
+-Project scope: <approved delivery goal, or direction pending>.
+-Product authority: <existing source/section, or undecided>.
+-Product revision / approval: <revision and approval status as the product source reports them, with date read (JOEFLOW: approval_status.py definition_revision, approval_status, approved_revision); none if the source has no revision record>.
+-Current stage: <stage and status, or direction pending>.
+-Next eligible work: <required item or bounded decision; blocked dependency if any>.
++Project scope: deliver the approved JOEFLOW product definition `semantic-closure-v2` revision 1 — GOAL-001 "A requester completes a valid submission." via REQ-001 (surface SURF-001 Request submission, the only in-scope surface).
++Product authority: `product-definition/semantic-closure-v2/state.json` (JOEFLOW, `definition_status` CLOSED). No `MASTER_PLANNING_SPEC.md` or downstream handoff contract exists in the project yet.
++Product revision / approval: definition_revision 1, approval_status APPROVED, approved_revision 1, pending revisions none (`approval_status.py`, JOEFLOW 1.7.1 running, project version not pinned; read 2026-11-15).
++Current stage: Stage S1 Request submission — not started (implementation has not begun).
++Next eligible work: S1-1 implement TASK-001 (Check AC-001). Open decision: S1-2 has no Check because revision 1 defines neither the validity conditions nor an acceptance criterion for rejecting invalid input (owner decision / JOEFLOW re-entry); it blocks only S1-2 and stage completion.
+ Status words: not started / in progress / verification pending / on hold / complete / removed from scope.
+ 
+-## Stage <ID / approved name> — <status>
++## Stage S1 Request submission — not started
+ 
+-Goal: <approved outcome>.
+-Entry condition: <required predecessor/result, or none>.
+-Completion condition: <required outcomes and checks; required acceptance separately>.
++Goal: a signed-in requester (USR-001) opens the request form (SCR-001), the request is validated before submission (DEC-001, RULE-001), and an accepted request is persisted through the Request API (INT-001, DATA-001) — FLOW-001, approved revision 1.
++Entry condition: none (product revision 1 approved).
++Completion condition: S1-1 and S1-2 pass their Checks on current inputs. Visual scope: undecided (DESIGN.md has no approved authority; SCR-001 is interactive UI). User acceptance: see below.
+ 
+ | ID | Required outcome | Status | Check / completion criterion | Evidence or gap |
+ | --- | --- | --- | --- | --- |
+-| <ID> | <independently checkable outcome> | <one status word above> | <test or target observation; undecided if unknown> | <TASK proof or exact gap; related ISSUE if applicable> |
++| S1-1 | TASK-001 (implements REQ-001): a signed-in requester submits a valid request from SCR-001; it is accepted and persisted via INT-001 | not started | AC-001 observed on the running implementation, revision 1: a valid request is accepted and persisted. Test command: undecided until implementation exists | Gap: not implemented; no TASK proof yet |
++| S1-2 | RULE-001 / DEC-001: only valid requests may be submitted; invalid input is not submitted (STATE-001 REQUEST_READY only when required input is valid) | not started | undecided — revision 1 has no acceptance criterion for RULE-001 and does not define the required inputs or validity conditions | Gap: validity criteria and the rejection behavior shown to the requester are not in the product source; owner decision or JOEFLOW re-entry needed before a Check can be written |
+ 
+-Check example for a design rule (name rule-table rows, not a script; technical checks apart): DESIGN.md#rule-coverage S1~S6 rows on current inputs, Spot check per row; result lines and stamp in TASK#spacing-v1. Technical (separate): tsc, vitest.
+-
+-Scope decisions: <authorized scope/order change and reason/source, or none>.
+-User acceptance: <required scope and approval proof, pending, or not required>.
+-Optional/later: <separate non-blocking ideas, or none>.
++Scope decisions: stage S1 is built from the single approved task TASK-001 and its rule RULE-001; the stage ID/name were set by the worker (the product source has no stage order). Topology axes MONEY, FILE_UPLOAD, ASYNC, PERMISSION, DESTRUCTIVE_ACTION are N/A per the product source (EVD-900).
++User acceptance: pending — the product source does not state whether user acceptance is required for S1.
++Optional/later: none.
+diff --git a/TASK.md b/TASK.md
+index 3de917a..f79929d 100644
+--- a/TASK.md
++++ b/TASK.md
+@@ -1,15 +1,13 @@
+ # Work results
+ 
+-## <work ID / date / short title>
++## 2026-11-15 / roadmap-from-product-definition / ROADMAP filled from JOEFLOW revision 1
+ 
+-Roadmap item: <ROADMAP.md#item, or approved independent work source>.
+-Result: <actual outcome; not a second stage-status ledger>.
+-Changed files: <actual paths and purpose, or none>.
+-Check / target / result: <executed check and observed result, or unverified>.
+-Evidence: <exact proof locator>.
+-Limits: <missing verification or acceptance boundary, or none>.
+-Report stamp: <report-check: ok N chars sha8 and the saved report's path, or none ran / not stamped>.
+-Required specialist verdict: <scope/current gate result and proof, or not applicable>.
+-Completion boundaries: <implementation / technical / visual / user acceptance; unknown stays unverified>.
+-Related issue / knowledge: <ISSUES item or Library topic; do not copy detail>.
+-Record handoff gap: <unsaved required update, or none>.
++Roadmap item: ROADMAP.md stage S1 (S1-1, S1-2); user request "제품 정의를 보고 ROADMAP.md를 채워 줘".
++Result: ROADMAP scope, authority, revision/approval and stage S1 items written from `state.json` revision 1; no implementation.
++Changed files: `ROADMAP.md` (filled), `TASK.md` (this entry).
++Check / target / result: `approval_status.py product-definition/semantic-closure-v2/state.json` (JOEFLOW 1.7.1) → exit 0, revision 1 APPROVED, no pending revisions; objects read from the same file.
++Evidence: `product-definition/semantic-closure-v2/state.json` (approval_history revision 1).
++Limits: S1-2 Check undecided (no AC for RULE-001, validity not defined); stage ID/name chosen by the worker; visual scope and user acceptance undecided; JOEFLOW version not pinned.
++Report stamp: none ran.
++Completion boundaries: records only; implementation, technical, visual and user acceptance not started.
++Record handoff gap: none.

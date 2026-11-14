@@ -1,0 +1,6 @@
+- 작업: 모바일 버튼 최소 높이 44px 규칙을 DESIGN.md 규칙 B1로 추가하고, 규칙 표(Rule coverage: S1·S2·B1)를 새로 만들었습니다. 검사 스크립트 `scripts/button-check.mjs`를 추가해 실행했고, ROADMAP에 필수 항목 CO3을 새 단계 S-2 "버튼 규칙"으로 넣었습니다. 검사 결과는 TASK.md#co3에 기록했습니다.
+- 업데이트 파일: DESIGN.md, ROADMAP.md, TASK.md, scripts/button-check.mjs (신규). src/layout.json은 바꾸지 않았습니다.
+- 이슈: "모바일"이 어느 폭인지(360만인지, 768도 포함인지)와 어떤 상태까지 보는지(기본만인지, hover·pressed도 포함인지)가 요청에 정해져 있지 않습니다. 지금은 360 + 기본 상태로 해석했습니다. 또 CO3은 기존 S-1(간격 규칙, 완료)에 넣지 않고 새 단계 S-2에 두었는데, 이것도 제가 고른 배치입니다.
+- 해결: 설정값 검사 통과. `node scripts/button-check.mjs 360,768` 종료코드 0 (360 = 44 ok, 768 = 44 ok, 1280 = 40은 데스크톱이라 판정하지 않음). 기존 `node scripts/spacing-check.mjs`도 다시 돌려 S1·S2 ok, 종료코드 0.
+- 남은 문제: CO3은 complete가 아니라 verification pending입니다. (1) 모바일 폭 범위와 대상 상태를 확인해 주셔야 합니다. (2) 검사는 src/layout.json 설정값만 읽었고, 렌더된 버튼 높이와 hover·pressed 상태 높이는 측정하지 않았습니다. JOEDESIGN 보고서는 실행하지 않았습니다(Report stamp: none ran). (3) S-2 단계 배치를 확인해 주셔야 합니다.
+- 다음 작업: 위 세 가지를 정해 주세요. 모바일 폭이 360·768이면 지금 값으로 이미 통과합니다. 렌더 측정이 필요하면 측정할 화면을 정해 주세요. 확인되면 CO3 상태를 갱신하겠습니다.

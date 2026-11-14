@@ -1,0 +1,58 @@
+diff --git a/DESIGN.md b/DESIGN.md
+index bfb6afe..1b101b1 100644
+--- a/DESIGN.md
++++ b/DESIGN.md
+@@ -16,5 +16,5 @@ Coverage table as this table (add Result if absent); never keep two rule tables.
+ 
+ | Rule | Check | Spot check | Layouts | Sizes | States | Unmeasured | Result |
+ | --- | --- | --- | --- | --- | --- | --- | --- |
+-| S1 | node scripts/spacing-check.mjs | 768 card: check 16 / observed 16 | stack | 360·768·1280 | 기본·hover | 렌더 측정은 보고에만 | TASK.md#co2 |
+-| S2 | node scripts/spacing-check.mjs | not spot-checked | stack | 360·768·1280 | 기본·hover | 렌더 미측정 | TASK.md#co2 |
++| S1 | node scripts/spacing-check.mjs | 768 card: check 16 / observed 16 | stack | 360·768·1280 | 기본·hover | 없음 (렌더 측정은 보고, 도장 확인 2026-11-15) | TASK.md#co2-verify |
++| S2 | node scripts/spacing-check.mjs | not spot-checked | stack | 360·768·1280 | 기본·hover | 없음 (렌더 측정은 보고, 도장 확인 2026-11-15) | TASK.md#co2-verify |
+diff --git a/ROADMAP.md b/ROADMAP.md
+index 1173837..162c691 100644
+--- a/ROADMAP.md
++++ b/ROADMAP.md
+@@ -3,11 +3,11 @@
+ Project scope: 소형 대시보드 화면의 간격 규칙 적용.
+ Product authority: docs/brief.md.
+ Product revision / approval: none (docs/brief.md has no revision record; read 2026-11-10).
+-Current stage: S-1 간격 규칙 — in progress.
+-Next eligible work: CO2 완료 판정.
++Current stage: S-1 간격 규칙 — complete (2026-11-15). 다음 단계 정의 없음.
++Next eligible work: none (열린 항목 없음; 다음 단계는 소유자가 정한다).
+ Status words: not started / in progress / verification pending / on hold / complete / removed from scope.
+ 
+-## Stage S-1 간격 규칙 — in progress
++## Stage S-1 간격 규칙 — complete
+ 
+ Goal: 승인된 간격 규칙 v1 적용.
+ Entry condition: none.
+@@ -16,7 +16,7 @@ Completion condition: CO1, CO2 complete.
+ | ID | Required outcome | Status | Check / completion criterion | Evidence or gap |
+ | --- | --- | --- | --- | --- |
+ | CO1 | 간격 토큰 정리 | complete | DESIGN.md 토큰 대조 | TASK.md#co1 |
+-| CO2 | 간격 규칙 v1(S1, S2) 구현 | verification pending | DESIGN.md 규칙 S1, S2 (stack, 360·768·1280, 기본·hover); 저장된 JOEDESIGN 보고 도장 확인 | TASK.md#co2 |
++| CO2 | 간격 규칙 v1(S1, S2) 구현 | complete | DESIGN.md 규칙 S1, S2 (stack, 360·768·1280, 기본·hover); 저장된 JOEDESIGN 보고 도장 확인 | TASK.md#co2-verify, TASK.md#co2 |
+ 
+ Scope decisions: none.
+ User acceptance: CO2에는 필요 없음.
+diff --git a/TASK.md b/TASK.md
+index ecd8692..6808a0d 100644
+--- a/TASK.md
++++ b/TASK.md
+@@ -27,3 +27,13 @@ Required specialist verdict: not applicable.
+ Completion boundaries: implementation 완료 / technical 완료 / visual 보고 참조 / user acceptance 해당 없음.
+ Related issue / knowledge: none.
+ Record handoff gap: none.
++
++## co2-verify / 2026-11-15 / CO2 완료 판정
++
++Roadmap item: ROADMAP.md CO2 (verification pending → complete).
++Result: 도장 확인과 기술 검사 재실행 후 CO2 complete, S-1 complete.
++Changed files: ROADMAP.md, TASK.md, DESIGN.md (Rule coverage Unmeasured 갱신).
++Check / target / result: `node <joedesign>/scripts/report-check.mjs --verify work/reports/2026-11-08-co2.md` 종료코드 0 (stamp match 404 chars ac33a64d); `node scripts/spacing-check.mjs` 종료코드 0 (S1 16, S2 24, stack).
++Scope: 보고 측정 범위 = S1·S2, stack, 360·768·1280, 기본·hover, 렌더 측정 — ROADMAP Check 범위와 일치. 렌더 측정은 보고에 의존하며 이번에 다시 캡처하지 않음.
++Report stamp: report-check: ok 404 chars ac33a64d (work/reports/2026-11-08-co2.md).
++Completion boundaries: implementation 완료 / technical 완료 / visual 완료(보고, 도장 확인) / user acceptance 해당 없음.

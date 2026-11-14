@@ -1,0 +1,6 @@
+- 작업: ROADMAP 항목 CO2의 완료 조건을 확인한 뒤 complete로 바꿨습니다. 저장된 JOEDESIGN 보고의 도장 확인(`node <joedesign>/scripts/report-check.mjs --verify work/reports/2026-11-08-co2.md`)은 종료코드 0이었습니다(stamp match, 404 chars ac33a64d). 간격 검사(`node scripts/spacing-check.mjs`)도 종료코드 0이었습니다(S1 16px, S2 24px, stack). 보고가 측정한 범위(S1·S2, stack, 360·768·1280, 기본·hover, 렌더 측정)는 ROADMAP에 적힌 Check 범위와 같습니다. 이 조건을 넘어 따로 결정할 일은 남아 있지 않았습니다. CO1도 이미 complete이므로 S-1 단계도 complete로 기록했습니다.
+- 업데이트 파일: ROADMAP.md(CO2 complete, S-1 complete, 현재·다음 줄 다시 씀), TASK.md(새 항목 `co2-verify / 2026-11-15`), DESIGN.md(Rule coverage 표 S1·S2의 미측정 칸과 Result 링크).
+- 이슈: 없음
+- 해결: 없음
+- 남은 문제: 렌더 측정은 JOEDESIGN 보고에 의존합니다. 도장으로 보고가 바뀌지 않았다는 것은 확인했지만, 이번에 화면을 다시 캡처하지는 않았습니다. 변경 사항은 커밋하지 않았습니다.
+- 다음 작업: 열린 항목이 없습니다. ROADMAP에 S-1 다음 단계가 없으니, 다음 단계와 범위(예: DESIGN에 승인 범위로 적힌 버튼 규칙)는 소유자가 정해야 합니다.

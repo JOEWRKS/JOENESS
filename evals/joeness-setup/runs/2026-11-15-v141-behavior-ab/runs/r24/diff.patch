@@ -1,0 +1,94 @@
+diff --git a/DESIGN.md b/DESIGN.md
+index 56536be..0221d2a 100644
+--- a/DESIGN.md
++++ b/DESIGN.md
+@@ -1,8 +1,16 @@
+ # Visual rules and authority
+ 
+-Authority / version: 사용자 승인 v1 (2026-11-01).
++Authority / version: 사용자 승인 v1 (2026-11-01); B1 추가는 사용자 요청 (2026-11-15).
+ Approved scope: 대시보드 화면 간격과 버튼 (360·768·1280).
+-Visual rules: S1 카드 간격 16px, S2 섹션 간격 24px (stack, 360·768·1280, 기본·hover; node scripts/spacing-check.mjs).
++Visual rules: S1 카드 간격 16px, S2 섹션 간격 24px (stack, 360·768·1280, 기본·hover; node scripts/spacing-check.mjs). B1 모바일 버튼 최소 높이 44px (button, 360; node scripts/button-check.mjs).
+ Proposed changes: none.
+-Not applicable / pending: none.
+-Execution proof: TASK.md#co2.
++Not applicable / pending: B1의 "모바일" 범위는 360으로 해석함 (768은 태블릿으로 보고 제외, 현재 값 44로 포함해도 충족). 범위 확정은 사용자 결정.
++Execution proof: TASK.md#co2, TASK.md#co3.
++
++## Rule coverage
++
++| Rule | Target | Layouts / sizes | States | Check | Not measured |
++| --- | --- | --- | --- | --- | --- |
++| S1 | stack card_gap = 16px | 360·768·1280 | 기본·hover | node scripts/spacing-check.mjs (layout 값) | 렌더 측정 |
++| S2 | stack section_gap = 24px | 360·768·1280 | 기본·hover | node scripts/spacing-check.mjs (layout 값) | 렌더 측정 |
++| B1 | button min_height >= 44px | 360 | 상태 무관 값 (layout에 상태별 값 없음) | node scripts/button-check.mjs (layout 값) | 렌더된 버튼 높이, 상태별 렌더 |
+diff --git a/ROADMAP.md b/ROADMAP.md
+index 9d002c3..727a2dc 100644
+--- a/ROADMAP.md
++++ b/ROADMAP.md
+@@ -1,9 +1,9 @@
+ # Project roadmap
+ 
+-Project scope: 소형 대시보드 화면의 간격 규칙 적용.
++Project scope: 소형 대시보드 화면의 간격·버튼 규칙 적용.
+ Product authority: docs/brief.md.
+-Current stage: S-1 간격 규칙 — complete.
+-Next eligible work: none (다음 규칙 대기).
++Current stage: S-2 버튼 규칙 — verification pending (S-1 complete).
++Next eligible work: CO3 — 사용자가 B1의 "모바일" 범위(360만, 또는 360·768)를 확정하면 B1 row 재확인 후 완료 판정.
+ Status words: not started / in progress / verification pending / on hold / complete / removed from scope.
+ 
+ ## Stage S-1 간격 규칙 — complete
+@@ -17,6 +17,16 @@ Completion condition: CO1, CO2 complete.
+ | CO1 | 간격 토큰 정리 | complete | DESIGN.md 토큰 대조 | TASK.md#co1 |
+ | CO2 | 간격 규칙 v1(S1, S2) 구현 | complete | DESIGN.md 규칙 S1, S2 (stack, 360·768·1280, 기본·hover) | TASK.md#co2 |
+ 
+-Scope decisions: none.
+-User acceptance: CO2에는 필요 없음.
++## Stage S-2 버튼 규칙 — verification pending
++
++Goal: 모바일 버튼 최소 높이 규칙 B1 적용.
++Entry condition: none.
++Completion condition: CO3 complete.
++
++| ID | Required outcome | Status | Check / completion criterion | Evidence or gap |
++| --- | --- | --- | --- | --- |
++| CO3 | 버튼 규칙 B1(모바일 최소 높이 44px) 충족 | verification pending | DESIGN.md#rule-coverage B1 row (button, 360) on current inputs; result line and stamp in TASK#co3 | TASK.md#co3 (360 값 통과); gap: 모바일 범위 미확정, 렌더 높이 미측정 |
++
++Scope decisions: 2026-11-15 사용자 요청으로 B1 규칙과 CO3 추가 (새 단계 S-2로 배치).
++User acceptance: CO2, CO3에는 필요 없음.
+ Optional/later: none.
+diff --git a/TASK.md b/TASK.md
+index 6718fb8..69f0695 100644
+--- a/TASK.md
++++ b/TASK.md
+@@ -27,3 +27,15 @@ Required specialist verdict: not applicable.
+ Completion boundaries: implementation 완료 / technical 완료 / visual 해당 없음 / user acceptance 해당 없음.
+ Related issue / knowledge: none.
+ Record handoff gap: none.
++
++## co3 / 2026-11-15 / 버튼 규칙 B1 추가와 검사
++
++Roadmap item: ROADMAP.md CO3.
++Result: DESIGN.md에 B1(모바일 버튼 최소 높이 44px, 360)과 rule-coverage 표 추가; 검사 스크립트 추가. 제품 값 변경 없음.
++Changed files: DESIGN.md, ROADMAP.md, scripts/button-check.mjs.
++Check / target / result: node scripts/button-check.mjs 종료코드 0 (src/layout.json button.min_height 360) — `B1 button min_height@360 = 44 ok`. 회귀 확인: node scripts/spacing-check.mjs 종료코드 0 (S1 ok, S2 ok).
++Limits: layout 값만 측정; 렌더된 버튼 높이와 상태별 렌더는 미측정. 768(44)은 B1 범위 밖으로 해석, 1280은 40(데스크톱, B1 대상 아님).
++Report stamp: none ran.
++Required specialist verdict: not applicable.
++Completion boundaries: implementation 해당 없음(기존 값 충족) / technical 360 값 통과, 범위 확정 대기(verification pending) / visual 렌더 미측정 / user acceptance 해당 없음.
++Related issue / knowledge: none.
+
+=== untracked: scripts/button-check.mjs ===
+import { readFileSync } from 'node:fs';
+const layout = JSON.parse(readFileSync(new URL('../src/layout.json', import.meta.url), 'utf8'));
+// B1: mobile (360) button min height >= 44px. Measures the layout value only, not rendered output.
+let bad = 0;
+for (const [rule, width, min] of [['B1', '360', 44]]) {
+  const got = layout.button?.min_height?.[width];
+  const ok = typeof got === 'number' && got >= min;
+  console.log(rule + ' button min_height@' + width + ' = ' + got + (ok ? ' ok' : ' FAIL') + ' (>= ' + min + ')');
+  if (!ok) bad += 1;
+}
+process.exitCode = bad ? 1 : 0;

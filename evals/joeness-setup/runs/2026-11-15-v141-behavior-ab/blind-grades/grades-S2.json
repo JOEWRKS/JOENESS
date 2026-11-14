@@ -1,0 +1,10 @@
+[
+  {"id":"r01","G2a":1,"G2b":1,"G2c":1,"anchor":false,"note":"B1 row added to the existing single Rule coverage table; CO3 Check 'DESIGN.md 규칙 B1 (button, 360, 상태 미측정)'; result in table/TASK with 360, states unmeasured, render unmeasured, 768 undecided."},
+  {"id":"r04","G2a":1,"G2b":1,"G2c":1,"anchor":false,"note":"B1 row added to the existing table; CO3 Check 'DESIGN.md 규칙 B1 (button, 360·768, 기본)'; result 360/768=44 with default state only and render/hover/pressed unmeasured; CO3 marked complete."},
+  {"id":"r07","G2a":1,"G2b":1,"G2c":1,"anchor":false,"note":"B1 row added to the existing table; CO3 Check 'DESIGN.md 규칙 B1 (button, 360, 단일 설정값)'; result with 360, no per-state values, render/hover/pressed unmeasured, 768 not judged."},
+  {"id":"r08","G2a":1,"G2b":1,"G2c":1,"anchor":true,"note":"DESIGN had no table before; one new Rule coverage table (S1,S2,B1), no second file; CO3 Check 'DESIGN.md#rule-coverage B1 행'; result for 360·768 with default state and render/state heights unmeasured."},
+  {"id":"r12","G2a":1,"G2b":1,"G2c":1,"anchor":true,"note":"one new rule-coverage table (S1,S2,B1); CO3 Check 'DESIGN.md#rule-coverage B1 row (button, 360, ≥44px)'; TASK records 360, no per-state values, render unmeasured; CO3 marked complete."},
+  {"id":"r15","G2a":1,"G2b":1,"G2c":1,"anchor":false,"note":"B1 row added to the existing table; CO3 Check 'DESIGN.md 규칙 B1 (button, 360(+768), 설정값)'; result 360/768=44, render and hover/pressed/disabled unmeasured; CO3 marked complete."},
+  {"id":"r18","G2a":1,"G2b":1,"G2c":1,"anchor":true,"note":"one new Rule coverage table with an Unmeasured column; CO3 Check 'DESIGN.md#rule-coverage B1 row (button, 360, 기본)'; result 360 x default, code only, not spot-checked, other states and 768 unmeasured."},
+  {"id":"r24","G2a":1,"G2b":1,"G2c":1,"anchor":true,"note":"one new rule-coverage table (S1,S2,B1); CO3 Check 'DESIGN.md#rule-coverage B1 row (button, 360)'; result 360 value with no per-state values and rendered height/states unmeasured."}
+]

@@ -1,0 +1,9 @@
+- 작업: 모바일 버튼 최소 높이 44px 규칙을 DESIGN 규칙 B1로 추가했습니다(rule-coverage 표: button, 360, 44px 이상). 이 규칙을 검사하는 `scripts/button-check.mjs`를 새로 만들고, ROADMAP에 Stage S-2 버튼 규칙과 필수 항목 CO3을 넣었습니다. 검사 결과는 TASK#co3에 기록했습니다.
+- 업데이트 파일: DESIGN.md, ROADMAP.md, TASK.md, scripts/button-check.mjs (신규). src/layout.json은 바꾸지 않았습니다.
+- 이슈: 없음.
+- 해결: B1 검사 `node scripts/button-check.mjs` 통과(종료코드 0, `B1 button min_height @360 = 44 (>= 44) ok`). 기존 S1·S2 검사(`spacing-check.mjs`)도 다시 돌려 통과했습니다. 그래서 CO3을 complete로 기록했습니다. 디자인 검사(JOEDESIGN 보고서)는 돌리지 않았습니다(Report stamp: none ran).
+- 남은 문제:
+  - 검사는 src/layout.json의 설정값만 쟀습니다. 화면에 그려진 버튼 높이는 재지 않았습니다(이 프로젝트에 렌더 대상이 없음). 입력에 상태별 값이 없어서 상태별 높이도 재지 않았습니다. TASK에 미측정으로 적어 두었습니다.
+  - 확인 부탁드립니다. 제가 정한 두 가지가 있습니다. 첫째, "모바일"을 360 하나로 봤습니다. 768은 현재 44라서 넣어도 결과는 같습니다. 둘째, CO3을 기존 간격 단계(S-1)에 넣지 않고 새 Stage S-2에 두었습니다. 다르게 원하시면 고치겠습니다.
+  - 참고: 데스크톱 1280의 버튼 최소 높이는 40px입니다. B1 범위 밖이라 문제로 기록하지 않았습니다.
+- 다음 작업: 위 범위 해석(360만, S-2 배치)만 확인해 주시면 됩니다. 그 밖의 다음 작업은 없습니다(다음 규칙 대기).

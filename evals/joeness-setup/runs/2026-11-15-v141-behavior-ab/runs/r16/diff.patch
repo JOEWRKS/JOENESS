@@ -1,0 +1,68 @@
+diff --git a/ROADMAP.md b/ROADMAP.md
+index 2145716..fce1976 100644
+--- a/ROADMAP.md
++++ b/ROADMAP.md
+@@ -1,23 +1,31 @@
+ # Project roadmap
+ 
+-Project scope: <approved delivery goal, or direction pending>.
+-Product authority: <existing source/section, or undecided>.
+-Current stage: <stage and status, or direction pending>.
+-Next eligible work: <required item or bounded decision; blocked dependency if any>.
++Project scope: 소형 대시보드에서 카드·섹션 간격과 버튼 크기를 일관되게 맞춘다 ([docs/brief.md](docs/brief.md)). 대시보드의 화면·구성 요소 범위와 구체 수치는 제품 문서에 없어 결정 대기.
++Product authority: [docs/brief.md](docs/brief.md) "제품 요약" 전체.
++Product revision / approval: 없음 — brief에 개정 번호와 승인 기록이 없다. 아래 단계·항목은 brief 문장에서 직접 옮긴 것이며, 소유자 승인은 기록되지 않았다.
++Current stage: Stage 1 — not started (구현 시작 전, 2026-11-15 사용자 진술).
++Next eligible work: 소유자 결정 D1~D3 (아래). 결정 전에는 S1~S3의 Check가 undecided여서 완료 판정 불가.
+ Status words: not started / in progress / verification pending / on hold / complete / removed from scope.
+ 
+-## Stage <ID / approved name> — <status>
++## Stage 1 / 간격·버튼 크기 일관화 — not started
+ 
+-Goal: <approved outcome>.
+-Entry condition: <required predecessor/result, or none>.
+-Completion condition: <required outcomes and checks; required acceptance separately>.
++Goal: 대시보드의 카드 간격, 섹션 간격, 버튼 크기가 각각 하나의 일관된 규칙을 따른다 (brief).
++Entry condition: 없음. 단 완료 판정에는 D1~D3 결정과 DESIGN.md 규칙·rule-coverage 표 기록이 필요.
++Completion condition: S1~S3이 각자의 Check를 현재 입력에서 통과. 사용자 승인은 아래 User acceptance로 별도.
+ 
+ | ID | Required outcome | Status | Check / completion criterion | Evidence or gap |
+ | --- | --- | --- | --- | --- |
+-| <ID> | <independently checkable outcome> | <one status word above> | <test or target observation; undecided if unknown> | <TASK proof or exact gap; related ISSUE if applicable> |
++| S1 | 카드 간 간격이 대상 화면 전체에서 하나의 규칙(값)으로 일치 | not started | undecided — D1·D2 결정 후 DESIGN.md#rule-coverage 카드 간격 행(화면·레이아웃·크기·상태별) on current inputs, 행마다 Spot check; 결과 줄과 stamp는 TASK | 간격 값·대상 화면 미정 (D1, D2); 구현 없음 |
++| S2 | 섹션 간 간격이 대상 화면 전체에서 하나의 규칙(값)으로 일치 | not started | undecided — D1·D2 결정 후 DESIGN.md#rule-coverage 섹션 간격 행 on current inputs, 행마다 Spot check; 결과 줄과 stamp는 TASK | 간격 값·대상 화면 미정 (D1, D2); 구현 없음 |
++| S3 | 버튼 크기가 대상 화면 전체에서 정해진 규칙(크기 단계)으로 일치 | not started | undecided — D1·D3 결정 후 DESIGN.md#rule-coverage 버튼 크기 행(버튼 종류·상태별) on current inputs, 행마다 Spot check; 결과 줄과 stamp는 TASK | 크기 값·변형 허용 여부 미정 (D1, D3); 구현 없음 |
+ 
+-Check example for a design rule (name rule-table rows, not a script; technical checks apart): DESIGN.md#rule-coverage S1~S6 rows on current inputs, Spot check per row; result lines and stamp in TASK#spacing-v1. Technical (separate): tsc, vitest.
++Technical checks (별도, 시각 규칙 통과를 대신하지 않음): 기술 스택 미정이라 undecided.
+ 
+-Scope decisions: <authorized scope/order change and reason/source, or none>.
+-User acceptance: <required scope and approval proof, pending, or not required>.
+-Optional/later: <separate non-blocking ideas, or none>.
++Pending owner decisions (brief로 정해지지 않음):
++- D1. 대상 범위: 대시보드에 포함되는 화면·섹션·카드 구성, 지원 화면 크기(레이아웃)와 상태.
++- D2. 카드 간격과 섹션 간격의 구체 값(또는 값 체계)과 둘의 관계.
++- D3. 버튼 크기: 단일 크기인지 크기 단계(예: 기본/작게)를 허용하는지, 그 값.
++
++Scope decisions: 없음 (brief 외의 범위·순서 변경 승인 없음).
++User acceptance: 필요 여부와 범위 미정 — brief에 승인 기록이 없어 소유자 확인 대기.
++Optional/later: 없음.
+diff --git a/TASK.md b/TASK.md
+index 3de917a..2713e53 100644
+--- a/TASK.md
++++ b/TASK.md
+@@ -13,3 +13,14 @@ Required specialist verdict: <scope/current gate result and proof, or not applic
+ Completion boundaries: <implementation / technical / visual / user acceptance; unknown stays unverified>.
+ Related issue / knowledge: <ISSUES item or Library topic; do not copy detail>.
+ Record handoff gap: <unsaved required update, or none>.
++
++## roadmap-v1 / 2026-11-15 / 제품 정의 기반 ROADMAP 작성
++
++Roadmap item: ROADMAP.md Stage 1 (S1~S3), 사용자 요청 "제품 정의를 보고 ROADMAP.md를 채워 줘".
++Result: brief의 범위(카드·섹션 간격, 버튼 크기 일관화)를 Stage 1 필수 항목 S1~S3으로 옮김. 수치·대상 화면이 brief에 없어 Check는 undecided, 결정 D1~D3를 ROADMAP에 명시.
++Changed files: ROADMAP.md (템플릿 → 실제 범위·단계·항목), TASK.md (이 항목).
++Check / target / result: ROADMAP 각 항목을 docs/brief.md 문장과 대조해 읽음 — brief 밖 범위 추가 없음. 구현·시각 검사는 없음.
++Evidence: ROADMAP.md, docs/brief.md.
++Limits: brief에 개정 번호·승인 기록 없음 → 범위 승인 미확인. DESIGN.md 규칙은 미작성(결정 대기).
++Report stamp: none ran.
++Completion boundaries: 문서 작성만. 구현·기술·시각 검증·사용자 승인 모두 해당 없음/미확인.

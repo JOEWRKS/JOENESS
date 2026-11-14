@@ -1,0 +1,6 @@
+- 작업: 모바일 버튼 최소 높이 44px 규칙을 DESIGN 규칙 B1로 추가하고(Rule coverage 표에 행 추가), 이를 검사하는 `scripts/button-check.mjs`를 새로 만들어 실행했습니다. ROADMAP에는 새 단계 S-2 버튼 규칙 아래 필수 항목 CO3을 넣었고, TASK에 새 항목 co3을 기록했습니다. 검사 결과: `node scripts/button-check.mjs` 종료코드 0 (src/layout.json의 button.min_height 값이 360=44, 768=44). 기존 `spacing-check`도 다시 돌렸고 종료코드 0 (S1, S2 ok)입니다. 제품 코드(src/layout.json)는 바꾸지 않았습니다.
+- 업데이트 파일: DESIGN.md, ROADMAP.md, TASK.md, scripts/button-check.mjs (신규). 커밋하지 않았습니다.
+- 이슈: 없음. 참고로 1280에서 버튼 최소 높이는 40인데, B1이 모바일만 다루므로 규칙 위반은 아닙니다.
+- 해결: CO3(B1)은 설정값 기준으로 검사를 통과했고 complete로 기록했습니다.
+- 남은 문제: (1) 검사는 설정값만 읽습니다. 화면에 실제로 그려진 버튼 높이와 hover·pressed·disabled 상태는 측정하지 않았고, DESIGN 표와 TASK에 미측정으로 적어 두었습니다. JOEDESIGN 보고서는 돌리지 않았습니다(Report stamp: none ran). (2) "모바일"을 360으로 해석한 것과 CO3을 S-1이 아닌 새 단계 S-2에 넣은 것은 제가 고른 것입니다. 768도 44로 통과해서 해석이 달라도 결과는 같지만, 이 두 가지는 확인이 필요합니다.
+- 다음 작업: 모바일 범위(360만인지, 768도 포함인지)와 S-2 배치를 확인해 주세요. 필요하면 실제 화면에서 버튼 높이를 측정하겠습니다.

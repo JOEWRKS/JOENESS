@@ -1,0 +1,6 @@
+- 작업: 승인된 제품 정의(product-definition/semantic-closure-v2/state.json, revision 1, 2026-08-29 사용자 승인)를 읽고 ROADMAP.md를 채웠습니다. 단계는 S1 요청 제출(TASK-001) 하나이고, 필수 항목은 4개입니다. S1-1 유효한 요청이 접수·저장됨(Check: AC-001 관찰), S1-2 유효하지 않은 요청은 제출되지 않음, S1-3 로그인한 요청자의 진입·제출, S1-4 SCR-001의 UX 상태 16개입니다. 구현 전이라 모두 not started입니다. 시작하기 전에 JOEFLOW 1.7.1 스크립트로 제품 정의를 확인했습니다. validate_state는 valid, validate_closure는 closed(오류 0), approval_status는 rev 1 APPROVED로 나왔습니다.
+- 업데이트 파일: ROADMAP.md, TASK.md(2026-11-15-roadmap-from-product-definition 항목)
+- 이슈: 제품 정의는 검증과 승인을 통과했지만 구현에 필요한 결정 몇 가지가 빠져 있습니다. (1) "유효한 요청"의 기준, 요청에 들어갈 필드, Request API가 이미 있는 시스템인지 새로 만들 대상인지가 없습니다. (2) 화면 상태 16개가 모두 COVERED로 표시되어 있지만, 연결된 근거가 "Only valid requests may be submitted." 같은 일반 문장입니다. 그래서 오프라인, 타임아웃, 취소, 만료, 비로그인 때 화면이 어떻게 동작할지는 정해져 있지 않습니다. (3) 사용자 인수 범위와 시각 디자인 범위도 정해지지 않았습니다. 이 내용은 ROADMAP의 결정 항목 D1~D4에 기록했습니다.
+- 해결: 없음
+- 남은 문제: 결정 D1~D4가 대기 중입니다. 이 결정 없이 제가 동작을 골라 구현하면, 해당 항목(S1-2, S1-4)은 확인해 주실 때까지 verification pending으로 남습니다. 기술 검사는 구현 스택을 정한 뒤 기재합니다. JOEFLOW 쪽에도 미비점이 있습니다. 버전이 고정되어 있지 않고, MASTER_PLANNING_SPEC.md와 planning-review-core.html이 없습니다. 둘 다 JOEFLOW 소관이라 손대지 않았습니다.
+- 다음 작업: S1-1(유효한 요청의 접수·저장)과 S1-3(로그인 상태에서의 진입·제출)은 지금 구현을 시작할 수 있습니다. 그 전에 D1(필드, 유효성 기준, Request API)과 D2(화면 상태별 동작)를 정해 주시는 것이 좋습니다. 제품 의미를 바꾸는 결정이라면 JOEFLOW에서 새 revision으로 승인하는 경로를 거칩니다.

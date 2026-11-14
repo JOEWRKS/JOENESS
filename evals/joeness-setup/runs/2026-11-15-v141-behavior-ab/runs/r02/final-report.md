@@ -1,0 +1,15 @@
+- 작업: 제품 정의(product-definition/semantic-closure-v2/state.json)를 읽고 ROADMAP.md를 채웠습니다. JOEFLOW 1.7.1 스크립트로 확인한 결과 revision 1은 2026-08-29에 사용자 승인(APPROVED)을 받았고, 대기 중인 revision은 없습니다. 상태는 CLOSED이고 `validate_state` 유효, `validate_closure` closed입니다. 제품 정의의 단일 TASK-001을 기준으로 단계 S1(요청 제출)을 만들고, 필수 항목 세 개를 모두 `not started`로 넣었습니다.
+  - S1-1: REQ-001 / AC-001. 유효한 요청이 접수되고 INT-001 Request API로 저장되는지 확인합니다.
+  - S1-2: RULE-001 / DEC-001. 유효하지 않은 요청은 제출되지 않고, 제출 전에 검증합니다.
+  - S1-3: SCR-001 화면의 UX 상태 16개와 submit 동작입니다.
+- 업데이트 파일: ROADMAP.md(범위, revision/승인, 현재·다음 작업, 단계 S1 표), TASK.md(2026-11-15 roadmap-fill 항목). ISSUES.md와 DESIGN.md는 그대로 두었습니다.
+- 이슈: 없음. 결함은 없고, 아래 제품 정의의 빈 곳은 ROADMAP의 gap으로 적었습니다.
+- 해결: 없음.
+- 남은 문제:
+  - revision 1에는 요청 필드(DATA-001)와 "유효한 요청"의 기준(STATE-001)이 정의되어 있지 않습니다. 이 결정이 S1-1과 S1-2의 Check를 막고 있습니다. 구현하면서 제가 기준을 정하면 사용자 확인 전까지 해당 항목은 verification pending으로 남습니다.
+  - INT-001 Request API의 실제 대상(엔드포인트)을 제품 정의에서 찾을 수 없습니다.
+  - offline, timeout, cancelled, expired 같은 여러 UX 상태가 일반 규칙에만 연결되어 있어서, 화면에서 어떻게 보여야 하는지 정해져 있지 않습니다.
+  - DESIGN.md에는 승인된 시각 규칙과 rule-coverage 행이 없습니다. 그래서 S1-3의 시각 기준은 정해지지 않았습니다(undecided).
+  - 사용자 인수 범위가 아직 정해지지 않았습니다(pending).
+  - 이 프로젝트에 JOEFLOW 버전이 고정되어 있지 않습니다(joeflow-project.json 없음).
+- 다음 작업: S1-1 구현(SCR-001 폼, Request 데이터, INT-001 호출)은 지금 시작할 수 있습니다. 다만 그 전에 요청 필드와 유효성 기준을 정해 주세요. 제품 의미가 바뀌는 결정이면 JOEFLOW 재진입이 필요합니다. 원하시면 DESIGN.md의 Product Authority를 revision 1로 맞추고, `joeflow_version.py --pin`으로 버전을 고정하겠습니다. 둘 다 승인해 주셔야 진행합니다.

@@ -1,0 +1,170 @@
+[
+ {
+  "arm": "B",
+  "scene": "S2",
+  "variant": "home",
+  "id": "r01",
+  "base": "ef1ed145dafd9475d73ad7e395d24053f36f2a2a"
+ },
+ {
+  "arm": "B",
+  "scene": "S3",
+  "variant": "joeflow",
+  "id": "r02",
+  "base": "cab41418b2c9308999bf681caa450d3162fada71"
+ },
+ {
+  "arm": "A",
+  "scene": "S3",
+  "variant": "joeflow",
+  "id": "r03",
+  "base": "a542776f0b83e6bb818289c2a6e16b78aa2eb4c0"
+ },
+ {
+  "arm": "B",
+  "scene": "S2",
+  "variant": "home",
+  "id": "r04",
+  "base": "5a28d1e5277316d8b838021a5a0b7556097d56b3"
+ },
+ {
+  "arm": "B",
+  "scene": "S1",
+  "variant": "home",
+  "id": "r05",
+  "base": "24e2a844d4a7960d3440a8b0557a26f537ad2c93"
+ },
+ {
+  "arm": "B",
+  "scene": "S1",
+  "variant": "none",
+  "id": "r06",
+  "base": "23e8b6d6b1a1de5e4fb2d4c7f4c03b3024a157a8"
+ },
+ {
+  "arm": "B",
+  "scene": "S2",
+  "variant": "home",
+  "id": "r07",
+  "base": "7b12027bc103f63fd7da05d051858e863438b3e1"
+ },
+ {
+  "arm": "A",
+  "scene": "S2",
+  "variant": "home",
+  "id": "r08",
+  "base": "e13ecf28bd796cb1fc3cbf90d02df4d7d041b781"
+ },
+ {
+  "arm": "B",
+  "scene": "S3",
+  "variant": "plain",
+  "id": "r09",
+  "base": "933f64da4605713ec77e3b9212abb2f4de6aadbc"
+ },
+ {
+  "arm": "B",
+  "scene": "S1",
+  "variant": "none",
+  "id": "r10",
+  "base": "aa72fcfb61f41fefaff824f7e38b265941aa8524"
+ },
+ {
+  "arm": "A",
+  "scene": "S1",
+  "variant": "none",
+  "id": "r11",
+  "base": "7883fab40dcbd2dd5fe78b86768f234f4c409aa7"
+ },
+ {
+  "arm": "A",
+  "scene": "S2",
+  "variant": "home",
+  "id": "r12",
+  "base": "11d29bac52add2ab47c55477b7e40eba69553cc0"
+ },
+ {
+  "arm": "A",
+  "scene": "S3",
+  "variant": "joeflow",
+  "id": "r13",
+  "base": "4838aca4e3838341d386f8aa9bebd7ac2a912c51"
+ },
+ {
+  "arm": "B",
+  "scene": "S1",
+  "variant": "home",
+  "id": "r14",
+  "base": "1202e485473dc47c183d00638efeb82ca4c7073d"
+ },
+ {
+  "arm": "B",
+  "scene": "S2",
+  "variant": "home",
+  "id": "r15",
+  "base": "4b3c750e6cfdc85e818887132cb74514b4c7406a"
+ },
+ {
+  "arm": "A",
+  "scene": "S3",
+  "variant": "plain",
+  "id": "r16",
+  "base": "5d5a6ef9b1921e2c34ae7606c01dca7179844118"
+ },
+ {
+  "arm": "A",
+  "scene": "S1",
+  "variant": "none",
+  "id": "r17",
+  "base": "e0d44b2ef2a6af6cbdf60e0ea6f76ebc91260f06"
+ },
+ {
+  "arm": "A",
+  "scene": "S2",
+  "variant": "home",
+  "id": "r18",
+  "base": "be2f66eff4793d437ae9e504d38188acb0a33815"
+ },
+ {
+  "arm": "B",
+  "scene": "S3",
+  "variant": "joeflow",
+  "id": "r19",
+  "base": "0dab1e583ff09eb9f22a113b7519ee0650f2fe3a"
+ },
+ {
+  "arm": "A",
+  "scene": "S3",
+  "variant": "joeflow",
+  "id": "r20",
+  "base": "7f625ecbd64fa71b4e09dfcef75ac67458da4ca9"
+ },
+ {
+  "arm": "A",
+  "scene": "S1",
+  "variant": "home",
+  "id": "r21",
+  "base": "ba20ab1a5221af0914f14fa52f6c37e5fcf150c7"
+ },
+ {
+  "arm": "A",
+  "scene": "S1",
+  "variant": "home",
+  "id": "r22",
+  "base": "c65ee875f0bc0f9ad1b389d159608371576488fb"
+ },
+ {
+  "arm": "B",
+  "scene": "S3",
+  "variant": "joeflow",
+  "id": "r23",
+  "base": "7ebd9c002ce0f0fe8ca77c55b9b02bedd78d5185"
+ },
+ {
+  "arm": "A",
+  "scene": "S2",
+  "variant": "home",
+  "id": "r24",
+  "base": "3e24368d314e4cf8cb9aa67d617ef7e9990582fe"
+ }
+]

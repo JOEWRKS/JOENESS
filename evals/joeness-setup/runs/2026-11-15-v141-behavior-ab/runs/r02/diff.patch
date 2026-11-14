@@ -1,0 +1,74 @@
+diff --git a/ROADMAP.md b/ROADMAP.md
+index a6a4e5a..2dac0b1 100644
+--- a/ROADMAP.md
++++ b/ROADMAP.md
+@@ -1,24 +1,24 @@
+ # Project roadmap
+ 
+-Project scope: <approved delivery goal, or direction pending>.
+-Product authority: <existing source/section, or undecided>.
+-Product revision / approval: <revision and approval status as the product source reports them, with date read (JOEFLOW: approval_status.py definition_revision, approval_status, approved_revision); none if the source has no revision record>.
+-Current stage: <stage and status, or direction pending>.
+-Next eligible work: <required item or bounded decision; blocked dependency if any>.
++Project scope: implement the approved JOEFLOW product definition — GOAL-001 "A requester completes a valid submission" through REQ-001 / TASK-001 (one feature area, SURF-001 Request submission). Implementation not started (user, 2026-11-15).
++Product authority: product-definition/semantic-closure-v2/state.json (JOEFLOW, schema 0.2.0); no MASTER_PLANNING_SPEC.md exists, so state.json is the only source.
++Product revision / approval: definition_revision 1, approval_status APPROVED, approved_revision 1 (approved by the user 2026-08-29), pending revisions none; definition_status CLOSED. Read 2026-11-15 with JOEFLOW 1.7.1 `approval_status.py` (exit 0); `validate_state.py` valid, `validate_closure.py` closed. JOEFLOW version not pinned in the project (no joeflow-project.json).
++Current stage: S1 Request submission — not started.
++Next eligible work: start S1-1 build (SCR-001 form, Request data, INT-001 call). Bounded decision needed: Request fields and validity criteria (S1-2 gap); it blocks the S1-1 and S1-2 Checks, not the start of the build. S1-3 waits on S1-1.
+ Status words: not started / in progress / verification pending / on hold / complete / removed from scope.
+ 
+-## Stage <ID / approved name> — <status>
++## Stage S1 / Request submission — not started
+ 
+-Goal: <approved outcome>.
+-Entry condition: <required predecessor/result, or none>.
+-Completion condition: <required outcomes and checks; required acceptance separately>.
++Goal: a signed-in requester (USR-001) opens the request form, the request is validated, and a valid request is accepted and persisted (GOAL-001, FLOW-001). Revision 1.
++Entry condition: approved revision 1 (met, read 2026-11-15).
++Completion condition: S1-1, S1-2 and S1-3 pass their Checks on current inputs against revision 1; user acceptance separately (below).
+ 
+ | ID | Required outcome | Status | Check / completion criterion | Evidence or gap |
+ | --- | --- | --- | --- | --- |
+-| <ID> | <independently checkable outcome> | <one status word above> | <test or target observation; undecided if unknown> | <TASK proof or exact gap; related ISSUE if applicable> |
++| S1-1 | TASK-001 / REQ-001: a signed-in requester submits a valid request on SCR-001 and it is accepted and persisted through INT-001 Request API | not started | AC-001 observed: a valid request is accepted and persisted (record which INT-001 target or stand-in the check ran against); revision 1 | Gap: no implementation. The concrete Request API (INT-001) target is not identified in the source. What makes a request valid is undefined (see S1-2) |
++| S1-2 | RULE-001 / DEC-001: only valid requests may be submitted; the request is validated before submission (user chose validated submission, UNK-001 → OPT-A) | not started | Observed: an invalid request is not submitted and not persisted, and a valid one passes (pairs with AC-001); revision 1 | Gap: revision 1 defines no Request fields (DATA-001) and no validity criteria (STATE-001: "Required input is valid" only). Needs an owner decision (JOEFLOW re-entry if material); criteria the implementer picks keep this item verification pending until the owner confirms |
++| S1-3 | SCR-001 UX states and the submit action as recorded in state.json `ux_coverage`: default, loading, empty, partial, success, error, disabled, permission_denied, unauthenticated, offline, timeout, retrying, submitting, completed, cancelled, expired | not started | Each listed state observed on SCR-001 and matching its bound product record; visual rules: undecided (DESIGN.md has no approved rules or rule-coverage rows) | Gap: many states bind only to general records (e.g. offline/cancelled → RULE-001, timeout/expired → STATE-001), so their visible behavior is not specified; implementer-chosen behavior stays verification pending until the owner confirms. DESIGN.md Product Authority not yet set to revision 1 |
+ 
+-Check example for a design rule (name rule-table rows, not a script; technical checks apart): DESIGN.md#rule-coverage S1~S6 rows on current inputs, Spot check per row; result lines and stamp in TASK#spacing-v1. Technical (separate): tsc, vitest.
+-
+-Scope decisions: <authorized scope/order change and reason/source, or none>.
+-User acceptance: <required scope and approval proof, pending, or not required>.
+-Optional/later: <separate non-blocking ideas, or none>.
++Scope decisions: single stage S1 derived from the source's single TASK-001; no other stage order is defined. Topology from source: AUTH active (login/session axes N/A); MONEY, FILE_UPLOAD, ASYNC, PERMISSION, DESTRUCTIVE_ACTION N/A (EVD-900).
++User acceptance: pending — scope and form not yet decided by the user.
++Optional/later: none.
+diff --git a/TASK.md b/TASK.md
+index 3de917a..0c951cb 100644
+--- a/TASK.md
++++ b/TASK.md
+@@ -1,15 +1,13 @@
+ # Work results
+ 
+-## <work ID / date / short title>
++## roadmap-fill / 2026-11-15 / ROADMAP from approved product definition
+ 
+-Roadmap item: <ROADMAP.md#item, or approved independent work source>.
+-Result: <actual outcome; not a second stage-status ledger>.
+-Changed files: <actual paths and purpose, or none>.
+-Check / target / result: <executed check and observed result, or unverified>.
+-Evidence: <exact proof locator>.
+-Limits: <missing verification or acceptance boundary, or none>.
+-Report stamp: <report-check: ok N chars sha8 and the saved report's path, or none ran / not stamped>.
+-Required specialist verdict: <scope/current gate result and proof, or not applicable>.
+-Completion boundaries: <implementation / technical / visual / user acceptance; unknown stays unverified>.
+-Related issue / knowledge: <ISSUES item or Library topic; do not copy detail>.
+-Record handoff gap: <unsaved required update, or none>.
++Roadmap item: ROADMAP.md stage S1 (S1-1, S1-2, S1-3); user request 2026-11-15.
++Result: filled ROADMAP header and stage S1 from state.json revision 1; no implementation.
++Changed files: ROADMAP.md (scope, revision/approval, stage S1 items), TASK.md (this entry).
++Check / target / result: JOEFLOW 1.7.1 on product-definition/semantic-closure-v2/state.json — `approval_status.py` revision 1 APPROVED, no pending (exit 0); `validate_state.py` valid; `validate_closure.py` closed.
++Evidence: the commands above, run 2026-11-15.
++Limits: Request fields/validity criteria, INT-001 target and several UX state behaviors are not in the source (ROADMAP S1 gaps). JOEFLOW version not pinned.
++Report stamp: none ran.
++Completion boundaries: records only; implementation, technical, visual and user acceptance not started.
++Record handoff gap: none.

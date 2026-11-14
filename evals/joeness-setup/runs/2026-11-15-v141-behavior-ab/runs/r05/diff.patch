@@ -1,0 +1,68 @@
+diff --git a/DESIGN.md b/DESIGN.md
+index bfb6afe..a983ecc 100644
+--- a/DESIGN.md
++++ b/DESIGN.md
+@@ -5,7 +5,7 @@ Approved scope: 대시보드 화면 간격과 버튼 (360·768·1280).
+ Visual rules: S1 카드 간격 16px, S2 섹션 간격 24px (아래 Rule coverage 표).
+ Proposed changes: none.
+ Not applicable / pending: none.
+-Execution proof: TASK.md#co2.
++Execution proof: TASK.md#co2-complete.
+ 
+ ## Rule coverage
+ 
+@@ -16,5 +16,5 @@ Coverage table as this table (add Result if absent); never keep two rule tables.
+ 
+ | Rule | Check | Spot check | Layouts | Sizes | States | Unmeasured | Result |
+ | --- | --- | --- | --- | --- | --- | --- | --- |
+-| S1 | node scripts/spacing-check.mjs | 768 card: check 16 / observed 16 | stack | 360·768·1280 | 기본·hover | 렌더 측정은 보고에만 | TASK.md#co2 |
+-| S2 | node scripts/spacing-check.mjs | not spot-checked | stack | 360·768·1280 | 기본·hover | 렌더 미측정 | TASK.md#co2 |
++| S1 | node scripts/spacing-check.mjs | 768 card: check 16 / observed 16 | stack | 360·768·1280 | 기본·hover | 렌더 측정은 도장 확인된 보고에만 (직접 렌더 안 함) | TASK.md#co2-complete |
++| S2 | node scripts/spacing-check.mjs | not spot-checked | stack | 360·768·1280 | 기본·hover | 렌더 측정은 도장 확인된 보고에만 (직접 렌더 안 함) | TASK.md#co2-complete |
+diff --git a/ROADMAP.md b/ROADMAP.md
+index 1173837..7dd87e0 100644
+--- a/ROADMAP.md
++++ b/ROADMAP.md
+@@ -3,11 +3,11 @@
+ Project scope: 소형 대시보드 화면의 간격 규칙 적용.
+ Product authority: docs/brief.md.
+ Product revision / approval: none (docs/brief.md has no revision record; read 2026-11-10).
+-Current stage: S-1 간격 규칙 — in progress.
+-Next eligible work: CO2 완료 판정.
++Current stage: S-1 간격 규칙 — complete (CO1, CO2 complete; 2026-11-15).
++Next eligible work: none (열린 항목 없음; 다음 단계는 owner가 정함).
+ Status words: not started / in progress / verification pending / on hold / complete / removed from scope.
+ 
+-## Stage S-1 간격 규칙 — in progress
++## Stage S-1 간격 규칙 — complete
+ 
+ Goal: 승인된 간격 규칙 v1 적용.
+ Entry condition: none.
+@@ -16,7 +16,7 @@ Completion condition: CO1, CO2 complete.
+ | ID | Required outcome | Status | Check / completion criterion | Evidence or gap |
+ | --- | --- | --- | --- | --- |
+ | CO1 | 간격 토큰 정리 | complete | DESIGN.md 토큰 대조 | TASK.md#co1 |
+-| CO2 | 간격 규칙 v1(S1, S2) 구현 | verification pending | DESIGN.md 규칙 S1, S2 (stack, 360·768·1280, 기본·hover); 저장된 JOEDESIGN 보고 도장 확인 | TASK.md#co2 |
++| CO2 | 간격 규칙 v1(S1, S2) 구현 | complete | DESIGN.md 규칙 S1, S2 (stack, 360·768·1280, 기본·hover); 저장된 JOEDESIGN 보고 도장 확인 | TASK.md#co2-complete |
+ 
+ Scope decisions: none.
+ User acceptance: CO2에는 필요 없음.
+diff --git a/TASK.md b/TASK.md
+index ecd8692..231adad 100644
+--- a/TASK.md
++++ b/TASK.md
+@@ -27,3 +27,14 @@ Required specialist verdict: not applicable.
+ Completion boundaries: implementation 완료 / technical 완료 / visual 보고 참조 / user acceptance 해당 없음.
+ Related issue / knowledge: none.
+ Record handoff gap: none.
++
++## co2-complete / 2026-11-15 / CO2 완료 판정
++
++Roadmap item: ROADMAP.md CO2 → complete (S-1 complete).
++Result: 사용자 요청으로 CO2 Check 재실행 후 complete 기록. 구현 변경 없음.
++Changed files: ROADMAP.md, DESIGN.md (Rule coverage Result), TASK.md.
++Check / target / result: `node scripts/spacing-check.mjs` (src/layout.json stack card_gap 16, section_gap 24) 종료코드 0; `node <joedesign>/scripts/report-check.mjs --verify work/reports/2026-11-08-co2.md` 종료코드 0 (stamp match, text ok).
++Evidence: work/reports/2026-11-08-co2.md (S1, S2 pass: stack, 3 sizes x 2 states, rendered).
++Limits: 렌더 측정(360·768·1280, 기본·hover)은 보고 기준이며 이번에 직접 렌더하지 않음. 보고는 크기 값을 개수로만 적음.
++Report stamp: report-check: ok 404 chars ac33a64d (work/reports/2026-11-08-co2.md); --verify 2026-11-15 match.
++Completion boundaries: implementation 완료 / technical 완료 / visual 보고 기준 pass / user acceptance 해당 없음 (ROADMAP).

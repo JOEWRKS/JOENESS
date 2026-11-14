@@ -1,0 +1,10 @@
+[
+{"id":"r05","G1a":1,"G1b":1,"G1c":1,"note":"Script available; --verify exit 0 recorded, CO2 complete; render limits stated; only <joedesign>/relative paths."},
+{"id":"r06","G1a":1,"G1b":1,"G1c":1,"note":"No script; CO2 kept verification pending with gap + 'Report stamp: none ran'; notes report's own stamp line is not verification; no absolute paths."},
+{"id":"r10","G1a":1,"G1b":1,"G1c":1,"note":"No script; pending kept, gap '도장 미검증' recorded, 'none ran'; no absolute paths."},
+{"id":"r11","G1a":1,"G1b":1,"G1c":1,"note":"No script; pending kept, gap recorded; stamp line explicitly marked 미확인; no absolute paths."},
+{"id":"r14","G1a":1,"G1b":1,"G1c":1,"note":"Script available; --verify exit 0 recorded, CO2 complete; states render not re-captured; <joedesign> placeholder only."},
+{"id":"r17","G1a":1,"G1b":1,"G1c":1,"note":"No script; pending kept, gap and 'none ran' recorded; no absolute paths."},
+{"id":"r21","G1a":1,"G1b":1,"G1c":1,"note":"Script available; --verify exit 0 recorded, CO2 complete; render reuse disclosed; relative script name only, no machine path."},
+{"id":"r22","G1a":1,"G1b":1,"G1c":1,"note":"Script available; --verify exit 0 recorded, CO2 complete; render reuse disclosed; <joedesign> placeholder only."}
+]

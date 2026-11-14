@@ -1,0 +1,98 @@
+diff --git a/ROADMAP.md b/ROADMAP.md
+index 2145716..c3942c1 100644
+--- a/ROADMAP.md
++++ b/ROADMAP.md
+@@ -1,23 +1,50 @@
+ # Project roadmap
+ 
+-Project scope: <approved delivery goal, or direction pending>.
+-Product authority: <existing source/section, or undecided>.
+-Current stage: <stage and status, or direction pending>.
+-Next eligible work: <required item or bounded decision; blocked dependency if any>.
++Project scope: deliver the approved product definition — a signed-in requester completes a valid request submission (SURF-001 "Request submission", GOAL-001, REQ-001). Nothing outside revision 1 is in scope.
++Product authority: product-definition/semantic-closure-v2/state.json (JOEFLOW, schema 0.2.0), revision 1, CLOSED, approved by the user 2026-08-29 (definition digest dd1a16a6…8876, manifest digest dd1e837b…b222). Read back 2026-11-15 with JOEFLOW 1.7.1: TASK.md#2026-11-15--roadmap-from-product-definition.
++Current stage: Stage H (planning handoff) — not started; Stage 1 (implementation) — not started.
++Next eligible work: owner decision D1 (request fields and validity rules) through JOEFLOW re-entry; meanwhile H1, H2 and I1 can start. I2–I4 checks wait on D1/D2/D3, I5 on D2, V1 on H2 and I1–I5.
+ Status words: not started / in progress / verification pending / on hold / complete / removed from scope.
+ 
+-## Stage <ID / approved name> — <status>
++## Open owner decisions
+ 
+-Goal: <approved outcome>.
+-Entry condition: <required predecessor/result, or none>.
+-Completion condition: <required outcomes and checks; required acceptance separately>.
++Product questions the approved definition does not settle. Not decided here; only the user resolves them, through JOEFLOW re-entry (JOEFLOW `references/reentry-workflow-v0.2.0.md`), which opens a new revision needing its own approval.
++
++| ID | Question | Why it is open | Blocks |
++| --- | --- | --- | --- |
++| D1 | Which fields does a Request carry, which are required, and what makes input valid? | DATA-001 says only "Carry request input"; STATE-001 says "Required input is valid" without naming the input or rules. | I2, I3, I4 checks |
++| D2 | What does the requester see on invalid input, while submitting, on API failure / timeout / offline, when not signed in, and after success (message, stay on form, input kept or cleared, retry)? | ux_coverage marks these states COVERED but binds them only to generic statements (RULE-001, FLOW-001, AC-001, DEC-001); no visible behavior is specified. | I4, I5 |
++| D3 | Does the Request API (INT-001) already exist and where; which sign-in system provides the signed-in requester (USR-001; AUTH login/session axes are N/A)? | Integration and sign-in sources are not named. A fact to obtain, not an implementation choice. | I1 environment, I3 |
++| D4 | Is visual design governed by a design source, and is user acceptance required for this delivery? | DESIGN.md has no authority; state.json states no acceptance requirement beyond AC-001. | visual check, User acceptance |
++
++## Stage H — Planning handoff (JOEFLOW HANDOFF) — not started
++
++Goal: implementation consumers read the approved meaning from the JOEFLOW projections and a compiled downstream contract (JOEFLOW SKILL.md V2 workflow, step 5).
++Entry condition: revision 1 approved and validated — met (TASK.md#2026-11-15--roadmap-from-product-definition).
++Completion condition: H1 and H2 pass their checks on the current approved revision. Run by JOEFLOW; this project records the result.
++
++| ID | Required outcome | Status | Check / completion criterion | Evidence or gap |
++| --- | --- | --- | --- | --- |
++| H1 | `MASTER_PLANNING_SPEC.md` and `planning-review-core.html` exist for revision 1 | not started | JOEFLOW `projection_check.py STATE_JSON --spec MASTER_PLANNING_SPEC.md --review planning-review-core.html` passes; browser render observed, else reported NOT_VERIFIED | Neither file exists (2026-11-15). |
++| H2 | `joewrks.action-conformance/2.1` contract compiled from revision 1 | not started | JOEFLOW `compile_downstream_v2.py STATE_JSON HANDOFF_DEFINITION_JSON` succeeds; `audit_downstream_v2.py` clean on current dependencies | No handoff definition yet. |
++
++## Stage 1 — Request submission implementation — not started
++
++Goal: a signed-in requester opens the request form; a valid request is submitted, accepted and persisted (FLOW-001, AC-001).
++Entry condition: revision 1 approved (met). Checks needing D1–D3 run only after those answers; if D1/D2 produce revision 2, re-read this stage against the newly approved revision.
++Completion condition: I1–I5 and V1 pass their checks on the current build; visual check and user acceptance as decided under D4, recorded separately.
+ 
+ | ID | Required outcome | Status | Check / completion criterion | Evidence or gap |
+ | --- | --- | --- | --- | --- |
+-| <ID> | <independently checkable outcome> | <one status word above> | <test or target observation; undecided if unknown> | <TASK proof or exact gap; related ISSUE if applicable> |
++| I1 | Signed-in requester can open the request form (SCR-001; FLOW-001 entry and precondition) | not started | Automated test + observation: signed-in requester reaches SCR-001 with the submit action; a not-signed-in visitor cannot submit | No code yet. Not-signed-in presentation → D2; sign-in source → D3. |
++| I2 | Only valid requests can be submitted; submit is available only in REQUEST_READY (RULE-001, DEC-001, STATE-001) | not started | Tests from the D1 rules: each invalid case is blocked and nothing reaches the API; fully valid input reaches REQUEST_READY and submits | Validity rules undefined → D1. |
++| I3 | A valid request is accepted and persisted through the Request API (AC-001, INT-001, DATA-001) | not started | Integration test against the D3 API: valid submission is accepted and the stored request reads back with the submitted values; invalid input creates no record | Needs D1 fields and D3 API. |
++| I4 | Requester sees that the request was accepted (FLOW-001 outcome) | not started | Test/observation of the success outcome on SCR-001 as decided in D2 | Success presentation undefined → D2. |
++| I5 | Form states for invalid input, submitting, API failure / timeout / offline behave as the owner decides | not started | One test or observation per state named in the D2 answer | Visible behavior undefined → D2; not to be chosen by the worker. |
++| V1 | Runtime conformance against the H2 contract | not started | JOEFLOW `verify_runtime_v21.py CONTRACT_JSON RUNTIME_PLAN_JSON RUNTIME_EVIDENCE_BUNDLE_JSON` passes on current build evidence | Depends on H2 and I1–I5. |
+ 
+-Check example for a design rule (name rule-table rows, not a script; technical checks apart): DESIGN.md#rule-coverage S1~S6 rows on current inputs, Spot check per row; result lines and stamp in TASK#spacing-v1. Technical (separate): tsc, vitest.
++Visual check: none defined while DESIGN.md has no authority (D4); if a design source is adopted, add its DESIGN.md#rule-coverage rows here. Technical checks (separate): test framework and build chosen with the stack at implementation start.
+ 
+-Scope decisions: <authorized scope/order change and reason/source, or none>.
+-User acceptance: <required scope and approval proof, pending, or not required>.
+-Optional/later: <separate non-blocking ideas, or none>.
++Scope decisions: none. Stage H before V1 follows JOEFLOW workflow order (HANDOFF → VERIFY); the order of the other items is a proposal not yet confirmed by the owner.
++User acceptance: undecided (D4).
++Optional/later: pin the JOEFLOW version for this project (`joeflow_version.py STATE_JSON --pin`; JOEFLOW notice 2026-11-15). Not required for delivery.
+diff --git a/TASK.md b/TASK.md
+index 3de917a..e27a8f4 100644
+--- a/TASK.md
++++ b/TASK.md
+@@ -1,15 +1,13 @@
+ # Work results
+ 
+-## <work ID / date / short title>
++## 2026-11-15 — ROADMAP from product definition
+ 
+-Roadmap item: <ROADMAP.md#item, or approved independent work source>.
+-Result: <actual outcome; not a second stage-status ledger>.
+-Changed files: <actual paths and purpose, or none>.
+-Check / target / result: <executed check and observed result, or unverified>.
+-Evidence: <exact proof locator>.
+-Limits: <missing verification or acceptance boundary, or none>.
+-Report stamp: <report-check: ok N chars sha8 and the saved report's path, or none ran / not stamped>.
+-Required specialist verdict: <scope/current gate result and proof, or not applicable>.
+-Completion boundaries: <implementation / technical / visual / user acceptance; unknown stays unverified>.
+-Related issue / knowledge: <ISSUES item or Library topic; do not copy detail>.
+-Record handoff gap: <unsaved required update, or none>.
++Roadmap item: ROADMAP.md (whole roadmap; user request "제품 정의를 보고 ROADMAP.md를 채워 줘", implementation not started).
++Result: ROADMAP filled from state.json revision 1: scope, Stage H (H1–H2), Stage 1 (I1–I5, V1), open owner decisions D1–D4. No product decision made.
++Changed files: ROADMAP.md (roadmap content); TASK.md (this entry; starter placeholder replaced).
++Check / target / result: JOEFLOW 1.7.1 scripts on product-definition/semantic-closure-v2/state.json (sha256 8b0f8d1c…041c): validate_state valid; validate_closure closed, 0 gaps; approval_status APPROVED, revision 1 current. MASTER_PLANNING_SPEC.md / planning-review-core.html not found.
++Evidence: script output in this session only (not saved).
++Limits: COVERED UX states and field validity were read as unspecified visible behavior (D1, D2) by reading their bindings, not by a JOEFLOW check; item order beyond HANDOFF → VERIFY not owner-confirmed.
++Report stamp: none ran.
++Completion boundaries: implementation not started; technical, visual and user acceptance unverified.
++Related issue / knowledge: none.

@@ -1,0 +1,68 @@
+diff --git a/ROADMAP.md b/ROADMAP.md
+index 2145716..9b49ec1 100644
+--- a/ROADMAP.md
++++ b/ROADMAP.md
+@@ -1,23 +1,30 @@
+ # Project roadmap
+ 
+-Project scope: <approved delivery goal, or direction pending>.
+-Product authority: <existing source/section, or undecided>.
+-Current stage: <stage and status, or direction pending>.
+-Next eligible work: <required item or bounded decision; blocked dependency if any>.
++Project scope: GOAL-001 "A requester completes a valid submission." — 로그인한 요청자(USR-001)가 요청 양식(SCR-001)에서 유효한 요청을 제출하고, 요청이 접수·저장된다 (REQ-001, TASK-001).
++Product authority: product-definition/semantic-closure-v2/state.json (JOEFLOW), revision 1, 2026-08-29 사용자 승인 (definition digest `dd1a16a6…8876`, manifest digest `dd1e837b…b222`). 2026-11-15 확인 결과는 TASK.md#2026-11-15-roadmap-from-product-definition. 프로젝트에 JOEFLOW 버전 고정 없음(실행 1.7.1).
++Current stage: S1 요청 제출 — not started (구현 시작 전).
++Next eligible work: S1-1, S1-3 구현 착수 가능. S1-2는 D1(유효성 기준), S1-4는 D2(화면 상태별 동작) 결정에 의존 — 결정 없이 구현자가 정하면 해당 항목은 owner 확인 전까지 verification pending. D3(사용자 인수)·D4(시각 디자인 범위)는 owner 결정 대기.
+ Status words: not started / in progress / verification pending / on hold / complete / removed from scope.
+ 
+-## Stage <ID / approved name> — <status>
++## Stage S1 요청 제출 (TASK-001) — not started
+ 
+-Goal: <approved outcome>.
+-Entry condition: <required predecessor/result, or none>.
+-Completion condition: <required outcomes and checks; required acceptance separately>.
++Goal: 로그인한 요청자가 유효한 요청을 제출하면 접수되고 저장된다 (GOAL-001, REQ-001).
++Entry condition: 제품 정의 revision 1 승인 (충족, 2026-08-29).
++Completion condition: S1-1~S1-4가 각 Check를 현재 빌드에서 통과. 기술 검사(테스트 도구)는 구현 스택을 정한 뒤 별도 기재. 사용자 인수는 D3로 별도.
+ 
+ | ID | Required outcome | Status | Check / completion criterion | Evidence or gap |
+ | --- | --- | --- | --- | --- |
+-| <ID> | <independently checkable outcome> | <one status word above> | <test or target observation; undecided if unknown> | <TASK proof or exact gap; related ISSUE if applicable> |
++| S1-1 | 유효한 요청을 SCR-001에서 제출하면 접수되고 Request API(INT-001)로 저장된다 (REQ-001, FLOW-001, DATA-001) | not started | AC-001 observed: 현재 빌드에서 유효한 요청 제출 → 접수 확인 + 저장소에서 해당 요청 조회 | 증거 없음(미구현). gap: Request API가 기존 시스템인지 새로 만들 대상인지, 요청 필드 구성(DATA-001 "Carry request input")이 제품 정의에 없음 → D1 |
++| S1-2 | 유효하지 않은 요청은 제출되지 않는다 (RULE-001; DEC-001 사용자 결정 "Validate the request before submission.") | not started | 유효하지 않은 입력으로 제출 시도 → 제출·저장되지 않음을 관찰 (D1이 정한 유효성 규칙마다 1건 이상) | 증거 없음. gap: "유효"의 기준(필수 필드, 형식, 한도)이 제품 정의에 없음 → D1 |
++| S1-3 | 로그인한 요청자가 요청 양식에 진입해 제출한다 (FLOW-001 precondition, USR-001) | not started | 로그인 상태에서 SCR-001 진입·제출 관찰; 비로그인 상태 동작은 D2 결정 후 관찰 항목 추가 | 증거 없음. gap: 로그인 수단과 비로그인 시 동작 미정(AUTH login 축은 N/A로 분류) → D2 |
++| S1-4 | SCR-001이 제품 정의의 16개 UX 상태(default, loading, empty, partial, success, error, disabled, permission_denied, unauthenticated, offline, timeout, retrying, submitting, completed, cancelled, expired)를 처리한다 | not started | undecided — D2에서 상태별 표시·동작이 정해지면 상태별 관찰 항목으로 기재 | gap: ux_coverage는 모두 COVERED지만 바인딩이 일반 문장(예: offline·cancelled → RULE-001 문장)이라 상태별 화면 동작을 정하지 않음 → D2 |
+ 
+-Check example for a design rule (name rule-table rows, not a script; technical checks apart): DESIGN.md#rule-coverage S1~S6 rows on current inputs, Spot check per row; result lines and stamp in TASK#spacing-v1. Technical (separate): tsc, vitest.
++Open decisions (owner):
++- D1 요청 필드 구성·유효성 기준·Request API 정체 — 제품 의미이므로 owner 확정 또는 JOEFLOW 재진입(새 revision·승인) 필요.
++- D2 SCR-001 상태별 동작(오류 표시, 오프라인·타임아웃·재시도, 취소·만료, 비로그인·권한 없음) — 미정인 채로 구현자가 정하면 S1-4는 owner 확인 전까지 verification pending.
++- D3 사용자 인수 범위·방법 — 제품 정의에 없음.
++- D4 시각 디자인을 S1 필수 항목으로 둘지 — REQ-001은 ui_required=true이나 DESIGN.md 권한·규칙은 undecided.
+ 
+-Scope decisions: <authorized scope/order change and reason/source, or none>.
+-User acceptance: <required scope and approval proof, pending, or not required>.
+-Optional/later: <separate non-blocking ideas, or none>.
++Scope decisions: S1 단일 단계와 S1-1~S1-4 분할은 제품 정의 TASK-001/REQ-001/AC-001에서 도출(2026-11-15 사용자 요청 "제품 정의를 보고 ROADMAP.md를 채워 줘"). 범위·순서 변경 없음.
++User acceptance: pending — D3.
++Optional/later: 없음.
+diff --git a/TASK.md b/TASK.md
+index 3de917a..4e60bd1 100644
+--- a/TASK.md
++++ b/TASK.md
+@@ -13,3 +13,15 @@ Required specialist verdict: <scope/current gate result and proof, or not applic
+ Completion boundaries: <implementation / technical / visual / user acceptance; unknown stays unverified>.
+ Related issue / knowledge: <ISSUES item or Library topic; do not copy detail>.
+ Record handoff gap: <unsaved required update, or none>.
++
++## 2026-11-15-roadmap-from-product-definition
++
++Roadmap item: ROADMAP.md 전체(S1, S1-1~S1-4, D1~D4) — 사용자 요청 "제품 정의를 보고 ROADMAP.md를 채워 줘".
++Result: 승인된 제품 정의 revision 1에서 단계 S1과 필수 항목 4개, owner 결정 4건을 ROADMAP에 기록. 구현 없음.
++Changed files: ROADMAP.md(채움), TASK.md(이 항목).
++Check / target / result: JOEFLOW 1.7.1 스크립트를 product-definition/semantic-closure-v2/state.json에 실행 — `validate_state.py` valid, `validate_closure.py` closed(오류 0), `approval_status.py` APPROVED rev 1(current_revision_approved true).
++Evidence: 위 명령 출력(이 세션). 
++Limits: 제품 정의에 유효성 기준·필드·Request API·UX 상태별 동작·사용자 인수가 없음(ROADMAP D1~D4). JOEFLOW 버전 미고정, MASTER_PLANNING_SPEC.md·planning-review-core.html 없음(JOEFLOW 소관, 수정 안 함).
++Report stamp: none ran.
++Completion boundaries: 구현·기술·시각·사용자 인수 모두 not started.
++Record handoff gap: none.

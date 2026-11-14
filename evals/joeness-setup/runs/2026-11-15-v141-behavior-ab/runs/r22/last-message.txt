@@ -1,0 +1,1 @@
+(report text before final 완료; same content saved to .final-report.md)

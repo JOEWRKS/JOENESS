@@ -1,0 +1,14 @@
+## A
+all: finished 12/12 | runs with machine path in committable files 0/12 | machine path hits 0
+S1 home: verify ran 2/2 | CO2 complete 2/2 | pending 0/2 | could-not-verify recorded 0/2 | reported 0/2 | AGENTS changed 0/2 | placeholder kept 2/2 | machine paths 0/2
+S1 none: verify ran 0/2 | CO2 complete 0/2 | pending 2/2 | could-not-verify recorded 2/2 | reported 2/2 | AGENTS changed 0/2 | placeholder kept 2/2 | machine paths 0/2
+S2: B1 in Rule coverage table 4/4 | B1 any table row 4/4 | one rule-coverage section 4/4 | >1 rule table header 0/4 | 2nd DESIGN file 0/4 | CO3 row 4/4 | CO3 -> table 4/4 | CO3 names B1 4/4
+S3 joeflow: approval_status ran 3/3 | revision line 0/3 | values 1/APPROVED 0/3 | none 0/3 | unfilled 0/3 | revision/approval anywhere 3/3
+S3 plain: approval_status ran 0/1 | revision line 1/1 | values 1/APPROVED 0/1 | none 0/1 | unfilled 0/1 | revision/approval anywhere 1/1
+## B
+all: finished 12/12 | runs with machine path in committable files 0/12 | machine path hits 0
+S1 home: verify ran 2/2 | CO2 complete 2/2 | pending 0/2 | could-not-verify recorded 0/2 | reported 0/2 | AGENTS changed 0/2 | placeholder kept 2/2 | machine paths 0/2
+S1 none: verify ran 0/2 | CO2 complete 0/2 | pending 2/2 | could-not-verify recorded 2/2 | reported 2/2 | AGENTS changed 0/2 | placeholder kept 2/2 | machine paths 0/2
+S2: B1 in Rule coverage table 4/4 | B1 any table row 4/4 | one rule-coverage section 4/4 | >1 rule table header 0/4 | 2nd DESIGN file 0/4 | CO3 row 4/4 | CO3 -> table 0/4 | CO3 names B1 4/4
+S3 joeflow: approval_status ran 3/3 | revision line 3/3 | values 1/APPROVED 3/3 | none 0/3 | unfilled 0/3 | revision/approval anywhere 3/3
+S3 plain: approval_status ran 0/1 | revision line 1/1 | values 1/APPROVED 0/1 | none 1/1 | unfilled 0/1 | revision/approval anywhere 1/1

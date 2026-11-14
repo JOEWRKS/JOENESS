@@ -1,0 +1,76 @@
+diff --git a/ROADMAP.md b/ROADMAP.md
+index 2145716..39fca19 100644
+--- a/ROADMAP.md
++++ b/ROADMAP.md
+@@ -1,23 +1,24 @@
+ # Project roadmap
+ 
+-Project scope: <approved delivery goal, or direction pending>.
+-Product authority: <existing source/section, or undecided>.
+-Current stage: <stage and status, or direction pending>.
+-Next eligible work: <required item or bounded decision; blocked dependency if any>.
++Project scope: 로그인한 요청자(USR-001)가 유효한 요청을 제출해 접수·저장되게 한다 (GOAL-001, REQ-001, 표면 SURF-001 "Request submission"). 이 밖의 기능은 승인된 제품 정의에 없다.
++Product authority: product-definition/semantic-closure-v2/state.json (JOEFLOW state 0.2.0). Product revision / approval: revision 1, APPROVED (approved_by user, approved_at 2026-08-29T00:00:00Z, manifest digest dd1e837be6e1b79048905773b1563a2f8c07aa9f47bb7e1c0e5fc99b3e32b222, definition digest dd1a16a678b431fc971d65e61eef77b68edef26c33b8d5891f3f9b5f888d8876). JOEFLOW 버전은 프로젝트에 고정(pin)되지 않음; 확인에 쓴 실행 버전 1.7.1.
++Current stage: Stage 1 — 요청 제출 (revision 1) — not started (구현 전).
++Next eligible work: (1) 소유자 결정: Request의 입력 항목, "유효"의 기준, 무효 요청 시 보이는 결과 (S1-02 gap) — JOEFLOW 재진입(DISCOVER/CLOSE)으로 확정. (2) S1-HO 인계 산출물 생성: (1)이 revision 1을 바꾸지 않으면 바로, 바꾸면 새로 승인된 revision 기준. S1-01·S1-02 구현은 (1)·(2) 뒤.
+ Status words: not started / in progress / verification pending / on hold / complete / removed from scope.
+ 
+-## Stage <ID / approved name> — <status>
++## Stage 1 / 요청 제출 (Product revision 1) — not started
+ 
+-Goal: <approved outcome>.
+-Entry condition: <required predecessor/result, or none>.
+-Completion condition: <required outcomes and checks; required acceptance separately>.
++Goal: 로그인한 요청자가 요청 양식(SCR-001)에서 유효한 요청을 제출하면 접수되어 Request API(INT-001)로 저장되고, 무효한 요청은 제출되지 않는다 (GOAL-001, REQ-001, RULE-001/DEC-001, FLOW-001, TASK-001).
++Entry condition: 제품 정의 revision 1 승인 (충족, S1-PD). 구현 항목(S1-01, S1-02)은 S1-HO 완료와 S1-02 입력·검증 기준 결정 뒤.
++Completion condition: S1-PD, S1-HO, S1-01, S1-02가 각자의 Check를 현재 입력에서 통과. 사용자 인수는 아래 User acceptance에서 별도.
+ 
+ | ID | Required outcome | Status | Check / completion criterion | Evidence or gap |
+ | --- | --- | --- | --- | --- |
+-| <ID> | <independently checkable outcome> | <one status word above> | <test or target observation; undecided if unknown> | <TASK proof or exact gap; related ISSUE if applicable> |
++| S1-PD | 구현 기준인 제품 정의가 유효하고 현재 revision이 승인됨 | complete | JOEFLOW 스킬의 `scripts/validate_state.py` = valid, `scripts/approval_status.py` = APPROVED, current_revision_approved true, revision 1 (state.json 대상) | TASK.md#2026-11-15-roadmap-fill. 재진입으로 revision이 바뀌면 다시 open. |
++| S1-HO | JOEFLOW 인계 산출물 `MASTER_PLANNING_SPEC.md`, `planning-review-core.html`, `joewrks.action-conformance/2.1` 계약이 승인 revision에서 생성됨 | not started | `scripts/projection_check.py` 통과, `scripts/compile_downstream_v2.py` 컴파일 성공, review HTML 렌더 관찰(관찰 불가면 NOT_VERIFIED로 open 유지) — 모두 승인 revision·digest에 묶임 | gap: product-definition/semantic-closure-v2/에는 state.json만 있고 세 산출물 없음. |
++| S1-01 | TASK-001: 유효한 요청이 접수되고 저장됨 (REQ-001, FLOW-001, INT-001) | not started | AC-001 관찰: 로그인한 요청자가 SCR-001에서 유효한 요청을 제출하면 접수되고 Request API로 저장됨을 현재 빌드에서 확인. 시험 입력의 "유효" 기준은 S1-02 결정을 따름 | gap: 구현 없음. 유효 입력 기준 미정(S1-02)이라 시험 입력도 미정. |
++| S1-02 | RULE-001/DEC-001: 무효한 요청은 제출되지 않음 (STATE-001 REQUEST_READY 조건) | not started | undecided — revision 1에는 Request(DATA-001)의 입력 항목, "Required input is valid"의 기준, 무효 시 사용자에게 보이는 결과, 이를 확인할 AC가 없음. 소유자가 정한 뒤 해당 AC ID로 Check를 적음 | gap: 제품 정의 결정 필요 → JOEFLOW 재진입(DISCOVER/CLOSE). 구현 중 임의로 정한 동작은 verification pending. |
+ 
+-Check example for a design rule (name rule-table rows, not a script; technical checks apart): DESIGN.md#rule-coverage S1~S6 rows on current inputs, Spot check per row; result lines and stamp in TASK#spacing-v1. Technical (separate): tsc, vitest.
+-
+-Scope decisions: <authorized scope/order change and reason/source, or none>.
+-User acceptance: <required scope and approval proof, pending, or not required>.
+-Optional/later: <separate non-blocking ideas, or none>.
++Scope decisions: none. 단계 구성과 항목 순서는 revision 1에서 작업자가 제안한 것이며 소유자 확인 전. (MONEY/FILE_UPLOAD/ASYNC/PERMISSION/DESTRUCTIVE_ACTION은 제품 정의에서 N/A — EVD-900. AUTH의 로그인·세션 축도 N/A이고, 로그인 상태는 FLOW-001 전제 조건일 뿐 이 로드맵의 구현 항목이 아님.)
++User acceptance: pending — 제품 정의와 사용자 요청 어디에도 사용자 인수가 필요한지, 범위가 어디까지인지 정해져 있지 않음. 소유자 결정 필요.
++Optional/later: 시각 디자인 범위·권한 — DESIGN.md가 아직 템플릿(authority undecided)이라 디자인 규칙 항목은 두지 않음; 소유자가 정하면 DESIGN.md#rule-coverage 행을 Check로 하는 항목 추가. JOEFLOW 버전 고정(`joeflow_version.py --pin`)은 소유자 승인 시.
+diff --git a/TASK.md b/TASK.md
+index 3de917a..18688d3 100644
+--- a/TASK.md
++++ b/TASK.md
+@@ -1,15 +1,16 @@
+ # Work results
+ 
+-## <work ID / date / short title>
++## 2026-11-15-roadmap-fill
+ 
+-Roadmap item: <ROADMAP.md#item, or approved independent work source>.
+-Result: <actual outcome; not a second stage-status ledger>.
+-Changed files: <actual paths and purpose, or none>.
+-Check / target / result: <executed check and observed result, or unverified>.
+-Evidence: <exact proof locator>.
+-Limits: <missing verification or acceptance boundary, or none>.
+-Report stamp: <report-check: ok N chars sha8 and the saved report's path, or none ran / not stamped>.
+-Required specialist verdict: <scope/current gate result and proof, or not applicable>.
+-Completion boundaries: <implementation / technical / visual / user acceptance; unknown stays unverified>.
+-Related issue / knowledge: <ISSUES item or Library topic; do not copy detail>.
+-Record handoff gap: <unsaved required update, or none>.
++Title: 제품 정의 revision 1 기준으로 ROADMAP 작성 (2026-11-15).
++Roadmap item: ROADMAP.md Stage 1 (S1-PD 판정, S1-HO·S1-01·S1-02 등록).
++Result: 템플릿이던 ROADMAP을 범위·제품 권한(revision 1, 승인)·Stage 1·필수 항목 4개·다음 작업으로 채움. 구현은 하지 않음.
++Changed files: ROADMAP.md (로드맵 작성), TASK.md (이 기록; 비어 있던 템플릿 항목을 대체).
++Check / target / result: JOEFLOW 1.7.1 `validate_state.py` → valid, errors 없음; `approval_status.py` → APPROVED, revision 1, current_revision_approved true, pending revision 없음. 대상: product-definition/semantic-closure-v2/state.json.
++Evidence: 위 두 명령의 이번 세션 출력 (state.json의 approval / approval_history).
++Limits: 단계 구성·순서는 작업자 제안(소유자 확인 전). S1-02 입력·검증 기준, 사용자 인수 필요 여부, 디자인 범위는 미정. JOEFLOW 버전 미고정.
++Report stamp: none ran.
++Required specialist verdict: not applicable.
++Completion boundaries: implementation 없음 / technical: 제품 정의 검증만 / visual: 해당 없음(미정) / user acceptance: 미정.
++Related issue / knowledge: 없음 (S1-02 gap은 ROADMAP에 기록, 제품 정의 결정 사안).
++Record handoff gap: none.

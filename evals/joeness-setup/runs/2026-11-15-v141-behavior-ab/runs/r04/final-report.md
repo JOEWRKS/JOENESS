@@ -1,0 +1,6 @@
+- 작업: 디자인 규칙 B1(모바일 버튼 최소 높이 44px)을 DESIGN.md 규칙 표에 추가하고, 이를 검사하는 `scripts/button-check.mjs`를 만들어 실행했습니다. ROADMAP에 새 단계 S-2 버튼 규칙과 필수 항목 CO3을 넣고 TASK에 co3 기록을 남겼습니다. 검사 결과: `node scripts/button-check.mjs` 종료코드 0 (`src/layout.json`의 button.min_height 360 = 44, 768 = 44). 회귀 검사 `node scripts/spacing-check.mjs`도 종료코드 0 (S1, S2 ok). 제품 코드(`src/layout.json`)는 바꾸지 않았습니다.
+- 업데이트 파일: DESIGN.md, ROADMAP.md, TASK.md, scripts/button-check.mjs (새 파일). 커밋은 하지 않았습니다.
+- 이슈: 없음
+- 해결: CO3(B1) 설정 값 검사 통과 — 360과 768에서 44px.
+- 남은 문제: 검사는 설정 값만 읽었습니다. 화면에 그려진 버튼의 실제 높이와 기본 외 상태(hover, pressed 등)는 측정하지 않았고, DESIGN 표와 ROADMAP에 미측정으로 적었습니다. "모바일"에는 360과 768을 넣었고 1280(현재 40px)은 데스크톱이라 B1에서 뺐습니다. 이 범위는 제가 해석한 것이지만, 360만 모바일로 보든 768까지 넣든 결과는 통과입니다. 데스크톱 버튼도 44px로 맞춰야 한다면 1280이 40이라 실패하므로 따로 알려 주세요.
+- 다음 작업: 없음 (열린 필수 항목 없음). 필요하면 렌더된 화면에서 버튼 높이를 측정하거나, 데스크톱 버튼 규칙을 정해 주세요.

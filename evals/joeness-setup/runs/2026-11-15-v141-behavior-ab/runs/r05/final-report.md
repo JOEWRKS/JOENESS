@@ -1,0 +1,6 @@
+- 작업: ROADMAP의 CO2를 complete로 바꿨습니다. 그 전에 CO2에 적힌 Check를 지금 파일로 다시 돌렸습니다. `node scripts/spacing-check.mjs`는 종료코드 0이었습니다(S1 card_gap 16, S2 section_gap 24). `node <joedesign>/scripts/report-check.mjs --verify work/reports/2026-11-08-co2.md`도 종료코드 0이었습니다(도장 일치 404 chars ac33a64d, text ok). 이제 S-1의 항목 CO1, CO2가 모두 complete라서 S-1 단계도 complete로 기록했습니다.
+- 업데이트 파일: ROADMAP.md(CO2 상태, 증거 링크, 현재 단계/다음 작업 줄, S-1 제목), TASK.md(새 항목 `co2-complete / 2026-11-15`), DESIGN.md(Rule coverage 표의 Result 링크와 Unmeasured 칸, Execution proof).
+- 이슈: 없음
+- 해결: 없음 (구현은 바꾸지 않았고 기록만 고쳤습니다)
+- 남은 문제: 360·768·1280 크기와 기본·hover 상태의 실제 렌더 측정은 도장이 확인된 JOEDESIGN 보고(2026-11-08)에만 있습니다. 이번에 제가 직접 렌더하지는 않았고, spacing-check는 src/layout.json 값만 봅니다. 또 보고는 크기를 "3 sizes"라는 개수로만 적었습니다. 이 한계는 TASK에 적어 두었습니다.
+- 다음 작업: ROADMAP에 열린 항목이 없습니다. 다음 단계나 목표는 정해 주셔야 합니다.

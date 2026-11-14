@@ -1,0 +1,1 @@
+(long report; ended with 완료; CO2 kept verification pending, stated JOEDESIGN_HOME unset)

@@ -1,0 +1,6 @@
+- 작업: CO2 완료 판정. 저장된 JOEDESIGN 보고 도장 확인(`report-check.mjs --verify`, 종료코드 0, stamp match 404 chars ac33a64d)과 `node scripts/spacing-check.mjs`(현재 src/layout.json: S1 card_gap 16, S2 section_gap 24, 종료코드 0)를 실행했습니다. 보고의 측정 범위(stack, 360·768·1280 × 기본·hover)가 DESIGN 규칙 S1, S2 범위와 일치해 CO2를 complete로 바꿨고, 완료 조건(CO1, CO2 complete)이 충족되어 S-1 단계도 complete로 기록했습니다.
+- 업데이트 파일: ROADMAP.md (CO2 상태, S-1 단계 상태, Current stage / Next eligible work 줄), TASK.md (새 항목 `co2-complete / 2026-11-15`)
+- 이슈: 없음
+- 해결: 없음 (코드 변경 없음, 기록만 갱신)
+- 남은 문제: 렌더 측정은 2026-11-08 보고를 재사용했고 이번에 다시 캡처하지 않았습니다(현재 layout 값은 보고 시점 값과 같음). DESIGN 승인 범위에 "버튼"이 있지만 버튼 규칙은 정의되어 있지 않아 CO2 범위 밖이며 ROADMAP 항목도 없습니다.
+- 다음 작업: 열린 필수 항목이 없습니다. 다음 단계(예: 버튼 크기 규칙을 넣을지)는 사용자가 결정합니다.
