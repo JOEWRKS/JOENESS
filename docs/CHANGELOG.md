@@ -7,6 +7,7 @@
 - `assets/DESIGN.md`에 `## Rule coverage` 표(JOEDESIGN Rule Coverage 7열 + Result 링크). DESIGN.md 하나·규칙 표 하나 규칙(JOEDESIGN 템플릿을 쓰면 그 표에 Result 열 추가).
 - `assets/ROADMAP.md`에 `Product revision / approval:` 줄(JOEFLOW면 `approval_status.py`의 `definition_revision`·`approval_status`·`approved_revision`, revision 기록이 없으면 `none`).
 - [후보 보고서](../evals/joeness-setup/runs/2026-11-12-v141-candidate/report.md): 테스트 1.4.0 104/104 → 후보 106/106(+ PowerShell 28 cases), 행동 A/B 없음. 사용자 승인("게시하고 2번 ㄱ", 2026-11-14)으로 게시. [소스·main·개인 설치·게시 상태](../evals/joeness-setup/runs/2026-11-15-v141-release/review-evidence.md).
+- [게시 후 행동 시험](../evals/joeness-setup/runs/2026-11-15-v141-behavior-ab/report.md) 44차(Opus 5.5 한 턴, 1.4.0 vs 1.4.1, 3장면 × 4회 = 24회 + 블라인드 채점 3회): 행동 결과 같음(블라인드 루브릭 A·B 모두 만점, 절대 경로 커밋 0/24). 차이는 형식뿐: revision 전용 줄 B 3/3·A 0/3(A도 Product authority 줄에 revision·승인을 3/3 적음), CO3 Check `DESIGN.md#` 앵커 B 0/4·A 4/4. 수정 3건의 행동 효과는 확인 안 됨(대조군 천장; 연결 설치 단계와 JOEDESIGN 템플릿 선설치 장면은 시험 안 함).
 
 ## 1.4.0 — JOEDESIGN 보고 도장 소비와 Check 칸 예시 (2026-11-10)
 
