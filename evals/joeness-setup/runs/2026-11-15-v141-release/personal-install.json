@@ -1,0 +1,526 @@
+{
+  "status": "installed-and-verified",
+  "old_source_commit": "696c32aa0a1d50fb972c4965495360496150908f",
+  "new_source_commit": "89ac76356bb3ae05f5676e26a396655416a50d77",
+  "old_manifest_sha256": "33e5ae2cf46203ec01d23c6692ad83a16b93ff75eb4516c207047396da8557dc",
+  "new_manifest_sha256": "1f8fb7ca73d0b8f8a98c76616c7d27b7bd05112626b1f3169ad4492616dcdcc5",
+  "old_state": {
+    "schemaVersion": 1,
+    "releaseVersion": "1.4.0",
+    "manifestSha256": "33e5ae2cf46203ec01d23c6692ad83a16b93ff75eb4516c207047396da8557dc",
+    "files": [
+      {
+        "path": "SKILL.md",
+        "sha256": "6623c4c4ce98d62dca78cbe6ac91e1ed4032968ffd793af4d0a91b5688e244f4"
+      },
+      {
+        "path": "agents/openai.yaml",
+        "sha256": "cc275e468658c7793d6f1305aaae5c6f37a06d831a7f2c3f18313f668427ec5c"
+      },
+      {
+        "path": "assets/AGENTS.md",
+        "sha256": "701b28992ffd863a3b2d5c262af4771a85681df1ef6531cff67916e2ca8bd2aa"
+      },
+      {
+        "path": "assets/DESIGN.md",
+        "sha256": "3b5ec8a163f2da4a770b4206029dd85a538dea0807060314cf51bd145ff66a5d"
+      },
+      {
+        "path": "assets/ISSUES.md",
+        "sha256": "44b5e1f7eea61716bdfa3b364b7eca9ffe60bc9c29f6e31b3a9bf753de6b8635"
+      },
+      {
+        "path": "assets/ROADMAP.md",
+        "sha256": "e1f101563287de39d4c35635babfd20ad4c1e03373bb523258f89b9a04b08a1f"
+      },
+      {
+        "path": "assets/TASK.md",
+        "sha256": "9f1d2951bbf6934434089a431ad275adabe95a47acd747f166364b309a59a3c6"
+      },
+      {
+        "path": "references/usage.md",
+        "sha256": "bb1d83b776b3775723dffb9ac16863cbe7967caa2b2b9c191a34fa1af4f49f48"
+      },
+      {
+        "path": "scripts/project-setup.ps1",
+        "sha256": "631334ba13683f97346d2b14d4aebedd671b16c9125e7dd4a26914d658788c8d"
+      },
+      {
+        "path": "references/review-gate.md",
+        "sha256": "9d1b42610dfd9a4ba19107004ecb71495fc3f8e246cdbf8cf2eb7270ccecdf48"
+      },
+      {
+        "path": "scripts/review-gate.mjs",
+        "sha256": "7ad13a9020a57aa0a6396348f8575229d7cac076a5d5a6c89178d26c3b6d9bd2"
+      },
+      {
+        "path": "references/roadmap-review.md",
+        "sha256": "bfb8910df6814edd4fab15b18b1c88c6dcc1127eb9921488772bdb9ffc15a201"
+      },
+      {
+        "path": "scripts/roadmap-review.mjs",
+        "sha256": "5dfb2d5a81df58d9e1c43651b43cc945356bbf61630b103877f9b8bcd13ba33f"
+      },
+      {
+        "path": "references/operation-review.md",
+        "sha256": "748d1631847ac23045406f6742b43a3a0bddb29ebfb32b3720f8f97c9546959c"
+      },
+      {
+        "path": "scripts/operation-review.mjs",
+        "sha256": "a1a6d80a7d57d4e9c3e66c49a6f877bf07836bac25d330bb466fc2a858679aad"
+      },
+      {
+        "path": "scripts/impact-review.mjs",
+        "sha256": "9cd8359daae4e0f68bcab688ae831e43d81a0b98bcb8ca10ed65a63d0e70cbc8"
+      },
+      {
+        "path": "references/impact-review.md",
+        "sha256": "6d98aa307aaace44461699e66fdbc3d658f67f8b6c756812ad9faa23ed330a82"
+      },
+      {
+        "path": "references/changes-hook.md",
+        "sha256": "a108b253f9502351880bc8143c8fd3b198ef31ba80bf0b81b9f35a5553febade"
+      },
+      {
+        "path": "scripts/changes-hook.mjs",
+        "sha256": "fd717c1cd7bfd91069456ea7f24288b9018bd222d0758f537ddda3507b451b4f"
+      }
+    ]
+  },
+  "before": {
+    "skills/joeness-setup/SKILL.md": "6623c4c4ce98d62dca78cbe6ac91e1ed4032968ffd793af4d0a91b5688e244f4",
+    "skills/joeness-setup/agents/openai.yaml": "cc275e468658c7793d6f1305aaae5c6f37a06d831a7f2c3f18313f668427ec5c",
+    "skills/joeness-setup/assets/AGENTS.md": "701b28992ffd863a3b2d5c262af4771a85681df1ef6531cff67916e2ca8bd2aa",
+    "skills/joeness-setup/assets/DESIGN.md": "3b5ec8a163f2da4a770b4206029dd85a538dea0807060314cf51bd145ff66a5d",
+    "skills/joeness-setup/assets/ISSUES.md": "44b5e1f7eea61716bdfa3b364b7eca9ffe60bc9c29f6e31b3a9bf753de6b8635",
+    "skills/joeness-setup/assets/ROADMAP.md": "e1f101563287de39d4c35635babfd20ad4c1e03373bb523258f89b9a04b08a1f",
+    "skills/joeness-setup/assets/TASK.md": "9f1d2951bbf6934434089a431ad275adabe95a47acd747f166364b309a59a3c6",
+    "skills/joeness-setup/references/usage.md": "bb1d83b776b3775723dffb9ac16863cbe7967caa2b2b9c191a34fa1af4f49f48",
+    "skills/joeness-setup/scripts/project-setup.ps1": "631334ba13683f97346d2b14d4aebedd671b16c9125e7dd4a26914d658788c8d",
+    "skills/joeness-setup/references/review-gate.md": "9d1b42610dfd9a4ba19107004ecb71495fc3f8e246cdbf8cf2eb7270ccecdf48",
+    "skills/joeness-setup/scripts/review-gate.mjs": "7ad13a9020a57aa0a6396348f8575229d7cac076a5d5a6c89178d26c3b6d9bd2",
+    "skills/joeness-setup/references/roadmap-review.md": "bfb8910df6814edd4fab15b18b1c88c6dcc1127eb9921488772bdb9ffc15a201",
+    "skills/joeness-setup/scripts/roadmap-review.mjs": "5dfb2d5a81df58d9e1c43651b43cc945356bbf61630b103877f9b8bcd13ba33f",
+    "skills/joeness-setup/references/operation-review.md": "748d1631847ac23045406f6742b43a3a0bddb29ebfb32b3720f8f97c9546959c",
+    "skills/joeness-setup/scripts/operation-review.mjs": "a1a6d80a7d57d4e9c3e66c49a6f877bf07836bac25d330bb466fc2a858679aad",
+    "skills/joeness-setup/scripts/impact-review.mjs": "9cd8359daae4e0f68bcab688ae831e43d81a0b98bcb8ca10ed65a63d0e70cbc8",
+    "skills/joeness-setup/references/impact-review.md": "6d98aa307aaace44461699e66fdbc3d658f67f8b6c756812ad9faa23ed330a82",
+    "skills/joeness-setup/references/changes-hook.md": "a108b253f9502351880bc8143c8fd3b198ef31ba80bf0b81b9f35a5553febade",
+    "skills/joeness-setup/scripts/changes-hook.mjs": "fd717c1cd7bfd91069456ea7f24288b9018bd222d0758f537ddda3507b451b4f",
+    "joeness-skills-state.json": "aeb85c3f23700f784f4c8be6397e79ab5e1f76dfd5dfc8811a43bb34df566e23",
+    "AGENTS.md": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "config.toml": "15f269576d32c019cf568d522646c306de69aa8e6ebe75adf3593097cebbe583"
+  },
+  "backup": "~\\.codex-install-backups\\joeness-v141-20261115-1f8fb7ca73d0",
+  "old_source": "<tmp>\\joeness-v141-old-package-drwl87\\source",
+  "commands": [
+    {
+      "command": [
+        "powershell.exe",
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "<tmp>\\joeness-v141-old-package-drwl87\\source\\JOENESS.ps1",
+        "-Check",
+        "-CodexHome",
+        "~/.codex"
+      ],
+      "exit": 0,
+      "output": {
+        "status": "current",
+        "mode": "check",
+        "codexHome": "~\\.codex",
+        "activeSkills": [
+          "joeness-setup"
+        ],
+        "warnings": [],
+        "changesRequired": false,
+        "changes": [],
+        "blockers": [],
+        "rollback": null
+      },
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": [
+        "powershell.exe",
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "<tmp>\\joeness-v141-old-package-drwl87\\source\\JOENESS.ps1",
+        "-Remove",
+        "-CodexHome",
+        "~/.codex"
+      ],
+      "exit": 0,
+      "output": {
+        "status": "removed",
+        "mode": "remove",
+        "codexHome": "~\\.codex",
+        "activeSkills": [],
+        "warnings": [],
+        "changesRequired": false,
+        "changes": [
+          "skills/joeness-setup/SKILL.md",
+          "skills/joeness-setup/agents/openai.yaml",
+          "skills/joeness-setup/assets/AGENTS.md",
+          "skills/joeness-setup/assets/DESIGN.md",
+          "skills/joeness-setup/assets/ISSUES.md",
+          "skills/joeness-setup/assets/ROADMAP.md",
+          "skills/joeness-setup/assets/TASK.md",
+          "skills/joeness-setup/references/usage.md",
+          "skills/joeness-setup/scripts/project-setup.ps1",
+          "skills/joeness-setup/references/review-gate.md",
+          "skills/joeness-setup/scripts/review-gate.mjs",
+          "skills/joeness-setup/references/roadmap-review.md",
+          "skills/joeness-setup/scripts/roadmap-review.mjs",
+          "skills/joeness-setup/references/operation-review.md",
+          "skills/joeness-setup/scripts/operation-review.mjs",
+          "skills/joeness-setup/scripts/impact-review.mjs",
+          "skills/joeness-setup/references/impact-review.md",
+          "skills/joeness-setup/references/changes-hook.md",
+          "skills/joeness-setup/scripts/changes-hook.mjs",
+          "joeness-skills-state.json"
+        ],
+        "blockers": null,
+        "rollback": null
+      },
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": [
+        "powershell.exe",
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "D:\\JOEWRKS\\JOENESS\\JOENESS.ps1",
+        "-Check",
+        "-CodexHome",
+        "~/.codex"
+      ],
+      "exit": 0,
+      "output": {
+        "status": "ready",
+        "mode": "check",
+        "codexHome": "~\\.codex",
+        "activeSkills": [],
+        "warnings": [],
+        "changesRequired": true,
+        "changes": [
+          "skills/joeness-setup/SKILL.md",
+          "skills/joeness-setup/agents/openai.yaml",
+          "skills/joeness-setup/assets/AGENTS.md",
+          "skills/joeness-setup/assets/DESIGN.md",
+          "skills/joeness-setup/assets/ISSUES.md",
+          "skills/joeness-setup/assets/ROADMAP.md",
+          "skills/joeness-setup/assets/TASK.md",
+          "skills/joeness-setup/references/usage.md",
+          "skills/joeness-setup/scripts/project-setup.ps1",
+          "skills/joeness-setup/references/review-gate.md",
+          "skills/joeness-setup/scripts/review-gate.mjs",
+          "skills/joeness-setup/references/roadmap-review.md",
+          "skills/joeness-setup/scripts/roadmap-review.mjs",
+          "skills/joeness-setup/references/operation-review.md",
+          "skills/joeness-setup/scripts/operation-review.mjs",
+          "skills/joeness-setup/scripts/impact-review.mjs",
+          "skills/joeness-setup/references/impact-review.md",
+          "skills/joeness-setup/references/changes-hook.md",
+          "skills/joeness-setup/scripts/changes-hook.mjs",
+          "joeness-skills-state.json"
+        ],
+        "blockers": [],
+        "rollback": null
+      },
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": [
+        "powershell.exe",
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "D:\\JOEWRKS\\JOENESS\\JOENESS.ps1",
+        "-Apply",
+        "-CodexHome",
+        "~/.codex"
+      ],
+      "exit": 0,
+      "output": {
+        "status": "current",
+        "mode": "apply",
+        "codexHome": "~\\.codex",
+        "activeSkills": [
+          "joeness-setup"
+        ],
+        "warnings": [],
+        "changesRequired": false,
+        "changes": [
+          "skills/joeness-setup/SKILL.md",
+          "skills/joeness-setup/agents/openai.yaml",
+          "skills/joeness-setup/assets/AGENTS.md",
+          "skills/joeness-setup/assets/DESIGN.md",
+          "skills/joeness-setup/assets/ISSUES.md",
+          "skills/joeness-setup/assets/ROADMAP.md",
+          "skills/joeness-setup/assets/TASK.md",
+          "skills/joeness-setup/references/usage.md",
+          "skills/joeness-setup/scripts/project-setup.ps1",
+          "skills/joeness-setup/references/review-gate.md",
+          "skills/joeness-setup/scripts/review-gate.mjs",
+          "skills/joeness-setup/references/roadmap-review.md",
+          "skills/joeness-setup/scripts/roadmap-review.mjs",
+          "skills/joeness-setup/references/operation-review.md",
+          "skills/joeness-setup/scripts/operation-review.mjs",
+          "skills/joeness-setup/scripts/impact-review.mjs",
+          "skills/joeness-setup/references/impact-review.md",
+          "skills/joeness-setup/references/changes-hook.md",
+          "skills/joeness-setup/scripts/changes-hook.mjs",
+          "joeness-skills-state.json"
+        ],
+        "blockers": null,
+        "rollback": null
+      },
+      "stderr_sha256": "0308f336d4e5a557090f035d3e1e252a03f49af5cad99c2c4227bb815e8d4beb"
+    },
+    {
+      "command": [
+        "powershell.exe",
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "D:\\JOEWRKS\\JOENESS\\JOENESS.ps1",
+        "-Check",
+        "-CodexHome",
+        "~/.codex"
+      ],
+      "exit": 0,
+      "output": {
+        "status": "current",
+        "mode": "check",
+        "codexHome": "~\\.codex",
+        "activeSkills": [
+          "joeness-setup"
+        ],
+        "warnings": [],
+        "changesRequired": false,
+        "changes": [],
+        "blockers": [],
+        "rollback": null
+      },
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "backed_up": [
+    {
+      "path": "skills/joeness-setup/SKILL.md",
+      "sha256": "6623c4c4ce98d62dca78cbe6ac91e1ed4032968ffd793af4d0a91b5688e244f4"
+    },
+    {
+      "path": "skills/joeness-setup/agents/openai.yaml",
+      "sha256": "cc275e468658c7793d6f1305aaae5c6f37a06d831a7f2c3f18313f668427ec5c"
+    },
+    {
+      "path": "skills/joeness-setup/assets/AGENTS.md",
+      "sha256": "701b28992ffd863a3b2d5c262af4771a85681df1ef6531cff67916e2ca8bd2aa"
+    },
+    {
+      "path": "skills/joeness-setup/assets/DESIGN.md",
+      "sha256": "3b5ec8a163f2da4a770b4206029dd85a538dea0807060314cf51bd145ff66a5d"
+    },
+    {
+      "path": "skills/joeness-setup/assets/ISSUES.md",
+      "sha256": "44b5e1f7eea61716bdfa3b364b7eca9ffe60bc9c29f6e31b3a9bf753de6b8635"
+    },
+    {
+      "path": "skills/joeness-setup/assets/ROADMAP.md",
+      "sha256": "e1f101563287de39d4c35635babfd20ad4c1e03373bb523258f89b9a04b08a1f"
+    },
+    {
+      "path": "skills/joeness-setup/assets/TASK.md",
+      "sha256": "9f1d2951bbf6934434089a431ad275adabe95a47acd747f166364b309a59a3c6"
+    },
+    {
+      "path": "skills/joeness-setup/references/usage.md",
+      "sha256": "bb1d83b776b3775723dffb9ac16863cbe7967caa2b2b9c191a34fa1af4f49f48"
+    },
+    {
+      "path": "skills/joeness-setup/scripts/project-setup.ps1",
+      "sha256": "631334ba13683f97346d2b14d4aebedd671b16c9125e7dd4a26914d658788c8d"
+    },
+    {
+      "path": "skills/joeness-setup/references/review-gate.md",
+      "sha256": "9d1b42610dfd9a4ba19107004ecb71495fc3f8e246cdbf8cf2eb7270ccecdf48"
+    },
+    {
+      "path": "skills/joeness-setup/scripts/review-gate.mjs",
+      "sha256": "7ad13a9020a57aa0a6396348f8575229d7cac076a5d5a6c89178d26c3b6d9bd2"
+    },
+    {
+      "path": "skills/joeness-setup/references/roadmap-review.md",
+      "sha256": "bfb8910df6814edd4fab15b18b1c88c6dcc1127eb9921488772bdb9ffc15a201"
+    },
+    {
+      "path": "skills/joeness-setup/scripts/roadmap-review.mjs",
+      "sha256": "5dfb2d5a81df58d9e1c43651b43cc945356bbf61630b103877f9b8bcd13ba33f"
+    },
+    {
+      "path": "skills/joeness-setup/references/operation-review.md",
+      "sha256": "748d1631847ac23045406f6742b43a3a0bddb29ebfb32b3720f8f97c9546959c"
+    },
+    {
+      "path": "skills/joeness-setup/scripts/operation-review.mjs",
+      "sha256": "a1a6d80a7d57d4e9c3e66c49a6f877bf07836bac25d330bb466fc2a858679aad"
+    },
+    {
+      "path": "skills/joeness-setup/scripts/impact-review.mjs",
+      "sha256": "9cd8359daae4e0f68bcab688ae831e43d81a0b98bcb8ca10ed65a63d0e70cbc8"
+    },
+    {
+      "path": "skills/joeness-setup/references/impact-review.md",
+      "sha256": "6d98aa307aaace44461699e66fdbc3d658f67f8b6c756812ad9faa23ed330a82"
+    },
+    {
+      "path": "skills/joeness-setup/references/changes-hook.md",
+      "sha256": "a108b253f9502351880bc8143c8fd3b198ef31ba80bf0b81b9f35a5553febade"
+    },
+    {
+      "path": "skills/joeness-setup/scripts/changes-hook.mjs",
+      "sha256": "fd717c1cd7bfd91069456ea7f24288b9018bd222d0758f537ddda3507b451b4f"
+    },
+    {
+      "path": "joeness-skills-state.json",
+      "sha256": "aeb85c3f23700f784f4c8be6397e79ab5e1f76dfd5dfc8811a43bb34df566e23"
+    }
+  ],
+  "after": {
+    "skills/joeness-setup/SKILL.md": "4bda2c2cee8162a00e59e27d9c73770a03afe07938eeeb77a7eb6a86b98f6506",
+    "skills/joeness-setup/agents/openai.yaml": "cc275e468658c7793d6f1305aaae5c6f37a06d831a7f2c3f18313f668427ec5c",
+    "skills/joeness-setup/assets/AGENTS.md": "4282fec781506c4faf1767fa9d8c2862d050721b3607be307af8e69b73d04fa9",
+    "skills/joeness-setup/assets/DESIGN.md": "e6f92288a4fc39d179da17cac1e0496a3fb51b5754e2e30b64b4bee89cbdd379",
+    "skills/joeness-setup/assets/ISSUES.md": "44b5e1f7eea61716bdfa3b364b7eca9ffe60bc9c29f6e31b3a9bf753de6b8635",
+    "skills/joeness-setup/assets/ROADMAP.md": "0a81b023a932304c0350c03fdde53f85811c11c3ebe6f47792b4a00b5397f249",
+    "skills/joeness-setup/assets/TASK.md": "9f1d2951bbf6934434089a431ad275adabe95a47acd747f166364b309a59a3c6",
+    "skills/joeness-setup/references/usage.md": "bb1d83b776b3775723dffb9ac16863cbe7967caa2b2b9c191a34fa1af4f49f48",
+    "skills/joeness-setup/scripts/project-setup.ps1": "e628c9e3a968fd7385d557eb6bd1e01594108f6f84b14efcd532cfe6c73753ca",
+    "skills/joeness-setup/references/review-gate.md": "7619729ecba5e6089d037d83339d987534e4b836ff1e472cf41db6398e64c50b",
+    "skills/joeness-setup/scripts/review-gate.mjs": "7ad13a9020a57aa0a6396348f8575229d7cac076a5d5a6c89178d26c3b6d9bd2",
+    "skills/joeness-setup/references/roadmap-review.md": "bfb8910df6814edd4fab15b18b1c88c6dcc1127eb9921488772bdb9ffc15a201",
+    "skills/joeness-setup/scripts/roadmap-review.mjs": "5dfb2d5a81df58d9e1c43651b43cc945356bbf61630b103877f9b8bcd13ba33f",
+    "skills/joeness-setup/references/operation-review.md": "748d1631847ac23045406f6742b43a3a0bddb29ebfb32b3720f8f97c9546959c",
+    "skills/joeness-setup/scripts/operation-review.mjs": "a1a6d80a7d57d4e9c3e66c49a6f877bf07836bac25d330bb466fc2a858679aad",
+    "skills/joeness-setup/scripts/impact-review.mjs": "9cd8359daae4e0f68bcab688ae831e43d81a0b98bcb8ca10ed65a63d0e70cbc8",
+    "skills/joeness-setup/references/impact-review.md": "6d98aa307aaace44461699e66fdbc3d658f67f8b6c756812ad9faa23ed330a82",
+    "skills/joeness-setup/references/changes-hook.md": "a108b253f9502351880bc8143c8fd3b198ef31ba80bf0b81b9f35a5553febade",
+    "skills/joeness-setup/scripts/changes-hook.mjs": "fd717c1cd7bfd91069456ea7f24288b9018bd222d0758f537ddda3507b451b4f",
+    "joeness-skills-state.json": "5fb329c38f4870d5cd06032abfe89e8919fd651523f513855f283d0e91aaf6d2",
+    "AGENTS.md": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "config.toml": "15f269576d32c019cf568d522646c306de69aa8e6ebe75adf3593097cebbe583"
+  },
+  "new_state": {
+    "schemaVersion": 1,
+    "releaseVersion": "1.4.1",
+    "manifestSha256": "1f8fb7ca73d0b8f8a98c76616c7d27b7bd05112626b1f3169ad4492616dcdcc5",
+    "files": [
+      {
+        "path": "SKILL.md",
+        "sha256": "4bda2c2cee8162a00e59e27d9c73770a03afe07938eeeb77a7eb6a86b98f6506"
+      },
+      {
+        "path": "agents/openai.yaml",
+        "sha256": "cc275e468658c7793d6f1305aaae5c6f37a06d831a7f2c3f18313f668427ec5c"
+      },
+      {
+        "path": "assets/AGENTS.md",
+        "sha256": "4282fec781506c4faf1767fa9d8c2862d050721b3607be307af8e69b73d04fa9"
+      },
+      {
+        "path": "assets/DESIGN.md",
+        "sha256": "e6f92288a4fc39d179da17cac1e0496a3fb51b5754e2e30b64b4bee89cbdd379"
+      },
+      {
+        "path": "assets/ISSUES.md",
+        "sha256": "44b5e1f7eea61716bdfa3b364b7eca9ffe60bc9c29f6e31b3a9bf753de6b8635"
+      },
+      {
+        "path": "assets/ROADMAP.md",
+        "sha256": "0a81b023a932304c0350c03fdde53f85811c11c3ebe6f47792b4a00b5397f249"
+      },
+      {
+        "path": "assets/TASK.md",
+        "sha256": "9f1d2951bbf6934434089a431ad275adabe95a47acd747f166364b309a59a3c6"
+      },
+      {
+        "path": "references/usage.md",
+        "sha256": "bb1d83b776b3775723dffb9ac16863cbe7967caa2b2b9c191a34fa1af4f49f48"
+      },
+      {
+        "path": "scripts/project-setup.ps1",
+        "sha256": "e628c9e3a968fd7385d557eb6bd1e01594108f6f84b14efcd532cfe6c73753ca"
+      },
+      {
+        "path": "references/review-gate.md",
+        "sha256": "7619729ecba5e6089d037d83339d987534e4b836ff1e472cf41db6398e64c50b"
+      },
+      {
+        "path": "scripts/review-gate.mjs",
+        "sha256": "7ad13a9020a57aa0a6396348f8575229d7cac076a5d5a6c89178d26c3b6d9bd2"
+      },
+      {
+        "path": "references/roadmap-review.md",
+        "sha256": "bfb8910df6814edd4fab15b18b1c88c6dcc1127eb9921488772bdb9ffc15a201"
+      },
+      {
+        "path": "scripts/roadmap-review.mjs",
+        "sha256": "5dfb2d5a81df58d9e1c43651b43cc945356bbf61630b103877f9b8bcd13ba33f"
+      },
+      {
+        "path": "references/operation-review.md",
+        "sha256": "748d1631847ac23045406f6742b43a3a0bddb29ebfb32b3720f8f97c9546959c"
+      },
+      {
+        "path": "scripts/operation-review.mjs",
+        "sha256": "a1a6d80a7d57d4e9c3e66c49a6f877bf07836bac25d330bb466fc2a858679aad"
+      },
+      {
+        "path": "scripts/impact-review.mjs",
+        "sha256": "9cd8359daae4e0f68bcab688ae831e43d81a0b98bcb8ca10ed65a63d0e70cbc8"
+      },
+      {
+        "path": "references/impact-review.md",
+        "sha256": "6d98aa307aaace44461699e66fdbc3d658f67f8b6c756812ad9faa23ed330a82"
+      },
+      {
+        "path": "references/changes-hook.md",
+        "sha256": "a108b253f9502351880bc8143c8fd3b198ef31ba80bf0b81b9f35a5553febade"
+      },
+      {
+        "path": "scripts/changes-hook.mjs",
+        "sha256": "fd717c1cd7bfd91069456ea7f24288b9018bd222d0758f537ddda3507b451b4f"
+      }
+    ]
+  },
+  "delta": [
+    "joeness-skills-state.json",
+    "skills/joeness-setup/SKILL.md",
+    "skills/joeness-setup/assets/AGENTS.md",
+    "skills/joeness-setup/assets/DESIGN.md",
+    "skills/joeness-setup/assets/ROADMAP.md",
+    "skills/joeness-setup/references/review-gate.md",
+    "skills/joeness-setup/scripts/project-setup.ps1"
+  ],
+  "representative_check": {
+    "command": [
+      "C:\\Program Files\\nodejs\\node.exe",
+      "--test",
+      "--test-name-pattern=current full specialist coverage|missing check blocks|approval remains separate",
+      "tests/joeness-review-gate.tests.mjs"
+    ],
+    "exit": 0,
+    "stdout": "✔ current full specialist coverage permits only visual claim, not user acceptance (127.8965ms)\n✔ missing check blocks and recovering the missing result passes (229.5215ms)\n✔ approval remains separate and bound to exact current outputs (343.0823ms)\nℹ tests 3\nℹ suites 0\nℹ pass 3\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 827.331\n",
+    "stderr": ""
+  }
+}
