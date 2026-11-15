@@ -1,0 +1,5 @@
+DESIGN.md
+ROADMAP.md
+TASK.md
+scripts/design-check.mjs
+work/reports/2026-11-15-co3.md

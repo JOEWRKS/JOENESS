@@ -1,0 +1,216 @@
+> [Bash] T=<data>/runs/r09; cat $T/tools/joeness-setup/SKILL.md; ls -R $T/tools/joeness-setup; ls -la $T/project; cd $T/project && git status && git log --oneline | head
+---
+name: joeness-setup
+description: Use when the user asks to install or connect JOENESS in a project, organize its working documents, or revise or detach its project setup. Ordinary coding, questions, and status updates do not require setup.
+---
+
+# JOENESS Setup
+
+Make project goals, current work, evidence and unresolved risks retrievable by
+their owners. Write each detailed fact once; link it from relevant summaries.
+Write concisely at source, retaining cause, uncertainty, evidence and approval
+boundaries. No fixed length cap, routine rewrite pass or history purge.
+
+"Install JOENESS in this project" requests a project setup proposal, not a
+personal package installation. Show changed paths, ownership transfers and
+recording scope; apply after approval. No global payload, background worker
+
+> [Bash] T=<data>/runs/r09; cd $T/project; cat README.md; find src -type f | head -50; for f in $T/tools/joeness-setup/assets/*.md; do echo "=== $f"; cat "$f"; done
+# 문의 폼
+
+작은 정적 문의 폼. `src/index.html`을 브라우저로 열어 쓴다.
+요청 내용은 최대 500자까지 받는다. 화면 크기는 360·768·1280을 지원한다.
+src/form.js
+src/index.html
+src/style.css
+=== <data>/runs/r09/tools/joeness-setup/assets/AGENTS.md
+# Project working connection
+
+Adapt paths and agreed scope before applying this body.
+- Owners: ROADMAP = goals, stage order, required items (status, check, proof, gap, next).
+  TASK = work results and checks. ISSUES = open defects/workarounds with cause, risk and
+  closure condition. DESIGN = visual rules and approvals. Library/ = research by topic
+  (source, date, fact vs inference). AGENTS = rules only. Product meaning:
+  <exact source or undecided>.
+- Read only what the task needs: resume → current ROADMAP item; defect → ISSUES + target;
+  visual → DESIGN; research → Library; completion → re
+
+> [Bash] T=<data>/runs/r09; cd $T/project; cat src/*; echo ====; cat $T/tools/joeness-setup/references/review-gate.md; echo ====; cat $T/tools/joeness-setup/references/usage.md; echo ===; ls -R $T/tools/joedesign | head -60
+const form = document.getElementById('request-form');
+form.addEventListener('submit', (event) => {
+  event.preventDefault();
+  form.reset();
+  alert('접수되었습니다.');
+});
+<!doctype html>
+<html lang="ko">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>문의</title><link rel="stylesheet" href="style.css"></head>
+<body>
+<form id="request-form">
+  <label for="name">이름</label>
+  <input id="name" name="name" required>
+  <label for="body">요청 내용</label>
+  <textarea id="body" name="body" maxlength="500" required></textarea>
+  <button type="submit">보내기</button>
+</form>
+<script src="form.js"></script>
+</body>
+</html>
+form { display: grid; gap: 12px; max-width: 480px; margin: 24px auto; padding: 0 16px; }
+input, textarea { font: inherit; min-height: 44px
+
+> [Bash] T=<data>/runs/r09; cat $T/tools/joedesign/SKILL.md; echo ====; cat $T/tools/joedesign/templates/DESIGN.md; cat $T/tools/joedesign/VERSION; echo ===; head -80 $T/tools/joeness-setup/scripts/project-setup.ps1; grep -n "machine\|absolute\|joedesign" $T/tools/joeness-setup/scripts/project-setup.ps1 | head -30
+---
+name: joedesign
+description: "Design, implement and review UI through one operating workflow: inspect visual sources, translate them into the product, prove the key composition, and expand through specialist review. Also use for scoped visual repairs. Not for Product Definition, pure backend work or nonvisual refactors."
+---
+
+# JOEDESIGN
+
+This is the single operating core for JOEDESIGN. It governs design decisions,
+implementation, observation and specialist review. The harness is an internal
+execution mechanism, not another skill or authority the user must select.
+User authority and Product meaning govern the work; specialist defaults do not
+replace this operating route. Read detailed modules only for the current stage.
+
+## One owner, bounded roles
+
+The coordinating agent is A: it owns
+
+> [Bash] T=<data>/runs/r09; sed -n 80,400p $T/tools/joeness-setup/scripts/project-setup.ps1 | grep -n "param\|-Check\|Write-Output\|ConvertTo-Json\|status\|Body" | head -60
+11:  $status=if($unresolved.Count){'partial'}else{'failed'}
+13:  return [pscustomobject]@{Status=$status;Changed=@($unresolved);Rollback=$rollback;Unresolved=@($unresolved);Error=$message}
+107: param(
+116:  [Parameter(Mandatory,ParameterSetName='Apply')][string]$ManagedBodyBase64,
+120: $r=[ordered]@{action=$action;status='blocked';verificationScope='managed-connection-only';projectRoot=$null;target='AGENTS.md';targetHash='absent';statePath='.joeness/setup-state.json';stateHash='absent';blockState='malformed';changedTargets=@();blockers=@();rollback=$null;unresolvedTargets=@()}
+144:   $r.status=if($o.BlockState -eq 'clean'){'current'}else{'ready'}
+149:  if($Detach -and $o.BlockState -eq 'absent'){$r.status='detached';return [pscustomobject]$r}
+152:  if($Relocate -and (Test-SetupInitialWindo
+
+> [Bash] S="<temp>"; mkdir -p "$S"; cat > "$S/body.md" <<'EOF'
+# Project working connection
+
+- Owners: ROADMAP = goals, stage order, required items (status, check, proof, gap, next).
+  TASK = work results and checks. ISSUES = open defects/workarounds with cause, risk and
+  closure condition. DESIGN = visual rules and approvals. Library/ = research by topic
+  (source, date, fact vs inference; created only when there is material). AGENTS = rules only.
+  Product meaning: README.md (static inquiry form, request body max 500 chars, sizes 360/768/1280).
+- Read only what the task needs: resume → current ROADMAP item; defect → ISSUES + target;
+  visual → DESIGN; research → Library; completion → required items and their proof.
+- Authority: only the user or named owner approves. Code, newer notes and old handoffs
+  never do; a handoff only points to sources. Facts come from the current target and
+  proof. Unclear or conflicting scope goes to the owner; keep only that verdict open.
+- Done = every required item passes the Check written on it in ROADMAP, run or observed
+  on current inputs. A check that is missing, fails, cannot run or is stale keeps the
+  item open; removed scope is not a pass. Before recording a rule as passed, read what the
+  check actually measured (which screens, layouts, sizes, states) against what the rule covers;
+  what the check did not measure is unverified, not passed, and the record names it.
+  Design checks use JOEDESIGN. `<joedesign>` below means the JOEDESIGN instal
+{"action":"check","status":"ready","verificationScope":"managed-connection-only","projectRoot":"<data>\\runs\\r09\\project","target":"AGENTS.md","targetHash":"absent","statePath":".joeness/setup-state.json","stateHash":"absent","blockState":"absent","changedTargets":[],"blockers":[],"rollback":null,"unresolvedTargets":[]}
+
+> [Bash] S="<temp>"; B=$(base64 -w0 "$S/body.md"); cd <data>/runs/r09/project && powershell -NoProfile -ExecutionPolicy Bypass -File ../tools/joeness-setup/scripts/project-setup.ps1 -Apply -ProjectPath . -ExpectedRoot '<data>\runs\r09\project' -ExpectedTargetHash absent -ExpectedStateHash absent -ManagedBodyBase64 "$B"; echo; powershell -NoProfile -ExecutionPolicy Bypass -File ../tools/joeness-setup/scripts/project-setup.ps1 -Check -ProjectPath .; echo; cat .joeness/setup-state.json; grep -c "joedesign>" AGENTS.md
+{"action":"apply","status":"current","verificationScope":"managed-connection-only","projectRoot":"<data>\\runs\\r09\\project","target":"AGENTS.md","targetHash":"254348c894e8c9af33fd9b7c1c7d4a0d2b045ef19f8d0ec3845988f29f485fc2","statePath":".joeness/setup-state.json","stateHash":"e8feea409bdbf3c5d31622f6d974e074687b8140620ff838c46c9ba5ea9b34a7","blockState":"clean","changedTargets":["AGENTS.md",".joeness/setup-state.json"],"blockers":[],"rollback":null,"unresolvedTargets":[]}
+
+{"action":"check","status":"current","verificationScope":"managed-connection-only","projectRoot":"<data>\\runs\\r09\\project","target":"AGENTS.md","targetHash":"254348c894e8c9af33fd9b7c1c7d4a0d2b045ef19f8d0ec3845988f29f485fc2","statePath":".joeness/setup-state.json","stateHash":"e8feea409bdbf3c5d31622f6d974e074687b81
+
+> [Bash] cd <data>/runs/r09/project
+cat > ROADMAP.md <<'EOF'
+# Project roadmap
+
+Project scope: 작은 정적 문의 폼(`src/`) 유지·개선. 프로젝트 전체 목표와 단계 순서는 미정(direction pending) — 결정 필요: 글자 수 표시 이후의 목표·단계를 사용자가 정한다.
+Product authority: [README.md](README.md) — 요청 내용 최대 500자, 화면 크기 360·768·1280 지원.
+Current stage: W1 요청 폼 글자 수 표시 — not started.
+Next eligible work: W1-1 구현 전 표시 방식 결정(아래 W1 결정 필요) → 구현. 막힌 의존 없음.
+Status words: not started / in progress / verification pending / on hold / complete / removed from scope.
+
+## Stage W1 — 요청 폼 글자 수 표시 — not started
+
+Goal: 요청 내용 입력란에 현재 글자 수를 표시한다(사용자 요청 2026-11-15; 상세 표시 방식은 미정).
+Entry condition: none.
+Completion condition: W1-1·W1-2 모두 각자의 Check 통과, W1-3 표시 방식이 사용자 확인됨. 사용자 수락은 별도(아래).
+
+| ID | Required outcome | Status | Check / completion criterion | Evidence or gap |
+| --- | --- | --- | --- | --- |
+| W1-1 | `#body` 입력 시 현재 글자 수가 갱신되어 보이고, 최대 500자(README) 기준과 일치 | not started | Technical: 빈 값·입력 중·500자·폼 제출 후 초기화 상태에서 표시 숫자가 실제 글자 수와 같은지 브라우저 확인. 글자 수 세는 기준(공백·줄바꿈·이모지)은 W1-3에서 확정 | 미구현. [TASK](TASK.md#w1-2026-11-15--요청-폼-글자-수-표시-등록) |
+| W1-2 | 카운터가 DESIGN 규칙을 지킴(360·768·1280) | not started | Visual (JOEDESIGN): DESIGN.md#rule-coverage 의 카운터 행(아직 없음 — 구현 전 JOEDESIGN이 추가) on current inputs, 360·768·1280 × 빈 값/입력 중/500자 상태, Spot check per row; 결과 줄과 보고 파일은 TASK, 보고서 `node <joedesign>/scripts/report-check.mjs --verify <file>` exit 0 필요 | 규칙 행 없음(undecided). [DESIGN](DESIGN.md#rule-coverage) |
+| W1-3 | 표시 방식(형식 예: `N/500`, 위치, 500자 도달 시 표현, 세는 기준)을 사용자가 확인 | not st
+ok
+
+> [Bash] cd <data>/runs/r09/project
+T=../tools/joedesign/templates/DESIGN.md
+{
+cat <<'EOF'
+# Visual rules and authority
+
+**Reporting:** design-check reports follow the `## Report Form` section below exactly.
+
+Authority / version: undecided — 승인된 시각 원본 없음. Status DRAFT, Revision 1. Product authority: [README.md](README.md).
+Approved scope: none (승인된 화면·상태·크기 없음). 지원 화면 크기 360·768·1280은 README의 제품 사실이며 시각 승인 아님.
+Visual rules: none approved. 아래 Token Roles는 현재 `src/style.css`에서 읽은 measured 값일 뿐 승인 규칙이 아님.
+Proposed changes: none.
+Not applicable / pending: W1 글자 수 카운터의 표시 규칙과 Rule Coverage 행은 구현 전에 JOEDESIGN이 제안하고 사용자가 승인한다([ROADMAP W1](ROADMAP.md#stage-w1--요청-폼-글자-수-표시--not-started)).
+Execution proof: none yet (TASK에 기록).
+
+## Token Roles
+
+| Role | Parts | Token / value | Status |
+| --- | --- | --- | --- |
+| field gap | form 항목 사이 | `gap: 12px` | measured (src/style.css) |
+| control height | input, button | `min-height: 44px`; input만 ≥1280px에서 `40px` | measured (src/style.css) |
+| textarea height | textarea | `min-height: 120px` | measured (src/style.css) |
+| form width / gutter | form | `max-width: 480px`, `padding: 0 16px` | measured (src/style.css) |
+
+## Rule Coverage
+
+No measurable rule is approved yet, so no row exists; nothing here is passed. Rows are added (rule → check → spot check → layouts, sizes, states → unmeasured) when a rule is approved, e.g. for W1-2.
+
+| Rule | Check | Spot check | Layouts | Sizes | States | Unmeasured |
+| --- | --- | --- | --- | --- | --- | --- |
+
+EOF
+awk 
+No measurable rule is approved yet, so no row exists; nothing here is passed. Rows are added (rule → check → spot check → layouts, sizes, states → unmeasured) when a rule is approved, e.g. for W1-2.
+
+| Rule | Check | Spot check | Layouts | Sizes | States | Unmeasured |
+| --- | --- | --- | --- | --- | --- | --- |
+
+## Report Form
+
+Any session that changes a file listed in Rule Coverage, with or without JOEDESIGN
+loaded, reports design-check results in one list, one line per check that ran:
+`check | result | sizes x states, mode | rendered or code | spot check` (the row's
+Spot check cell, or "not spot-checked"). The fourth cell is `code`, `rendered`, or
+`rendered (injected css)` when the preview could not load the page's linked CSS
+and the same CSS was injected (another departure: `rendered (
+
+> [Bash] cd <data>/runs/r09/project; grep -rn "JOEWRKS\|[A-Z]:\\\\\|/d/" AGENTS.md ROADMAP.md TASK.md ISSUES.md DESIGN.md .joeness || echo "no machine paths"; git add AGENTS.md ROADMAP.md TASK.md ISSUES.md DESIGN.md .joeness/setup-state.json && git commit -q -m "JOENESS 연결: AGENTS 연결 구역, ROADMAP·TASK·ISSUES·DESIGN 생성, W1 요청 폼 글자 수 표시 등록
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>" && git log --oneline -2 && git status --short
+no machine paths
+558b086 JOENESS 연결: AGENTS 연결 구역, ROADMAP·TASK·ISSUES·DESIGN 생성, W1 요청 폼 글자 수 표시 등록
+1623cca fixture
+
+> [Bash] cd <data>/runs/r09/project; cat > .final-report.md <<'EOF'
+- 작업: 프로젝트에 JOENESS 연결하고 첫 작업 '요청 폼 글자 수 표시' 등록(구현은 안 함)
+- 업데이트 파일: 작업 규칙 연결(AGENTS.md, .joeness/setup-state.json), 로드맵(ROADMAP.md), 작업 기록(TASK.md), 문제 기록(ISSUES.md), 디자인 규칙(DESIGN.md)
+- 이슈: 없음
+- 해결: 없음
+- 남은 문제: 글자 수 표시 방식(형식·위치·500자 도달 시 표현·세는 기준) 미결정, 카운터 디자인 규칙 미정, 프로젝트 전체 목표·단계 미정, 새 채팅에서 지침 전달 확인 안 함
+- 다음 작업: 글자 수 표시 방식 결정 → 구현 → JOEDESIGN 디자인 검사
+
+상세 보고
+- 연결: 설치 스크립트로 확인(Check) 후 적용(Apply)했고, 다시 확인한 결과 `current`. 커밋 `558b086`(전부 커밋, 작업 트리 깨끗함).
+- 기록 범위: TASK·ROADMAP·ISSUES·DESIGN(사용자 승인 2026-11-15). 제품 기준은 README.md(최대 500자, 화면 360·768·1280).
+- ROADMAP: 단계 W1 '요청 폼 글자 수 표시'를 not started로 둠. W1-1 동작(기술 확인), W1-2 디자인(JOEDESIGN 검사: DESIGN.md#rule-coverage 행 기준, 보고서는 `node <joedesign>/scripts/report-check.mjs --verify` exit 0 필요), W1-3 표시 방식 사용자 확인. 이후 목표·단계는 꾸며 넣지 않고 '미정'으로 표시함.
+- TASK: W1 등록 항목 하나(검사 실행 없음, Report stamp: none ran).
+- DESIGN: 승인된 시각 원본·규칙 없음(DRAFT). 현재 CSS 값은 measured로만 적음(예: 입력란 높이 44px, 1280 이상에서 입력란만 40px). JOEDESIGN 보고 형식(Report Form)을 넣어 둠. Rule Coverage 행은 아직 없어서 통과한 규칙도 없음.
+- JOEDESIGN 경로: 커밋된 문서에는 `<joedesign>`을 글자 그대로 두고, 이 기계의 설치 위치(JOEDESIGN_HOME이 없으면 설치 폴더)를 뜻한다고 적음. 기계 경로는 커밋하지 않음.
+- 검증 범위: 연결 구역 적용만 확인함. 문서 내용은 직접 다시 읽어 확인함. 새 채팅에서 지침이 실제로 전달되는지는 확인 안 함. 디자인 검사(design checks: none ran)와 작업 결과 검증은 실행하지 않음.
+- 선택 항목: Claude Code용 턴 사이 변경 알림 hook은 승인받지 않아 넣지 않음. 원하면 따로 제안 가능.
+EOF
+git status --short
+?? .final-report.md
+
+> [SubagentHandback] {"message":"- 작업: 이 프로젝트에 JOENESS를 연결하고 첫 작업 '요청 폼 글자 수 표시'를 등록함(구현은 아직 안 함)\n- 업데이트 파일: 작업 규칙(AGENTS.md, .joeness/setup-state.json), 로드맵(ROADMAP.md), 작업 기록(TASK.md), 문제 기록(ISSUES.md), 디자인 규칙(DESIGN.md)\n- 이슈: 없음\n- 해결: 없음\n- 남은 문제: 글자 수 표시 방식(형식·위치·500자에 닿았을 때 모습·세는 기준) 미정, 카운터 디자인 규칙 미정, 프로젝트 전체 목표·단계 미정, 새 채팅에서 지침이 전달되는지 확인 안 함\n- 다음 작업: 글자 수 표시 방식 정하기 → 구현 → JOEDESIGN 디자인 검사\n\n상세 보고\n- 연결: 설치 스크립트로 확인(Check)한 뒤 적용(Apply)했고, 다시 확인한 결과는 `current`입니다. 전부 커밋 `558b086`에 들어갔고 작업 트리는 깨끗합니다.\n- 기록 범위: TASK·ROADMAP·ISSUES·DESIGN(2026-11-15 승인)입니다. 제품 기준은 README.md(최대 500자, 화면 360·768·1280)입니다.\n- ROADMAP: W1 단계는 시작 전(not started)이며 항목은 셋입니다.\n  - W1-1: 동작 확인(기술 검사).\n  - W1-2: JOEDESIGN 디자인 검사. 기준은 `DESIGN.md#rule-coverage`의 행이고, 보고서는 `node <joedesign>/scripts/report-check.mjs --verify`가 exit 0이어야 합니다.\n  - W1-3: 표시 방식 사용자 확인.\n  - 그 뒤 목표와 단계는 지어내지 않고 '미정'으로 적었습니다.\n- TASK: W1 등록 항목 하나만 있습니다. 검사는 실행하지 않았고 `Report stamp: none ran`입니다.\n- ISSUES: 열린 문제 없음.\n- DESIGN: 승인된 시각 원본이나 규칙이 없어 초안(DRAFT)입니다.\n  - 현재 CSS 값은 측정값(measured)으로만 적었습니다. 예: 입력란 높이 44px, 1280 이상에서는 입력란만 40px.\n  - JOEDESIGN 보고 형식(Report Form)을 넣었습니다.\n  - Rule Coverage 행이 아직 없으므로 통과한 규칙도 없습니다.\n- JOEDESIGN 경로: 커밋한 문서에는 `<joedesign>`을 글자 그대로 두고, 이 기계의 설치 위치를 뜻한다고 적었습니다(JOEDESIGN_HOME이 설정되어 있으면 그 위치). 기계 경로는 커밋하지 않았습니다.\n- 확인 범위: 연결 구역 적용은 스크립트로, 문서 내용은 직접 다시 읽어 확인했습니다. 새 채팅에서 지침 전달, 디자인 검사(design checks: none ran), 작업 결과 검증은 하지 않았습니다.\n- 넣지 않은 것: Claude Code용 턴 사이 변경 알림 hook은 승인을 받지 않아 넣지 않았습니다. 원하면 따로 제안하겠습니다.\n- 최종
+{"success":true,"message":"Report delivered to your caller."}

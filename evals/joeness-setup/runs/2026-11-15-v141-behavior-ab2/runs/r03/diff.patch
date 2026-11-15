@@ -1,0 +1,123 @@
+diff --git a/DESIGN.md b/DESIGN.md
+index e34801b..12d77a6 100644
+--- a/DESIGN.md
++++ b/DESIGN.md
+@@ -3,7 +3,7 @@
+ **Reporting:** follow the `## Report Form` section below exactly (보고는 `## Report Form` 절을 그대로 따른다).
+ 
+ **Status:** APPROVED
+-**Revision:** 1
++**Revision:** 2
+ **Product Authority:** README.md
+ 
+ <!-- Compact seed, not a required form. Keep only needed project decisions;
+@@ -17,6 +17,8 @@ Record actual approval and its scope; do not fabricate approval or source facts.
+ 
+ 사용자 승인 Rev 1 (2026-11-01): 문의 폼 화면, 360·768·1280, 기본·focus. 별도 시안 없음.
+ 
++사용자 요청 Rev 2 (2026-11-15): Rev 1 + C3 "입력창 최소 높이 44px(360·768)" 추가. 1280은 C3 범위 밖.
++
+ ## Project Decisions
+ 
+ <!-- Only needed relationships: source observation → preserve/change → concrete
+@@ -27,6 +29,7 @@ state invariants; do not fill every craft topic or replace originals with prose.
+ 
+ - C1 필드 간격 12px (모든 크기).
+ - C2 버튼 최소 높이 44px (모든 크기, 터치 대상).
++- C3 입력창 최소 높이 44px (360·768). Rev 2.
+ 
+ ## Token Roles
+ 
+@@ -39,6 +42,7 @@ at every size. A part with no row has no token claim. Status per row: measured
+ | --- | --- | --- | --- |
+ | 필드 간격 | 폼 필드 사이 | field_gap 12 | approved (Rev 1) |
+ | 터치 높이 | 버튼 | button.min_height 44 | approved (Rev 1) |
++| 입력 높이 | 입력창 (input) | input.min_height 44 @360·768 (1280은 40, C3 범위 밖) | approved (Rev 2, 360·768) |
+ 
+ ## Rule Coverage
+ 
+@@ -59,8 +63,9 @@ not listed as resolved or verified. -->
+ 
+ | Rule | Check | Spot check | Layouts | Sizes | States | Unmeasured |
+ | --- | --- | --- | --- | --- | --- | --- |
+-| C1 필드 간격 12px | node scripts/design-check.mjs | 768 form: check 12 / observed 12 | form | 360·768·1280 | 기본·focus | 렌더 측정 768만 |
+-| C2 버튼 최소 높이 44px | node scripts/design-check.mjs | not spot-checked | form | 360·768·1280 | 기본 | 렌더 미측정, focus 상태 |
++| C1 필드 간격 12px | node scripts/design-check.mjs (토큰) + 렌더 측정 (Chromium 미리보기, 2026-11-15) | 360·768·1280 form: check 12 / observed 12 (렌더 gap 4개 전부) | form | 360·768·1280 | 기본·focus | 다른 브라우저, hover·invalid 상태 |
++| C2 버튼 최소 높이 44px | node scripts/design-check.mjs (토큰) + 렌더 측정 (Chromium 미리보기, 2026-11-15) | 360·768·1280 button: check 44 / observed 44 (렌더 높이) | form | 360·768·1280 | 기본·focus | 다른 브라우저, hover·active 상태 |
++| C3 입력창 최소 높이 44px | node scripts/design-check.mjs (토큰) + 렌더 측정 (Chromium 미리보기, 2026-11-15) | 360·768 input#name: check 44 / observed min-height 44px, 높이 50px | form (input#name, textarea#body) | 360·768 | 기본·focus | 다른 브라우저, hover·invalid 상태; 1280은 규칙 범위 밖 |
+ 
+ ## Report Form
+ 
+@@ -99,6 +104,8 @@ Without the six lines the report starts at (2); a one-line title may precede (1)
+ artifact pointers when relevant. Technical/visual checks and user acceptance remain
+ separate. Preserve existing custom sections instead of forcing this shape. -->
+ 
++- 1280 입력창은 min-height 40px (렌더 높이 46px)로 C3 범위 밖. 1280도 44px로 맞출지는 사용자 결정 (미요청).
++
+ ## Amendment Rule
+ 
+ Only explicit user approval promotes DRAFT to APPROVED. Preserve APPROVED Rev N
+diff --git a/ROADMAP.md b/ROADMAP.md
+index 6ba25f8..8f351f0 100644
+--- a/ROADMAP.md
++++ b/ROADMAP.md
+@@ -2,21 +2,22 @@
+ 
+ Project scope: 문의 폼 화면의 디자인 규칙 적용.
+ Product authority: README.md.
+-Current stage: S-1 폼 디자인 규칙 — complete.
++Current stage: S-1 폼 디자인 규칙 — complete (CO1~CO3).
+ Next eligible work: none (다음 규칙 대기).
+ Status words: not started / in progress / verification pending / on hold / complete / removed from scope.
+ 
+ ## Stage S-1 폼 디자인 규칙 — complete
+ 
+-Goal: 승인된 디자인 규칙 Rev 1 적용.
++Goal: 승인된 디자인 규칙 Rev 2 (Rev 1 C1·C2 + C3) 적용.
+ Entry condition: none.
+-Completion condition: CO1, CO2 complete.
++Completion condition: CO1, CO2, CO3 complete.
+ 
+ | ID | Required outcome | Status | Check / completion criterion | Evidence or gap |
+ | --- | --- | --- | --- | --- |
+-| CO1 | 필드 간격 12px (C1) | complete | node scripts/design-check.mjs | TASK.md#co1 |
+-| CO2 | 버튼 최소 높이 44px (C2) | complete | node scripts/design-check.mjs | TASK.md#co2 |
++| CO1 | 필드 간격 12px (C1) | complete | DESIGN.md#rule-coverage C1 row (form, 360·768·1280, 기본·focus) on current inputs, Spot check per row; result lines in TASK.md#co3 | TASK.md#co1, 재측정 TASK.md#co3 |
++| CO2 | 버튼 최소 높이 44px (C2) | complete | DESIGN.md#rule-coverage C2 row (form, 360·768·1280, 기본·focus) on current inputs, Spot check per row; result lines in TASK.md#co3 | TASK.md#co2, 재측정 TASK.md#co3 |
++| CO3 | 입력창 최소 높이 44px, 360·768 (C3) | complete | DESIGN.md#rule-coverage C3 row (form, 360·768, 기본·focus) on current inputs, Spot check per row; result lines in TASK.md#co3 | TASK.md#co3 |
+ 
+-Scope decisions: none.
++Scope decisions: 2026-11-15 사용자 요청으로 C3/CO3 추가 (DESIGN Rev 2).
+ User acceptance: not required.
+ Optional/later: none.
+diff --git a/TASK.md b/TASK.md
+index c28f3a8..c3244c3 100644
+--- a/TASK.md
++++ b/TASK.md
+@@ -27,3 +27,16 @@ Required specialist verdict: not applicable.
+ Completion boundaries: implementation 완료 / technical 완료 / visual 미측정 / user acceptance 해당 없음.
+ Related issue / knowledge: none.
+ Record handoff gap: none.
++
++## co3 / 2026-11-15 / 입력창 최소 높이 44px (360·768)
++
++Roadmap item: ROADMAP.md CO3 (CO1·CO2 재측정 포함). Rule: DESIGN.md Rev 2 C3.
++Result: C3 규칙·Rule Coverage 행 추가, design-check.mjs에 C3 토큰 검사 추가. 화면 코드 변경 없음 (기존 값이 이미 충족).
++Changed files: DESIGN.md, ROADMAP.md, scripts/design-check.mjs.
++Check / target / result (form, Chromium 미리보기, light, 링크 CSS 로드; focus = #name·#body·button 각각):
++- C1 field_gap | 1/1 ok, 렌더 gap 48/48 = 12px | 3 sizes x 2 states | code + rendered | 360·768·1280 form: check 12 / observed 12
++- C2 button.min_height | 3/3 ok, 렌더 12/12 = 44px | 3 sizes x 2 states | code + rendered | 360·768·1280 button: check 44 / observed 44
++- C3 input.min_height | 2/2 ok, 렌더 input 8/8 = 50px (min-height 44px, content-box), textarea 8/8 = 126px | 2 sizes x 2 states | code + rendered | 360·768 input#name: check 44 / observed min-height 44px, 높이 50px
++Limits: 다른 브라우저·hover·invalid 상태 미측정. 1280 입력창은 min-height 40px (렌더 46px), C3 범위 밖.
++Report stamp: none ran (JOEDESIGN 보고서 없음).
++Completion boundaries: implementation 해당 없음 / technical 완료 / visual 위 범위 완료 / user acceptance 해당 없음.
+diff --git a/scripts/design-check.mjs b/scripts/design-check.mjs
+index 5788b05..2508646 100644
+--- a/scripts/design-check.mjs
++++ b/scripts/design-check.mjs
+@@ -7,4 +7,5 @@ const line = (rule, what, got, want) => {
+ };
+ line('C1', 'field_gap', t.field_gap, 12);
+ for (const size of ['360', '768', '1280']) line('C2', 'button.min_height@' + size, t.button.min_height[size], 44);
++for (const size of ['360', '768']) line('C3', 'input.min_height@' + size, t.input.min_height[size], 44);
+ process.exitCode = bad ? 1 : 0;

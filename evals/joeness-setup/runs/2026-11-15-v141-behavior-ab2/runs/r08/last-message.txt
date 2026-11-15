@@ -1,0 +1,13 @@
+r08 is finished. The final report is saved, uncommitted, at <data>\runs\r08\project\.final-report.md. It holds the six bullets, `design checks: none ran` and a short detail section.
+
+- **Connection:** I ran the installer script `project-setup.ps1`. `-Check` returned ready, `-Apply` returned current, and a second `-Check` returned current with the block clean. The connection body names README.md as the product source and lists the approved recording scope (TASK·ROADMAP·ISSUES·DESIGN). It keeps the literal `<joedesign>` placeholder, and no machine path appears in AGENTS.md, the state file or the four records.
+- **Records:**
+  - ROADMAP.md: overall direction is marked pending. There is one stage, with item F1 "요청 폼 글자 수 표시" set to not started. Its check has a technical part, DESIGN rule rows that are not defined yet, and the `report-check.mjs --verify` step.
+  - TASK.md: entry T1, registration only. No code changed, no check ran, and `Report stamp: none ran`.
+  - ISSUES.md: none.
+  - DESIGN.md: DRAFT with no approved visual source. Values read from `src/style.css` are listed as measured, not approved. The rule-coverage table is empty, and the Report Form section is copied from the JOEDESIGN template. Undecided: the counter's format, position and near-limit display.
+- **Commit:** `cd38a79` on master holds 6 files: AGENTS.md, .joeness/setup-state.json, ROADMAP.md, TASK.md, ISSUES.md and DESIGN.md. The working tree is clean apart from `.final-report.md`.
+- **Not done or not checked:** whether the instructions reach a fresh chat was not tested. The between-turn change-notice hook was only mentioned in the report as an option, not added.
+- **Arm note for grading:** the setup assets in this run's tools folder have no DESIGN rule-coverage table and no ROADMAP `Product revision / approval` line. That looks like the 1.4.0 arm.
+
+완료

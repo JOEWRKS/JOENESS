@@ -1,0 +1,958 @@
+[
+ {
+  "id": "r01",
+  "arm": "A",
+  "scene": "S2",
+  "finished": true,
+  "commits_by_agent": 1,
+  "uncommitted_left": [],
+  "files": [
+   "DESIGN.md",
+   "ROADMAP.md",
+   "TASK.md",
+   "scripts/design-check.mjs",
+   "work/reports/2026-11-15-co3.md"
+  ],
+  "committed_files": [
+   "DESIGN.md",
+   "ROADMAP.md",
+   "TASK.md",
+   "scripts/design-check.mjs",
+   "work/reports/2026-11-15-co3.md"
+  ],
+  "committed_machine_paths": 0,
+  "committed_machine_path_list": [],
+  "pending_machine_paths": 0,
+  "pending_machine_path_list": [],
+  "final_report_machine_paths": 0,
+  "tool_calls": 30,
+  "setup_calls": [],
+  "leak_hits": [],
+  "used_session_scratchpad": false,
+  "used_browser": true,
+  "read_skill_md": true,
+  "ends_with_question": false,
+  "rule_coverage_sections": 1,
+  "rule_table_headers": 1,
+  "result_column": false,
+  "c3_in_rule_coverage_table": true,
+  "c3_rows_anywhere": 1,
+  "other_design_files": [],
+  "co3_row": true,
+  "co3_status": "complete",
+  "co3_check": "DESIGN.md#rule-coverage C3 row (form, 360·768, 기본·focus) on current inputs, Spot check per row; result lines and stamp in TASK. Technical (separate): node scripts/design-check.mjs exit 0",
+  "co3_points_to_table": true,
+  "co3_names_c3": true,
+  "co3_script_only": false,
+  "check_script_changed": true
+ },
+ {
+  "id": "r02",
+  "arm": "B",
+  "scene": "S2",
+  "finished": true,
+  "commits_by_agent": 0,
+  "uncommitted_left": [
+   " M DESIGN.md",
+   " M ROADMAP.md",
+   " M TASK.md",
+   " M scripts/design-check.mjs"
+  ],
+  "files": [
+   "DESIGN.md",
+   "ROADMAP.md",
+   "TASK.md",
+   "scripts/design-check.mjs"
+  ],
+  "committed_files": [],
+  "committed_machine_paths": 0,
+  "committed_machine_path_list": [],
+  "pending_machine_paths": 0,
+  "pending_machine_path_list": [],
+  "final_report_machine_paths": 0,
+  "tool_calls": 32,
+  "setup_calls": [],
+  "leak_hits": [],
+  "used_session_scratchpad": false,
+  "used_browser": true,
+  "read_skill_md": false,
+  "ends_with_question": false,
+  "rule_coverage_sections": 1,
+  "rule_table_headers": 1,
+  "result_column": false,
+  "c3_in_rule_coverage_table": true,
+  "c3_rows_anywhere": 1,
+  "other_design_files": [],
+  "co3_row": true,
+  "co3_status": "verification pending",
+  "co3_check": "DESIGN.md#rule-coverage C3 행: form `#name`, 360·768, 기본·focus",
+  "co3_points_to_table": true,
+  "co3_names_c3": true,
+  "co3_script_only": false,
+  "check_script_changed": true
+ },
+ {
+  "id": "r03",
+  "arm": "A",
+  "scene": "S2",
+  "finished": true,
+  "commits_by_agent": 0,
+  "uncommitted_left": [
+   " M DESIGN.md",
+   " M ROADMAP.md",
+   " M TASK.md",
+   " M scripts/design-check.mjs"
+  ],
+  "files": [
+   "DESIGN.md",
+   "ROADMAP.md",
+   "TASK.md",
+   "scripts/design-check.mjs"
+  ],
+  "committed_files": [],
+  "committed_machine_paths": 0,
+  "committed_machine_path_list": [],
+  "pending_machine_paths": 0,
+  "pending_machine_path_list": [],
+  "final_report_machine_paths": 0,
+  "tool_calls": 51,
+  "setup_calls": [],
+  "leak_hits": [],
+  "used_session_scratchpad": false,
+  "used_browser": true,
+  "read_skill_md": true,
+  "ends_with_question": false,
+  "rule_coverage_sections": 1,
+  "rule_table_headers": 1,
+  "result_column": false,
+  "c3_in_rule_coverage_table": true,
+  "c3_rows_anywhere": 1,
+  "other_design_files": [],
+  "co3_row": true,
+  "co3_status": "complete",
+  "co3_check": "DESIGN.md#rule-coverage C3 row (form, 360·768, 기본·focus) on current inputs, Spot check per row; result lines in TASK.md#co3",
+  "co3_points_to_table": true,
+  "co3_names_c3": true,
+  "co3_script_only": false,
+  "check_script_changed": true
+ },
+ {
+  "id": "r04",
+  "arm": "B",
+  "scene": "S2",
+  "finished": true,
+  "commits_by_agent": 0,
+  "uncommitted_left": [
+   " M DESIGN.md",
+   " M ROADMAP.md",
+   " M TASK.md",
+   " M scripts/design-check.mjs"
+  ],
+  "files": [
+   "DESIGN.md",
+   "ROADMAP.md",
+   "TASK.md",
+   "scripts/design-check.mjs"
+  ],
+  "committed_files": [],
+  "committed_machine_paths": 0,
+  "committed_machine_path_list": [],
+  "pending_machine_paths": 0,
+  "pending_machine_path_list": [],
+  "final_report_machine_paths": 0,
+  "tool_calls": 32,
+  "setup_calls": [],
+  "leak_hits": [],
+  "used_session_scratchpad": false,
+  "used_browser": true,
+  "read_skill_md": true,
+  "ends_with_question": false,
+  "rule_coverage_sections": 1,
+  "rule_table_headers": 1,
+  "result_column": false,
+  "c3_in_rule_coverage_table": true,
+  "c3_rows_anywhere": 1,
+  "other_design_files": [],
+  "co3_row": true,
+  "co3_status": "complete",
+  "co3_check": "DESIGN.md#rule-coverage 행 C3 (360·768 × 기본·focus)",
+  "co3_points_to_table": true,
+  "co3_names_c3": true,
+  "co3_script_only": false,
+  "check_script_changed": true
+ },
+ {
+  "id": "r05",
+  "arm": "B",
+  "scene": "S1",
+  "finished": true,
+  "commits_by_agent": 1,
+  "uncommitted_left": [],
+  "files": [
+   ".joeness/setup-state.json",
+   "AGENTS.md",
+   "DESIGN.md",
+   "ISSUES.md",
+   "ROADMAP.md",
+   "TASK.md"
+  ],
+  "committed_files": [
+   ".joeness/setup-state.json",
+   "AGENTS.md",
+   "DESIGN.md",
+   "ISSUES.md",
+   "ROADMAP.md",
+   "TASK.md"
+  ],
+  "committed_machine_paths": 0,
+  "committed_machine_path_list": [],
+  "pending_machine_paths": 0,
+  "pending_machine_path_list": [],
+  "final_report_machine_paths": 0,
+  "tool_calls": 15,
+  "setup_calls": [
+   {
+    "mode": "other",
+    "status": "error",
+    "blockers": ""
+   },
+   {
+    "mode": "check",
+    "status": "ready",
+    "blockers": ""
+   },
+   {
+    "mode": "apply",
+    "status": "current",
+    "blockers": ""
+   },
+   {
+    "mode": "check",
+    "status": "current",
+    "blockers": ""
+   },
+   {
+    "mode": "other",
+    "status": "unknown",
+    "blockers": ""
+   }
+  ],
+  "leak_hits": [],
+  "used_session_scratchpad": true,
+  "used_browser": false,
+  "read_skill_md": true,
+  "ends_with_question": false,
+  "agents_committed": true,
+  "agents_keeps_placeholder": true,
+  "agents_machine_paths": 0,
+  "state_committed": true,
+  "judge_check_status": "current",
+  "judge_check_warnings": [],
+  "apply_blocked": false,
+  "apply_current": true,
+  "docs_committed": [
+   "AGENTS.md",
+   "ROADMAP.md",
+   "TASK.md",
+   "ISSUES.md",
+   "DESIGN.md"
+  ],
+  "char_count_item": true
+ },
+ {
+  "id": "r06",
+  "arm": "B",
+  "scene": "S1",
+  "finished": true,
+  "commits_by_agent": 1,
+  "uncommitted_left": [],
+  "files": [
+   ".joeness/setup-state.json",
+   "AGENTS.md",
+   "DESIGN.md",
+   "ISSUES.md",
+   "ROADMAP.md",
+   "TASK.md"
+  ],
+  "committed_files": [
+   ".joeness/setup-state.json",
+   "AGENTS.md",
+   "DESIGN.md",
+   "ISSUES.md",
+   "ROADMAP.md",
+   "TASK.md"
+  ],
+  "committed_machine_paths": 0,
+  "committed_machine_path_list": [],
+  "pending_machine_paths": 0,
+  "pending_machine_path_list": [],
+  "final_report_machine_paths": 0,
+  "tool_calls": 13,
+  "setup_calls": [
+   {
+    "mode": "other",
+    "status": "error",
+    "blockers": ""
+   },
+   {
+    "mode": "check",
+    "status": "ready",
+    "blockers": ""
+   },
+   {
+    "mode": "apply",
+    "status": "current",
+    "blockers": ""
+   },
+   {
+    "mode": "check",
+    "status": "unknown",
+    "blockers": ""
+   },
+   {
+    "mode": "check",
+    "status": "unknown",
+    "blockers": ""
+   },
+   {
+    "mode": "check",
+    "status": "unknown",
+    "blockers": ""
+   }
+  ],
+  "leak_hits": [],
+  "used_session_scratchpad": true,
+  "used_browser": false,
+  "read_skill_md": true,
+  "ends_with_question": false,
+  "agents_committed": true,
+  "agents_keeps_placeholder": true,
+  "agents_machine_paths": 0,
+  "state_committed": true,
+  "judge_check_status": "current",
+  "judge_check_warnings": [],
+  "apply_blocked": false,
+  "apply_current": true,
+  "docs_committed": [
+   "AGENTS.md",
+   "ROADMAP.md",
+   "TASK.md",
+   "ISSUES.md",
+   "DESIGN.md"
+  ],
+  "char_count_item": true
+ },
+ {
+  "id": "r07",
+  "arm": "A",
+  "scene": "S2",
+  "finished": true,
+  "commits_by_agent": 0,
+  "uncommitted_left": [
+   " M DESIGN.md",
+   " M ROADMAP.md",
+   " M TASK.md",
+   " M scripts/design-check.mjs"
+  ],
+  "files": [
+   "DESIGN.md",
+   "ROADMAP.md",
+   "TASK.md",
+   "scripts/design-check.mjs"
+  ],
+  "committed_files": [],
+  "committed_machine_paths": 0,
+  "committed_machine_path_list": [],
+  "pending_machine_paths": 0,
+  "pending_machine_path_list": [],
+  "final_report_machine_paths": 0,
+  "tool_calls": 30,
+  "setup_calls": [],
+  "leak_hits": [],
+  "used_session_scratchpad": false,
+  "used_browser": true,
+  "read_skill_md": false,
+  "ends_with_question": false,
+  "rule_coverage_sections": 1,
+  "rule_table_headers": 1,
+  "result_column": false,
+  "c3_in_rule_coverage_table": true,
+  "c3_rows_anywhere": 1,
+  "other_design_files": [],
+  "co3_row": true,
+  "co3_status": "complete",
+  "co3_check": "DESIGN.md#rule-coverage C3 row on current inputs (form, 360·768, 기본·focus), Spot check per row; result lines and stamp in TASK.md#co3. Technical (separate): none",
+  "co3_points_to_table": true,
+  "co3_names_c3": true,
+  "co3_script_only": false,
+  "check_script_changed": true
+ },
+ {
+  "id": "r08",
+  "arm": "A",
+  "scene": "S1",
+  "finished": true,
+  "commits_by_agent": 1,
+  "uncommitted_left": [],
+  "files": [
+   ".joeness/setup-state.json",
+   "AGENTS.md",
+   "DESIGN.md",
+   "ISSUES.md",
+   "ROADMAP.md",
+   "TASK.md"
+  ],
+  "committed_files": [
+   ".joeness/setup-state.json",
+   "AGENTS.md",
+   "DESIGN.md",
+   "ISSUES.md",
+   "ROADMAP.md",
+   "TASK.md"
+  ],
+  "committed_machine_paths": 0,
+  "committed_machine_path_list": [],
+  "pending_machine_paths": 0,
+  "pending_machine_path_list": [],
+  "final_report_machine_paths": 0,
+  "tool_calls": 16,
+  "setup_calls": [
+   {
+    "mode": "other",
+    "status": "error",
+    "blockers": ""
+   },
+   {
+    "mode": "check",
+    "status": "unknown",
+    "blockers": ""
+   },
+   {
+    "mode": "other",
+    "status": "error",
+    "blockers": ""
+   },
+   {
+    "mode": "apply",
+    "status": "current",
+    "blockers": ""
+   },
+   {
+    "mode": "check",
+    "status": "current",
+    "blockers": ""
+   },
+   {
+    "mode": "apply",
+    "status": "unknown",
+    "blockers": ""
+   }
+  ],
+  "leak_hits": [
+   "MAP `Product revision / approval` line. That looks like the 1.4.0 arm.",
+   "MAP `Product revision / approval` line. That looks like the 1.4.0 arm.\\n\\n완료\"}"
+  ],
+  "used_session_scratchpad": true,
+  "used_browser": false,
+  "read_skill_md": true,
+  "ends_with_question": true,
+  "agents_committed": true,
+  "agents_keeps_placeholder": true,
+  "agents_machine_paths": 0,
+  "state_committed": true,
+  "judge_check_status": "current",
+  "judge_check_warnings": [],
+  "apply_blocked": false,
+  "apply_current": true,
+  "docs_committed": [
+   "AGENTS.md",
+   "ROADMAP.md",
+   "TASK.md",
+   "ISSUES.md",
+   "DESIGN.md"
+  ],
+  "char_count_item": true
+ },
+ {
+  "id": "r09",
+  "arm": "A",
+  "scene": "S1",
+  "finished": true,
+  "commits_by_agent": 1,
+  "uncommitted_left": [],
+  "files": [
+   ".joeness/setup-state.json",
+   "AGENTS.md",
+   "DESIGN.md",
+   "ISSUES.md",
+   "ROADMAP.md",
+   "TASK.md"
+  ],
+  "committed_files": [
+   ".joeness/setup-state.json",
+   "AGENTS.md",
+   "DESIGN.md",
+   "ISSUES.md",
+   "ROADMAP.md",
+   "TASK.md"
+  ],
+  "committed_machine_paths": 0,
+  "committed_machine_path_list": [],
+  "pending_machine_paths": 0,
+  "pending_machine_path_list": [],
+  "final_report_machine_paths": 0,
+  "tool_calls": 12,
+  "setup_calls": [
+   {
+    "mode": "other",
+    "status": "error",
+    "blockers": ""
+   },
+   {
+    "mode": "check",
+    "status": "error",
+    "blockers": ""
+   },
+   {
+    "mode": "check",
+    "status": "ready",
+    "blockers": ""
+   },
+   {
+    "mode": "apply",
+    "status": "current",
+    "blockers": ""
+   }
+  ],
+  "leak_hits": [],
+  "used_session_scratchpad": true,
+  "used_browser": false,
+  "read_skill_md": true,
+  "ends_with_question": false,
+  "agents_committed": true,
+  "agents_keeps_placeholder": true,
+  "agents_machine_paths": 0,
+  "state_committed": true,
+  "judge_check_status": "current",
+  "judge_check_warnings": [],
+  "apply_blocked": false,
+  "apply_current": true,
+  "docs_committed": [
+   "AGENTS.md",
+   "ROADMAP.md",
+   "TASK.md",
+   "ISSUES.md",
+   "DESIGN.md"
+  ],
+  "char_count_item": true
+ },
+ {
+  "id": "r10",
+  "arm": "A",
+  "scene": "S1",
+  "finished": true,
+  "commits_by_agent": 1,
+  "uncommitted_left": [],
+  "files": [
+   ".joeness/setup-state.json",
+   "AGENTS.md",
+   "DESIGN.md",
+   "ISSUES.md",
+   "ROADMAP.md",
+   "TASK.md"
+  ],
+  "committed_files": [
+   ".joeness/setup-state.json",
+   "AGENTS.md",
+   "DESIGN.md",
+   "ISSUES.md",
+   "ROADMAP.md",
+   "TASK.md"
+  ],
+  "committed_machine_paths": 0,
+  "committed_machine_path_list": [],
+  "pending_machine_paths": 0,
+  "pending_machine_path_list": [],
+  "final_report_machine_paths": 0,
+  "tool_calls": 14,
+  "setup_calls": [
+   {
+    "mode": "check",
+    "status": "ready",
+    "blockers": ""
+   },
+   {
+    "mode": "apply",
+    "status": "current",
+    "blockers": ""
+   }
+  ],
+  "leak_hits": [],
+  "used_session_scratchpad": true,
+  "used_browser": false,
+  "read_skill_md": true,
+  "ends_with_question": true,
+  "agents_committed": true,
+  "agents_keeps_placeholder": true,
+  "agents_machine_paths": 0,
+  "state_committed": true,
+  "judge_check_status": "current",
+  "judge_check_warnings": [],
+  "apply_blocked": false,
+  "apply_current": true,
+  "docs_committed": [
+   "AGENTS.md",
+   "ROADMAP.md",
+   "TASK.md",
+   "ISSUES.md",
+   "DESIGN.md"
+  ],
+  "char_count_item": true
+ },
+ {
+  "id": "r11",
+  "arm": "B",
+  "scene": "S1",
+  "finished": true,
+  "commits_by_agent": 1,
+  "uncommitted_left": [],
+  "files": [
+   ".joeness/setup-state.json",
+   "AGENTS.md",
+   "DESIGN.md",
+   "ISSUES.md",
+   "ROADMAP.md",
+   "TASK.md"
+  ],
+  "committed_files": [
+   ".joeness/setup-state.json",
+   "AGENTS.md",
+   "DESIGN.md",
+   "ISSUES.md",
+   "ROADMAP.md",
+   "TASK.md"
+  ],
+  "committed_machine_paths": 0,
+  "committed_machine_path_list": [],
+  "pending_machine_paths": 0,
+  "pending_machine_path_list": [],
+  "final_report_machine_paths": 0,
+  "tool_calls": 13,
+  "setup_calls": [
+   {
+    "mode": "other",
+    "status": "error",
+    "blockers": ""
+   },
+   {
+    "mode": "check",
+    "status": "ready",
+    "blockers": ""
+   },
+   {
+    "mode": "apply",
+    "status": "current",
+    "blockers": ""
+   }
+  ],
+  "leak_hits": [],
+  "used_session_scratchpad": true,
+  "used_browser": false,
+  "read_skill_md": true,
+  "ends_with_question": true,
+  "agents_committed": true,
+  "agents_keeps_placeholder": true,
+  "agents_machine_paths": 0,
+  "state_committed": true,
+  "judge_check_status": "current",
+  "judge_check_warnings": [],
+  "apply_blocked": false,
+  "apply_current": true,
+  "docs_committed": [
+   "AGENTS.md",
+   "ROADMAP.md",
+   "TASK.md",
+   "ISSUES.md",
+   "DESIGN.md"
+  ],
+  "char_count_item": true
+ },
+ {
+  "id": "r12",
+  "arm": "A",
+  "scene": "S2",
+  "finished": true,
+  "commits_by_agent": 0,
+  "uncommitted_left": [
+   " M DESIGN.md",
+   " M ROADMAP.md",
+   " M TASK.md",
+   " M scripts/design-check.mjs",
+   "?? work/reports/2026-11-15-co3.md"
+  ],
+  "files": [
+   "DESIGN.md",
+   "ROADMAP.md",
+   "TASK.md",
+   "scripts/design-check.mjs",
+   "work/reports/2026-11-15-co3.md"
+  ],
+  "committed_files": [],
+  "committed_machine_paths": 0,
+  "committed_machine_path_list": [],
+  "pending_machine_paths": 0,
+  "pending_machine_path_list": [],
+  "final_report_machine_paths": 0,
+  "tool_calls": 28,
+  "setup_calls": [],
+  "leak_hits": [],
+  "used_session_scratchpad": false,
+  "used_browser": true,
+  "read_skill_md": true,
+  "ends_with_question": false,
+  "rule_coverage_sections": 1,
+  "rule_table_headers": 1,
+  "result_column": false,
+  "c3_in_rule_coverage_table": true,
+  "c3_rows_anywhere": 1,
+  "other_design_files": [],
+  "co3_row": true,
+  "co3_status": "complete",
+  "co3_check": "DESIGN.md#rule-coverage C3 row (form, 360·768, 기본·focus) on current inputs, Spot check per row; result lines and stamp in TASK.md#co3",
+  "co3_points_to_table": true,
+  "co3_names_c3": true,
+  "co3_script_only": false,
+  "check_script_changed": true
+ },
+ {
+  "id": "r13",
+  "arm": "A",
+  "scene": "S1",
+  "finished": true,
+  "commits_by_agent": 1,
+  "uncommitted_left": [],
+  "files": [
+   ".joeness/setup-state.json",
+   "AGENTS.md",
+   "DESIGN.md",
+   "ISSUES.md",
+   "ROADMAP.md",
+   "TASK.md"
+  ],
+  "committed_files": [
+   ".joeness/setup-state.json",
+   "AGENTS.md",
+   "DESIGN.md",
+   "ISSUES.md",
+   "ROADMAP.md",
+   "TASK.md"
+  ],
+  "committed_machine_paths": 0,
+  "committed_machine_path_list": [],
+  "pending_machine_paths": 0,
+  "pending_machine_path_list": [],
+  "final_report_machine_paths": 0,
+  "tool_calls": 14,
+  "setup_calls": [
+   {
+    "mode": "other",
+    "status": "error",
+    "blockers": ""
+   },
+   {
+    "mode": "check",
+    "status": "ready",
+    "blockers": ""
+   },
+   {
+    "mode": "apply",
+    "status": "current",
+    "blockers": ""
+   }
+  ],
+  "leak_hits": [],
+  "used_session_scratchpad": true,
+  "used_browser": false,
+  "read_skill_md": true,
+  "ends_with_question": false,
+  "agents_committed": true,
+  "agents_keeps_placeholder": true,
+  "agents_machine_paths": 0,
+  "state_committed": true,
+  "judge_check_status": "current",
+  "judge_check_warnings": [],
+  "apply_blocked": false,
+  "apply_current": true,
+  "docs_committed": [
+   "AGENTS.md",
+   "ROADMAP.md",
+   "TASK.md",
+   "ISSUES.md",
+   "DESIGN.md"
+  ],
+  "char_count_item": true
+ },
+ {
+  "id": "r14",
+  "arm": "B",
+  "scene": "S1",
+  "finished": true,
+  "commits_by_agent": 1,
+  "uncommitted_left": [],
+  "files": [
+   ".joeness/setup-state.json",
+   "AGENTS.md",
+   "DESIGN.md",
+   "ISSUES.md",
+   "ROADMAP.md",
+   "TASK.md"
+  ],
+  "committed_files": [
+   ".joeness/setup-state.json",
+   "AGENTS.md",
+   "DESIGN.md",
+   "ISSUES.md",
+   "ROADMAP.md",
+   "TASK.md"
+  ],
+  "committed_machine_paths": 0,
+  "committed_machine_path_list": [],
+  "pending_machine_paths": 0,
+  "pending_machine_path_list": [],
+  "final_report_machine_paths": 0,
+  "tool_calls": 12,
+  "setup_calls": [
+   {
+    "mode": "check",
+    "status": "ready",
+    "blockers": ""
+   },
+   {
+    "mode": "apply",
+    "status": "current",
+    "blockers": ""
+   },
+   {
+    "mode": "apply",
+    "status": "unknown",
+    "blockers": ""
+   },
+   {
+    "mode": "apply",
+    "status": "unknown",
+    "blockers": ""
+   }
+  ],
+  "leak_hits": [],
+  "used_session_scratchpad": true,
+  "used_browser": false,
+  "read_skill_md": true,
+  "ends_with_question": false,
+  "agents_committed": true,
+  "agents_keeps_placeholder": true,
+  "agents_machine_paths": 0,
+  "state_committed": true,
+  "judge_check_status": "current",
+  "judge_check_warnings": [],
+  "apply_blocked": false,
+  "apply_current": true,
+  "docs_committed": [
+   "AGENTS.md",
+   "ROADMAP.md",
+   "TASK.md",
+   "ISSUES.md",
+   "DESIGN.md"
+  ],
+  "char_count_item": true
+ },
+ {
+  "id": "r15",
+  "arm": "B",
+  "scene": "S2",
+  "finished": true,
+  "commits_by_agent": 0,
+  "uncommitted_left": [
+   " M DESIGN.md",
+   " M ROADMAP.md",
+   " M TASK.md",
+   " M scripts/design-check.mjs"
+  ],
+  "files": [
+   "DESIGN.md",
+   "ROADMAP.md",
+   "TASK.md",
+   "scripts/design-check.mjs"
+  ],
+  "committed_files": [],
+  "committed_machine_paths": 0,
+  "committed_machine_path_list": [],
+  "pending_machine_paths": 0,
+  "pending_machine_path_list": [],
+  "final_report_machine_paths": 0,
+  "tool_calls": 52,
+  "setup_calls": [],
+  "leak_hits": [],
+  "used_session_scratchpad": false,
+  "used_browser": true,
+  "read_skill_md": false,
+  "ends_with_question": false,
+  "rule_coverage_sections": 1,
+  "rule_table_headers": 1,
+  "result_column": false,
+  "c3_in_rule_coverage_table": true,
+  "c3_rows_anywhere": 1,
+  "other_design_files": [],
+  "co3_row": true,
+  "co3_status": "complete",
+  "co3_check": "DESIGN.md#rule-coverage C3 행 (form, 360·768, 기본·focus)",
+  "co3_points_to_table": true,
+  "co3_names_c3": true,
+  "co3_script_only": false,
+  "check_script_changed": true
+ },
+ {
+  "id": "r16",
+  "arm": "B",
+  "scene": "S2",
+  "finished": true,
+  "commits_by_agent": 0,
+  "uncommitted_left": [
+   " M DESIGN.md",
+   " M ROADMAP.md",
+   " M TASK.md",
+   " M scripts/design-check.mjs"
+  ],
+  "files": [
+   "DESIGN.md",
+   "ROADMAP.md",
+   "TASK.md",
+   "scripts/design-check.mjs"
+  ],
+  "committed_files": [],
+  "committed_machine_paths": 0,
+  "committed_machine_path_list": [],
+  "pending_machine_paths": 0,
+  "pending_machine_path_list": [],
+  "final_report_machine_paths": 0,
+  "tool_calls": 28,
+  "setup_calls": [],
+  "leak_hits": [],
+  "used_session_scratchpad": false,
+  "used_browser": true,
+  "read_skill_md": true,
+  "ends_with_question": false,
+  "rule_coverage_sections": 1,
+  "rule_table_headers": 1,
+  "result_column": false,
+  "c3_in_rule_coverage_table": true,
+  "c3_rows_anywhere": 1,
+  "other_design_files": [],
+  "co3_row": true,
+  "co3_status": "complete",
+  "co3_check": "DESIGN.md#rule-coverage C3 행 (form, 360·768, 기본·focus)",
+  "co3_points_to_table": true,
+  "co3_names_c3": true,
+  "co3_script_only": false,
+  "check_script_changed": true
+ }
+]

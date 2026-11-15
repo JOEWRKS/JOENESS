@@ -1,0 +1,6 @@
+.joeness/setup-state.json
+AGENTS.md
+DESIGN.md
+ISSUES.md
+ROADMAP.md
+TASK.md

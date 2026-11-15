@@ -1,0 +1,159 @@
+> [Bash] cd "<data>/runs/r11"; ls -la project tools/joeness-setup tools/joeness-setup/* tools/joedesign; cat tools/joeness-setup/SKILL.md; cd project; git status; git log --oneline | head
+-rw-r--r-- 1 <user> 197609 18481 Nov 15 02:24 tools/joeness-setup/SKILL.md
+
+project:
+total 5
+drwxr-xr-x 1 <user> 197609   0 Nov 15 19:17 .
+drwxr-xr-x 1 <user> 197609   0 Nov 15 19:17 ..
+drwxr-xr-x 1 <user> 197609   0 Nov 15 19:17 .git
+-rw-r--r-- 1 <user> 197609 188 Nov 15 19:17 README.md
+drwxr-xr-x 1 <user> 197609   0 Nov 15 19:17 src
+
+tools/joedesign:
+total 25
+drwxr-xr-x 1 <user> 197609     0 Nov 15 19:17 .
+drwxr-xr-x 1 <user> 197609     0 Nov 15 19:17 ..
+-rw-r--r-- 1 <user> 197609 14766 Nov 15 01:06 SKILL.md
+-rw-r--r-- 1 <user> 197609     6 Nov 15 01:38 VERSION
+drwxr-xr-x 1 <user> 197609     0 Nov 15 19:17 agents
+drwxr-xr-x 1 <user> 197609     0 Nov 15 19:17 references
+drwxr-xr-x 1 <user> 197609     0 Nov 15 19:17 scripts
+drwxr-xr-x 1 <user> 197609     0 Nov 15 19:17 templates
+
+tools/joe
+
+> [Bash] cd "<data>/runs/r11"; for f in tools/joeness-setup/assets/*; do echo "=== $f"; cat "$f"; done; echo ====; cat project/README.md; find project/src -type f | head; 
+=== tools/joeness-setup/assets/AGENTS.md
+# Project working connection
+
+Adapt paths and agreed scope before applying this body.
+- Owners: ROADMAP = goals, stage order, required items (status, check, proof, gap, next).
+  TASK = work results and checks. ISSUES = open defects/workarounds with cause, risk and
+  closure condition. DESIGN = visual rules and approvals. Library/ = research by topic
+  (source, date, fact vs inference). AGENTS = rules only. Product meaning:
+  <exact source or undecided>.
+- Read only what the task needs: resume → current ROADMAP item; defect → ISSUES + target;
+  visual → DESIGN; research → Library; completion → required items and their proof.
+- Authority: only the user or named owner approves. Code, newer notes and old handoffs
+  never do; a handoff only points to sou
+
+> [Bash] cd "<data>/runs/r11"; cat tools/joeness-setup/references/review-gate.md tools/joeness-setup/references/usage.md; sed -n 1,80p tools/joeness-setup/scripts/project-setup.ps1
+# External review consumption
+
+Use only where an authorized roadmap outcome requires an external specialist
+verdict. No new public skill, global payload, background worker or stage engine.
+Node.js 18+ is required for this explicit read-only helper. Missing runtime or
+missing input means unverified; do not fall back to a completion claim.
+
+## Owners and invocation
+
+- User/authorized scope owner: approves criteria, required targets, dependencies,
+  scope removal and acceptance. Pin the baseline SHA outside the result file.
+- Specialist (JOEDESIGN for visual work): owns criterion interpretation, required
+  screen/state/viewport coverage, actual measurements, professional review,
+  result production and invalidation dependencies. Hashes alone are not visual proof.
+- JOENESS integrator: checks 
+
+> [Bash] cd "<data>/runs/r11"; cat project/src/*; echo =====; cat tools/joedesign/VERSION; ls -R tools/joedesign | head -50; cat tools/joedesign/SKILL.md
+const form = document.getElementById('request-form');
+form.addEventListener('submit', (event) => {
+  event.preventDefault();
+  form.reset();
+  alert('접수되었습니다.');
+});
+<!doctype html>
+<html lang="ko">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>문의</title><link rel="stylesheet" href="style.css"></head>
+<body>
+<form id="request-form">
+  <label for="name">이름</label>
+  <input id="name" name="name" required>
+  <label for="body">요청 내용</label>
+  <textarea id="body" name="body" maxlength="500" required></textarea>
+  <button type="submit">보내기</button>
+</form>
+<script src="form.js"></script>
+</body>
+</html>
+form { display: grid; gap: 12px; max-width: 480px; margin: 24px auto; padding: 0 16px; }
+input, textarea { font: inherit; min-height: 44px
+
+> [Bash] cd "<data>/runs/r11"; cat tools/joedesign/templates/DESIGN.md; sed -n 1,60p tools/joedesign/scripts/report-check.mjs; cat tools/joeness-setup/references/changes-hook.md | head -20
+# Project Design
+
+**Reporting:** follow the `## Report Form` section below exactly (보고는 `## Report Form` 절을 그대로 따른다).
+
+**Status:** DRAFT
+**Revision:** 1
+**Product Authority:** <pointer>
+
+<!-- Compact seed, not a required form. Keep only needed project decisions;
+unknown/empty is valid. Do not retranscribe settled source specifications. -->
+
+## Visual Sources and Approval Scope
+
+<!-- Original artifact/version + direct real-asset pointers + surface/state/viewport.
+Distinguish approved visual targets from ordinary references. Supplied ≠ approved.
+Record actual approval and its scope; do not fabricate approval or source facts. -->
+
+## Project Decisions
+
+<!-- Only needed relationships: source observation → preserve/change → concrete
+implementation/native-role mapping → expected observable diffe
+
+> [PowerShell] cd "<data>\runs\r11\project"; & "..\tools\joeness-setup\scripts\project-setup.ps1" -Check -ProjectPath (Get-Location).Path
+{"action":"check","status":"ready","verificationScope":"managed-connection-only","projectRoot":"<data>\\runs\\r11\\project","target":"AGENTS.md","targetHash":"absent","statePath":".joeness/setup-state.json","stateHash":"absent","blockState":"absent","changedTargets":[],"blockers":[],"warnings":[],"rollback":null,"unresolvedTargets":[]}
+
+> [Write] <temp>
+File created successfully at: <temp> (file state is current in your context — no need to Read it back)
+
+> [PowerShell] cd "<data>\runs\r11\project"; $root=(Get-Location).Path; $b=[IO.File]::ReadAllBytes("<temp>"); $b64=[Convert]::ToBase64String($b); & "..\tools\joeness-setup\scripts\project-setup.ps1" -Apply -ProjectPath $root -ExpectedRoot $root -ExpectedTargetHash absent -ExpectedStateHash absent -ManagedBodyBase64 $b64; & "..\tools\joeness-setup\scripts\project-setup.ps1" -Check -ProjectPath $root
+{"action":"apply","status":"current","verificationScope":"managed-connection-only","projectRoot":"<data>\\runs\\r11\\project","target":"AGENTS.md","targetHash":"5a0b1515fddf21df43672a941214a77ef6f3f04372bbb8ed45e92144040211c8","statePath":".joeness/setup-state.json","stateHash":"edb5222ddc17437f16cb3f7bfb41e59aa0618c020a0685dc94fb05cbff2d392f","blockState":"clean","changedTargets":["AGENTS.md",".joeness/setup-state.json"],"blockers":[],"warnings":[],"rollback":null,"unresolvedTargets":[]}
+{"action":"check","status":"current","verificationScope":"managed-connection-only","projectRoot":"<data>\\runs\\r11\\project","target":"AGENTS.md","targetHash":"5a0b1515fddf21df43672a941214a77ef6f3f04372bbb8ed45e92144040211c8","statePath":".joeness/setup-state.json","stateHash":"edb5222ddc17437f16cb3f7bf
+
+> [Bash] cd "<data>/runs/r11/project"; cat .joeness/setup-state.json; head -3 AGENTS.md
+{"schemaVersion":1,"toolVersion":"0.2","targetRelativePath":"AGENTS.md","appliedBlockBase64":"PCEtLSBKT0VORVNTLVNFVFVQOkJFR0lOIC0tPgojIFByb2plY3Qgd29ya2luZyBjb25uZWN0aW9uCgotIE93bmVyczogUk9BRE1BUC5tZCA9IGdvYWxzLCBzdGFnZSBvcmRlciwgcmVxdWlyZWQgaXRlbXMgKHN0YXR1cywgY2hlY2ssIHByb29mLCBnYXAsIG5leHQpLgogIFRBU0subWQgPSB3b3JrIHJlc3VsdHMgYW5kIGNoZWNrcy4gSVNTVUVTLm1kID0gb3BlbiBkZWZlY3RzL3dvcmthcm91bmRzIHdpdGggY2F1c2UsIHJpc2sgYW5kCiAgY2xvc3VyZSBjb25kaXRpb24uIERFU0lHTi5tZCA9IHZpc3VhbCBydWxlcyBhbmQgYXBwcm92YWxzLiBMaWJyYXJ5LyA9IHJlc2VhcmNoIGJ5IHRvcGljCiAgKHNvdXJjZSwgZGF0ZSwgZmFjdCB2cyBpbmZlcmVuY2U7IGNyZWF0ZWQgb25seSB3aGVuIHRoZXJlIGlzIG1hdGVyaWFsKS4gQUdFTlRTID0gcnVsZXMgb25seS4KICBQcm9kdWN0IG1lYW5pbmc6IFJFQURNRS5tZCAobm8gcmV2aXNpb24gcmVjb3JkKTsgYW55dGhpbmcgaXQgZG9lcyBub3Qgc2V0dGxlIGlzIHVuZGVjaWRlZC4KLSBSZW
+
+> [Bash] cd "<data>/runs/r11/project"
+cat > ROADMAP.md <<'EOF'
+# Project roadmap
+
+Project scope: 작은 정적 문의 폼(`src/index.html`) 유지·개선. 현재 승인된 작업은 F1(요청 폼 글자 수 표시, 사용자 요청 2026-11-15)뿐이며, 그 밖의 프로젝트 목표·단계는 direction pending(결정 필요: 다음 목표와 순서).
+Product authority: [README.md](README.md) (요청 내용 최대 500자, 지원 화면 360·768·1280). README가 정하지 않는 동작은 undecided.
+Product revision / approval: none (README.md has no revision or approval record; read 2026-11-15).
+Current stage: Stage 1 — not started.
+Next eligible work: F1 구현 전 표시 형식(위치·문구·형태) 확인과 JOEDESIGN 규칙 행 작성 → F1 구현.
+Status words: not started / in progress / verification pending / on hold / complete / removed from scope.
+
+## Stage 1 / 요청 폼 글자 수 표시 — not started
+
+Goal: 요청 내용 입력란에 현재 글자 수가 보인다.
+Entry condition: none.
+Completion condition: F1 Check 전부 통과(현재 입력 기준), 표시 형식에 대한 사용자 확인. 사용자 수락은 별도.
+
+| ID | Required outcome | Status | Check / completion criterion | Evidence or gap |
+| --- | --- | --- | --- | --- |
+| F1 | 요청 내용(`#body`) 입력 시 현재 글자 수가 표시된다 | not started | Behavior: 빈 상태·입력 중·500자·제출 후 초기화 상태에서 표시 숫자가 입력란의 실제 글자 수(maxlength 500 기준)와 일치, 브라우저 관찰. Design: DESIGN.md#rule-coverage 의 글자 수 표시 행(구현 전 JOEDESIGN으로 작성; 360·768·1280, 위 상태들), Spot check per row; result lines and stamp in TASK, `node <joedesign>/scripts/report-check.mjs --verify <file>` exit 0. Owner: 표시 형식(예: `N/500`, 위치, 문구)은 README·요청이 정하지 않음 → 사용자 확인 전 verification pending. | 미구현. 등록: [TASK](TASK.md#2026-11-15--f1-등록--요청-폼-글자-수-표시). 규칙 행 없음, 형식 미정. |
+
+Scope decisions: none.
+User accept
+?? .joeness/
+?? AGENTS.md
+?? DESIGN.md
+?? ISSUES.md
+?? ROADMAP.md
+?? TASK.md
+
+> [Bash] cd "<data>/runs/r11/project"; grep -nE '[A-Za-z]:[\\/]|/Users/|JOEWRKS' AGENTS.md ROADMAP.md TASK.md ISSUES.md DESIGN.md .joeness/setup-state.json; echo "grep exit $?"; git add AGENTS.md ROADMAP.md TASK.md ISSUES.md DESIGN.md .joeness/setup-state.json && git commit -q -m "chore: connect JOENESS (AGENTS block, ROADMAP/TASK/ISSUES/DESIGN), register F1 char counter task
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>" && git log --oneline -2 && git status --short
+grep exit 1
+7fdd2f5 chore: connect JOENESS (AGENTS block, ROADMAP/TASK/ISSUES/DESIGN), register F1 char counter task
+4f1d02e fixture
+
+> [Write] <data>\runs\r11\project\.final-report.md
+File created successfully at: <data>\runs\r11\project\.final-report.md (file state is current in your context — no need to Read it back)
+
+> [SubagentHandback] {"message":"완료"}
+{"success":true,"message":"Report delivered to your caller."}

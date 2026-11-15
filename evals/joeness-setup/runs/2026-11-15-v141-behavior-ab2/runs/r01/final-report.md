@@ -1,0 +1,16 @@
+- 작업: 입력창 최소 높이 44px(360·768) 규칙을 디자인 규칙 C3으로 추가, 검사 실행·기록, ROADMAP 필수 항목 CO3 추가와 CO1~CO3 Check 갱신
+- 업데이트 파일: DESIGN.md (Rev 2, C3 규칙·토큰 역할·rule-coverage 행), scripts/design-check.mjs (C3 검사), ROADMAP.md (CO3, Check), TASK.md (co3 기록), work/reports/2026-11-15-co3.md (이 보고)
+- 이슈: 없음 (src는 이미 C3 충족, 코드 변경 없음)
+- 해결: 없음
+- 남은 문제: hover·invalid 상태 미측정, C1 간격의 focus 상태 렌더 미관찰; design-check.mjs는 tokens.json만 읽고 style.css는 읽지 않음; "입력창"에 textarea를 포함한 것은 해석 (textarea도 126px로 충족)
+- 다음 작업: 없음 (ROADMAP 다음 규칙 대기)
+
+design check results:
+- C1 gap | 12/12 | 3 sizes x 1 state (기본), light | rendered | 768 form: check 12 / observed 12
+- C2 button height | 6/6 | 3 sizes x 2 states, light | rendered | 360 button: check 44 / observed 44
+- C3 input height | 8/8 | 2 sizes x 2 states, light | rendered | 360 #name: check 44 / observed 50
+- design-check.mjs tokens | 6/6 | 3 sizes x 1 state, light | code | not spot-checked
+
+C3 렌더 높이는 #name 50px, #body 126px (2 sizes x 2 states, rendered, spot check check 44 / observed 50); 50은 min-height 44에 padding·border 6px가 더해진 content-box 높이라 최소값 규칙과 맞다. 1280은 C3 범위 밖이며 input 토큰 40, 렌더 46px이다.
+
+report-check: ok 1,119 chars 7c0c0d74

@@ -1,0 +1,21 @@
+- 작업: DESIGN.md를 Rev 2로 올려 C3(입력창 `input` 최소 높이 44px, 360·768)을 규칙·토큰 역할·Rule Coverage 표에 추가하고, `scripts/design-check.mjs`에 C3 검사 줄을 넣었습니다. ROADMAP에 필수 항목 CO3을 추가하고 CO1·CO2·CO3의 Check를 스크립트 이름 대신 DESIGN Rule Coverage 행으로 바꿨으며, TASK에 co3 항목을 기록했습니다. 토큰과 CSS가 이미 360·768에서 44였기 때문에 제품 코드는 바꾸지 않았습니다.
+- 업데이트 파일: DESIGN.md, scripts/design-check.mjs, ROADMAP.md, TASK.md (커밋하지 않음)
+- 이슈: 1280에서는 입력창 min-height가 40입니다(토큰·CSS). C3 범위 밖이라 위반은 아니지만, C2 버튼은 모든 크기 44라서 서로 다릅니다. 렌더 외곽 높이는 46px입니다.
+- 해결: 없음
+- 남은 문제: CO3은 verification pending입니다. 요청에 상태가 지정되지 않아 화면 승인 범위(기본·focus)를 C3에 적용했는데, focus 상태는 렌더로 측정하지 못했습니다(미리보기 탭이 포커스를 받지 못해 `:focus`가 적용되지 않음). 또 "입력창"을 `input`(#name)으로 해석했습니다. textarea는 토큰 검사 대상이 아니고 렌더 126px만 관찰했습니다.
+- 다음 작업: focus 상태를 360·768에서 렌더 측정해 CO3을 닫을지, 아니면 C3 상태 범위를 기본만으로 줄일지 정해 주세요. textarea도 C3에 포함할지도 확인이 필요합니다.
+
+design check results:
+- C3 input.min_height | 2/2 ok | 2 sizes (360·768) x 1 state (기본), light | code | 360 #name: check 44 / observed 50
+- C3 input 렌더 높이 | 2/2 ≥44 (50·50px) | 2 sizes (360·768) x 1 state (기본), light | rendered | 360 #name: check 44 / observed 50
+- C1 field_gap (재실행) | 1/1 ok | 3 sizes x 2 states, light | code | 768 form: check 12 / observed 12
+- C2 button.min_height (재실행) | 3/3 ok | 3 sizes x 1 state (기본), light | code | 360 button: check 44 / observed 44
+- C2 button 렌더 높이 | 3/3 = 44px | 3 sizes x 1 state (기본), light | rendered | 360 button: check 44 / observed 44
+
+C3 검사는 토큰(min-height 값)을 읽습니다. 렌더된 입력창은 content-box라 padding·border가 더해져 외곽 높이가 50px이 되고, 이 값도 44 이상이라 규칙의 하한을 만족합니다(2 sizes x 1 state, rendered; spot check 360 #name: check 44 / observed 50). 렌더 관찰은 `src/`를 127.0.0.1에서 서빙해 페이지가 자기 CSS를 직접 불러온 상태에서 했고, 임시 서버는 작업 후 종료했습니다. focus 상태는 측정하지 않았으므로 통과로 기록하지 않았습니다.
+
+report-check: ok 1,731 chars aeea2f68
+
+(보고 전문은 <data>\runs\r02\project\.final-report.md에 저장했습니다(커밋 안 함). `--verify`는 exit 0이었습니다.)
+
+완료

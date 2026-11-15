@@ -1,0 +1,161 @@
+diff --git a/.joeness/setup-state.json b/.joeness/setup-state.json
+new file mode 100644
+index 0000000..3e50d40
+--- /dev/null
++++ b/.joeness/setup-state.json
+@@ -0,0 +1 @@
++{"schemaVersion":1,"toolVersion":"0.2","targetRelativePath":"AGENTS.md","appliedBlockBase64":"PCEtLSBKT0VORVNTLVNFVFVQOkJFR0lOIC0tPgojIFByb2plY3Qgd29ya2luZyBjb25uZWN0aW9uCgotIE93bmVyczogUk9BRE1BUCA9IGdvYWxzLCBzdGFnZSBvcmRlciwgcmVxdWlyZWQgaXRlbXMgKHN0YXR1cywgY2hlY2ssIHByb29mLCBnYXAsIG5leHQpLgogIFRBU0sgPSB3b3JrIHJlc3VsdHMgYW5kIGNoZWNrcy4gSVNTVUVTID0gb3BlbiBkZWZlY3RzL3dvcmthcm91bmRzIHdpdGggY2F1c2UsIHJpc2sgYW5kCiAgY2xvc3VyZSBjb25kaXRpb24uIERFU0lHTiA9IHZpc3VhbCBydWxlcyBhbmQgYXBwcm92YWxzLiBMaWJyYXJ5LyA9IHJlc2VhcmNoIGJ5IHRvcGljCiAgKHNvdXJjZSwgZGF0ZSwgZmFjdCB2cyBpbmZlcmVuY2UpLiBBR0VOVFMgPSBydWxlcyBvbmx5LiBQcm9kdWN0IG1lYW5pbmc6CiAgYFJFQURNRS5tZGAgKG5vIHJldmlzaW9uIHJlY29yZDsgZGVsaXZlcnkgZ29hbCBiZXlvbmQgaXQgdW5kZWNpZGVkKS4gRGVzaWduIGNoZWNrczogSk9FREVTSUdOLgotIFJlYWQgb25seSB3aGF0IHRoZSB0YXNrIG5lZWRzOiByZXN1bWUg4oaSIGN1cnJlbnQgUk9BRE1BUCBpdGVtOyBkZWZlY3Qg4oaSIElTU1VFUyArIHRhcmdldDsKICB2aXN1YWwg4oaSIERFU0lHTjsgcmVzZWFyY2gg4oaSIExpYnJhcnk7IGNvbXBsZXRpb24g4oaSIHJlcXVpcmVkIGl0ZW1zIGFuZCB0aGVpciBwcm9vZi4KLSBBdXRob3JpdHk6IG9ubHkgdGhlIHVzZXIgb3IgbmFtZWQgb3duZXIgYXBwcm92ZXMuIENvZGUsIG5ld2VyIG5vdGVzIGFuZCBvbGQgaGFuZG9mZnMKICBuZXZlciBkbzsgYSBoYW5kb2ZmIG9ubHkgcG9pbnRzIHRvIHNvdXJjZXMuIEZhY3RzIGNvbWUgZnJvbSB0aGUgY3VycmVudCB0YXJnZXQgYW5kCiAgcHJvb2YuIFVuY2xlYXIgb3IgY29uZmxpY3Rpbmcgc2NvcGUgZ29lcyB0byB0aGUgb3duZXI7IGtlZXAgb25seSB0aGF0IHZlcmRpY3Qgb3Blbi4KLSBEb25lID0gZXZlcnkgcmVxdWlyZWQgaXRlbSBwYXNzZXMgdGhlIENoZWNrIHdyaXR0ZW4gb24gaXQgaW4gUk9BRE1BUCwgcnVuIG9yIG9ic2VydmVkCiAgb24gY3VycmVudCBpbnB1dHMuIEEgY2hlY2sgdGhhdCBpcyBtaXNzaW5nLCBmYWlscywgY2Fubm90IHJ1biBvciBpcyBzdGFsZSBrZWVwcyB0aGUKICBpdGVtIG9wZW47IHJlbW92ZWQgc2NvcGUgaXMgbm90IGEgcGFzcy4gQmVmb3JlIHJlY29yZGluZyBhIHJ1bGUgYXMgcGFzc2VkLCByZWFkIHdoYXQgdGhlCiAgY2hlY2sgYWN0dWFsbHkgbWVhc3VyZWQgKHdoaWNoIHNjcmVlbnMsIGxheW91dHMsIHNpemVzLCBzdGF0ZXMpIGFnYWluc3Qgd2hhdCB0aGUgcnVsZSBjb3ZlcnM7CiAgd2hhdCB0aGUgY2hlY2sgZGlkIG5vdCBtZWFzdXJlIGlzIHVudmVyaWZpZWQsIG5vdCBwYXNzZWQsIGFuZCB0aGUgcmVjb3JkIG5hbWVzIGl0LgogIEJlZm9yZSBhbiBpdGVtIHdpdGggYSBzYXZlZCBKT0VERVNJR04gcmVwb3J0IGJlY29tZXMgY29tcGxldGUsIHJ1bgogIGBub2RlIDxqb2VkZXNpZ24+L3NjcmlwdHMvcmVwb3J0LWNoZWNrLm1qcyAtLXZlcmlmeSA8ZmlsZT5gIGFuZCByZXF1aXJlIGV4aXQgMDsgYSBtaXNzaW5nIG9yIG1pc21hdGNoZWQKICBzdGFtcCwgb3Igbm8gTm9kZSBvciBzY3JpcHQsIGtlZXBzIGl0IHZlcmlmaWNhdGlvbiBwZW5kaW5nIGFuZCB0aGUgcmVjb3JkIHNheXMgc28uCiAgS2VlcCBgPGpvZWRlc2lnbj5gIGxpdGVyYWwgaGVyZSBhbmQgaW4gcmVjb3JkczsgYXQgcnVuIHRpbWUgaXQgaXMgdGhpcyBtYWNoaW5lJ3MgSk9FREVTSUdOCiAgc2tpbGwgZm9sZGVyIChgSk9FREVTSUdOX0hPTUVgIGlmIHNldCwgZWxzZSB0aGUgaW5zdGFsbGVkIGpvZWRlc2lnbiBza2lsbCkuIE5ldmVyIGNvbW1pdCBhbiBhYnNvbHV0ZSBwYXRoLgogIEEgdXNlci12aXNpYmxlIGJlaGF2aW9yIHlvdSBwaWNrZWQgeW91cnNlbGYsIHdoZXJlIG5laXRoZXIgdGhlIHByb2R1Y3Qgc291cmNlIG5vciB0aGUKICB1c2VyJ3MgcmVxdWVzdCBzZXR0bGVzIGl0LCBhbHNvIGtlZXBzIGl0IG9wZW4gKHZlcmlmaWNhdGlvbiBwZW5kaW5nKSB1bnRpbCB0aGUgb3duZXIgY29uZmlybXM7CiAgaG93IHRvIGltcGxlbWVudCBhIHNwZWNpZmllZCBiZWhhdmlvciBpcyB5b3VyIGNhbGwuIFRhc2ssIHN0YWdlIGFuZCB1c2VyIGFjY2VwdGFuY2UgYXJlIHNlcGFyYXRlLgogIEFwcHJvdmVkIG91dGNvbWVzLCBvcmRlciBhbmQgY3JpdGVyaWEgY2hhbmdlIG9ubHkgYnkgdGhlIG93bmVyOyB3b3JrZXIgbWV0aG9kcyBhcmUKICByZXBsYWNlYWJsZS4gQW4gb3BlbiBpdGVtIGJsb2NrcyBvbmx5IHdvcmsgdGhhdCBkZXBlbmRzIG9uIGl0LgotIFJlY29yZGluZyAoYXBwcm92ZWQ6IFRBU0ssIFJPQURNQVAsIElTU1VFUywgREVTSUdOOyBERVNJR04gb25seSBmb3Igb3duZXItYXV0aG9yaXplZCBkZWNpc2lvbnMpOiBhZnRlciByZWFsIHdvcmssIHVwZGF0ZSBUQVNLIGFuZCB0aGUgYWZmZWN0ZWQgUk9BRE1BUCBpdGVtLgogIEVhY2ggbmV3IHBpZWNlIG9mIHdvcmsgZ2V0cyBpdHMgb3duIGRhdGVkIFRBU0sgZW50cnk7IG5ldmVyIGFwcGVuZCBpdCB1bmRlciBhbiB1bnJlbGF0ZWQgZW50cnkuCiAgQ29weSBhIGRlc2lnbiByZXBvcnQncyBzdGFtcCBsaW5lIHRvIFRBU0sgYFJlcG9ydCBzdGFtcDpgIChgbm9uZSByYW5gIGlmIG5vIGRlc2lnbiBjaGVjayksIGFuZCB3cml0ZSBhCiAgZGVzaWduIHJ1bGUncyBST0FETUFQIENoZWNrIGFzIHJvd3Mgb2YgdGhlIERFU0lHTiBydWxlIHRhYmxlLCBub3QgYSBzY3JpcHQgbmFtZTsgdGVjaG5pY2FsIGNoZWNrcyBhcGFydC4KICBXaGVuIGFuIGl0ZW0ncyBzdGF0dXMgY2hhbmdlcywgcmV3cml0ZSBST0FETUFQJ3MgY3VycmVudC9uZXh0IGxpbmVzIHNvIHRoZXkgbWF0Y2ggZXZlcnkKICBvcGVuIGl0ZW07IG5ldmVyIGp1c3QgcHJlcGVuZCBvciBhcHBlbmQgdG8gdGhlbS4KICBLZWVwIGVhY2ggbmV3IFRBU0sgZW50cnkgdG8gYWJvdXQgMTAgbGluZXM6IHdoYXQgY2hhbmdlZCwgd2hhdCB3YXMgY2hlY2tlZCwgYW5kIGxpbmtzOyBuZXZlcgogIGNvcHkgdGV4dCB0aGF0IGFub3RoZXIgcmVjb3JkIG9yIGFuIGVhcmxpZXIgZW50cnkgYWxyZWFkeSBob2xkcy4KICBXaGlsZSBUQVNLIGlzIG92ZXIgYWJvdXQgNDBLQiwgb2ZmZXIgb25jZSBwZXIgc2Vzc2lvbiB0byBtb3ZlIGNsb3NlZCBlbnRyaWVzIHRvIFRBU0stYXJjaGl2ZS5tZAogIChhbmNob3JzIGtlcHQsIGV2ZXJ5IGxpbmsgcmVwb2ludGVkLCBpbmNsdWRpbmcgaGVhZGluZyBsaW5rcyk7IGFmdGVyIHRoYXQsIGRvIG5vdCBtZW50aW9uIGl0IGFnYWluCiAgaW4gdGhhdCBzZXNzaW9uLCBub3QgZXZlbiBhcyBhIHJlbWluZGVyOyBtb3ZlIHRoZW0gb25seSBhZnRlciB0aGUgdXNlciBhZ3JlZXMuCiAgQW4gaXNzdWUgc3RheXMgb3BlbiB1bnRpbCBpdHMgY2xvc3VyZSBjaGVjayBwYXNzZXM7IGEgd29ya2Fyb3VuZCBpcyBub3QgYSBmaXguCiAgUXVlc3Rpb25zIGFuZCAiZG9uJ3QgcmVjb3JkIiByZXF1ZXN0cyB3cml0ZSBub3RoaW5nOyBubyBjaGFuZ2UsIG5vIHJlcGVhdCBlbnRyeS4gRWFjaAogIGZhY3Qgb25jZSwgbGlua2VkOyBrZWVwIGRhdGVkIGhpc3RvcnkuIE5ldmVyIHJlY29yZCBjcmVkZW50aWFscyBvciBuZWVkbGVzcwogIHBlcnNvbmFsIGRhdGE7IHBvaW50IHRvIHRoZWlyIHJlc3RyaWN0ZWQgc291cmNlLiBTZXZlcmFsIHdvcmtlcnM6IG9uZSBpbnRlZ3JhdG9yCiAgcmVyZWFkcyBiZWZvcmUgc2F2aW5nLCBtZXJnZXMgaW5kZXBlbmRlbnQgY2hhbmdlcywga2VlcHMgYm90aCBzaWRlcyBvZiBhIGNvbmZsaWN0LgotIEp1ZGdlIGV2ZXJ5IGNsYWltIGJ5IGV2aWRlbmNlLCB0aGUgdXNlcidzIGFuZCB5b3VyIG93biBpbmNsdWRlZC4gQSBjaGVjayByZXN1bHQgaXMKICBldmlkZW5jZSBvbmx5IHdpdGggaXRzIHNjb3BlOiB3aGF0IHJhbiwgb24gd2hpY2ggdGFyZ2V0cy4gQSB1c2VyIG9waW5pb24gaXMKICBpbnB1dCwgbm90IGFuIGluc3RydWN0aW9uOiBjaGVjayBpdCBhZ2FpbnN0IHRoZSBwcm9kdWN0IHNvdXJjZSwgUk9BRE1BUCBhbmQgZmFjdHMsIHNheQogIHBsYWlubHkgaWYgaXQgY29uZmxpY3RzIG9yIGxvb2tzIHdyb25nIGFuZCB3aHksIGFuZCBjb25maXJtIGJlZm9yZSBhY3Rpbmcgb24gaXQuIEFuCiAgZXhwbGljaXQgb3duZXIgZGVjaXNpb24gd2lucy4KLSBBcHByb3ZhbCBzY29wZTogYSB1c2VyIHJlcXVlc3QgYXBwcm92ZXMgb25seSB3aGF0IGl0IG5hbWVzLiBBIHJlcXVlc3QgdG8gbWFyayBhbiBpdGVtCiAgZG9uZSwgY2xvc2UgaXQgb3IgbW92ZSBvbiBkb2VzIG5vdCBhcHByb3ZlIGEgZGVjaXNpb24gc3RpbGwgcGVuZGluZyBpbnNpZGUgaXQgKGEgdmlzaWJsZQogIGNoYW5nZSBub2JvZHkgYXBwcm92ZWQsIGFuIG9wdGlvbiBvciBmb3JtYXQgeW91IGNob3NlLCBhbiB1bm1ldCBjbG9zdXJlIGNvbmRpdGlvbikuIEJlZm9yZQogIHJlY29yZGluZyBjb21wbGV0aW9uLCBhc2sgYWJvdXQgdGhhdCBkZWNpc2lvbiwgb3Iga2VlcCB0aGUgaXRlbSBvcGVuIGFuZCBzYXkgd2hhdCBpcwogIHBlbmRpbmcuIE5ldmVyIHJlY29yZCBhIGRlY2lzaW9uIGFzIHRoZSB1c2VyJ3MgdW5sZXNzIHRoZSB1c2VyIHN0YXRlZCBpdC4KLSBFYWNoIGZvbGxvdy11cCB0dXJuIGdldHMgdGhlIHNhbWUgcnVsZXM6IHJlLWNoZWNrIFJPQURNQVAgYW5kIHJlY29yZHMsIGFuZCBrZWVwIHJlY29yZHMKICBhbmQgdGhlIHJlcG9ydCBhcyBjb21wbGV0ZSBhcyBvbiB0aGUgZmlyc3QgdHVybi4KLSBSZXVzZSBwcm9vZjsgcmUtY2hlY2sgYWZ0ZXIgYSBjaGFuZ2Ugb3IgZmFpbHVyZS4gQSBjaGFuZ2UgcmUtbWVhc3VyZXMgZXZlcnkgcnVsZSBhbmQKICB0YXJnZXQgdGhlIGNoYW5nZWQgZmlsZXMgYWZmZWN0LCBub3Qgb25seSB0aGUgb25lIGJlaW5nIGZpeGVkLiBOb3QgZm91bmQg4omgIG5ldmVyIGNoZWNrZWQuIElmIGEKICBzb3VyY2Ugb3Igd3JpdGUgZmFpbHMsIHNheSBzbyBhbmQgY29udGludWUgb3RoZXIgaW5kZXBlbmRlbnQgd29yay4KLSBBZnRlciByZWFsIHdvcmssIHJlcG9ydCBzaXggYnVsbGV0czog7J6R7JeFLCDsl4XrjbDsnbTtirgg7YyM7J28LCDsnbTsiogsIO2VtOqysCAodmVyaWZpZWQgZml4IG9ubHk7IGEgZml4IG1hcmtlZCBgY2hhbmdlZGAgZ29lcyB1bmRlciDrgqjsnYAg66y47KCcKSwKICDrgqjsnYAg66y47KCcICh1bnJlc29sdmVkIG9yIHVudmVyaWZpZWQpLCDri6TsnYwg7J6R7JeFOyAi7JeG7J2MIiBpZiBlbXB0eS4gQWRkIGEgYnJpZWYg7IOB7IS4IOuztOqzoAogIG9ubHkgaWYgbmVlZGVkLiBTaW1wbGUgcXVlc3Rpb25zOiBqdXN0IGFuc3dlci4KPCEtLSBKT0VORVNTLVNFVFVQOkVORCAtLT4=","appliedBlockSha256":"eccfe5d8d1ed5476d84cd0106033916bfcc4fb47589f34f319b87771055ec699","ownedBoundary":{"prefixBase64":"","suffixBase64":"Cg=="}}
+diff --git a/AGENTS.md b/AGENTS.md
+new file mode 100644
+index 0000000..f304e63
+--- /dev/null
++++ b/AGENTS.md
+@@ -0,0 +1,63 @@
++<!-- JOENESS-SETUP:BEGIN -->
++# Project working connection
++
++- Owners: ROADMAP = goals, stage order, required items (status, check, proof, gap, next).
++  TASK = work results and checks. ISSUES = open defects/workarounds with cause, risk and
++  closure condition. DESIGN = visual rules and approvals. Library/ = research by topic
++  (source, date, fact vs inference). AGENTS = rules only. Product meaning:
++  `README.md` (no revision record; delivery goal beyond it undecided). Design checks: JOEDESIGN.
++- Read only what the task needs: resume → current ROADMAP item; defect → ISSUES + target;
++  visual → DESIGN; research → Library; completion → required items and their proof.
++- Authority: only the user or named owner approves. Code, newer notes and old handoffs
++  never do; a handoff only points to sources. Facts come from the current target and
++  proof. Unclear or conflicting scope goes to the owner; keep only that verdict open.
++- Done = every required item passes the Check written on it in ROADMAP, run or observed
++  on current inputs. A check that is missing, fails, cannot run or is stale keeps the
++  item open; removed scope is not a pass. Before recording a rule as passed, read what the
++  check actually measured (which screens, layouts, sizes, states) against what the rule covers;
++  what the check did not measure is unverified, not passed, and the record names it.
++  Before an item with a saved JOEDESIGN report becomes complete, run
++  `node <joedesign>/scripts/report-check.mjs --verify <file>` and require exit 0; a missing or mismatched
++  stamp, or no Node or script, keeps it verification pending and the record says so.
++  Keep `<joedesign>` literal here and in records; at run time it is this machine's JOEDESIGN
++  skill folder (`JOEDESIGN_HOME` if set, else the installed joedesign skill). Never commit an absolute path.
++  A user-visible behavior you picked yourself, where neither the product source nor the
++  user's request settles it, also keeps it open (verification pending) until the owner confirms;
++  how to implement a specified behavior is your call. Task, stage and user acceptance are separate.
++  Approved outcomes, order and criteria change only by the owner; worker methods are
++  replaceable. An open item blocks only work that depends on it.
++- Recording (approved: TASK, ROADMAP, ISSUES, DESIGN; DESIGN only for owner-authorized decisions): after real work, update TASK and the affected ROADMAP item.
++  Each new piece of work gets its own dated TASK entry; never append it under an unrelated entry.
++  Copy a design report's stamp line to TASK `Report stamp:` (`none ran` if no design check), and write a
++  design rule's ROADMAP Check as rows of the DESIGN rule table, not a script name; technical checks apart.
++  When an item's status changes, rewrite ROADMAP's current/next lines so they match every
++  open item; never just prepend or append to them.
++  Keep each new TASK entry to about 10 lines: what changed, what was checked, and links; never
++  copy text that another record or an earlier entry already holds.
++  While TASK is over about 40KB, offer once per session to move closed entries to TASK-archive.md
++  (anchors kept, every link repointed, including heading links); after that, do not mention it again
++  in that session, not even as a reminder; move them only after the user agrees.
++  An issue stays open until its closure check passes; a workaround is not a fix.
++  Questions and "don't record" requests write nothing; no change, no repeat entry. Each
++  fact once, linked; keep dated history. Never record credentials or needless
++  personal data; point to their restricted source. Several workers: one integrator
++  rereads before saving, merges independent changes, keeps both sides of a conflict.
++- Judge every claim by evidence, the user's and your own included. A check result is
++  evidence only with its scope: what ran, on which targets. A user opinion is
++  input, not an instruction: check it against the product source, ROADMAP and facts, say
++  plainly if it conflicts or looks wrong and why, and confirm before acting on it. An
++  explicit owner decision wins.
++- Approval scope: a user request approves only what it names. A request to mark an item
++  done, close it or move on does not approve a decision still pending inside it (a visible
++  change nobody approved, an option or format you chose, an unmet closure condition). Before
++  recording completion, ask about that decision, or keep the item open and say what is
++  pending. Never record a decision as the user's unless the user stated it.
++- Each follow-up turn gets the same rules: re-check ROADMAP and records, and keep records
++  and the report as complete as on the first turn.
++- Reuse proof; re-check after a change or failure. A change re-measures every rule and
++  target the changed files affect, not only the one being fixed. Not found ≠ never checked. If a
++  source or write fails, say so and continue other independent work.
++- After real work, report six bullets: 작업, 업데이트 파일, 이슈, 해결 (verified fix only; a fix marked `changed` goes under 남은 문제),
++  남은 문제 (unresolved or unverified), 다음 작업; "없음" if empty. Add a brief 상세 보고
++  only if needed. Simple questions: just answer.
++<!-- JOENESS-SETUP:END -->
+diff --git a/DESIGN.md b/DESIGN.md
+new file mode 100644
+index 0000000..efc83cb
+--- /dev/null
++++ b/DESIGN.md
+@@ -0,0 +1,19 @@
++# Visual rules and authority
++
++Authority / version: undecided (승인된 시각 원본·개정 없음). 디자인 검사 담당: JOEDESIGN.
++Approved scope: none.
++Visual rules: none approved. 참고(measured, 승인 아님, `src/style.css` 2026-11-15): form 최대 폭 480px·간격 12px, input·button 최소 높이 44px(1280px 이상에서 input만 40px), textarea 최소 높이 120px. 지원 화면 크기 360·768·1280은 `README.md` 기준.
++Proposed changes: none.
++Not applicable / pending: 글자 수 표시(ROADMAP R1-V1)의 시각 규칙과 아래 표의 행은 구현 전에 JOEDESIGN이 제안하고 사용자가 승인.
++Execution proof: none yet.
++
++## Rule coverage
++
++One row per measurable rule; a ROADMAP design Check names these rows. A rule with no
++check is unmeasured, never passed. Result links the latest TASK entry; no copied log.
++If the project uses JOEDESIGN's DESIGN template, keep one DESIGN.md and its Rule
++Coverage table as this table (add Result if absent); never keep two rule tables.
++
++| Rule | Check | Spot check | Layouts | Sizes | States | Unmeasured | Result |
++| --- | --- | --- | --- | --- | --- | --- | --- |
++| (none yet) | — | — | — | — | — | 모든 시각 규칙 미정의 | not run |
+diff --git a/ISSUES.md b/ISSUES.md
+new file mode 100644
+index 0000000..d5c58c9
+--- /dev/null
++++ b/ISSUES.md
+@@ -0,0 +1,3 @@
++# Open problems and workarounds
++
++Active issues: none (2026-11-15 설정 시점에 확인된 결함 없음).
+diff --git a/ROADMAP.md b/ROADMAP.md
+new file mode 100644
+index 0000000..2200430
+--- /dev/null
++++ b/ROADMAP.md
+@@ -0,0 +1,24 @@
++# Project roadmap
++
++Project scope: 문의 폼(`README.md`: 이름·요청 내용 입력, 요청 내용 최대 500자, 화면 360·768·1280 지원). 이번에 등록된 작업은 요청 폼 글자 수 표시(R1). 그 밖의 전체 납품 목표·단계 순서: 미정(결정 필요: 사용자).
++Product authority: `README.md` (전체). 별도 제품 정의 문서 없음.
++Product revision / approval: none (README에 개정·승인 기록 없음; 2026-11-15 읽음).
++Current stage: Stage 1 — 요청 폼 글자 수 표시, not started.
++Next eligible work: R1 표시 형식 결정(R1-D) 확인 후 R1-C1 구현; R1-V1 디자인 규칙 행은 구현 전에 DESIGN에 정의.
++Status words: not started / in progress / verification pending / on hold / complete / removed from scope.
++
++## Stage 1 — 요청 폼 글자 수 표시 — not started
++
++Goal: 요청 내용 입력란에 현재 글자 수를 표시(사용자 요청 2026-11-15, [TASK](TASK.md#t1--2026-11-15--요청-폼-글자-수-표시-등록)).
++Entry condition: none.
++Completion condition: R1-D, R1-C1, R1-V1 모두 아래 Check 통과. 사용자 수락은 별도(아래).
++
++| ID | Required outcome | Status | Check / completion criterion | Evidence or gap |
++| --- | --- | --- | --- | --- |
++| R1-D | 표시 형식·위치·500자 도달 시 동작 결정 | not started | 사용자(제품 소유자) 확인 기록. README는 500자 제한만 정하고 표시 형식은 정하지 않음 | 미결정 |
++| R1-C1 | 요청 내용 입력·삭제·붙여넣기·폼 초기화 후 표시 수가 실제 글자 수와 일치, 최대 500 | not started | 브라우저에서 `src/index.html` 0자·임의 입력·500자·보내기 후 초기화 상태 관찰 결과를 TASK에 기록 | 미구현 |
++| R1-V1 | 글자 수 표시의 시각 규칙 준수 | not started | DESIGN.md#rule-coverage 의 글자 수 표시 행(구현 전 정의)을 현재 입력으로 360·768·1280, 위 상태에서 실행, 행마다 Spot check; 결과 줄과 JOEDESIGN 보고서 스탬프는 TASK에, 완료 전 `node <joedesign>/scripts/report-check.mjs --verify <file>` exit 0 | 규칙 행 미정의, 미실행 |
++
++Scope decisions: none.
++User acceptance: 글자 수 표시 결과의 사용자 수락 pending(필요 여부 포함 미정).
++Optional/later: none.
+diff --git a/TASK.md b/TASK.md
+new file mode 100644
+index 0000000..ee5196b
+--- /dev/null
++++ b/TASK.md
+@@ -0,0 +1,15 @@
++# Work results
++
++## T1 / 2026-11-15 / 요청 폼 글자 수 표시 등록
++
++Roadmap item: [ROADMAP Stage 1](ROADMAP.md#stage-1--요청-폼-글자-수-표시--not-started) (R1-D, R1-C1, R1-V1).
++Result: 작업 등록만 함. 구현 안 함(사용자 지시).
++Changed files: none (코드 변경 없음).
++Check / target / result: 현재 대상 확인만 — `src/index.html` textarea `#body` maxlength 500, `src/form.js`는 제출 시 `form.reset()`; 글자 수 표시 없음.
++Evidence: 이 항목을 등록한 커밋.
++Limits: 표시 형식·위치·500자 동작 미결정(R1-D); 시각 규칙 미정의(R1-V1).
++Report stamp: none ran.
++Required specialist verdict: R1-V1 — JOEDESIGN, 미실행.
++Completion boundaries: implementation not started / technical unverified / visual unverified / user acceptance pending.
++Related issue / knowledge: none.
++Record handoff gap: none.

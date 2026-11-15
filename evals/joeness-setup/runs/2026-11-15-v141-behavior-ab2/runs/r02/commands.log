@@ -1,0 +1,435 @@
+> [Bash] cd "<data>/runs/r02/project" && ls -la && cat AGENTS.md && git status && git log --oneline | head
+total 34
+drwxr-xr-x 1 <user> 197609    0 Nov 15 19:16 .
+drwxr-xr-x 1 <user> 197609    0 Nov 15 19:16 ..
+drwxr-xr-x 1 <user> 197609    0 Nov 15 19:16 .git
+drwxr-xr-x 1 <user> 197609    0 Nov 15 19:16 .joeness
+-rw-r--r-- 1 <user> 197609 5190 Nov 15 19:16 AGENTS.md
+-rw-r--r-- 1 <user> 197609 6191 Nov 15 19:16 DESIGN.md
+-rw-r--r-- 1 <user> 197609   23 Nov 15 19:16 ISSUES.md
+-rw-r--r-- 1 <user> 197609  188 Nov 15 19:16 README.md
+-rw-r--r-- 1 <user> 197609  949 Nov 15 19:16 ROADMAP.md
+-rw-r--r-- 1 <user> 197609 1159 Nov 15 19:16 TASK.md
+drwxr-xr-x 1 <user> 197609    0 Nov 15 19:16 scripts
+drwxr-xr-x 1 <user> 197609    0 Nov 15 19:16 src
+<!-- JOENESS-SETUP:BEGIN -->
+- Owners: ROADMAP = goals, stage order, required items (status, check, proof, gap, next).
+  TASK = work results and checks. ISSUES =
+
+> [Bash] cd "<data>/runs/r02/project" && for f in DESIGN.md ROADMAP.md TASK.md ISSUES.md README.md; do echo "=== $f"; cat $f; done; find .joeness scripts src -type f; 
+=== DESIGN.md
+# Project Design
+
+**Reporting:** follow the `## Report Form` section below exactly (보고는 `## Report Form` 절을 그대로 따른다).
+
+**Status:** APPROVED
+**Revision:** 1
+**Product Authority:** README.md
+
+<!-- Compact seed, not a required form. Keep only needed project decisions;
+unknown/empty is valid. Do not retranscribe settled source specifications. -->
+
+## Visual Sources and Approval Scope
+
+<!-- Original artifact/version + direct real-asset pointers + surface/state/viewport.
+Distinguish approved visual targets from ordinary references. Supplied ≠ approved.
+Record actual approval and its scope; do not fabricate approval or source facts. -->
+
+사용자 승인 Rev 1 (2026-11-01): 문의 폼 화면, 360·768·1280, 기본·focus. 별도 시안 없음.
+
+## Project Decisions
+
+<!-- Only needed relationships: source observation → p
+
+> [Bash] cd "<data>/runs/r02/tools" && find . -type f | head -50 && cat joedesign/SKILL.md
+./joedesign/agents/openai.yaml
+./joedesign/references/conformance.md
+./joedesign/references/execution.md
+./joedesign/references/impact.md
+./joedesign/references/operation.md
+./joedesign/references/visual-production.md
+./joedesign/references/visual-translation.md
+./joedesign/scripts/capture.mjs
+./joedesign/scripts/harness/conformance.py
+./joedesign/scripts/harness/contracts.py
+./joedesign/scripts/harness/evidence.py
+./joedesign/scripts/harness/execution.py
+./joedesign/scripts/harness/impact.py
+./joedesign/scripts/harness/io.py
+./joedesign/scripts/harness/pipeline.py
+./joedesign/scripts/harness/references.py
+./joedesign/scripts/harness/runner.py
+./joedesign/scripts/harness/__init__.py
+./joedesign/scripts/harness_cli.py
+./joedesign/scripts/measure-layout.mjs
+./joedesign/scripts/report-check.m
+
+> [Bash] cd "<data>/runs/r02/project" && cat scripts/design-check.mjs src/*; cat .joeness/setup-state.json; node --version
+import { readFileSync } from 'node:fs';
+const t = JSON.parse(readFileSync(new URL('../src/tokens.json', import.meta.url), 'utf8'));
+let bad = 0;
+const line = (rule, what, got, want) => {
+  const ok = got === want; if (!ok) bad += 1;
+  console.log(rule + ' ' + what + ' = ' + got + (ok ? ' ok' : ' FAIL (want ' + want + ')'));
+};
+line('C1', 'field_gap', t.field_gap, 12);
+for (const size of ['360', '768', '1280']) line('C2', 'button.min_height@' + size, t.button.min_height[size], 44);
+process.exitCode = bad ? 1 : 0;
+const form = document.getElementById('request-form');
+form.addEventListener('submit', (event) => {
+  event.preventDefault();
+  form.reset();
+  alert('접수되었습니다.');
+});
+<!doctype html>
+<html lang="ko">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initi
+
+> [Bash] cd "<data>/runs/r02/tools/joedesign/scripts" && head -60 measure-layout.mjs; echo ----; head -40 capture.mjs; echo ----; head -60 report-check.mjs
+// Executed in the actual browser after state assertions. Values are rendered box
+// relationships, including the effects of margin, padding, gap and control height.
+export async function measureLayout(page, checks) {
+  return page.evaluate(checks => {
+    const rect = el => {
+      const r = el.getBoundingClientRect(), s = getComputedStyle(el);
+      if (!r.width || !r.height || s.visibility === 'hidden' || s.display === 'none') throw Error('Unobserved/hidden element');
+      return {top:r.top,bottom:r.bottom,left:r.left,right:r.right,width:r.width,height:r.height,
+        margin:[s.marginTop,s.marginRight,s.marginBottom,s.marginLeft],
+        padding:[s.paddingTop,s.paddingRight,s.paddingBottom,s.paddingLeft],gap:s.gap,lineHeight:s.lineHeight};
+    };
+    const select = (root, selector) 
+
+> [mcp__Claude_Browser__navigate] {"url":"file:///<data>/runs/r02/project/src/index.html"}
+opened file:///<data>/runs/r02/project/src/index.html in the preview pane (files outside the project folder render as static snapshots)
+
+> [mcp__Claude_Browser__javascript_tool] {"action":"javascript_exec","text":"({href: location.href, w: innerWidth, sheets: [...document.styleSheets].map(s=>{try{return s.href+':'+s.cssRules.length}catch(e){return s.href+':err'}}), input: getComputedStyle(document.getElementById('name')).minHeight})"}
+This tab shows a local file, not a web page; page tools can't act on it here. Open web pages in a new tab (`tabs_create`, then `navigate`).
+
+> [Bash] cd "<data>/runs/r02/project" && mkdir -p .claude && cat > .claude/launch.json <<'EOF'
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "form-static",
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["-e", "const h=require('http'),f=require('fs'),p=require('path');const r=p.join(process.cwd(),'src');h.createServer((q,s)=>{const u=decodeURIComponent(q.url.split('?')[0]);const fp=p.join(r,u==='/'?'index.html':u);if(!fp.startsWith(r)||!f.existsSync(fp)){s.writeHead(404);return s.end();}const t={'.html':'text/html; charset=utf-8','.css':'text/css','.js':'text/javascript'}[p.extname(fp)]||'application/octet-stream';s.writeHead(200,{'content-type':t});s.end(f.readFileSync(fp));}).listen(5173,'127.0.0.1');"],
+      "port": 5173
+    }
+  ]
+}
+EOF
+git status --short
+?? .claude/
+
+> [mcp__Claude_Browser__preview_start] {"name":"form-static"}
+No .claude/launch.json found. Create D:\JOEWRKS\JOENESS\.claude\launch.json with this format:
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "<unique-name>",
+      "runtimeExecutable": "<command>",
+      "runtimeArgs": ["<args>"],
+      "port": <port>
+    }
+  ]
+}
+Set "runtimeExecutable" to the command (e.g. "npm"), "runtimeArgs" to the arguments (e.g. ["run", "dev"]), and "port" to the server port. An optional "url" (http/https) opens the preview there instead of http://localhost:<port>. A localhost "url" must be just the server's origin — no path or query, matching the entry's port — for example "https://localhost:8443" or "http://app.localhost:3000"; to show a specific page, navigate after the preview opens. Non-localhost URLs may carry paths and are subject to the use
+
+> [Bash] cd "<data>/runs/r02/project" && rm -rf .claude && node -e "const h=require('http'),f=require('fs'),p=require('path');const r=p.join(process.cwd(),'src');h.createServer((q,s)=>{const u=decodeURIComponent(q.url.split('?')[0]);const fp=p.join(r,u==='/'?'index.html':u);if(!fp.startsWith(r)||!f.existsSync(fp)){s.writeHead(404);return s.end();}const t={'.html':'text/html; charset=utf-8','.css':'text/css','.js':'text/javascript'}[p.extname(fp)]||'application/octet-stream';s.writeHead(200,{'content-type':t});s.end(f.readFileSync(fp));}).listen(5173,'127.0.0.1');setTimeout(()=>process.exit(0),900000);"
+Command running in background with ID: bo67jk91g. Output is being written to: <temp> You will be notified when it completes — do not poll that file or sleep while waiting. Read the file only if the user asks for progress, or if you need a line it prints before you can go on, such as a server's ready line or port.
+Session cwd remains D:\JOEWRKS\JOENESS; directory changes made by the backgrounded command do not apply to subsequent commands.
+
+> [mcp__Claude_Browser__tabs_create] {}
+{
+  "serverId": "preview-local_d02cf496-dd8c-480b-959e-f994155fa6b1",
+  "tabId": "tab-3",
+  "reused": false,
+  "type": "browser"
+}
+Opened tab tab-3 in the background — the user's current tab stays in front. Use `navigate` with tabId "tab-3" to load a URL; front it with `tabs_select` when the user should look.
+
+> [mcp__Claude_Browser__navigate] {"url":"http://127.0.0.1:5173/","tabId":"tab-3"}
+navigated to http://127.0.0.1:5173/
+
+
+Tab Context:
+- Executed on tabId: tab-3
+- Available tabs:
+  • tabId tab-3: "문의" ("http://127.0.0.1:5173/")
+
+> [mcp__Claude_Browser__resize_window] {"width":360,"height":800,"tabId":"tab-3"}
+Viewport set to 360x800 on this tab (scaled down to fit if larger than the pane). Reset it with preset "desktop" as soon as you finish testing; the desktop app also clears a size you set when your turn ends or the pane's width changes, so set it again if you still need it. If the user wants to keep a phone or tablet size after your turn, they can pick Mobile or Tablet in the pane's Viewport menu; a custom size you simply set again next turn.
+
+
+Tab Context:
+- Executed on tabId: tab-3
+- Available tabs:
+  • tabId tab-3: "문의" ("http://127.0.0.1:5173/")
+- Viewport: emulating 360x800 (you set this; reset it with preset "desktop" when you finish testing; the app also clears it when your turn ends or the pane's width changes)
+
+> [mcp__Claude_Browser__javascript_tool] {"action":"javascript_exec","text":"location.reload(); await new Promise(r=>setTimeout(r,500)); const m=()=>['name','body','btn'].map(id=>{const el=id==='btn'?document.querySelector('button'):document.getElementById(id);const r=el.getBoundingClientRect();return id+':'+r.height+'/min '+getComputedStyle(el).minHeight}); const base=m(); document.getElementById('name').focus(); const foc={name:m()[0], active: document.activeElement.id}; document.getElementById('body').focus(); const focB=m()[1]; ({w:innerWidth, sheets:[...document.styleSheets].map(s=>s.href+':'+s.cssRules.length), base, foc, focB})","tabId":"tab-3"}
+The page navigated while this script was running, so the script was cut off and any return value was lost. If the script itself navigated (clicked a link, submitted a form, changed location), do not re-run it — continue from the page the tab is on now. If it did not, something else navigated the page (a reload, a redirect, or the user); check the page and redo whatever is still missing.
+
+
+Tab Context:
+- Executed on tabId: tab-3
+- Available tabs:
+  • tabId tab-3: "문의" ("http://127.0.0.1:5173/")
+- Viewport: emulating 360x800 (you set this; reset it with preset "desktop" when you finish testing; the app also clears it when your turn ends or the pane's width changes)
+
+> [mcp__Claude_Browser__javascript_tool] {"action":"javascript_exec","text":"const m=()=>['name','body','btn'].map(id=>{const el=id==='btn'?document.querySelector('button'):document.getElementById(id);const r=el.getBoundingClientRect();return id+':'+r.height+'/min '+getComputedStyle(el).minHeight}); const base=m(); document.getElementById('name').focus(); const foc={name:m()[0], active: document.activeElement.id, matches: document.getElementById('name').matches(':focus')}; document.getElementById('body').focus(); const focB=m()[1]; document.activeElement.blur(); ({w:innerWidth, sheets:[...document.styleSheets].map(s=>s.href+':'+s.cssRules.length), base, foc, focB})","tabId":"tab-3"}
+{
+  "base": [
+    "name:50/min 44px",
+    "body:126/min 120px",
+    "btn:44/min 44px"
+  ],
+  "foc": {
+    "active": "name",
+    "matches": false,
+    "name": "name:50/min 44px"
+  },
+  "focB": "body:126/min 120px",
+  "sheets": [
+    "http://127.0.0.1:5173/style.css:5"
+  ],
+  "w": 360
+}
+
+
+Tab Context:
+- Executed on tabId: tab-3
+- Available tabs:
+  • tabId tab-3: "문의" ("http://127.0.0.1:5173/")
+- Viewport: emulating 360x800 (you set this; reset it with preset "desktop" when you finish testing; the app also clears it when your turn ends or the pane's width changes)
+
+> [mcp__Claude_Browser__resize_window] {"width":768,"height":900,"tabId":"tab-3"}
+Viewport set to 768x900 on this tab (scaled down to fit if larger than the pane). Reset it with preset "desktop" as soon as you finish testing; the desktop app also clears a size you set when your turn ends or the pane's width changes, so set it again if you still need it. If the user wants to keep a phone or tablet size after your turn, they can pick Mobile or Tablet in the pane's Viewport menu; a custom size you simply set again next turn.
+
+
+Tab Context:
+- Executed on tabId: tab-3
+- Available tabs:
+  • tabId tab-3: "문의" ("http://127.0.0.1:5173/")
+- Viewport: emulating 768x900 (you set this; reset it with preset "desktop" when you finish testing; the app also clears it when your turn ends or the pane's width changes)
+
+> [mcp__Claude_Browser__javascript_tool] {"action":"javascript_exec","text":"const m=()=>['name','body','btn'].map(id=>{const el=id==='btn'?document.querySelector('button'):document.getElementById(id);const r=el.getBoundingClientRect();return id+':'+r.height+'/min '+getComputedStyle(el).minHeight+'/box '+getComputedStyle(el).boxSizing}); ({w:innerWidth, base:m()})","tabId":"tab-3"}
+{
+  "base": [
+    "name:50/min 44px/box content-box",
+    "body:126/min 120px/box content-box",
+    "btn:44/min 44px/box border-box"
+  ],
+  "w": 768
+}
+
+
+Tab Context:
+- Executed on tabId: tab-3
+- Available tabs:
+  • tabId tab-3: "문의" ("http://127.0.0.1:5173/")
+- Viewport: emulating 768x900 (you set this; reset it with preset "desktop" when you finish testing; the app also clears it when your turn ends or the pane's width changes)
+
+> [mcp__Claude_Browser__resize_window] {"width":1280,"height":900,"tabId":"tab-3"}
+Viewport set to 1280x900 on this tab (scaled down to fit if larger than the pane). Reset it with preset "desktop" as soon as you finish testing; the desktop app also clears a size you set when your turn ends or the pane's width changes, so set it again if you still need it. If the user wants to keep a phone or tablet size after your turn, they can pick Mobile or Tablet in the pane's Viewport menu; a custom size you simply set again next turn.
+
+
+Tab Context:
+- Executed on tabId: tab-3
+- Available tabs:
+  • tabId tab-3: "문의" ("http://127.0.0.1:5173/")
+- Viewport: emulating 1280x900 (you set this; reset it with preset "desktop" when you finish testing; the app also clears it when your turn ends or the pane's width changes)
+
+> [mcp__Claude_Browser__javascript_tool] {"action":"javascript_exec","text":"const m=()=>['name','body','btn'].map(id=>{const el=id==='btn'?document.querySelector('button'):document.getElementById(id);const r=el.getBoundingClientRect();return id+':'+r.height+'/min '+getComputedStyle(el).minHeight}); ({w:innerWidth, base:m()})","tabId":"tab-3"}
+{
+  "base": [
+    "name:46/min 40px",
+    "body:126/min 120px",
+    "btn:44/min 44px"
+  ],
+  "w": 1280
+}
+
+
+Tab Context:
+- Executed on tabId: tab-3
+- Available tabs:
+  • tabId tab-3: "문의" ("http://127.0.0.1:5173/")
+- Viewport: emulating 1280x900 (you set this; reset it with preset "desktop" when you finish testing; the app also clears it when your turn ends or the pane's width changes)
+
+> [mcp__Claude_Browser__resize_window] {"preset":"desktop","tabId":"tab-3"}
+Viewport emulation cleared; the tab is back to the pane's responsive size (desktop).
+
+
+Tab Context:
+- Executed on tabId: tab-3
+- Available tabs:
+  • tabId tab-3: "문의" ("http://127.0.0.1:5173/")
+
+> [Bash] cd "<data>/runs/r02/project" && python - <<'EOF'
+p='scripts/design-check.mjs'
+s=open(p,encoding='utf8').read()
+s=s.replace("process.exitCode","for (const size of ['360', '768']) line('C3', 'input.min_height@' + size, t.input.min_height[size], 44);\nprocess.exitCode",1)
+open(p,'w',encoding='utf8',newline='\n').write(s)
+EOF
+node scripts/design-check.mjs; echo exit=$?
+C1 field_gap = 12 ok
+C2 button.min_height@360 = 44 ok
+C2 button.min_height@768 = 44 ok
+C2 button.min_height@1280 = 44 ok
+C3 input.min_height@360 = 44 ok
+C3 input.min_height@768 = 44 ok
+exit=0
+
+> [mcp__Claude_Browser__tabs_select] {"tabId":"tab-3"}
+Fronted tab tab-3.
+
+> [mcp__Claude_Browser__resize_window] {"width":360,"height":800,"tabId":"tab-3"}
+Viewport set to 360x800 on this tab (scaled down to fit if larger than the pane). Reset it with preset "desktop" as soon as you finish testing; the desktop app also clears a size you set when your turn ends or the pane's width changes, so set it again if you still need it. If the user wants to keep a phone or tablet size after your turn, they can pick Mobile or Tablet in the pane's Viewport menu; a custom size you simply set again next turn.
+
+
+Tab Context:
+- Executed on tabId: tab-3
+- Available tabs:
+  • tabId tab-3: "문의" ("http://127.0.0.1:5173/")
+- Viewport: emulating 360x800 (you set this; reset it with preset "desktop" when you finish testing; the app also clears it when your turn ends or the pane's width changes)
+
+> [mcp__Claude_Browser__computer] {"action":"screenshot","tabId":"tab-3","scale":0.5}
+screenshot failed: Screenshot timed out after 5s: the Browser pane is not displayed, so the page is not compositing frames. Display the pane and retry.
+
+> [mcp__Claude_Browser__javascript_tool] {"action":"javascript_exec","text":"const el=document.getElementById('name'); el.focus(); ({hasFocus: document.hasFocus(), matches: el.matches(':focus'), h: el.getBoundingClientRect().height, w: innerWidth})","tabId":"tab-3"}
+{
+  "h": 50,
+  "hasFocus": false,
+  "matches": false,
+  "w": 360
+}
+
+
+Tab Context:
+- Executed on tabId: tab-3
+- Available tabs:
+  • tabId tab-3: "문의" ("http://127.0.0.1:5173/")
+- Viewport: emulating 360x800 (you set this; reset it with preset "desktop" when you finish testing; the app also clears it when your turn ends or the pane's width changes)
+
+> [mcp__Claude_Browser__resize_window] {"preset":"desktop","tabId":"tab-3"}
+Viewport emulation cleared; the tab is back to the pane's responsive size (desktop).
+
+
+Tab Context:
+- Executed on tabId: tab-3
+- Available tabs:
+  • tabId tab-3: "문의" ("http://127.0.0.1:5173/")
+
+> [Bash] cd "<data>/runs/r02/project" && python - <<'EOF'
+p='DESIGN.md'
+s=open(p,encoding='utf8').read()
+def rep(a,b):
+    global s
+    assert s.count(a)==1, a
+    s=s.replace(a,b)
+rep("**Revision:** 1\n","**Revision:** 2\n")
+rep("사용자 승인 Rev 1 (2026-11-01): 문의 폼 화면, 360·768·1280, 기본·focus. 별도 시안 없음.\n",
+"사용자 승인 Rev 1 (2026-11-01): 문의 폼 화면, 360·768·1280, 기본·focus. 별도 시안 없음.\n"
+"사용자 요청 Rev 2 (2026-11-15): C3 입력창 최소 높이 44px, 360·768 추가. 요청에 상태 지정 없음 → 화면 승인 범위(기본·focus)를 적용.\n")
+rep("- C2 버튼 최소 높이 44px (모든 크기, 터치 대상).\n",
+"- C2 버튼 최소 높이 44px (모든 크기, 터치 대상).\n"
+"- C3 입력창(`input`) 최소 높이 44px (360·768). 1280은 이 규칙 범위 밖(현재 코드 값 40, 측정값일 뿐 승인 아님).\n")
+rep("| 터치 높이 | 버튼 | button.min_height 44 | approved (Rev 1) |\n",
+"| 터치 높이 | 버튼 | button.min_height 44 | approved (Rev 1) |\n"
+"| 입력 높이 | 입력창 `input` | input.min_height 44 (360·768) | approved (Rev 2, 2026-11-15 사용자 요청) |\n"
+"| 입력 높이 1280 | 입력창 `input` | input.min_height 40 (1280) | measured (src/tokens.json, style.css) |\n")
+rep("| C2 버튼 최소 높이 44px | node scripts/design-check.mjs | not spot-checked | form | 360·768·1280 | 기본 | 렌더 미측정, focus 상태 |\n",
+"| C2 버튼 최소 높이 44px | node scripts/design-check.mjs (토큰) | 360 button: check 44 / observed 44 (렌더 높이, 2026-11-15) | form | 360·768·1280 | 기본 | focus 상태 |\n"
+"| C3 입력창 최소 높이 44px | node scripts/design-check.mjs (토큰 input.min_height) | 360 #name: check 44 / observed 50 (렌더 외곽 높이 ≥44; computed min-height 44px, content-box) | form `#name` | 360·768 | 기본·focus | focus 상태 렌더 미측정; textarea는 토큰 검사 없음(렌더 126
+ DESIGN.md                | 9 +++++++--
+ scripts/design-check.mjs | 1 +
+ 2 files changed, 8 insertions(+), 2 deletions(-)
+
+> [Bash] cd "<data>/runs/r02/project" && python - <<'EOF'
+p='ROADMAP.md'
+s=open(p,encoding='utf8').read()
+def rep(a,b):
+    global s
+    assert s.count(a)==1, a
+    s=s.replace(a,b)
+rep("Current stage: S-1 폼 디자인 규칙 — complete.\nNext eligible work: none (다음 규칙 대기).\n",
+"Current stage: S-1 폼 디자인 규칙 — in progress (CO1·CO2 complete, CO3 verification pending).\n"
+"Next eligible work: CO3 — focus 상태 렌더 측정(360·768), 또는 C3 상태 범위를 기본만으로 할지 사용자 결정.\n")
+rep("## Stage S-1 폼 디자인 규칙 — complete\n","## Stage S-1 폼 디자인 규칙 — in progress\n")
+rep("Goal: 승인된 디자인 규칙 Rev 1 적용.\n","Goal: 승인된 디자인 규칙 Rev 2 (C1–C3) 적용.\n")
+rep("Completion condition: CO1, CO2 complete.\n","Completion condition: CO1, CO2, CO3 complete.\n")
+rep("| CO1 | 필드 간격 12px (C1) | complete | node scripts/design-check.mjs | TASK.md#co1 |\n"
+    "| CO2 | 버튼 최소 높이 44px (C2) | complete | node scripts/design-check.mjs | TASK.md#co2 |\n",
+"| CO1 | 필드 간격 12px (C1) | complete | DESIGN.md#rule-coverage C1 행: form, 360·768·1280, 기본·focus | TASK.md#co1 |\n"
+"| CO2 | 버튼 최소 높이 44px (C2) | complete | DESIGN.md#rule-coverage C2 행: form, 360·768·1280, 기본 | TASK.md#co2 |\n"
+"| CO3 | 입력창 최소 높이 44px (C3) | verification pending | DESIGN.md#rule-coverage C3 행: form `#name`, 360·768, 기본·focus | TASK.md#co3; gap: focus 상태 렌더 미측정 |\n")
+open(p,'w',encoding='utf8',newline='\n').write(s)
+
+p='TASK.md'
+s=open(p,encoding='utf8').read().rstrip('\n')+"\n"
+s+="""
+## co3 / 2026-11-15 / 입력창 최소 높이 44px
+
+Roadmap item: ROADMAP.md CO3 (verification pending).
+Result: DESIGN Rev 2
+diff --git a/ROADMAP.md b/ROADMAP.md
+index 5348724..a6e2661 100644
+--- a/ROADMAP.md
++++ b/ROADMAP.md
+@@ -3,20 +3,21 @@
+ Project scope: 문의 폼 화면의 디자인 규칙 적용.
+ Product authority: README.md.
+ Product revision / approval: none (README.md has no revision record; read 2026-11-10).
+-Current stage: S-1 폼 디자인 규칙 — complete.
+-Next eligible work: none (다음 규칙 대기).
++Current stage: S-1 폼 디자인 규칙 — in progress (CO1·CO2 complete, CO3 verification pending).
++Next eligible work: CO3 — focus 상태 렌더 측정(360·768), 또는 C3 상태 범위를 기본만으로 할지 사용자 결정.
+ Status words: not started / in progress / verification pending / on hold / complete / removed from scope.
+ 
+-## Stage S-1 폼 디자인 규칙 — complete
++## Stage S-1 폼 디자인 규칙 — in progress
+ 
+-Goal: 승인된 디자인 규칙 Rev 1 적용.
++Goal: 승인된 디자인 규칙 Rev 2 (C1–C3) 적용.
+ Entry condition: none.
+-Compl
+
+> [Bash] cd "<data>/runs/r02/project" && cat > .final-report.md <<'EOF'
+- 작업: DESIGN.md를 Rev 2로 올려 C3(입력창 `input` 최소 높이 44px, 360·768)을 규칙·토큰 역할·Rule Coverage 표에 추가하고, `scripts/design-check.mjs`에 C3 검사 줄을 넣었습니다. ROADMAP에 필수 항목 CO3을 추가하고 CO1·CO2·CO3의 Check를 스크립트 이름 대신 DESIGN Rule Coverage 행으로 바꿨으며, TASK에 co3 항목을 기록했습니다. 토큰과 CSS가 이미 360·768에서 44였기 때문에 제품 코드는 바꾸지 않았습니다.
+- 업데이트 파일: DESIGN.md, scripts/design-check.mjs, ROADMAP.md, TASK.md (커밋하지 않음)
+- 이슈: 1280에서는 입력창 min-height가 40입니다(토큰·CSS). C3 범위 밖이라 위반은 아니지만, C2 버튼은 모든 크기 44라서 서로 다릅니다. 렌더 외곽 높이는 46px입니다.
+- 해결: 없음
+- 남은 문제: CO3은 verification pending입니다. 요청에 상태가 지정되지 않아 화면 승인 범위(기본·focus)를 C3에 적용했는데, focus 상태는 렌더로 측정하지 못했습니다(미리보기 탭이 포커스를 받지 못해 `:focus`가 적용되지 않음). 또 "입력창"을 `input`(#name)으로 해석했습니다. textarea는 토큰 검사 대상이 아니고 렌더 126px만 관찰했습니다.
+- 다음 작업: focus 상태를 360·768에서 렌더 측정해 CO3을 닫을지, 아니면 C3 상태 범위를 기본만으로 줄일지 정해 주세요. textarea도 C3에 포함할지도 확인이 필요합니다.
+
+design check results:
+- C3 input.min_height | 2/2 ok | 2 sizes (360·768) x 1 state (기본), light | code | 360 #name: check 44 / observed 50
+- C3 input 렌더 높이 | 2/2 ≥44 (50·50px) | 2 sizes (360·768) x 1 state (기본), light | rendered | 360 #name: check 44 / observed 50
+- C1 field_gap (재실행) | 1/1 ok | 3 sizes x 2 states, light | code | 768 form: check 12 / observed 12
+- C2 button.min_height (재실행) | 3/3 ok | 3 sizes x 1 state (기본), light | code | 360 button: check 44 / observed 44
+- C2 button 렌더 높이 | 3/3 = 44px | 3 sizes x 1 state (기본), light | rendered | 360 button: check 44 / observed 44
+
+C3 검사는 토큰(min-h
+report-check: ok 1,731 chars aeea2f68
+exit=0
+
+> [TaskStop] {"task_id":"bo67jk91g"}
+{"message":"Successfully stopped task: bo67jk91g (cd \"<data>/runs/r02/project\" && rm -rf .claude && node -e \"const h=require('http'),f=require('fs'),p=require('path');const r=p.join(process.cwd(),'src');h.createServer((q,s)=>{const u=decodeURIComponent(q.url.split('?')[0]);const fp=p.join(r,u==='/'?'index.html':u);if(!fp.startsWith(r)||!f.existsSync(fp)){s.writeHead(404);return s.end();}const t={'.html':'text/html; charset=utf-8','.css':'text/css','.js':'text/javascript'}[p.extname(fp)]||'application/octet-stream';s.writeHead(200,{'content-type':t});s.end(f.readFileSync(fp));}).listen(5173,'127.0.0.1');setTimeout(()=>process.exit(0),900000);\")","task_id":"bo67jk91g","task_type":"local_bash","command":"cd \"<data>/runs/r02/project\" && rm -rf .claude && node -e \"const h=require('http')
+
+> [Bash] cd "<data>/runs/r02/project" && printf '\nreport-check: ok 1,731 chars aeea2f68\n' >> .final-report.md && node "<data>/runs/r02/tools/joedesign/scripts/report-check.mjs" --verify .final-report.md; echo exit=$? && sed -i 's|^Report stamp: see .final-report.md last line.*$|Report stamp: report-check: ok 1,731 chars aeea2f68 (`--verify` exit 0; report not committed).|' TASK.md && grep -n "Report stamp" TASK.md && git status --short && grep -rn "D:/\|D:\\\\" DESIGN.md ROADMAP.md TASK.md scripts || echo "no abs paths"
+stamp: match (1,731 chars aeea2f68); text ok
+exit=0
+11:Report stamp: none ran.
+25:Report stamp: none ran.
+38:Report stamp: report-check: ok 1,731 chars aeea2f68 (`--verify` exit 0; report not committed).
+ M DESIGN.md
+ M ROADMAP.md
+ M TASK.md
+ M scripts/design-check.mjs
+?? .final-report.md
+no abs paths
+
+> [SubagentHandback] {"message":"- 작업: DESIGN.md를 Rev 2로 올려 C3(입력창 `input` 최소 높이 44px, 360·768)을 규칙·토큰 역할·Rule Coverage 표에 추가하고, `scripts/design-check.mjs`에 C3 검사 줄을 넣었습니다. ROADMAP에 필수 항목 CO3을 추가하고 CO1·CO2·CO3의 Check를 스크립트 이름 대신 DESIGN Rule Coverage 행으로 바꿨으며, TASK에 co3 항목을 기록했습니다. 토큰과 CSS가 이미 360·768에서 44였기 때문에 제품 코드는 바꾸지 않았습니다.\n- 업데이트 파일: DESIGN.md, scripts/design-check.mjs, ROADMAP.md, TASK.md (커밋하지 않음)\n- 이슈: 1280에서는 입력창 min-height가 40입니다(토큰·CSS). C3 범위 밖이라 위반은 아니지만, C2 버튼은 모든 크기 44라서 서로 다릅니다. 렌더 외곽 높이는 46px입니다.\n- 해결: 없음\n- 남은 문제: CO3은 verification pending입니다. 요청에 상태가 지정되지 않아 화면 승인 범위(기본·focus)를 C3에 적용했는데, focus 상태는 렌더로 측정하지 못했습니다(미리보기 탭이 포커스를 받지 못해 `:focus`가 적용되지 않음). 또 \"입력창\"을 `input`(#name)으로 해석했습니다. textarea는 토큰 검사 대상이 아니고 렌더 126px만 관찰했습니다.\n- 다음 작업: focus 상태를 360·768에서 렌더 측정해 CO3을 닫을지, 아니면 C3 상태 범위를 기본만으로 줄일지 정해 주세요. textarea도 C3에 포함할지도 확인이 필요합니다.\n\ndesign check results:\n- C3 input.min_height | 2/2 ok | 2 sizes (360·768) x 1 state (기본), light | code | 360 #name: check 44 / observed 50\n- C3 input 렌더 높이 | 2/2 ≥44 (50·50px) | 2 sizes (360·768) x 1 state (기본), light | rendered | 360 #name: check 44 / observed 50\n- C1 field_gap (재실행) | 1/1 ok | 3 sizes x 2 states, light | code | 768 form: check 12 / observed 12\n- C2 button.min_height (재실행) | 3/3 ok | 3 sizes x 1 state (기본), light | code | 360 button: check 44 / observed 44\n- C2 button 렌더 높이 | 3/3 = 44px | 3 sizes x 1 state (기본), light | rendered | 360 button: check 44 / observed 44\n\nC3 검사는 토큰(min-height 값)을 읽습니다. 렌더된 입력창은 content-bo
+{"success":true,"message":"Report delivered to your caller."}

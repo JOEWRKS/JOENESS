@@ -1,0 +1,31 @@
+- 작업: JOENESS 연결, 기준 문서 4개 생성, 첫 작업 '요청 폼 글자 수 표시' 등록(구현은 안 함), 커밋까지 했습니다.
+- 업데이트 파일: 작업 규칙 연결(AGENTS.md, .joeness/setup-state.json), 로드맵(ROADMAP.md), 작업 기록(TASK.md), 이슈 목록(ISSUES.md), 디자인 기준(DESIGN.md).
+- 이슈: 없음.
+- 해결: 없음.
+- 남은 문제: 글자 수를 어떤 형식으로, 어디에 보여 줄지, 500자에 도달하면 어떻게 동작할지 정해지지 않았습니다. 디자인 규칙은 아직 정의·승인 전입니다. 새 채팅에서 지침이 제대로 전달되는지는 확인하지 않았습니다.
+- 다음 작업: 표시 형식을 정한 뒤(R1-D) 구현합니다(R1-C1). 구현 전에 JOEDESIGN으로 글자 수 표시 규칙을 DESIGN에 정의합니다(R1-V1).
+
+design checks: none ran
+
+상세 보고
+- 연결: 설치 스크립트 `project-setup.ps1`의 `-Check` 결과는 ready, `-Apply` 결과는 `current`였습니다. 적용 후 다시 Check해도 `current`였고 경고나 차단은 없었습니다.
+  - 연결 본문의 제품 기준은 `README.md`입니다.
+  - 기록 범위는 승인하신 대로 TASK·ROADMAP·ISSUES·DESIGN이고, DESIGN에는 승인된 결정만 기록합니다.
+  - `<joedesign>`은 문자 그대로 두었고, 커밋된 파일에 절대 경로는 없습니다.
+- ROADMAP:
+  - README에 개정·승인 기록이 없어서 `Product revision / approval: none`으로 적었습니다.
+  - 전체 납품 목표와 단계 순서도 README에 없어서 '미정'으로 두었습니다. 이번 요청 범위만 Stage 1로 만들었습니다. 항목은 R1-D(형식 결정), R1-C1(동작), R1-V1(시각 검사) 세 개입니다.
+  - R1-V1의 검사 기준은 DESIGN 규칙 표의 해당 행과 JOEDESIGN 보고서 스탬프 확인(`node <joedesign>/scripts/report-check.mjs --verify <file>`)입니다.
+- DESIGN:
+  - 승인된 시각 원본이 없어서 권한과 규칙은 '미정'으로 두었습니다. 현재 CSS 값은 '측정값(승인 아님)'으로만 기록했습니다.
+  - 규칙 표는 하나만 있고 아직 행이 없습니다. 나중에 JOEDESIGN 템플릿 형식으로 바꾸더라도 표는 하나로 유지해야 합니다.
+- TASK T1: 등록만 했고 코드는 바꾸지 않았습니다. `Report stamp: none ran`입니다.
+- 확인 범위:
+  - 연결 정상: 확인됨
+  - 문서 적합성: 작성한 문서를 다시 읽어 점검함
+  - 새 채팅 지침 전달: 확인 안 함
+  - 작업 결과 검증: 구현 전이라 해당 없음
+- 선택 사항: Claude Code용 턴 사이 변경 알림 hook은 적용하지 않았습니다. 원하시면 따로 넣을 수 있습니다.
+- 커밋: `0414a80`. 이 보고서를 저장한 `.final-report.md`는 커밋하지 않았습니다.
+
+완료

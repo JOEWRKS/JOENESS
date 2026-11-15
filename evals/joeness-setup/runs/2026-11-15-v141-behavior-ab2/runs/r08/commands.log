@@ -1,0 +1,158 @@
+> [Bash] cd "<data>/runs/r08"; ls -la project tools/joeness-setup tools/joeness-setup/* tools/joedesign; cat tools/joeness-setup/SKILL.md; cd project; git status; git log --oneline | head
+-rw-r--r-- 1 <user> 197609 17455 Nov 10 15:48 tools/joeness-setup/SKILL.md
+
+project:
+total 5
+drwxr-xr-x 1 <user> 197609   0 Nov 15 19:17 .
+drwxr-xr-x 1 <user> 197609   0 Nov 15 19:17 ..
+drwxr-xr-x 1 <user> 197609   0 Nov 15 19:17 .git
+-rw-r--r-- 1 <user> 197609 188 Nov 15 19:17 README.md
+drwxr-xr-x 1 <user> 197609   0 Nov 15 19:17 src
+
+tools/joedesign:
+total 25
+drwxr-xr-x 1 <user> 197609     0 Nov 15 19:17 .
+drwxr-xr-x 1 <user> 197609     0 Nov 15 19:17 ..
+-rw-r--r-- 1 <user> 197609 14766 Nov 15 01:06 SKILL.md
+-rw-r--r-- 1 <user> 197609     6 Nov 15 01:38 VERSION
+drwxr-xr-x 1 <user> 197609     0 Nov 15 19:17 agents
+drwxr-xr-x 1 <user> 197609     0 Nov 15 19:17 references
+drwxr-xr-x 1 <user> 197609     0 Nov 15 19:17 scripts
+drwxr-xr-x 1 <user> 197609     0 Nov 15 19:17 templates
+
+tools/joe
+
+> [Bash] cd "<data>/runs/r08"; cat project/README.md; find project/src; for f in tools/joeness-setup/assets/*; do echo "=== $f"; cat "$f"; done; cat tools/joeness-setup/references/usage.md
+# 문의 폼
+
+작은 정적 문의 폼. `src/index.html`을 브라우저로 열어 쓴다.
+요청 내용은 최대 500자까지 받는다. 화면 크기는 360·768·1280을 지원한다.
+project/src
+project/src/form.js
+project/src/index.html
+project/src/style.css
+=== tools/joeness-setup/assets/AGENTS.md
+# Project working connection
+
+Adapt paths and agreed scope before applying this body.
+- Owners: ROADMAP = goals, stage order, required items (status, check, proof, gap, next).
+  TASK = work results and checks. ISSUES = open defects/workarounds with cause, risk and
+  closure condition. DESIGN = visual rules and approvals. Library/ = research by topic
+  (source, date, fact vs inference). AGENTS = rules only. Product meaning:
+  <exact source or undecided>.
+- Read only what the task needs: resume → current ROADMAP item; defect → ISSUES + target;
+  visual → DESIGN; research → Libr
+
+> [Bash] cd "<data>/runs/r08"; cat project/src/*; cat tools/joeness-setup/references/review-gate.md; cat tools/joedesign/SKILL.md; cat tools/joedesign/VERSION; find tools/joedesign
+const form = document.getElementById('request-form');
+form.addEventListener('submit', (event) => {
+  event.preventDefault();
+  form.reset();
+  alert('접수되었습니다.');
+});
+<!doctype html>
+<html lang="ko">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>문의</title><link rel="stylesheet" href="style.css"></head>
+<body>
+<form id="request-form">
+  <label for="name">이름</label>
+  <input id="name" name="name" required>
+  <label for="body">요청 내용</label>
+  <textarea id="body" name="body" maxlength="500" required></textarea>
+  <button type="submit">보내기</button>
+</form>
+<script src="form.js"></script>
+</body>
+</html>
+form { display: grid; gap: 12px; max-width: 480px; margin: 24px auto; padding: 0 16px; }
+input, textarea { font: inherit; min-height: 44px
+
+> [Bash] cd "<data>/runs/r08"; cat tools/joedesign/templates/DESIGN.md; sed -n 1,80p tools/joeness-setup/scripts/project-setup.ps1; grep -n "param\|Expected\|absent\|joedesign\|Path\b" tools/joeness-setup/scripts/project-setup.ps1 | head -80
+# Project Design
+
+**Reporting:** follow the `## Report Form` section below exactly (보고는 `## Report Form` 절을 그대로 따른다).
+
+**Status:** DRAFT
+**Revision:** 1
+**Product Authority:** <pointer>
+
+<!-- Compact seed, not a required form. Keep only needed project decisions;
+unknown/empty is valid. Do not retranscribe settled source specifications. -->
+
+## Visual Sources and Approval Scope
+
+<!-- Original artifact/version + direct real-asset pointers + surface/state/viewport.
+Distinguish approved visual targets from ordinary references. Supplied ≠ approved.
+Record actual approval and its scope; do not fabricate approval or source facts. -->
+
+## Project Decisions
+
+<!-- Only needed relationships: source observation → preserve/change → concrete
+implementation/native-role mapping → expected observable diffe
+
+> [PowerShell] $p='<data>\runs\r08\project'; Set-Location $p; & '..\tools\joeness-setup\scripts\project-setup.ps1' -Check -ProjectPath $p | ConvertTo-Json -Depth 5
+"{\"action\":\"check\",\"status\":\"ready\",\"verificationScope\":\"managed-connection-only\",\"projectRoot\":\"D:\\\\JOEWRKS\\\\.claude-worktrees\\\\_data\\\\2026-11-15-joeness-v141-behavior2\\\\runs\\\\r08\\\\project\",\"target\":\"AGENTS.md\",\"targetHash\":\"absent\",\"statePath\":\".joeness/setup-state.json\",\"stateHash\":\"absent\",\"blockState\":\"absent\",\"changedTargets\":[],\"blockers\":[],\"rollback\":null,\"unresolvedTargets\":[]}"
+
+> [Bash] mkdir -p "<temp>"; cd "<data>/runs/r08"; grep -n "joedesign\|machine\|[A-Z]:\\\\" tools/joeness-setup/scripts/project-setup.ps1 | head; sed -n 1,60p tools/joedesign/scripts/report-check.mjs
+#!/usr/bin/env node
+// Check a design report draft against the JOEDESIGN result-form contract.
+//
+// usage: node report-check.mjs REPORT.md
+//
+// Exit 0: no findings. Exit 1: findings (one per line, with the report line number).
+// Exit 2: usage or read error.
+//
+// It reads the text only; it does not judge whether a number is true.
+//   R1  a results list exists: at least one line in the form
+//       check | result | sizes x states, mode | rendered or code | spot check
+//   R2  a fix line's result is `fixed` or `changed`; `fixed` needs an observation
+//       in its spot check cell
+//   R3  outside the list, a sentence that states a design-check outcome (pass, count,
+//       no failures) also carries, in that same sentence, the scope (sizes x states),
+//       rendered or code, and the 
+
+> [Write] <temp>
+File created successfully at: <temp> (file state is current in your context — no need to Read it back)
+
+> [PowerShell] $p='<data>\runs\r08\project'; Set-Location $p; $b=[IO.File]::ReadAllBytes('<temp>'); $b64=[Convert]::ToBase64String($b); & '..\tools\joeness-setup\scripts\project-setup.ps1' -Apply -ProjectPath $p -ExpectedRoot $p -ExpectedTargetHash absent -ExpectedStateHash absent -ManagedBodyBase64 $b64; & '..\tools\joeness-setup\scripts\project-setup.ps1' -Check -ProjectPath $p
+{"action":"apply","status":"current","verificationScope":"managed-connection-only","projectRoot":"<data>\\runs\\r08\\project","target":"AGENTS.md","targetHash":"718ffa0b4f296ee5fc57b23e7ed887053991129007e777fff5af452953c98df8","statePath":".joeness/setup-state.json","stateHash":"5013ae2297c5cec5c2452219c883b1faaaba0520e6fa07eb268a4026d821ff64","blockState":"clean","changedTargets":["AGENTS.md",".joeness/setup-state.json"],"blockers":[],"rollback":null,"unresolvedTargets":[]}
+{"action":"check","status":"current","verificationScope":"managed-connection-only","projectRoot":"<data>\\runs\\r08\\project","target":"AGENTS.md","targetHash":"718ffa0b4f296ee5fc57b23e7ed887053991129007e777fff5af452953c98df8","statePath":".joeness/setup-state.json","stateHash":"5013ae2297c5cec5c2452219c883b1faaaba052
+
+> [Bash] cd "<data>/runs/r08/project"; cat .joeness/setup-state.json | head -c 400; echo; grep -c "JOEWRKS" AGENTS.md .joeness/setup-state.json
+{"schemaVersion":1,"toolVersion":"0.2","targetRelativePath":"AGENTS.md","appliedBlockBase64":"PCEtLSBKT0VORVNTLVNFVFVQOkJFR0lOIC0tPgojIFByb2plY3Qgd29ya2luZyBjb25uZWN0aW9uCgotIE93bmVyczogUk9BRE1BUC5tZCA9IGdvYWxzLCBzdGFnZSBvcmRlciwgcmVxdWlyZWQgaXRlbXMgKHN0YXR1cywgY2hlY2ssIHByb29mLCBnYXAsIG5leHQpLgogIFRBU0subWQgPSB3b3JrIHJlc3VsdHMgYW5kIGNoZWNrcy4gSVNTVUVTLm1kID0gb3BlbiBkZWZlY3RzL3dvcmthcm91bmRzIHdpdG
+AGENTS.md:0
+.joeness/setup-state.json:0
+
+> [Write] <data>\runs\r08\project\ROADMAP.md
+File created successfully at: <data>\runs\r08\project\ROADMAP.md (file state is current in your context — no need to Read it back)
+
+> [Write] <data>\runs\r08\project\TASK.md
+File created successfully at: <data>\runs\r08\project\TASK.md (file state is current in your context — no need to Read it back)
+
+> [Write] <data>\runs\r08\project\ISSUES.md
+File created successfully at: <data>\runs\r08\project\ISSUES.md (file state is current in your context — no need to Read it back)
+
+> [Write] <data>\runs\r08\project\DESIGN.md
+File created successfully at: <data>\runs\r08\project\DESIGN.md (file state is current in your context — no need to Read it back)
+
+> [Bash] cd "<data>/runs/r08/project"; sed -i 's/TASK.md#t1/TASK.md T1/g' ROADMAP.md; grep -c "TASK.md T1" ROADMAP.md; grep -rn "JOEWRKS\|[A-Z]:\\\\" AGENTS.md ROADMAP.md TASK.md ISSUES.md DESIGN.md; git add -A; git status --short; git commit -q -m "JOENESS 연결: AGENTS 연결 구역과 ROADMAP·TASK·ISSUES·DESIGN 생성, T1 글자 수 표시 등록
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"; git log --oneline | head -2; git status --short; powershell -NoProfile -File ../tools/joeness-setup/scripts/project-setup.ps1 -Check -ProjectPath "$(pwd -W)"
+2
+A  .joeness/setup-state.json
+A  AGENTS.md
+A  DESIGN.md
+A  ISSUES.md
+A  ROADMAP.md
+A  TASK.md
+cd38a79 JOENESS 연결: AGENTS 연결 구역과 ROADMAP·TASK·ISSUES·DESIGN 생성, T1 글자 수 표시 등록
+b732eed fixture
+{"action":"check","status":"current","verificationScope":"managed-connection-only","projectRoot":"<data>\\runs\\r08\\project","target":"AGENTS.md","targetHash":"718ffa0b4f296ee5fc57b23e7ed887053991129007e777fff5af452953c98df8","statePath":".joeness/setup-state.json","stateHash":"5013ae2297c5cec5c2452219c883b1faaaba0520e6fa07eb268a4026d821ff64","blockState":"clean","changedTargets":[],"blockers":[],"rollback":null,"unresolvedTargets":[]}
+[This command modified 1 file you've previously read: ..\.claude-worktrees\_data\2026-11-15-joeness-v141-behavior2\runs\r08\project\ROADMAP.md. Call Read before editing.
+
+> [Write] <data>\runs\r08\project\.final-report.md
+File created successfully at: <data>\runs\r08\project\.final-report.md (file state is current in your context — no need to Read it back)
+
+> [SubagentHandback] {"message":"r08 is finished. The final report is saved, uncommitted, at <data>\\runs\\r08\\project\\.final-report.md. It holds the six bullets, `design checks: none ran` and a short detail section.\n\n- **Connection:** I ran the installer script `project-setup.ps1`. `-Check` returned ready, `-Apply` returned current, and a second `-Check` returned current with the block clean. The connection body names README.md as the product source and lists the approved recording scope (TASK·ROADMAP·ISSUES·DESIGN). It keeps the literal `<joedesign>` placeholder, and no machine path appears in AGENTS.md, the state file or the four records.\n- **Records:**\n  - ROADMAP.md: overall direction is marked pending. There is one stage, with item F1 \"요청 폼 글자 수 표시\" set to not started. Its check has a technical part, DESIGN rule rows that are not defined yet, and the `report-check.mjs --verify` step.\n  - TASK.md: entry T1, registration only. No code changed, no check ran, and `Report stamp: none ran`.\n  - ISSUES.md: none.\n  - DESIGN.md: DRAFT with no approved visual source. Values read from `src/style.css` are listed as measured, not approved. The rule-coverage table is empty, and the Report Form section is copied from the JOEDESIGN template. Undecided: the counter's format, position and near-limit display.\n- **Commit:** `cd38a79` on master holds 6 files: AGENTS.md, .joeness/setup-state.json, ROADMAP.md, TASK.md, ISSUES.md and DESIGN.md. The working tree is clean apart from `.final-report.md`.\n
+{"success":true,"message":"Report delivered to your caller."}

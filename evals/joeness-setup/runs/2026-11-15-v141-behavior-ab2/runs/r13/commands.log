@@ -1,0 +1,195 @@
+> [Bash] cd "<data>/runs/r13" && ls -la project tools/joeness-setup tools/joeness-setup/* tools/joedesign && cat tools/joeness-setup/SKILL.md && cd project && git status && git log --oneline | head
+-rw-r--r-- 1 <user> 197609 17455 Nov 10 15:48 tools/joeness-setup/SKILL.md
+
+project:
+total 5
+drwxr-xr-x 1 <user> 197609   0 Nov 15 19:17 .
+drwxr-xr-x 1 <user> 197609   0 Nov 15 19:17 ..
+drwxr-xr-x 1 <user> 197609   0 Nov 15 19:17 .git
+-rw-r--r-- 1 <user> 197609 188 Nov 15 19:17 README.md
+drwxr-xr-x 1 <user> 197609   0 Nov 15 19:17 src
+
+tools/joedesign:
+total 25
+drwxr-xr-x 1 <user> 197609     0 Nov 15 19:17 .
+drwxr-xr-x 1 <user> 197609     0 Nov 15 19:17 ..
+-rw-r--r-- 1 <user> 197609 14766 Nov 15 01:06 SKILL.md
+-rw-r--r-- 1 <user> 197609     6 Nov 15 01:38 VERSION
+drwxr-xr-x 1 <user> 197609     0 Nov 15 19:17 agents
+drwxr-xr-x 1 <user> 197609     0 Nov 15 19:17 references
+drwxr-xr-x 1 <user> 197609     0 Nov 15 19:17 scripts
+drwxr-xr-x 1 <user> 197609     0 Nov 15 19:17 templates
+
+tools/joe
+
+> [Bash] cd "<data>/runs/r13" && cat project/README.md; find project/src -type f | head -50; for f in tools/joeness-setup/assets/*; do echo "=== $f"; cat "$f"; done
+# 문의 폼
+
+작은 정적 문의 폼. `src/index.html`을 브라우저로 열어 쓴다.
+요청 내용은 최대 500자까지 받는다. 화면 크기는 360·768·1280을 지원한다.
+project/src/form.js
+project/src/index.html
+project/src/style.css
+=== tools/joeness-setup/assets/AGENTS.md
+# Project working connection
+
+Adapt paths and agreed scope before applying this body.
+- Owners: ROADMAP = goals, stage order, required items (status, check, proof, gap, next).
+  TASK = work results and checks. ISSUES = open defects/workarounds with cause, risk and
+  closure condition. DESIGN = visual rules and approvals. Library/ = research by topic
+  (source, date, fact vs inference). AGENTS = rules only. Product meaning:
+  <exact source or undecided>.
+- Read only what the task needs: resume → current ROADMAP item; defect → ISSUES + target;
+  visual → DESIGN; research → Library; complet
+
+> [Bash] cd "<data>/runs/r13/tools" && cat joeness-setup/references/review-gate.md joeness-setup/references/usage.md; cat joedesign/SKILL.md; cat joedesign/VERSION; ls -R joedesign
+<persisted-output>
+Output too large (30.8KB). Full output saved to: <home>\.claude\projects\D--JOEWRKS-JOENESS\12ff189e-7698-4c57-b72e-5f55f8821590\tool-results\b1d95f9gb.txt
+
+Preview (first 2KB):
+# External review consumption
+
+Use only where an authorized roadmap outcome requires an external specialist
+verdict. No new public skill, global payload, background worker or stage engine.
+Node.js 18+ is required for this explicit read-only helper. Missing runtime or
+missing input means unverified; do not fall back to a completion claim.
+
+## Owners and invocation
+
+- User/authorized scope owner: approves criteria, required targets, dependencies,
+  scope removal and acceptance. Pin the baseline SHA outside the result file.
+- Specialist (JOEDESIGN for visual work): owns criterion interpretation, req
+
+> [Read] <home>\.claude\projects\D--JOEWRKS-JOENESS\12ff189e-7698-4c57-b72e-5f55f8821590\tool-results\b1d95f9gb.txt
+1	# External review consumption
+2	
+3	Use only where an authorized roadmap outcome requires an external specialist
+4	verdict. No new public skill, global payload, background worker or stage engine.
+5	Node.js 18+ is required for this explicit read-only helper. Missing runtime or
+6	missing input means unverified; do not fall back to a completion claim.
+7	
+8	## Owners and invocation
+9	
+10	- User/authorized scope owner: approves criteria, required targets, dependencies,
+11	  scope removal and acceptance. Pin the baseline SHA outside the result file.
+12	- Specialist (JOEDESIGN for visual work): owns criterion interpretation, required
+13	  screen/state/viewport coverage, actual measurements, professional review,
+14	  result production and invalidation dependencies. Hashes alone are not visual pro
+
+> [Bash] cd "<data>/runs/r13" && cat tools/joedesign/templates/DESIGN.md; echo ====; cat project/src/*; echo ====; head -80 tools/joeness-setup/scripts/project-setup.ps1; grep -n "param\|absolute\|machine\|joedesign" tools/joeness-setup/scripts/project-setup.ps1 | head -40
+# Project Design
+
+**Reporting:** follow the `## Report Form` section below exactly (보고는 `## Report Form` 절을 그대로 따른다).
+
+**Status:** DRAFT
+**Revision:** 1
+**Product Authority:** <pointer>
+
+<!-- Compact seed, not a required form. Keep only needed project decisions;
+unknown/empty is valid. Do not retranscribe settled source specifications. -->
+
+## Visual Sources and Approval Scope
+
+<!-- Original artifact/version + direct real-asset pointers + surface/state/viewport.
+Distinguish approved visual targets from ordinary references. Supplied ≠ approved.
+Record actual approval and its scope; do not fabricate approval or source facts. -->
+
+## Project Decisions
+
+<!-- Only needed relationships: source observation → preserve/change → concrete
+implementation/native-role mapping → expected observable diffe
+
+> [PowerShell] Set-Location "<data>\runs\r13\project"; & "..\tools\joeness-setup\scripts\project-setup.ps1" -Check -ProjectPath (Get-Location).Path; node --version
+{"action":"check","status":"ready","verificationScope":"managed-connection-only","projectRoot":"<data>\\runs\\r13\\project","target":"AGENTS.md","targetHash":"absent","statePath":".joeness/setup-state.json","stateHash":"absent","blockState":"absent","changedTargets":[],"blockers":[],"rollback":null,"unresolvedTargets":[]}
+v26.3.0
+
+> [Bash] mkdir -p "<temp>" && cd "<data>/runs/r13" && sed -e '/^Adapt paths and agreed scope before applying this body.$/d' -e 's|  <exact source or undecided>.|  README.md (approval record: none).|' -e 's|- Recording (<agreed scope>):|- Recording (TASK, ROADMAP, ISSUES, DESIGN; approved 2026-11-15):|' tools/joeness-setup/assets/AGENTS.md > "<temp>" && grep -n "Product meaning" -A1 "<temp>"; grep -n "Recording\|joedesign\|Adapt" "<temp>"
+6:  (source, date, fact vs inference). AGENTS = rules only. Product meaning:
+7-  README.md (approval record: none).
+19:  `node <joedesign>/scripts/report-check.mjs --verify <file>` and require exit 0; a missing or mismatched
+26:- Recording (TASK, ROADMAP, ISSUES, DESIGN; approved 2026-11-15): after real work, update TASK and the affected ROADMAP item.
+
+> [Bash] cd "<temp>" && sed -i '7a\- Design checks use JOEDESIGN. `<joedesign>` means the JOEDESIGN skill folder installed on the\n  working machine (JOEDESIGN_HOME when set); never write a machine path into records.' body.md && sed -n 1,12p body.md
+# Project working connection
+
+- Owners: ROADMAP = goals, stage order, required items (status, check, proof, gap, next).
+  TASK = work results and checks. ISSUES = open defects/workarounds with cause, risk and
+  closure condition. DESIGN = visual rules and approvals. Library/ = research by topic
+  (source, date, fact vs inference). AGENTS = rules only. Product meaning:
+  README.md (approval record: none).
+- Design checks use JOEDESIGN. `<joedesign>` means the JOEDESIGN skill folder installed on the
+  working machine (JOEDESIGN_HOME when set); never write a machine path into records.
+- Read only what the task needs: resume → current ROADMAP item; defect → ISSUES + target;
+  visual → DESIGN; research → Library; completion → required items and their proof.
+- Authority: only the user or named o
+
+> [PowerShell] Set-Location "<data>\runs\r13\project"; $b=[IO.File]::ReadAllBytes("<temp>"); $b64=[Convert]::ToBase64String($b); $root=(Get-Location).Path; & "..\tools\joeness-setup\scripts\project-setup.ps1" -Apply -ProjectPath $root -ExpectedRoot $root -ExpectedTargetHash absent -ExpectedStateHash absent -ManagedBodyBase64 $b64; & "..\tools\joeness-setup\scripts\project-setup.ps1" -Check -ProjectPath $root
+{"action":"apply","status":"current","verificationScope":"managed-connection-only","projectRoot":"<data>\\runs\\r13\\project","target":"AGENTS.md","targetHash":"1c76748f384202a4677bb0e3e3b675f4681cc3a6c934c8831cd6351c7ffe069d","statePath":".joeness/setup-state.json","stateHash":"b82c6b9f25ecc2ecd54c11a390e83f5965d718304183158661d6b9d89dde6646","blockState":"clean","changedTargets":["AGENTS.md",".joeness/setup-state.json"],"blockers":[],"rollback":null,"unresolvedTargets":[]}
+{"action":"check","status":"current","verificationScope":"managed-connection-only","projectRoot":"<data>\\runs\\r13\\project","target":"AGENTS.md","targetHash":"1c76748f384202a4677bb0e3e3b675f4681cc3a6c934c8831cd6351c7ffe069d","statePath":".joeness/setup-state.json","stateHash":"b82c6b9f25ecc2ecd54c11a390e83f5965d7183
+
+> [Bash] cd "<data>/runs/r13/project" && cat .joeness/setup-state.json; grep -c "D:" AGENTS.md .joeness/setup-state.json
+{"schemaVersion":1,"toolVersion":"0.2","targetRelativePath":"AGENTS.md","appliedBlockBase64":"PCEtLSBKT0VORVNTLVNFVFVQOkJFR0lOIC0tPgojIFByb2plY3Qgd29ya2luZyBjb25uZWN0aW9uCgotIE93bmVyczogUk9BRE1BUCA9IGdvYWxzLCBzdGFnZSBvcmRlciwgcmVxdWlyZWQgaXRlbXMgKHN0YXR1cywgY2hlY2ssIHByb29mLCBnYXAsIG5leHQpLgogIFRBU0sgPSB3b3JrIHJlc3VsdHMgYW5kIGNoZWNrcy4gSVNTVUVTID0gb3BlbiBkZWZlY3RzL3dvcmthcm91bmRzIHdpdGggY2F1c2UsIHJpc2sgYW5kCiAgY2xvc3VyZSBjb25kaXRpb24uIERFU0lHTiA9IHZpc3VhbCBydWxlcyBhbmQgYXBwcm92YWxzLiBMaWJyYXJ5LyA9IHJlc2VhcmNoIGJ5IHRvcGljCiAgKHNvdXJjZSwgZGF0ZSwgZmFjdCB2cyBpbmZlcmVuY2UpLiBBR0VOVFMgPSBydWxlcyBvbmx5LiBQcm9kdWN0IG1lYW5pbmc6CiAgUkVBRE1FLm1kIChhcHByb3ZhbCByZWNvcmQ6IG5vbmUpLgotIERlc2lnbiBjaGVja3MgdXNlIEpPRURFU0lHTi4gYDxqb2VkZXNpZ24+YCBtZWFucyB0aGUgSk9FREVTSUdOIHNraWxsIGZvbGRlciBpbnN0YWxsZWQgb24gdG
+
+> [Bash] cd "<data>/runs/r13/project" && cat > ROADMAP.md <<'EOF'
+# Project roadmap
+
+Project scope: README.md에 적힌 정적 문의 폼(`src/`) 유지·개선. 현재 승인된 작업은 S1(요청 폼 글자 수 표시) 하나이며, 그 밖의 전체 목표·이후 단계는 결정 대기(direction pending; 사용자 결정 필요).
+Product authority: [README.md](README.md) (요청 내용 최대 500자, 화면 크기 360·768·1280 지원). S1의 근거는 2026-11-15 사용자 요청.
+Product revision / approval: README.md at commit 490f22d; 별도 제품 승인 기록 없음.
+Current stage: S1 — not started (TASK 등록만, 구현 미착수).
+Next eligible work: S1-2 표시 형식 결정(사용자 확인) 및 S1-1 구현 — 구현은 사용자 지시 후. 차단된 의존 없음.
+Status words: not started / in progress / verification pending / on hold / complete / removed from scope.
+
+## Stage S1 / 요청 폼 글자 수 표시 — not started
+
+Goal: 요청 내용 입력란에 현재 글자 수를 표시한다 (2026-11-15 사용자 요청).
+Entry condition: none.
+Completion condition: S1-1~S1-3이 각 Check를 현재 입력에서 통과. 사용자 수락은 아래 User acceptance에 따로 둔다.
+
+| ID | Required outcome | Status | Check / completion criterion | Evidence or gap |
+| --- | --- | --- | --- | --- |
+| S1-1 | 요청 내용 글자 수가 500자 제한과 함께 표시되고 입력·삭제·붙여넣기·전송 후 초기화 때 실제 값과 일치 | not started | Technical: `src/index.html`을 브라우저에서 열어 빈 값·입력·삭제·붙여넣기·500자·전송 후 reset에서 표시 수 = textarea 값 길이, 제한 수 = `maxlength`(500) 확인; 결과 TASK#t1 | 미구현 ([TASK#t1](TASK.md#t1--2026-11-15--요청-폼-글자-수-표시)) |
+| S1-2 | 표시 형식(예: `N/500`)·위치·한도 도달 시 표시 결정 | not started | 사용자 확인 (README와 요청 모두 형식을 정하지 않음; 작업자가 고른 형식은 확인 전까지 verification pending) | 미결정 |
+| S1-3 | 글자 수 표시가 지원 화면 크기에서 레이아웃을 깨지 않음 | not started | DESIGN.md#rule-coverage L1·C1 rows on current inputs (360·768·1
+no-machine-paths
+
+> [Bash] cd "<data>/runs/r13/project" && git add AGENTS.md .joeness/setup-state.json ROADMAP.md TASK.md ISSUES.md DESIGN.md && git status --short && git commit -q -m "chore: connect JOENESS and register T1 (request form character count)
+
+Add JOENESS AGENTS connection block and setup state, ROADMAP (stage S1),
+TASK (T1 registered, not implemented), ISSUES (none) and DESIGN (DRAFT,
+JOEDESIGN rule coverage and report form).
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>" && git log --oneline | head -3 && git status --short
+A  .joeness/setup-state.json
+A  AGENTS.md
+A  DESIGN.md
+A  ISSUES.md
+A  ROADMAP.md
+A  TASK.md
+0122393 chore: connect JOENESS and register T1 (request form character count)
+490f22d fixture
+
+> [Bash] cd "<data>/runs/r13/project" && cat > .final-report.md <<'EOF'
+- 작업: JOENESS 연결, 기준 문서 4개 생성, 첫 작업 T1 '요청 폼 글자 수 표시' 등록 (구현 안 함), 커밋.
+- 업데이트 파일: 작업 규칙 연결(AGENTS.md), 연결 기준 상태(.joeness/setup-state.json), 로드맵(ROADMAP.md), 작업 기록(TASK.md), 문제 목록(ISSUES.md), 디자인 규칙(DESIGN.md).
+- 이슈: 없음.
+- 해결: 없음.
+- 남은 문제: 글자 수 표시 형식·위치 미결정, 구현·기술 검사·디자인 검사 미실행, 새 채팅에서 지침 전달 확인 안 함.
+- 다음 작업: 표시 형식 결정(예: `N/500`, 입력란 아래 오른쪽 등) 후 구현 지시 → S1-1 기술 확인, S1-3 JOEDESIGN 검사.
+
+design checks: none ran
+
+상세 보고
+- 연결: 설치 스크립트 `-Check`(ready) → `-Apply`(current) → 재확인 `-Check`(current, blocker 없음). AGENTS 연결 본문의 `<joedesign>`은 기기 경로 대신 문자 그대로 두었고, "작업 기기에 설치된 JOEDESIGN 폴더(JOEDESIGN_HOME이 있으면 그것)"라는 뜻을 한 줄 덧붙였습니다. 커밋된 파일에 기기 경로 없음 확인.
+- 기록 범위: TASK·ROADMAP·ISSUES·DESIGN (2026-11-15 승인). 제품 기준은 README.md(500자 제한, 360·768·1280 지원), 별도 승인 기록 없음.
+- ROADMAP: 단계 S1 하나만 등록(not started). S1-1 글자 수 표시 동작(기술 확인), S1-2 표시 형식 결정(사용자 확인 필요 — README와 요청 모두 형식을 정하지 않음), S1-3 레이아웃(DESIGN 규칙표 L1·C1 행, 저장된 JOEDESIGN 보고서 `report-check --verify` 통과 필요). S1 이후 프로젝트 목표는 결정 대기로 두었습니다.
+- DESIGN: DRAFT Rev 1. 승인된 시각 원본 없음. 현재 CSS 값은 measured로만 기록(승인 아님). C1 규칙은 형식 결정 후 확정.
+- TASK T1: 등록만, 변경 코드 없음, Report stamp `none ran`.
+- 선택 사항(미적용): Claude Code용 턴 사이 변경 알림 hook은 별도 승인 시에만 추가합니다.
+- 커밋: `0122393` (master). 이 보고 파일은 커밋하지 않았습니다. 연결 정상과 문서 적합성은 확인했고, 새 채팅에서의 지침 전달과 작업 결과 검증은 아직 확인하지 않았습니다.
+EOF
+git status --short
+?? .final-report.md
+
+> [SubagentHandback] {"message":"완료"}
+{"success":true,"message":"Report delivered to your caller."}

@@ -1,0 +1,8 @@
+## A
+all: finished 8/8 | runs with committed machine path 0/8 (hits 0) | runs with uncommitted machine path 0/8 | leak 1/8 | ends with question-like line 2/8 | used session scratchpad 4/8 | used browser 4/8 | read SKILL.md 7/8
+S1: committed 4/4 | uncommitted left 0/4 | AGENTS <joedesign> kept 4/4 | AGENTS machine path 0/4 | apply blocked 0/4 | apply current 4/4 | judge -Check current 4/4 | warnings 0/4 | state committed 4/4 | 5 docs committed 4/4 | 글자 수 item 4/4
+S2: one rule-coverage section 4/4 | one rule table 4/4 | Result column 0/4 | C3 in Rule Coverage table 4/4 | C3 row once 4/4 | 2nd DESIGN file 0/4 | CO3 row 4/4 | CO3 -> table 4/4 | CO3 names C3 4/4 | CO3 script only 0/4 | check script changed 4/4
+## B
+all: finished 8/8 | runs with committed machine path 0/8 (hits 0) | runs with uncommitted machine path 0/8 | leak 0/8 | ends with question-like line 1/8 | used session scratchpad 4/8 | used browser 4/8 | read SKILL.md 6/8
+S1: committed 4/4 | uncommitted left 0/4 | AGENTS <joedesign> kept 4/4 | AGENTS machine path 0/4 | apply blocked 0/4 | apply current 4/4 | judge -Check current 4/4 | warnings 0/4 | state committed 4/4 | 5 docs committed 4/4 | 글자 수 item 4/4
+S2: one rule-coverage section 4/4 | one rule table 4/4 | Result column 0/4 | C3 in Rule Coverage table 4/4 | C3 row once 4/4 | 2nd DESIGN file 0/4 | CO3 row 4/4 | CO3 -> table 4/4 | CO3 names C3 4/4 | CO3 script only 0/4 | check script changed 4/4

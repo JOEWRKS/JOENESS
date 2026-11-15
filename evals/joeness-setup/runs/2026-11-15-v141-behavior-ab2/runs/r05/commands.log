@@ -1,0 +1,119 @@
+> [PowerShell] $t='<data>\runs\r05'; Get-ChildItem -Recurse -Force "$t\project" | Where-Object FullName -notmatch '\\.git\\' | Select-Object FullName; Get-ChildItem -Recurse "$t\tools" | Select-Object FullName; Get-Content "$t\tools\joeness-setup\SKILL.md" -Encoding utf8
+FullName                                                                                                               
+--------                                                                                                               
+<data>\runs\r05\project\.git                             
+<data>\runs\r05\project\src                              
+<data>\runs\r05\project\README.md                        
+<data>\runs\r05\project\src\form.js                      
+<data>\runs\r05\project\src\index.html                   
+<data>\runs\r05\project\src\style.css                    
+<data>\runs\r05\tools\joedesign                          
+<data>\runs\r05\tools\joeness-setup                      
+<data>\runs\r05\tools\joedesign\agents                   
+<data>\runs\r05\tools\joede
+
+> [PowerShell] $t='<data>\runs\r05\tools\joeness-setup'; foreach($f in 'assets\AGENTS.md','assets\ROADMAP.md','assets\TASK.md','assets\ISSUES.md','assets\DESIGN.md','references\usage.md','references\review-gate.md'){ "===== $f"; Get-Content "$t\$f" -Encoding utf8 }
+===== assets\AGENTS.md
+# Project working connection
+
+Adapt paths and agreed scope before applying this body.
+- Owners: ROADMAP = goals, stage order, required items (status, check, proof, gap, next).
+  TASK = work results and checks. ISSUES = open defects/workarounds with cause, risk and
+  closure condition. DESIGN = visual rules and approvals. Library/ = research by topic
+  (source, date, fact vs inference). AGENTS = rules only. Product meaning:
+  <exact source or undecided>.
+- Read only what the task needs: resume → current ROADMAP item; defect → ISSUES + target;
+  visual → DESIGN; research → Library; completion → required items and their proof.
+- Authority: only the user or named owner approves. Code, newer notes and old handoffs
+  never do; a handoff only points to sources. 
+
+> [PowerShell] $p='<data>\runs\r05\project'; cd $p; git status; git log --oneline -5; Get-Content README.md -Encoding utf8; Get-Content src\index.html,src\form.js,src\style.css -Encoding utf8; $j='<data>\runs\r05\tools\joedesign'; Get-Content "$j\SKILL.md" -Encoding utf8; Get-Content "$j\templates\DESIGN.md" -Encoding utf8
+On branch master
+nothing to commit, working tree clean
+aa9140d fixture
+# 문의 폼
+
+작은 정적 문의 폼. `src/index.html`을 브라우저로 열어 쓴다.
+요청 내용은 최대 500자까지 받는다. 화면 크기는 360·768·1280을 지원한다.
+<!doctype html>
+<html lang="ko">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>문의</title><link rel="stylesheet" href="style.css"></head>
+<body>
+<form id="request-form">
+  <label for="name">이름</label>
+  <input id="name" name="name" required>
+  <label for="body">요청 내용</label>
+  <textarea id="body" name="body" maxlength="500" required></textarea>
+  <button type="submit">보내기</button>
+</form>
+<script src="form.js"></script>
+</body>
+</html>
+const form = document.getElementById('request-form');
+form.addEventListener('submit', (event) => {
+  event.preve
+
+> [PowerShell] $s='<data>\runs\r05\tools\joeness-setup\scripts\project-setup.ps1'; Get-Content $s -Encoding utf8 -TotalCount 80; Select-String -Path $s -Pattern 'warnings|absolute|ExpectedTargetHash|Base64' | Select-Object -First 30 | ForEach-Object { "$($_.LineNumber): $($_.Line)" }
+[CmdletBinding()]
+param(
+ [switch]$Check, [switch]$Apply, [switch]$Detach, [switch]$Relocate, [string]$ProjectPath,
+ [string]$ExpectedRoot, [string]$ExpectedTargetHash, [string]$ExpectedStateHash,
+ [string]$ManagedBodyBase64
+)
+Set-StrictMode -Version Latest
+$ErrorActionPreference='Stop'
+$script:SetupUtf8=New-Object Text.UTF8Encoding($false,$true)
+$script:SetupBegin='<!-- JOENESS-SETUP:BEGIN -->'
+$script:SetupEnd='<!-- JOENESS-SETUP:END -->'
+# Two observed saved-project chats received only the first 32 KiB of AGENTS.md.
+$script:SetupInitialWindowBytes=32768
+function Test-SetupInitialWindow([string]$Text,[int]$Start,[int]$Length) {
+ $Start -ge 0 -and $script:SetupUtf8.GetByteCount($Text.Substring(0,$Start+$Length)) -le $script:SetupInitialWindowBytes
+}
+function Test-SetupWind
+
+> [PowerShell] $p='<data>\runs\r05\project'; cd $p; & '<data>\runs\r05\tools\joeness-setup\scripts\project-setup.ps1' -Check -ProjectPath $p; node --version
+{"action":"check","status":"ready","verificationScope":"managed-connection-only","projectRoot":"<data>\\runs\\r05\\project","target":"AGENTS.md","targetHash":"absent","statePath":".joeness/setup-state.json","stateHash":"absent","blockState":"absent","changedTargets":[],"blockers":[],"warnings":[],"rollback":null,"unresolvedTargets":[]}
+v26.3.0
+
+> [Bash] mkdir -p "<temp>" && cd "<data>/runs/r05/project" && git config user.name; git config user.email; git branch
+fixture
+fixture@example.invalid
+* master
+
+> [Write] <temp>
+File created successfully at: <temp> (file state is current in your context — no need to Read it back)
+
+> [PowerShell] $p='<data>\runs\r05\project'; cd $p; $b=[Convert]::ToBase64String([IO.File]::ReadAllBytes('<temp>')); $s='<data>\runs\r05\tools\joeness-setup\scripts\project-setup.ps1'; & $s -Apply -ProjectPath $p -ExpectedRoot $p -ExpectedTargetHash absent -ExpectedStateHash absent -ManagedBodyBase64 $b; & $s -Check -ProjectPath $p
+{"action":"apply","status":"current","verificationScope":"managed-connection-only","projectRoot":"<data>\\runs\\r05\\project","target":"AGENTS.md","targetHash":"12cec4fb91f926ecfef0fb95b344c2d0ed6368f2ea8ee032956791f4b836a002","statePath":".joeness/setup-state.json","stateHash":"fe2ae1329314b764d17b1a546af3b2dd2a241de95166eeb783867f7683e219ba","blockState":"clean","changedTargets":["AGENTS.md",".joeness/setup-state.json"],"blockers":[],"warnings":[],"rollback":null,"unresolvedTargets":[]}
+{"action":"check","status":"current","verificationScope":"managed-connection-only","projectRoot":"<data>\\runs\\r05\\project","target":"AGENTS.md","targetHash":"12cec4fb91f926ecfef0fb95b344c2d0ed6368f2ea8ee032956791f4b836a002","statePath":".joeness/setup-state.json","stateHash":"fe2ae1329314b764d17b1a546
+
+> [Write] <data>\runs\r05\project\ROADMAP.md
+File created successfully at: <data>\runs\r05\project\ROADMAP.md (file state is current in your context — no need to Read it back)
+
+> [Write] <data>\runs\r05\project\TASK.md
+File created successfully at: <data>\runs\r05\project\TASK.md (file state is current in your context — no need to Read it back)
+
+> [Write] <data>\runs\r05\project\ISSUES.md
+File created successfully at: <data>\runs\r05\project\ISSUES.md (file state is current in your context — no need to Read it back)
+
+> [Write] <data>\runs\r05\project\DESIGN.md
+File created successfully at: <data>\runs\r05\project\DESIGN.md (file state is current in your context — no need to Read it back)
+
+> [PowerShell] $p='<data>\runs\r05\project'; cd $p; Select-String -Path AGENTS.md,ROADMAP.md,TASK.md,ISSUES.md,DESIGN.md,.joeness\setup-state.json -Pattern '[A-Za-z]:\\|JOEWRKS|Users' ; git add -A; git status --short; git commit -q -m "chore: connect JOENESS (AGENTS block, ROADMAP/TASK/ISSUES/DESIGN) and register R1 character counter task" -m "Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"; git log --oneline -2; git status --short; & '<data>\runs\r05\tools\joeness-setup\scripts\project-setup.ps1' -Check -ProjectPath $p
+A  .joeness/setup-state.json
+A  AGENTS.md
+A  DESIGN.md
+A  ISSUES.md
+A  ROADMAP.md
+A  TASK.md
+5456b41 chore: connect JOENESS (AGENTS block, ROADMAP/TASK/ISSUES/DESIGN) and register R1 character counter task
+aa9140d fixture
+{"action":"check","status":"current","verificationScope":"managed-connection-only","projectRoot":"<data>\\runs\\r05\\project","target":"AGENTS.md","targetHash":"12cec4fb91f926ecfef0fb95b344c2d0ed6368f2ea8ee032956791f4b836a002","statePath":".joeness/setup-state.json","stateHash":"fe2ae1329314b764d17b1a546af3b2dd2a241de95166eeb783867f7683e219ba","blockState":"clean","changedTargets":[],"blockers":[],"warnings":[],"rollback":null,"unresolvedTargets":[]}
+
+> [Write] <data>\runs\r05\project\.final-report.md
+File created successfully at: <data>\runs\r05\project\.final-report.md (file state is current in your context — no need to Read it back)
+
+> [SubagentHandback] {"message":"- 작업: 이 프로젝트에 JOENESS를 연결했습니다. 기준 문서 4개를 새로 만들고, 첫 작업 R1 '요청 폼 글자 수 표시'를 등록한 뒤(구현은 안 함) 전부 커밋했습니다.\n- 업데이트 파일: 작업 규칙 연결(AGENTS.md, .joeness/setup-state.json), 로드맵(ROADMAP.md), 작업 기록(TASK.md), 문제 목록(ISSUES.md), 디자인 기준(DESIGN.md).\n- 이슈: 없음.\n- 해결: 없음.\n- 남은 문제: 프로젝트 전체 목표와 단계 순서가 정해지지 않았습니다. 글자 수 표시의 형식, 위치, 한도에 닿았을 때의 모양도 미정입니다. 디자인 검사 규칙은 아직 없고, 새 채팅에서 지침이 실제로 전달되는지도 확인하지 않았습니다.\n- 다음 작업: 글자 수 표시 방식 결정 → DESIGN에 규칙 행 추가 → R1 구현.\n\ndesign checks: none ran\n\n상세 보고\n- 연결: 설치 스크립트 `project-setup.ps1`로 Check, Apply, 다시 Check 순서로 실행했습니다. 결과는 `current`이고 경고는 없습니다. master 브랜치에 커밋 5456b41로 올렸습니다. 커밋한 파일에 이 기계의 경로가 들어가지 않았고, `<joedesign>`은 글자 그대로 두었습니다.\n- 기록 범위: 승인하신 대로 TASK, ROADMAP, ISSUES, DESIGN입니다. 제품 기준 문서는 README.md로 정했습니다. README.md에는 개정이나 승인 기록이 없고, 2026-11-15에 읽었습니다.\n- ROADMAP: 전체 목표를 받지 않아 '방향 미정'으로 적었습니다. R1은 단계에 속하지 않은 요청 작업으로 등록했고 상태는 '시작 안 함'입니다. 완료 조건은 둘로 나눠 적었습니다.\n  - 기술 확인: 입력·붙여넣기·삭제 때 숫자가 맞게 바뀌고, 제출 후 0으로 돌아오며, 500자 한도는 그대로인지.\n  - 디자인 검사: DESIGN 규칙 행 기준으로 360/768/1280 크기에서 빈 칸, 입력 중, 한도 도달 상태.\n- 구현 때 주의할 점: 지금 제출 처리에 쓰는 `form.reset()`은 입력 이벤트를 내지 않습니다. 그래서 제출 후 글자 수를 따로 0으로 되돌려야 합니다.\n- DESIGN: JOEDESIGN 템플릿 형식에 Result 열을 더해 규칙 표를 하나만 두었습니다. 상태는 DRAFT이고, 승인된 시각 기준은 없습니다. style.css의 값은 승인이 아니라 코드에서 읽은 측정값으로만 적었습니다.\n- 확인하지 않은 것: 새 채팅에서 AGENTS 지침이 실제로 전달되는지, 그리고 문서 내용을 받아들이실지.\n- 선택 항목: Claude Code용 '턴 사이 변경 알림 hook'은 따로 승인이 필요해서 넣지 않았습니다. 원하시면 따로 요청해 주세요.\n\n같은 보고를 커밋하지 않은 `<data>\\runs\\r05\\project\\.final-report.md`에 저장했습니다.\n\n완료"}
+{"success":true,"message":"Report delivered to your caller."}
