@@ -1,6 +1,6 @@
 # 변경 이력
 
-## 1.4.2 — 연결문에 Result 열 규칙 (준비, 미게시)
+## 1.4.2 — 연결문에 Result 열 규칙 (2026-11-15)
 
 - 계기: 45차 행동 A/B에서 JOEDESIGN DESIGN 템플릿이 먼저 깔린 장면의 B(1.4.1) 4회 중 기존 Rule Coverage 표에 Result 열을 더한 run 0/4. 이 규칙은 `SKILL.md`·`assets/DESIGN.md`에만 있고 매 턴 읽히는 연결문에는 없었다(SKILL.md를 읽은 run 2/4). 사용자 결정으로 연결문에 넣음.
 - 연결문(`assets/AGENTS.md`) Done 절의 `<joedesign>` 안내 바로 뒤 두 줄: JOEDESIGN의 DESIGN 템플릿을 이미 쓰면 그 Rule Coverage 표가 DESIGN 규칙 표이고, 없으면 Result 열(최신 TASK 링크, 복사한 로그 없음)을 더하며 두 번째 표를 만들지 않는다. 5,148바이트·823단어 → 5,344바이트·856단어. `SKILL.md`·`assets/DESIGN.md`의 같은 규칙과 표현을 맞춤(두 파일 불변). manifest는 `assets/AGENTS.md` 파일 해시만 갱신, 버전 핀은 게시 때 올림.
