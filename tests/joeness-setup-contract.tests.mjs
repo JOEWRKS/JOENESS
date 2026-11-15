@@ -119,6 +119,9 @@ test('design asset carries the rule-coverage table that ROADMAP design Checks na
   assert.ok(design.includes("JOEDESIGN's DESIGN template"),'which-template rule is stated');
   assert.ok(read('skills/joeness-setup/assets/ROADMAP.md').toString().includes('DESIGN.md#rule-coverage'));
   assert.ok(read('skills/joeness-setup/SKILL.md').toString().includes('one `## Rule coverage` table'));
+  // The connection body, read every turn, carries the same one-table rule for a pre-installed JOEDESIGN template.
+  assert.match(read('skills/joeness-setup/assets/AGENTS.md').toString(),
+    /JOEDESIGN's DESIGN template is already used, its Rule Coverage table is the DESIGN rule\s+table: add a Result column \(latest TASK link, no copied log\) if absent; never add a second table\./);
 });
 
 test('connection body keeps the JOEDESIGN path a run-time placeholder',()=>{
