@@ -5,6 +5,7 @@
 - 계기: 45차 행동 A/B에서 JOEDESIGN DESIGN 템플릿이 먼저 깔린 장면의 B(1.4.1) 4회 중 기존 Rule Coverage 표에 Result 열을 더한 run 0/4. 이 규칙은 `SKILL.md`·`assets/DESIGN.md`에만 있고 매 턴 읽히는 연결문에는 없었다(SKILL.md를 읽은 run 2/4). 사용자 결정으로 연결문에 넣음.
 - 연결문(`assets/AGENTS.md`) Done 절의 `<joedesign>` 안내 바로 뒤 두 줄: JOEDESIGN의 DESIGN 템플릿을 이미 쓰면 그 Rule Coverage 표가 DESIGN 규칙 표이고, 없으면 Result 열(최신 TASK 링크, 복사한 로그 없음)을 더하며 두 번째 표를 만들지 않는다. 5,148바이트·823단어 → 5,344바이트·856단어. `SKILL.md`·`assets/DESIGN.md`의 같은 규칙과 표현을 맞춤(두 파일 불변). manifest는 `assets/AGENTS.md` 파일 해시만 갱신, 버전 핀은 게시 때 올림.
 - `tests/joeness-setup-contract.tests.mjs`에 새 줄 존재 단언 1개. 테스트 node 106/106, PowerShell 5.1 release·project-setup(28 cases)·install 통과. 임시 프로젝트에서 `-Apply` → `-Check` `current`, 1.4.1 블록 위 `-Apply`로 갱신. 행동 A/B 없음. [준비 보고](../evals/joeness-setup/runs/2026-11-15-v142-prep/report.md).
+- 게시 뒤 행동 시험(46차, 승인 "JOENESS S2 8회 ㄱ"; Opus 5.5 한 턴, 1.4.1 vs 1.4.2, S2 8회 + 블라인드 채점 1회): 기존 Rule Coverage 표에 Result 열 B 4/4 vs A 3/4(r05 중단, 끝난 run 3/3). 사전 등록 기준(B ≥ 3/4, A ≤ 1/4) 미달이라 차이 없음이다. 대조군이 천장이었고(A 3/3 모두 SKILL.md 전문을 읽음), 부모 `AGENTS.md` 문맥 오염 가능성도 있어 행동 효과는 확인되지 않았다. B에서 SKILL.md를 읽지 않은 3회도 Result 열을 더했다. 부차 지표는 같았다(표 하나, 두 번째 DESIGN 파일 0, CO3 → C3 행). 출력 누출 0, 하네스의 저장소 경로 노출 4 run. [보고](../evals/joeness-setup/runs/2026-11-16-v142-behavior-ab/report.md).
 
 ## 1.4.1 — 통합 시험 결함 3건 (2026-11-15)
 
