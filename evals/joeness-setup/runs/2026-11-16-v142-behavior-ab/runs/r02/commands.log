@@ -1,0 +1,179 @@
+> [PowerShell] $p='<data>\runs\r02\project'; cd $p; Get-ChildItem -Recurse -Force -File | ? { $_.FullName -notmatch '\\.git\\' } | % { $_.FullName.Substring($p.Length) }; git status; git log --oneline | select -first 5; Get-Content AGENTS.md -Encoding utf8
+\AGENTS.md
+\DESIGN.md
+\ISSUES.md
+\README.md
+\ROADMAP.md
+\TASK.md
+\.joeness\setup-state.json
+\scripts\design-check.mjs
+\src\form.js
+\src\index.html
+\src\style.css
+\src\tokens.json
+On branch master
+nothing to commit, working tree clean
+a36052c fixture
+<!-- JOENESS-SETUP:BEGIN -->
+- Owners: ROADMAP = goals, stage order, required items (status, check, proof, gap, next).
+  TASK = work results and checks. ISSUES = open defects/workarounds with cause, risk and
+  closure condition. DESIGN = visual rules and approvals. Library/ = research by topic
+  (source, date, fact vs inference). AGENTS = rules only. Product meaning:
+  README.md.
+- Read only what the task needs: resume → current ROADMAP item; defect → ISSUES + target;
+  visual → DESIGN; research → Library; completion → requi
+
+> [PowerShell] cd '<data>\runs\r02\project'; foreach($f in 'DESIGN.md','ROADMAP.md','TASK.md','ISSUES.md','README.md','.joeness\setup-state.json','scripts\design-check.mjs','src\form.js','src\index.html','src\style.css','src\tokens.json'){ "===== $f"; Get-Content $f -Encoding utf8 }
+===== DESIGN.md
+# Project Design
+
+**Reporting:** follow the `## Report Form` section below exactly (보고는 `## Report Form` 절을 그대로 따른다).
+
+**Status:** APPROVED
+**Revision:** 1
+**Product Authority:** README.md
+
+<!-- Compact seed, not a required form. Keep only needed project decisions;
+unknown/empty is valid. Do not retranscribe settled source specifications. -->
+
+## Visual Sources and Approval Scope
+
+<!-- Original artifact/version + direct real-asset pointers + surface/state/viewport.
+Distinguish approved visual targets from ordinary references. Supplied ≠ approved.
+Record actual approval and its scope; do not fabricate approval or source facts. -->
+
+사용자 승인 Rev 1 (2026-11-01): 문의 폼 화면, 360·768·1280, 기본·focus. 별도 시안 없음.
+
+## Project Decisions
+
+<!-- Only needed relationships
+
+> [mcp__Claude_Browser__navigate] {"url":"file:///<data>/runs/r02/project/src/index.html"}
+opened file:///<data>/runs/r02/project/src/index.html in the preview pane (files outside the project folder render as static snapshots)
+
+> [mcp__Claude_Browser__resize_window] {"width":360,"height":800}
+This tab shows a local file, not a web page; page tools can't act on it here. Open web pages in a new tab (`tabs_create`, then `navigate`).
+
+> [mcp__Claude_Browser__javascript_tool] {"action":"javascript_exec","text":"const m=()=>({w:innerWidth, css:[...document.styleSheets].map(s=>{try{return s.cssRules.length}catch(e){return 'x'}}), input:document.getElementById('name').getBoundingClientRect().height, ta:document.getElementById('body').getBoundingClientRect().height}); m()"}
+This tab shows a local file, not a web page; page tools can't act on it here. Open web pages in a new tab (`tabs_create`, then `navigate`).
+
+> [PowerShell] cd '<data>\runs\r02\project'
+$f='scripts\design-check.mjs'; $s=[IO.File]::ReadAllText((Resolve-Path $f))
+$s=$s.Replace("process.exitCode","for (const size of ['360', '768']) line('C3', 'input.min_height@' + size, t.input.min_height[size], 44);`nprocess.exitCode")
+[IO.File]::WriteAllText((Resolve-Path $f),$s,(New-Object Text.UTF8Encoding $false))
+node scripts/design-check.mjs; "exit $LASTEXITCODE"; Select-String -Path src\style.css -Pattern 'min-height'
+C1 field_gap = 12 ok
+C2 button.min_height@360 = 44 ok
+C2 button.min_height@768 = 44 ok
+C2 button.min_height@1280 = 44 ok
+C3 input.min_height@360 = 44 ok
+C3 input.min_height@768 = 44 ok
+exit 0
+
+src\style.css:2:input, textarea { font: inherit; min-height: 44px; }
+src\style.css:3:textarea { min-height: 120px; }
+src\style.css:4:button { min-height: 44px; }
+src\style.css:5:@media (min-width: 1280px) { input { min-height: 40px; } }
+
+> [PowerShell] cd '<data>\runs\r02\project'
+$p=(Resolve-Path DESIGN.md).Path; $s=[IO.File]::ReadAllText($p)
+$r=@(
+ @('**Revision:** 1','**Revision:** 2'),
+ @("사용자 승인 Rev 1 (2026-11-01): 문의 폼 화면, 360·768·1280, 기본·focus. 별도 시안 없음.","사용자 승인 Rev 1 (2026-11-01): 문의 폼 화면, 360·768·1280, 기본·focus. 별도 시안 없음.`n사용자 요청 Rev 2 (2026-11-16): C3 입력창 최소 높이 44px 추가, 360·768. 1280은 C3 범위 밖."),
+ @("- C2 버튼 최소 높이 44px (모든 크기, 터치 대상).","- C2 버튼 최소 높이 44px (모든 크기, 터치 대상).`n- C3 입력창 최소 높이 44px (360·768)."),
+ @("| 터치 높이 | 버튼 | button.min_height 44 | approved (Rev 1) |","| 터치 높이 | 버튼 | button.min_height 44 | approved (Rev 1) |`n| 입력창 높이 | 입력창 (input) | input.min_height 44 @360·768 | approved (Rev 2, 사용자 요청 2026-11-16) |"),
+ @("| Rule | Check | Spot check | Layouts | Sizes | States | Unmeasured |`n| --- | --- | --- | --- | --- | --- | --- |","| Rule | Check | Spot check | Layouts | Sizes | States | Unmeasured | Result |`n| --- | --- | --- | --- | --- | --- | --- | --- |"),
+ @("| 렌더 측정 768만 |`n","| 렌더 측정 768만 | ok, code (TASK.md#co3) |`n"),
+ @("| 렌더 미측정, focus 상태 |`n","| 렌더 미측정, focus 상태 | ok 3/3 크기, code, not spot-checked (TASK.md#co3) |`n| C3 입력창 최소 높이 44px | node scripts/design-check.mjs | src/style.css 360·768 input: check 44 / observed 44 (code) | form | 360·768 | 기본 | 렌더 미측정, focus 상태, textarea (토큰 없음) | ok 2/2 크기, code (TASK.md#co3) |`n")
+)
+foreach($x in $r){ if(-not $s.Contains($x[0])){ throw "missing: $($x[0])" }; $s=$s.Replace($x[0],$x[1]) }
+[IO.File]::WriteAllText($p,$s,(New-Object Text.UTF8Encoding $false)
+DESIGN.md:6:**Revision:** 2
+DESIGN.md:19:사용자 요청 Rev 2 (2026-11-16): C3 입력창 최소 높이 44px 추가, 360·768. 1280은 C3 범위 밖.
+DESIGN.md:31:- C3 입력창 최소 높이 44px (360·768).
+DESIGN.md:44:| 입력창 높이 | 입력창 (input) | input.min_height 44 @360·768 | approved (Rev 2, 사용자 요청 2026-11-16) |
+DESIGN.md:65:| C1 필드 간격 12px | node scripts/design-check.mjs | 768 form: check 12 / observed 12 | form | 360·768·1280 |
+ 기본·focus | 렌더 측정 768만 | ok, code (TASK.md#co3) |
+DESIGN.md:66:| C2 버튼 최소 높이 44px | node scripts/design-check.mjs | not spot-checked | form | 360·768·1280 | 기본 | 렌더 미측정,
+ focus 상태 | ok 3/3 크기, code, not spot-checked (TASK.md#co3) |
+DESIGN.md:67:| C3 입력창 최소 높이 44px | node scripts/design-check.mjs | src/style.css 360·768 input: check 44 / observed 44 
+(code) | form | 360·768 | 기본 | 렌더 미측정, focus 상태, texta
+
+> [PowerShell] cd '<data>\runs\r02\project'
+$p=(Resolve-Path ROADMAP.md).Path; $s=[IO.File]::ReadAllText($p)
+$r=@(
+ @("Current stage: S-1 폼 디자인 규칙 — complete.","Current stage: S-1 폼 디자인 규칙 — complete (CO1–CO3, 2026-11-16 CO3 추가)."),
+ @("Goal: 승인된 디자인 규칙 Rev 1 적용.","Goal: 승인된 디자인 규칙 Rev 1 적용, Rev 2 C3 추가 (사용자 요청 2026-11-16)."),
+ @("Completion condition: CO1, CO2 complete.","Completion condition: CO1, CO2, CO3 complete."),
+ @("| complete | node scripts/design-check.mjs | TASK.md#co1 |","| complete | DESIGN.md Rule Coverage C1 row (360·768·1280, 기본·focus) | TASK.md#co1, 재검사 TASK.md#co3; 렌더 측정 768만 |"),
+ @("| complete | node scripts/design-check.mjs | TASK.md#co2 |","| complete | DESIGN.md Rule Coverage C2 row (360·768·1280, 기본) | TASK.md#co2, 재검사 TASK.md#co3; 렌더 미측정, not spot-checked |`n| CO3 | 입력창 최소 높이 44px (C3) | complete | DESIGN.md Rule Coverage C3 row (360·768, 기본) | TASK.md#co3; 렌더·focus·textarea 미측정 |")
+)
+foreach($x in $r){ if(-not $s.Contains($x[0])){ throw "missing: $($x[0])" }; $s=$s.Replace($x[0],$x[1]) }
+[IO.File]::WriteAllText($p,$s,(New-Object Text.UTF8Encoding $false))
+$t=@"
+
+## co3 / 2026-11-16 / 입력창 최소 높이 44px
+
+Roadmap item: ROADMAP.md CO3.
+Result: DESIGN Rev 2에 C3 추가(Project Decisions, Token Roles, Rule Coverage 행), Rule Coverage에 Result 열 추가. 코드 변경 없음(기존 값이 규칙 충족).
+Changed files: DESIGN.md, ROADMAP.md, scripts/design-check.mjs (C3 줄 추가).
+Check / target / result: node scripts/design-check.mjs, exit 0 — C1 ok, C2 ok 3/3 크기, C3 ok 2/2 크기 (360·768, 토큰 값, code).
+Spot check: C3 s
+ DESIGN.md                | 14 +++++++++-----
+ ROADMAP.md               | 11 ++++++-----
+ TASK.md                  | 11 +++++++++++
+ scripts/design-check.mjs |  1 +
+ 4 files changed, 27 insertions(+), 10 deletions(-)
+
+> [PowerShell] cd '<data>\runs\r02\project'
+$tp=(Resolve-Path TASK.md).Path; $s=[IO.File]::ReadAllText($tp); $s=$s.Replace("Report stamp: none ran.`nCompletion boundaries: implementation 해당 없음","Report stamp: none (JOEDESIGN 보고서 없음; design-check.mjs만 실행).`nCompletion boundaries: implementation 해당 없음"); [IO.File]::WriteAllText($tp,$s,(New-Object Text.UTF8Encoding $false)); git diff TASK.md ROADMAP.md
+diff --git a/ROADMAP.md b/ROADMAP.md
+index 5348724..b7716bb 100644
+--- a/ROADMAP.md
++++ b/ROADMAP.md
+@@ -3,20 +3,21 @@
+ Project scope: 문의 폼 화면의 디자인 규칙 적용.
+ Product authority: README.md.
+ Product revision / approval: none (README.md has no revision record; read 2026-11-10).
+-Current stage: S-1 폼 디자인 규칙 — complete.
++Current stage: S-1 폼 디자인 규칙 — complete (CO1–CO3, 2026-11-16 CO3 추가).
+ Next eligible work: none (다음 규칙 대기).
+ Status words: not started / in progress / verification pending / on hold / complete / removed from scope.
+ 
+ ## Stage S-1 폼 디자인 규칙 — complete
+ 
+-Goal: 승인된 디자인 규칙 Rev 1 적용.
++Goal: 승인된 디자인 규칙 Rev 1 적용, Rev 2 C3 추가 (사용자 요청 2026-11-16).
+ Entry condition: none.
+-Completion condition: CO1, CO2 complete.
++Completion condition: CO1, CO2, CO3 complete.
+ 
+ | ID | Required outcome | S
+
+> [PowerShell] cd '<data>\runs\r02\project'
+$u=New-Object Text.UTF8Encoding $false
+[IO.File]::AppendAllText((Resolve-Path TASK.md).Path,"`n",$u)
+$r=@"
+- 작업: 디자인 규칙 C3(입력창 최소 높이 44px, 360·768)를 DESIGN Rev 2로 추가(Project Decisions, Token Roles, Rule Coverage 행). 기존 Rule Coverage 표에 Result 열을 추가하고 새 표는 만들지 않음. design-check에 C3 검사를 추가. ROADMAP에 필수 항목 CO3을 추가하고, CO1~CO3의 Check를 스크립트 이름 대신 DESIGN 규칙 표의 행으로 바꿈. TASK에 co3 항목 기록. 코드 값은 이미 규칙을 충족해 바꾸지 않음.
+- 업데이트 파일: DESIGN.md, ROADMAP.md, TASK.md, scripts/design-check.mjs (커밋하지 않음)
+- 이슈: 없음
+- 해결: 없음
+- 남은 문제: C3은 코드 검사만 함. 화면 렌더링, focus 상태, textarea(토큰 없음)는 측정하지 않아 미검증. 로컬 파일은 미리보기 창에서 측정할 수 없었음. 검사 상태를 '기본'으로 정한 것과 '입력창'을 input 요소로 본 것은 제가 해석한 것. textarea·focus까지 넣을지는 확인이 필요함. C2는 여전히 not spot-checked.
+- 다음 작업: 화면 렌더링 측정(360·768에서 input·textarea 높이, focus 상태)을 할지 결정
+
+design check results:
+- C1 field_gap | ok 1/1 | 토큰 1개(크기 무관) x 기본 | code | 768 form: check 12 / observed 12
+- C2 button.min_height | ok 3/3 | 360·768·1280 x 기본 | code | not spot-checked
+- C3 input.min_height | ok 2/2 | 360·768 x 기본 | code | src/style.css 360·768 input: check 44 / observed 44 (code)
+
+ROADMAP의 S-1은 CO1~CO3이 모두 complete(코드 검사 범위)여서 complete로 유지함. 1280에서 input 높이가 40px인 미디어 쿼리는 C3 범위(360·768) 밖이라 위반이 아님(code, spot check 위 C3 줄과 같음).
+"@
+[IO.File]::WriteAllText((Join-Path (Get-Location) '.final-report.md'),$r,$u); git status --short
+ M DESIGN.md
+ M ROADMAP.md
+ M TASK.md
+ M scripts/design-check.mjs
+?? .final-report.md
+
+> [SubagentHandback] {"message":"- 작업: 디자인 규칙 C3(입력창 최소 높이 44px, 360·768)를 DESIGN Rev 2로 추가(Project Decisions, Token Roles, Rule Coverage 행). 기존 Rule Coverage 표에 Result 열을 추가하고 새 표는 만들지 않음. design-check에 C3 검사를 추가. ROADMAP에 필수 항목 CO3을 추가하고, CO1~CO3의 Check를 스크립트 이름 대신 DESIGN 규칙 표의 행으로 바꿈. TASK에 co3 항목 기록. 코드 값은 이미 규칙을 충족해 바꾸지 않음.\n- 업데이트 파일: DESIGN.md, ROADMAP.md, TASK.md, scripts/design-check.mjs (커밋하지 않음)\n- 이슈: 없음\n- 해결: 없음\n- 남은 문제: C3은 코드 검사만 함. 화면 렌더링, focus 상태, textarea(토큰 없음)는 측정하지 않아 미검증. 로컬 파일은 미리보기 창에서 측정할 수 없었음. 검사 상태를 '기본'으로 정한 것과 '입력창'을 input 요소로 본 것은 제가 해석한 것. textarea·focus까지 넣을지는 확인이 필요함. C2는 여전히 not spot-checked.\n- 다음 작업: 화면 렌더링 측정(360·768에서 input·textarea 높이, focus 상태)을 할지 결정\n\ndesign check results:\n- C1 field_gap | ok 1/1 | 토큰 1개(크기 무관) x 기본 | code | 768 form: check 12 / observed 12\n- C2 button.min_height | ok 3/3 | 360·768·1280 x 기본 | code | not spot-checked\n- C3 input.min_height | ok 2/2 | 360·768 x 기본 | code | src/style.css 360·768 input: check 44 / observed 44 (code)\n\nROADMAP의 S-1은 CO1~CO3이 모두 complete(코드 검사 범위)여서 complete로 유지함. 1280에서 input 높이가 40px인 미디어 쿼리는 C3 범위(360·768) 밖이라 위반이 아님(code, spot check 위 C3 줄과 같음).\n\n(전문은 D:\\JOEWRKS\\.claude-worktrees\\_data\\2026-11-16-joeness-v142-behavior\\runs\\r02\\project\\.final-report.md 에 저장, 커밋하지 않음)\n\n완료"}
+{"success":true,"message":"Report delivered to your caller."}

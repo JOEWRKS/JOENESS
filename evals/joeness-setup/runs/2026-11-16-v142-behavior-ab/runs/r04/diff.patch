@@ -1,0 +1,107 @@
+diff --git a/DESIGN.md b/DESIGN.md
+index e34801b..51b4539 100644
+--- a/DESIGN.md
++++ b/DESIGN.md
+@@ -16,6 +16,7 @@ Distinguish approved visual targets from ordinary references. Supplied ≠ appro
+ Record actual approval and its scope; do not fabricate approval or source facts. -->
+ 
+ 사용자 승인 Rev 1 (2026-11-01): 문의 폼 화면, 360·768·1280, 기본·focus. 별도 시안 없음.
++C3 추가: 사용자 요청 2026-11-16 (입력창 최소 높이 44px, 360·768). Revision 번호는 1로 둠 (Rev 2 표기 여부 미정).
+ 
+ ## Project Decisions
+ 
+@@ -27,6 +28,7 @@ state invariants; do not fill every craft topic or replace originals with prose.
+ 
+ - C1 필드 간격 12px (모든 크기).
+ - C2 버튼 최소 높이 44px (모든 크기, 터치 대상).
++- C3 입력창 최소 높이 44px (360·768). 1280은 이 규칙 밖 (현재 코드 input 40px).
+ 
+ ## Token Roles
+ 
+@@ -39,6 +41,7 @@ at every size. A part with no row has no token claim. Status per row: measured
+ | --- | --- | --- | --- |
+ | 필드 간격 | 폼 필드 사이 | field_gap 12 | approved (Rev 1) |
+ | 터치 높이 | 버튼 | button.min_height 44 | approved (Rev 1) |
++| 입력 높이 | 입력창 (input, textarea) | input.min_height 44 @360·768 (1280은 40, 규칙 범위 밖) | approved (사용자 요청 2026-11-16, C3) |
+ 
+ ## Rule Coverage
+ 
+@@ -57,10 +60,11 @@ quoted elsewhere (report, ROADMAP), quote it with this row's layouts, sizes and
+ states, and with "not spot-checked" when that is the row's state; such a result is
+ not listed as resolved or verified. -->
+ 
+-| Rule | Check | Spot check | Layouts | Sizes | States | Unmeasured |
+-| --- | --- | --- | --- | --- | --- | --- |
+-| C1 필드 간격 12px | node scripts/design-check.mjs | 768 form: check 12 / observed 12 | form | 360·768·1280 | 기본·focus | 렌더 측정 768만 |
+-| C2 버튼 최소 높이 44px | node scripts/design-check.mjs | not spot-checked | form | 360·768·1280 | 기본 | 렌더 미측정, focus 상태 |
++| Rule | Check | Spot check | Layouts | Sizes | States | Unmeasured | Result |
++| --- | --- | --- | --- | --- | --- | --- | --- |
++| C1 필드 간격 12px | node scripts/design-check.mjs | 768 form: check 12 / observed 12 | form | 360·768·1280 | 기본·focus | 렌더 측정 768만 | [TASK.md#co3](TASK.md#co3) |
++| C2 버튼 최소 높이 44px | node scripts/design-check.mjs | not spot-checked | form | 360·768·1280 | 기본 | 렌더 미측정, focus 상태 | [TASK.md#co3](TASK.md#co3) |
++| C3 입력창 최소 높이 44px (360·768) | node scripts/design-check.mjs (토큰 input.min_height@360/768) | not spot-checked | form | 360·768 | 기본 | 렌더 미측정, focus 상태, textarea(토큰 없음, CSS 120px는 코드 읽기만) | [TASK.md#co3](TASK.md#co3) |
+ 
+ ## Report Form
+ 
+diff --git a/ROADMAP.md b/ROADMAP.md
+index 5348724..a346e2c 100644
+--- a/ROADMAP.md
++++ b/ROADMAP.md
+@@ -3,20 +3,21 @@
+ Project scope: 문의 폼 화면의 디자인 규칙 적용.
+ Product authority: README.md.
+ Product revision / approval: none (README.md has no revision record; read 2026-11-10).
+-Current stage: S-1 폼 디자인 규칙 — complete.
+-Next eligible work: none (다음 규칙 대기).
++Current stage: S-1 폼 디자인 규칙 — verification pending (CO3: 렌더 미측정, not spot-checked).
++Next eligible work: CO3 렌더 측정과 spot check (input·textarea, 360·768, 기본); C3 범위에 textarea 포함 여부 사용자 확인.
+ Status words: not started / in progress / verification pending / on hold / complete / removed from scope.
+ 
+-## Stage S-1 폼 디자인 규칙 — complete
++## Stage S-1 폼 디자인 규칙 — verification pending
+ 
+-Goal: 승인된 디자인 규칙 Rev 1 적용.
++Goal: 승인된 디자인 규칙 Rev 1 적용 (C3는 사용자 요청 2026-11-16으로 추가).
+ Entry condition: none.
+-Completion condition: CO1, CO2 complete.
++Completion condition: CO1, CO2, CO3 complete.
+ 
+ | ID | Required outcome | Status | Check / completion criterion | Evidence or gap |
+ | --- | --- | --- | --- | --- |
+-| CO1 | 필드 간격 12px (C1) | complete | node scripts/design-check.mjs | TASK.md#co1 |
+-| CO2 | 버튼 최소 높이 44px (C2) | complete | node scripts/design-check.mjs | TASK.md#co2 |
++| CO1 | 필드 간격 12px (C1) | complete | [DESIGN.md Rule Coverage](DESIGN.md#rule-coverage) C1 행 | TASK.md#co1 |
++| CO2 | 버튼 최소 높이 44px (C2) | complete | [DESIGN.md Rule Coverage](DESIGN.md#rule-coverage) C2 행 | TASK.md#co2 |
++| CO3 | 입력창 최소 높이 44px, 360·768 (C3) | verification pending | [DESIGN.md Rule Coverage](DESIGN.md#rule-coverage) C3 행 | TASK.md#co3; gap: 토큰 값만 확인(code), 렌더 미측정, not spot-checked |
+ 
+ Scope decisions: none.
+ User acceptance: not required.
+diff --git a/TASK.md b/TASK.md
+index c28f3a8..68823bb 100644
+--- a/TASK.md
++++ b/TASK.md
+@@ -27,3 +27,14 @@ Required specialist verdict: not applicable.
+ Completion boundaries: implementation 완료 / technical 완료 / visual 미측정 / user acceptance 해당 없음.
+ Related issue / knowledge: none.
+ Record handoff gap: none.
++
++## co3 / 2026-11-16 / 입력창 최소 높이 44px (360·768)
++
++Roadmap item: ROADMAP.md CO3 (verification pending).
++Result: C3 규칙 추가(DESIGN.md), design-check.mjs에 C3 토큰 검사 추가, Rule Coverage에 Result 열 추가. src 변경 없음.
++Changed files: DESIGN.md, ROADMAP.md, scripts/design-check.mjs.
++Check / target / result: node scripts/design-check.mjs, C1 1/1, C2 3/3, C3 2/2 ok (토큰 값, code, C2·C3 not spot-checked).
++Limits: 렌더 미측정(Playwright 없음, 미리보기가 로컬 파일 불가), focus 상태, textarea는 CSS 코드 읽기만.
++Report stamp: report-check: ok 1,376 chars b04e47ac
++Completion boundaries: implementation 해당 없음(기존 코드 충족) / technical code만 / visual 미측정 / user acceptance 해당 없음.
++Open: textarea 포함 여부, DESIGN Rev 2 표기 여부 — 사용자 확인 대기.
+\ No newline at end of file
+diff --git a/scripts/design-check.mjs b/scripts/design-check.mjs
+index 5788b05..2508646 100644
+--- a/scripts/design-check.mjs
++++ b/scripts/design-check.mjs
+@@ -7,4 +7,5 @@ const line = (rule, what, got, want) => {
+ };
+ line('C1', 'field_gap', t.field_gap, 12);
+ for (const size of ['360', '768', '1280']) line('C2', 'button.min_height@' + size, t.button.min_height[size], 44);
++for (const size of ['360', '768']) line('C3', 'input.min_height@' + size, t.input.min_height[size], 44);
+ process.exitCode = bad ? 1 : 0;

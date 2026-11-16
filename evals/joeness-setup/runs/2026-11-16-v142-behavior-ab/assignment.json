@@ -1,0 +1,58 @@
+[
+ {
+  "arm": "A",
+  "scene": "S2",
+  "id": "r01",
+  "blind": "p5",
+  "base": "f73d82438d1953bd9a53ebbd1a62b75416d32ad3"
+ },
+ {
+  "arm": "B",
+  "scene": "S2",
+  "id": "r02",
+  "blind": "p1",
+  "base": "a36052ce80036790e0d5164e5e58bf4999942a00"
+ },
+ {
+  "arm": "A",
+  "scene": "S2",
+  "id": "r03",
+  "blind": "p4",
+  "base": "c38c83631d488db8f715ef5de25177b805e9a8e3"
+ },
+ {
+  "arm": "B",
+  "scene": "S2",
+  "id": "r04",
+  "blind": "p6",
+  "base": "0c5101d726e9d6a49895611059562946dc4c7a29"
+ },
+ {
+  "arm": "A",
+  "scene": "S2",
+  "id": "r05",
+  "blind": "p2",
+  "base": "a338dd0bd16d87bee25407dcb2ffea44110ec0e7"
+ },
+ {
+  "arm": "B",
+  "scene": "S2",
+  "id": "r06",
+  "blind": "p3",
+  "base": "a90c12aa1f5df7040ddba32a9a4590c869ca6fcf"
+ },
+ {
+  "arm": "A",
+  "scene": "S2",
+  "id": "r07",
+  "blind": "p8",
+  "base": "10329b91dfac52851cf9c21fc0043584479aec9a"
+ },
+ {
+  "arm": "B",
+  "scene": "S2",
+  "id": "r08",
+  "blind": "p7",
+  "base": "d01e5c45ddf06fb4f1379c2a218647ef08c6f26e"
+ }
+]

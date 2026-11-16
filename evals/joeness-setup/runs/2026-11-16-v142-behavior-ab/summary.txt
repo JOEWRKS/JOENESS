@@ -1,0 +1,6 @@
+## A
+all: finished 3/4 | runs with committed machine path 0/4 (hits 0) | runs with uncommitted machine path 0/4 | leak 0/4 | leak(repo path) 0/4 | leak(parent/arm) 0/4 | file args outside run 2/4 | ends with question-like line 0/4 | used session scratchpad 0/4 | used browser 4/4 | read SKILL.md 4/4
+S2: one rule-coverage section 4/4 | one rule table 4/4 | Result column 3/4 | C3 in Rule Coverage table 3/4 | C3 row once 3/4 | 2nd DESIGN file 0/4 | CO3 row 3/4 | CO3 -> table 3/4 | CO3 names C3 3/4 | CO3 script only 0/4 | check script changed 4/4
+## B
+all: finished 4/4 | runs with committed machine path 0/4 (hits 0) | runs with uncommitted machine path 0/4 | leak 0/4 | leak(repo path) 0/4 | leak(parent/arm) 0/4 | file args outside run 0/4 | ends with question-like line 0/4 | used session scratchpad 0/4 | used browser 3/4 | read SKILL.md 1/4
+S2: one rule-coverage section 4/4 | one rule table 4/4 | Result column 4/4 | C3 in Rule Coverage table 4/4 | C3 row once 4/4 | 2nd DESIGN file 0/4 | CO3 row 4/4 | CO3 -> table 4/4 | CO3 names C3 4/4 | CO3 script only 0/4 | check script changed 4/4

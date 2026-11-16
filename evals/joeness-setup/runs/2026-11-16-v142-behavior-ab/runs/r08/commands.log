@@ -1,0 +1,266 @@
+> [Bash] cd "<data>/runs/r08/project" && ls -la && cat AGENTS.md && git status && git log --oneline | head
+total 34
+drwxr-xr-x 1 <user> 197609    0 Nov 16 01:25 .
+drwxr-xr-x 1 <user> 197609    0 Nov 16 01:25 ..
+drwxr-xr-x 1 <user> 197609    0 Nov 17 00:12 .git
+drwxr-xr-x 1 <user> 197609    0 Nov 16 01:25 .joeness
+-rw-r--r-- 1 <user> 197609 5386 Nov 16 01:25 AGENTS.md
+-rw-r--r-- 1 <user> 197609 6191 Nov 16 01:25 DESIGN.md
+-rw-r--r-- 1 <user> 197609   23 Nov 16 01:25 ISSUES.md
+-rw-r--r-- 1 <user> 197609  188 Nov 16 01:25 README.md
+-rw-r--r-- 1 <user> 197609  949 Nov 16 01:25 ROADMAP.md
+-rw-r--r-- 1 <user> 197609 1159 Nov 16 01:25 TASK.md
+drwxr-xr-x 1 <user> 197609    0 Nov 16 01:25 scripts
+drwxr-xr-x 1 <user> 197609    0 Nov 16 01:25 src
+<!-- JOENESS-SETUP:BEGIN -->
+- Owners: ROADMAP = goals, stage order, required items (status, check, proof, gap, next).
+  TASK = work results and checks. ISSUES =
+
+> [Bash] cd "<data>/runs/r08/project" && for f in DESIGN.md ROADMAP.md TASK.md ISSUES.md README.md; do echo "=== $f"; cat $f; done; find .joeness scripts src -type f | head -50
+=== DESIGN.md
+# Project Design
+
+**Reporting:** follow the `## Report Form` section below exactly (보고는 `## Report Form` 절을 그대로 따른다).
+
+**Status:** APPROVED
+**Revision:** 1
+**Product Authority:** README.md
+
+<!-- Compact seed, not a required form. Keep only needed project decisions;
+unknown/empty is valid. Do not retranscribe settled source specifications. -->
+
+## Visual Sources and Approval Scope
+
+<!-- Original artifact/version + direct real-asset pointers + surface/state/viewport.
+Distinguish approved visual targets from ordinary references. Supplied ≠ approved.
+Record actual approval and its scope; do not fabricate approval or source facts. -->
+
+사용자 승인 Rev 1 (2026-11-01): 문의 폼 화면, 360·768·1280, 기본·focus. 별도 시안 없음.
+
+## Project Decisions
+
+<!-- Only needed relationships: source observation → p
+
+> [Bash] cd "<data>/runs/r08/project" && for f in .joeness/setup-state.json scripts/design-check.mjs src/*; do echo "=== $f"; cat $f; done; node scripts/design-check.mjs; echo exit=$?; ls ../tools/joedesign ../tools/joedesign/scripts
+=== .joeness/setup-state.json
+{"schemaVersion":1,"toolVersion":"0.2","targetRelativePath":"AGENTS.md","appliedBlockBase64":"PCEtLSBKT0VORVNTLVNFVFVQOkJFR0lOIC0tPgotIE93bmVyczogUk9BRE1BUCA9IGdvYWxzLCBzdGFnZSBvcmRlciwgcmVxdWlyZWQgaXRlbXMgKHN0YXR1cywgY2hlY2ssIHByb29mLCBnYXAsIG5leHQpLgogIFRBU0sgPSB3b3JrIHJlc3VsdHMgYW5kIGNoZWNrcy4gSVNTVUVTID0gb3BlbiBkZWZlY3RzL3dvcmthcm91bmRzIHdpdGggY2F1c2UsIHJpc2sgYW5kCiAgY2xvc3VyZSBjb25kaXRpb24uIERFU0lHTiA9IHZpc3VhbCBydWxlcyBhbmQgYXBwcm92YWxzLiBMaWJyYXJ5LyA9IHJlc2VhcmNoIGJ5IHRvcGljCiAgKHNvdXJjZSwgZGF0ZSwgZmFjdCB2cyBpbmZlcmVuY2UpLiBBR0VOVFMgPSBydWxlcyBvbmx5LiBQcm9kdWN0IG1lYW5pbmc6CiAgUkVBRE1FLm1kLgotIFJlYWQgb25seSB3aGF0IHRoZSB0YXNrIG5lZWRzOiByZXN1bWUg4oaSIGN1cnJlbnQgUk9BRE1BUCBpdGVtOyBkZWZlY3Qg4oaSIElTU1VFUyArIHRhcmdldDsKICB2aXN1YWwg4oaSIERFU0lHTjsgcmVzZWFyY2gg
+
+> [Bash] cd "<data>/runs/r08/tools" && cat joedesign/SKILL.md | head -150; ls joedesign/references joedesign/templates; head -40 joedesign/scripts/measure-layout.mjs; head -60 joedesign/scripts/report-check.mjs; ls joeness-setup
+---
+name: joedesign
+description: "Design, implement and review UI through one operating workflow: inspect visual sources, translate them into the product, prove the key composition, and expand through specialist review. Also use for scoped visual repairs. Not for Product Definition, pure backend work or nonvisual refactors."
+---
+
+# JOEDESIGN
+
+This is the single operating core for JOEDESIGN. It governs design decisions,
+implementation, observation and specialist review. The harness is an internal
+execution mechanism, not another skill or authority the user must select.
+User authority and Product meaning govern the work; specialist defaults do not
+replace this operating route. Read detailed modules only for the current stage.
+
+## One owner, bounded roles
+
+The coordinating agent is A: it owns
+
+> [Bash] cd "<data>/runs/r08/project" && cat >> scripts/design-check.mjs.tmp <<'EOF'
+EOF
+rm scripts/design-check.mjs.tmp
+node -e "
+const fs=require('fs');const p='scripts/design-check.mjs';let s=fs.readFileSync(p,'utf8');
+s=s.replace(\"process.exitCode\",\"for (const size of ['360', '768']) line('C3', 'input.min_height@' + size, t.input.min_height[size], 44);\nprocess.exitCode\");
+fs.writeFileSync(p,s);"
+cat scripts/design-check.mjs; node scripts/design-check.mjs; echo exit=$?
+import { readFileSync } from 'node:fs';
+const t = JSON.parse(readFileSync(new URL('../src/tokens.json', import.meta.url), 'utf8'));
+let bad = 0;
+const line = (rule, what, got, want) => {
+  const ok = got === want; if (!ok) bad += 1;
+  console.log(rule + ' ' + what + ' = ' + got + (ok ? ' ok' : ' FAIL (want ' + want + ')'));
+};
+line('C1', 'field_gap', t.field_gap, 12);
+for (const size of ['360', '768', '1280']) line('C2', 'button.min_height@' + size, t.button.min_height[size], 44);
+for (const size of ['360', '768']) line('C3', 'input.min_height@' + size, t.input.min_height[size], 44);
+process.exitCode = bad ? 1 : 0;
+C1 field_gap = 12 ok
+C2 button.min_height@360 = 44 ok
+C2 button.min_height@768 = 44 ok
+C2 button.min_height@1280 = 44 ok
+C3 input.min_height@360 = 44 ok
+C3 input.min_height@768 
+
+> [mcp__Claude_Browser__preview_start] {"url":"file:///<data>/runs/r08/project/src/index.html"}
+opened file:///<data>/runs/r08/project/src/index.html in the preview pane (files outside the project folder render as static snapshots)
+
+> [mcp__Claude_Browser__resize_window] {"width":360,"height":800}
+This tab shows a local file, not a web page; page tools can't act on it here. Open web pages in a new tab (`tabs_create`, then `navigate`).
+
+> [mcp__Claude_Browser__javascript_tool] {"action":"javascript_exec","text":"location.reload(); await new Promise(r=>setTimeout(r,800)); const m=()=>({w:innerWidth, sheets:document.styleSheets.length, cssLoaded: getComputedStyle(document.querySelector('form')).display, input:document.querySelector('#name').getBoundingClientRect().height, inputMin:getComputedStyle(document.querySelector('#name')).minHeight, ta:document.querySelector('#body').getBoundingClientRect().height}); m()"}
+This tab shows a local file, not a web page; page tools can't act on it here. Open web pages in a new tab (`tabs_create`, then `navigate`).
+
+> [Bash] cd "<data>/runs/r08/project" && head -20 ../tools/joedesign/scripts/capture.mjs; node -e "try{require.resolve('playwright');console.log('pw yes')}catch(e){console.log('pw no')}"; python --version 2>&1
+// Optional collector: use an existing Playwright package and browser, never install.
+import fs from 'node:fs';
+import path from 'node:path';
+import {createRequire} from 'node:module';
+import {createHash} from 'node:crypto';
+import {measureLayout} from './measure-layout.mjs';
+
+const require = createRequire(import.meta.url);
+const input = JSON.parse(fs.readFileSync(0, 'utf8'));
+const base = new URL(input.browser.base_url);
+if (!['http:', 'https:'].includes(base.protocol) || !['localhost', '127.0.0.1', '[::1]'].includes(base.hostname)) {
+  throw new Error('Collector only operates an explicitly configured local preview');
+}
+const {chromium} = require(input.browser.playwright_module || 'playwright');
+const out = path.resolve(input.output_dir);
+fs.mkdirSync(out, {recursive: true});
+const captur
+
+> [Bash] cd "<data>/runs/r08/project" && mkdir -p .claude && cat > .claude/launch.json <<'EOF'
+{"version":"0.0.1","configurations":[{"name":"form-static","runtimeExecutable":"python","runtimeArgs":["-m","http.server","8765","--bind","127.0.0.1","--directory","src"],"port":8765}]}
+EOF
+(Bash completed with no output)
+
+> [mcp__Claude_Browser__preview_start] {"name":"form-static"}
+No .claude/launch.json found. Create D:\JOEWRKS\JOENESS\.claude\launch.json with this format:
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "<unique-name>",
+      "runtimeExecutable": "<command>",
+      "runtimeArgs": ["<args>"],
+      "port": <port>
+    }
+  ]
+}
+Set "runtimeExecutable" to the command (e.g. "npm"), "runtimeArgs" to the arguments (e.g. ["run", "dev"]), and "port" to the server port. An optional "url" (http/https) opens the preview there instead of http://localhost:<port>. A localhost "url" must be just the server's origin — no path or query, matching the entry's port — for example "https://localhost:8443" or "http://app.localhost:3000"; to show a specific page, navigate after the preview opens. Non-localhost URLs may carry paths and are subject to the use
+
+> [Bash] cd "<data>/runs/r08/project" && rm -rf .claude && python -m http.server 8765 --bind 127.0.0.1 --directory src
+Command running in background with ID: b2moodn6f. Output is being written to: <temp> You will be notified when it completes — do not poll that file or sleep while waiting. Read the file only if the user asks for progress, or if you need a line it prints before you can go on, such as a server's ready line or port.
+Session cwd remains D:\JOEWRKS\JOENESS; directory changes made by the backgrounded command do not apply to subsequent commands.
+
+> [mcp__Claude_Browser__tabs_create] {}
+{
+  "serverId": "preview-local_b1090e93-7ff9-47be-ae23-8311a499f67c",
+  "tabId": "tab-2",
+  "reused": false,
+  "type": "browser"
+}
+Opened tab tab-2 in the background — the user's current tab stays in front. Use `navigate` with tabId "tab-2" to load a URL; front it with `tabs_select` when the user should look.
+
+> [mcp__Claude_Browser__browser_batch] {"actions":[{"name":"resize_window","input":{"tabId":"tab-2","width":360,"height":800}},{"name":"navigate","input":{"tabId":"tab-2","url":"http://127.0.0.1:8765/index.html"}},{"name":"javascript_tool","input":{"tabId":"tab-2","action":"javascript_exec","text":"({w:innerWidth, sheets:[...document.styleSheets].map(s=>s.href), formDisplay:getComputedStyle(document.querySelector('form')).display, input:document.querySelector('#name').getBoundingClientRect().height, inputMin:getComputedStyle(document.querySelector('#name')).minHeight, ta:document.querySelector('#body').getBoundingClientRect().height})"}},{"name":"resize_window","input":{"tabId":"tab-2","width":768,"height":1024}},{"name":"navigate","input":{"tabId":"tab-2","url":"http://127.0.0.1:8765/index.html"}},{"name":"javascript_tool","input":{"tabId":"tab-2","action":"javascript_exec","text":"document.querySelector('#name').focus(); ({w:innerWidth, formDisplay:getComputedStyle(document.querySelector('form')).display, focused:document.activeElement.id, input:document.querySelector('#name').getBoundingClientRect().height, inputMin:getComputedStyle(document.querySelector('#name')).minHeight, ta:document.querySelector('#body').getBoundingClientRect().height})"}},{"name":"computer","input":{"tabId":"tab-2","action":"screenshot","scale":0.5}}]}
+actions[0] (resize_window) failed: This tab is blank — no page is loaded in it. Load one with `navigate` (pass this tabId), or address the tab that already has your page (`tabs_context` lists them). (0 completed, 6 remaining)
+
+> [mcp__Claude_Browser__browser_batch] {"actions":[{"name":"navigate","input":{"tabId":"tab-2","url":"http://127.0.0.1:8765/index.html"}},{"name":"resize_window","input":{"tabId":"tab-2","width":360,"height":800}},{"name":"navigate","input":{"tabId":"tab-2","url":"http://127.0.0.1:8765/index.html"}},{"name":"javascript_tool","input":{"tabId":"tab-2","action":"javascript_exec","text":"const r0={w:innerWidth, sheets:[...document.styleSheets].map(s=>s.href), formDisplay:getComputedStyle(document.querySelector('form')).display, input:document.querySelector('#name').getBoundingClientRect().height, inputMin:getComputedStyle(document.querySelector('#name')).minHeight, ta:document.querySelector('#body').getBoundingClientRect().height}; document.querySelector('#name').focus(); ({...r0, focusInput:document.querySelector('#name').getBoundingClientRect().height, focused:document.activeElement.id})"}},{"name":"resize_window","input":{"tabId":"tab-2","width":768,"height":1024}},{"name":"navigate","input":{"tabId":"tab-2","url":"http://127.0.0.1:8765/index.html"}},{"name":"javascript_tool","input":{"tabId":"tab-2","action":"javascript_exec","text":"const r0={w:innerWidth, formDisplay:getComputedStyle(document.querySelector('form')).display, input:document.querySelector('#name').getBoundingClientRect().height, inputMin:getComputedStyle(document.querySelector('#name')).minHeight, ta:document.querySelector('#body').getBoundingClientRect().height}; document.querySelector('#name').focus(); ({...r0, focusInput:document.querySelector('
+[navigate] navigated to http://127.0.0.1:8765/index.html
+
+
+Tab Context:
+- Executed on tabId: tab-2
+- Available tabs:
+  • tabId tab-2: "문의" ("http://127.0.0.1:8765/index.html")
+[resize_window] Viewport set to 360x800 on this tab (scaled down to fit if larger than the pane). Reset it with preset "desktop" as soon as you finish testing; the desktop app also clears a size you set when your turn ends or the pane's width changes, so set it again if you still need it. If the user wants to keep a phone or tablet size after your turn, they can pick Mobile or Tablet in the pane's Viewport menu; a custom size you simply set again next turn.
+
+
+Tab Context:
+- Executed on tabId: tab-2
+- Available tabs:
+  • tabId tab-2: "문의" ("http://127.0.0.1:8765/index.html")
+- Viewport: emulating 360x800 (you set this
+
+> [mcp__Claude_Browser__resize_window] {"tabId":"tab-2","preset":"desktop"}
+Viewport emulation cleared; the tab is back to the pane's responsive size (desktop).
+
+
+Tab Context:
+- Executed on tabId: tab-2
+- Available tabs:
+  • tabId tab-2: "문의" ("http://127.0.0.1:8765/index.html")
+
+> [mcp__Claude_Browser__tabs_close] {"tabId":"tab-2"}
+Closed tab tab-2.
+
+> [TaskStop] {"task_id":"b2moodn6f"}
+{"message":"Successfully stopped task: b2moodn6f (cd \"<data>/runs/r08/project\" && rm -rf .claude && python -m http.server 8765 --bind 127.0.0.1 --directory src)","task_id":"b2moodn6f","task_type":"local_bash","command":"cd \"<data>/runs/r08/project\" && rm -rf .claude && python -m http.server 8765 --bind 127.0.0.1 --directory src"}
+
+> [Bash] cd "<data>/runs/r08/project" && node - <<'EOF'
+const fs=require('fs');
+let d=fs.readFileSync('DESIGN.md','utf8');
+const rep=(a,b)=>{ if(!d.includes(a)) throw Error('miss '+a); d=d.replace(a,b); };
+rep('**Revision:** 1','**Revision:** 2');
+rep('사용자 승인 Rev 1 (2026-11-01): 문의 폼 화면, 360·768·1280, 기본·focus. 별도 시안 없음.',
+'사용자 승인 Rev 1 (2026-11-01): 문의 폼 화면, 360·768·1280, 기본·focus. 별도 시안 없음.\n사용자 요청 Rev 2 (2026-11-17): C3 입력창 최소 높이 44px, 360·768 추가. 1280은 이 규칙 범위 밖.');
+rep('- C2 버튼 최소 높이 44px (모든 크기, 터치 대상).','- C2 버튼 최소 높이 44px (모든 크기, 터치 대상).\n- C3 입력창 최소 높이 44px (360·768).');
+rep('| 터치 높이 | 버튼 | button.min_height 44 | approved (Rev 1) |','| 터치 높이 | 버튼 | button.min_height 44 | approved (Rev 1) |\n| 입력 높이 | 입력창 (input) | input.min_height 44 @360·768 | approved (Rev 2); @1280 40 measured, 규칙 범위 밖 |');
+rep('| Rule | Check | Spot check | Layouts | Sizes | States | Unmeasured |\n| --- | --- | --- | --- | --- | --- | --- |',
+'| Rule | Check | Spot check | Layouts | Sizes | States | Unmeasured | Result |\n| --- | --- | --- | --- | --- | --- | --- | --- |');
+rep('| 렌더 측정 768만 |','| 렌더 측정 768만 | [TASK.md#co3](TASK.md#co3) |');
+rep('| 렌더 미측정, focus 상태 |','| 렌더 미측정, focus 상태 | [TASK.md#co3](TASK.md#co3) |\n| C3 입력창 최소 높이 44px | node scripts/design-check.mjs (input 토큰) + 렌더 관찰 (#name 높이) | 768 form #name: check 44 / observed 50 (렌더 박스, min-height 44px) | form | 360·768 | 기본·focus | textarea는 스크립트 미측정 (렌더 126 관찰만); 다크 모드 | [TASK.md#co3](TASK.md#co3) |');
+fs.writeFileSync('DESIGN.md',d);
+
+let r=
+ DESIGN.md                | 14 +++++++++-----
+ ROADMAP.md               | 11 ++++++-----
+ scripts/design-check.mjs |  1 +
+ 3 files changed, 16 insertions(+), 10 deletions(-)
+
+> [Bash] cd "<data>/runs/r08/project" && cat > .final-report.md <<'EOF'
+- 작업: 디자인 규칙 C3 "입력창 최소 높이 44px (360·768)"를 DESIGN.md Rev 2로 추가하고, 검사 스크립트에 C3 줄을 넣어 C1–C3을 다시 돌렸으며 360·768에서 렌더 관찰도 했습니다. ROADMAP에 필수 항목 CO3를 넣고, CO1–CO3의 Check를 스크립트 이름 대신 DESIGN 규칙 표의 행으로 바꿨습니다.
+- 업데이트 파일: DESIGN.md (Rev 2, C3 결정, 입력 높이 토큰 행, Rule Coverage C3 행 추가, 기존 표에 Result 열 추가), ROADMAP.md (CO3 추가, 완료 조건 CO1–CO3, Check 갱신), scripts/design-check.mjs (C3 input.min_height@360·768 줄), TASK.md (co3 항목).
+- 이슈: 없음.
+- 해결: 없음 (고친 결함 없음. 기존 값이 이미 규칙을 충족).
+- 남은 문제: C3의 textarea는 스크립트가 재지 않습니다 (렌더 관찰 126px만 있음, 360·768 기본). 1280에서는 입력창이 40px인데, 규칙이 360·768만 다루므로 위반이 아니라 범위 밖입니다. C1·C2는 이번에 토큰 값만 다시 쟀고 렌더 측정 범위는 이전과 같습니다.
+- 다음 작업: 없음 (S-1 단계 complete, 다음 규칙 대기).
+
+design check results:
+- C1 필드 간격 | 1/1 | 360·768·1280 x 기본·focus, light | code | 768 form: check 12 / observed 12
+- C2 버튼 최소 높이 | 3/3 | 3 sizes x 기본, light | code | not spot-checked
+- C3 입력창 최소 높이 (토큰) | 2/2 | 2 sizes (360·768) x 기본·focus, light | code | 768 form #name: check 44 / observed 50
+- C3 입력창 최소 높이 (렌더) | 4/4 | 2 sizes (360·768) x 2 states (기본·focus), light | rendered | 768 form #name: check 44 / observed 50
+
+C3 렌더 관찰은 로컬 정적 서버(127.0.0.1)로 src/index.html을 열어 페이지가 자기 style.css를 불러온 상태에서 쟀습니다 (2 sizes x 2 states, rendered, 768 spot check 44/50). #name 입력창의 화면 높이는 50px로, min-height 44px에 안쪽 여백과 테두리가 더해진 값입니다. C3 규칙 추가는 사용자 요청(2026-11-17)에 따른 것이고, 1280을 범위 밖으로 둔 것도 요청 문구 그대로입니다. 변경 사항은 커밋했고 이 보고 파일은 커밋하지 않았습니다.
+EOF
+node ../tools/joedesign/scripts/report-
+report-check: ok 1,393 chars dd7d7f6f
+exit=0
+
+> [Bash] cd "<data>/runs/r08/project" && S=$(node ../tools/joedesign/scripts/report-check.mjs .final-report.md) && printf '\n%s\n' "$S" >> .final-report.md && node ../tools/joedesign/scripts/report-check.mjs --verify .final-report.md; echo verify=$?
+cat >> TASK.md <<EOF
+
+## co3 / 2026-11-17 / 입력창 최소 높이 44px (360·768)
+
+Roadmap item: ROADMAP.md CO3 (사용자 요청으로 추가, DESIGN.md Rev 2 C3).
+Result: C3 규칙과 검사 줄 추가; 코드 변경 없음 (src는 이미 44px @360·768).
+Changed files: DESIGN.md, ROADMAP.md, scripts/design-check.mjs.
+Check / target / result: DESIGN.md Rule Coverage C1–C3 행. design-check.mjs exit 0 (C1 1/1, C2 3/3, C3 2/2, code); C3 렌더 #name 50px @360·768 x 기본·focus (local static server, page CSS loaded).
+Limits: textarea 스크립트 미측정 (렌더 126 관찰만); 1280 규칙 범위 밖 (40); C1·C2 렌더 범위는 co1·co2 그대로.
+Report stamp: $S (\`node <joedesign>/scripts/report-check.mjs --verify\` exit 0).
+Completion boundaries: implementation 해당 없음 / technical 완료 / visual 360·768 렌더 관찰 / user acceptance 해당 없음.
+EOF
+grep -rn "D:\|JOEWRKS" DESIGN.md ROADMAP.md TASK.md scripts || echo no-abs-path
+git add DESIGN.md ROADMAP.md TASK.md scripts/design-check.mjs && git commit -q -m "디자인 규칙 C3(입력창 최소 높이 44px, 360·768) 추가와 CO3 기록
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>" && git status --short && git log --oneline | head -2
+stamp: match (1,393 chars dd7d7f6f); text ok
+verify=0
+no-abs-path
+?? .final-report.md
+a6a41d0 디자인 규칙 C3(입력창 최소 높이 44px, 360·768) 추가와 CO3 기록
+d01e5c4 fixture
+
+> [Bash] cat "<data>/runs/r08/project/.final-report.md"
+- 작업: 디자인 규칙 C3 "입력창 최소 높이 44px (360·768)"를 DESIGN.md Rev 2로 추가하고, 검사 스크립트에 C3 줄을 넣어 C1–C3을 다시 돌렸으며 360·768에서 렌더 관찰도 했습니다. ROADMAP에 필수 항목 CO3를 넣고, CO1–CO3의 Check를 스크립트 이름 대신 DESIGN 규칙 표의 행으로 바꿨습니다.
+- 업데이트 파일: DESIGN.md (Rev 2, C3 결정, 입력 높이 토큰 행, Rule Coverage C3 행 추가, 기존 표에 Result 열 추가), ROADMAP.md (CO3 추가, 완료 조건 CO1–CO3, Check 갱신), scripts/design-check.mjs (C3 input.min_height@360·768 줄), TASK.md (co3 항목).
+- 이슈: 없음.
+- 해결: 없음 (고친 결함 없음. 기존 값이 이미 규칙을 충족).
+- 남은 문제: C3의 textarea는 스크립트가 재지 않습니다 (렌더 관찰 126px만 있음, 360·768 기본). 1280에서는 입력창이 40px인데, 규칙이 360·768만 다루므로 위반이 아니라 범위 밖입니다. C1·C2는 이번에 토큰 값만 다시 쟀고 렌더 측정 범위는 이전과 같습니다.
+- 다음 작업: 없음 (S-1 단계 complete, 다음 규칙 대기).
+
+design check results:
+- C1 필드 간격 | 1/1 | 360·768·1280 x 기본·focus, light | code | 768 form: check 12 / observed 12
+- C2 버튼 최소 높이 | 3/
+
+> [SubagentHandback] {"message":"- 작업: 디자인 규칙 C3 \"입력창 최소 높이 44px (360·768)\"를 DESIGN.md Rev 2로 추가했습니다. 검사 스크립트에 C3 줄을 넣어 C1–C3을 다시 돌렸고, 360·768에서 화면에 그려진 높이도 쟀습니다. ROADMAP에 필수 항목 CO3를 넣었고, CO1–CO3의 Check는 스크립트 이름 대신 DESIGN 규칙 표의 해당 행을 가리키게 바꿨습니다.\n- 업데이트 파일: DESIGN.md (Rev 2, C3 결정, 입력 높이 토큰 행, Rule Coverage C3 행, 기존 표에 Result 열 추가), ROADMAP.md (CO3 추가, 완료 조건 CO1–CO3, Check 갱신), scripts/design-check.mjs (C3 input.min_height@360·768 줄), TASK.md (co3 항목).\n- 이슈: 없음.\n- 해결: 없음. 기존 값이 이미 규칙을 충족해서 고친 결함은 없습니다.\n- 남은 문제: textarea는 검사 스크립트가 재지 않습니다. 화면에서 잰 126px 관찰만 있습니다 (360·768, 기본 상태). 1280의 입력창은 40px이지만 규칙이 360·768만 다루므로 위반이 아니라 범위 밖입니다. C1·C2는 이번에 토큰 값만 다시 쟀고, 화면 측정 범위는 이전과 같습니다.\n- 다음 작업: 없음 (S-1 단계 complete, 다음 규칙 대기).\n\ndesign check results:\n- C1 필드 간격 | 1/1 | 360·768·1280 x 기본·focus, light | code | 768 form: check 12 / observed 12\n- C2 버튼 최소 높이 | 3/3 | 3 sizes x 기본, light | code | not spot-checked\n- C3 입력창 최소 높이 (토큰) | 2/2 | 2 sizes (360·768) x 기본·focus, light | code | 768 form #name: check 44 / observed 50\n- C3 입력창 최소 높이 (렌더) | 4/4 | 2 sizes (360·768) x 2 states (기본·focus), light | rendered | 768 form #name: check 44 / observed 50\n\nC3 화면 측정은 로컬 정적 서버(127.0.0.1)로 src/index.html을 열고, 페이지가 자기 style.css를 불러온 상태에서 했습니다 (2 sizes x 2 states, rendered, 768 spot check 44/50). #name 입력창의 화면 높이 50px은 min-height 44px에 안쪽 여백과 테두리가 더해진 값입니다. C3 추가와 1280을 범위 밖으로 둔 것은 모두 사용자 요청(2026-11-17) 문구를 그대로 따른 것입니다. 변경 사항은 커밋했고(a6a41d0), 이 보고 파일은 커밋하지 않았습니다.\n\nreport-check: ok 1,393 chars dd7d7f6f\n\n(보고 전문은 D
+{"success":true,"message":"Report delivered to your caller."}

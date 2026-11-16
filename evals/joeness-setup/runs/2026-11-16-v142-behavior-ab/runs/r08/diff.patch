@@ -1,0 +1,111 @@
+diff --git a/DESIGN.md b/DESIGN.md
+index e34801b..0c1e265 100644
+--- a/DESIGN.md
++++ b/DESIGN.md
+@@ -3,7 +3,7 @@
+ **Reporting:** follow the `## Report Form` section below exactly (보고는 `## Report Form` 절을 그대로 따른다).
+ 
+ **Status:** APPROVED
+-**Revision:** 1
++**Revision:** 2
+ **Product Authority:** README.md
+ 
+ <!-- Compact seed, not a required form. Keep only needed project decisions;
+@@ -16,6 +16,7 @@ Distinguish approved visual targets from ordinary references. Supplied ≠ appro
+ Record actual approval and its scope; do not fabricate approval or source facts. -->
+ 
+ 사용자 승인 Rev 1 (2026-11-01): 문의 폼 화면, 360·768·1280, 기본·focus. 별도 시안 없음.
++사용자 요청 Rev 2 (2026-11-17): C3 입력창 최소 높이 44px, 360·768 추가. 1280은 이 규칙 범위 밖.
+ 
+ ## Project Decisions
+ 
+@@ -27,6 +28,7 @@ state invariants; do not fill every craft topic or replace originals with prose.
+ 
+ - C1 필드 간격 12px (모든 크기).
+ - C2 버튼 최소 높이 44px (모든 크기, 터치 대상).
++- C3 입력창 최소 높이 44px (360·768).
+ 
+ ## Token Roles
+ 
+@@ -39,6 +41,7 @@ at every size. A part with no row has no token claim. Status per row: measured
+ | --- | --- | --- | --- |
+ | 필드 간격 | 폼 필드 사이 | field_gap 12 | approved (Rev 1) |
+ | 터치 높이 | 버튼 | button.min_height 44 | approved (Rev 1) |
++| 입력 높이 | 입력창 (input) | input.min_height 44 @360·768 | approved (Rev 2); @1280 40 measured, 규칙 범위 밖 |
+ 
+ ## Rule Coverage
+ 
+@@ -57,10 +60,11 @@ quoted elsewhere (report, ROADMAP), quote it with this row's layouts, sizes and
+ states, and with "not spot-checked" when that is the row's state; such a result is
+ not listed as resolved or verified. -->
+ 
+-| Rule | Check | Spot check | Layouts | Sizes | States | Unmeasured |
+-| --- | --- | --- | --- | --- | --- | --- |
+-| C1 필드 간격 12px | node scripts/design-check.mjs | 768 form: check 12 / observed 12 | form | 360·768·1280 | 기본·focus | 렌더 측정 768만 |
+-| C2 버튼 최소 높이 44px | node scripts/design-check.mjs | not spot-checked | form | 360·768·1280 | 기본 | 렌더 미측정, focus 상태 |
++| Rule | Check | Spot check | Layouts | Sizes | States | Unmeasured | Result |
++| --- | --- | --- | --- | --- | --- | --- | --- |
++| C1 필드 간격 12px | node scripts/design-check.mjs | 768 form: check 12 / observed 12 | form | 360·768·1280 | 기본·focus | 렌더 측정 768만 | [TASK.md#co3](TASK.md#co3) |
++| C2 버튼 최소 높이 44px | node scripts/design-check.mjs | not spot-checked | form | 360·768·1280 | 기본 | 렌더 미측정, focus 상태 | [TASK.md#co3](TASK.md#co3) |
++| C3 입력창 최소 높이 44px | node scripts/design-check.mjs (input 토큰) + 렌더 관찰 (#name 높이) | 768 form #name: check 44 / observed 50 (렌더 박스, min-height 44px) | form | 360·768 | 기본·focus | textarea는 스크립트 미측정 (렌더 126 관찰만); 다크 모드 | [TASK.md#co3](TASK.md#co3) |
+ 
+ ## Report Form
+ 
+diff --git a/ROADMAP.md b/ROADMAP.md
+index 5348724..f869bcb 100644
+--- a/ROADMAP.md
++++ b/ROADMAP.md
+@@ -4,19 +4,20 @@ Project scope: 문의 폼 화면의 디자인 규칙 적용.
+ Product authority: README.md.
+ Product revision / approval: none (README.md has no revision record; read 2026-11-10).
+ Current stage: S-1 폼 디자인 규칙 — complete.
+-Next eligible work: none (다음 규칙 대기).
++Next eligible work: none (CO1–CO3 complete; 다음 규칙 대기).
+ Status words: not started / in progress / verification pending / on hold / complete / removed from scope.
+ 
+ ## Stage S-1 폼 디자인 규칙 — complete
+ 
+-Goal: 승인된 디자인 규칙 Rev 1 적용.
++Goal: 승인된 디자인 규칙 Rev 2 적용.
+ Entry condition: none.
+-Completion condition: CO1, CO2 complete.
++Completion condition: CO1, CO2, CO3 complete.
+ 
+ | ID | Required outcome | Status | Check / completion criterion | Evidence or gap |
+ | --- | --- | --- | --- | --- |
+-| CO1 | 필드 간격 12px (C1) | complete | node scripts/design-check.mjs | TASK.md#co1 |
+-| CO2 | 버튼 최소 높이 44px (C2) | complete | node scripts/design-check.mjs | TASK.md#co2 |
++| CO1 | 필드 간격 12px (C1) | complete | DESIGN.md Rule Coverage C1 행 | TASK.md#co1, 재측정 TASK.md#co3 |
++| CO2 | 버튼 최소 높이 44px (C2) | complete | DESIGN.md Rule Coverage C2 행 | TASK.md#co2, 재측정 TASK.md#co3 |
++| CO3 | 입력창 최소 높이 44px, 360·768 (C3) | complete | DESIGN.md Rule Coverage C3 행 | TASK.md#co3; 미측정: textarea 스크립트 측정 |
+ 
+ Scope decisions: none.
+ User acceptance: not required.
+diff --git a/TASK.md b/TASK.md
+index c28f3a8..4f2fcc5 100644
+--- a/TASK.md
++++ b/TASK.md
+@@ -27,3 +27,13 @@ Required specialist verdict: not applicable.
+ Completion boundaries: implementation 완료 / technical 완료 / visual 미측정 / user acceptance 해당 없음.
+ Related issue / knowledge: none.
+ Record handoff gap: none.
++
++## co3 / 2026-11-17 / 입력창 최소 높이 44px (360·768)
++
++Roadmap item: ROADMAP.md CO3 (사용자 요청으로 추가, DESIGN.md Rev 2 C3).
++Result: C3 규칙과 검사 줄 추가; 코드 변경 없음 (src는 이미 44px @360·768).
++Changed files: DESIGN.md, ROADMAP.md, scripts/design-check.mjs.
++Check / target / result: DESIGN.md Rule Coverage C1–C3 행. design-check.mjs exit 0 (C1 1/1, C2 3/3, C3 2/2, code); C3 렌더 #name 50px @360·768 x 기본·focus (local static server, page CSS loaded).
++Limits: textarea 스크립트 미측정 (렌더 126 관찰만); 1280 규칙 범위 밖 (40); C1·C2 렌더 범위는 co1·co2 그대로.
++Report stamp: report-check: ok 1,393 chars dd7d7f6f (`node <joedesign>/scripts/report-check.mjs --verify` exit 0).
++Completion boundaries: implementation 해당 없음 / technical 완료 / visual 360·768 렌더 관찰 / user acceptance 해당 없음.
+diff --git a/scripts/design-check.mjs b/scripts/design-check.mjs
+index 5788b05..2508646 100644
+--- a/scripts/design-check.mjs
++++ b/scripts/design-check.mjs
+@@ -7,4 +7,5 @@ const line = (rule, what, got, want) => {
+ };
+ line('C1', 'field_gap', t.field_gap, 12);
+ for (const size of ['360', '768', '1280']) line('C2', 'button.min_height@' + size, t.button.min_height[size], 44);
++for (const size of ['360', '768']) line('C3', 'input.min_height@' + size, t.input.min_height[size], 44);
+ process.exitCode = bad ? 1 : 0;

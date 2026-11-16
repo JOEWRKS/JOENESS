@@ -1,0 +1,13 @@
+- 작업: 디자인 규칙 C3(입력창 최소 높이 44px, 360·768)를 DESIGN Rev 2로 추가(Project Decisions, Token Roles, Rule Coverage 행). 기존 Rule Coverage 표에 Result 열을 추가하고 새 표는 만들지 않음. design-check에 C3 검사를 추가. ROADMAP에 필수 항목 CO3을 추가하고, CO1~CO3의 Check를 스크립트 이름 대신 DESIGN 규칙 표의 행으로 바꿈. TASK에 co3 항목 기록. 코드 값은 이미 규칙을 충족해 바꾸지 않음.
+- 업데이트 파일: DESIGN.md, ROADMAP.md, TASK.md, scripts/design-check.mjs (커밋하지 않음)
+- 이슈: 없음
+- 해결: 없음
+- 남은 문제: C3은 코드 검사만 함. 화면 렌더링, focus 상태, textarea(토큰 없음)는 측정하지 않아 미검증. 로컬 파일은 미리보기 창에서 측정할 수 없었음. 검사 상태를 '기본'으로 정한 것과 '입력창'을 input 요소로 본 것은 제가 해석한 것. textarea·focus까지 넣을지는 확인이 필요함. C2는 여전히 not spot-checked.
+- 다음 작업: 화면 렌더링 측정(360·768에서 input·textarea 높이, focus 상태)을 할지 결정
+
+design check results:
+- C1 field_gap | ok 1/1 | 토큰 1개(크기 무관) x 기본 | code | 768 form: check 12 / observed 12
+- C2 button.min_height | ok 3/3 | 360·768·1280 x 기본 | code | not spot-checked
+- C3 input.min_height | ok 2/2 | 360·768 x 기본 | code | src/style.css 360·768 input: check 44 / observed 44 (code)
+
+ROADMAP의 S-1은 CO1~CO3이 모두 complete(코드 검사 범위)여서 complete로 유지함. 1280에서 input 높이가 40px인 미디어 쿼리는 C3 범위(360·768) 밖이라 위반이 아님(code, spot check 위 C3 줄과 같음).

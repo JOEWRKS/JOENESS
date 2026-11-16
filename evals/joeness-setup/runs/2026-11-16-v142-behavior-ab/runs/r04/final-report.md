@@ -1,0 +1,15 @@
+- 작업: 입력창 최소 높이 44px(360·768)를 디자인 규칙 C3로 추가했습니다(DESIGN.md 규칙·토큰 역할·Rule Coverage 행). 검사 스크립트에 C3 토큰 검사를 더해 C1~C3를 다시 돌렸고, ROADMAP에 CO3를 필수 항목으로 넣었습니다. CO1~CO3의 Check는 스크립트 이름 대신 DESIGN.md Rule Coverage 표의 해당 행을 가리키게 바꿨습니다. 기존 Rule Coverage 표에 Result 열을 추가해 최신 TASK 기록(TASK.md#co3)을 연결했고, 두 번째 표는 만들지 않았습니다.
+- 업데이트 파일: DESIGN.md, ROADMAP.md, TASK.md, scripts/design-check.mjs (src 코드는 바꾸지 않았습니다. 현재 CSS와 토큰이 이미 360·768에서 input 44px입니다.)
+- 이슈: 이번 세션에서는 페이지를 렌더해 높이를 잴 수 없었습니다(Playwright 없음, 미리보기 창이 로컬 파일을 열 수 없음). C3 검사는 토큰 값만 읽은 결과(code)이고 spot check를 하지 못했습니다.
+- 해결: 없음
+- 남은 문제: CO3는 verification pending입니다. 렌더 측정과 spot check(360·768 기본 상태), focus 상태가 남았습니다. "입력창"에 textarea까지 넣은 것은 제가 고른 범위라 확인이 필요합니다(textarea는 토큰이 없고 CSS 120px를 코드로만 읽음). C3 추가를 DESIGN Rev 2로 표기할지도 정해 주셔야 합니다(지금은 Rev 1 유지). 참고로 기존 CO2도 Rule Coverage상 not spot-checked이고 렌더 미측정인데 complete로 기록돼 있습니다(상태는 바꾸지 않았습니다).
+- 다음 작업: 브라우저 렌더 환경에서 input·textarea 높이를 360·768로 재고 C3 행에 spot check를 기록한 뒤 CO3 완료 판정; textarea 포함 여부와 Rev 표기 결정.
+
+design check results:
+- C1 field gap | 1/1 | 1 token (모든 크기) x 기본, light | code | 768 form: check 12 / observed 12
+- C2 button min height | 3/3 | 3 sizes x 기본, light | code | not spot-checked
+- C3 input min height | 2/2 | 2 sizes x 기본, light | code | not spot-checked
+
+C3 토큰 값은 360과 768 모두 44입니다(2 sizes x 기본, code, not spot-checked). 1280의 input 40px는 C3 범위 밖이라 그대로 두었습니다.
+
+report-check: ok 1,376 chars b04e47ac

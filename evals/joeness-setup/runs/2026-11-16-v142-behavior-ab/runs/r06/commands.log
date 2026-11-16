@@ -1,0 +1,294 @@
+> [Bash] cd "<data>/runs/r06/project" && ls -la && cat AGENTS.md && git status && git log --oneline | head
+total 34
+drwxr-xr-x 1 <user> 197609    0 Nov 16 01:25 .
+drwxr-xr-x 1 <user> 197609    0 Nov 16 01:25 ..
+drwxr-xr-x 1 <user> 197609    0 Nov 16 01:25 .git
+drwxr-xr-x 1 <user> 197609    0 Nov 16 01:25 .joeness
+-rw-r--r-- 1 <user> 197609 5386 Nov 16 01:25 AGENTS.md
+-rw-r--r-- 1 <user> 197609 6191 Nov 16 01:25 DESIGN.md
+-rw-r--r-- 1 <user> 197609   23 Nov 16 01:25 ISSUES.md
+-rw-r--r-- 1 <user> 197609  188 Nov 16 01:25 README.md
+-rw-r--r-- 1 <user> 197609  949 Nov 16 01:25 ROADMAP.md
+-rw-r--r-- 1 <user> 197609 1159 Nov 16 01:25 TASK.md
+drwxr-xr-x 1 <user> 197609    0 Nov 16 01:25 scripts
+drwxr-xr-x 1 <user> 197609    0 Nov 16 01:25 src
+<!-- JOENESS-SETUP:BEGIN -->
+- Owners: ROADMAP = goals, stage order, required items (status, check, proof, gap, next).
+  TASK = work results and checks. ISSUES =
+
+> [Bash] cd "<data>/runs/r06/project" && cat DESIGN.md ROADMAP.md TASK.md ISSUES.md README.md && find scripts src .joeness -type f && cat scripts/* | head -150
+# Project Design
+
+**Reporting:** follow the `## Report Form` section below exactly (보고는 `## Report Form` 절을 그대로 따른다).
+
+**Status:** APPROVED
+**Revision:** 1
+**Product Authority:** README.md
+
+<!-- Compact seed, not a required form. Keep only needed project decisions;
+unknown/empty is valid. Do not retranscribe settled source specifications. -->
+
+## Visual Sources and Approval Scope
+
+<!-- Original artifact/version + direct real-asset pointers + surface/state/viewport.
+Distinguish approved visual targets from ordinary references. Supplied ≠ approved.
+Record actual approval and its scope; do not fabricate approval or source facts. -->
+
+사용자 승인 Rev 1 (2026-11-01): 문의 폼 화면, 360·768·1280, 기본·focus. 별도 시안 없음.
+
+## Project Decisions
+
+<!-- Only needed relationships: source observation → preserve/change
+
+> [Bash] cd "<data>/runs/r06/project" && cat src/tokens.json src/style.css src/index.html src/form.js .joeness/setup-state.json; ls "<data>/runs/r06/tools/joedesign" "<data>/runs/r06/tools/joedesign/scripts"; node --version
+{
+  "field_gap": 12,
+  "button": {
+    "min_height": {
+      "360": 44,
+      "768": 44,
+      "1280": 44
+    }
+  },
+  "input": {
+    "min_height": {
+      "360": 44,
+      "768": 44,
+      "1280": 40
+    }
+  }
+}
+form { display: grid; gap: 12px; max-width: 480px; margin: 24px auto; padding: 0 16px; }
+input, textarea { font: inherit; min-height: 44px; }
+textarea { min-height: 120px; }
+button { min-height: 44px; }
+@media (min-width: 1280px) { input { min-height: 40px; } }
+<!doctype html>
+<html lang="ko">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>문의</title><link rel="stylesheet" href="style.css"></head>
+<body>
+<form id="request-form">
+  <label for="name">이름</label>
+  <input id="name" name="name" required>
+  <label for="body">요청 내용</
+
+> [Bash] cd "<data>/runs/r06/tools" && wc -c joeness-setup/SKILL.md joedesign/SKILL.md && sed -n 1,80p joeness-setup/SKILL.md
+18481 joeness-setup/SKILL.md
+14766 joedesign/SKILL.md
+33247 total
+---
+name: joeness-setup
+description: Use when the user asks to install or connect JOENESS in a project, organize its working documents, or revise or detach its project setup. Ordinary coding, questions, and status updates do not require setup.
+---
+
+# JOENESS Setup
+
+Make project goals, current work, evidence and unresolved risks retrievable by
+their owners. Write each detailed fact once; link it from relevant summaries.
+Write concisely at source, retaining cause, uncertainty, evidence and approval
+boundaries. No fixed length cap, routine rewrite pass or history purge.
+
+"Install JOENESS in this project" requests a project setup proposal, not a
+personal package installation. Show changed paths, ownership transfers and
+recording
+
+> [Bash] cd "<data>/runs/r06/tools/joedesign" && cat SKILL.md | head -150; ls references scripts/harness; head -60 scripts/measure-layout.mjs; head -40 scripts/report-check.mjs
+---
+name: joedesign
+description: "Design, implement and review UI through one operating workflow: inspect visual sources, translate them into the product, prove the key composition, and expand through specialist review. Also use for scoped visual repairs. Not for Product Definition, pure backend work or nonvisual refactors."
+---
+
+# JOEDESIGN
+
+This is the single operating core for JOEDESIGN. It governs design decisions,
+implementation, observation and specialist review. The harness is an internal
+execution mechanism, not another skill or authority the user must select.
+User authority and Product meaning govern the work; specialist defaults do not
+replace this operating route. Read detailed modules only for the current stage.
+
+## One owner, bounded roles
+
+The coordinating agent is A: it owns
+
+> [Bash] cd "<data>/runs/r06/tools/joedesign" && head -40 scripts/capture.mjs; ls scripts/v26.3.0 | head; node -e "try{require.resolve('playwright');console.log('pw yes')}catch(e){console.log('pw no')}"
+// Optional collector: use an existing Playwright package and browser, never install.
+import fs from 'node:fs';
+import path from 'node:path';
+import {createRequire} from 'node:module';
+import {createHash} from 'node:crypto';
+import {measureLayout} from './measure-layout.mjs';
+
+const require = createRequire(import.meta.url);
+const input = JSON.parse(fs.readFileSync(0, 'utf8'));
+const base = new URL(input.browser.base_url);
+if (!['http:', 'https:'].includes(base.protocol) || !['localhost', '127.0.0.1', '[::1]'].includes(base.hostname)) {
+  throw new Error('Collector only operates an explicitly configured local preview');
+}
+const {chromium} = require(input.browser.playwright_module || 'playwright');
+const out = path.resolve(input.output_dir);
+fs.mkdirSync(out, {recursive: true});
+const captur
+
+> [Bash] cd "<data>/runs/r06/project" && cat >> scripts/design-check.mjs.tmp <<'EOF'
+EOF
+rm scripts/design-check.mjs.tmp
+python - <<'EOF'
+p='scripts/design-check.mjs'
+s=open(p,encoding='utf8').read()
+old="for (const size of ['360', '768', '1280']) line('C2', 'button.min_height@' + size, t.button.min_height[size], 44);\n"
+assert old in s
+s=s.replace(old, old+"for (const size of ['360', '768']) line('C3', 'input.min_height@' + size, t.input.min_height[size], 44);\n")
+open(p,'w',encoding='utf8',newline='\n').write(s)
+EOF
+node scripts/design-check.mjs; echo "exit=$?"; git diff
+C1 field_gap = 12 ok
+C2 button.min_height@360 = 44 ok
+C2 button.min_height@768 = 44 ok
+C2 button.min_height@1280 = 44 ok
+C3 input.min_height@360 = 44 ok
+C3 input.min_height@768 = 44 ok
+exit=0
+diff --git a/scripts/design-check.mjs b/scripts/design-check.mjs
+index 5788b05..2508646 100644
+--- a/scripts/design-check.mjs
++++ b/scripts/design-check.mjs
+@@ -7,4 +7,5 @@ const line = (rule, what, got, want) => {
+ };
+ line('C1', 'field_gap', t.field_gap, 12);
+ for (const size of ['360', '768', '1280']) line('C2', 'button.min_height@' + size, t.button.min_height[size], 44);
++for (const size of ['360', '768']) line('C3', 'input.min_height@' + size, t.input.min_height[size], 44);
+ process.exitCode = bad ? 1 : 0;
+
+> [Bash] cd "<data>/runs/r06/project" && python - <<'EOF'
+p='DESIGN.md'
+s=open(p,encoding='utf8').read()
+reps=[
+("**Revision:** 1\n","**Revision:** 2\n"),
+("사용자 승인 Rev 1 (2026-11-01): 문의 폼 화면, 360·768·1280, 기본·focus. 별도 시안 없음.\n",
+ "사용자 승인 Rev 1 (2026-11-01): 문의 폼 화면, 360·768·1280, 기본·focus. 별도 시안 없음.\n"
+ "Rev 2 (2026-11-16): 사용자 요청으로 C3 추가 — \"입력창 최소 높이 44px(360·768) 규칙을 디자인 규칙 C3으로 추가\". 범위는 360·768만; 1280과 상태(기본·focus)는 요청에 없음. Rev 1 규칙은 그대로.\n"),
+("- C2 버튼 최소 높이 44px (모든 크기, 터치 대상).\n",
+ "- C2 버튼 최소 높이 44px (모든 크기, 터치 대상).\n- C3 입력창(`input`) 최소 높이 44px (360·768). 1280의 input 40px은 C3 범위 밖 (measured, src/style.css).\n"),
+("| 터치 높이 | 버튼 | button.min_height 44 | approved (Rev 1) |\n",
+ "| 터치 높이 | 버튼 | button.min_height 44 | approved (Rev 1) |\n| 입력창 높이 | input | input.min_height 44 (360·768) / 40 (1280) | 360·768 approved (Rev 2); 1280 measured |\n"),
+("| Rule | Check | Spot check | Layouts | Sizes | States | Unmeasured |\n| --- | --- | --- | --- | --- | --- | --- |\n",
+ "| Rule | Check | Spot check | Layouts | Sizes | States | Unmeasured | Result |\n| --- | --- | --- | --- | --- | --- | --- | --- |\n"),
+("| 렌더 측정 768만 |\n","| 렌더 측정 768만 | [TASK co3](TASK.md#co3) |\n"),
+("| 렌더 미측정, focus 상태 |\n","| 렌더 미측정, focus 상태 | [TASK co3](TASK.md#co3) |\n"),
+]
+for a,b in reps:
+    assert s.count(a)==1,a
+    s=s.replace(a,b)
+row="| C2 버튼 최소 높이 44px | node scripts/design-check.mjs | not spot-checked | form | 360·768·1280 | 기본 | 렌더 미측정, focus 상태 | [TASK co3](TASK.md#co3) |\n"
+assert row in s
+s=s.r
+diff --git a/DESIGN.md b/DESIGN.md
+index e34801b..eee0f93 100644
+--- a/DESIGN.md
++++ b/DESIGN.md
+@@ -3,7 +3,7 @@
+ **Reporting:** follow the `## Report Form` section below exactly (보고는 `## Report Form` 절을 그대로 따른다).
+ 
+ **Status:** APPROVED
+-**Revision:** 1
++**Revision:** 2
+ **Product Authority:** README.md
+ 
+ <!-- Compact seed, not a required form. Keep only needed project decisions;
+@@ -16,6 +16,7 @@ Distinguish approved visual targets from ordinary references. Supplied ≠ appro
+ Record actual approval and its scope; do not fabricate approval or source facts. -->
+ 
+ 사용자 승인 Rev 1 (2026-11-01): 문의 폼 화면, 360·768·1280, 기본·focus. 별도 시안 없음.
++Rev 2 (2026-11-16): 사용자 요청으로 C3 추가 — "입력창 최소 높이 44px(360·768) 규칙을 디자인 규칙 C3으로 추가". 범위는 360·768만; 1280과 상태(기본·focus)는 요청에 없음. Rev 1 규칙은 그대로.
+ 
+ ## Project Deci
+
+> [Bash] cd "<data>/runs/r06/project" && python - <<'EOF'
+p='ROADMAP.md'
+s=open(p,encoding='utf8').read()
+reps=[
+("Current stage: S-1 폼 디자인 규칙 — complete.\nNext eligible work: none (다음 규칙 대기).\n",
+ "Current stage: S-1 폼 디자인 규칙 — verification pending (CO3: C3 렌더 미측정·not spot-checked).\nNext eligible work: CO3 — 360·768에서 input 렌더 높이 측정 및 C3 spot check (이 기계에 Playwright 없음).\n"),
+("## Stage S-1 폼 디자인 규칙 — complete\n","## Stage S-1 폼 디자인 규칙 — verification pending\n"),
+("Goal: 승인된 디자인 규칙 Rev 1 적용.\n","Goal: 승인된 디자인 규칙 적용 (Rev 1: C1·C2, Rev 2: C3).\n"),
+("Completion condition: CO1, CO2 complete.\n","Completion condition: CO1, CO2, CO3 complete.\n"),
+("| CO1 | 필드 간격 12px (C1) | complete | node scripts/design-check.mjs | TASK.md#co1 |\n",
+ "| CO1 | 필드 간격 12px (C1) | complete | DESIGN.md Rule Coverage C1 행 | TASK.md#co1; 재실행 TASK.md#co3 |\n"),
+("| CO2 | 버튼 최소 높이 44px (C2) | complete | node scripts/design-check.mjs | TASK.md#co2 |\n",
+ "| CO2 | 버튼 최소 높이 44px (C2) | complete | DESIGN.md Rule Coverage C2 행 | TASK.md#co2; 재실행 TASK.md#co3 |\n"
+ "| CO3 | 입력창 최소 높이 44px, 360·768 (C3) | verification pending | DESIGN.md Rule Coverage C3 행 | TASK.md#co3; gap: 코드(토큰) 2/2 ok, 렌더 미측정, not spot-checked, focus 미측정 |\n"),
+]
+for a,b in reps:
+    assert s.count(a)==1,a
+    s=s.replace(a,b)
+open(p,'w',encoding='utf8',newline='\n').write(s)
+EOF
+cat >> TASK.md <<'EOF'
+
+## co3 / 2026-11-16 / 입력창 최소 높이 44px (C3)
+
+Roadmap item: ROADMAP.md CO3 (CO1·CO2 Check를 DESIGN 행으로 갱신).
+Result: DESIGN Rev 2에 C3 추가, Rule Coverage
+diff --git a/ROADMAP.md b/ROADMAP.md
+index 5348724..077b176 100644
+--- a/ROADMAP.md
++++ b/ROADMAP.md
+@@ -3,20 +3,21 @@
+ Project scope: 문의 폼 화면의 디자인 규칙 적용.
+ Product authority: README.md.
+ Product revision / approval: none (README.md has no revision record; read 2026-11-10).
+-Current stage: S-1 폼 디자인 규칙 — complete.
+-Next eligible work: none (다음 규칙 대기).
++Current stage: S-1 폼 디자인 규칙 — verification pending (CO3: C3 렌더 미측정·not spot-checked).
++Next eligible work: CO3 — 360·768에서 input 렌더 높이 측정 및 C3 spot check (이 기계에 Playwright 없음).
+ Status words: not started / in progress / verification pending / on hold / complete / removed from scope.
+ 
+-## Stage S-1 폼 디자인 규칙 — complete
++## Stage S-1 폼 디자인 규칙 — verification pending
+ 
+-Goal: 승인된 디자인 규칙 Rev 1 적용.
++Goal: 승인된 디자인 규칙 적용 (Rev 1: C1·C2, Rev 2: C3).
+ E
+
+> [Bash] cd "<data>/runs/r06/project" && sed -i 's/^Scope decisions: none\.$/Scope decisions: CO3를 새 단계 대신 S-1에 추가 (2026-11-16 작업자 선택, 사용자 확인 대기)./' ROADMAP.md && grep -n "Scope decisions" ROADMAP.md
+cat > .final-report.md <<'EOF'
+- 작업: 입력창 최소 높이 44px(360·768)를 DESIGN 규칙 C3(Rev 2)로 추가하고, Rule Coverage 표에 C3 행과 Result 열(최신 TASK 링크)을 더했습니다. 새 표는 만들지 않았습니다. scripts/design-check.mjs에 C3 검사를 넣고 다시 돌렸습니다. ROADMAP에 필수 항목 CO3를 넣었고, CO1·CO2·CO3의 Check를 스크립트 이름 대신 DESIGN Rule Coverage의 C1·C2·C3 행으로 바꿨습니다. src는 이미 360·768에서 44px이라 고치지 않았습니다.
+- 업데이트 파일: DESIGN.md, ROADMAP.md, TASK.md (co3 항목), scripts/design-check.mjs. 커밋하지 않았습니다.
+- 이슈: 없음 (C3 위반 없음).
+- 해결: 없음 (고친 결함 없음).
+- 남은 문제: CO3는 verification pending입니다. C3 결과는 토큰 값(code)만 읽은 2/2 ok이고 not spot-checked입니다. 렌더 높이와 focus 상태는 측정하지 않았고(이 기계에 Playwright 없음), textarea는 C3 검사 대상이 아닙니다. CO3를 새 단계가 아닌 S-1에 넣은 것은 제가 고른 것이라 확인이 필요합니다. CO2(C2)도 여전히 not spot-checked에 렌더 미측정인데 ROADMAP에는 complete로 남아 있습니다. 상태를 바꿀지 결정해 주세요.
+- 다음 작업: 360·768에서 input 렌더 높이를 측정하고 C3 spot check를 기록하면 CO3를 complete로 바꿀 수 있습니다. CO3를 둘 단계와 CO2 상태도 확인해 주세요.
+
+design check results:
+- C1 field_gap | 1/1 | 1 size(토큰, 크기 무관) x 기본, light | code | 768 form: check 12 / observed 12
+- C2 button.min_height | 3/3 | 3 sizes x 1 state, light | code | not spot-checked
+- C3 input.min_height | 2/2 | 2 sizes x 1 state, light | code | not spot-checked
+
+참고: src/style.css를 읽어 보니 input은 1280 이상에서 min-height 40px입니다. C3 범위(360·768) 밖이라 위반은 아니지만 C2의 터치 높이 44px과는 다릅니다(코드를 읽은 결과이며 렌더 측정은 아님).
+EOF
+node "<dat
+22:Scope decisions: CO3를 새 단계 대신 S-1에 추가 (2026-11-16 작업자 선택, 사용자 확인 대기).
+report-check: 1 finding(s)
+line 3 [R3] 이슈: 없음 (C3 위반 없음). -- check outcome without sizes x states, rendered or code, spot check outcome: add the parenthesis copied from its result line, or name the check and leave the outcome to the line
+exit=1
+
+> [Bash] cd "<data>/runs/r06/project" && sed -i 's/^- 이슈: 없음 (C3 위반 없음)\.$/- 이슈: 없음./' .final-report.md && R="<data>/runs/r06/tools/joedesign/scripts/report-check.mjs" && out=$(node "$R" .final-report.md); echo "$out"; printf '\n%s\n' "$out" >> .final-report.md; node "$R" --verify .final-report.md; echo "verify exit=$?"; tail -3 .final-report.md
+report-check: ok 1,252 chars 5b5d55e4
+stamp: match (1,252 chars 5b5d55e4); text ok
+verify exit=0
+참고: src/style.css를 읽어 보니 input은 1280 이상에서 min-height 40px입니다. C3 범위(360·768) 밖이라 위반은 아니지만 C2의 터치 높이 44px과는 다릅니다(코드를 읽은 결과이며 렌더 측정은 아님).
+
+report-check: ok 1,252 chars 5b5d55e4
+
+> [Bash] cd "<data>/runs/r06/project" && sed -i 's/^Report stamp: pending$/Report stamp: report-check: ok 1,252 chars 5b5d55e4/' TASK.md && tail -10 TASK.md && git status --short && grep -rn "JOEWRKS\|D:/\|D:\\\\" DESIGN.md ROADMAP.md TASK.md scripts || echo "no abs paths"
+## co3 / 2026-11-16 / 입력창 최소 높이 44px (C3)
+
+Roadmap item: ROADMAP.md CO3 (CO1·CO2 Check를 DESIGN 행으로 갱신).
+Result: DESIGN Rev 2에 C3 추가, Rule Coverage에 C3 행과 Result 열 추가; scripts/design-check.mjs에 C3 검사 추가. src 변경 없음.
+Changed files: DESIGN.md, ROADMAP.md, scripts/design-check.mjs, TASK.md.
+Check / target / result: node scripts/design-check.mjs (exit 0), src/tokens.json — C1 1/1, C2 3/3, C3 2/2 (360·768) ok; code, 기본, not spot-checked (C1은 DESIGN 행의 기존 spot check).
+Evidence: 명령 출력 C3 input.min_height@360/768 = 44 ok. src/style.css 읽음: input min-height 44px, 1280 이상 40px (C3 범위 밖).
+Limits: 렌더 미측정 (Playwright 없음), focus 미측정, textarea는 C3 검사 대상 아님.
+Report stamp: report-check: ok 1,252 chars 5b5d55e4
+Completion boundaries: implementation 해당 없음 (기존 값) / technical 코드 2/2 / visual 미측정 / user acceptanc
