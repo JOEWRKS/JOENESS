@@ -1,6 +1,6 @@
 {
   "status": "PLAN_ONLY_WAIT_FOR_MANAGER",
-  "personal": "C:/Users/tjdwo/.codex",
+  "personal": "~/.codex",
   "previous_release_commit": "5f16ea00c5c1f46c8c87999a3247739576dd537e",
   "previous_manifest_sha256": "a569ff74f16df210e1e87046c8edfd61f19912653f2c8cfec328ec92e64d8fed",
   "source_commit": null,
@@ -137,7 +137,7 @@
     "AGENTS.md": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "config.toml": "f3121e33d0d2b9e69bfcbe2284483d492238f7fb67394a5c58d73a02e5c5de83"
   },
-  "backup_root": "C:/Users/tjdwo/.codex-install-backups/joeness-20261013-baf66705ad39",
+  "backup_root": "~/.codex-install-backups/joeness-20261013-baf66705ad39",
   "steps": [
     "Recheck every before hash and exact inventory immediately before mutation. Block on drift/unknown files.",
     "Back up only the 11 owned skill files and joeness-skills-state.json outside skill discovery; verify backup hashes. Never copy login/config into repository evidence.",

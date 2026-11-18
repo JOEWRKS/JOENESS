@@ -18,5 +18,5 @@ User decision on 2026-10-29: commit, push, and update the personal installation.
    [Exact record](personal-install.json). The 17 installed files match the manifest. The delta is
    exactly assets/AGENTS.md and the state file; global AGENTS.md/config.toml unchanged; the
    representative installed checks passed.
-   Backup: `C:/Users/tjdwo/.codex-install-backups/joeness-v111-20261029-1a55f7d861dd`.
+   Backup: `~/.codex-install-backups/joeness-v111-20261029-1a55f7d861dd`.
 3. Existing project connections are not updated automatically. Existing tags/Releases untouched.

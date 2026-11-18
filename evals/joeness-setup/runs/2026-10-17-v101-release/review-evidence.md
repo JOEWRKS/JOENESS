@@ -67,7 +67,7 @@ text, configured-gate missing-proof exit 2/UNVERIFIED and protected fixture byte
 - Guarded script: `node install-and-check.mjs --approved-personal-v101 <source SHA>`.
 - Old package Check current → verified backup → old Remove removed → new Check
   ready → Apply current → Check current; all five commands exit 0.
-- Backup: `C:/Users/tjdwo/.codex-install-backups/joeness-v101-20261017-7e00a1b4981b`.
+- Backup: `~/.codex-install-backups/joeness-v101-20261017-7e00a1b4981b`.
   Contains only the previous 17 managed files and ownership state, each hash-checked;
   no credentials or entire Codex home. Old exported package path is in raw evidence.
 - Installed namespace contains exactly 17 files, each matching new manifest/state.

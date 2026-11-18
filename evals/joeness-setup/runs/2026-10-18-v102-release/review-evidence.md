@@ -38,7 +38,7 @@ and manifest `7e00a1b4981ba4a677c7214d287c17cb02e91faa42574a4c87c4bed356b2c36c`.
 17 managed files+state, preserves global AGENTS/config, and verifies the expected
 two-file delta (template+state). Partial transitions are not retried blindly.
 
-Verified personal backup: `C:/Users/tjdwo/.codex-install-backups/joeness-v102-20261018-73281c229fde`.
+Verified personal backup: `~/.codex-install-backups/joeness-v102-20261018-73281c229fde`.
 The old17 managed files and ownership state are recoverable there; no credentials
 or whole-home backup. Only template/state changed. Other16 payload files and global
 AGENTS.md/config.toml unchanged. Other projects and skills were not targeted.

@@ -1,6 +1,6 @@
 {
   "status": "PASS-isolated-candidate-not-personal-release",
-  "root": "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-v100-candidate-CQHK7s",
+  "root": "~\\AppData\\Local\\Temp\\joeness-v100-candidate-CQHK7s",
   "baseline": "c4902f72b728e36d558225157a10f740ed6abdc0",
   "manifest_sha256": "529a22ace091617b01e4eb82178f3a7fb9dbc16e2eab0b0b925676be81c0a905",
   "steps": [
@@ -14,7 +14,7 @@
         "D:\\JOEWRKS\\작업하네스\\JOENESS.ps1",
         "-Check",
         "-CodexHome",
-        "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-v100-candidate-CQHK7s"
+        "~\\AppData\\Local\\Temp\\joeness-v100-candidate-CQHK7s"
       ],
       "exit": 0,
       "stdout": "{\"status\":\"ready\",\"mode\":\"check\",\"codexHome\":\"C:\\\\Users\\\\tjdwo\\\\AppData\\\\Local\\\\Temp\\\\joeness-v100-candidate-CQHK7s\",\"activeSkills\":[],\"warnings\":[],\"changesRequired\":true,\"changes\":[\"skills/joeness-setup/SKILL.md\",\"skills/joeness-setup/agents/openai.yaml\",\"skills/joeness-setup/assets/AGENTS.md\",\"skills/joeness-setup/assets/DESIGN.md\",\"skills/joeness-setup/assets/ISSUES.md\",\"skills/joeness-setup/assets/ROADMAP.md\",\"skills/joeness-setup/assets/TASK.md\",\"skills/joeness-setup/references/usage.md\",\"skills/joeness-setup/scripts/project-setup.ps1\",\"skills/joeness-setup/references/review-gate.md\",\"skills/joeness-setup/scripts/review-gate.mjs\",\"skills/joeness-setup/references/roadmap-review.md\",\"skills/joeness-setup/scripts/roadmap-review.mjs\",\"skills/joeness-setup/references/operation-review.md\",\"skills/joeness-setup/scripts/operation-review.mjs\",\"skills/joeness-setup/scripts/impact-review.mjs\",\"skills/joeness-setup/references/impact-review.md\",\"joeness-skills-state.json\"],\"blockers\":[],\"rollback\":null}\r\n",
@@ -30,7 +30,7 @@
         "D:\\JOEWRKS\\작업하네스\\JOENESS.ps1",
         "-Apply",
         "-CodexHome",
-        "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-v100-candidate-CQHK7s"
+        "~\\AppData\\Local\\Temp\\joeness-v100-candidate-CQHK7s"
       ],
       "exit": 0,
       "stdout": "{\"status\":\"current\",\"mode\":\"apply\",\"codexHome\":\"C:\\\\Users\\\\tjdwo\\\\AppData\\\\Local\\\\Temp\\\\joeness-v100-candidate-CQHK7s\",\"activeSkills\":[\"joeness-setup\"],\"warnings\":[],\"changesRequired\":false,\"changes\":[\"skills/joeness-setup/SKILL.md\",\"skills/joeness-setup/agents/openai.yaml\",\"skills/joeness-setup/assets/AGENTS.md\",\"skills/joeness-setup/assets/DESIGN.md\",\"skills/joeness-setup/assets/ISSUES.md\",\"skills/joeness-setup/assets/ROADMAP.md\",\"skills/joeness-setup/assets/TASK.md\",\"skills/joeness-setup/references/usage.md\",\"skills/joeness-setup/scripts/project-setup.ps1\",\"skills/joeness-setup/references/review-gate.md\",\"skills/joeness-setup/scripts/review-gate.mjs\",\"skills/joeness-setup/references/roadmap-review.md\",\"skills/joeness-setup/scripts/roadmap-review.mjs\",\"skills/joeness-setup/references/operation-review.md\",\"skills/joeness-setup/scripts/operation-review.mjs\",\"skills/joeness-setup/scripts/impact-review.mjs\",\"skills/joeness-setup/references/impact-review.md\",\"joeness-skills-state.json\"],\"blockers\":null,\"rollback\":null}\r\n",
@@ -46,7 +46,7 @@
         "D:\\JOEWRKS\\작업하네스\\JOENESS.ps1",
         "-Check",
         "-CodexHome",
-        "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-v100-candidate-CQHK7s"
+        "~\\AppData\\Local\\Temp\\joeness-v100-candidate-CQHK7s"
       ],
       "exit": 0,
       "stdout": "{\"status\":\"current\",\"mode\":\"check\",\"codexHome\":\"C:\\\\Users\\\\tjdwo\\\\AppData\\\\Local\\\\Temp\\\\joeness-v100-candidate-CQHK7s\",\"activeSkills\":[\"joeness-setup\"],\"warnings\":[],\"changesRequired\":false,\"changes\":[],\"blockers\":[],\"rollback\":null}\r\n",
@@ -62,7 +62,7 @@
         "D:\\JOEWRKS\\작업하네스\\JOENESS.ps1",
         "-Apply",
         "-CodexHome",
-        "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-v100-candidate-CQHK7s"
+        "~\\AppData\\Local\\Temp\\joeness-v100-candidate-CQHK7s"
       ],
       "exit": 0,
       "stdout": "{\"status\":\"current\",\"mode\":\"apply\",\"codexHome\":\"C:\\\\Users\\\\tjdwo\\\\AppData\\\\Local\\\\Temp\\\\joeness-v100-candidate-CQHK7s\",\"activeSkills\":[\"joeness-setup\"],\"warnings\":[],\"changesRequired\":false,\"changes\":[],\"blockers\":null,\"rollback\":null}\r\n",
@@ -78,7 +78,7 @@
         "D:\\JOEWRKS\\작업하네스\\JOENESS.ps1",
         "-Remove",
         "-CodexHome",
-        "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-v100-candidate-CQHK7s"
+        "~\\AppData\\Local\\Temp\\joeness-v100-candidate-CQHK7s"
       ],
       "exit": 0,
       "stdout": "{\"status\":\"removed\",\"mode\":\"remove\",\"codexHome\":\"C:\\\\Users\\\\tjdwo\\\\AppData\\\\Local\\\\Temp\\\\joeness-v100-candidate-CQHK7s\",\"activeSkills\":[],\"warnings\":[],\"changesRequired\":false,\"changes\":[\"skills/joeness-setup/SKILL.md\",\"skills/joeness-setup/agents/openai.yaml\",\"skills/joeness-setup/assets/AGENTS.md\",\"skills/joeness-setup/assets/DESIGN.md\",\"skills/joeness-setup/assets/ISSUES.md\",\"skills/joeness-setup/assets/ROADMAP.md\",\"skills/joeness-setup/assets/TASK.md\",\"skills/joeness-setup/references/usage.md\",\"skills/joeness-setup/scripts/project-setup.ps1\",\"skills/joeness-setup/references/review-gate.md\",\"skills/joeness-setup/scripts/review-gate.mjs\",\"skills/joeness-setup/references/roadmap-review.md\",\"skills/joeness-setup/scripts/roadmap-review.mjs\",\"skills/joeness-setup/references/operation-review.md\",\"skills/joeness-setup/scripts/operation-review.mjs\",\"skills/joeness-setup/scripts/impact-review.mjs\",\"skills/joeness-setup/references/impact-review.md\",\"joeness-skills-state.json\"],\"blockers\":null,\"rollback\":null}\r\n",
@@ -94,7 +94,7 @@
         "D:\\JOEWRKS\\작업하네스\\JOENESS.ps1",
         "-Check",
         "-CodexHome",
-        "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-v100-candidate-CQHK7s"
+        "~\\AppData\\Local\\Temp\\joeness-v100-candidate-CQHK7s"
       ],
       "exit": 0,
       "stdout": "{\"status\":\"ready\",\"mode\":\"check\",\"codexHome\":\"C:\\\\Users\\\\tjdwo\\\\AppData\\\\Local\\\\Temp\\\\joeness-v100-candidate-CQHK7s\",\"activeSkills\":[],\"warnings\":[],\"changesRequired\":true,\"changes\":[\"skills/joeness-setup/SKILL.md\",\"skills/joeness-setup/agents/openai.yaml\",\"skills/joeness-setup/assets/AGENTS.md\",\"skills/joeness-setup/assets/DESIGN.md\",\"skills/joeness-setup/assets/ISSUES.md\",\"skills/joeness-setup/assets/ROADMAP.md\",\"skills/joeness-setup/assets/TASK.md\",\"skills/joeness-setup/references/usage.md\",\"skills/joeness-setup/scripts/project-setup.ps1\",\"skills/joeness-setup/references/review-gate.md\",\"skills/joeness-setup/scripts/review-gate.mjs\",\"skills/joeness-setup/references/roadmap-review.md\",\"skills/joeness-setup/scripts/roadmap-review.mjs\",\"skills/joeness-setup/references/operation-review.md\",\"skills/joeness-setup/scripts/operation-review.mjs\",\"skills/joeness-setup/scripts/impact-review.mjs\",\"skills/joeness-setup/references/impact-review.md\",\"joeness-skills-state.json\"],\"blockers\":[],\"rollback\":null}\r\n",
@@ -110,7 +110,7 @@
         "D:\\JOEWRKS\\작업하네스\\JOENESS.ps1",
         "-Apply",
         "-CodexHome",
-        "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-v100-candidate-CQHK7s"
+        "~\\AppData\\Local\\Temp\\joeness-v100-candidate-CQHK7s"
       ],
       "exit": 0,
       "stdout": "{\"status\":\"current\",\"mode\":\"apply\",\"codexHome\":\"C:\\\\Users\\\\tjdwo\\\\AppData\\\\Local\\\\Temp\\\\joeness-v100-candidate-CQHK7s\",\"activeSkills\":[\"joeness-setup\"],\"warnings\":[],\"changesRequired\":false,\"changes\":[\"skills/joeness-setup/SKILL.md\",\"skills/joeness-setup/agents/openai.yaml\",\"skills/joeness-setup/assets/AGENTS.md\",\"skills/joeness-setup/assets/DESIGN.md\",\"skills/joeness-setup/assets/ISSUES.md\",\"skills/joeness-setup/assets/ROADMAP.md\",\"skills/joeness-setup/assets/TASK.md\",\"skills/joeness-setup/references/usage.md\",\"skills/joeness-setup/scripts/project-setup.ps1\",\"skills/joeness-setup/references/review-gate.md\",\"skills/joeness-setup/scripts/review-gate.mjs\",\"skills/joeness-setup/references/roadmap-review.md\",\"skills/joeness-setup/scripts/roadmap-review.mjs\",\"skills/joeness-setup/references/operation-review.md\",\"skills/joeness-setup/scripts/operation-review.mjs\",\"skills/joeness-setup/scripts/impact-review.mjs\",\"skills/joeness-setup/references/impact-review.md\",\"joeness-skills-state.json\"],\"blockers\":null,\"rollback\":null}\r\n",
@@ -126,7 +126,7 @@
         "D:\\JOEWRKS\\작업하네스\\JOENESS.ps1",
         "-Check",
         "-CodexHome",
-        "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-v100-candidate-CQHK7s"
+        "~\\AppData\\Local\\Temp\\joeness-v100-candidate-CQHK7s"
       ],
       "exit": 0,
       "stdout": "{\"status\":\"current\",\"mode\":\"check\",\"codexHome\":\"C:\\\\Users\\\\tjdwo\\\\AppData\\\\Local\\\\Temp\\\\joeness-v100-candidate-CQHK7s\",\"activeSkills\":[\"joeness-setup\"],\"warnings\":[],\"changesRequired\":false,\"changes\":[],\"blockers\":[],\"rollback\":null}\r\n",

@@ -75,4 +75,4 @@ A bounded temporary old-source copy under the user's local Temp directory was
 used to perform the exact-source removal. Its recursive and explicit cleanup
 commands were rejected by command policy; it contains only copied JOENESS
 source/installed skill bytes and remains at
-`C:\Users\tjdwo\AppData\Local\Temp\joeness-report-old-09f17b265324454b98a9a67634626a41`.
+`~\AppData\Local\Temp\joeness-report-old-09f17b265324454b98a9a67634626a41`.

@@ -1,6 +1,6 @@
 {
   "type": "isolated-installed-consumer-not-personal-install",
-  "root": "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-f01f02-install-LGhEB9",
+  "root": "~\\AppData\\Local\\Temp\\joeness-f01f02-install-LGhEB9",
   "manifest_sha256": "7b4fe35f553c271ccd5ac8201b4aba82b9ad0abc840c899eba9340daa1f06335",
   "apply": {
     "command": [
@@ -12,13 +12,13 @@
       "D:\\JOEWRKS\\작업하네스\\JOENESS.ps1",
       "-Apply",
       "-CodexHome",
-      "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-f01f02-install-LGhEB9"
+      "~\\AppData\\Local\\Temp\\joeness-f01f02-install-LGhEB9"
     ],
     "exit": 0,
     "output": {
       "status": "current",
       "mode": "apply",
-      "codexHome": "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-f01f02-install-LGhEB9",
+      "codexHome": "~\\AppData\\Local\\Temp\\joeness-f01f02-install-LGhEB9",
       "activeSkills": [
         "joeness-setup"
       ],
@@ -55,13 +55,13 @@
       "D:\\JOEWRKS\\작업하네스\\JOENESS.ps1",
       "-Check",
       "-CodexHome",
-      "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-f01f02-install-LGhEB9"
+      "~\\AppData\\Local\\Temp\\joeness-f01f02-install-LGhEB9"
     ],
     "exit": 0,
     "output": {
       "status": "current",
       "mode": "check",
-      "codexHome": "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-f01f02-install-LGhEB9",
+      "codexHome": "~\\AppData\\Local\\Temp\\joeness-f01f02-install-LGhEB9",
       "activeSkills": [
         "joeness-setup"
       ],
@@ -145,7 +145,7 @@
       "C:\\Program Files\\nodejs\\node.exe",
       "D:\\JOEWRKS\\작업하네스\\evals\\joeness-setup\\runs\\2026-10-13-roadmap-review\\verify-producer-fixtures.mjs"
     ],
-    "cli": "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-f01f02-install-LGhEB9\\skills\\joeness-setup\\scripts\\roadmap-review.mjs",
+    "cli": "~\\AppData\\Local\\Temp\\joeness-f01f02-install-LGhEB9\\skills\\joeness-setup\\scripts\\roadmap-review.mjs",
     "exit": 0,
     "stdout": "{\"passed\":13,\"total\":13,\"cli_sha256\":\"5dfb2d5a81df58d9e1c43651b43cc945356bbf61630b103877f9b8bcd13ba33f\"}\n",
     "stderr": ""

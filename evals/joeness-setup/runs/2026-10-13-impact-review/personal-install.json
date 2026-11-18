@@ -3,9 +3,9 @@
   "source_commit": "eed525502e5c704b16ef4539c6334eabab187744",
   "source_manifest_sha256": "49889a08818ac80006527a16bfa0911c08024ea67f4d263375ab4a96a6167aeb",
   "plan_sha256": "2244d772220458237e98550618850697dca398655aae35d598a4558004b50865",
-  "backup": "C:\\Users\\tjdwo\\.codex-install-backups\\joeness-20261013-49889a08818a",
+  "backup": "~\\.codex-install-backups\\joeness-20261013-49889a08818a",
   "backup_manifest_sha256": "874efdd06116386e1119ea3d3b57b46af8152c31f0b1915aa07409cc7a3803ea",
-  "old_source": "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-approved-upgrade-P31PVV\\old-source",
+  "old_source": "~\\AppData\\Local\\Temp\\joeness-approved-upgrade-P31PVV\\old-source",
   "steps": [
     {
       "command": [
@@ -14,16 +14,16 @@
         "-ExecutionPolicy",
         "Bypass",
         "-File",
-        "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-approved-upgrade-P31PVV\\old-source\\JOENESS.ps1",
+        "~\\AppData\\Local\\Temp\\joeness-approved-upgrade-P31PVV\\old-source\\JOENESS.ps1",
         "-Check",
         "-CodexHome",
-        "C:/Users/tjdwo/.codex"
+        "~/.codex"
       ],
       "exit": 0,
       "output": {
         "status": "current",
         "mode": "check",
-        "codexHome": "C:\\Users\\tjdwo\\.codex",
+        "codexHome": "~\\.codex",
         "activeSkills": [
           "joeness-setup"
         ],
@@ -42,16 +42,16 @@
         "-ExecutionPolicy",
         "Bypass",
         "-File",
-        "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-approved-upgrade-P31PVV\\old-source\\JOENESS.ps1",
+        "~\\AppData\\Local\\Temp\\joeness-approved-upgrade-P31PVV\\old-source\\JOENESS.ps1",
         "-Remove",
         "-CodexHome",
-        "C:/Users/tjdwo/.codex"
+        "~/.codex"
       ],
       "exit": 0,
       "output": {
         "status": "removed",
         "mode": "remove",
-        "codexHome": "C:\\Users\\tjdwo\\.codex",
+        "codexHome": "~\\.codex",
         "activeSkills": [],
         "warnings": [],
         "changesRequired": false,
@@ -84,13 +84,13 @@
         "D:\\JOEWRKS\\작업하네스\\JOENESS.ps1",
         "-Apply",
         "-CodexHome",
-        "C:/Users/tjdwo/.codex"
+        "~/.codex"
       ],
       "exit": 0,
       "output": {
         "status": "current",
         "mode": "apply",
-        "codexHome": "C:\\Users\\tjdwo\\.codex",
+        "codexHome": "~\\.codex",
         "activeSkills": [
           "joeness-setup"
         ],
@@ -131,13 +131,13 @@
         "D:\\JOEWRKS\\작업하네스\\JOENESS.ps1",
         "-Check",
         "-CodexHome",
-        "C:/Users/tjdwo/.codex"
+        "~/.codex"
       ],
       "exit": 0,
       "output": {
         "status": "current",
         "mode": "check",
-        "codexHome": "C:\\Users\\tjdwo\\.codex",
+        "codexHome": "~\\.codex",
         "activeSkills": [
           "joeness-setup"
         ],

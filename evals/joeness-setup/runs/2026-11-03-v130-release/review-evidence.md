@@ -14,7 +14,7 @@ tag and Release in sequence, as approved since 1.2.0.
    The 19 installed files match the manifest. The delta is exactly the state file and
    `skills/joeness-setup/assets/AGENTS.md`; global AGENTS.md/config.toml unchanged; the representative
    installed check (review-gate tests against the installed CLI) passed.
-   Backup: `C:/Users/tjdwo/.codex-install-backups/joeness-v130-20261103-831fe05ac007`.
+   Backup: `~/.codex-install-backups/joeness-v130-20261103-831fe05ac007`.
 3. Claude Code sessions in `D:\JOEWRKS` load the skill through `D:\JOEWRKS\.claude\skills\joeness-setup`,
    a link to the clean main clone `D:\JOEWRKS\.local\joe-latest-20261029\JOENESS`. Fast-forwarded
    `e2b1343` → `f7937db` (1.3.0) with no local changes.

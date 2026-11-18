@@ -63,7 +63,7 @@ User decision on 2026-10-25: commit, fix the version, push, and update the local
    [Exact record](personal-install.json). The 17 installed files match the manifest. The delta
    is exactly SKILL.md, assets/AGENTS.md, assets/ROADMAP.md and the state file. Global
    AGENTS.md/config.toml are unchanged, and the representative installed checks passed.
-   Backup: `C:/Users/tjdwo/.codex-install-backups/joeness-v110-20261025-acef856fad8c`.
+   Backup: `~/.codex-install-backups/joeness-v110-20261025-acef856fad8c`.
 3. Harness fix, made before any change: the 1.0.2 script piped `git archive` into `tar` stdin,
    which hit EOF under Node 26, and Git Bash GNU tar read `C:` as a host. The archive is now
    written to a temp file and extracted with Windows `tar.exe`. The two preflight stops

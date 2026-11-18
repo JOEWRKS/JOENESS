@@ -1,6 +1,6 @@
 {
   "kind": "independent-producer-synthetic-fixtures-source-consumption",
-  "cli": "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-f01f02-install-LGhEB9\\skills\\joeness-setup\\scripts\\roadmap-review.mjs",
+  "cli": "~\\AppData\\Local\\Temp\\joeness-f01f02-install-LGhEB9\\skills\\joeness-setup\\scripts\\roadmap-review.mjs",
   "cli_sha256": "5dfb2d5a81df58d9e1c43651b43cc945356bbf61630b103877f9b8bcd13ba33f",
   "expectations": "D:/JOEWRKS/JOEDESIGN/evals/feedback-implementation-20261013/f02-expectations-v3.json",
   "expectation_sha256": "8f3dd6235fcc96c434671a7b82d0dfb602710bf9e371b1105ea416c9bb3c86bb",
@@ -12,7 +12,7 @@
       "expected": "ready",
       "command": [
         "C:\\Program Files\\nodejs\\node.exe",
-        "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-f01f02-install-LGhEB9\\skills\\joeness-setup\\scripts\\roadmap-review.mjs",
+        "~\\AppData\\Local\\Temp\\joeness-f01f02-install-LGhEB9\\skills\\joeness-setup\\scripts\\roadmap-review.mjs",
         "--root",
         "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-P01",
         "--input",
@@ -121,7 +121,7 @@
       "expected": "blocked",
       "command": [
         "C:\\Program Files\\nodejs\\node.exe",
-        "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-f01f02-install-LGhEB9\\skills\\joeness-setup\\scripts\\roadmap-review.mjs",
+        "~\\AppData\\Local\\Temp\\joeness-f01f02-install-LGhEB9\\skills\\joeness-setup\\scripts\\roadmap-review.mjs",
         "--root",
         "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N01",
         "--input",
@@ -237,7 +237,7 @@
       "expected": "blocked",
       "command": [
         "C:\\Program Files\\nodejs\\node.exe",
-        "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-f01f02-install-LGhEB9\\skills\\joeness-setup\\scripts\\roadmap-review.mjs",
+        "~\\AppData\\Local\\Temp\\joeness-f01f02-install-LGhEB9\\skills\\joeness-setup\\scripts\\roadmap-review.mjs",
         "--root",
         "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N02",
         "--input",
@@ -353,7 +353,7 @@
       "expected": "unknown",
       "command": [
         "C:\\Program Files\\nodejs\\node.exe",
-        "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-f01f02-install-LGhEB9\\skills\\joeness-setup\\scripts\\roadmap-review.mjs",
+        "~\\AppData\\Local\\Temp\\joeness-f01f02-install-LGhEB9\\skills\\joeness-setup\\scripts\\roadmap-review.mjs",
         "--root",
         "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N03",
         "--input",
@@ -476,7 +476,7 @@
       "expected": "unknown",
       "command": [
         "C:\\Program Files\\nodejs\\node.exe",
-        "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-f01f02-install-LGhEB9\\skills\\joeness-setup\\scripts\\roadmap-review.mjs",
+        "~\\AppData\\Local\\Temp\\joeness-f01f02-install-LGhEB9\\skills\\joeness-setup\\scripts\\roadmap-review.mjs",
         "--root",
         "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N04",
         "--input",
@@ -635,7 +635,7 @@
       "expected": "conflict",
       "command": [
         "C:\\Program Files\\nodejs\\node.exe",
-        "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-f01f02-install-LGhEB9\\skills\\joeness-setup\\scripts\\roadmap-review.mjs",
+        "~\\AppData\\Local\\Temp\\joeness-f01f02-install-LGhEB9\\skills\\joeness-setup\\scripts\\roadmap-review.mjs",
         "--root",
         "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N05",
         "--input",
@@ -758,7 +758,7 @@
       "expected": "ready",
       "command": [
         "C:\\Program Files\\nodejs\\node.exe",
-        "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-f01f02-install-LGhEB9\\skills\\joeness-setup\\scripts\\roadmap-review.mjs",
+        "~\\AppData\\Local\\Temp\\joeness-f01f02-install-LGhEB9\\skills\\joeness-setup\\scripts\\roadmap-review.mjs",
         "--root",
         "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-P02",
         "--input",
@@ -873,7 +873,7 @@
       "expected": "invalid_or_unknown",
       "command": [
         "C:\\Program Files\\nodejs\\node.exe",
-        "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-f01f02-install-LGhEB9\\skills\\joeness-setup\\scripts\\roadmap-review.mjs",
+        "~\\AppData\\Local\\Temp\\joeness-f01f02-install-LGhEB9\\skills\\joeness-setup\\scripts\\roadmap-review.mjs",
         "--root",
         "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N06",
         "--input",
@@ -995,7 +995,7 @@
       "expected": "unknown",
       "command": [
         "C:\\Program Files\\nodejs\\node.exe",
-        "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-f01f02-install-LGhEB9\\skills\\joeness-setup\\scripts\\roadmap-review.mjs",
+        "~\\AppData\\Local\\Temp\\joeness-f01f02-install-LGhEB9\\skills\\joeness-setup\\scripts\\roadmap-review.mjs",
         "--root",
         "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N07",
         "--input",
@@ -1118,7 +1118,7 @@
       "expected": "unknown",
       "command": [
         "C:\\Program Files\\nodejs\\node.exe",
-        "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-f01f02-install-LGhEB9\\skills\\joeness-setup\\scripts\\roadmap-review.mjs",
+        "~\\AppData\\Local\\Temp\\joeness-f01f02-install-LGhEB9\\skills\\joeness-setup\\scripts\\roadmap-review.mjs",
         "--root",
         "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N08",
         "--input",
@@ -1242,7 +1242,7 @@
       "expected": "invalid",
       "command": [
         "C:\\Program Files\\nodejs\\node.exe",
-        "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-f01f02-install-LGhEB9\\skills\\joeness-setup\\scripts\\roadmap-review.mjs",
+        "~\\AppData\\Local\\Temp\\joeness-f01f02-install-LGhEB9\\skills\\joeness-setup\\scripts\\roadmap-review.mjs",
         "--root",
         "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N09",
         "--input",
@@ -1364,7 +1364,7 @@
       "expected": "invalid_or_conflict",
       "command": [
         "C:\\Program Files\\nodejs\\node.exe",
-        "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-f01f02-install-LGhEB9\\skills\\joeness-setup\\scripts\\roadmap-review.mjs",
+        "~\\AppData\\Local\\Temp\\joeness-f01f02-install-LGhEB9\\skills\\joeness-setup\\scripts\\roadmap-review.mjs",
         "--root",
         "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N10",
         "--input",
@@ -1487,7 +1487,7 @@
       "expected": "unknown",
       "command": [
         "C:\\Program Files\\nodejs\\node.exe",
-        "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-f01f02-install-LGhEB9\\skills\\joeness-setup\\scripts\\roadmap-review.mjs",
+        "~\\AppData\\Local\\Temp\\joeness-f01f02-install-LGhEB9\\skills\\joeness-setup\\scripts\\roadmap-review.mjs",
         "--root",
         "D:\\JOEWRKS\\JOEDESIGN\\evals\\feedback-implementation-20261013\\f02-fixtures-v3\\F02-N11",
         "--input",

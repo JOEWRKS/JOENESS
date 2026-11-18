@@ -1,6 +1,6 @@
 {
   "type": "isolated-installed-consumer-not-personal-install",
-  "root": "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-f03f04-install-nMPKdZ",
+  "root": "~\\AppData\\Local\\Temp\\joeness-f03f04-install-nMPKdZ",
   "manifest_sha256": "c644ab274f8f28aa845abd3dc4305252d5ab9187ab8c529571ed0df24198d534",
   "apply": {
     "command": [
@@ -12,13 +12,13 @@
       "D:\\JOEWRKS\\작업하네스\\JOENESS.ps1",
       "-Apply",
       "-CodexHome",
-      "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-f03f04-install-nMPKdZ"
+      "~\\AppData\\Local\\Temp\\joeness-f03f04-install-nMPKdZ"
     ],
     "exit": 0,
     "output": {
       "status": "current",
       "mode": "apply",
-      "codexHome": "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-f03f04-install-nMPKdZ",
+      "codexHome": "~\\AppData\\Local\\Temp\\joeness-f03f04-install-nMPKdZ",
       "activeSkills": [
         "joeness-setup"
       ],
@@ -57,13 +57,13 @@
       "D:\\JOEWRKS\\작업하네스\\JOENESS.ps1",
       "-Check",
       "-CodexHome",
-      "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-f03f04-install-nMPKdZ"
+      "~\\AppData\\Local\\Temp\\joeness-f03f04-install-nMPKdZ"
     ],
     "exit": 0,
     "output": {
       "status": "current",
       "mode": "check",
-      "codexHome": "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-f03f04-install-nMPKdZ",
+      "codexHome": "~\\AppData\\Local\\Temp\\joeness-f03f04-install-nMPKdZ",
       "activeSkills": [
         "joeness-setup"
       ],
@@ -157,7 +157,7 @@
       "C:\\Program Files\\nodejs\\node.exe",
       "D:\\JOEWRKS\\작업하네스\\evals\\joeness-setup\\runs\\2026-10-13-operation-review\\verify-actual-producer.mjs"
     ],
-    "cli": "C:\\Users\\tjdwo\\AppData\\Local\\Temp\\joeness-f03f04-install-nMPKdZ\\skills\\joeness-setup\\scripts\\operation-review.mjs",
+    "cli": "~\\AppData\\Local\\Temp\\joeness-f03f04-install-nMPKdZ\\skills\\joeness-setup\\scripts\\operation-review.mjs",
     "exit": 0,
     "stdout": "{\"passed\":4,\"total\":4,\"source_unchanged\":true,\"consumer_sha256\":\"5cc094925c22aab56bc4255ff037551991bab56a471dcd1116e5d2889d8e50cc\",\"captures\":\"C:\\\\Users\\\\tjdwo\\\\AppData\\\\Local\\\\Temp\\\\joeness-operation-execution-T34myq\"}\n",
     "stderr": ""
