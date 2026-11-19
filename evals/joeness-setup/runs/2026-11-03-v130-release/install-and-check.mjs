@@ -9,7 +9,7 @@ import assert from 'node:assert/strict';
 assert.equal(process.argv[2],'--approved-personal-v130');
 const newCommit=process.argv[3];assert.match(newCommit,/^[a-f0-9]{40}$/);
 const here=fileURLToPath(new URL('.',import.meta.url)),repo=resolve(here,'../../../..');
-const home='C:/Users/tjdwo/.codex',skill=join(home,'skills/joeness-setup');
+const home='~/.codex',skill=join(home,'skills/joeness-setup');
 const oldCommit='8f9db3f0e02c1fb9f97a77249d8bda186f2d9ac8';
 const sha=b=>createHash('sha256').update(b).digest('hex'),hash=p=>sha(readFileSync(p));
 const call=(cmd,args,opts={})=>{const r=spawnSync(cmd,args,{cwd:repo,timeout:120000,maxBuffer:4*1024*1024,...opts});assert.ifError(r.error);return r;};
@@ -33,8 +33,8 @@ assert.deepEqual(oldState,{schemaVersion:1,releaseVersion:'1.2.0',manifestSha256
 for(const f of oldManifest.publicSkills[0].files)assert.equal(hash(join(skill,f.path)),f.sha256);
 for(const f of newManifest.publicSkills[0].files){const p='skills/joeness-setup/'+f.path;assert.equal(hash(join(repo,p)),f.sha256);assert.equal(sha(git(['show',newCommit+':'+p])),f.sha256);}
 for(const p of ['JOENESS.ps1','scripts/sync-harness.ps1'])assert.equal(hash(join(repo,p)),sha(git(['show',newCommit+':'+p])));
-const before=snapshot(),backup=resolve('C:/Users/tjdwo/.codex-install-backups/joeness-v130-20261103-'+sha(newBytes).slice(0,12));
-assert.equal(dirname(backup),resolve('C:/Users/tjdwo/.codex-install-backups'));
+const before=snapshot(),backup=resolve('~/.codex-install-backups/joeness-v130-20261103-'+sha(newBytes).slice(0,12));
+assert.equal(dirname(backup),resolve('~/.codex-install-backups'));
 assert.ok(!existsSync(backup),'Existing backup: inspect previous attempt, no blind retry');
 assert.ok(!existsSync(join(here,'personal-install.json')),'Keep prior evidence');
 const temp=mkdtempSync(join(tmpdir(),'joeness-v130-old-package-')),old=join(temp,'source');mkdirSync(old);

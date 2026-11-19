@@ -6,7 +6,7 @@ import json, os, pathlib, subprocess, sys, uuid
 HERE = pathlib.Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE.parent))
 from build import build
-CLI = r'C:\Users\tjdwo\AppData\Roaming\Claude\claude-code\2.1.309\9078b9c1d466\claude.exe'
+CLI = r'~\AppData\Roaming\Claude\claude-code\2.1.309\9078b9c1d466\claude.exe'
 TOOLS = ('Read,Edit,Write,Glob,Grep,Bash(git status:*),Bash(git diff:*),Bash(git log:*),Bash(git show:*),'
          'Bash(npm run:*),Bash(node:*),Bash(ls:*)')
 PRE = ('You are working in the project folder {fx}. Work only inside this folder. node_modules and .browsers are shared '

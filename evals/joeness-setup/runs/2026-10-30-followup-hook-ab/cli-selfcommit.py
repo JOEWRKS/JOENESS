@@ -4,7 +4,7 @@
 import json, os, pathlib, shutil, subprocess, sys, uuid
 HERE = pathlib.Path(__file__).resolve().parent
 SRC = pathlib.Path(r'D:\JOEWRKS\.claude-worktrees\JOENESS-light\skills\joeness-setup\scripts\changes-hook.mjs')
-CLI = r'C:\Users\tjdwo\AppData\Roaming\Claude\claude-code\2.1.309\9078b9c1d466\claude.exe'
+CLI = r'~\AppData\Roaming\Claude\claude-code\2.1.309\9078b9c1d466\claude.exe'
 DROP = ('CLAUDE_CODE_SESSION_ID', 'CLAUDE_CODE_CHILD_SESSION', 'CLAUDE_CODE_HOST_SESSION_ID', 'CLAUDE_CODE_TERMINAL_MCP_TOOLS',
         'CLAUDE_CODE_REPORT_FINDINGS', 'CLAUDE_CODE_ENABLE_ASK_USER_QUESTION_TOOL')
 SETTINGS = {'hooks': {

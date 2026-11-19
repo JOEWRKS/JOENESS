@@ -8,7 +8,7 @@ HERE = pathlib.Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE.parent))
 from build import build
 # cli.py and drive.py run on import, so their constants are copied here.
-CLI = r'C:\Users\tjdwo\AppData\Roaming\Claude\claude-code\2.1.309\9078b9c1d466\claude.exe'
+CLI = r'~\AppData\Roaming\Claude\claude-code\2.1.309\9078b9c1d466\claude.exe'
 TOOLS = ('Read,Edit,Write,Glob,Grep,Bash(git status:*),Bash(git diff:*),Bash(git log:*),Bash(git show:*),'
          'Bash(npm run:*),Bash(node:*),Bash(ls:*)')
 M2 = ('\n\n/* 휴대폰: 이름 한 줄 유지 */\n@media (max-width: 480px) {\n  .row { overflow: hidden; }\n'
