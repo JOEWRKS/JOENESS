@@ -1,5 +1,14 @@
 # 변경 이력
 
+## 2.0.0 — 후보 (미게시)
+
+- 범위(사용자 확정): 저장소 정리, 보안 검토 문서, 한 쪽 빠른 시작과 README 축약, 버전 2.0.0. **스킬 폴더 `skills/joeness-setup/**`(19개 파일)는 1.4.2와 바이트 단위로 같다.** 에이전트가 읽는 글이 곧 도구의 동작이고, 작은 동작 변화는 감당할 수 있는 시험으로 잡지 못하기 때문이다. manifest는 `release.version`만 바뀌었다.
+- A. 정리: 아무도 링크하지 않는 2026-09 `docs/superpowers` 초안 4개(0.2 project setup, setup-only distribution의 plan·spec) 삭제(이력에 남음). 2026-10-24~11-03 기록의 구동 스크립트 7개(1.1.0·1.1.1·1.2.0·1.3.0 `install-and-check.mjs`, followup-hook-ab `cli-*.py` 3개)에서 홈 경로를 `~`로 가림. 측정 출력과 `evals/experiments`는 손대지 않음.
+- B. [보안 검토](SECURITY.md): 진짜 비밀값 0건(트리·이력 745커밋), 의존성 없음, CI 읽기 권한만. 옛 기록·Git 이력·커밋 메타데이터의 개인 식별자는 남김(이력 재작성 안 함). 스크립트별 신뢰 경계와 신고 방법.
+- C. [빠른 시작](QUICKSTART.md): Codex 설치, Claude Code 클론 연결(스크립트 없음), 프로젝트 연결, 상태 확인(설치본 경로 포함), 업그레이드(옛 패키지 `-Remove` → 새 패키지 `-Apply`), 연결 해제, 제거. README 233줄 → 139줄(버전 이력 단락은 이 파일로, 파일 담당 표는 usage.md 링크로). installation.md 첫 단락 갱신.
+- 게이트: 스킬 폴더 트리 `73af9e5`(= `JOENESS-v1.4.2`) 불변, manifest는 버전 한 줄만 다름, Node 106/106, PowerShell 5.1 release·install·project-setup(28 cases) 종료 0. PowerShell 7과 GitHub Windows CI는 아직 안 돌림. [기록](../evals/v2-release-20261119/report.md).
+- 업그레이드 주의: 1.4.2 개인 설치본에서 2.0.0 `-Check`는 `blocked`다. 1.4.2 패키지로 `-Remove`한 뒤 `-Apply`한다. 연결된 프로젝트의 `-Check`는 그대로 `current`다(연결문이 같으므로 갱신할 것도 없다).
+
 ## 1.4.2 — 연결문에 Result 열 규칙 (2026-11-15)
 
 - 계기: 45차 행동 A/B에서 JOEDESIGN DESIGN 템플릿이 먼저 깔린 장면의 B(1.4.1) 4회 중 기존 Rule Coverage 표에 Result 열을 더한 run 0/4. 이 규칙은 `SKILL.md`·`assets/DESIGN.md`에만 있고 매 턴 읽히는 연결문에는 없었다(SKILL.md를 읽은 run 2/4). 사용자 결정으로 연결문에 넣음.

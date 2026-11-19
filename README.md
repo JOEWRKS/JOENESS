@@ -1,4 +1,4 @@
-# JOENESS 1.4.2
+# JOENESS 2.0.0
 
 [English](#english) | [한국어](#korean)
 
@@ -10,13 +10,14 @@
 
 **Task sequence, progress, and remaining-work management.**
 
-Three-point summary:
-
 1. Project goals and completion criteria organized into a staged roadmap.
 2. Dedicated documents for plans, results, issues, and design, with task-specific reading priorities.
 3. Six-field summary first; supporting evidence only where needed.
 
-Source version: **1.4.2** (the connection body now carries the rule that an existing JOEDESIGN Rule Coverage table is the DESIGN rule table, with a Result column added if absent and never a second table, [evidence](evals/joeness-setup/runs/2026-11-15-v142-prep/report.md); [status](evals/joeness-setup/runs/2026-11-15-v142-release/review-evidence.md)). 1.4.1 (fixes three defects from the 2026-11-12 three-tool integration trial: the committed connection body keeps `<joedesign>` literal and `-Apply` rejects machine paths, the DESIGN template gains the rule-coverage table, ROADMAP records the product revision and approval, [evidence](evals/joeness-setup/runs/2026-11-12-v141-candidate/report.md); [status](evals/joeness-setup/runs/2026-11-15-v141-release/review-evidence.md)). 1.4.0 (consumes JOEDESIGN report stamps: TASK records the stamp line, an item with a saved JOEDESIGN report becomes complete only after `report-check.mjs --verify` exits 0, a `changed` fix stays a remaining problem, and a design-rule Check names rule-table rows, [evidence](evals/joeness-setup/runs/2026-11-09-report-stamp-ab/report.md); [status](evals/joeness-setup/runs/2026-11-10-v140-release/review-evidence.md)). 1.3.0 (adds the check-scope rule to the connection body: before recording a rule as passed, compare what the check actually measured with what the rule covers and name the unmeasured targets; a check result counts only with its scope; a change re-measures every affected rule, [evidence](evals/joeness-setup/runs/2026-11-02-check-scope-ab/report.md); [status](evals/joeness-setup/runs/2026-11-03-v130-release/review-evidence.md)). 1.2.0 (adds an optional Claude Code hook that setup can offer: it tells the agent about commits that landed between turns, [evidence](evals/joeness-setup/runs/2026-10-30-followup-hook-ab/report.md); published as [JOENESS-v1.2.0](https://github.com/JOEWRKS/JOENESS/releases/tag/JOENESS-v1.2.0): [status](evals/joeness-setup/runs/2026-10-30-v120-release/review-evidence.md)). 1.1.1 (adds an approval-scope rule, [evidence](evals/joeness-setup/runs/2026-10-29-approval-scope-ab/report.md); personally installed, not yet published: [status](evals/joeness-setup/runs/2026-10-29-v111-release/review-evidence.md)). 1.1.0 [validation and publication status](evals/joeness-setup/runs/2026-10-24-v110-release/review-evidence.md). No automatic update of personal installations or existing project connections.
+Version **2.0.0**: repository hygiene, a security review and a one-page quickstart. The installed skill is byte-identical to 1.4.2. Version history: [CHANGELOG (Korean)](docs/CHANGELOG.md). No automatic update of personal installations or existing project connections.
+
+- [Quickstart (Korean)](docs/QUICKSTART.md): install for Codex or Claude Code, connect a project, check status, upgrade, detach, remove.
+- [Security review (Korean)](docs/SECURITY.md): what was checked, what remains, script trust boundaries, reporting.
 
 ## 2. Design Purpose
 
@@ -27,62 +28,23 @@ Source version: **1.4.2** (the connection body now carries the rule that an exis
 
 ## 3. Key Features
 
-| File | Owned information |
-|---|---|
-| `AGENTS.md` | Working rules and document locations |
-| `ROADMAP.md` | Goals, staged checklists, current status, and next work |
-| `TASK.md` | Work results and verification evidence |
-| `ISSUES.md` | Open issues, workarounds, and residual risks |
-| `DESIGN.md` | Design standards and approval scope |
+Setup creates `AGENTS.md`, `ROADMAP.md`, `TASK.md`, `ISSUES.md` and `DESIGN.md` in the project, each with one owner role, plus `Library/` when material exists. [Document responsibilities and reading order (Korean)](skills/joeness-setup/references/usage.md#문서-구조와-책임).
 
-- Document organization: preservation and relocation within approved scope. Product-definition sources retained separately.
-- Reference storage: `Library/` created when material exists; research and references grouped by topic.
-- Reading order: relevant documents first. [Document responsibilities and reading order (Korean)](skills/joeness-setup/references/usage.md#문서-구조와-책임).
-
-Example report:
-
-- Work: reservation cancellation bug fixed.
-- Updated files: reservation logic, tests, and work record.
-- Issue: cancellation also deleted the reservation history.
-- Resolution: status-only cancellation implemented and checked.
-- Remaining problems: verification on the actual venue device pending.
-- Next work: reservation and cancellation tests on that device.
-
-Field meanings: `Issue` for encountered problems; `Resolution` for verified action; `Remaining problems` for unresolved or unverified work. Additional evidence only when needed. No mandatory report format for simple questions.
+After work, the agent reports six fields first (work, updated files, issue, resolution, remaining problems, next work); evidence follows only when needed. [Connect verification results to required outcomes](skills/joeness-setup/references/review-gate.md).
 
 ## 4. Usage
-
-### Installation
-
-Repository checkout in Windows PowerShell. For an existing download, start in that folder.
 
 ```powershell
 git clone https://github.com/JOEWRKS/JOENESS.git
 cd JOENESS
 powershell.exe -NoProfile -File .\JOENESS.ps1 -Check
-```
-
-| Check result | Action |
-|---|---|
-| `ready` | Installation commands below permitted |
-| `current` | Same package already installed; no reinstall needed |
-| `blocked` | Existing files preserved; no overwrite. Consult the [update and recovery guide (Korean)](docs/installation.md) |
-
-```powershell
 powershell.exe -NoProfile -File .\JOENESS.ps1 -Apply
 powershell.exe -NoProfile -File .\JOENESS.ps1 -Check
 ```
 
-### Project setup
+Run `-Apply` only after `ready`; finish at `current`. `blocked` preserves existing files: an older installed version must first be removed with its own package ([Quickstart §6](docs/QUICKSTART.md)).
 
-Open the intended Git project in Codex, then request setup.
-
-- New project: `Install JOENESS in this project. The goal is [goal]. First show the proposed documents and recording scope.`
-- Existing project: `Install JOENESS in this project. Preserve existing plans, results, and approval evidence. Show the organization proposal first.`
-- Approve the proposal: `Apply this proposal.`
-- Routine work: `Continue with the next eligible task in the roadmap.`
-
-Personal tool installation and project-document setup are separate. Project files created or changed **only after proposal approval**. No per-task reinstall.
+Then, in a new chat in the Git project: `Install JOENESS in this project. The goal is [goal]. First show the proposed documents and recording scope.` → `Apply this proposal.` → `Continue with the next eligible task in the roadmap.` Project files change **only after proposal approval**.
 
 ## 5. Tool Integration
 
@@ -92,20 +54,11 @@ Personal tool installation and project-document setup are separate. Project file
 | [JOEFLOW](https://github.com/JOEWRKS/JOEFLOW) | Requirements, rules, exceptions, and acceptance criteria |
 | [JOEDESIGN](https://github.com/JOEWRKS/JOEDESIGN) | UI creation, visual standards, and design review |
 
-**Work organization → product definition → UI creation and review → development by the implementation owner → result verification → completed and remaining-work records.**
-
-Reservation-feature handoff example:
-
-- JOEFLOW → design and implementation owners: reservation/cancellation rules and acceptance criteria.
-- Design owner → implementation and recording owners: UI standards and review results.
-- Implementation owner → JOENESS records: development/test results and outstanding verification.
-- JOENESS: links to each source; roadmap completion and remaining-work status updates.
-
-JOENESS used throughout the workflow. **Standalone use supported for each tool.** No automatic execution of other tools or approval on the user's behalf. [Connect verification results to required outcomes](skills/joeness-setup/references/review-gate.md).
+Each tool works standalone. No automatic execution of other tools or approval on the user's behalf.
 
 ## 6. Limitations
 
-- Supported environment: Codex, Windows PowerShell 5.1 or PowerShell 7 on Windows, UTF-8 documents in Git projects. Optional verification helpers require Node.js 18 or later.
+- Supported environment: Codex (installer) and Claude Code (manual clone link), Windows PowerShell 5.1 or PowerShell 7 on Windows, UTF-8 documents in Git projects. Optional verification helpers require Node.js 18 or later.
 - Undecided scope: unresolved goals remain pending. No invented completion or design approval.
 - Separate checks: installation, document organization, instruction delivery, and work verification. No overall completion while required verification or user acceptance remains pending.
 - Automation limits: no continuous monitoring, automatic updates, or enforced locking. No automatic update of existing projects or open conversations.
@@ -113,7 +66,7 @@ JOENESS used throughout the workflow. **Standalone use supported for each tool.*
 - Unproven: token savings, general performance superiority, and reliability across all environments.
 - Excluded from records: passwords, credentials, and unnecessary personal data.
 
-[Detailed usage, recording controls, and disconnecting (Korean)](skills/joeness-setup/references/usage.md) · [Installation checks, updates, and recovery (Korean)](docs/installation.md) · [Changelog (Korean)](docs/CHANGELOG.md) · [Development roadmap (Korean)](docs/ROADMAP.md) · [Windows checks](.github/workflows/windows-ci.yml)
+[Detailed usage and disconnecting (Korean)](skills/joeness-setup/references/usage.md) · [Installation, updates, and recovery (Korean)](docs/installation.md) · [Development roadmap (Korean)](docs/ROADMAP.md) · [Windows checks](.github/workflows/windows-ci.yml)
 
 ---
 
@@ -125,13 +78,14 @@ JOENESS used throughout the workflow. **Standalone use supported for each tool.*
 
 **작업 순서·진행 상태·남은 일 관리 도구.**
 
-세줄요약:
-
 1. 프로젝트 목표와 완료 조건을 단계별 로드맵으로 정리.
 2. 계획·결과·문제·디자인의 기록 위치와 읽기 우선순위 구분.
 3. 작업 결과를 여섯 항목으로 선요약. 필요한 근거만 후술.
 
-소스 버전: **1.4.2**(연결문에 규칙 추가: 프로젝트에 JOEDESIGN Rule Coverage 표가 이미 있으면 그 표가 DESIGN 규칙 표이고 Result 열이 없으면 더하며 두 번째 표를 만들지 않음, [근거](evals/joeness-setup/runs/2026-11-15-v142-prep/report.md); [상태](evals/joeness-setup/runs/2026-11-15-v142-release/review-evidence.md)). 1.4.1(2026-11-12 세 도구 통합 시험 결함 3건 수정: 커밋되는 연결문은 `<joedesign>`을 글자 그대로 두고 `-Apply`가 기계 경로를 거부, DESIGN 템플릿에 규칙 표, ROADMAP에 제품 revision·승인 줄, [근거](evals/joeness-setup/runs/2026-11-12-v141-candidate/report.md); [상태](evals/joeness-setup/runs/2026-11-15-v141-release/review-evidence.md)). 1.4.0(JOEDESIGN 보고 도장 소비: TASK에 도장 줄 기록, 저장된 JOEDESIGN 보고가 있는 항목은 `report-check.mjs --verify` 종료코드 0 뒤에만 완료, `changed` 수정은 남은 문제, 디자인 규칙 Check는 규칙 표의 행을 가리킴, [근거](evals/joeness-setup/runs/2026-11-09-report-stamp-ab/report.md); [상태](evals/joeness-setup/runs/2026-11-10-v140-release/review-evidence.md)). 1.3.0(연결문에 검사 범위 규칙 추가: 규칙 통과를 적기 전에 검사가 실제로 잰 것을 규칙 범위와 대조하고 안 잰 대상을 기록에 적음, 검사 결과는 범위와 함께여야 근거, 변경 뒤 영향 규칙 재측정, [근거](evals/joeness-setup/runs/2026-11-02-check-scope-ab/report.md); [상태](evals/joeness-setup/runs/2026-11-03-v130-release/review-evidence.md)). 1.2.0(셋업이 선택으로 제안하는 Claude Code hook 추가: 턴 사이에 들어온 커밋을 에이전트에 알림, [근거](evals/joeness-setup/runs/2026-10-30-followup-hook-ab/report.md); [JOENESS-v1.2.0](https://github.com/JOEWRKS/JOENESS/releases/tag/JOENESS-v1.2.0)으로 게시: [상태](evals/joeness-setup/runs/2026-10-30-v120-release/review-evidence.md)). 1.1.1(승인 범위 규칙 추가, [근거](evals/joeness-setup/runs/2026-10-29-approval-scope-ab/report.md); 개인 설치 완료·게시 전: [상태](evals/joeness-setup/runs/2026-10-29-v111-release/review-evidence.md)). 1.1.0 [검증·게시 상태](evals/joeness-setup/runs/2026-10-24-v110-release/review-evidence.md). 개인 설치·기존 프로젝트 연결 자동 갱신 없음.
+버전 **2.0.0**: 저장소 정리·보안 검토·한 쪽 빠른 시작. 설치되는 스킬은 1.4.2와 바이트 단위로 같음. 버전별 내용은 [변경 이력](docs/CHANGELOG.md). 개인 설치·기존 프로젝트 연결 자동 갱신 없음.
+
+- [빠른 시작](docs/QUICKSTART.md): Codex·Claude Code 설치, 프로젝트 연결, 상태 확인, 업그레이드, 연결 해제, 제거.
+- [보안 검토](docs/SECURITY.md): 확인한 것, 남은 것, 스크립트 신뢰 경계, 신고 방법.
 
 ## 2. 설계 목적
 
@@ -142,62 +96,23 @@ JOENESS used throughout the workflow. **Standalone use supported for each tool.*
 
 ## 3. 주요 기능
 
-| 파일 | 담당 정보 |
-|---|---|
-| `AGENTS.md` | 작업 규칙·문서 위치 |
-| `ROADMAP.md` | 목표·단계별 체크리스트·현재 상태·다음 작업 |
-| `TASK.md` | 수행 결과·검증 근거 |
-| `ISSUES.md` | 미해결 문제·우회책·남은 위험 |
-| `DESIGN.md` | 디자인 기준·승인 범위 |
+셋업은 프로젝트에 `AGENTS.md`·`ROADMAP.md`·`TASK.md`·`ISSUES.md`·`DESIGN.md`를 담당 하나씩 두고, 자료가 생기면 `Library/`를 만든다. [문서별 책임·읽는 순서](skills/joeness-setup/references/usage.md#문서-구조와-책임).
 
-- 문서 정리: 승인 범위 내 기존 내용 보존·재배치. 제품 기준 원본 별도 유지.
-- 자료 보관: 실제 자료 발생 시 `Library/` 생성, 주제별 조사·참고 저장.
-- 조회 순서: 작업에 필요한 문서부터 확인. [문서별 책임·읽는 순서](skills/joeness-setup/references/usage.md#문서-구조와-책임).
-
-보고 예시:
-
-- 작업: 예약 취소 오류 수정.
-- 업데이트 파일: 예약 기능, 검사, 작업 기록.
-- 이슈: 취소 시 예약 내역도 삭제.
-- 해결: 취소 상태만 변경하도록 수정·확인.
-- 남은 문제: 실제 행사장 기기 확인 필요.
-- 다음 작업: 해당 기기에서 예약·취소 시험.
-
-항목 구분: `이슈`는 발생 문제, `해결`은 확인한 조치, `남은 문제`는 미해결·미검증. 근거는 필요한 경우만 후술. 단순 질문에는 형식 강제 없음.
+작업 뒤 에이전트는 작업·업데이트 파일·이슈·해결·남은 문제·다음 작업 여섯 항목으로 먼저 보고하고, 근거는 필요할 때만 덧붙인다. [필요한 항목에 검증 결과 연결](skills/joeness-setup/references/review-gate.md).
 
 ## 4. 사용 방법
-
-### 설치
-
-Windows PowerShell에서 저장소 확보. 기존 다운로드 사용 시 해당 폴더에서 시작.
 
 ```powershell
 git clone https://github.com/JOEWRKS/JOENESS.git
 cd JOENESS
 powershell.exe -NoProfile -File .\JOENESS.ps1 -Check
-```
-
-| 확인 결과 | 조치 |
-|---|---|
-| `ready` | 아래 설치 명령 실행 가능 |
-| `current` | 같은 패키지 설치 확인. 재설치 불필요 |
-| `blocked` | 기존 파일 보존·덮어쓰기 중단. [업데이트·복구 안내](docs/installation.md) 확인 |
-
-```powershell
 powershell.exe -NoProfile -File .\JOENESS.ps1 -Apply
 powershell.exe -NoProfile -File .\JOENESS.ps1 -Check
 ```
 
-### 프로젝트 적용
+`-Apply`는 `ready`일 때만, 마지막은 `current`. `blocked`는 기존 파일 보존 상태다. 이전 버전이 설치되어 있으면 그 버전의 패키지로 먼저 제거한다([빠른 시작 6절](docs/QUICKSTART.md)).
 
-Codex에서 사용할 Git 프로젝트를 연 뒤 요청.
-
-- 새 프로젝트: `이 프로젝트에 JOENESS 설치해줘. 목표는 [목표]. 만들 문서와 기록 범위를 먼저 보여줘.`
-- 기존 프로젝트: `이 프로젝트에 JOENESS 설치해줘. 기존 계획·결과·승인 근거를 보존하고 정리안을 먼저 보여줘.`
-- 변경안 승인: `이대로 적용해줘.`
-- 평소 작업: `로드맵에서 다음으로 가능한 작업을 이어서 진행해.`
-
-개인 도구 설치와 프로젝트 문서 정리는 별도. **변경안 승인 후에만** 프로젝트 파일 생성·변경. 매 작업 재설치 불필요.
+그다음 Git 프로젝트를 연 새 채팅에서: `이 프로젝트에 JOENESS 설치해줘. 목표는 [목표]. 만들 문서와 기록 범위를 먼저 보여줘.` → `이대로 적용해줘.` → `로드맵에서 다음으로 가능한 작업을 이어서 진행해.` **변경안 승인 후에만** 프로젝트 파일 생성·변경.
 
 ## 5. 도구 간 연결
 
@@ -207,20 +122,11 @@ Codex에서 사용할 Git 프로젝트를 연 뒤 요청.
 | [JOEFLOW](https://github.com/JOEWRKS/JOEFLOW) | 요구사항·규칙·예외·완료 기준 확정 |
 | [JOEDESIGN](https://github.com/JOEWRKS/JOEDESIGN) | 화면 제작·시각 기준 수립·디자인 검수 |
 
-**작업 정리 → 만들 것 확정 → 화면 제작·검수 → 구현 담당의 개발 → 결과 검증 → 완료·잔여 기록.**
-
-예약 기능 인계 예시:
-
-- JOEFLOW → 디자인·구현 담당: 예약·취소 규칙, 완료 기준.
-- 디자인 담당 → 구현·기록 담당: 화면 기준, 검수 결과.
-- 구현 담당 → JOENESS 기록: 개발·시험 결과, 남은 검증.
-- JOENESS: 각 원본 연결, 로드맵 완료·잔여 상태 갱신.
-
-JOENESS는 전 과정에서 사용. **각 도구의 단독 사용 지원.** 다른 도구 자동 실행·사용자 대신 승인 없음. [필요한 항목에 검증 결과 연결](skills/joeness-setup/references/review-gate.md).
+각 도구는 단독 사용 가능. 다른 도구 자동 실행·사용자 대신 승인 없음.
 
 ## 6. 한계
 
-- 지원 환경: Codex, Windows PowerShell 5.1/7, Git 프로젝트의 UTF-8 문서. 선택형 검증 도구는 Node.js 18 이상 필요.
+- 지원 환경: Codex(설치기)·Claude Code(클론 수동 연결), Windows PowerShell 5.1/7, Git 프로젝트의 UTF-8 문서. 선택형 검증 도구는 Node.js 18 이상 필요.
 - 미정 사항: 목표 미확정 시 결정 대기 유지. 완료·디자인 승인 임의 생성 금지.
 - 완료 구분: 설치 성공·문서 정리·지침 전달·작업 검증은 별도. 필수 검증·사용자 수락 미완 시 전체 완료 보류.
 - 자동화 범위: 상시 감시·자동 업데이트·강제 잠금 없음. 기존 프로젝트·열린 채팅 자동 갱신 없음.
@@ -228,6 +134,6 @@ JOENESS는 전 과정에서 사용. **각 도구의 단독 사용 지원.** 다�
 - 미입증: 토큰 절감·일반적인 성능 우위·모든 환경의 안정성.
 - 기록 제외: 비밀번호·인증키·불필요한 개인정보.
 
-[상세 사용법·기록 중지·연결 해제](skills/joeness-setup/references/usage.md) · [설치 확인·업데이트·복구](docs/installation.md) · [변경 이력](docs/CHANGELOG.md) · [개발 로드맵](docs/ROADMAP.md) · [Windows 검사](.github/workflows/windows-ci.yml)
+[상세 사용법·연결 해제](skills/joeness-setup/references/usage.md) · [설치·업데이트·복구](docs/installation.md) · [개발 로드맵](docs/ROADMAP.md) · [Windows 검사](.github/workflows/windows-ci.yml)
 
 [English ↑](#english) | [한국어 ↑](#korean)

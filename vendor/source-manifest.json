@@ -2,7 +2,7 @@
   "schemaVersion": 3,
   "release": {
     "name": "JOENESS",
-    "version": "1.4.2",
+    "version": "2.0.0",
     "entrypoint": "JOENESS.ps1"
   },
   "target": {
