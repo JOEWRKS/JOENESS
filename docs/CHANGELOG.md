@@ -1,5 +1,19 @@
 # 변경 이력
 
+## 2.0.1 — 후보 (미게시)
+
+- 계기: 2026-11-19 2.0.0 게시 뒤 두 시험. QUICKSTART 특성화 시험([보고](../evals/v2-tests-20261119/docs-joeness-report.md), 결함 D1~D10)과 세 도구 통합 시험([보고](../evals/v2-tests-20261119/integration-report.md), [trace](../evals/v2-tests-20261119/integration-trace.md)). 사용자 승인 "세 도구 2.0.1 시작". 준비 보고: [report-201.md](../evals/v2-tests-20261119/report-201.md).
+- **바뀐 것**
+  - 검수 도구 `.mjs` 4개(`review-gate`·`roadmap-review`·`operation-review`·`impact-review`)의 진입 판정. 실제 모듈 경로와 호출 경로를 그대로 비교해서, junction·심볼릭 링크 설치 경로(Claude Code 스킬 폴더)로 부르면 main이 돌지 않고 **출력 없이 exit 0**이었다(통합 D1, fail-open). 양쪽을 `realpathSync.native`로 풀고 Windows에서는 대소문자를 무시해 비교한다. 같은 파일 이름으로 직접 실행했는데도 판정이 어긋나면 stderr 경고와 exit 2를 낸다. import될 때(review-gate가 impact-review를 부름)는 그대로 거짓이다.
+  - `review-gate.mjs`: 고정값이 어긋났는데 CRLF를 LF로 바꾸면 맞는 경우, 오류 문구에 줄바꿈 변환이 원인이라고 덧붙인다(판정은 그대로 차단).
+  - `references/review-gate.md`: "installed skill's absolute directory" 대신 `node <joeness-setup>/scripts/review-gate.mjs`. `<joedesign>`처럼 커밋 파일에는 글자 그대로 두고 실행할 때 푼다(통합 D5). 고정 파일(기준선·결과·acceptance·authority·입력·evidence)을 `.gitattributes`로 `-text` 또는 `eol=lf`로 묶으라는 안내(통합 D4).
+  - 설치기 `scripts/sync-harness.ps1`(스킬 밖): `-Remove` 성공 뒤 비게 된 `skills/joeness-setup` 폴더 트리를 지운다. 무언가 남은 폴더나 링크는 남기고 `warnings`에 적는다. 함께 쓰는 `skills` 폴더는 건드리지 않는다(문서 D8). 결과 JSON에 `packageRelease`·`installedRelease`(문서 D5). 소유 불일치 `blocked` 메시지 뒤에 두 버전과 할 일을 붙인다(문서 D6, 앞부분 문구는 같음).
+  - 문서: QUICKSTART(D1~D7, D9, D10), installation.md, README.
+  - 스킬 폴더에서 바뀐 파일은 위 `.mjs` 4개와 `review-gate.md`뿐이다. `SKILL.md`·연결문 `assets/AGENTS.md`·`project-setup.ps1`은 바이트 단위로 같다. manifest는 다섯 파일 해시와 `release.version`.
+- **확인된 것**: 새 `tests/joeness-entry-link.tests.mjs`가 2.0.0 코드에서 5/5 실패(링크 경로 stdout 빈 문자열·exit 0), 수정 뒤 5/5 통과. 2.0.0 패키지 `-Remove` 뒤 빈 폴더 6개 재현, 2.0.1에서는 `skills`만 남음. 2.0.0 설치본에 2.0.1 `-Check` → `blocked` exit 2, `installedRelease` `2.0.0`. 2.0.0 gate로 새 CRLF 테스트 실패, 2.0.1 통과. Node 113/113, PowerShell 5.1 release·install·project-setup exit 0.
+- **확인되지 않은 것**: PowerShell 7과 GitHub Windows CI(push 전). macOS·Linux 심볼릭 링크 경로(테스트는 Windows junction만 돌림). 실제 Claude Code 설치 폴더(`D:\JOEWRKS\.claude\skills`)에서의 실행(이 세션은 접근하지 않음). 에이전트 행동 변화는 시험하지 않았다(매 턴 읽히는 `SKILL.md`·연결문은 바꾸지 않음).
+- **세션이 대신 내린 결정**: `-Apply`에서 `.gitattributes` 부재 경고는 넣지 않음(게이트는 쓰는 프로젝트만 쓰고, 연결 시점에는 고정 파일이 없으며, 파일이 있어도 고정 경로를 덮는지는 알 수 없음. 대신 고정하는 자리의 안내와 게이트 오류 문구로 처리). `<joeness-setup>` 자리표시자 이름(통합 시험 세션이 지은 이름을 채택). `-Remove`는 `skills` 폴더를 남김(다른 스킬과 함께 쓰는 폴더이고 우리가 만들었는지 알 수 없음). 결과 JSON에 `packageRelease`도 추가. `roadmap-review.md`·`operation-review.md`·`impact-review.md`의 `node scripts/...` 표기는 그대로 둠(절대 경로를 요구하지 않음).
+
 ## 2.0.0 — 저장소 정리·보안 검토·빠른 시작 (2026-11-19)
 
 - 게시: 사용자 승인("게시 ㄱㄱ", 2026-11-19, 부모 세션이 직접 받음) 뒤 태그 `JOENESS-v2.0.0`, GitHub Release, Codex 개인 설치(1.4.2 패키지 `-Remove` → 2.0.0 `-Apply`, 기록 [evals/v2-release-20261119/personal-install.json](../evals/v2-release-20261119/personal-install.json)), Claude Code 클론 fast-forward. 릴리스 노트 [release-notes-v2.0.0.md](../evals/v2-release-20261119/release-notes-v2.0.0.md), 상태 [review-evidence.md](../evals/v2-release-20261119/review-evidence.md).
