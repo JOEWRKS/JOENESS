@@ -30,7 +30,8 @@
 
 ## 고치지 않은 것과 이유
 
-- 통합 D3(Result 열 갱신이 게이트 기준선을 stale로 만듦), D6(규칙 종류 표현), D8(DESIGN 머리줄 형식 차이): JOENESS와 JOEDESIGN 사이 규칙 문제다. 고치려면 매 턴 읽히는 연결문이나 SKILL.md, 또는 JOEDESIGN 쪽을 바꿔야 해서 이번 범위(행동 시험 없이 바꾸지 않음) 밖이다.
+- 통합 D3(Result 열 갱신이 게이트 기준선을 stale로 만듦): 처음에는 고치지 않았으나, 사용자 결정("3번 절차로", 부모 세션 경유)으로 추가 커밋에서 **절차 문장**으로 해결했다. `references/review-gate.md`에 한 절(Result 갱신은 과업 완료의 마지막 단계, 그 뒤 stale 판정은 정상, 같은 과업 재검수는 갱신 전 바이트로 되돌려 돌린 뒤 다시 갱신). 코드 변경 0, 연결문·SKILL.md 불변. JOEDESIGN은 같은 문장을 `conformance.md`에 넣는다. 행동 효과는 시험하지 않았다.
+- 통합 D6(규칙 종류 표현), D8(DESIGN 머리줄 형식 차이): JOENESS와 JOEDESIGN 사이 규칙 문제다. 고치려면 매 턴 읽히는 연결문이나 SKILL.md, 또는 JOEDESIGN 쪽을 바꿔야 해서 이번 범위(행동 시험 없이 바꾸지 않음) 밖이다.
 - `roadmap-review.md`·`operation-review.md`·`impact-review.md`의 `node scripts/...` 표기: 절대 경로를 요구하지 않아 결함 보고 대상이 아니었다. 그대로 둠.
 - macOS·Linux: 테스트는 Windows가 아니면 심볼릭 링크를 쓰지만, 이 기계에서는 junction만 돌았다.
 

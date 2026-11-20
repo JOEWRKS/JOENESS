@@ -112,6 +112,13 @@ still permit reuse of unchanged checks. Supply refreshed results without duplica
 the previous baseline/results as dated proof; they are not competing live state.
 Use narrow scopes so an unrelated criterion change does not block other work.
 
+When DESIGN.md is pinned authority, updating its rule table Result cell is the
+last step of completing a task. After that update, JOEDESIGN `verify-design`
+reporting `DESIGN_AUTHORITY_STALE` and this gate reporting `Authority
+missing/changed` are expected: the next task's review sets a new baseline. To
+rerun the same task's gate, restore the Result cell to its pre-update bytes,
+run the gate, then apply the update again.
+
 For an explicitly requested, independently reviewed DESIGN append-only transition,
 read [impact-review.md](impact-review.md). Its diagnostic alone never grants reuse.
 Only the exact externally pinned transition may reuse unchanged geometry through

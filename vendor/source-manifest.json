@@ -53,7 +53,7 @@
         },
         {
           "path": "references/review-gate.md",
-          "sha256": "1c24b59d1489e93a1446051cdd845980600d226446c0c63ebb0d3cafbf6a0f96"
+          "sha256": "f58d301c7422e72537a184360dedcd5623bfef7bd173c1668e53e587a7481787"
         },
         {
           "path": "scripts/review-gate.mjs",
