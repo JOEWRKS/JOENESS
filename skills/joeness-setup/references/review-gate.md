@@ -17,11 +17,17 @@ missing input means unverified; do not fall back to a completion claim.
   Records implementation, technical verification, visual compliance and user
   acceptance separately in the existing TASK/ROADMAP, not a new live ledger.
 
-From the installed skill's absolute directory, run:
+Run:
 
 ```text
-node scripts/review-gate.mjs --root <project> --baseline <relative-json> --baseline-sha256 <approved-pin> --result <relative-result-json> --claim visual
+node <joeness-setup>/scripts/review-gate.mjs --root <project> --baseline <relative-json> --baseline-sha256 <approved-pin> --result <relative-result-json> --claim visual
 ```
+
+`<joeness-setup>` is the installed joeness-setup skill folder (the one holding
+the SKILL.md you loaded). Like `<joedesign>`, it stays literal in committed files
+such as a ROADMAP Check and resolves at run time; never commit the machine path.
+A junction or symlink install path runs the same checks as the real path; a
+helper that prints nothing is a failure, not a pass.
 
 `--claim` is implementation, technical, visual or complete. Exit0 permits only
 that claim in the declared scope; exit2 blocks it. `project_complete` is always
@@ -57,6 +63,12 @@ backslashes or drive prefixes. Symlinks resolving outside the root are rejected.
 Additional specialist fields are permitted; they remain bound by the baseline pin.
 The pin is SHA-256 of exact baseline bytes. Do not take the expectation from the
 incoming result or refresh it automatically after a failure.
+
+Pins and fingerprints are raw bytes, so a checkout that converts line endings
+(Git `core.autocrlf=true` without attributes) breaks them in a fresh clone.
+Before pinning, commit `.gitattributes` lines marking the baseline, results,
+acceptance, authority, check inputs and evidence `-text` (or `eol=lf`). A
+mismatch whose bytes match only with LF is reported as such; it still blocks.
 
 ## Specialist result
 

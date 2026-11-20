@@ -1,4 +1,4 @@
-# JOENESS 2.0.0
+# JOENESS 2.0.1
 
 [English](#english) | [한국어](#korean)
 
@@ -14,7 +14,7 @@
 2. Dedicated documents for plans, results, issues, and design, with task-specific reading priorities.
 3. Six-field summary first; supporting evidence only where needed.
 
-Version **2.0.0**: repository hygiene, a security review and a one-page quickstart. The installed skill is byte-identical to 1.4.2. Version history: [CHANGELOG (Korean)](docs/CHANGELOG.md). No automatic update of personal installations or existing project connections.
+Version **2.0.1** (candidate, unpublished): the four review helpers no longer exit 0 without running when started through a junction or symlink path; `-Remove` deletes the emptied skill folders; `-Check` reports `installedRelease`; line-ending guidance for pinned gate files; quickstart fixes. 2.0.0 added repository hygiene, a security review and a one-page quickstart. Version history: [CHANGELOG (Korean)](docs/CHANGELOG.md). No automatic update of personal installations or existing project connections.
 
 - [Quickstart (Korean)](docs/QUICKSTART.md): install for Codex or Claude Code, connect a project, check status, upgrade, detach, remove.
 - [Security review (Korean)](docs/SECURITY.md): what was checked, what remains, script trust boundaries, reporting.
@@ -82,7 +82,7 @@ Each tool works standalone. No automatic execution of other tools or approval on
 2. 계획·결과·문제·디자인의 기록 위치와 읽기 우선순위 구분.
 3. 작업 결과를 여섯 항목으로 선요약. 필요한 근거만 후술.
 
-버전 **2.0.0**: 저장소 정리·보안 검토·한 쪽 빠른 시작. 설치되는 스킬은 1.4.2와 바이트 단위로 같음. 버전별 내용은 [변경 이력](docs/CHANGELOG.md). 개인 설치·기존 프로젝트 연결 자동 갱신 없음.
+버전 **2.0.1**(후보, 미게시): 검수 도구 4개가 junction·심볼릭 링크 경로에서 검사 없이 exit 0으로 끝나던 결함 수정, `-Remove`가 빈 스킬 폴더를 지움, `-Check`에 `installedRelease`, 게이트 고정 파일의 줄바꿈 안내, 빠른 시작 보완. 2.0.0은 저장소 정리·보안 검토·한 쪽 빠른 시작. 버전별 내용은 [변경 이력](docs/CHANGELOG.md). 개인 설치·기존 프로젝트 연결 자동 갱신 없음.
 
 - [빠른 시작](docs/QUICKSTART.md): Codex·Claude Code 설치, 프로젝트 연결, 상태 확인, 업그레이드, 연결 해제, 제거.
 - [보안 검토](docs/SECURITY.md): 확인한 것, 남은 것, 스크립트 신뢰 경계, 신고 방법.

@@ -8,7 +8,7 @@ param(
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
-$script:JoenessRelease = '2.0.0'
+$script:JoenessRelease = '2.0.1'
 $script:LegacyStateName = 'joewrks-harness-state.json'
 $script:LegacyMarkers = @('<!-- JOEWRKS-HARNESS:BEGIN -->', '<!-- JOEWRKS-HARNESS:END -->')
 $script:Utf8Strict = New-Object Text.UTF8Encoding($false, $true)
@@ -109,11 +109,13 @@ function Get-JoenessLegacyObservation {
 }
 
 function New-JoenessPublicResult {
-    param([string] $Status, [string] $Mode, [string] $CodexHome, [object[]] $Warnings, [bool] $ChangesRequired, [object[]] $Changes, [object[]] $Blockers, $Rollback)
+    param([string] $Status, [string] $Mode, [string] $CodexHome, [object[]] $Warnings, [bool] $ChangesRequired, [object[]] $Changes, [object[]] $Blockers, $Rollback, $InstalledRelease = $null)
     [pscustomobject][ordered]@{
         status = $Status
         mode = $Mode
         codexHome = $CodexHome
+        packageRelease = $script:JoenessRelease
+        installedRelease = $InstalledRelease
         activeSkills = @()
         warnings = @($Warnings)
         changesRequired = $ChangesRequired
@@ -123,12 +125,28 @@ function New-JoenessPublicResult {
     }
 }
 
+# Deletes the now-empty joeness-setup folder tree after a successful Remove (2.0.1). A folder that still
+# holds anything, or is a reparse point, is kept and reported; the shared skills folder itself is never touched.
+function Remove-JoenessEmptySkillFolders {
+    param([string] $SkillRoot)
+    $kept = @()
+    if (-not (Test-Path -LiteralPath $SkillRoot -PathType Container)) { return ,$kept }
+    $dirs = @(Get-ChildItem -LiteralPath $SkillRoot -Force -Recurse -Directory | Sort-Object { $_.FullName.Length } -Descending) + @(Get-Item -LiteralPath $SkillRoot -Force)
+    foreach ($dir in $dirs) {
+        $name = if ($dir.FullName.Length -gt $SkillRoot.Length) { 'skills/joeness-setup/' + $dir.FullName.Substring($SkillRoot.Length + 1).Replace('\', '/') } else { 'skills/joeness-setup' }
+        if (($dir.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0 -or @(Get-ChildItem -LiteralPath $dir.FullName -Force).Count) { $kept += $name; continue }
+        try { [IO.Directory]::Delete($dir.FullName, $false) } catch { $kept += $name }
+    }
+    ,$kept
+}
+
 function Invoke-JoenessHarnessSync {
     [CmdletBinding()]
     param([switch]$Check, [switch]$Apply, [switch]$Remove, [string]$CodexHome, [scriptblock]$AfterWrite)
     $mode = if ($Apply) { 'apply' } elseif ($Remove) { 'remove' } else { 'check' }
     $resolved = Resolve-JoenessCodexHome $CodexHome
     $warnings = @()
+    $installedRelease = $null
     try {
         if (([int][bool]$Check + [int][bool]$Apply + [int][bool]$Remove) -gt 1) { throw 'Choose one mode' }
         $sourceRoot = Split-Path -Parent $PSScriptRoot
@@ -156,8 +174,10 @@ function Invoke-JoenessHarnessSync {
         $owned = $null
         if ($skillState.Hash -ne 'absent') {
             $owned = (ConvertFrom-JoenessUtf8 $skillState.Bytes 'Skill ownership state') | ConvertFrom-Json
+            if ($null -ne $owned -and $null -ne $owned.PSObject.Properties['releaseVersion'] -and $owned.releaseVersion -is [string]) { $installedRelease = $owned.releaseVersion }
             if ($owned.schemaVersion -ne 1 -or $owned.releaseVersion -cne $script:JoenessRelease -or $owned.manifestSha256 -cne $source.ManifestHash) {
-                throw 'Skill ownership does not match this package; existing files were preserved'
+                $seen = if ($installedRelease) { $installedRelease } else { 'unknown' }
+                throw "Skill ownership does not match this package; existing files were preserved (installed release $seen, this package $script:JoenessRelease; to change releases run -Remove with the package of the installed release first)"
             }
             if (($owned.files | ConvertTo-Json -Compress) -cne ($files | ConvertTo-Json -Compress)) { throw 'Skill ownership inventory mismatch' }
             if (($currentFiles | Sort-Object) -join ',' -cne (($files.path | Sort-Object) -join ',')) { throw 'Owned skill inventory drift' }
@@ -181,7 +201,7 @@ function Invoke-JoenessHarnessSync {
         $changes = @($all | Where-Object { $_.Before.Hash -cne $_.NewHash } | ForEach-Object { $_.Label })
         if (-not $Apply -and -not $Remove) {
             $status = if ($changes.Count) { 'ready' } else { 'current' }
-            $result = New-JoenessPublicResult $status $mode $resolved $warnings ([bool]$changes.Count) $changes @() $null
+            $result = New-JoenessPublicResult $status $mode $resolved $warnings ([bool]$changes.Count) $changes @() $null $installedRelease
         } else {
             $guard = {
                 Assert-SetupPath $resolved
@@ -194,14 +214,19 @@ function Invoke-JoenessHarnessSync {
             }
             $tx = Invoke-SetupTransaction $all $AfterWrite $guard
             $status = if ($tx.Status -eq 'success') { if ($Remove) { 'removed' } else { 'current' } } else { $tx.Status }
+            if ($status -eq 'removed') {
+                $kept = Remove-JoenessEmptySkillFolders $skillRoot
+                if ($kept.Count) { $warnings += "Folders kept after Remove because they are not empty or are links: $($kept -join ', ')" }
+            }
+            $after = if ($status -eq 'current') { $script:JoenessRelease } elseif ($status -eq 'removed') { $null } else { $installedRelease }
             $rollback = if ($tx.Rollback) { [pscustomobject]@{ status = $tx.Rollback; problems = $tx.Unresolved } } else { $null }
             $blockers = if ($tx.Error) { @([pscustomobject]@{ kind = 'writeFailure'; message = $tx.Error }) } else { @() }
-            $result = New-JoenessPublicResult $status $mode $resolved $warnings ($status -in @('failed', 'partial')) $tx.Changed $blockers $rollback
+            $result = New-JoenessPublicResult $status $mode $resolved $warnings ($status -in @('failed', 'partial')) $tx.Changed $blockers $rollback $after
         }
         if ($result.status -eq 'current') { $result.activeSkills = @('joeness-setup') }
         $result
     } catch {
-        New-JoenessPublicResult 'blocked' $mode $resolved $warnings $false @() @([pscustomobject]@{ kind = 'conflict'; message = $_.Exception.Message }) $null
+        New-JoenessPublicResult 'blocked' $mode $resolved $warnings $false @() @([pscustomobject]@{ kind = 'conflict'; message = $_.Exception.Message }) $null $installedRelease
     }
 }
 

@@ -66,8 +66,30 @@ try {
         $env:JOENESS_TEST_OPERATION_CLI = $priorOperationCli
         $env:JOENESS_TEST_IMPACT_CLI = $priorImpactCli
     }
-    Eq (Invoke-JoenessHarnessSync -Remove -CodexHome $clean).status removed cleanRemove
+    Eq $installed.installedRelease $script:JoenessRelease applyInstalledRelease
+    Eq $installed.packageRelease $script:JoenessRelease applyPackageRelease
+    Eq (Invoke-JoenessHarnessSync -Check -CodexHome $clean).installedRelease $script:JoenessRelease checkInstalledRelease
+    $removedClean = Invoke-JoenessHarnessSync -Remove -CodexHome $clean
+    Eq $removedClean.status removed cleanRemove
+    Eq $removedClean.warnings.Count 0 cleanRemoveNoWarnings
+    Eq ($null -eq $removedClean.installedRelease) $true removeInstalledReleaseNull
     Eq (Test-Path (Join-Path $clean skills/joeness-setup/SKILL.md)) $false skillRemoved
+    # 2.0.1: Remove leaves no empty joeness-setup folder tree; the shared skills folder stays.
+    Eq (Test-Path (Join-Path $clean skills/joeness-setup)) $false skillFoldersRemoved
+    Eq (Test-Path (Join-Path $clean skills)) $true sharedSkillsFolderKept
+    Eq ($null -eq (Invoke-JoenessHarnessSync -Check -CodexHome $clean).installedRelease) $true freshCheckInstalledReleaseNull
+    # A file that arrives in an owned folder during Remove keeps that folder and its parents.
+    $arrive = Join-Path $root arrive
+    Eq (Invoke-JoenessHarnessSync -Apply -CodexHome $arrive).status current arriveApply
+    $arrived = Join-Path $arrive skills/joeness-setup/assets/user-note.txt
+    $arriveResult = Invoke-JoenessHarnessSync -Remove -CodexHome $arrive -AfterWrite {
+        param($stage)
+        if ($stage -eq 'joeness-skills-state.json') { [IO.File]::WriteAllText($arrived, 'user', $utf8) }
+    }
+    Eq $arriveResult.status removed arriveRemove
+    Eq ([IO.File]::ReadAllText($arrived)) user arrivedFilePreserved
+    Eq (($arriveResult.warnings -join ' ').Contains('skills/joeness-setup/assets')) $true arriveWarning
+    Eq (Test-Path (Join-Path $arrive skills/joeness-setup/scripts)) $false arriveEmptySiblingRemoved
     Eq (Test-Path (Join-Path $clean AGENTS.md)) $false removeNoAgents
     Eq (Test-Path (Join-Path $clean joewrks-harness-state.json)) $false removeNoCoreState
 
@@ -137,6 +159,10 @@ try {
     $tampered.releaseVersion = 'foreign'
     [IO.File]::WriteAllText($skillStatePath, ($tampered | ConvertTo-Json -Depth 6 -Compress), $utf8)
     BlockedWithoutMutation $ownedState ownedStateDrift
+    $foreignCheck = Invoke-JoenessHarnessSync -Check -CodexHome $ownedState
+    Eq $foreignCheck.installedRelease foreign blockedInstalledRelease
+    Eq $foreignCheck.blockers[0].message.Contains('installed release foreign') $true blockedMessageNamesRelease
+    Eq $foreignCheck.blockers[0].message.StartsWith('Skill ownership does not match this package; existing files were preserved') $true blockedMessagePrefix
 
     # Manifest validation rejects extra active payload before any target operation.
     $sourceRoot = Join-Path $root source

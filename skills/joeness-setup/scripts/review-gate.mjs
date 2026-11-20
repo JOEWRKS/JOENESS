@@ -1,8 +1,8 @@
 // Explicit, read-only evidence consumer. Not a daemon, visual judge, or Markdown lock.
 import {readFileSync,realpathSync} from 'node:fs';
-import {resolve,relative,isAbsolute,sep} from 'node:path';
+import {resolve,relative,isAbsolute,sep,basename} from 'node:path';
 import {createHash} from 'node:crypto';
-import {pathToFileURL} from 'node:url';
+import {fileURLToPath} from 'node:url';
 import {inspect as inspectImpact} from './impact-review.mjs';
 
 const hash=b=>createHash('sha256').update(b).digest('hex');
@@ -30,7 +30,7 @@ export function evaluate(options) {
   }
   const bytes=(p,evidence=false)=>readFileSync(pathFor(p,evidence));
   const json=(p,evidence=false)=>JSON.parse(bytes(p,evidence).toString('utf8'));
-  function pin(p,expected) {assert(digest(expected),'Missing external SHA-256 pin');const raw=bytes(p);assert(hash(raw)===expected,'Pinned baseline/acceptance changed');return JSON.parse(raw.toString('utf8'));}
+  function pin(p,expected) {assert(digest(expected),'Missing external SHA-256 pin');const raw=bytes(p);if(hash(raw)!==expected){const lf=Buffer.from(raw.toString('latin1').replace(/\r\n/g,'\n'),'latin1');assert(false,'Pinned baseline/acceptance changed'+(lf.length!==raw.length&&hash(lf)===expected?' (bytes match the pin only with LF line endings; a CRLF checkout such as core.autocrlf rewrote '+p+'. Keep pinned files -text or eol=lf in .gitattributes)':''));}return JSON.parse(raw.toString('utf8'));}
   function baseline(b) {
     assert(b.schema==='joeness.review-baseline.v1'&&text(b.scope_id)&&text(b.authorization_ref),'Invalid baseline identity/authorization reference');
     assert(Array.isArray(b.authority)&&b.authority.length>0,'Missing authority');
@@ -122,7 +122,12 @@ export function evaluate(options) {
   return {schema:'joeness.review-gate.v1',scope_id:b.scope_id,claim:options.claim,allowed,required_scope_complete:scopeComplete,project_complete:false,lanes:states,checks,errors,...(impact?{impact_reuse:{diagnostic_valid:impact.valid,candidate_check_ids:impact.candidate_check_ids,reused_check_ids:reused}}:{}),limits:['No visual re-judgment or user-identity authentication','Pinned scope completeness and dependency discovery require authorized review','Explicit CLI only; direct Markdown edits and natural-language claims are not intercepted']};
 }
 
-if(process.argv[1]&&import.meta.url===pathToFileURL(resolve(process.argv[1])).href){
+// Entry guard (2.0.1). True only when this file is the process entry, compared by real path so a junction
+// or symlink install path (Claude Code skills folder) runs main too. A false guard on import is intended
+// (review-gate imports impact-review). A direct run under this file's name that still fails the comparison
+// exits 2 on stderr; it never ends as a silent exit 0.
+function isEntry(url){const a=process.argv[1];if(!a)return false;const self=fileURLToPath(url),win=process.platform==='win32',key=p=>{let r=resolve(p);try{r=realpathSync.native(r);}catch{}return win?r.toLowerCase():r;},name=p=>win?basename(p).toLowerCase():basename(p);if(key(a)===key(self))return true;if(name(a)===name(self)){process.stderr.write('joeness: entry guard mismatch for '+basename(self)+'; refusing to exit 0 without running. Run the script by its real path.\n');process.exit(2);}return false;}
+if(isEntry(import.meta.url)){
   try {
     const o={results:[],evidenceRoots:[]};
     const names={'--root':'root','--baseline':'baseline','--baseline-sha256':'baselineSha256','--previous-baseline':'previousBaseline','--previous-baseline-sha256':'previousBaselineSha256','--claim':'claim','--acceptance':'acceptance','--acceptance-sha256':'acceptanceSha256','--impact':'impact','--impact-sha256':'impactSha256','--impact-review':'impactReview','--impact-review-sha256':'impactReviewSha256','--old-result':'oldResult','--old-result-sha256':'oldResultSha256'};

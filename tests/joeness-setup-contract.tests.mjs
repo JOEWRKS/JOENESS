@@ -60,7 +60,7 @@ test('one self-contained setup skill with real supporting files', () => {
 test('manifest pins exact sole setup skill without global runtime',()=>{
   const m=JSON.parse(read('vendor/source-manifest.json'));
   assert.equal(m.schemaVersion,3);
-  assert.equal(m.release.version,'2.0.0');
+  assert.equal(m.release.version,'2.0.1');
   const installer=read('scripts/sync-harness.ps1').toString();
   assert.ok(installer.includes("$script:JoenessRelease = '"+m.release.version+"'"), 'installer and manifest share the product version');
   assert.ok(read('README.md').toString().startsWith('# JOENESS '+m.release.version+'\n'), 'README identifies the same product');
@@ -143,4 +143,12 @@ test('setup and normal-session connection carry scoped recording safeguards',()=
   }
   const skill=read('skills/joeness-setup/SKILL.md').toString();
   assert.match(skill,/not an atomic lock/);
+});
+
+test('review-gate reference names the gate script by a run-time placeholder, not an absolute directory (2.0.1)',()=>{
+  const text=read('skills/joeness-setup/references/review-gate.md').toString();
+  assert.ok(text.includes('node <joeness-setup>/scripts/review-gate.mjs --root <project>'));
+  assert.match(text,/stays literal in committed files/);
+  assert.doesNotMatch(text,/absolute directory/);
+  assert.match(text,/\.gitattributes/);
 });

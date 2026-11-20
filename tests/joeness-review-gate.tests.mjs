@@ -131,3 +131,11 @@ test('junction outside root cannot smuggle evidence into allowed project',t=>{
 test('CLI rejects inherited property names as unknown options',t=>{
   const f=fixture(t);for(const key of ['constructor','toString','__proto__'])assert.equal(f.run([key,'ignored']).exit,2);
 });
+
+test('a CRLF-converted pinned baseline still fails closed but names the line-ending cause (2.0.1)',t=>{
+  const f=fixture(t),lf=JSON.stringify(f.b,null,2)+'\n';f.put('baseline.json',lf);const pin=f.sha('baseline.json');
+  f.put('receipt.json',{...f.receipt(),baseline_sha256:pin});assert.equal(f.run([],pin).exit,0);
+  f.put('baseline.json',lf.replace(/\n/g,'\r\n'));const r=f.run([],pin);
+  assert.equal(r.exit,2);assert.equal(r.allowed,false);assert.match(r.errors[0],/^Pinned baseline\/acceptance changed \(bytes match the pin only with LF line endings/);
+  f.put('baseline.json',lf.replace('spacing','spacinG'));assert.equal(f.run([],pin).errors[0],'Pinned baseline/acceptance changed');
+});

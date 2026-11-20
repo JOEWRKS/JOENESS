@@ -1,6 +1,6 @@
 // Read-only diagnostic. No gate override, receipt rewrite, repin or approval.
 import {readFileSync,realpathSync,statSync} from 'node:fs';
-import {resolve,relative,isAbsolute,sep} from 'node:path';
+import {resolve,relative,isAbsolute,sep,basename} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {createHash} from 'node:crypto';
 import {isDeepStrictEqual as equal} from 'node:util';
@@ -100,7 +100,12 @@ export function inspect(options){
  }catch(e){out.errors.push(e.message);out.checks=out.checks.map(c=>({...c,classification:'unknown',reasons:['Invalid shared evidence']}));out.candidate_check_ids=[];}
  return out;
 }
-if(process.argv[1]&&resolve(process.argv[1])===fileURLToPath(import.meta.url)){
+// Entry guard (2.0.1). True only when this file is the process entry, compared by real path so a junction
+// or symlink install path (Claude Code skills folder) runs main too. A false guard on import is intended
+// (review-gate imports impact-review). A direct run under this file's name that still fails the comparison
+// exits 2 on stderr; it never ends as a silent exit 0.
+function isEntry(url){const a=process.argv[1];if(!a)return false;const self=fileURLToPath(url),win=process.platform==='win32',key=p=>{let r=resolve(p);try{r=realpathSync.native(r);}catch{}return win?r.toLowerCase():r;},name=p=>win?basename(p).toLowerCase():basename(p);if(key(a)===key(self))return true;if(name(a)===name(self)){process.stderr.write('joeness: entry guard mismatch for '+basename(self)+'; refusing to exit 0 without running. Run the script by its real path.\n');process.exit(2);}return false;}
+if(isEntry(import.meta.url)){
  let out;try{
   const names={'--root':'root','--impact':'impact','--impact-sha256':'impactSha256','--impact-review':'impactReview','--impact-review-sha256':'impactReviewSha256','--baseline':'baseline','--baseline-sha256':'baselineSha256','--previous-baseline':'previousBaseline','--previous-baseline-sha256':'previousBaselineSha256','--old-result':'oldResult','--old-result-sha256':'oldResultSha256'},opts={evidenceRoots:[]};
   for(let i=2;i<process.argv.length;i+=2){const k=process.argv[i],v=process.argv[i+1];need(text(v)&&!v.startsWith('--'),'Missing CLI value');if(k==='--evidence-root')opts.evidenceRoots.push(v);else{need(Object.hasOwn(names,k)&&!Object.hasOwn(opts,names[k]),'Unknown/duplicate CLI option');opts[names[k]]=v;}}
