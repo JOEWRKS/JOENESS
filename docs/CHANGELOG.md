@@ -1,7 +1,8 @@
 # 변경 이력
 
-## 2.0.1 — 후보 (미게시)
+## 2.0.1 — 검수 게이트 fail-open 수정·설치기 정리·문서 (2026-11-20)
 
+- 게시: 사용자 승인("세 도구 게시", 2026-11-20, 부모 세션이 직접 받음) 뒤 태그 `JOENESS-v2.0.1`, GitHub Release, Codex 개인 설치(2.0.0 패키지 `-Remove` → 2.0.1 `-Apply`, 기록 [evals/v2-tests-20261119/personal-install.json](../evals/v2-tests-20261119/personal-install.json)), Claude Code 클론 fast-forward. 릴리스 노트 [release-notes-v2.0.1.md](../evals/v2-tests-20261119/release-notes-v2.0.1.md), 상태 [review-evidence.md](../evals/v2-tests-20261119/review-evidence.md).
 - 계기: 2026-11-19 2.0.0 게시 뒤 두 시험. QUICKSTART 특성화 시험([보고](../evals/v2-tests-20261119/docs-joeness-report.md), 결함 D1~D10)과 세 도구 통합 시험([보고](../evals/v2-tests-20261119/integration-report.md), [trace](../evals/v2-tests-20261119/integration-trace.md)). 사용자 승인 "세 도구 2.0.1 시작". 준비 보고: [report-201.md](../evals/v2-tests-20261119/report-201.md).
 - **바뀐 것**
   - 검수 도구 `.mjs` 4개(`review-gate`·`roadmap-review`·`operation-review`·`impact-review`)의 진입 판정. 실제 모듈 경로와 호출 경로를 그대로 비교해서, junction·심볼릭 링크 설치 경로(Claude Code 스킬 폴더)로 부르면 main이 돌지 않고 **출력 없이 exit 0**이었다(통합 D1, fail-open). 양쪽을 `realpathSync.native`로 풀고 Windows에서는 대소문자를 무시해 비교한다. 같은 파일 이름으로 직접 실행했는데도 판정이 어긋나면 stderr 경고와 exit 2를 낸다. import될 때(review-gate가 impact-review를 부름)는 그대로 거짓이다.
