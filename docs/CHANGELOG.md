@@ -1,7 +1,8 @@
 # 변경 이력
 
-## 2.0.2 — ROADMAP 리비전 줄 출력 스크립트 (후보, 미게시, 2026-11-26)
+## 2.0.2 — ROADMAP 리비전 줄 출력 스크립트 (2026-11-26)
 
+- 게시: 사용자 승인("추천대로 게시", 2026-11-26, 부모 세션이 직접 받음) 뒤 태그 `JOENESS-v2.0.2`, GitHub Release, Codex 개인 설치(2.0.1 패키지 `-Remove` → 2.0.2 `-Apply`, 기록 [evals/v2.0.2-tests-20261126/personal-install.json](../evals/v2.0.2-tests-20261126/personal-install.json)), Claude Code 클론 fast-forward. 릴리스 노트 [release-notes-v2.0.2.md](../evals/v2.0.2-tests-20261126/release-notes-v2.0.2.md), 상태 [review-evidence.md](../evals/v2.0.2-tests-20261126/review-evidence.md).
 - 계기: ATELIER 실사용(JOENESS 2.0.1 + JOEFLOW + JOEDESIGN)의 마찰 기록 19번, 검토 묶음 J. JOEFLOW 승인·재진입 때마다 ROADMAP `Product revision / approval:` 줄을 `approval_status.py` 출력에서 손으로 옮겨 적었다(지금까지 7회). 사용자 확정(2026-11-26): 2.0.2는 묶음 J만. 기록 [evals/v2.0.2-tests-20261126/report-202.md](../evals/v2.0.2-tests-20261126/report-202.md).
 - **바뀐 것**
   - 새 `skills/joeness-setup/scripts/revision-line.mjs`: `approval_status.py`가 찍은 JSON(stdin 또는 `--input <file>`)과 날짜(`--date YYYY-MM-DD`, 없으면 그 기계의 오늘)를 받아 `Product revision / approval: definition_revision N, approval_status S, approved_revision M, definition_status D (`approval_status.py`, read YYYY-MM-DD).` 한 줄만 찍는다. 파일은 고치지 않는다. `pending_revisions`가 비어 있지 않으면 괄호 안 `read` 앞에 `pending_revisions 24-25`(연속이면 범위, 하나면 그 번호)를 넣는다. `definition_revision`이 null이면 `none`. JSON이 아니거나 `error`를 담았거나 필드가 빠졌거나 값이 이상하면 stderr와 exit 2, stdout은 비운다. 진입 판정은 2.0.1 검수 도구와 같은 실제 경로 비교.
