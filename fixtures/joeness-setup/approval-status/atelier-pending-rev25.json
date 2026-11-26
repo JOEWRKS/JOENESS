@@ -1,0 +1,38 @@
+{
+  "approval_status": "UNAPPROVED",
+  "approved_revision": 23,
+  "approved_revisions": [
+    17,
+    18,
+    19,
+    20,
+    21,
+    22,
+    23
+  ],
+  "current_revision_approved": false,
+  "definition_revision": 25,
+  "definition_status": "OPEN",
+  "joeflow_version": {
+    "notice": "this project does not record which JOEFLOW version it uses; running 2.0.1. Record it once with joeflow_version.py STATE_JSON --pin (writes joeflow-project.json next to state.json) and use the scripts of that version",
+    "pinned_version": null,
+    "project_file": "product-definition/atelier/joeflow-project.json",
+    "running_version": "2.0.1",
+    "state_schema_version": "0.2.0"
+  },
+  "last_approved_revision": 23,
+  "pending_changes": {
+    "added": 0,
+    "changed": 0,
+    "from_revision": 23,
+    "retired": 0,
+    "superseded": 0,
+    "to_revision": 25
+  },
+  "pending_revisions": [
+    24,
+    25
+  ],
+  "revisions_without_own_approval": [],
+  "summary": "Revision 25 is NOT approved (OPEN); 2 revision(s) pending since approved revision 23. Work built on these revisions is unapproved until the user approves the current Approval Manifest."
+}

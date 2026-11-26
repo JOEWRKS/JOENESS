@@ -2,7 +2,7 @@
 
 Project scope: <approved delivery goal, or direction pending>.
 Product authority: <existing source/section, or undecided>.
-Product revision / approval: <revision and approval status as the product source reports them, with date read (JOEFLOW: approval_status.py definition_revision, approval_status, approved_revision); none if the source has no revision record>.
+Product revision / approval: <revision and approval status as the product source reports them, with date read (JOEFLOW: approval_status.py definition_revision, approval_status, approved_revision, definition_status; `node <joeness-setup>/scripts/revision-line.mjs` prints this whole line from that JSON, with pending_revisions when unapproved); none if the source has no revision record>.
 Current stage: <stage and status, or direction pending>.
 Next eligible work: <required item or bounded decision; blocked dependency if any>.
 Status words: not started / in progress / verification pending / on hold / complete / removed from scope.

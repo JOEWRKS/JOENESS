@@ -123,8 +123,13 @@ ROADMAP states project scope and Product source, current stage and next eligible
 work. Beside Product source it records the product definition's revision and
 approval status as that source reports them, with the date read (a JOEFLOW project
 copies `approval_status.py` `definition_revision`, `approval_status`,
-`approved_revision`); a source without revisions gets `none`. JOENESS records the
-reading only; the product source owns approval. Each stage has an entry condition
+`approved_revision`, `definition_status`); a source without revisions gets `none`.
+After each JOEFLOW approval or re-entry, pipe that JSON to
+`node <joeness-setup>/scripts/revision-line.mjs` (this skill's folder; or
+`--input <file>`, `--date`): it only prints the line, with `pending_revisions`
+inside the parenthesis when revisions are unapproved; paste it yourself, since
+you still own the ROADMAP edit. JOENESS records the reading only; the product
+source owns approval. Each stage has an entry condition
 and completion condition. Each required
 outcome has an ID, status, check/criterion and proof or exact gap. Separate checks
 that can independently pass; do not turn every implementation step into a gate.

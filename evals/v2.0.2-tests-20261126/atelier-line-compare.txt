@@ -1,0 +1,6 @@
+# script output (fixtures/joeness-setup/approval-status/atelier-rev23.json, --date 2026-11-26)
+Product revision / approval: definition_revision 23, approval_status APPROVED, approved_revision 23, definition_status CLOSED (`approval_status.py`, read 2026-11-26).
+# ATELIER ROADMAP.md line 5 (read 2026-11-26)
+Product revision / approval: definition_revision 23, approval_status APPROVED, approved_revision 23, definition_status CLOSED (`approval_status.py`, read 2026-11-26).
+# pending fixture (atelier-pending-rev25.json, --date 2026-11-26)
+Product revision / approval: definition_revision 25, approval_status UNAPPROVED, approved_revision 23, definition_status OPEN (`approval_status.py`, pending_revisions 24-25, read 2026-11-26).

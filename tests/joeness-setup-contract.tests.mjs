@@ -60,7 +60,7 @@ test('one self-contained setup skill with real supporting files', () => {
 test('manifest pins exact sole setup skill without global runtime',()=>{
   const m=JSON.parse(read('vendor/source-manifest.json'));
   assert.equal(m.schemaVersion,3);
-  assert.equal(m.release.version,'2.0.1');
+  assert.equal(m.release.version,'2.0.2');
   const installer=read('scripts/sync-harness.ps1').toString();
   assert.ok(installer.includes("$script:JoenessRelease = '"+m.release.version+"'"), 'installer and manifest share the product version');
   assert.ok(read('README.md').toString().startsWith('# JOENESS '+m.release.version+'\n'), 'README identifies the same product');
@@ -71,7 +71,7 @@ test('manifest pins exact sole setup skill without global runtime',()=>{
   const skillRoot=fileURLToPath(new URL('../skills/joeness-setup/',import.meta.url));
   const disk=readdirSync(skillRoot,{recursive:true,withFileTypes:true})
     .filter(e=>e.isFile()).map(e=>relative(skillRoot,join(e.parentPath,e.name)).replaceAll('\\','/'));
-  const expected=['SKILL.md','agents/openai.yaml','scripts/project-setup.ps1','scripts/review-gate.mjs','scripts/roadmap-review.mjs','scripts/operation-review.mjs','scripts/impact-review.mjs','scripts/changes-hook.mjs','references/usage.md','references/review-gate.md','references/roadmap-review.md','references/operation-review.md','references/impact-review.md','references/changes-hook.md',...['AGENTS','TASK','ROADMAP','ISSUES','DESIGN'].map(n=>'assets/'+n+'.md')].sort();
+  const expected=['SKILL.md','agents/openai.yaml','scripts/project-setup.ps1','scripts/review-gate.mjs','scripts/roadmap-review.mjs','scripts/operation-review.mjs','scripts/impact-review.mjs','scripts/changes-hook.mjs','scripts/revision-line.mjs','references/usage.md','references/review-gate.md','references/roadmap-review.md','references/operation-review.md','references/impact-review.md','references/changes-hook.md',...['AGENTS','TASK','ROADMAP','ISSUES','DESIGN'].map(n=>'assets/'+n+'.md')].sort();
   assert.equal(m.publicSkills[0].files.length,expected.length);
   assert.deepEqual(disk.sort(),expected);
   assert.deepEqual(m.publicSkills[0].files.map(f=>f.path).sort(),expected);
@@ -151,4 +151,15 @@ test('review-gate reference names the gate script by a run-time placeholder, not
   assert.match(text,/stays literal in committed files/);
   assert.doesNotMatch(text,/absolute directory/);
   assert.match(text,/\.gitattributes/);
+});
+
+test('roadmap section and ROADMAP asset name the revision-line printer; the agent keeps the edit (2.0.2)',()=>{
+  const skill=read('skills/joeness-setup/SKILL.md').toString();
+  assert.ok(skill.includes('`node <joeness-setup>/scripts/revision-line.mjs`'));
+  assert.match(skill,/it only prints the line/);
+  assert.match(skill,/you still own the ROADMAP edit/);
+  assert.match(skill,/`pending_revisions`\s+inside the parenthesis/);
+  const roadmap=read('skills/joeness-setup/assets/ROADMAP.md').toString();
+  assert.ok(roadmap.includes('`node <joeness-setup>/scripts/revision-line.mjs` prints this whole line'));
+  assert.ok(roadmap.includes('definition_status'));
 });

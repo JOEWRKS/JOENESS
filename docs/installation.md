@@ -1,6 +1,6 @@
 # JOENESS 설치·업데이트·복구
 
-현재 소스: **2.0.1**(후보, 미게시). 2.0.0 스킬에서 검수 도구 `.mjs` 4개의 실행 경로 판정(junction·심볼릭 링크 경로에서 검사 없이 exit 0이던 결함)과 `references/review-gate.md`의 실행 자리·줄바꿈 안내만 바뀌었고, 설치기는 `-Remove` 뒤 빈 스킬 폴더를 지우고 `-Check` JSON에 `installedRelease`·`packageRelease`를 낸다. 2.0.0은 1.4.2 스킬에 저장소 정리·[보안 검토](SECURITY.md)·[빠른 시작](QUICKSTART.md)을 더한 판. 버전별 내용과 근거는 [변경 이력](CHANGELOG.md). 기존 `JOENESS-v*` 태그·Release는 바꾸지 않음. 기존 프로젝트 연결은 자동 갱신하지 않음.
+현재 소스: **2.0.2**(후보, 미게시). 2.0.1 스킬에 `scripts/revision-line.mjs` 한 파일을 더하고(20개 파일) `SKILL.md`의 로드맵 절과 `assets/ROADMAP.md` 한 줄에 그 안내를 넣었다. 2.0.1은 2.0.0 스킬에서 검수 도구 `.mjs` 4개의 실행 경로 판정(junction·심볼릭 링크 경로에서 검사 없이 exit 0이던 결함)과 `references/review-gate.md`의 실행 자리·줄바꿈 안내만 바뀌었고, 설치기는 `-Remove` 뒤 빈 스킬 폴더를 지우고 `-Check` JSON에 `installedRelease`·`packageRelease`를 낸다. 2.0.0은 1.4.2 스킬에 저장소 정리·[보안 검토](SECURITY.md)·[빠른 시작](QUICKSTART.md)을 더한 판. 버전별 내용과 근거는 [변경 이력](CHANGELOG.md). 기존 `JOENESS-v*` 태그·Release는 바꾸지 않음. 기존 프로젝트 연결은 자동 갱신하지 않음.
 
 ## 핵심 기준
 
@@ -8,7 +8,7 @@
 |---|---|
 | 설치 진입점 | 저장소 루트의 `JOENESS.ps1` |
 | 버전 원본 | `vendor/source-manifest.json`의 `release.version` |
-| 현재 소스 버전 | 2.0.1 (후보) |
+| 현재 소스 버전 | 2.0.2 (후보) |
 | 설치본 식별 | 버전과 manifest 해시 함께 대조. 설치본 버전은 `-Check` JSON `installedRelease`(2.0.1부터) 또는 `<설치위치>\joeness-skills-state.json`의 `releaseVersion` |
 | 갱신 범위 | 저장소 갱신과 개인 설치 갱신은 별도 |
 
